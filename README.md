@@ -106,6 +106,12 @@ emacs，就可以让 Chinese-pyim 使用词库了。
 
 最后，重启emacs
 
+注意：每一个词库文件必须按行排序（准确的说，是按每一行的拼音code排序），
+因为`Chinese-pyim` 寻找词条时，使用二分法来优化速度，而二分法工作的前提
+就是对文件按行排序。具体细节请参考：`pyim-bisearch-word` 。
+所以，当词库排序不正确时（比如：用户手动调整词库文件后），记得运行函数
+`pyim-update-table` 重新对文件排序。
+
 ## 激活 Chinese-pyim ##
 
 ```lisp
