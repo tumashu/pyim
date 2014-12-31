@@ -447,7 +447,7 @@
 (defun pyim-pinyin-activate-function ()
   (setq pyim-do-completion nil
         pyim-handle-function 'pyim-pinyin-handle-string
-        pyim-translate-function 'pyim-punc-translate)
+        pyim-translate-function 'pyim-punctuation-translate)
   (make-local-variable 'pyim-pinyin-pylist)
   (make-local-variable 'pyim-pinyin-pos))
 
