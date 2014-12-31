@@ -182,12 +182,12 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
 
 这个列表每一个元素代表一个词库的信息，可以仅仅使用文件名来表示，比如：
 
-    \"~/.emacs.d/pyim/default.txt\"
+    \"/path/to/pyim-bigdict.txt\"
 
 也可以使用一个 plist 来表示，比如：
 
     (:name \"100万大词库\"
-     :file \"~/.emacs.d/eim/pinyin-ext.txt\"
+     :file \"/path/to/pinyin-bigdict.txt\"
      :coding utf-8-unix)
 
 第二种表示方式的优势就是可以指定拼音词库的编码, 省去转码词库的麻烦。
@@ -205,8 +205,13 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
 
 所以，当用户手动调整词库文件后，记得运行 `pyim-update-table' 来对文件排序。
 
-`Chinese-pyim' 选择这种简单格式的主要原因是：有现成的工具可以将其他优秀输入法
-的词库直接转化为`Chinese-pyim' 词库，不需要额外的后处理。"
+可以使用词库转换工具快速方便的将其他优秀输入法的词库转化为`Chinese-pyim'拼
+音词库，用户可以通过下述三种方法了解词库转换的具体细节：
+
+1. 使用emacs package管理器查看chinese-pyim包的简介。
+2. 阅读 pyim.el 文件 Commentary 部份的内容
+3. 查看 Chinese-pyim 在线README：https://github.com/tumashu/chinese-pyim
+"
   :group 'chinese-pyim
   :type 'list)
 
