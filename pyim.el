@@ -1003,7 +1003,7 @@ Return the input string."
     (char-to-string char)))
 
 ;;; 切换中英文标点符号
-(defun pyim-punc-translate-toggle (arg)
+(defun pyim-toggle-full-width-punctuation (arg)
   (interactive "P")
   (setq pyim-punctuation-translate-p
         (if (null arg)
