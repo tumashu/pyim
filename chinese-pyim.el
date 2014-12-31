@@ -139,12 +139,13 @@
 ;; ## 激活 Chinese-pyim ##
 ;;
 ;; ```lisp
-;; (require 'chinese-pyim)
 ;; (setq default-input-method "chinese-pyim")
 ;; (global-set-key (kbd "C-<SPC>") 'toggle-input-method)
 ;; (global-set-key (kbd ";") 'pyim-insert-ascii)
 ;;
 ;; ```
+;; 切换全角半角标点符号使用命令: M-x pyim-toggle-full-width-punctuation
+;;
 ;; # 其他 #
 ;;
 ;; 1. 了解 Chinese-pyim 个人词频文件设置的细节：C-h v pyim-personal-file
