@@ -115,6 +115,11 @@ emacs，就可以让 Chinese-pyim 使用词库了。
 (global-set-key (kbd ";") 'pyim-insert-ascii)
 
 ```
+# 其他 #
+
+1. 了解 Chinese-pyim 个人词频文件设置的细节：C-h v pyim-personal-file
+2. 了解 Chinese-pyim 词库设置细节：C-h v pyim-dicts
+
 
 
 ---
