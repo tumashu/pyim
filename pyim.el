@@ -301,14 +301,14 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
   "buffer 的名字格式，%s 对应 package name")
 (defvar pyim-activated-p nil)
 
-(defvar pyim-punc-escape-list (number-sequence ?0 ?9)
+(defvar pyim-punctuation-escape-list (number-sequence ?0 ?9)
   "Punctuation will not insert after this characters.
 If you don't like this funciton, set the variable to nil")
 
 (defvar pyim-insert-ascii-char (cons ?\; "；")
   "*Key used for `pyim-insert-ascii'.")
 
-(defvar pyim-punc-translate-p t
+(defvar pyim-punctuation-translate-p t
   "*Non-nil means will translate punctuation.")
 
 (defvar pyim-local-variable-list
@@ -980,15 +980,15 @@ Return the input string."
 (require 'pyim-pinyin)
 
 ;; 处理标点符号
-(defun pyim-punc-translate (char)
-  (if pyim-punc-translate-p
+(defun pyim-punctuation-translate (char)
+  (if pyim-punctuation-translate-p
       (cond ((< char ? ) "")
             ((and pyim-insert-ascii-char
                   (= char (car pyim-insert-ascii-char)))
              (char-to-string char))
             (t (let ((str (char-to-string char))
                      punc)
-                 (if (and (not (member (char-before) pyim-punc-escape-list))
+                 (if (and (not (member (char-before) pyim-punctuation-escape-list))
                           (setq punc (cdr (assoc str pyim-punctuation-dict))))
                      (progn
                        (if (= char (char-before))
@@ -1005,9 +1005,9 @@ Return the input string."
 ;;; 切换中英文标点符号
 (defun pyim-punc-translate-toggle (arg)
   (interactive "P")
-  (setq pyim-punc-translate-p
+  (setq pyim-punctuation-translate-p
         (if (null arg)
-            (not pyim-punc-translate-p)
+            (not pyim-punctuation-translate-p)
           (> (prefix-numeric-value arg) 0))))
 
 ;;;  一个快速插入英文的命令。按自己的需要绑定到 ";"
