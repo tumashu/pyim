@@ -1,4 +1,4 @@
-# pyim - Chinese pinyin input method
+# chinese-pyim - Chinese pinyin input method
 
 *Author:* Ye Wenbin <wenbinye@163.com>, Feng Shu <tumashu@gmail.com><br>
 *Version:* 0.0.1<br>
@@ -115,7 +115,7 @@ emacs，就可以让 Chinese-pyim 使用词库了。
 ## 激活 Chinese-pyim ##
 
 ```lisp
-(require 'pyim)
+(require 'chinese-pyim)
 (setq default-input-method "chinese-pyim")
 (global-set-key (kbd "C-<SPC>") 'toggle-input-method)
 (global-set-key (kbd ";") 'pyim-insert-ascii)
@@ -129,4 +129,4 @@ emacs，就可以让 Chinese-pyim 使用词库了。
 
 
 ---
-Converted from `pyim.el` by [*el2markdown*](https://github.com/Lindydancer/el2markdown).
+Converted from `chinese-pyim.el` by [*el2markdown*](https://github.com/Lindydancer/el2markdown).

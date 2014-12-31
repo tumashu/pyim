@@ -1,4 +1,4 @@
-;;; pyim-pinyin.el --- Pinyin functions used by Chinese-pyim (chinese pinyin input method)
+;;; chinese-pyim-pinyin.el --- Pinyin functions used by Chinese-pyim (chinese pinyin input method)
 
 ;; Copyright 2006 Ye Wenbin
 ;;           2014 Feng Shu
@@ -498,10 +498,10 @@
         (pyim-pinyin-make-char-table-1 pinyin-list)))))
 
 
-(provide 'pyim-pinyin)
+(provide 'chinese-pyim-pinyin)
 
 ;; Local Variables:
 ;; coding: utf-8-unix
 ;; End:
 
-;;; pyim-pinyin.el ends here
+;;; chinese-pyim-pinyin.el ends here

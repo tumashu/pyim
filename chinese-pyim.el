@@ -1,4 +1,4 @@
-;;; pyim.el --- Chinese pinyin input method
+;;; chinese-pyim.el --- Chinese pinyin input method
 
 ;; Copyright 2006 Ye Wenbin
 ;;           2014 Feng Shu
@@ -135,7 +135,7 @@
 ;; ## 激活 Chinese-pyim ##
 ;;
 ;; ```lisp
-;; (require 'pyim)
+;; (require 'chinese-pyim)
 ;; (setq default-input-method "chinese-pyim")
 ;; (global-set-key (kbd "C-<SPC>") 'toggle-input-method)
 ;; (global-set-key (kbd ";") 'pyim-insert-ascii)
@@ -988,7 +988,7 @@ Return the input string."
 (global-set-key [pyim-advice] 'pyim-advice)
 
 ;;; Function dealing with chinese words and punctuations
-(require 'pyim-pinyin)
+(require 'chinese-pyim-pinyin)
 
 ;; 处理标点符号
 (defun pyim-punctuation-translate (char)
@@ -1130,12 +1130,12 @@ Return the input string."
       (if (looking-at "^$")
           (delete-char -1)))))
 
-;;;###autoload (require 'pyim)
+;;;###autoload (require 'chinese-pyim)
 
-(provide 'pyim)
+(provide 'chinese-pyim)
 
 ;; Local Variables:
 ;; coding: utf-8-unix
 ;; End:
 
-;;; pyim.el ends here
+;;; chinese-pyim.el ends here
