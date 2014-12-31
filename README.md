@@ -23,6 +23,7 @@ Window平台下的搜狗输入法，baidu输入法以及QQ输入法，linux平�
 
 1. *当 emacs-eim 拼音词库词条超过100万时，选词频率大大降低。*
 2. *当 emacs-eim 拼音词库词条超过100万时，中文输入体验可以达到搜狗输入法的80%。*
+3. *随着使用时间的延长，emacs-eim会越来越好用（个人词库的积累）。*
 
 所以，本人认为将 Chinese-eim 作为一个 *备用* 中文输入法是非常合适的，于是我 fork 了
 emacs-eim, 简化代码并更改名称为：chinese-pyim。
@@ -81,7 +82,7 @@ emacs，就可以让 Chinese-pyim 使用词库了。
 3. 下载地址： http://code.google.com/p/imewlconverter/
 4. 依赖平台:  "Microsoft .NET Framework 2.0"
 
-首先从其他拼音输入法网站上获取所需词库，使用下述自定义输入格式转换词库文件，然后将转
+首先从其他拼音输入法网站上获取所需词库，使用下述自定义输出格式转换词库文件，然后将转
 换得到的内容保存到文件中。
 
         shen,lan,ci,ku 深蓝词库
