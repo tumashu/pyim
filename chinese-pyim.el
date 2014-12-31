@@ -1130,8 +1130,6 @@ Return the input string."
       (if (looking-at "^$")
           (delete-char -1)))))
 
-;;;###autoload (require 'chinese-pyim)
-
 (provide 'chinese-pyim)
 
 ;; Local Variables:
