@@ -205,6 +205,42 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
   :group 'chinese-pyim
   :type 'list)
 
+(defcustom pyim-punctuation-dict
+  '(("'" "‘" "’")
+    ("\"" "“" "”")
+    ("_" "――")
+    ("^" "……")
+    ("]" "】")
+    ("[" "【")
+    ("@" "◎")
+    ("?" "？")
+    (">" "》")
+    ("=" "＝")
+    ("<" "《")
+    (";" "；")
+    (":" "：")
+    ("/" "、")
+    ("." "。")
+    ("-" "－")
+    ("," "，")
+    ("+" "＋")
+    ("*" "×")
+    (")" "）")
+    ("(" "（")
+    ("&" "※")
+    ("%" "％")
+    ("$" "￥")
+    ("#" "＃")
+    ("!" "！")
+    ("`" "・")
+    ("~" "～")
+    ("}" "』")
+    ("|" "÷")
+    ("{" "『"))
+  "标点符号表。"
+  :group 'chinese-pyim
+  :type 'list)
+
 (defcustom pyim-page-length 9
   "每页显示的词条数目"
   :group 'chinese-pyim
@@ -259,6 +295,16 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
 (defvar pyim-buffer-name-format " *%s*"
   "buffer 的名字格式，%s 对应 package name")
 (defvar pyim-activated-p nil)
+
+(defvar pyim-punc-escape-list (number-sequence ?0 ?9)
+  "Punctuation will not insert after this characters.
+If you don't like this funciton, set the variable to nil")
+
+(defvar pyim-insert-ascii-char (cons ?\; "；")
+  "*Key used for `pyim-insert-ascii'.")
+
+(defvar pyim-punc-translate-p t
+  "*Non-nil means will translate punctuation.")
 
 (defvar pyim-local-variable-list
   '(pyim-page-length
@@ -927,7 +973,80 @@ Return the input string."
 
 ;;; Function dealing with chinese words and punctuations
 (require 'pyim-pinyin)
-(require 'pyim-extra)
+
+;; 处理标点符号
+(defun pyim-punc-translate (char)
+  (if pyim-punc-translate-p
+      (cond ((< char ? ) "")
+            ((and pyim-insert-ascii-char
+                  (= char (car pyim-insert-ascii-char)))
+             (char-to-string char))
+            (t (let ((str (char-to-string char))
+                     punc)
+                 (if (and (not (member (char-before) pyim-punc-escape-list))
+                          (setq punc (cdr (assoc str pyim-punctuation-dict))))
+                     (progn
+                       (if (= char (char-before))
+                           (delete-char -1))
+                       (if (= (safe-length punc) 1)
+                           (car punc)
+                         (setcdr (cdr punc) (not (cddr punc)))
+                         (if (cddr punc)
+                             (car punc)
+                           (nth 1 punc))))
+                   str))))
+    (char-to-string char)))
+
+;;; 切换中英文标点符号
+(defun pyim-punc-translate-toggle (arg)
+  (interactive "P")
+  (setq pyim-punc-translate-p
+        (if (null arg)
+            (not pyim-punc-translate-p)
+          (> (prefix-numeric-value arg) 0))))
+
+;;;  一个快速插入英文的命令。按自己的需要绑定到 ";"
+(defun pyim-insert-ascii ()
+  (interactive)
+  (if current-input-method
+      (let (c)
+        (message (format "自定义输入(直接空格%s, 回车%c): "
+                         (cdr pyim-insert-ascii-char)
+                         (car pyim-insert-ascii-char)))
+        (setq c (read-event))
+        (cond ((= c ? ) (insert (cdr pyim-insert-ascii-char)))
+              ((= c ?\r) (insert-char (car pyim-insert-ascii-char) 1))
+              (t
+               (setq unread-command-events (list last-input-event))
+               (insert (read-from-minibuffer "自定义输入: ")))))
+    (call-interactively 'self-insert-command)))
+
+;;;  增加两个快速选择的按键
+(defun pyim-quick-select-1 ()
+  "如果没有可选项，插入数字，否则选择对应的词条"
+  (interactive)
+  (if (car pyim-current-choices)
+      (let ((index (pyim-page-start))
+            (end (pyim-page-end)))
+        (if (>= index end)
+            (pyim-append-string (pyim-translate last-command-event))
+          (pyim-remember-select (1+ index))
+          (setq pyim-current-str (pyim-choice (nth index (car pyim-current-choices))))))
+    (pyim-append-string (pyim-translate last-command-event)))
+  (pyim-terminate-translation))
+
+(defun pyim-quick-select-2 ()
+  "如果没有可选项，插入数字，否则选择对应的词条"
+  (interactive)
+  (if (car pyim-current-choices)
+      (let ((index (1+ (pyim-page-start)))
+            (end (pyim-page-end)))
+        (if (>= index end)
+            (pyim-append-string (pyim-translate last-command-event))
+          (pyim-remember-select (1+ index))
+          (setq pyim-current-str (pyim-choice (nth index (car pyim-current-choices))))))
+    (pyim-append-string (pyim-translate last-command-event)))
+  (pyim-terminate-translation))
 
 (defvar pyim-mode-map
   (let ((map (make-sparse-keymap))
