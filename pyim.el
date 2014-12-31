@@ -1026,33 +1026,6 @@ Return the input string."
                (insert (read-from-minibuffer "自定义输入: ")))))
     (call-interactively 'self-insert-command)))
 
-;;;  增加两个快速选择的按键
-(defun pyim-quick-select-1 ()
-  "如果没有可选项，插入数字，否则选择对应的词条"
-  (interactive)
-  (if (car pyim-current-choices)
-      (let ((index (pyim-page-start))
-            (end (pyim-page-end)))
-        (if (>= index end)
-            (pyim-append-string (pyim-translate last-command-event))
-          (pyim-remember-select (1+ index))
-          (setq pyim-current-str (pyim-choice (nth index (car pyim-current-choices))))))
-    (pyim-append-string (pyim-translate last-command-event)))
-  (pyim-terminate-translation))
-
-(defun pyim-quick-select-2 ()
-  "如果没有可选项，插入数字，否则选择对应的词条"
-  (interactive)
-  (if (car pyim-current-choices)
-      (let ((index (1+ (pyim-page-start)))
-            (end (pyim-page-end)))
-        (if (>= index end)
-            (pyim-append-string (pyim-translate last-command-event))
-          (pyim-remember-select (1+ index))
-          (setq pyim-current-str (pyim-choice (nth index (car pyim-current-choices))))))
-    (pyim-append-string (pyim-translate last-command-event)))
-  (pyim-terminate-translation))
-
 (defvar pyim-mode-map
   (let ((map (make-sparse-keymap))
         (i ?\ ))
