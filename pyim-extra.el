@@ -114,37 +114,6 @@ If you don't like this funciton, set the variable to nil")
                (insert (read-from-minibuffer "自定义输入: ")))))
     (call-interactively 'self-insert-command)))
 
-;;;  load and save history
-(defun pyim-load-history (history-file package)
-  (let* ((pyim-current-package package)
-         (history (pyim-history))
-         item)
-    (when (file-exists-p history-file)
-      (with-current-buffer (find-file-noselect history-file)
-        (goto-char (point-min))
-        (while (not (eobp))
-          (if (and (setq item (pyim-line-content))
-                   (= (length item) 2))
-              (puthash (car item)
-                       `(nil ("pos" . ,(string-to-number (cadr item))))
-                       history))
-          (forward-line 1))
-        (kill-buffer (current-buffer))))))
-
-(defun pyim-save-history (history-file package)
-  (interactive)
-  (let* ((pyim-current-package package)
-         (history (pyim-history)))
-    (with-temp-buffer
-      (erase-buffer)
-      (let (pos)
-        (maphash (lambda (key val)
-                   (unless (or (pyim-string-emptyp key)
-                               (= (setq pos (cdr (assoc "pos" (cdr val)))) 1))
-                     (insert key " " (number-to-string pos) "\n")))
-                 history))
-      (write-file history-file))))
-
 ;;;  增加两个快速选择的按键
 (defun pyim-quick-select-1 ()
   "如果没有可选项，插入数字，否则选择对应的词条"
@@ -171,46 +140,6 @@ If you don't like this funciton, set the variable to nil")
           (setq pyim-current-str (pyim-choice (nth index (car pyim-current-choices))))))
     (pyim-append-string (pyim-translate last-command-event)))
   (pyim-terminate-translation))
-
-(defun pyim-describe-char (pos package)
-  (interactive
-   (list (point)
-         (if (eq input-method-function 'pyim-input-method)
-             (pyim-package-name)
-           (let (pyim-current-package)
-             (setq pyim-current-package
-                   (if (= (length pyim-package-list) 1)
-                       (cdar pyim-package-list)
-                     (assoc
-                      (completing-read "In package: "
-                                       pyim-package-list nil t
-                                       (caar pyim-package-list))
-                      pyim-package-list)))
-             (pyim-package-name)))))
-  (if (>= pos (point-max))
-      (error "No character follows specified position"))
-  (let ((char (char-after pos))
-        (func (intern-soft (format "%s-get-char-code" package)))
-        code)
-    (when func
-      (setq code (funcall func char))
-      (if code
-          (message "Type %S to input %c for input method %s"
-                   code char package)
-        (message "Can't find char code for %c" char)))))
-
-;;;  char table
-(defun pyim-make-char-table (chars table)
-  "Set `pyim-char-database'"
-  (dolist (char chars)
-    (let ((code (car char)))
-      (dolist (c (cdr char))
-        (set (intern c table) code)))))
-
-(defsubst pyim-get-char-code (char table)
-  "Get the code of the character CHAR"
-  (symbol-value (intern-soft (char-to-string char) table)))
-
 
 (provide 'pyim-extra)
 

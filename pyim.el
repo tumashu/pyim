@@ -762,7 +762,7 @@ beginning of line"
 
 ;;;  Core function of input method (stole from quail)
 (defun pyim-exit-from-minibuffer ()
-  (inactivate-input-method)
+  (deactivate-input-method)
   (if (<= (minibuffer-depth) 1)
       (remove-hook 'minibuffer-exit-hook 'quail-exit-from-minibuffer)))
 
@@ -992,7 +992,7 @@ Return the input string."
     (pyim-pinyin-make-char-table))
 
   (setq input-method-function 'pyim-input-method)
-  (setq inactivate-current-input-method-function 'pyim-inactivate)
+  (setq deactivate-current-input-method-function 'pyim-inactivate)
   ;; (setq describe-current-input-method-function 'pyim-help)
   ;; If we are in minibuffer, turn off the current input method
   ;; before exiting.
@@ -1029,7 +1029,7 @@ Return the input string."
         (pyim-delete-duplicate-word)
         (forward-line 1))
       (if (looking-at "^$")
-          (delete-backward-char 1)))))
+          (delete-char -1)))))
 
 ;;;###autoload (require 'pyim)
 

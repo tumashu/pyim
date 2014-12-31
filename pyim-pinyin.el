@@ -366,10 +366,12 @@
   (let ((valid t)
         (i 0))
     (while (and (< i (length str)) valid)
-      (if (member (char-to-string (aref str i)) pyim-total-char)
+      (if (member (char-to-string (aref str i))
+                  (mapcar 'identity "vmpfwckzyjqdltxuognbhsrei-a"))
           (setq valid nil))
       (setq i (1+ i)))
     valid))
+
 ;;;  commands
 (defun pyim-pinyin-select-current ()
   (interactive)
@@ -458,12 +460,13 @@
           (setq words (append words
                               (cdr
                                (pyim-bisearch-word code
-                                                    (point-min)
-                                                    (point-max)))))))
+                                                   (point-min)
+                                                   (point-max)))))))
       (delete-dups words))))
 
 (defun pyim-pinyin-get-char-code (char)
-  (pyim-get-char-code char pyim-pinyin-char-table))
+  "Get the code of the character CHAR"
+  (symbol-value (intern-soft (char-to-string char) pyim-pinyin-char-table)))
 
 (defun pyim-pinyin-make-char-table-1 (chars)
   (dolist (char chars)
