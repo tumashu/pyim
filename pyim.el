@@ -398,15 +398,13 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
     buflist))
 
 (defun pyim-read-file (file name &optional coding)
-  (let (region)
-    (save-excursion
-      (set-buffer (generate-new-buffer name))
-      (if coding
-          (let ((coding-system-for-read coding))
-            (insert-file-contents file))
-        (insert-file-contents file))
-      `(("buffer" . ,(current-buffer))
-        ("file" . ,file)))))
+  (with-current-buffer (generate-new-buffer name)
+    (if coding
+        (let ((coding-system-for-read coding))
+          (insert-file-contents file))
+      (insert-file-contents file))
+    `(("buffer" . ,(current-buffer))
+      ("file" . ,file))))
 
 (defun pyim-save-personal-file ()
   "与 `pyim-personal-file' 文件对应的buffer在 `Chinese-pyim' 使用期间不断更新。
@@ -911,14 +909,7 @@ Return the input string."
     (char-to-string key)))
 
 (defun pyim-input-string-to-events (str)
-  (let ((events (mapcar
-                 (lambda (c)
-                   ;; This gives us the chance to unify on input
-                   ;; (e.g. using ucs-tables.el).
-                   (or (and translation-table-for-input
-                            (aref translation-table-for-input c))
-                       c))
-                 str)))
+  (let ((events (mapcar 'identity str)))
     (if (or (get-text-property 0 'advice str)
             (next-single-property-change 0 'advice str))
         (setq events
