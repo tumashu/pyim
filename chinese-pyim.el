@@ -154,7 +154,7 @@
 (require 'help-mode)
 
 (defgroup chinese-pyim nil
-  "eim: emacs input method"
+  "Chinese pinyin input method"
   :group 'leim)
 
 (defcustom pyim-personal-file (locate-user-emacs-file "pyim/pyim-personal.txt")
