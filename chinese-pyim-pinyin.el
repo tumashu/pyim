@@ -367,7 +367,7 @@
         (i 0))
     (while (and (< i (length str)) valid)
       (if (member (char-to-string (aref str i))
-                  (mapcar 'identity "vmpfwckzyjqdltxuognbhsrei-a"))
+                  (mapcar 'identity "vmpfwckzyjqdltxuognbhsrei'-a"))
           (setq valid nil))
       (setq i (1+ i)))
     valid))

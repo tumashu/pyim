@@ -747,7 +747,7 @@ beginning of line"
           (member last-command-event
                   (mapcar 'identity "abcdefghjklmnopqrstwxyz"))
         (member last-command-event
-                (mapcar 'identity "vmpfwckzyjqdltxuognbhsrei-a")))
+                (mapcar 'identity "vmpfwckzyjqdltxuognbhsrei'-a")))
       (progn
         (setq pyim-current-key (concat pyim-current-key (char-to-string last-command-event)))
         (funcall pyim-handle-function))
