@@ -82,7 +82,7 @@
 ;; ### 第一种方式 ###
 ;;
 ;; 获取其他 Chinese-pyim 用户的拼音词库，比如，某个同学测试 Chinese-pyim 时创建了一个
-;; 中文拼音词库，词条数量大于300万，文件大小大于25M。
+;; 中文拼音词库，词条数量大于100万，文件大小大于20M。
 ;;
 ;; https://github.com/tumashu/chinese-pyim-bigdict/blob/master/pyim-bigdict.txt?raw=true
 ;;
@@ -186,7 +186,7 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
 (defcustom pyim-dicts nil
   "
 拼音词库是`Chinese-pyim' 使用顺手与否的关键，根据经验估计：
-1. 当词库词条超过100万时(词库文件>25M)，Chinese-pyim 选词频率大大降低。
+1. 当词库词条超过100万时(词库文件>20M)，Chinese-pyim 选词频率大大降低。
 2. 当词库词条超过100万时，Chinese-pyim 中文输入体验可以达到搜狗输入法的80%。
 
 使用这个列表可以为 `Chinese-pyim' 拼音输入法添加词库，列表中排列靠前的词库优先使用。

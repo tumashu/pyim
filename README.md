@@ -62,7 +62,7 @@ Chinese-pyim 默认没有携带任何拼音词库，如果不配置拼音词库�
 ### 第一种方式 ###
 
 获取其他 Chinese-pyim 用户的拼音词库，比如，某个同学测试 Chinese-pyim 时创建了一个
-中文拼音词库，词条数量大于300万，文件大小大于25M。
+中文拼音词库，词条数量大于100万，文件大小大于20M。
 
 https://github.com/tumashu/chinese-pyim-bigdict/blob/master/pyim-bigdict.txt?raw=true
 
