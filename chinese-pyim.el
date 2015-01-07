@@ -1063,6 +1063,7 @@ Return the input string."
     (define-key map " " 'pyim-pinyin-select-current)
     (define-key map [backspace] 'pyim-delete-last-char)
     (define-key map (kbd "M-DEL") 'pyim-pinyin-backward-kill-py)
+    (define-key map (kbd "M-g") 'pyim-pinyin-fuzzy-adjust)
     (define-key map [delete] 'pyim-delete-last-char)
     (define-key map "\177" 'pyim-delete-last-char)
     (define-key map "\C-n" 'pyim-pinyin-next-page)

@@ -444,6 +444,23 @@
         (replace-match "" nil nil pyim-current-key))
   (pyim-pinyin-handle-string))
 
+(defun pyim-pinyin-fuzzy-adjust ()
+  (interactive)
+  (cond
+   ((string-match-p "eng" pyim-current-key)
+    (setq pyim-current-key
+          (replace-regexp-in-string "eng" "en" pyim-current-key)))
+   ((string-match-p "en[^g]" pyim-current-key)
+    (setq pyim-current-key
+          (replace-regexp-in-string "en" "eng" pyim-current-key)))
+   ((string-match-p "un" pyim-current-key)
+    (setq pyim-current-key
+          (replace-regexp-in-string "un" "ong" pyim-current-key)))
+   ((string-match-p "ong" pyim-current-key)
+    (setq pyim-current-key
+          (replace-regexp-in-string "ong" "un" pyim-current-key))))
+  (pyim-pinyin-handle-string))
+
 (defun pyim-pinyin-activate-function ()
   (setq pyim-do-completion nil
         pyim-handle-function 'pyim-pinyin-handle-string
