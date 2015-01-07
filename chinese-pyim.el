@@ -1024,7 +1024,10 @@ Return the input string."
   (setq pyim-punctuation-translate-p
         (if (null arg)
             (not pyim-punctuation-translate-p)
-          (> (prefix-numeric-value arg) 0))))
+          (> (prefix-numeric-value arg) 0)))
+  (if pyim-punctuation-translate-p
+      (message "开启标点转换功能（使用全角标点）")
+    (message "关闭标点转换功能（使用半角标点）")))
 
 ;;;  一个快速插入英文的命令。按自己的需要绑定到 ";"
 (defun pyim-insert-ascii ()
