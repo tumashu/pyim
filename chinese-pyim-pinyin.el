@@ -53,8 +53,8 @@
                  (progn
                    (setq userpos (pyim-pinyin-user-divide-pos str)
                          pyim-current-key (pyim-pinyin-restore-user-divide
-                                            (pyim-pinyin-pylist-to-string pyim-pinyin-pylist)
-                                            userpos))
+                                           (pyim-pinyin-pylist-to-string pyim-pinyin-pylist)
+                                           userpos))
                    (setq pyim-current-choices (list (delete-dups (pyim-pinyin-get-choices pyim-pinyin-pylist))))
                    (when  (car pyim-current-choices)
                      (setq pyim-current-pos 1)
@@ -62,8 +62,8 @@
                      t)))
       (setq pyim-current-str (replace-regexp-in-string "-" "" pyim-current-key))
       (setq pyim-guidance-str (format "%s"
-                                       (replace-regexp-in-string
-                                        "-" " " pyim-current-key)))
+                                      (replace-regexp-in-string
+                                       "-" " " pyim-current-key)))
       (pyim-show))))
 
 (defun pyim-pinyin-format-page ()
@@ -75,7 +75,7 @@
          (pos (1- (min pyim-current-pos (length choices))))
          (i 0) rest)
     (setq pyim-current-str (concat (substring pyim-current-str 0 pyim-pinyin-pos)
-                                    (pyim-choice (nth pos choices)))
+                                   (pyim-choice (nth pos choices)))
           rest (mapconcat (lambda (py)
                             (concat (car py) (cdr py)))
                           (nthcdr (length pyim-current-str) pyim-pinyin-pylist)
@@ -230,7 +230,7 @@
     (dolist (word (reverse wordspy))
       (if (listp word)
           (setq words (append words (pyim-pinyin-match-word (pyim-pinyin-get (car word))
-                                                             (cdr word))))
+                                                            (cdr word))))
         (setq words (append words (mapcar (lambda (w)
                                             (propertize w 'py (list word)))
                                           (pyim-pinyin-get word))))))
@@ -355,7 +355,7 @@
   (let ((py (pyim-pinyin-match-py word pylist)))
     (when py
       (pyim-pinyin-rearrange-1 word
-                                (car py))
+                               (car py))
       (pyim-pinyin-rearrange-1 word (cdr py)))))
 
 (defun pyim-pinyin-rearrange-1 (word py)
@@ -408,10 +408,10 @@
             (pyim-show)
           (setq pyim-current-pos (+ pyim-current-pos index))
           (setq pyim-current-str (concat (substring pyim-current-str 0
-                                                     pyim-pinyin-pos)
-                                          (pyim-choice
-                                           (nth (1- pyim-current-pos)
-                                                (car pyim-current-choices)))))
+                                                    pyim-pinyin-pos)
+                                         (pyim-choice
+                                          (nth (1- pyim-current-pos)
+                                               (car pyim-current-choices)))))
           (pyim-pinyin-select-current)))
     (pyim-append-string (char-to-string last-command-event))
     (pyim-terminate-translation)))
@@ -434,7 +434,7 @@
 (defun pyim-pinyin-quit-no-clear ()
   (interactive)
   (setq pyim-current-str (replace-regexp-in-string "-" ""
-                                                    pyim-current-key))
+                                                   pyim-current-key))
   (pyim-terminate-translation))
 
 (defun pyim-pinyin-backward-kill-py ()
