@@ -122,6 +122,7 @@ emacs，就可以让 Chinese-pyim 使用词库了。
 (setq default-input-method "chinese-pyim")
 (global-set-key (kbd "C-<SPC>") 'toggle-input-method)
 ;; (global-set-key (kbd "C-;") 'pyim-insert-ascii)
+;; (global-set-key (kbd "C-;") 'pyim-toggle-full-width-punctuation)
 ;; (global-set-key (kbd "C-;") 'pyim-punctuation-translate-at-point)
 
 ```
