@@ -1033,16 +1033,15 @@ Return the input string."
 (defun pyim-insert-ascii ()
   (interactive)
   (if current-input-method
-      (let (c)
-        (message (format "自定义输入(直接空格%s, 回车%c): "
-                         (cdr pyim-insert-ascii-char)
-                         (car pyim-insert-ascii-char)))
+      (let ((msg "自定义输入: ")
+            c)
+        (message msg)
         (setq c (read-event))
         (cond ((= c ? ) (insert (cdr pyim-insert-ascii-char)))
               ((= c ?\r) (insert-char (car pyim-insert-ascii-char) 1))
               (t
                (setq unread-command-events (list last-input-event))
-               (insert (read-from-minibuffer "自定义输入: ")))))
+               (insert (read-no-blanks-input msg)))))
     (call-interactively 'self-insert-command)))
 
 (defvar pyim-mode-map
