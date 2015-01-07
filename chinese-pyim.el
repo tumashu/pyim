@@ -141,7 +141,7 @@
 ;; ```lisp
 ;; (setq default-input-method "chinese-pyim")
 ;; (global-set-key (kbd "C-<SPC>") 'toggle-input-method)
-;; (global-set-key (kbd ";") 'pyim-insert-ascii)
+;; (global-set-key (kbd "C-;") 'pyim-insert-ascii)
 ;;
 ;; ```
 ;; 切换全角半角标点符号使用命令: M-x pyim-toggle-full-width-punctuation
@@ -320,9 +320,6 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
 (defvar pyim-punctuation-escape-list (number-sequence ?0 ?9)
   "Punctuation will not insert after this characters.
 If you don't like this funciton, set the variable to nil")
-
-(defvar pyim-insert-ascii-char (cons ?\; "；")
-  "*Key used for `pyim-insert-ascii'.")
 
 (defvar pyim-punctuation-translate-p t
   "*Non-nil means will translate punctuation.")
@@ -999,9 +996,6 @@ Return the input string."
 (defun pyim-punctuation-translate (char)
   (if pyim-punctuation-translate-p
       (cond ((< char ? ) "")
-            ((and pyim-insert-ascii-char
-                  (= char (car pyim-insert-ascii-char)))
-             (char-to-string char))
             (t (let ((str (char-to-string char))
                      punc)
                  (if (and (not (member (char-before) pyim-punctuation-escape-list))
@@ -1029,19 +1023,11 @@ Return the input string."
       (message "开启标点转换功能（使用全角标点）")
     (message "关闭标点转换功能（使用半角标点）")))
 
-;;;  一个快速插入英文的命令。按自己的需要绑定到 ";"
+;;;  一个快速插入英文的命令。
 (defun pyim-insert-ascii ()
   (interactive)
   (if current-input-method
-      (let ((msg "自定义输入: ")
-            c)
-        (message msg)
-        (setq c (read-event))
-        (cond ((= c ? ) (insert (cdr pyim-insert-ascii-char)))
-              ((= c ?\r) (insert-char (car pyim-insert-ascii-char) 1))
-              (t
-               (setq unread-command-events (list last-input-event))
-               (insert (read-no-blanks-input msg)))))
+      (insert (read-no-blanks-input "自定义输入: "))
     (call-interactively 'self-insert-command)))
 
 (defvar pyim-mode-map
