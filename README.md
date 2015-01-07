@@ -121,7 +121,8 @@ emacs，就可以让 Chinese-pyim 使用词库了。
 ```lisp
 (setq default-input-method "chinese-pyim")
 (global-set-key (kbd "C-<SPC>") 'toggle-input-method)
-(global-set-key (kbd "C-;") 'pyim-insert-ascii)
+;; (global-set-key (kbd "C-;") 'pyim-insert-ascii)
+;; (global-set-key (kbd "C-;") 'pyim-punctuation-translate-at-point)
 
 ```
 切换全角半角标点符号使用命令: M-x pyim-toggle-full-width-punctuation

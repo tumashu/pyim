@@ -141,7 +141,8 @@
 ;; ```lisp
 ;; (setq default-input-method "chinese-pyim")
 ;; (global-set-key (kbd "C-<SPC>") 'toggle-input-method)
-;; (global-set-key (kbd "C-;") 'pyim-insert-ascii)
+;; ;; (global-set-key (kbd "C-;") 'pyim-insert-ascii)
+;; ;; (global-set-key (kbd "C-;") 'pyim-punctuation-translate-at-point)
 ;;
 ;; ```
 ;; 切换全角半角标点符号使用命令: M-x pyim-toggle-full-width-punctuation
@@ -1011,6 +1012,22 @@ Return the input string."
                            (nth 1 punc))))
                    str))))
     (char-to-string char)))
+
+;;; 切换光标处标点的样式（全角 or 半角）
+(defun pyim-punctuation-translate-at-point ()
+  (interactive)
+  (let* ((current-char (char-to-string (preceding-char)))
+         (punc-list
+          (some (lambda (x)
+                  (when (member current-char x) x))
+                pyim-punctuation-dict)))
+    (when punc-list
+      (delete-char -1)
+      (if (string= current-char (car punc-list))
+          (if (> (length (cdr punc-list)) 1)
+              (insert (ido-completing-read "请选择："(cdr punc-list)))
+            (insert (car (cdr punc-list))))
+        (insert (car punc-list))))))
 
 ;;; 切换中英文标点符号
 (defun pyim-toggle-full-width-punctuation (arg)
