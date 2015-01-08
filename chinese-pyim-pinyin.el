@@ -5,6 +5,7 @@
 
 ;; Author: Ye Wenbin <wenbinye@163.com>, Feng Shu <tumashu@gmail.com>
 ;; URL: https://github.com/tumashu/chinese-pyim
+;; Package-Requires: ((cl-lib "0.5"))
 ;; Version: 0.0.1
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -22,9 +23,7 @@
 ;; Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 ;;; Code:
-
-(eval-when-compile
-  (require 'cl))
+(require 'cl-lib)
 
 ;;;  variable declare
 (defvar pyim-pinyin-shenmu

@@ -5,6 +5,7 @@
 ;;
 ;; Author: Ye Wenbin <wenbinye@163.com>, Feng Shu <tumashu@gmail.com>
 ;; URL: https://github.com/tumashu/chinese-pyim
+;; Package-Requires: ((cl-lib "0.5"))
 ;; Version: 0.0.1
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -158,9 +159,7 @@
 ;;
 
 ;;; Code:
-
-(eval-when-compile
-  (require 'cl))
+(require 'cl-lib)
 (require 'help-mode)
 
 (defgroup chinese-pyim nil
@@ -1039,9 +1038,9 @@ Return the input string."
   (interactive)
   (let* ((current-char (char-to-string (preceding-char)))
          (punc-list
-          (some (lambda (x)
-                  (when (member current-char x) x))
-                pyim-punctuation-dict)))
+          (cl-some (lambda (x)
+                     (when (member current-char x) x))
+                   pyim-punctuation-dict)))
     (when punc-list
       (delete-char -1)
       (if (string= current-char (car punc-list))
