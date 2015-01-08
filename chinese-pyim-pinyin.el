@@ -444,7 +444,7 @@
         (replace-match "" nil nil pyim-current-key))
   (pyim-pinyin-handle-string))
 
-(defun pyim-pinyin-fuzzy-adjust ()
+(defun pyim-pinyin-fuzzy-adjust-1 ()
   (interactive)
   (cond
    ((string-match-p "eng" pyim-current-key)

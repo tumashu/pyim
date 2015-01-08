@@ -128,6 +128,9 @@ emacs，就可以让 Chinese-pyim 使用词库了。
 ```
 切换全角半角标点符号使用命令: M-x pyim-toggle-full-width-punctuation
 
+Chinese-pyim 使用一个比较 *粗糙* 的方法处理 *模糊音*，要了解具体细节，请
+运行： C-h v pyim-pinyin-fuzzy-adjust-function
+
 # 其他 #
 
 1. 了解 Chinese-pyim 个人词频文件设置的细节：C-h v pyim-personal-file

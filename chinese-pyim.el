@@ -148,6 +148,9 @@
 ;; ```
 ;; 切换全角半角标点符号使用命令: M-x pyim-toggle-full-width-punctuation
 ;;
+;; Chinese-pyim 使用一个比较 *粗糙* 的方法处理 *模糊音*，要了解具体细节，请
+;; 运行： C-h v pyim-pinyin-fuzzy-adjust-function
+;;
 ;; # 其他 #
 ;;
 ;; 1. 了解 Chinese-pyim 个人词频文件设置的细节：C-h v pyim-personal-file
@@ -263,6 +266,23 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
   "标点符号表。"
   :group 'chinese-pyim
   :type 'list)
+
+(defcustom pyim-pinyin-fuzzy-adjust-function
+  'pyim-pinyin-fuzzy-adjust-1
+  "Chinese-pyim的核心并不能处理模糊音，这里提供了一个比较
+ *粗糙* 的方法来处理模糊音。
+
+假如：用户输入了一个错误的拼音“ying-gai”，用户可以通过快
+捷键运行一个函数，将“ing” 替换 “in”，得到 “yin-gai”
+对应的词语。
+
+这种处理方式能力有限，一次不能处理太多的模糊音，用户需要根据
+自己的需要，自定义模糊音处理函数。
+
+模糊音处理函数可以参考：`pyim-pinyin-fuzzy-adjust-1'
+"
+  :group 'chinese-pyim
+  :type 'function)
 
 (defcustom pyim-page-length 9
   "每页显示的词条数目"
@@ -1063,7 +1083,9 @@ Return the input string."
     (define-key map " " 'pyim-pinyin-select-current)
     (define-key map [backspace] 'pyim-delete-last-char)
     (define-key map (kbd "M-DEL") 'pyim-pinyin-backward-kill-py)
-    (define-key map (kbd "M-g") 'pyim-pinyin-fuzzy-adjust)
+    (define-key map (kbd "M-g") (lambda ()
+                                  (interactive)
+                                  (funcall pyim-pinyin-fuzzy-adjust-function)))
     (define-key map [delete] 'pyim-delete-last-char)
     (define-key map "\177" 'pyim-delete-last-char)
     (define-key map "\C-n" 'pyim-pinyin-next-page)
