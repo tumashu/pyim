@@ -135,6 +135,9 @@ Chinese-pyim 使用一个比较 *粗糙* 的方法处理 *模糊音*，要了解
 
 1. 了解 Chinese-pyim 个人词频文件设置的细节：C-h v pyim-personal-file
 2. 了解 Chinese-pyim 词库设置细节：C-h v pyim-dicts
+3. 下面两个函数可以将汉字字符串转换为拼音字符串。
+   1. `pyim-hanzi2pinyin` （考虑多音字）
+   2. `pyim-hanzi2pinyin-simple`  （不考虑多音字）
 
 
 
