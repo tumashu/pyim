@@ -449,13 +449,13 @@
    ((string-match-p "eng" pyim-current-key)
     (setq pyim-current-key
           (replace-regexp-in-string "eng" "en" pyim-current-key)))
-   ((string-match-p "en[^g]" pyim-current-key)
+   ((string-match-p "en[^g]*" pyim-current-key)
     (setq pyim-current-key
           (replace-regexp-in-string "en" "eng" pyim-current-key)))
    ((string-match-p "ing" pyim-current-key)
     (setq pyim-current-key
           (replace-regexp-in-string "ing" "in" pyim-current-key)))
-   ((string-match-p "in[^g]" pyim-current-key)
+   ((string-match-p "in[^g]*" pyim-current-key)
     (setq pyim-current-key
           (replace-regexp-in-string "in" "ing" pyim-current-key)))
    ((string-match-p "un" pyim-current-key)
