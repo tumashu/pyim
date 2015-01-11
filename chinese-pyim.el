@@ -7,6 +7,7 @@
 ;; URL: https://github.com/tumashu/chinese-pyim
 ;; Package-Requires: ((cl-lib "0.5"))
 ;; Version: 0.0.1
+;; Keywords: convenience, Chinese, pinyin, input-method
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
