@@ -429,7 +429,6 @@ If you don't like this funciton, set the variable to nil")
         (with-temp-buffer
           (erase-buffer)
           (insert ";; -*- coding: utf-8 -*-\n")
-          (insert "a 啊\n")
           (write-file (expand-file-name file))
           (message "自动创建 Chinese-pyim 文件: %s" file)))
     (error
@@ -614,13 +613,17 @@ whenever possible."
           history
         (dolist (buf (pyim-buffer-list))
           (with-current-buffer (cdr (assoc "buffer" buf))
-            (setq words (append words
-                                (cdr
-                                 (pyim-bisearch-word code
-                                                     (point-min)
-                                                     (point-max)))))
-            (if pyim-do-completion
-                (setq completions (pyim-completions code completions)))))
+            ;; Chinese-pyim 首次运行时，personal-file 文件为空文件，
+            ;; 其对应的 buffer 为空，这里确保 buffer 包含有效的词库
+            ;; 信息时才搜索所需的词条。
+            (when (pyim-dict-buffer-valid-p)
+              (setq words (append words
+                                  (cdr
+                                   (pyim-bisearch-word code
+                                                       (point-min)
+                                                       (point-max)))))
+              (if pyim-do-completion
+                  (setq completions (pyim-completions code completions))))))
         (setq words (delete-dups words))
         (puthash code (list words
                             (cons "pos" (or (cdr (assoc "pos" (cdr history))) 1))
@@ -642,6 +645,15 @@ whenever possible."
         (forward-line 1)
         (setq cnt (1+ cnt)))
       completions)))
+
+(defun pyim-dict-buffer-valid-p ()
+  "提取 buffer 中间一行文本，确定其是否符合词库格式。"
+  (save-excursion
+    (let ((mid (/ (+ (point-min) (point-max)) 2))
+          ccode)
+      (goto-char mid)
+      (beginning-of-line)
+      (re-search-forward "[ \t]" (line-end-position) t))))
 
 (defun pyim-bisearch-word (code start end)
   (let ((mid (/ (+ start end) 2))
