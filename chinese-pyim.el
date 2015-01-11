@@ -489,7 +489,8 @@ If you don't like this funciton, set the variable to nil")
   "为每一个词库文件创建一个buffer(这些buffer用户不可见)，然后将各个词库文件的内容插入
 与之对应的buffer。最后返回一个包含所有buffer对象以及词库文件名的alist。
 
-`pyim-personal-file' 文件最先导入。然后按照先后顺序导入 `pyim-dicts' 中定义的词库。
+`pyim-personal-file' 文件最先导入。然后按照先后顺序导入 `pyim-dicts' 中定义的词库
+排在最前面的词库首先被加载，相同的词库文件只加载一次。
 "
   (let ((personal-file (expand-file-name pyim-personal-file))
         (dicts-list pyim-dicts)
