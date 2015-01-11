@@ -556,12 +556,12 @@
       (mapconcat 'identity
                  (cl-remove-duplicates
                   (let ((result '("")))
-                    (loop for i in pinyin-list
-                          do (setq result
-                                   (loop for j in i
-                                         append (loop for k in result
-                                                      collect (concat k (if shou-zi-mu (substring j 0 1) j)
-                                                                      (or separator "")))))) result)
+                    (cl-loop for i in pinyin-list
+                             do (setq result
+                                      (cl-loop for j in i
+                                               append (cl-loop for k in result
+                                                               collect (concat k (if shou-zi-mu (substring j 0 1) j)
+                                                                               (or separator "")))))) result)
                   :test (lambda (x y) (or (null y) (equal x y)))
                   :from-end t) " "))))
 
