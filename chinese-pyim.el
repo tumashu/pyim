@@ -90,13 +90,8 @@
 ;;
 ;; 其他同学可以下载上述词库来体验一下超大词库为 Chinese-pyim 带来的巨大变化。
 ;;
-;; 假设下载的文件为：/path/to/pyim-bigdict.txt，在.emacs中添加如下一行配置，然后重启
-;; emacs，就可以让 Chinese-pyim 使用词库了。
-;;
-;; ```lisp
-;; (setq pyim-dicts
-;;       '((:name "bigdict" :file "/path/to/pyim-bigdict.txt" :coding utf-8-unix)))
-;; ```
+;; 下载上述词库后，运行 `pyim-add-dict' ，按照命令提示，将下载得到的词库文件信息添加
+;; 到 `pyim-dicts' 中，最后重启emacs。
 ;;
 ;; ### 第二种方式 ###
 ;;
@@ -117,20 +112,8 @@
 ;;
 ;;         shen-lan-ci-ku 深蓝词库
 ;;
-;; 这里假设转换得到两个文件：
-;;
-;; 1. /path/to/pyim-dict1.txt
-;; 2. /path/to/pyim-dict2.txt
-;;
-;; 在.emacs中添加如下一行配置，可以让Chinese-pyim使用上述两个词库。
-;;
-;; ```lisp
-;; (setq pyim-dicts
-;;       '((:name "dict1" :file "/path/to/pyim-dict1.txt" :coding gbk-dos)
-;;         (:name "dict2" :file "/path/to/pyim-dict2.txt" :coding gbk-dos)))
-;; ```
-;;
-;; 最后，重启emacs
+;; 最后，使用命令 `pyim-add-dict' ，将转换得到的词库文件的信息添加到 `pyim-dicts' 中，
+;; 完成后，重启emacs。
 ;;
 ;; 注意：每一个词库文件必须按行排序（准确的说，是按每一行的拼音code排序），
 ;; 因为`Chinese-pyim' 寻找词条时，使用二分法来优化速度，而二分法工作的前提
@@ -152,6 +135,20 @@
 ;;
 ;; Chinese-pyim 使用一个比较 *粗糙* 的方法处理 *模糊音*，要了解具体细节，请
 ;; 运行： C-h v pyim-pinyin-fuzzy-adjust-function
+;;
+;; # 如何手动安装和管理词库 #
+;; 这里假设有两个词库文件：
+;;
+;; 1. /path/to/pyim-dict1.txt
+;; 2. /path/to/pyim-dict2.txt
+;;
+;; 在~/.emacs文件中添加如下一行配置。
+;;
+;; ```lisp
+;; (setq pyim-dicts
+;;       '((:name "dict1" :file "/path/to/pyim-dict1.txt" :coding gbk-dos)
+;;         (:name "dict2" :file "/path/to/pyim-dict2.txt" :coding gbk-dos)))
+;; ```
 ;;
 ;; # 其他 #
 ;;
@@ -453,13 +450,39 @@ If you don't like this funciton, set the variable to nil")
     (error
      (warn "`Chinese-pyim' 模版词库创建失败！" ))))
 
-(defun pyim-dict-available-p (dictname)
-  "检测 :name 为 `dictname' 的词库信息是否存在。
+(defun pyim-dict-name-available-p (dict-name)
+  "查询 `pyim-dicts' 中 `:name' 为 `dict-name' 的词库信息是否存在。
 这个函数主要用于词库 package。"
   (cl-some (lambda (x)
              (let ((name (plist-get x :name)))
-               (string= name dictname)))
+               (string= name dict-name)))
            pyim-dicts))
+
+(defun pyim-dict-file-available-p (dict-file)
+  "查询 `pyim-dicts' 中 `:file' 为 `dict-file' 的词库信息是否存在。
+这个函数主要用于词库 package。"
+  (cl-some (lambda (x)
+             (let ((file (plist-get x :file)))
+               (string= (expand-file-name file)
+                        (expand-file-name dict-file))))
+           pyim-dicts))
+
+(defun pyim-add-dict ()
+  "为 `pyim-dicts' 添加词库信息，然后 `pyim-dicts' 将通过
+`customize-save-variable' 函数保存到用户emacs配置中"
+  (interactive)
+  (let (dict name file coding first-used)
+    (setq name (read-from-minibuffer "请输入词库名称： "))
+    (setq file (ido-read-file-name "请选择词库文件： " "~/"))
+    (setq coding (ido-completing-read "词库文件编码: " '("utf-8-unix" "cjk-dos")))
+    (setq first-used  (yes-or-no-p "是否让 Chinese-pyim 优先使用词库？ "))
+    (setq dict `(:name ,name :file ,file :coding ,(intern coding)))
+    (if first-used
+        (add-to-list 'pyim-dicts dict)
+      (add-to-list 'pyim-dicts dict t))
+    ;; 将`pyim-dict'的设置保存到emacs配置文件中。
+    (customize-save-variable 'pyim-dicts pyim-dicts)
+    (message "添加并保存 Chinese-pyim 输入法词库: (%s)，重启 emacs 后生效！" name)))
 
 ;;;  read file functions
 (defun pyim-load-file ()

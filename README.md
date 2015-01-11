@@ -68,13 +68,8 @@ https://github.com/tumashu/chinese-pyim-bigdict/blob/master/pyim-bigdict.txt?raw
 
 其他同学可以下载上述词库来体验一下超大词库为 Chinese-pyim 带来的巨大变化。
 
-假设下载的文件为：/path/to/pyim-bigdict.txt，在.emacs中添加如下一行配置，然后重启
-emacs，就可以让 Chinese-pyim 使用词库了。
-
-```lisp
-(setq pyim-dicts
-      '((:name "bigdict" :file "/path/to/pyim-bigdict.txt" :coding utf-8-unix)))
-```
+下载上述词库后，运行 `pyim-add-dict` ，按照命令提示，将下载得到的词库文件信息添加
+到 `pyim-dicts` 中，最后重启emacs。
 
 ### 第二种方式 ###
 
@@ -95,20 +90,8 @@ emacs，就可以让 Chinese-pyim 使用词库了。
 
         shen-lan-ci-ku 深蓝词库
 
-这里假设转换得到两个文件：
-
-1. /path/to/pyim-dict1.txt
-2. /path/to/pyim-dict2.txt
-
-在.emacs中添加如下一行配置，可以让Chinese-pyim使用上述两个词库。
-
-```lisp
-(setq pyim-dicts
-      '((:name "dict1" :file "/path/to/pyim-dict1.txt" :coding gbk-dos)
-        (:name "dict2" :file "/path/to/pyim-dict2.txt" :coding gbk-dos)))
-```
-
-最后，重启emacs
+最后，使用命令 `pyim-add-dict` ，将转换得到的词库文件的信息添加到 `pyim-dicts` 中，
+完成后，重启emacs。
 
 注意：每一个词库文件必须按行排序（准确的说，是按每一行的拼音code排序），
 因为`Chinese-pyim` 寻找词条时，使用二分法来优化速度，而二分法工作的前提
@@ -130,6 +113,20 @@ emacs，就可以让 Chinese-pyim 使用词库了。
 
 Chinese-pyim 使用一个比较 *粗糙* 的方法处理 *模糊音*，要了解具体细节，请
 运行： C-h v pyim-pinyin-fuzzy-adjust-function
+
+# 如何手动安装和管理词库 #
+这里假设有两个词库文件：
+
+1. /path/to/pyim-dict1.txt
+2. /path/to/pyim-dict2.txt
+
+在~/.emacs文件中添加如下一行配置。
+
+```lisp
+(setq pyim-dicts
+      '((:name "dict1" :file "/path/to/pyim-dict1.txt" :coding gbk-dos)
+        (:name "dict2" :file "/path/to/pyim-dict2.txt" :coding gbk-dos)))
+```
 
 # 其他 #
 
