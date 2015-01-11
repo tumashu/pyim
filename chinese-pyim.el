@@ -429,6 +429,7 @@ If you don't like this funciton, set the variable to nil")
         (with-temp-buffer
           (erase-buffer)
           (insert ";; -*- coding: utf-8 -*-\n")
+          (make-directory (file-name-directory file) t)
           (write-file (expand-file-name file))
           (message "自动创建 Chinese-pyim 文件: %s" file)))
     (error
