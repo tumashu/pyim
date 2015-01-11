@@ -453,6 +453,14 @@ If you don't like this funciton, set the variable to nil")
     (error
      (warn "`Chinese-pyim' 模版词库创建失败！" ))))
 
+(defun pyim-dict-available-p (dictname)
+  "检测 :name 为 `dictname' 的词库信息是否存在。
+这个函数主要用于词库 package。"
+  (cl-some (lambda (x)
+             (let ((name (plist-get x :name)))
+               (string= name dictname)))
+           pyim-dicts))
+
 ;;;  read file functions
 (defun pyim-load-file ()
   "为每一个词库文件创建一个buffer(这些buffer用户不可见)，然后将各个词库文件的内容插入
