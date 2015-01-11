@@ -1,6 +1,6 @@
 # chinese-pyim - Chinese pinyin input method
 
-*Author:* Ye Wenbin <wenbinye@163.com>, Feng Shu <tumashu@gmail.com><br>
+*Author:* Ye Wenbin <wenbinye@163.com>, Feng Shu <tumashu@163.com><br>
 *Version:* 0.0.1<br>
 
 # 简介 #

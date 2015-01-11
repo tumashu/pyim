@@ -1,9 +1,9 @@
 ;;; chinese-pyim-pinyin.el --- Pinyin functions used by Chinese-pyim (chinese pinyin input method)
 
 ;; Copyright 2006 Ye Wenbin
-;;           2014 Feng Shu
+;;           2014-2015 Feng Shu
 
-;; Author: Ye Wenbin <wenbinye@163.com>, Feng Shu <tumashu@gmail.com>
+;; Author: Ye Wenbin <wenbinye@163.com>, Feng Shu <tumashu@163.com>
 ;; URL: https://github.com/tumashu/chinese-pyim
 ;; Package-Requires: ((cl-lib "0.5"))
 ;; Version: 0.0.1
