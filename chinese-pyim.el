@@ -91,7 +91,7 @@
 ;; 其他同学可以下载上述词库来体验一下超大词库为 Chinese-pyim 带来的巨大变化。
 ;;
 ;; 下载上述词库后，运行 `pyim-add-dict' ，按照命令提示，将下载得到的词库文件信息添加
-;; 到 `pyim-dicts' 中，最后重启emacs。
+;; 到 `pyim-dicts' 中，最后运行命令 `pyim-restart' 或者重启emacs。
 ;;
 ;; ### 第二种方式 ###
 ;;
@@ -113,7 +113,7 @@
 ;;         shen-lan-ci-ku 深蓝词库
 ;;
 ;; 最后，使用命令 `pyim-add-dict' ，将转换得到的词库文件的信息添加到 `pyim-dicts' 中，
-;; 完成后，重启emacs。
+;; 完成后运行命令 `pyim-restart' 或者重启emacs。
 ;;
 ;; 注意：每一个词库文件必须按行排序（准确的说，是按每一行的拼音code排序），
 ;; 因为`Chinese-pyim' 寻找词条时，使用二分法来优化速度，而二分法工作的前提
@@ -490,7 +490,7 @@ If you don't like this funciton, set the variable to nil")
   https://github.com/tumashu/chinese-pyim-bigdict/blob/master/pyim-bigdict.txt?raw=true
 
 下载上述拼音词库后，运行 `pyim-add-dict' ，按照命令提示，将词库文件信息添加到
- `pyim-dicts' 中，最后重启emacs。
+ `pyim-dicts' 中，最后运行命令 `pyim-restart' 或者重启emacs。。
 
 喜欢折腾的用户可以从下面几个途径获得 Chinese-pyim 更详细的信息。
 1. 使用 `C-h v pyim-dicts' 了解 `Chinese-pyim' 词库文件格式，
@@ -730,14 +730,26 @@ beginning of line"
         (bufname (pyim-name))
         buffer file)
     (dolist (buf buflist)
-      (unless (buffer-live-p (cdr (setq buffer (assoc "buffer" buf))))
-        (if (file-exists-p (setq file (cdr (assoc "file" buf))))
-            (with-current-buffer (format "*%s*" (generate-new-buffer bufname))
+      (setq buffer (assoc "buffer" buf))
+      (setq file (cdr (assoc "file" buf)))
+      (unless (buffer-live-p (cdr buffer))
+        (if (file-exists-p file)
+            (with-current-buffer (generate-new-buffer
+                                  (format pyim-buffer-name-format bufname))
               (insert-file-contents file)
               (setcdr buffer (current-buffer)))
           (message "%s for %s is not exists!" file bufname)
           (setq buflist (remove buf buflist)))))
     t))
+
+(defun pyim-kill-buffers ()
+  "删除所有词库文件对应的 buffer ，用于重启 Chinese-pyim 。"
+  (let ((buflist (pyim-buffer-list))
+        buffer)
+    (dolist (buf buflist)
+      (setq buffer (cdr (assoc "buffer" buf)))
+      (when (buffer-live-p buffer)
+        (kill-buffer buffer)))))
 
 (defun pyim-inactivate ()
   (interactive)
@@ -1184,15 +1196,24 @@ Return the input string."
     map)
   "Keymap")
 
-;;;  pyim-start
-(defun pyim-start (name &optional active-func)
+(defun pyim-restart ()
+  "重启 Chinese-pyim"
+  (interactive)
+  (pyim-start (pyim-name) nil t))
+
+(defun pyim-start (name &optional active-func restart)
   (interactive)
   (mapc 'kill-local-variable pyim-local-variable-list)
   (mapc 'make-local-variable pyim-local-variable-list)
-  (if (functionp active-func)
-      (funcall active-func))
+  ;; 重启时，kill 所有已经打开的 buffer。
+  (when restart
+    (when (yes-or-no-p "正在重启 Chinese-pyim，需要保存 personal 文件的变动吗？ ")
+      (pyim-save-personal-file))
+    (pyim-kill-buffers)
+    (pyim-set-buffer-list nil))
   (unless (and (pyim-name)
-               (pyim-check-buffers))
+               (pyim-check-buffers)
+               (not restart))
     (pyim-set-name name)
     (pyim-set-buffer-list (pyim-load-file))
     (pyim-set-history (make-hash-table :test 'equal))
@@ -1200,13 +1221,12 @@ Return the input string."
                          (set-keymap-parent map pyim-mode-map)
                          map))
     (pyim-set-active-function 'pyim-pinyin-activate-function)
+    (pyim-pinyin-make-char-table)
     (run-hooks 'pyim-load-hook)
     (message nil))
 
-  (unless pyim-activated-p
-    (add-to-list 'kill-emacs-hook 'pyim-save-personal-file)
-    (setq pyim-activated-p t)
-    (pyim-pinyin-make-char-table))
+  (unless (member 'pyim-save-personal-file kill-emacs-hook)
+    (add-to-list 'kill-emacs-hook 'pyim-save-personal-file))
 
   (setq input-method-function 'pyim-input-method)
   (setq deactivate-current-input-method-function 'pyim-inactivate)
@@ -1217,7 +1237,9 @@ Return the input string."
     (add-hook 'minibuffer-exit-hook 'pyim-exit-from-minibuffer))
   (run-hooks 'pyim-active-hook)
   (if (functionp (pyim-active-function))
-      (funcall (pyim-active-function))))
+      (funcall (pyim-active-function)))
+  (when restart
+    (message "Chinese-pyim 重启完成。")))
 
 ;;; 注册输入法
 (register-input-method "chinese-pyim" "euc-cn" 'pyim-start "[pyim]")

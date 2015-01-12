@@ -69,7 +69,7 @@ https://github.com/tumashu/chinese-pyim-bigdict/blob/master/pyim-bigdict.txt?raw
 其他同学可以下载上述词库来体验一下超大词库为 Chinese-pyim 带来的巨大变化。
 
 下载上述词库后，运行 `pyim-add-dict` ，按照命令提示，将下载得到的词库文件信息添加
-到 `pyim-dicts` 中，最后重启emacs。
+到 `pyim-dicts` 中，最后运行命令 `pyim-restart` 或者重启emacs。
 
 ### 第二种方式 ###
 
@@ -91,7 +91,7 @@ https://github.com/tumashu/chinese-pyim-bigdict/blob/master/pyim-bigdict.txt?raw
         shen-lan-ci-ku 深蓝词库
 
 最后，使用命令 `pyim-add-dict` ，将转换得到的词库文件的信息添加到 `pyim-dicts` 中，
-完成后，重启emacs。
+完成后运行命令 `pyim-restart` 或者重启emacs。
 
 注意：每一个词库文件必须按行排序（准确的说，是按每一行的拼音code排序），
 因为`Chinese-pyim` 寻找词条时，使用二分法来优化速度，而二分法工作的前提
