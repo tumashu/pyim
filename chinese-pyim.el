@@ -1197,18 +1197,24 @@ Return the input string."
   "Keymap")
 
 (defun pyim-restart ()
-  "重启 Chinese-pyim"
+  "重启 Chinese-pyim，不建议用于编程环境。"
   (interactive)
-  (pyim-start (pyim-name) nil t))
+  (let ((file-save-p
+         (yes-or-no-p "正在重启 Chinese-pyim，需要保存 personal 文件的变动吗？ ")))
+    (pyim-restart-1 file-save-p)))
 
-(defun pyim-start (name &optional active-func restart)
+(defun pyim-restart-1 (save-personal-file)
+  "重启 Chinese-pyim，用于编程环境。"
+  (pyim-start (pyim-name) nil t save-personal-file))
+
+(defun pyim-start (name &optional active-func restart save-personal-file)
   (interactive)
   (mapc 'kill-local-variable pyim-local-variable-list)
   (mapc 'make-local-variable pyim-local-variable-list)
   ;; 重启时，kill 所有已经打开的 buffer。
+  (when (and restart save-personal-file)
+    (pyim-save-personal-file))
   (when restart
-    (when (yes-or-no-p "正在重启 Chinese-pyim，需要保存 personal 文件的变动吗？ ")
-      (pyim-save-personal-file))
     (pyim-kill-buffers)
     (pyim-set-buffer-list nil))
   (unless (and (pyim-name)
