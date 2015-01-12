@@ -135,7 +135,16 @@ Chinese-pyim 使用一个比较 *粗糙* 的方法处理 *模糊音*，要了解
 3. 下面两个函数可以将汉字字符串转换为拼音字符串。
    1. `pyim-hanzi2pinyin` （考虑多音字）
    2. `pyim-hanzi2pinyin-simple`  （不考虑多音字）
-
+4. 可以定义类似下面的命令来实现快速切换词库的功能。
+```lisp
+(defun pyim-use-dict:bigdict ()
+  (interactive)
+  (setq pyim-dicts
+        '((:name "BigDict"
+                 :file "/path/to/pyim-bigdict.txt"
+                 :coding utf-8-unix)))
+  (pyim-restart-1 t))
+```
 
 
 ---
