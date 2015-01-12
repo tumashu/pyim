@@ -648,13 +648,22 @@ whenever possible."
       completions)))
 
 (defun pyim-dict-buffer-valid-p ()
-  "提取 buffer 中间一行文本，确定其是否符合词库格式。"
-  (save-excursion
-    (let ((mid (/ (+ (point-min) (point-max)) 2))
-          ccode)
-      (goto-char mid)
-      (beginning-of-line)
-      (re-search-forward "[ \t]" (line-end-position) t))))
+  "粗略地确定当前 buffer 是否是一个有效的词库产生的 buffer。
+确定标准：
+
+1. buffer 必须多于5行。
+2. buffer 中间一行必须包含空格或者TAB。
+2. buffer 中间一行必须包含中文字符(\\cc)。
+
+BUG: 这个函数需要进一步优化，使其判断更准确。"
+  (when (> (count-lines (point-min) (point-max)) 5)
+    (save-excursion
+      (let ((mid (/ (+ (point-min) (point-max)) 2))
+            ccode)
+        (goto-char mid)
+        (beginning-of-line)
+        (and (re-search-forward "[ \t]" (line-end-position) t)
+             (re-search-forward "\\cc" (line-end-position) t))))))
 
 (defun pyim-bisearch-word (code start end)
   (let ((mid (/ (+ start end) 2))
