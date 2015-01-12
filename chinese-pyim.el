@@ -504,16 +504,26 @@ If you don't like this funciton, set the variable to nil")
                        (not (pyim-file-load-p file buflist)))
                   (setq buflist (append buflist (list (pyim-read-file file bufname))))
                 (message "忽略导入重复的词库文件：%s。" file)))))
-        (warn "Chinese-pyim 没有可用词库，拼音词库是 `Chinese-pyim' 使用顺手与否的关键。
-根据经验估计：
+        (warn "Chinese-pyim 没有可用词库！！！
+拼音词库是 Chinese-pyim 使用顺手与否的关键。根据经验估计：
 1. 当词库词条超过100万时(词库文件>20M)，Chinese-pyim 选词频率大大降低。
 2. 当词库词条超过100万时，Chinese-pyim 中文输入体验可以达到搜狗输入法的80%%。
 
-用户可以使用 `C-h v pyim-dicts' 了解 `Chinese-pyim' 词库文件格式等信息，
-也可以通过下述三种方法了解导入其它输入法词库的具体方法：
-1. 使用 package 管理器查看 Chinese-pyim 包的简介。
-2. 阅读 chinese-pyim.el 文件 Commentary。
-3. 查看 Chinese-pyim 在线 README：https://github.com/tumashu/chinese-pyim。")))
+赶时间的朋友可以直接下载其他 Chinese-pyim 用户现成的拼音词库，比如，某个同学
+自己使用的词库：BigDict，这个词库词条数量大于100万，文件大小大于20M，可以显著
+增强 Chinese-pyim 的输入体验。
+
+  https://github.com/tumashu/chinese-pyim-bigdict/blob/master/pyim-bigdict.txt?raw=true
+
+下载上述拼音词库后，运行 `pyim-add-dict' ，按照命令提示，将词库文件信息添加到
+ `pyim-dicts' 中，最后重启emacs。
+
+喜欢折腾的用户可以从下面几个途径获得 Chinese-pyim 更详细的信息。
+1. 使用 `C-h v pyim-dicts' 了解 `Chinese-pyim' 词库文件格式，
+2. 了解如何导入其它输入法的词库。
+   1. 使用 package 管理器查看 Chinese-pyim 包的简介
+   2. 阅读 chinese-pyim.el 文件 Commentary
+   3. 查看 Chinese-pyim 在线 README：https://github.com/tumashu/chinese-pyim")))
     buflist))
 
 (defun pyim-file-load-p (file buflist)
