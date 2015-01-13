@@ -1073,7 +1073,8 @@ Return the input string."
 (defun pyim-return-proper-punctuation (punc-list &optional before)
   "返回合适的标点符号，`punc-list'为标点符号列表，其格式类似：
       `(\",\" \"，\") 或者：`(\"'\" \"‘\" \"’\")
-当 `before' 为 t 时，只返回切换之前的结果。"
+当 `before' 为 t 时，只返回切换之前的结果，这个用来获取切换之前
+的标点符号。"
   (let* ((str (car punc-list))
          (punc (cdr punc-list))
          (switch-p (cdr (assoc str pyim-pair-punctuation-status))))
