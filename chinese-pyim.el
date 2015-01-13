@@ -288,6 +288,7 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
   :group 'chinese-pyim)
 
 ;;;  variable declare
+(defvar pyim-name "Chinese-pyim")
 (defvar pyim-info (make-vector 9 nil)
   "拼音输入法运行时需要的信息，一个 vector，有五个部分:
 1. name
@@ -373,9 +374,6 @@ If you don't like this funciton, set the variable to nil")
   (put var 'permanent-local t))
 
 ;;;  package contents
-(defsubst pyim-name ()
-  (aref pyim-info 0))
-
 (defsubst pyim-buffer-list ()
   (aref pyim-info 1))
 
@@ -395,9 +393,6 @@ If you don't like this funciton, set the variable to nil")
 
 (defsubst pyim-active-function ()
   (aref pyim-info 5))
-
-(defsubst pyim-set-name (name)
-  (aset pyim-info 0 name))
 
 (defsubst pyim-set-buffer-list (list)
   (aset pyim-info 1 list))
@@ -496,7 +491,7 @@ If you don't like this funciton, set the variable to nil")
 "
   (let ((personal-file (expand-file-name pyim-personal-file))
         (dicts-list pyim-dicts)
-        (bufname (format pyim-buffer-name-format (pyim-name)))
+        (bufname (format pyim-buffer-name-format pyim-name))
         buflist buf file coding)
     (save-excursion
       (unless (file-exists-p personal-file)
@@ -713,7 +708,7 @@ beginning of line"
   "检查所有的 buffer 是否还存在，如果不存在，重新打开文件，如果文件不
 存在，从 buffer-list 中删除这个 buffer"
   (let ((buflist (pyim-buffer-list))
-        (bufname (pyim-name))
+        (bufname pyim-name)
         buffer file)
     (dolist (buf buflist)
       (setq buffer (assoc "buffer" buf))
@@ -1188,7 +1183,7 @@ Return the input string."
 
 (defun pyim-restart-1 (save-personal-file)
   "重启 Chinese-pyim，用于编程环境。"
-  (pyim-start (pyim-name) nil t save-personal-file))
+  (pyim-start pyim-name nil t save-personal-file))
 
 (defun pyim-start (name &optional active-func restart save-personal-file)
   (interactive)
@@ -1200,10 +1195,9 @@ Return the input string."
   (when restart
     (pyim-kill-buffers)
     (pyim-set-buffer-list nil))
-  (unless (and (pyim-name)
+  (unless (and (pyim-buffer-list)
                (pyim-check-buffers)
                (not restart))
-    (pyim-set-name name)
     (pyim-set-buffer-list (pyim-load-file))
     (pyim-set-history (make-hash-table :test 'equal))
     (pyim-set-active-function 'pyim-pinyin-activate-function)
