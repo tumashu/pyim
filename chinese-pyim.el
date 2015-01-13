@@ -345,6 +345,10 @@ If you don't like this funciton, set the variable to nil")
 (defvar pyim-punctuation-translate-p t
   "*Non-nil means will translate punctuation.")
 
+(defvar pyim-pair-punctuation-switch-status
+  '(("\"" nil) ("'" nil))
+  "成对标点符号切换状态")
+
 (defvar pyim-local-variable-list
   '(pyim-page-length
     pyim-do-completion
@@ -370,7 +374,9 @@ If you don't like this funciton, set the variable to nil")
 
     input-method-function
     inactivate-current-input-method-function
-    describe-current-input-method-function)
+    describe-current-input-method-function
+
+    pyim-pair-punctuation-switch-status)
   "A list of buffer local variable")
 
 (dolist (var pyim-local-variable-list)
@@ -1064,26 +1070,49 @@ Return the input string."
 (require 'chinese-pyim-pinyin)
 
 ;; 处理标点符号
+(defun pyim-return-proper-punctuation (punc-list &optional before)
+  "返回合适的标点符号，`punc-list'为标点符号列表，其格式类似：
+      `(\",\" \"，\") 或者：`(\"'\" \"‘\" \"’\")
+当 `before' 为 t 时，只返回切换之前的结果。"
+  (let* ((str (car punc-list))
+         (punc (cdr punc-list))
+         (switch-p (cdr (assoc str pyim-pair-punctuation-switch-status))))
+    (if (= (safe-length punc) 1)
+        (car punc)
+      (if before
+          (setq switch-p (not switch-p))
+        (setf (cdr (assoc str pyim-pair-punctuation-switch-status))
+              (not switch-p)))
+      (if switch-p
+          (car punc)
+        (nth 1 punc)))))
+
 (defun pyim-punctuation-translate (char)
   (if pyim-punctuation-translate-p
       (cond ((< char ? ) "")
-            (t (let ((str (char-to-string char))
-                     punc)
-                 (if (and (not (member (char-before) pyim-punctuation-escape-list))
-                          (setq punc (cdr (assoc str pyim-punctuation-dict))))
-                     (progn
-                       (if (= char (char-before))
-                           (delete-char -1))
-                       (if (= (safe-length punc) 1)
-                           (car punc)
-                         (setcdr (cdr punc) (not (cddr punc)))
-                         (if (cddr punc)
-                             (car punc)
-                           (nth 1 punc))))
-                   str))))
+            (t (let* ((str (char-to-string char))
+                      (before-str (char-to-string (char-before)))
+                      (punc (assoc str pyim-punctuation-dict))
+                      (before-str-pos (cl-position before-str punc :test #'string=)))
+                 (cond
+                  ((member (char-before)
+                           pyim-punctuation-escape-list) str)
+                  ;; 当前面一个字符为对应中文标点时，切换为英文标点。
+                  ((and (numberp before-str-pos)
+                        (= before-str-pos 0))
+                   (delete-char -1)
+                   (pyim-return-proper-punctuation punc t))
+                  ;; 当前面一个字符是对应的英文标点时，切换为中文标点。
+                  ((and (numberp before-str-pos)
+                        (> before-str-pos 0))
+                   (delete-char -1)
+                   str)
+                  ;; 插入正确的标点。
+                  (punc (pyim-return-proper-punctuation punc))
+                  (t str)))))
     (char-to-string char)))
 
-;;; 切换光标处标点的样式（全角 or 半角）
+;; 切换光标处标点的样式（全角 or 半角）
 (defun pyim-punctuation-translate-at-point ()
   (interactive)
   (let* ((current-char (char-to-string (preceding-char)))
