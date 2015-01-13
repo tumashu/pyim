@@ -1098,12 +1098,12 @@ Return the input string."
                  (cond
                   ((member (char-before)
                            pyim-punctuation-escape-list) str)
-                  ;; 当前面一个字符为对应中文标点时，切换为英文标点。
-                  ((and (numberp before-str-pos)
-                        (= before-str-pos 0))
-                   (delete-char -1)
-                   (pyim-return-proper-punctuation punc t))
-                  ;; 当前面一个字符是对应的英文标点时，切换为中文标点。
+                  ;; 当前面一个字符为对应英文标点时，切换为中文标点。
+                  ;; ((and (numberp before-str-pos)
+                  ;;       (= before-str-pos 0))
+                  ;;  (delete-char -1)
+                  ;;  (pyim-return-proper-punctuation punc t))
+                  ;; 当前面一个字符是对应的中文标点时，切换为英文标点。
                   ((and (numberp before-str-pos)
                         (> before-str-pos 0))
                    (delete-char -1)
