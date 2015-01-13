@@ -1123,9 +1123,7 @@ Return the input string."
     (when punc-list
       (delete-char -1)
       (if (string= current-char (car punc-list))
-          (if (> (length (cdr punc-list)) 1)
-              (insert (completing-read "请选择："(cdr punc-list)))
-            (insert (car (cdr punc-list))))
+          (insert (pyim-return-proper-punctuation punc-list t))
         (insert (car punc-list))))))
 
 ;;; 切换中英文标点符号
