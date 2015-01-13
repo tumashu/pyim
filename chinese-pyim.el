@@ -288,13 +288,13 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
   :group 'chinese-pyim)
 
 ;;;  variable declare
-(defvar pyim-name "Chinese-pyim")
+(defvar pyim-buffer-name " *Chinese-pyim*")
 (defvar pyim-buffer-list nil
-  "加载Chinese-pyim 后，词库文件与buffer的对应数据。
-1. 每个 buffer 都是一个 assoc list。
-2. 每一个 assoc list 都包含两个部份：
+  "一个列表，用来保存词库文件与 buffer 的对应信息。
+1. 每个元素都是一个 alist。
+2. 每一个 alist 都包含两个部份：
    1. buffer 词库文件导入时创建的 buffer (用户不可见)。
-   2. file:  词库文件的路径。
+   2. file   词库文件的路径。
 ")
 (defvar pyim-history nil
   "保存输入过的词的选择
@@ -337,9 +337,6 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
 (defvar pyim-add-completion-function nil)
 (defvar pyim-format-function 'pyim-format)
 (defvar pyim-handle-function 'pyim-handle-string)
-(defvar pyim-buffer-name-format " *%s*"
-  "buffer 的名字格式，%s 对应 package name")
-(defvar pyim-activated-p nil)
 
 (defvar pyim-punctuation-escape-list (number-sequence ?0 ?9)
   "Punctuation will not insert after this characters.
@@ -468,7 +465,7 @@ If you don't like this funciton, set the variable to nil")
 "
   (let ((personal-file (expand-file-name pyim-personal-file))
         (dicts-list pyim-dicts)
-        (bufname (format pyim-buffer-name-format pyim-name))
+        (bufname pyim-buffer-name)
         buflist buf file coding)
     (save-excursion
       (unless (file-exists-p personal-file)
@@ -685,15 +682,14 @@ beginning of line"
   "检查所有的 buffer 是否还存在，如果不存在，重新打开文件，如果文件不
 存在，从 buffer-list 中删除这个 buffer"
   (let ((buflist pyim-buffer-list)
-        (bufname pyim-name)
+        (bufname pyim-buffer-name)
         buffer file)
     (dolist (buf buflist)
       (setq buffer (assoc "buffer" buf))
       (setq file (cdr (assoc "file" buf)))
       (unless (buffer-live-p (cdr buffer))
         (if (file-exists-p file)
-            (with-current-buffer (generate-new-buffer
-                                  (format pyim-buffer-name-format bufname))
+            (with-current-buffer (generate-new-buffer bufname)
               (insert-file-contents file)
               (setcdr buffer (current-buffer)))
           (message "%s for %s is not exists!" file bufname)
@@ -1160,7 +1156,7 @@ Return the input string."
 
 (defun pyim-restart-1 (save-personal-file)
   "重启 Chinese-pyim，用于编程环境。"
-  (pyim-start pyim-name nil t save-personal-file))
+  (pyim-start "Chinese-pyim" nil t save-personal-file))
 
 (defun pyim-start (name &optional active-func restart save-personal-file)
   (interactive)
