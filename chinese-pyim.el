@@ -84,7 +84,7 @@
 ;; ### 第一种方式 ###
 ;;
 ;; 获取其他 Chinese-pyim 用户的拼音词库，比如，某个同学测试 Chinese-pyim 时创建了一个
-;; 中文拼音词库，词条数量大于100万，文件大小大于20M。
+;; 中文拼音词库，词条数量大于100万，文件大小大于20M，(注意：请使用另存为，不要直接点击链接)。
 ;;
 ;; https://github.com/tumashu/chinese-pyim-bigdict/blob/master/pyim-bigdict.txt?raw=true
 ;;
@@ -440,7 +440,7 @@ If you don't like this funciton, set the variable to nil")
 
 赶时间的朋友可以直接下载其他 Chinese-pyim 用户现成的拼音词库，比如，某个同学
 自己使用的词库：BigDict，这个词库词条数量大于100万，文件大小大于20M，可以显著
-增强 Chinese-pyim 的输入体验。
+增强 Chinese-pyim 的输入体验，(注意：请使用另存为，不要直接点击链接)。
 
   https://github.com/tumashu/chinese-pyim-bigdict/blob/master/pyim-bigdict.txt?raw=true
 
