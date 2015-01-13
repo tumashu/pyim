@@ -119,7 +119,7 @@
 ;; 因为`Chinese-pyim' 寻找词条时，使用二分法来优化速度，而二分法工作的前提
 ;; 就是对文件按行排序。具体细节请参考：`pyim-bisearch-word' 。
 ;; 所以，当词库排序不正确时（比如：用户手动调整词库文件后），记得运行函数
-;; `pyim-update-table' 重新对文件排序。
+;; `pyim-update-dict-file' 重新对文件排序。
 ;;
 ;; ## 激活 Chinese-pyim ##
 ;;
@@ -221,7 +221,7 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
 但要注意：词库文件必须按行排序（准确的说，是按每一行的 code 排序），因为
 `Chinese-pyim' 寻找词条时，使用二分法来优化速度，而二分法工作的前提就是对
 文件按行排序。具体细节请参考：`pyim-bisearch-word' 。当用户手动调整词库文
-件后，记得运行 `pyim-update-table' 来对文件排序。"
+件后，记得运行 `pyim-update-dict-file' 来对文件排序。"
   :group 'chinese-pyim
   :type 'list)
 
@@ -1198,7 +1198,10 @@ Return the input string."
 (register-input-method "chinese-pyim" "euc-cn" 'pyim-start "[pyim]")
 
 ;;;###autoload
-(defun pyim-update-table ()
+(defun pyim-update-dict-file ()
+  "手动调整 Chinese-pyim 词库文件后，执行此命令可以：
+1. 按照每行拼音对文件进行排序。
+2. 删除重复的词条。"
   (interactive)
   (save-restriction
     (let ((lastw "")

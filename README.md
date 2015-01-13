@@ -97,7 +97,7 @@ https://github.com/tumashu/chinese-pyim-bigdict/blob/master/pyim-bigdict.txt?raw
 因为`Chinese-pyim` 寻找词条时，使用二分法来优化速度，而二分法工作的前提
 就是对文件按行排序。具体细节请参考：`pyim-bisearch-word` 。
 所以，当词库排序不正确时（比如：用户手动调整词库文件后），记得运行函数
-`pyim-update-table` 重新对文件排序。
+`pyim-update-dict-file` 重新对文件排序。
 
 ## 激活 Chinese-pyim ##
 
