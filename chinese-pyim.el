@@ -393,12 +393,6 @@ If you don't like this funciton, set the variable to nil")
 比如，上次的位置，用来输入标点等。"
   (aref pyim-info 2))
 
-(defsubst pyim-mode-map ()
-  (aref pyim-info 3))
-
-(defsubst pyim-options ()
-  (aref pyim-info 4))
-
 (defsubst pyim-active-function ()
   (aref pyim-info 5))
 
@@ -411,25 +405,8 @@ If you don't like this funciton, set the variable to nil")
 (defsubst pyim-set-history (history)
   (aset pyim-info 2 history))
 
-(defsubst pyim-set-mode-map (map)
-  (aset pyim-info 3 map))
-
-(defsubst pyim-set-options (options)
-  (aset pyim-info 4 options))
-
 (defsubst pyim-set-active-function (func)
   (aset pyim-info 5 func))
-
-(defun pyim-get-option (option)
-  (cdr (assoc option (pyim-options))))
-
-(defun pyim-set-option (option flag)
-  (let ((options (pyim-options))
-        opt)
-    (if (setq opt (assoc option options))
-        (setcdr opt flag)
-      (push (cons option flag) options)
-      (pyim-set-options options))))
 
 (defun pyim-create-template-dict (file)
   "生成模版词库。"
@@ -938,10 +915,7 @@ beginning of line"
               (list (aref pyim-current-key (1- (length pyim-current-key)))))
         (pyim-terminate-translation))
     (setq pyim-current-choices (pyim-get pyim-current-key)
-          pyim-current-pos
-          (if (pyim-get-option 'record-position)
-              (cdr (assoc "pos" (cdr pyim-current-choices)))
-            1))
+          pyim-current-pos 1)
     (pyim-format-page)))
 
 (defun pyim-translate (char)
@@ -1053,7 +1027,7 @@ Return the input string."
       ;; OK, we can start translation.
       (let* ((echo-keystrokes 0)
              (help-char nil)
-             (overriding-terminal-local-map (pyim-mode-map))
+             (overriding-terminal-local-map pyim-mode-map)
              (generated-events nil)
              (input-method-function nil)
              (modified-p (buffer-modified-p))
@@ -1072,7 +1046,7 @@ Return the input string."
                                      pyim-current-key
                                      pyim-guidance-str)))
                  (keyseq (read-key-sequence prompt nil nil t))
-                 (cmd (lookup-key (pyim-mode-map) keyseq)))
+                 (cmd (lookup-key pyim-mode-map keyseq)))
             ;;             (message "key: %s, cmd:%s\nlcmd: %s, lcmdv: %s, tcmd: %s"
             ;;                      key cmd last-command last-command-event this-command)
             (if (if key
@@ -1232,9 +1206,6 @@ Return the input string."
     (pyim-set-name name)
     (pyim-set-buffer-list (pyim-load-file))
     (pyim-set-history (make-hash-table :test 'equal))
-    (pyim-set-mode-map (let ((map (make-sparse-keymap)))
-                         (set-keymap-parent map pyim-mode-map)
-                         map))
     (pyim-set-active-function 'pyim-pinyin-activate-function)
     (pyim-pinyin-make-char-table)
     (run-hooks 'pyim-load-hook)
