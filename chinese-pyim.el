@@ -289,21 +289,27 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
 
 ;;;  variable declare
 (defvar pyim-name "Chinese-pyim")
-(defvar pyim-buffer-list nil)
-(defvar pyim-info (make-vector 9 nil)
-  "拼音输入法运行时需要的信息，一个 vector，有五个部分:
-1. name
-2. buffer-list
-   1. 每个 buffer 都是一个 assoc list。
-   2. 每一个 assoc list 都包含两个部份：
-      1. buffer 词库文件导入时创建的 buffer (用户不可见)。
-      2. file:  词库文件的路径。
-3. history
-4. keymap
-5. active-function.
+(defvar pyim-buffer-list nil
+  "加载Chinese-pyim 后，词库文件与buffer的对应数据。
+1. 每个 buffer 都是一个 assoc list。
+2. 每一个 assoc list 都包含两个部份：
+   1. buffer 词库文件导入时创建的 buffer (用户不可见)。
+   2. file:  词库文件的路径。
 ")
-(defvar pyim-do-completion t "是否读入可能的补全")
+(defvar pyim-history nil
+  "保存输入过的词的选择
+1. 加快搜索。
+2. 处理标点。
 
+每个元素都有这样的格式：
+
+   ((list WORDS) other-properties)
+
+其中：OTHER-PROPERTIES 是一些其它的属性，
+比如，上次的位置，用来输入标点等。")
+
+(defvar pyim-active-function nil)
+(defvar pyim-do-completion t "是否读入可能的补全")
 (defvar pyim-current-key "" "已经输入的代码")
 (defvar pyim-current-str "" "当前选择的词条")
 (defvar pyim-current-choices nil
@@ -373,29 +379,6 @@ If you don't like this funciton, set the variable to nil")
 (dolist (var pyim-local-variable-list)
   (make-variable-buffer-local var)
   (put var 'permanent-local t))
-
-(defsubst pyim-history ()
-  "
-保存输入过的词的选择
-1. 加快搜索。
-2. 处理标点。
-
-每个元素都有这样的格式：
-
-   ((list WORDS) other-properties)
-
-其中：OTHER-PROPERTIES 是一些其它的属性，
-比如，上次的位置，用来输入标点等。"
-  (aref pyim-info 2))
-
-(defsubst pyim-active-function ()
-  (aref pyim-info 5))
-
-(defsubst pyim-set-history (history)
-  (aset pyim-info 2 history))
-
-(defsubst pyim-set-active-function (func)
-  (aset pyim-info 5 func))
 
 (defun pyim-create-template-dict (file)
   "生成模版词库。"
@@ -607,7 +590,7 @@ whenever possible."
 ;;;  code search
 (defun pyim-get (code)
   (when (and (stringp code) (not (pyim-string-emptyp code)))
-    (let ((history (gethash code (pyim-history)))
+    (let ((history (gethash code pyim-history))
           pos words completions)
       (if (and (car history) (assoc "completions" (cdr history)))
           history
@@ -628,7 +611,7 @@ whenever possible."
         (puthash code (list words
                             (cons "pos" (or (cdr (assoc "pos" (cdr history))) 1))
                             (cons "completions" completions))
-                 (pyim-history))))))
+                 pyim-history)))))
 
 (defun pyim-completions (code completions)
   (let ((maxln 200)
@@ -862,7 +845,7 @@ beginning of line"
     (setq rest (append rest (list (cons "pos" (or pos
                                                   pyim-current-pos)))))
     (puthash pyim-current-key (cons (car pyim-current-choices)
-                                    rest) (pyim-history))))
+                                    rest) pyim-history)))
 
 (defun pyim-number-select ()
   "如果没有可选项，插入数字，否则选择对应的词条"
@@ -1193,8 +1176,8 @@ Return the input string."
                (pyim-check-buffers)
                (not restart))
     (setq pyim-buffer-list (pyim-load-file))
-    (pyim-set-history (make-hash-table :test 'equal))
-    (pyim-set-active-function 'pyim-pinyin-activate-function)
+    (setq pyim-history (make-hash-table :test 'equal))
+    (setq pyim-active-function 'pyim-pinyin-activate-function)
     (pyim-pinyin-make-char-table)
     (run-hooks 'pyim-load-hook)
     (message nil))
@@ -1210,8 +1193,8 @@ Return the input string."
   (when (eq (selected-window) (minibuffer-window))
     (add-hook 'minibuffer-exit-hook 'pyim-exit-from-minibuffer))
   (run-hooks 'pyim-active-hook)
-  (if (functionp (pyim-active-function))
-      (funcall (pyim-active-function)))
+  (if (functionp pyim-active-function)
+      (funcall pyim-active-function))
   (when restart
     (message "Chinese-pyim 重启完成。")))
 
