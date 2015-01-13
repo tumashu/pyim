@@ -515,14 +515,16 @@ If you don't like this funciton, set the variable to nil")
 
 这个函数默认作为`kill-emacs-hook'使用。"
   (interactive)
-  (let* ((buffer (car pyim-buffer-list))
-         (file (cdr (assoc "file" buffer))))
-    (with-current-buffer (cdr (assoc "buffer" buffer))
-      (save-restriction
-        (if (file-exists-p file)
-            (progn (write-region (point-min) (point-max) file)
-                   (message "更新 Chinese-pyim 文件：%s。" file))
-          (message "Chinese-pyim 文件：%s 不存在。" file))))))
+  (let* ((element (car pyim-buffer-list))
+         (buffer (cdr (assoc "buffer" element)))
+         (file (cdr (assoc "file" element))))
+    (when (buffer-live-p buffer)
+      (with-current-buffer buffer
+        (save-restriction
+          (if (file-exists-p file)
+              (progn (write-region (point-min) (point-max) file)
+                     (message "更新 Chinese-pyim 文件：%s。" file))
+            (message "Chinese-pyim 文件：%s 不存在。" file)))))))
 
 ;;;  common functions
 (defsubst pyim-delete-region ()
