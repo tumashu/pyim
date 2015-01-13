@@ -289,6 +289,7 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
 
 ;;;  variable declare
 (defvar pyim-name "Chinese-pyim")
+(defvar pyim-buffer-list nil)
 (defvar pyim-info (make-vector 9 nil)
   "拼音输入法运行时需要的信息，一个 vector，有五个部分:
 1. name
@@ -373,10 +374,6 @@ If you don't like this funciton, set the variable to nil")
   (make-variable-buffer-local var)
   (put var 'permanent-local t))
 
-;;;  package contents
-(defsubst pyim-buffer-list ()
-  (aref pyim-info 1))
-
 (defsubst pyim-history ()
   "
 保存输入过的词的选择
@@ -393,9 +390,6 @@ If you don't like this funciton, set the variable to nil")
 
 (defsubst pyim-active-function ()
   (aref pyim-info 5))
-
-(defsubst pyim-set-buffer-list (list)
-  (aset pyim-info 1 list))
 
 (defsubst pyim-set-history (history)
   (aset pyim-info 2 history))
@@ -541,7 +535,7 @@ If you don't like this funciton, set the variable to nil")
 
 这个函数默认作为`kill-emacs-hook'使用。"
   (interactive)
-  (let* ((buffer (car (pyim-buffer-list)))
+  (let* ((buffer (car pyim-buffer-list))
          (file (cdr (assoc "file" buffer))))
     (with-current-buffer (cdr (assoc "buffer" buffer))
       (save-restriction
@@ -617,7 +611,7 @@ whenever possible."
           pos words completions)
       (if (and (car history) (assoc "completions" (cdr history)))
           history
-        (dolist (buf (pyim-buffer-list))
+        (dolist (buf pyim-buffer-list)
           (with-current-buffer (cdr (assoc "buffer" buf))
             ;; Chinese-pyim 首次运行时，personal-file 文件为空文件，
             ;; 其对应的 buffer 为空，这里确保 buffer 包含有效的词库
@@ -707,7 +701,7 @@ beginning of line"
 (defun pyim-check-buffers ()
   "检查所有的 buffer 是否还存在，如果不存在，重新打开文件，如果文件不
 存在，从 buffer-list 中删除这个 buffer"
-  (let ((buflist (pyim-buffer-list))
+  (let ((buflist pyim-buffer-list)
         (bufname pyim-name)
         buffer file)
     (dolist (buf buflist)
@@ -725,7 +719,7 @@ beginning of line"
 
 (defun pyim-kill-buffers ()
   "删除所有词库文件对应的 buffer ，用于重启 Chinese-pyim 。"
-  (let ((buflist (pyim-buffer-list))
+  (let ((buflist pyim-buffer-list)
         buffer)
     (dolist (buf buflist)
       (setq buffer (cdr (assoc "buffer" buf)))
@@ -1194,11 +1188,11 @@ Return the input string."
     (pyim-save-personal-file))
   (when restart
     (pyim-kill-buffers)
-    (pyim-set-buffer-list nil))
-  (unless (and (pyim-buffer-list)
+    (setq pyim-buffer-list nil))
+  (unless (and pyim-buffer-list
                (pyim-check-buffers)
                (not restart))
-    (pyim-set-buffer-list (pyim-load-file))
+    (setq pyim-buffer-list (pyim-load-file))
     (pyim-set-history (make-hash-table :test 'equal))
     (pyim-set-active-function 'pyim-pinyin-activate-function)
     (pyim-pinyin-make-char-table)

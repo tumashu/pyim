@@ -326,7 +326,7 @@
               (substring abbpy 1))))))
 
 (defun pyim-pinyin-intern-word (word py)
-  (let((buf (cdr (assoc "buffer" (car (pyim-buffer-list)))))
+  (let((buf (cdr (assoc "buffer" (car pyim-buffer-list))))
        words)
     (with-current-buffer buf
       (pyim-bisearch-word py (point-min) (point-max))
@@ -478,7 +478,7 @@
 (defun pyim-pinyin-get (code)
   (let (words)
     (when (and (stringp code) (string< "" code))
-      (dolist (buf (pyim-buffer-list))
+      (dolist (buf pyim-buffer-list)
         (with-current-buffer (cdr (assoc "buffer" buf))
           (setq words (append words
                               (cdr
