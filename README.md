@@ -128,14 +128,18 @@ Chinese-pyim 使用一个比较 *粗糙* 的方法处理 *模糊音*，要了解
         (:name "dict2" :file "/path/to/pyim-dict2.txt" :coding gbk-dos)))
 ```
 
-# 其他 #
+# 其他 Tips #
 
-1. 了解 Chinese-pyim 个人词频文件设置的细节：C-h v pyim-personal-file
-2. 了解 Chinese-pyim 词库设置细节：C-h v pyim-dicts
-3. 下面两个函数可以将汉字字符串转换为拼音字符串。
+1. 如何快速切换全角标点与半角标点。
+   1. 第一种方法：使用命令 `pyim-toggle-full-width-punctuation`，全局切换。
+   2. 第二种方法：使用命令 `pyim-punctuation-translate-at-point` 只切换光标处标点的样式。
+   3. 第三种方法：设置变量 `pyim-punctuation-translate-char`。输入变量设定的字符会切换光标处标点的样式。
+2. 了解 Chinese-pyim 个人词频文件设置的细节：C-h v pyim-personal-file
+3. 了解 Chinese-pyim 词库设置细节：C-h v pyim-dicts
+4. 下面两个函数可以将汉字字符串转换为拼音字符串。
    1. `pyim-hanzi2pinyin` （考虑多音字）
    2. `pyim-hanzi2pinyin-simple`  （不考虑多音字）
-4. 可以定义类似下面的命令来实现快速切换词库的功能。
+5. 可以定义类似下面的命令来实现快速切换词库的功能。
 ```lisp
 (defun pyim-use-dict:bigdict ()
   (interactive)
