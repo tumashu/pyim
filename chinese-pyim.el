@@ -359,6 +359,29 @@ If you don't like this funciton, set the variable to nil")
   '(("\"" nil) ("'" nil))
   "成对标点符号切换状态")
 
+(defvar pyim-dict-help-string
+  "Chinese-pyim 没有可用词库！！！
+
+拼音词库是 Chinese-pyim 使用顺手与否的关键。根据经验估计：
+1. 当词库词条超过100万时(词库文件>20M)，Chinese-pyim 选词频率大大降低。
+2. 当词库词条超过100万时，Chinese-pyim 中文输入体验可以达到搜狗输入法的80%。
+
+赶时间的朋友可以直接下载其他 Chinese-pyim 用户现成的拼音词库，比如，某个同学
+自己使用的词库：BigDict，这个词库词条数量大于100万，文件大小大于20M，可以显著
+增强 Chinese-pyim 的输入体验，(注意：请使用另存为，不要直接点击链接)。
+
+  https://github.com/tumashu/chinese-pyim-bigdict/blob/master/pyim-bigdict.txt?raw=true
+
+下载上述拼音词库后，运行 `pyim-add-dict' ，按照命令提示，将词库文件信息添加到
+ `pyim-dicts' 中，最后运行命令 `pyim-restart' 或者重启emacs。。
+
+喜欢折腾的用户可以从下面几个途径获得 Chinese-pyim 更详细的信息。
+1. 使用 `C-h v pyim-dicts' 了解 `Chinese-pyim' 词库文件格式，
+2. 了解如何导入其它输入法的词库。
+   1. 使用 package 管理器查看 Chinese-pyim 包的简介
+   2. 阅读 chinese-pyim.el 文件 Commentary
+   3. 查看 Chinese-pyim 在线 README：https://github.com/tumashu/chinese-pyim")
+
 (defvar pyim-local-variable-list
   '(pyim-page-length
     pyim-do-completion
@@ -440,7 +463,7 @@ If you don't like this funciton, set the variable to nil")
     (customize-save-variable 'pyim-dicts pyim-dicts)
     (message "添加并保存 Chinese-pyim 输入法词库: (%s)，重启 emacs 后生效！" name)))
 
-(defun pyim-show-dict-help ()
+(defun pyim-show-help (string)
   "显示 Chinese-pyim 帮助信息，让用户快速的了解如何安装词库。"
   (let ((buffer-name "*Chinese-pyim-dict-help*"))
     (with-output-to-temp-buffer buffer-name
@@ -448,27 +471,7 @@ If you don't like this funciton, set the variable to nil")
       (when (featurep 'org)
         (org-mode))
       (setq truncate-lines 1)
-      (insert "Chinese-pyim 没有可用词库！！！
-
-拼音词库是 Chinese-pyim 使用顺手与否的关键。根据经验估计：
-1. 当词库词条超过100万时(词库文件>20M)，Chinese-pyim 选词频率大大降低。
-2. 当词库词条超过100万时，Chinese-pyim 中文输入体验可以达到搜狗输入法的80%。
-
-赶时间的朋友可以直接下载其他 Chinese-pyim 用户现成的拼音词库，比如，某个同学
-自己使用的词库：BigDict，这个词库词条数量大于100万，文件大小大于20M，可以显著
-增强 Chinese-pyim 的输入体验，(注意：请使用另存为，不要直接点击链接)。
-
-  https://github.com/tumashu/chinese-pyim-bigdict/blob/master/pyim-bigdict.txt?raw=true
-
-下载上述拼音词库后，运行 `pyim-add-dict' ，按照命令提示，将词库文件信息添加到
- `pyim-dicts' 中，最后运行命令 `pyim-restart' 或者重启emacs。。
-
-喜欢折腾的用户可以从下面几个途径获得 Chinese-pyim 更详细的信息。
-1. 使用 `C-h v pyim-dicts' 了解 `Chinese-pyim' 词库文件格式，
-2. 了解如何导入其它输入法的词库。
-   1. 使用 package 管理器查看 Chinese-pyim 包的简介
-   2. 阅读 chinese-pyim.el 文件 Commentary
-   3. 查看 Chinese-pyim 在线 README：https://github.com/tumashu/chinese-pyim")
+      (insert string)
       (goto-char (point-min)))))
 
 ;;;  read file functions
@@ -507,7 +510,7 @@ If you don't like this funciton, set the variable to nil")
                   (setq buflist (append buflist (list (pyim-read-file file bufname))))
                 (message "忽略导入重复的词库文件：%s。" file)))))
         ;; 当用户没有设置词库信息时，弹出帮助信息。
-        (pyim-show-dict-help)))
+        (pyim-show-help pyim-dict-help-string)))
     buflist))
 
 (defun pyim-file-load-p (file buflist)
