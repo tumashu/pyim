@@ -522,14 +522,16 @@
                           "\\(.\\)" "\\1_" hanzi-string)) "_"))))
         (pyim-pinyin-make-char-table-1 pinyin-list)))))
 
-(defun pyim-hanzi2pinyin (string &optional shou-zi-mu separator ignore-duo-yin-zi)
+(defun pyim-hanzi2pinyin (string &optional shou-zi-mu separator return-list ignore-duo-yin-zi)
   "将汉字字符串转换为对应的拼音字符串, 如果 `shou-zi-mu' 设置为t,转换仅得到拼音
 首字母字符串。如果 `ignore-duo-yin-zi' 设置为t, 遇到多音字时，只使用第一个拼音。
 其它拼音忽略。"
-  (let (string-list pinyin-list)
+  (let (string-list pinyin-list output)
+
     ;; 确保 `pyim-pinyin-char-table' 已经生成。
     (unless (pyim-pinyin-get-char-code ?文)
       (pyim-pinyin-make-char-table))
+
     ;; 将汉字字符串转换为字符list，英文原样输出。
     (setq string-list (split-string
                        (replace-regexp-in-string
@@ -538,6 +540,7 @@
     ;; 删除空字符串
     (setq string-list (cl-remove-if #'(lambda (x)
                                         (= (length x) 0)) string-list))
+
     ;; 将上述汉字字符串里面的所有汉字转换为与之对应的拼音list。
     (setq pinyin-list (mapcar (lambda (str)
                                 (cond
@@ -546,28 +549,44 @@
                                        (string-match-p "\\cc" str))
                                   (or (pyim-pinyin-get-char-code (string-to-char str)) (list str)))
                                  ((> (length str) 0) (list str)))) string-list))
-    ;; 通过排列组合的方式将 pinyin-list 转化为拼音字符串。
-    (if ignore-duo-yin-zi
-        (mapconcat 'identity
-                   (mapcar
-                    (lambda (x)
-                      (if shou-zi-mu
-                          (substring (car x) 0 1)
-                        (car x))) pinyin-list) (or separator ""))
 
-      (mapconcat 'identity
-                 (cl-remove-duplicates
-                  (let ((result '("")))
-                    (cl-loop for i in pinyin-list
-                             do (setq result
-                                      (cl-loop for j in i
-                                               append (cl-loop for k in result
-                                                               collect (concat k (if shou-zi-mu (substring j 0 1) j)
-                                                                               (or separator "")))))) result)
-                  :test (lambda (x y) (or (null y) (equal x y)))
-                  :from-end t) " "))))
+    ;; 通过排列组合的方式将 pinyin-list 转化为拼音字符串列表。
+    (setq output
+          (if ignore-duo-yin-zi
+              (list (mapconcat 'identity
+                               (mapcar
+                                (lambda (x)
+                                  (if shou-zi-mu
+                                      (substring (car x) 0 1)
+                                    (car x))) pinyin-list)
+                               (or separator "")))
+            (cl-remove-duplicates
+             (let ((result '("")))
+               (cl-loop for i in pinyin-list
+                        do (setq result
+                                 (cl-loop for j in i
+                                          append (cl-loop for k in result
+                                                          collect (concat k (if shou-zi-mu (substring j 0 1) j)
+                                                                          (or separator "")))))) result)
+             :test (lambda (x y) (or (null y) (equal x y)))
+             :from-end t)))
 
-(defun pyim-hanzi2pinyin-simple (string &optional shou-zi-mu separator)
+    ;; 清理多余的拼音连接符，这个处理方式有点hack。需要优化。
+    (setq output (mapcar (lambda (x)
+                           (replace-regexp-in-string
+                            "- " " " x)) output))
+    (setq output (mapcar (lambda (x)
+                           (replace-regexp-in-string
+                            "-$" "" x)) output))
+    (setq output (mapcar (lambda (x)
+                           (replace-regexp-in-string
+                            " -" " " x)) output))
+    ;; 返回字符串或者列表
+    (if return-list
+        output
+      (mapconcat 'identity output " "))))
+
+(defun pyim-hanzi2pinyin-simple (string &optional shou-zi-mu separator return-list)
   "简化版的 `pyim-hanzi2pinyin', 不处理多音字。"
   (pyim-hanzi2pinyin string shou-zi-mu separator t))
 
