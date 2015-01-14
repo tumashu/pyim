@@ -700,14 +700,41 @@ beginning of line"
         (buffer-substring-no-properties (line-beginning-position) (1- (point)))
       (error "文件类型错误！%s 的第 %d 行没有词条！" (buffer-name) (line-number-at-pos)))))
 
-(defun pyim-delete-duplicate-word ()
+(defun pyim-build-word-count-table (hash-table)
+  (let (list)
+    (maphash (lambda (key value)
+               (setq list (cons (list key value) list)))
+             hash-table) list))
+
+(defun pyim-sort-and-delete-dups (words-list)
+  "通过对中文文章分词来制作拼音词库时，按照词条在文章中
+出现的频率对词条排序。"
+  (let ((count-table (make-hash-table :test 'equal)))
+    (progn
+      (mapcar (lambda (x)
+                (let ((value (gethash x count-table)))
+                  (if value
+                      (puthash x (1+ value) count-table)
+                    (puthash x 1 count-table)))) words-list)
+      (mapcar 'car (sort (pyim-build-word-count-table count-table)
+                         (lambda (a b) (> (cadr a) (cadr b ))))))))
+
+(defun pyim-delete-duplicate-word (&optional sort-by-freq)
+  "制作拼音词库时，删除当前行重复出现的词条，
+当`sort-by-freq' 为t时，首先按照词条频率的高低
+排序，然后再删除重复词条。"
   (interactive)
-  (let* ((words-list1 (pyim-line-content " "))
-         (length (length words-list1))
-         (words-list2 (delete-dups words-list1)))
-    (when (> length (length words-list2))
+  (let* (words-list length)
+    (setq words-list (pyim-line-content " "))
+    (setq length (length words-list))
+    (setq words-list
+          (if sort-by-freq
+              (cons (car words-list) ;; 拼音必须排在第一位
+                    (pyim-sort-and-delete-dups (cdr words-list)))
+            (delete-dups words-list)))
+    (when (> length (length words-list))
       (pyim-delete-line)
-      (insert (mapconcat 'identity words-list2 " "))
+      (insert (mapconcat 'identity words-list " "))
       (insert "\n")
       (goto-char (line-beginning-position)))))
 
@@ -1263,10 +1290,17 @@ Return the input string."
 (register-input-method "chinese-pyim" "euc-cn" 'pyim-start "[pyim]")
 
 ;;;###autoload
-(defun pyim-update-dict-file (&optional force)
+(defun pyim-update-dict-file (&optional force sort-by-freq)
   "手动调整 Chinese-pyim 词库文件后，执行此命令可以：
 1. 按照每行拼音对文件进行排序。
-2. 删除重复的词条。"
+2. 删除重复的词条。
+
+当我们明确无误的知道此命令的使用条件已经符合时。可以将 `force' 设置
+为 t ，此时，就不需要用户进一步确认是否执行此命令。
+
+当 `sort-by-freq' 设置位 t 时，删除每一行的重复词条之前，首先将词条按照
+词条出现的频率大小排序，这个选项适用于：从文章构建词库，文章中词条出现
+频率可以代表此词条的使用频率。"
   (interactive)
   (when (or force
             (yes-or-no-p "注意：当前 buffer *必须* 为词库文件 buffer，是否继续？"))
@@ -1289,7 +1323,7 @@ Return the input string."
             (forward-line 1)))
         (goto-char (point-min))
         (while (not (eobp))
-          (pyim-delete-duplicate-word)
+          (pyim-delete-duplicate-word sort-by-freq)
           (forward-line 1))
         (if (looking-at "^$")
             (delete-char -1))))))
@@ -1358,8 +1392,8 @@ Return the input string."
       (pyim-convert-current-line-to-dict-format)
       (forward-line 1))
     ;; 将文件按行排序，并删除重复的词条，运行两次。
-    (pyim-update-dict-file t)
-    (pyim-update-dict-file t)))
+    (pyim-update-dict-file t t)
+    (pyim-update-dict-file t t)))
 
 (provide 'chinese-pyim)
 
