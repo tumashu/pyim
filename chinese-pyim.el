@@ -1250,34 +1250,36 @@ Return the input string."
 (register-input-method "chinese-pyim" "euc-cn" 'pyim-start "[pyim]")
 
 ;;;###autoload
-(defun pyim-update-dict-file ()
+(defun pyim-update-dict-file (&optional force)
   "手动调整 Chinese-pyim 词库文件后，执行此命令可以：
 1. 按照每行拼音对文件进行排序。
 2. 删除重复的词条。"
   (interactive)
-  (save-restriction
-    (let ((lastw "")
-          first-char total-char currw)
-      (goto-char (point-min))
-      (perform-replace "[ \t]+$" "" nil t nil nil nil (point-min) (point-max))
-      (sort-regexp-fields nil "^.*$" "[a-z-]+[ ]+"
-                          (point-min)
-                          (point-max))
-      (goto-char (point-min))
-      (while (not (eobp))
-        (if (looking-at "^[ \t]*$")     ; 如果有空行，删除
-            (pyim-delete-line)
-          (setq currw (pyim-code-at-point))
-          (if (string= currw lastw)
-              (delete-region (1- (point)) (+ (point) (length currw))))
-          (setq lastw currw)
-          (forward-line 1)))
-      (goto-char (point-min))
-      (while (not (eobp))
-        (pyim-delete-duplicate-word)
-        (forward-line 1))
-      (if (looking-at "^$")
-          (delete-char -1)))))
+  (when (or force
+            (yes-or-no-p "注意：当前 buffer *必须* 为词库文件 buffer，是否继续？"))
+    (save-restriction
+      (let ((lastw "")
+            first-char total-char currw)
+        (goto-char (point-min))
+        (perform-replace "[ \t]+$" "" nil t nil nil nil (point-min) (point-max))
+        (sort-regexp-fields nil "^.*$" "[a-z-]+[ ]+"
+                            (point-min)
+                            (point-max))
+        (goto-char (point-min))
+        (while (not (eobp))
+          (if (looking-at "^[ \t]*$")     ; 如果有空行，删除
+              (pyim-delete-line)
+            (setq currw (pyim-code-at-point))
+            (if (string= currw lastw)
+                (delete-region (1- (point)) (+ (point) (length currw))))
+            (setq lastw currw)
+            (forward-line 1)))
+        (goto-char (point-min))
+        (while (not (eobp))
+          (pyim-delete-duplicate-word)
+          (forward-line 1))
+        (if (looking-at "^$")
+            (delete-char -1))))))
 
 (defun pyim-convert-current-line-to-dict-format ()
   "将当前行对应的汉语词条转换为 Chinese-pyim 可以识别的词库格式（ni-hao 你好）。"
@@ -1301,30 +1303,43 @@ Return the input string."
       (insert insert-string))))
 
 (defun pyim-build-dict-from-chinese-word ()
-  "将一篇汉语文章转换为 Chinese-pyim 可以识别的拼音词库。
+  "将一篇中文文章转换为 Chinese-pyim 可以识别的拼音词库。
 其步骤为：
 1. 清除所有非汉语内容。
 2. 使用分词系统将文章分词。
 3. 将词条与词条之间用换行符封开。
 4. 为每一行的词条添加拼音。"
   (interactive)
-  ;; 将所有的空格和TAB替换为换行符
-  (goto-char (point-min))
-  (while (re-search-forward "[[:blank:]]+" nil t)
-    (replace-match "\n"))
-  ;; 删除空白行
-  (goto-char (point-min))
-  (while (re-search-forward "\n+" nil t)
-    (replace-match "\n"))
-  ;; 为每一行的词条添加拼音code
-  (goto-char (point-min))
-  (when (yes-or-no-p "注意：重复运行此命令会导致词库信息丢失！ 是否运行此命令？ ")
+  (save-excursion
+    (pyim-show-help
+     "将一篇中文文章转换为 Chinese-pyim 可以识别的拼音词库。
+1. 准备材料：准备好所需要的中文文章，比如：一本网络小说，将其转换为文本文件。
+2. 预处理：  打开文本文件，将文本文件另存为 UTF-8 格式。
+3. 分词处理：使用分词工具将上述文件中的中文词语用空格分开，这里只介绍（jieba）结巴分词工具。
+   1. 安装教程请参考： https://github.com/fxsjy/jieba
+   2. 使用命令： python -m jieba -d \"  \" 源文件.txt  > 目标文件.txt
+   3. 命令帮助： python -m jieba --help
+4. 添加拼音：使用 emacs 打开 “目标文件.txt”，然后运行命令：M-x pyim-build-dict-from-chinese-word
+5. 保存文件
+6. 注意：当文件很大时，这个命令需要执行较长时间，据估计：生成5万词条的词库大约需要15分钟。"))
+  (when (and (yes-or-no-p "您上述准备工作是否已经完成？如果完成，请输入 yes 继续执行命令：")
+             (yes-or-no-p "注意：重复运行此命令会导致词库信息丢失！ 是否运行此命令？ "))
+    ;; 将所有的空白字符替换为换行符
+    (goto-char (point-min))
+    (while (re-search-forward "[[:blank:]]+" nil t)
+      (replace-match "\n"))
+    ;; 删除空白行
+    (goto-char (point-min))
+    (while (re-search-forward "\n+" nil t)
+      (replace-match "\n"))
+    ;; 为每一行的词条添加拼音code
+    (goto-char (point-min))
     (while (not (eobp))
       (pyim-convert-current-line-to-dict-format)
-      (forward-line 1)))
-  ;; 将文件按行排序，并删除重复的词条，运行两次。
-  (pyim-update-dict-file)
-  (pyim-update-dict-file))
+      (forward-line 1))
+    ;; 将文件按行排序，并删除重复的词条，运行两次。
+    (pyim-update-dict-file t)
+    (pyim-update-dict-file t)))
 
 (provide 'chinese-pyim)
 
