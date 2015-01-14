@@ -96,6 +96,7 @@ https://github.com/tumashu/chinese-pyim-bigdict/blob/master/pyim-bigdict.txt?raw
 ### 第三种方式 ###
 
 获取中文词条，然后添加拼音code。中文词条的获取途径很多，比如：
+
 1. 从其它输入法中导出。
 2. 获取中文文章，通过分词系统分词得到。
 3. 中文处理工具自带的dict。
