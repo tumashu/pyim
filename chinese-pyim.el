@@ -1255,6 +1255,7 @@ Return the input string."
   (save-restriction
     (let ((lastw "")
           first-char total-char currw)
+      (goto-char (point-min))
       (perform-replace "[ \t]+$" "" nil t nil nil nil (point-min) (point-max))
       (sort-regexp-fields nil "^.*$" "[a-z-]+[ ]+"
                           (point-min)
@@ -1274,6 +1275,53 @@ Return the input string."
         (forward-line 1))
       (if (looking-at "^$")
           (delete-char -1)))))
+
+(defun pyim-convert-current-line-to-dict-format ()
+  "将当前行对应的汉语词条转换为 Chinese-pyim 可以识别的词库格式（ni-hao 你好）。"
+  (interactive)
+  (let (line-content pinyin-list insert-string)
+    (setq line-content (buffer-substring-no-properties
+                        (line-beginning-position) (line-end-position)))
+    (setq line-content (replace-regexp-in-string "^ +\\| +$" "" line-content))
+    (setq pinyin-list (pyim-hanzi2pinyin line-content nil "-" t))
+    (delete-region (line-beginning-position) (line-end-position))
+    (setq insert-string
+          (mapconcat
+           (lambda (x)
+             ;; 拼音中不能有中文字符。
+             ;; 中文词条中必须有中文字符，并且不能有ascii字符。
+             (unless (or (string-match-p "[^a-z-]" x)
+                         (string-match-p "[:ascii:]" line-content)
+                         (not (string-match-p "\\cc" line-content)))
+               (format "%s  %s" x line-content))) pinyin-list "\n"))
+    (when (> (length insert-string) 1)
+      (insert insert-string))))
+
+(defun pyim-build-dict-from-chinese-word ()
+  "将一篇汉语文章转换为 Chinese-pyim 可以识别的拼音词库。
+其步骤为：
+1. 清除所有非汉语内容。
+2. 使用分词系统将文章分词。
+3. 将词条与词条之间用换行符封开。
+4. 为每一行的词条添加拼音。"
+  (interactive)
+  ;; 将所有的空格和TAB替换为换行符
+  (goto-char (point-min))
+  (while (re-search-forward "[[:blank:]]+" nil t)
+    (replace-match "\n"))
+  ;; 删除空白行
+  (goto-char (point-min))
+  (while (re-search-forward "\n+" nil t)
+    (replace-match "\n"))
+  ;; 为每一行的词条添加拼音code
+  (goto-char (point-min))
+  (when (yes-or-no-p "注意：重复运行此命令会导致词库信息丢失！ 是否运行此命令？ ")
+    (while (not (eobp))
+      (pyim-convert-current-line-to-dict-format)
+      (forward-line 1)))
+  ;; 将文件按行排序，并删除重复的词条，运行两次。
+  (pyim-update-dict-file)
+  (pyim-update-dict-file))
 
 (provide 'chinese-pyim)
 
