@@ -261,6 +261,12 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
   :group 'chinese-pyim
   :type 'list)
 
+(defcustom pyim-punctuation-translate-char ?v
+  "光标前面的字符为标点符号时，按这个字符可以切换前面的标点
+符号的样式（半角/全角）"
+  :group 'chinese-pyim
+  :type 'character)
+
 (defcustom pyim-pinyin-fuzzy-adjust-function
   'pyim-pinyin-fuzzy-adjust-1
   "Chinese-pyim的核心并不能处理模糊音，这里提供了一个比较
@@ -1092,24 +1098,33 @@ Return the input string."
   (if pyim-punctuation-translate-p
       (cond ((< char ? ) "")
             (t (let* ((str (char-to-string char))
+                      (punc-list (assoc str pyim-punctuation-dict))
                       (before-str (char-to-string (char-before)))
-                      (punc (assoc str pyim-punctuation-dict))
-                      (before-str-pos (cl-position before-str punc :test #'string=)))
+                      (before-punc-list
+                       (cl-some (lambda (x)
+                                  (when (member before-str x) x))
+                                pyim-punctuation-dict))
+                      (before-punc-pos (cl-position before-str before-punc-list :test #'string=)))
                  (cond
                   ((member (char-before)
                            pyim-punctuation-escape-list) str)
-                  ;; 当前面一个字符为对应英文标点时，切换为中文标点。
-                  ;; ((and (numberp before-str-pos)
-                  ;;       (= before-str-pos 0))
-                  ;;  (delete-char -1)
-                  ;;  (pyim-return-proper-punctuation punc t))
-                  ;; 当前面一个字符是对应的中文标点时，切换为英文标点。
-                  ((and (numberp before-str-pos)
-                        (> before-str-pos 0))
+                  ;; 当光标前面为英文标点时， 按 `pyim-punctuation-translate-char'
+                  ;; 对应的字符后， 自动将其转换为对应的中文标点。
+                  ((and (numberp before-punc-pos)
+                        (= before-punc-pos 0)
+                        (= char pyim-punctuation-translate-char))
                    (delete-char -1)
-                   str)
-                  ;; 插入正确的标点。
-                  (punc (pyim-return-proper-punctuation punc))
+                   (pyim-return-proper-punctuation before-punc-list t))
+                  ;; 当光标前面为中文标点时， 按 `pyim-punctuation-translate-char'
+                  ;; 对应的字符后， 自动将其转换为对应的英文标点。
+                  ((and (numberp before-punc-pos)
+                        (> before-punc-pos 0)
+                        (= char pyim-punctuation-translate-char))
+                   (delete-char -1)
+                   (car before-punc-list))
+                  ;; 正常输入标点符号。
+                  (punc-list (pyim-return-proper-punctuation punc-list))
+                  ;; 当输入的字符不是标点符号时，原样插入。
                   (t str)))))
     (char-to-string char)))
 
