@@ -700,29 +700,23 @@ beginning of line"
         (buffer-substring-no-properties (line-beginning-position) (1- (point)))
       (error "文件类型错误！%s 的第 %d 行没有词条！" (buffer-name) (line-number-at-pos)))))
 
-(defun pyim-build-word-count-table (hash-table)
-  (let (list)
-    (maphash (lambda (key value)
-               (setq list (cons (list key value) list)))
-             hash-table) list))
+(defun pyim-sort-and-remove-duplicates (words-list)
+  "使用分词后的文章来制作拼音词库时，首先按照词条在文章中
+出现的频率对词条排序，然后再删除重复词条。"
+  (let ((list (cl-remove-duplicates words-list :test #'equal))
+        (count-table (make-hash-table :test #'equal)))
+    (dolist (x words-list)
+      (let ((value (gethash x count-table)))
+        (if value
+            (puthash x (1+ value) count-table)
+          (puthash x 1 count-table))))
+    (sort list (lambda (a b) (> (gethash a count-table)
+                                (gethash b count-table))))))
 
-(defun pyim-sort-and-delete-dups (words-list)
-  "通过对中文文章分词来制作拼音词库时，按照词条在文章中
-出现的频率对词条排序。"
-  (let ((count-table (make-hash-table :test 'equal)))
-    (progn
-      (mapcar (lambda (x)
-                (let ((value (gethash x count-table)))
-                  (if value
-                      (puthash x (1+ value) count-table)
-                    (puthash x 1 count-table)))) words-list)
-      (mapcar 'car (sort (pyim-build-word-count-table count-table)
-                         (lambda (a b) (> (cadr a) (cadr b ))))))))
-
-(defun pyim-delete-duplicate-word (&optional sort-by-freq)
+(defun pyim-remove-duplicates-word (&optional sort-by-freq)
   "制作拼音词库时，删除当前行重复出现的词条，
-当`sort-by-freq' 为t时，首先按照词条频率的高低
-排序，然后再删除重复词条。"
+当 `sort-by-freq' 为 t 时，首先按照当前行词条出现频率对词条排序，
+然后再删除重复词条，用于：从中文文章构建词库。"
   (interactive)
   (let* (words-list length)
     (setq words-list (pyim-line-content " "))
@@ -730,8 +724,8 @@ beginning of line"
     (setq words-list
           (if sort-by-freq
               (cons (car words-list) ;; 拼音必须排在第一位
-                    (pyim-sort-and-delete-dups (cdr words-list)))
-            (delete-dups words-list)))
+                    (pyim-sort-and-remove-duplicates (cdr words-list)))
+            (cl-remove-duplicates words-list :test #'equal)))
     (when (> length (length words-list))
       (pyim-delete-line)
       (insert (mapconcat 'identity words-list " "))
@@ -1323,7 +1317,7 @@ Return the input string."
             (forward-line 1)))
         (goto-char (point-min))
         (while (not (eobp))
-          (pyim-delete-duplicate-word sort-by-freq)
+          (pyim-remove-duplicates-word sort-by-freq)
           (forward-line 1))
         (if (looking-at "^$")
             (delete-char -1))))))
