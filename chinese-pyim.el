@@ -301,12 +301,22 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
   :group 'chinese-pyim
   :type 'function)
 
+(defcustom pyim-predict-words-number 4
+  "设置获取多少个联想词条，如果设置为 nil
+或者 0 时，关闭联想功能。"
+  :group 'chinese-pyim
+  :type 'number)
+
 (defcustom pyim-page-length 9
   "每页显示的词条数目"
   :group 'chinese-pyim
   :type 'number)
 
 (defface pyim-string-face '((t (:underline t)))
+  "Face to show current string"
+  :group 'chinese-pyim)
+
+(defface pyim-predict-words-face '((t (:foreground "orange")))
   "Face to show current string"
   :group 'chinese-pyim)
 
@@ -319,7 +329,6 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
    1. buffer 词库文件导入时创建的 buffer (用户不可见)。
    2. file   词库文件的路径。")
 (defvar pyim-active-function nil)
-(defvar pyim-do-completion nil "是否读入可能的补全")
 (defvar pyim-current-key "" "已经输入的代码")
 (defvar pyim-current-str "" "当前选择的词条")
 
@@ -330,6 +339,9 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
 2. CDR 部分是一个 Association list。通常含有这样的内容：
    1. pos 上次选择的位置
    2. completion 下一个可能的字母（如果 pyim-do-completion 为 t）")
+
+(defvar pyim-current-predict-words nil
+  "用来纪录联想得到的词条，有利于将联想词和正常词分开处理。")
 
 (defvar pyim-current-pos nil "当前选择的词条在 pyim-current-choices 中的位置")
 (defvar pyim-guidance-str "" "显示可选词条的字符串")
@@ -433,7 +445,6 @@ If you don't like this funciton, set the variable to nil")
 
 (defvar pyim-local-variable-list
   '(pyim-page-length
-    pyim-do-completion
 
     pyim-current-key
     pyim-current-str
@@ -1086,19 +1097,23 @@ beginning of line"
 保存到 personal-file 对应的 buffer。"
   (let((buf (cdr (assoc "buffer" (car pyim-buffer-list))))
        words)
-    (with-current-buffer buf
-      (pyim-bisearch-word py (point-min) (point-max))
-      (if (string= (pyim-code-at-point) py)
-          (progn
-            (setq words (pyim-line-content)
-                  words (cons (car words) (delete-dups (append (list word)
-                                                               (cdr words)))))
-            ;; (message "delete: %s" words))
-            (pyim-delete-line))
-        (forward-line 1)
-        (setq words (list py word)))
-      ;;    (message "insert: %s" words)
-      (insert (mapconcat 'identity words " ") "\n"))))
+    ;; 联想得到的词条不能保存到 presonal-file 中，
+    ;; 因为联想得到的词条与当前拼音不对应，保存后会导致
+    ;; Chinese-pyim 运行不正常。
+    (unless (member word pyim-current-predict-words)
+      (with-current-buffer buf
+        (pyim-bisearch-word py (point-min) (point-max))
+        (if (string= (pyim-code-at-point) py)
+            (progn
+              (setq words (pyim-line-content)
+                    words (cons (car words) (delete-dups (append (list word)
+                                                                 (cdr words)))))
+              ;; (message "delete: %s" words))
+              (pyim-delete-line))
+          (forward-line 1)
+          (setq words (list py word)))
+        ;;    (message "insert: %s" words)
+        (insert (mapconcat 'identity words " ") "\n")))))
 
 (defun pyim-create-word (word pylist)
   ;; (message "create: %s, %s" word pylist)
@@ -1144,7 +1159,10 @@ beginning of line"
         (setq chpy (nth pyim-pinyin-position pyim-pinyin-list))
         (pyim-rearrange-1 str (concat (car chpy) (cdr chpy))))
       (setq pyim-pinyin-position (+ pyim-pinyin-position (length str)))
-      (if (= pyim-pinyin-position (length pyim-pinyin-list))
+      (if (or (= pyim-pinyin-position (length pyim-pinyin-list))
+              ;; 联想得到的词条，实际拼音和当前拼音不一致，
+              ;; 需要特殊处理。
+              (member pyim-current-str pyim-current-predict-words))
                                         ; 如果是最后一个，检查
                                         ; 是不是在文件中，没有的话，创
                                         ; 建这个词
@@ -1230,7 +1248,7 @@ beginning of line"
 
 ;;;  pyim-get
 (defun pyim-get (code)
-  (let (words)
+  (let (words predict-words)
     (when (and (stringp code) (string< "" code))
       (dolist (buf pyim-buffer-list)
         (with-current-buffer (cdr (assoc "buffer" buf))
@@ -1238,24 +1256,40 @@ beginning of line"
                               (cdr
                                (pyim-bisearch-word code
                                                    (point-min)
-                                                   (point-max)))))))
-      (delete-dups words))))
+                                                   (point-max)))))
+          (when (and pyim-predict-words-number
+                     (> pyim-predict-words-number 0)
+                     ;; 联想词条时，最起码需要两个汉字。
+                     ;; 也就是要求拼音字符串中必须包含
+                     ;; "-"。
+                     (string-match-p "-" code))
+            ;; 联想得到的词条后期需要特殊处理，所以用一个
+            ;; 全局变量来纪录。
+            (setq pyim-current-predict-words
+                  (append (pyim-get-predict-words code)
+                          predict-words)))))
+      (delete-dups (append words pyim-current-predict-words)))))
 
-(defun pyim-completions (code completions)
-  (let ((maxln 200)
-        (cnt 0)
-        (len (length code))
-        (reg (concat "^" (regexp-quote code))))
+(defun pyim-get-predict-words (code)
+  "用于拼音联想输入，获取与当前拼音临近的几行中文词条，
+如果一行中有多个词条，只取第一个词条。"
+  (let ((max-line pyim-predict-words-number)
+        (regexp (concat "^" (regexp-quote code)))
+        (count 0)
+        words)
     (save-excursion
       (forward-line 1)
-      (while (and (looking-at reg)
-                  (< cnt maxln))
-        (add-to-list 'completions (buffer-substring-no-properties
-                                   (+ (point) len)
-                                   (+ (point) len 1)))
+      (while (and (looking-at regexp)
+                  (< count max-line))
+        (setq words (append words
+                            (list (nth 1 (pyim-line-content)))))
+        (setq words
+              (mapcar (lambda (x)
+                        (propertize x 'face 'pyim-predict-words-face))
+                      words))
         (forward-line 1)
-        (setq cnt (1+ cnt)))
-      completions)))
+        (setq count (1+ count)))
+      words)))
 
 (defun pyim-get-char-code (char)
   "Get the code of the character CHAR"
