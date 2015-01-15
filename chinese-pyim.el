@@ -317,22 +317,19 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
 1. 每个元素都是一个 alist。
 2. 每一个 alist 都包含两个部份：
    1. buffer 词库文件导入时创建的 buffer (用户不可见)。
-   2. file   词库文件的路径。
-")
+   2. file   词库文件的路径。")
 (defvar pyim-active-function nil)
 (defvar pyim-do-completion nil "是否读入可能的补全")
 (defvar pyim-current-key "" "已经输入的代码")
 (defvar pyim-current-str "" "当前选择的词条")
 
 (defvar pyim-current-choices nil
-  "
-所有可选的词条，是一个list。
+  "所有可选的词条，是一个list。
 1. CAR 部份是可选的词条，一般是一个字符串列表。
    也可以含有list。但是包含的list第一个元素必须是将要插入的字符串。
 2. CDR 部分是一个 Association list。通常含有这样的内容：
    1. pos 上次选择的位置
-   2. completion 下一个可能的字母（如果 pyim-do-completion 为 t）
-")
+   2. completion 下一个可能的字母（如果 pyim-do-completion 为 t）")
 
 (defvar pyim-current-pos nil "当前选择的词条在 pyim-current-choices 中的位置")
 (defvar pyim-guidance-str "" "显示可选词条的字符串")
