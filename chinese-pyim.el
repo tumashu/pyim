@@ -1082,6 +1082,8 @@ beginning of line"
               (substring abbpy 1))))))
 
 (defun pyim-intern-word (word py)
+  "这个函数用于保存用户词频，将参数拼音 `py' 对应的中文词条 `word'
+保存到 personal-file 对应的 buffer。"
   (let((buf (cdr (assoc "buffer" (car pyim-buffer-list))))
        words)
     (with-current-buffer buf
