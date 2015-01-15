@@ -147,7 +147,7 @@
 ;; 切换全角半角标点符号使用命令: M-x pyim-toggle-full-width-punctuation
 ;;
 ;; Chinese-pyim 使用一个比较 *粗糙* 的方法处理 *模糊音*，要了解具体细节，请
-;; 运行： C-h v pyim-pinyin-fuzzy-adjust-function
+;; 运行： C-h v pyim-fuzzy-pinyin-adjust-function
 ;;
 ;; # 如何手动安装和管理词库 #
 ;; 这里假设有两个词库文件：
@@ -284,8 +284,8 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
   :group 'chinese-pyim
   :type 'character)
 
-(defcustom pyim-pinyin-fuzzy-adjust-function
-  'pyim-pinyin-fuzzy-adjust-1
+(defcustom pyim-fuzzy-pinyin-adjust-function
+  'pyim-fuzzy-pinyin-adjust-1
   "Chinese-pyim的核心并不能处理模糊音，这里提供了一个比较
  *粗糙* 的方法来处理模糊音。
 
@@ -319,22 +319,11 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
    1. buffer 词库文件导入时创建的 buffer (用户不可见)。
    2. file   词库文件的路径。
 ")
-(defvar pyim-history nil
-  "保存输入过的词的选择
-1. 加快搜索。
-2. 处理标点。
-
-每个元素都有这样的格式：
-
-   ((list WORDS) other-properties)
-
-其中：OTHER-PROPERTIES 是一些其它的属性，
-比如，上次的位置，用来输入标点等。")
-
 (defvar pyim-active-function nil)
-(defvar pyim-do-completion t "是否读入可能的补全")
+(defvar pyim-do-completion nil "是否读入可能的补全")
 (defvar pyim-current-key "" "已经输入的代码")
 (defvar pyim-current-str "" "当前选择的词条")
+
 (defvar pyim-current-choices nil
   "
 所有可选的词条，是一个list。
@@ -356,7 +345,7 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
 (defvar pyim-active-hook nil)
 
 (defvar pyim-stop-function nil)
-(defvar pyim-translate-function nil)
+(defvar pyim-translate-function 'pyim-punctuation-translate)
 (defvar pyim-add-completion-function nil)
 (defvar pyim-format-function 'pyim-format)
 (defvar pyim-handle-function 'pyim-handle-string)
@@ -371,6 +360,24 @@ If you don't like this funciton, set the variable to nil")
 (defvar pyim-pair-punctuation-status
   '(("\"" nil) ("'" nil))
   "成对标点符号切换状态")
+
+(defvar pyim-shen-mu
+  '("b" "p" "m" "f" "d" "t" "n" "l" "g" "k" "h"
+    "j" "q" "x" "z" "c" "s" "zh" "ch" "sh" "r" "y" "w"))
+
+(defvar pyim-yun-mu
+  '("a" "o" "e" "i" "u" "v" "ai" "ei" "ui" "ao" "ou" "iu"
+    "ie" "ia" "ua" "ve" "er" "an" "en" "in" "un" "vn" "ang" "iong"
+    "eng" "ing" "ong" "uan" "uang" "ian" "iang" "iao" "ue"
+    "uai" "uo"))
+
+(defvar pyim-valid-yun-mu
+  '("a" "o" "e" "ai" "ei" "ui" "ao" "ou" "er" "an" "en"
+    "ang" "eng"))
+
+(defvar pyim-char-table (make-vector 1511 nil))
+(defvar pyim-position nil)
+(defvar pyim-pinyin-list nil)
 
 (defvar pyim-dict-help-string
   "Chinese-pyim 没有可用词库！！！
@@ -394,6 +401,38 @@ If you don't like this funciton, set the variable to nil")
    1. 使用 package 管理器查看 Chinese-pyim 包的简介
    2. 阅读 chinese-pyim.el 文件 Commentary
    3. 查看 Chinese-pyim 在线 README：https://github.com/tumashu/chinese-pyim")
+
+(defvar pyim-mode-map
+  (let ((map (make-sparse-keymap))
+        (i ?\ ))
+    (while (< i 127)
+      (define-key map (char-to-string i) 'pyim-self-insert-command)
+      (setq i (1+ i)))
+    (setq i 128)
+    (while (< i 256)
+      (define-key map (vector i) 'pyim-self-insert-command)
+      (setq i (1+ i)))
+    (dolist (i (number-sequence ?1 ?9))
+      (define-key map (char-to-string i) 'pyim-number-select))
+    (define-key map " " 'pyim-select-current)
+    (define-key map [backspace] 'pyim-delete-last-char)
+    (define-key map (kbd "M-DEL") 'pyim-backward-kill-py)
+    (define-key map (kbd "M-g") (lambda ()
+                                  (interactive)
+                                  (funcall pyim-fuzzy-pinyin-adjust-function)))
+    (define-key map [delete] 'pyim-delete-last-char)
+    (define-key map "\177" 'pyim-delete-last-char)
+    (define-key map "\C-n" 'pyim-next-page)
+    (define-key map "\C-p" 'pyim-previous-page)
+    (define-key map "=" 'pyim-next-page)
+    (define-key map "-" 'pyim-previous-page)
+    (define-key map "\M-n" 'pyim-next-page)
+    (define-key map "\M-p" 'pyim-previous-page)
+    (define-key map "\C-m" 'pyim-quit-no-clear)
+    (define-key map "\C-c" 'pyim-quit-clear)
+    (define-key map "\C-g" 'pyim-quit-clear)
+    map)
+  "Keymap")
 
 (defvar pyim-local-variable-list
   '(pyim-page-length
@@ -422,7 +461,10 @@ If you don't like this funciton, set the variable to nil")
     inactivate-current-input-method-function
     describe-current-input-method-function
 
-    pyim-pair-punctuation-status)
+    pyim-pair-punctuation-status
+
+    pyim-pinyin-list
+    pyim-pinyin-position)
   "A list of buffer local variable")
 
 (dolist (var pyim-local-variable-list)
@@ -618,48 +660,6 @@ whenever possible."
   "append STR to pyim-current-str"
   (setq pyim-current-str (concat pyim-current-str str)))
 
-;;;  code search
-(defun pyim-get (code)
-  (when (and (stringp code) (not (pyim-string-emptyp code)))
-    (let ((history (gethash code pyim-history))
-          pos words completions)
-      (if (and (car history) (assoc "completions" (cdr history)))
-          history
-        (dolist (buf pyim-buffer-list)
-          (with-current-buffer (cdr (assoc "buffer" buf))
-            ;; Chinese-pyim 首次运行时，personal-file 文件为空文件，
-            ;; 其对应的 buffer 为空，这里确保 buffer 包含有效的词库
-            ;; 信息时才搜索所需的词条。
-            (when (pyim-dict-buffer-valid-p)
-              (setq words (append words
-                                  (cdr
-                                   (pyim-bisearch-word code
-                                                       (point-min)
-                                                       (point-max)))))
-              (if pyim-do-completion
-                  (setq completions (pyim-completions code completions))))))
-        (setq words (delete-dups words))
-        (puthash code (list words
-                            (cons "pos" (or (cdr (assoc "pos" (cdr history))) 1))
-                            (cons "completions" completions))
-                 pyim-history)))))
-
-(defun pyim-completions (code completions)
-  (let ((maxln 200)
-        (cnt 0)
-        (len (length code))
-        (reg (concat "^" (regexp-quote code))))
-    (save-excursion
-      (forward-line 1)
-      (while (and (looking-at reg)
-                  (< cnt maxln))
-        (add-to-list 'completions (buffer-substring-no-properties
-                                   (+ (point) len)
-                                   (+ (point) len 1)))
-        (forward-line 1)
-        (setq cnt (1+ cnt)))
-      completions)))
-
 (defun pyim-dict-buffer-valid-p ()
   "粗略地确定当前 buffer 是否是一个有效的词库产生的 buffer。
 确定标准：
@@ -777,43 +777,6 @@ beginning of line"
       (funcall pyim-add-completion-function)
     t))
 
-(defun pyim-format (key cp tp choice)
-  (let ((i 0))
-    (format "%s[%d/%d]: %s"
-            key  cp tp
-            (mapconcat 'identity
-                       (mapcar
-                        (lambda (c)
-                          (format "%d.%s " (setq i (1+ i)) c))
-                        choice) " "))))
-
-(defun pyim-format-page ()
-  "按当前位置，生成候选词条"
-  (let ((end (pyim-page-end)))
-    (if (car pyim-current-choices)
-        (let* ((start (1- (pyim-page-start)))
-               (choices (car pyim-current-choices))
-               (choice (pyim-subseq choices start end))
-               (pos (1- (min pyim-current-pos (length choices))))
-               (i 0))
-          (setq pyim-current-str (pyim-choice (nth pos choices)))
-          (setq pyim-guidance-str
-                (funcall pyim-format-function pyim-current-key (pyim-current-page)
-                         (pyim-total-page) choice))
-          ;; (message "%d, %s, %s" pos pyim-current-str pyim-guidance-str)
-          (pyim-show))
-      (setq pyim-current-str pyim-current-key)
-      (setq pyim-guidance-str
-            (concat pyim-current-key
-                    (if (cdr (assoc "completions" (cdr pyim-current-choices)))
-                        (format "[%s]: "
-                                (mapconcat 'identity
-                                           (cdr (assoc
-                                                 "completions"
-                                                 (cdr pyim-current-choices)))
-                                           "")))))
-      (pyim-show))))
-
 (defun pyim-current-page ()
   (1+ (/ (1- pyim-current-pos) pyim-page-length)))
 
@@ -838,22 +801,497 @@ beginning of line"
           whole
         (pyim-page-end (pyim-add-completion))))))
 
+
+;;;  handle function
+(defun pyim-handle-string ()
+  (let ((str pyim-current-key)
+        userpos wordspy)
+    (setq pyim-pinyin-list (pyim-split-string str)
+          pyim-pinyin-position 0)
+    (unless (and (pyim-validp pyim-pinyin-list)
+                 (progn
+                   (setq userpos (pyim-user-divide-pos str)
+                         pyim-current-key (pyim-restore-user-divide
+                                           (pyim-pylist-to-string pyim-pinyin-list)
+                                           userpos))
+                   (setq pyim-current-choices (list (delete-dups (pyim-get-choices pyim-pinyin-list))))
+                   (when  (car pyim-current-choices)
+                     (setq pyim-current-pos 1)
+                     (pyim-format-page)
+                     t)))
+      (setq pyim-current-str (replace-regexp-in-string "-" "" pyim-current-key))
+      (setq pyim-guidance-str (format "%s"
+                                      (replace-regexp-in-string
+                                       "-" " " pyim-current-key)))
+      (pyim-show))))
+
+(defun pyim-format-page ()
+  "按当前位置，生成候选词条"
+  (let* ((end (pyim-page-end))
+         (start (1- (pyim-page-start)))
+         (choices (car pyim-current-choices))
+         (choice (pyim-subseq choices start end))
+         (pos (1- (min pyim-current-pos (length choices))))
+         (i 0) rest)
+    (setq pyim-current-str (concat (substring pyim-current-str 0 pyim-pinyin-position)
+                                   (pyim-choice (nth pos choices)))
+          rest (mapconcat (lambda (py)
+                            (concat (car py) (cdr py)))
+                          (nthcdr (length pyim-current-str) pyim-pinyin-list)
+                          "'"))
+    (if (string< "" rest)
+        (setq pyim-current-str (concat pyim-current-str rest)))
+    (setq pyim-guidance-str
+          (format "%s[%d/%d]: %s"
+                  (replace-regexp-in-string "-" " " pyim-current-key)
+                  (pyim-current-page) (pyim-total-page)
+                  (mapconcat 'identity
+                             (mapcar
+                              (lambda (c)
+                                (format "%d.%s " (setq i (1+ i))
+                                        (if (consp c)
+                                            (concat (car c) (cdr c))
+                                          c)))
+                              choice) " ")))
+    (pyim-show)))
+
+(defun pyim-pylist-to-string (pylist)
+  "把分解的拼音合并，以便进行查找"
+  (mapconcat 'identity
+             (mapcar (lambda (w) (concat (car w) (cdr w))) pylist)
+             "-"))
+
+;; 将汉字的拼音分成声母和其它
+(defun pyim-get-sm (py)
+  "从一个拼音字符串中提出第一个声母。"
+  (when (and py (string< "" py))
+    (let (shenmu yunmu len)
+      (if (< (length py) 2)
+          (if (member py pyim-shen-mu)
+              (cons py "")
+            (cons "" py))
+        (setq shenmu (substring py 0 2))
+        (if (member shenmu pyim-shen-mu)
+            (setq py (substring py 2))
+          (setq shenmu (substring py 0 1))
+          (if (member shenmu pyim-shen-mu)
+              (setq py (substring py 1))
+            (setq shenmu "")))
+        (cons shenmu py)))))
+
+(defun pyim-get-ym (py)
+  "从一个拼音字符串中提出第一个韵母"
+  (when (and py (string< "" py))
+    (let (yunmu len)
+      (setq len (min (length py) 5))
+      (setq yunmu (substring py 0 len))
+      (while (and (not (member yunmu pyim-yun-mu))
+                  (> len 0))
+        (setq yunmu (substring py 0 (setq len (1- len)))))
+      (setq py (substring py len))
+      (if (and (string< "" py)
+               (not (member (substring py 0 1) pyim-shen-mu))
+               (member (substring yunmu -1) pyim-shen-mu)
+               (member (substring yunmu 0 -1) pyim-yun-mu))
+          (setq py (concat (substring yunmu -1) py)
+                yunmu (substring yunmu 0 -1)))
+      (cons yunmu py))))
+
+(defun pyim-get-charpy (py)
+  "分解一个拼音字符串成声母和韵母。"
+  (when (and py (string< "" py))
+    (let* ((sm (pyim-get-sm py))
+           (ym (pyim-get-ym (cdr sm)))
+           (chpy (concat (car sm) (car ym))))
+      (if (or (null ym)                 ; 如果韵母为空
+              (and (string< "" (car ym)) (not (pyim-get chpy)))) ; 错误的拼音
+          (cons sm "")
+        (cons (cons (car sm) (car ym)) (cdr ym))))))
+
+;;; 处理输入的拼音
+(defun pyim-split-string (py)
+  "把一个拼音字符串分解。如果含有 '，优先在这个位置中断，否则，自动分
+解成声母和韵母的组合"
+  (when (and py (string< "" py))
+    (apply 'append
+           (mapcar (lambda (p)
+                     (let (chpy pylist)
+                       (setq p (replace-regexp-in-string "[ -]" "" p))
+                       (while (when (string< "" p)
+                                (setq chpy (pyim-get-charpy p))
+                                (setq pylist (append pylist (list (car chpy))))
+                                (setq p (cdr chpy))))
+                       pylist))
+                   (split-string py "'")))))
+
+(defun pyim-validp (pylist)
+  "检查得到的拼音是否含有声母为空，而韵母又不正确的拼音"
+  (let ((valid t) py)
+    (while (progn
+             (setq py (car pylist))
+             (if (and (not (string< "" (car py)))
+                      (not (member (cdr py) pyim-valid-yun-mu)))
+                 (setq valid nil)
+               (setq pylist (cdr pylist)))))
+    valid))
+
+(defun pyim-user-divide-pos (py)
+  "检测出用户分割的位置"
+  (setq py (replace-regexp-in-string "-" "" py))
+  (let (poslist (start 0))
+    (while (string-match "'" py start)
+      (setq start (match-end 0))
+      (setq poslist (append poslist (list (match-beginning 0)))))
+    poslist))
+
+(defun pyim-restore-user-divide (py pos)
+  "按检测出的用户分解的位置，重新设置拼音"
+  (let ((i 0) (shift 0) cur)
+    (setq cur (car pos)
+          pos (cdr pos))
+    (while (and cur (< i (length py)))
+      (if (= (aref py i) ?-)
+          (if (= i (+ cur shift))
+              (progn
+                (aset py i ?')
+                (setq cur (car pos)
+                      pos (cdr pos)))
+            (setq shift (1+ shift))))
+      (setq i (1+ i)))
+    (if cur (setq py (concat py "'")))  ; the last char is `''
+    py))
+
+;;;  词组选择解析
+(defun pyim-get-choices (pylist)
+  "得到可能的词组和汉字。例如：
+
+ (pyim-get-choices  (pyim-split-string \"pin-yin\"))
+  => (#(\"拼音\" 0 2 (py (\"pin-yin\"))) \"拼\" \"品\" \"贫\" \"苹\" \"聘\" \"频\" \"拚\" \"颦\" \"牝\" \"嫔\" \"姘\" \"嚬\")
+
+ (pyim-get-choices  (pyim-split-string \"pin-yin\"))
+ => (#(\"拼音\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) #(\"贫铀\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) #(\"聘用\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) \"拼\" \"品\" \"贫\" \"苹\" \"聘\" \"频\" \"拚\" \"颦\" \"牝\" \"嫔\" \"姘\" \"嚬\")
+
+"
+  (let (choice words chars wordspy choice)
+    (setq wordspy (pyim-possible-words-py pylist))
+    (if wordspy
+        (setq words (pyim-possible-words wordspy)))
+    (setq chars (pyim-get (concat (caar pylist) (cdar pylist)))
+          choice (append words chars))))
+
+(defun pyim-possible-words (wordspy)
+  "根据拼音得到可能的词组。例如：
+  (pyim-possible-words '((\"p-y\" (\"p\" . \"in\") (\"y\" . \"\"))))
+    => (#(\"拼音\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) #(\"贫铀\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) #(\"聘用\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))))
+
+"
+  (let (words)
+    (dolist (word (reverse wordspy))
+      (if (listp word)
+          (setq words (append words (pyim-match-word (pyim-get (car word))
+                                                     (cdr word))))
+        (setq words (append words (mapcar (lambda (w)
+                                            (propertize w 'py (list word)))
+                                          (pyim-get word))))))
+    words))
+
+(defun pyim-possible-words-py (pylist)
+  "所有可能的词组拼音。从第一个字开始，每个字断开形成一个拼音。如果是
+完整拼音，则给出完整的拼音，如果是给出声母，则为一个 CONS CELL，CAR 是
+拼音，CDR 是拼音列表。例如：
+
+ (setq foo-pylist (pyim-split-string \"pin-yin-sh-r\"))
+  => ((\"p\" . \"in\") (\"y\" . \"in\") (\"sh\" . \"\") (\"r\" . \"\"))
+
+ (pyim-possible-words-py foo-pylist)
+  => (\"pin-yin\" (\"p-y-sh\" (\"p\" . \"in\") (\"y\" . \"in\") (\"sh\" . \"\")) (\"p-y-sh-r\" (\"p\" . \"in\") (\"y\" . \"in\") (\"sh\" . \"\") (\"r\" . \"\")))
+ "
+  (let (pys fullpy smpy wordlist (full t))
+    (if (string< "" (cdar pylist))
+        (setq fullpy (concat (caar pylist) (cdar pylist))
+              smpy (pyim-essential-py (car pylist)))
+      (setq smpy (caar pylist)
+            full nil))
+    (setq wordlist (list (car pylist)))
+    (dolist (py (cdr pylist))
+      (setq wordlist (append wordlist (list py)))
+      (if (and full (string< "" (cdr py)))
+          (setq fullpy (concat fullpy "-" (car py) (cdr py))
+                smpy (concat smpy "-" (pyim-essential-py py))
+                pys (append pys (list fullpy)))
+        (setq full nil
+              smpy (concat smpy "-" (pyim-essential-py py))
+              pys (append pys (list (cons smpy wordlist))))))
+    ;; (message "%s: %s" pys wordlist))
+    pys))
+
+(defun pyim-match-word (wordlist wordspy)
+  "给出一个词组列表和它的拼音列表，给出所有可能的词组，并加上一个 py
+属性。例如：
+
+ (pyim-get \"p-y\")
+  => (\"拼音\" \"番禺\" \"培养\" \"培育\" \"配药\" \"彭阳\" \"朋友\" \"偏远\" \"便宜\" \"片语\" \"飘扬\" \"漂移\" \"漂游\" \"贫铀\" \"聘用\" \"平阳\" \"平遥\" \"平邑\" \"平阴\" \"平舆\" \"平原\" \"平远\" \"濮阳\")
+
+ (pyim-match-word (pyim-get \"p-y\") '((\"p\" . \"in\") (\"y\" . \"\")))
+  => (#(\"拼音\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) #(\"贫铀\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) #(\"聘用\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))))
+
+"
+  (let (words)
+    (dolist (word wordlist)
+      ;;      (message "word: %s" word)
+      (let ((match t) py pys (tmppy wordspy))
+        (dotimes (i (length wordspy))
+          (setq py (car tmppy)
+                tmppy (cdr tmppy))
+          ;; (message "py: %s" py)
+          (when (string< "" (cdr py))
+            (let (chmatch)
+              (dolist (chpy (pyim-get-char-code (aref word i)))
+                (if (string= (cdr (pyim-get-sm chpy)) (cdr py))
+                    (setq chmatch t)))
+              (or chmatch (setq match nil)))))
+        ;; (message "%d: py: %s, match: %s" i py match))
+        (if match
+            (setq words (append words (list (propertize word 'py wordspy)))))))
+    words))
+
+(defun pyim-essential-py (py)
+  "一个拼音中的主要部分，如果有声母返回声母，否则返回韵母"
+  (if (string< "" (car py))
+      (car py)
+    (cdr py)))
+
+;;;  create and rearrage
+(defun pyim-match-py (word pylist)
+  (let (sym words fullpy abbpy chpy)
+    (when (> (length word) 1)
+      (if (stringp (car pylist))        ; if is full pinyin
+          (progn (setq fullpy (car pylist))
+                 (cons fullpy (mapconcat 'identity
+                                         (mapcar 'pyim-essential-py
+                                                 (pyim-split-string (replace-regexp-in-string "-" "'" fullpy)))
+                                         "-")))
+        (dotimes (i (length word))
+          (setq chpy (car pylist)
+                pylist (cdr pylist))
+          (setq abbpy (concat abbpy "-"
+                              (if (string< "" (car chpy))
+                                  (car chpy) (cdr chpy))))
+          (if (string< "" (cdr chpy))
+              (setq fullpy (concat fullpy "-" (car chpy) (cdr chpy)))
+            (setq fullpy (concat fullpy "-"
+                                 (car (pyim-get-char-code (aref word i)))))))
+        (cons (substring fullpy 1)
+              (substring abbpy 1))))))
+
+(defun pyim-intern-word (word py)
+  (let((buf (cdr (assoc "buffer" (car pyim-buffer-list))))
+       words)
+    (with-current-buffer buf
+      (pyim-bisearch-word py (point-min) (point-max))
+      (if (string= (pyim-code-at-point) py)
+          (progn
+            (setq words (pyim-line-content)
+                  words (cons (car words) (delete-dups (append (list word)
+                                                               (cdr words)))))
+            ;; (message "delete: %s" words))
+            (pyim-delete-line))
+        (forward-line 1)
+        (setq words (list py word)))
+      ;;    (message "insert: %s" words)
+      (insert (mapconcat 'identity words " ") "\n"))))
+
+(defun pyim-create-word (word pylist)
+  ;; (message "create: %s, %s" word pylist)
+  (let ((py (pyim-match-py word pylist))
+        words)
+    (when py
+      (pyim-intern-word word (car py))
+      (pyim-intern-word word (cdr py)))))
+
+(defun pyim-rearrange (word pylist)
+  ;; (message "rearrage: %s, %s" word pylist)
+  (let ((py (pyim-match-py word pylist)))
+    (when py
+      (pyim-rearrange-1 word
+                        (car py))
+      (pyim-rearrange-1 word (cdr py)))))
+
+(defun pyim-rearrange-1 (word py)
+  (pyim-intern-word word py))
+
+(defun pyim-han-stringp (str)
+  "Predicate whether the STR is a pinyin of a chinese character"
+  (let ((valid t)
+        (i 0))
+    (while (and (< i (length str)) valid)
+      (if (member (char-to-string (aref str i))
+                  (mapcar 'identity "vmpfwckzyjqdltxuognbhsrei'-a"))
+          (setq valid nil))
+      (setq i (1+ i)))
+    valid))
+
 ;;;  commands
+(defun pyim-select-current ()
+  (interactive)
+  (if (null (car pyim-current-choices))  ; 如果没有选项，输入空格
+      (progn
+        (setq pyim-current-str (pyim-translate last-command-event))
+        (pyim-terminate-translation))
+    (let ((str (pyim-choice (nth (1- pyim-current-pos) (car pyim-current-choices))))
+          chpy pylist)
+      (if (> (length str) 1)            ; 重排
+          (pyim-rearrange str (get-text-property 0 'py str))
+        (setq chpy (nth pyim-pinyin-position pyim-pinyin-list))
+        (pyim-rearrange-1 str (concat (car chpy) (cdr chpy))))
+      (setq pyim-pinyin-position (+ pyim-pinyin-position (length str)))
+      (if (= pyim-pinyin-position (length pyim-pinyin-list))
+                                        ; 如果是最后一个，检查
+                                        ; 是不是在文件中，没有的话，创
+                                        ; 建这个词
+          (progn
+            (if (not (member pyim-current-str (car pyim-current-choices)))
+                (pyim-create-word pyim-current-str pyim-pinyin-list))
+            (pyim-terminate-translation))
+        (setq pylist (nthcdr pyim-pinyin-position pyim-pinyin-list))
+        (setq pyim-current-choices (list (pyim-get-choices pylist))
+              pyim-current-pos 1)
+        (pyim-format-page)))))
+
+(defun pyim-number-select ()
+  "如果没有可选项，插入数字，否则选择对应的词条"
+  (interactive)
+  (if (car pyim-current-choices)
+      (let ((index (- last-command-event ?1))
+            (end (pyim-page-end)))
+        (if (> (+ index (pyim-page-start)) end)
+            (pyim-show)
+          (setq pyim-current-pos (+ pyim-current-pos index))
+          (setq pyim-current-str (concat (substring pyim-current-str 0
+                                                    pyim-pinyin-position)
+                                         (pyim-choice
+                                          (nth (1- pyim-current-pos)
+                                               (car pyim-current-choices)))))
+          (pyim-select-current)))
+    (pyim-append-string (char-to-string last-command-event))
+    (pyim-terminate-translation)))
+
 (defun pyim-next-page (arg)
   (interactive "p")
-  (if (> (length pyim-current-key) 0)
-      (let ((new (+ pyim-current-pos (* pyim-page-length arg) 1)))
-        (setq pyim-current-pos (if (> new 0) new 1)
-              pyim-current-pos (pyim-page-start))
-        (pyim-format-page))
-    (message "%c" last-command-event)
-    (pyim-append-string (pyim-translate last-command-event))
-    (pyim-terminate-translation)))
+  (if (= (length pyim-current-key) 0)
+      (progn
+        (pyim-append-string (pyim-translate last-command-event))
+        (pyim-terminate-translation))
+    (let ((new (+ pyim-current-pos (* pyim-page-length arg) 1)))
+      (setq pyim-current-pos (if (> new 0) new 1)
+            pyim-current-pos (pyim-page-start))
+      (pyim-format-page))))
 
 (defun pyim-previous-page (arg)
   (interactive "p")
   (pyim-next-page (- arg)))
 
+(defun pyim-quit-no-clear ()
+  (interactive)
+  (setq pyim-current-str (replace-regexp-in-string "-" ""
+                                                   pyim-current-key))
+  (pyim-terminate-translation))
+
+(defun pyim-backward-kill-py ()
+  (interactive)
+  (string-match "['-][^'-]+$" pyim-current-key)
+  (setq pyim-current-key
+        (replace-match "" nil nil pyim-current-key))
+  (pyim-handle-string))
+
+(defun pyim-fuzzy-pinyin-adjust-1 ()
+  (interactive)
+  (cond
+   ((string-match-p "eng" pyim-current-key)
+    (setq pyim-current-key
+          (replace-regexp-in-string "eng" "en" pyim-current-key)))
+   ((string-match-p "en[^g]*" pyim-current-key)
+    (setq pyim-current-key
+          (replace-regexp-in-string "en" "eng" pyim-current-key))))
+  (cond
+   ((string-match-p "ing" pyim-current-key)
+    (setq pyim-current-key
+          (replace-regexp-in-string "ing" "in" pyim-current-key)))
+   ((string-match-p "in[^g]*" pyim-current-key)
+    (setq pyim-current-key
+          (replace-regexp-in-string "in" "ing" pyim-current-key))))
+  (cond
+   ((string-match-p "un" pyim-current-key)
+    (setq pyim-current-key
+          (replace-regexp-in-string "un" "ong" pyim-current-key)))
+   ((string-match-p "ong" pyim-current-key)
+    (setq pyim-current-key
+          (replace-regexp-in-string "ong" "un" pyim-current-key))))
+  (pyim-handle-string))
+
+;;;  pyim-get
+(defun pyim-get (code)
+  (let (words)
+    (when (and (stringp code) (string< "" code))
+      (dolist (buf pyim-buffer-list)
+        (with-current-buffer (cdr (assoc "buffer" buf))
+          (setq words (append words
+                              (cdr
+                               (pyim-bisearch-word code
+                                                   (point-min)
+                                                   (point-max)))))))
+      (delete-dups words))))
+
+(defun pyim-completions (code completions)
+  (let ((maxln 200)
+        (cnt 0)
+        (len (length code))
+        (reg (concat "^" (regexp-quote code))))
+    (save-excursion
+      (forward-line 1)
+      (while (and (looking-at reg)
+                  (< cnt maxln))
+        (add-to-list 'completions (buffer-substring-no-properties
+                                   (+ (point) len)
+                                   (+ (point) len 1)))
+        (forward-line 1)
+        (setq cnt (1+ cnt)))
+      completions)))
+
+(defun pyim-get-char-code (char)
+  "Get the code of the character CHAR"
+  (symbol-value (intern-soft (char-to-string char) pyim-char-table)))
+
+(defun pyim-make-char-table-1 (chars)
+  (dolist (char chars)
+    (let ((code (car char)))
+      (dolist (c (cdr char))
+        (let* ((s (intern-soft c pyim-char-table))
+               (py (and s (symbol-value s))))
+          (set (intern c pyim-char-table) (append py (list code))))))))
+
+(defun pyim-make-char-table ()
+  "Build pinyin char hashtable from quail/PY.el"
+  (interactive)
+  (with-temp-buffer
+    (insert-file-contents (locate-library "quail/PY.el"))
+    (goto-char (point-min))
+    (while (re-search-forward
+            "^[[:space:]]*([[:space:]]*\"\\([a-z]+\\)\"[[:space:]]*\"\\([^\"]+\\)\"[[:space:]]*)[[:space:]]*$" nil t)
+      (let ((pinyin (match-string 1))
+            (hanzi-string (substring-no-properties (match-string 2)))
+            pinyin-list)
+        (setq pinyin-list
+              (list
+               (append (list pinyin)
+                       (split-string
+                        (replace-regexp-in-string
+                         "_$" ""
+                         (replace-regexp-in-string
+                          "\\(.\\)" "\\1_" hanzi-string)) "_"))))
+        (pyim-make-char-table-1 pinyin-list)))))
+
+;;;  commands
 (defun pyim-delete-last-char ()
   (interactive)
   (if (> (length pyim-current-key) 1)
@@ -878,48 +1316,9 @@ beginning of line"
     (pyim-append-string (pyim-translate last-command-event))
     (pyim-terminate-translation)))
 
-(defun pyim-select-current ()
-  "如果没有可选项，而且是用空格来绑定这个键，就插入空格，否则选择第一
-个词条"
-  (interactive)
-  (if (null (car pyim-current-choices))
-      (setq pyim-current-str
-            (if (> (length pyim-current-str) 0)
-                ""
-              (pyim-translate last-command-event)))
-    (pyim-remember-select))
-  (pyim-terminate-translation))
-
-(defun pyim-remember-select (&optional pos)
-  (let ((rest (emms-delete-if (lambda (p) (string= (car p) "pos"))
-                              (cdr pyim-current-choices))))
-    (setq rest (append rest (list (cons "pos" (or pos
-                                                  pyim-current-pos)))))
-    (puthash pyim-current-key (cons (car pyim-current-choices)
-                                    rest) pyim-history)))
-
-(defun pyim-number-select ()
-  "如果没有可选项，插入数字，否则选择对应的词条"
-  (interactive)
-  (if (car pyim-current-choices)
-      (let ((index (+ (pyim-page-start) (- last-command-event ?2)))
-            (end (pyim-page-end)))
-        (if (>= index end)
-            (pyim-show)
-          (pyim-remember-select (1+ index))
-          (setq pyim-current-str (pyim-choice (nth index (car pyim-current-choices))))
-          (pyim-terminate-translation)))
-    (pyim-append-string (char-to-string last-command-event))
-    (pyim-terminate-translation)))
-
 (defun pyim-quit-clear ()
   (interactive)
   (setq pyim-current-str "")
-  (pyim-terminate-translation))
-
-(defun pyim-quit-no-clear ()
-  (interactive)
-  (setq pyim-current-str pyim-current-key)
   (pyim-terminate-translation))
 
 (defun pyim-terminate-translation ()
@@ -928,18 +1327,6 @@ beginning of line"
   (pyim-delete-region)
   (setq pyim-current-choices nil)
   (setq pyim-guidance-str ""))
-
-;;;  pyim-handle-string
-(defun pyim-handle-string ()
-  (if (and (functionp pyim-stop-function)
-           (funcall pyim-stop-function))
-      (progn
-        (setq unread-command-events
-              (list (aref pyim-current-key (1- (length pyim-current-key)))))
-        (pyim-terminate-translation))
-    (setq pyim-current-choices (pyim-get pyim-current-key)
-          pyim-current-pos 1)
-    (pyim-format-page)))
 
 (defun pyim-translate (char)
   (if (functionp pyim-translate-function)
@@ -1113,9 +1500,6 @@ Return the input string."
 
 (global-set-key [pyim-advice] 'pyim-advice)
 
-;;; Function dealing with chinese words and punctuations
-(require 'chinese-pyim-pinyin)
-
 ;; 处理标点符号
 (defun pyim-return-proper-punctuation (punc-list &optional before)
   "返回合适的标点符号，`punc-list'为标点符号列表，其格式类似：
@@ -1201,38 +1585,6 @@ Return the input string."
       (insert (read-no-blanks-input "自定义输入: "))
     (call-interactively 'self-insert-command)))
 
-(defvar pyim-mode-map
-  (let ((map (make-sparse-keymap))
-        (i ?\ ))
-    (while (< i 127)
-      (define-key map (char-to-string i) 'pyim-self-insert-command)
-      (setq i (1+ i)))
-    (setq i 128)
-    (while (< i 256)
-      (define-key map (vector i) 'pyim-self-insert-command)
-      (setq i (1+ i)))
-    (dolist (i (number-sequence ?1 ?9))
-      (define-key map (char-to-string i) 'pyim-pinyin-number-select))
-    (define-key map " " 'pyim-pinyin-select-current)
-    (define-key map [backspace] 'pyim-delete-last-char)
-    (define-key map (kbd "M-DEL") 'pyim-pinyin-backward-kill-py)
-    (define-key map (kbd "M-g") (lambda ()
-                                  (interactive)
-                                  (funcall pyim-pinyin-fuzzy-adjust-function)))
-    (define-key map [delete] 'pyim-delete-last-char)
-    (define-key map "\177" 'pyim-delete-last-char)
-    (define-key map "\C-n" 'pyim-pinyin-next-page)
-    (define-key map "\C-p" 'pyim-pinyin-previous-page)
-    (define-key map "=" 'pyim-pinyin-next-page)
-    (define-key map "-" 'pyim-pinyin-previous-page)
-    (define-key map "\M-n" 'pyim-pinyin-next-page)
-    (define-key map "\M-p" 'pyim-pinyin-previous-page)
-    (define-key map "\C-m" 'pyim-pinyin-quit-no-clear)
-    (define-key map "\C-c" 'pyim-quit-clear)
-    (define-key map "\C-g" 'pyim-quit-clear)
-    map)
-  "Keymap")
-
 (defun pyim-restart ()
   "重启 Chinese-pyim，不建议用于编程环境。"
   (interactive)
@@ -1258,9 +1610,7 @@ Return the input string."
                (pyim-check-buffers)
                (not restart))
     (setq pyim-buffer-list (pyim-load-file))
-    (setq pyim-history (make-hash-table :test 'equal))
-    (setq pyim-active-function 'pyim-pinyin-activate-function)
-    (pyim-pinyin-make-char-table)
+    (pyim-make-char-table)
     (run-hooks 'pyim-load-hook)
     (message nil))
 
@@ -1282,6 +1632,76 @@ Return the input string."
 
 ;;; 注册输入法
 (register-input-method "chinese-pyim" "euc-cn" 'pyim-start "[pyim]")
+
+;;;###autoload
+(defun pyim-hanzi2pinyin (string &optional shou-zi-mu separator return-list ignore-duo-yin-zi)
+  "将汉字字符串转换为对应的拼音字符串, 如果 `shou-zi-mu' 设置为t,转换仅得到拼音
+首字母字符串。如果 `ignore-duo-yin-zi' 设置为t, 遇到多音字时，只使用第一个拼音。
+其它拼音忽略。"
+  (let (string-list pinyin-list output)
+
+    ;; 确保 `pyim-char-table' 已经生成。
+    (unless (pyim-get-char-code ?文)
+      (pyim-make-char-table))
+
+    ;; 将汉字字符串转换为字符list，英文原样输出。
+    (setq string-list (split-string
+                       (replace-regexp-in-string
+                        "\\(\\cc\\)" "-\\1-" string)
+                       "-"))
+    ;; 删除空字符串
+    (setq string-list (cl-remove-if #'(lambda (x)
+                                        (= (length x) 0)) string-list))
+
+    ;; 将上述汉字字符串里面的所有汉字转换为与之对应的拼音list。
+    (setq pinyin-list (mapcar (lambda (str)
+                                (cond
+                                 ((> (length str) 1) (list str))
+                                 ((and (> (length str) 0)
+                                       (string-match-p "\\cc" str))
+                                  (or (pyim-get-char-code (string-to-char str)) (list str)))
+                                 ((> (length str) 0) (list str)))) string-list))
+
+    ;; 通过排列组合的方式将 pinyin-list 转化为拼音字符串列表。
+    (setq output
+          (if ignore-duo-yin-zi
+              (list (mapconcat 'identity
+                               (mapcar
+                                (lambda (x)
+                                  (if shou-zi-mu
+                                      (substring (car x) 0 1)
+                                    (car x))) pinyin-list)
+                               (or separator "")))
+            (cl-remove-duplicates
+             (let ((result '("")))
+               (cl-loop for i in pinyin-list
+                        do (setq result
+                                 (cl-loop for j in i
+                                          append (cl-loop for k in result
+                                                          collect (concat k (if shou-zi-mu (substring j 0 1) j)
+                                                                          (or separator "")))))) result)
+             :test (lambda (x y) (or (null y) (equal x y)))
+             :from-end t)))
+
+    ;; 清理多余的拼音连接符，这个处理方式有点hack。需要优化。
+    (setq output (mapcar (lambda (x)
+                           (replace-regexp-in-string
+                            "- " " " x)) output))
+    (setq output (mapcar (lambda (x)
+                           (replace-regexp-in-string
+                            "-$" "" x)) output))
+    (setq output (mapcar (lambda (x)
+                           (replace-regexp-in-string
+                            " -" " " x)) output))
+    ;; 返回字符串或者列表
+    (if return-list
+        output
+      (mapconcat 'identity output " "))))
+
+;;;###autoload
+(defun pyim-hanzi2pinyin-simple (string &optional shou-zi-mu separator return-list)
+  "简化版的 `pyim-hanzi2pinyin', 不处理多音字。"
+  (pyim-hanzi2pinyin string shou-zi-mu separator t))
 
 ;;;###autoload
 (defun pyim-update-dict-file (&optional force sort-by-freq)
@@ -1343,6 +1763,7 @@ Return the input string."
     (when (> (length insert-string) 1)
       (insert insert-string))))
 
+;;;###autoload
 (defun pyim-build-dict-from-chinese-word ()
   "将一篇中文文章转换为 Chinese-pyim 可以识别的拼音词库。
 其步骤为：
