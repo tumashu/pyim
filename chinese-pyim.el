@@ -1260,8 +1260,9 @@ beginning of line"
           (when (and pyim-predict-words-number
                      (> pyim-predict-words-number 0)
                      ;; 联想词条时，最起码需要两个汉字。
-                     ;; 也就是要求拼音字符串中必须包含
-                     ;; "-"。
+                     ;; 也就是要求拼音字符串中必须包含 "-"。
+                     ;; BUG: 这种处理方式不太周全，
+                     ;;      需要进一步优化。
                      (string-match-p "-" code))
             ;; 联想得到的词条后期需要特殊处理，所以用一个
             ;; 全局变量来纪录。
