@@ -186,14 +186,29 @@
 ;; ```
 ;;
 ;; 6. 与 Company-mode 配合使用，来补全中文。
-;; 由于中文不强制分词（英文用空格分词），所以 `company-mode' 中文补全特别
-;; 难用。Chinese-pyim 自带两个 Company 补全后端：
+;; 由于中文不强制分词（英文用空格分词），所以 `company-mode' 自带的补全后端在补全中文时特别
+;; 难用。Chinese-pyim 自带了两个 Company 补全后端，补全中文比较好使。
 ;;
 ;; 1. `pyim-company-dabbrev' 与 `company-dabbrev' 功能类似，用于补全其它 buffer 中的中文词语。
 ;; 2. `pyim-company-predict-words' 专门用于 Chinese-pyim 联想词的输入。
 ;;
-;; 只要用户正确安装了 `company-mode'，上述功能就默认激活了。另外，其它补全系统，
-;; 比如 `auto-complete' 也可以简单的实现类似的功能，这里就不详细说明了。
+;; 注意：与 Chinese-pyim 配合使用时，`company-mode' 需要做以下配置：
+;; ```lisp
+;; (require 'company)
+;; (require 'company-dabbrev)
+;; (require 'adaptive-wrap)
+;; ;; 加快 Company 菜单弹出速度。
+;; (setq company-idle-delay 0.1)
+;; ;; 两个字符开始补全，与 Chinese-pyim 配合
+;; ;; 使用时这个选项必须开启。
+;; (setq company-minimum-prefix-length 2)
+;; (setq company-require-match nil)
+;; (setq company-selection-wrap-around t)
+;; (setq company-dabbrev-downcase nil)
+;; (setq company-dabbrev-ignore-case nil)
+;; ```
+;; 当然，`auto-complete' 也可以使用类似的方式实现上述功能，
+;; 这里就不详细说明了，有兴趣的同学自己折腾吧。
 
 ;;; Code:
 (require 'cl-lib)
