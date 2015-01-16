@@ -174,7 +174,6 @@ Chinese-pyim 使用一个比较 *粗糙* 的方法处理 *模糊音*，要了解
 ```lisp
 (require 'company)
 (require 'company-dabbrev)
-(require 'adaptive-wrap)
 ;; 加快 Company 菜单弹出速度。
 (setq company-idle-delay 0.1)
 ;; 两个字符开始补全，与 Chinese-pyim 配合
