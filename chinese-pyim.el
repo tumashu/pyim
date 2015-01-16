@@ -1871,7 +1871,7 @@ Return the input string."
      (and (featurep 'chinese-pyim)
           ;; 光标前字符是否时汉字？
           (string-match-p "\\cc" (char-to-string (char-before)))
-          pyim-current-str))
+           pyim-current-str))
     (candidates
      (let* ((case-fold-search company-dabbrev-ignore-case)
             (words (company-dabbrev--search
@@ -1896,11 +1896,12 @@ Return the input string."
   (interactive (list 'interactive))
   (cl-case command
     (interactive (company-begin-backend 'pyim-company-backend))
-    (prefix (and (featurep 'chinese-pyim)
-                 ;; 光标前字符是否时汉字？
-                 (string-match-p "\\cc" (char-to-string (char-before)))
-                 pyim-current-predict-words
-                 pyim-current-str))
+    (prefix
+     (and (featurep 'chinese-pyim)
+          ;; 光标前字符是否时汉字？
+          (string-match-p "\\cc" (char-to-string (char-before)))
+          pyim-current-predict-words
+          pyim-current-str))
     (candidates pyim-current-predict-words)))
 
 (provide 'chinese-pyim)
