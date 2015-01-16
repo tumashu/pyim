@@ -125,7 +125,7 @@ Chinese-pyim 命令 `pyim-build-dict-from-chinese-word` 可以为中文词条添
 切换全角半角标点符号使用命令: M-x pyim-toggle-full-width-punctuation
 
 Chinese-pyim 使用一个比较 *粗糙* 的方法处理 *模糊音*，要了解具体细节，请
-运行： C-h v pyim-pinyin-fuzzy-adjust-function
+运行： C-h v pyim-fuzzy-pinyin-adjust-function
 
 # 如何手动安装和管理词库 #
 这里假设有两个词库文件：
@@ -162,6 +162,16 @@ Chinese-pyim 使用一个比较 *粗糙* 的方法处理 *模糊音*，要了解
                  :coding utf-8-unix)))
   (pyim-restart-1 t))
 ```
+
+6. 与 Company-mode 配合使用，来补全中文。
+由于中文不强制分词（英文用空格分词），所以 `company-mode` 中文补全特别
+难用。Chinese-pyim 自带两个 Company 补全后端：
+
+1. `pyim-company-dabbrev` 与 `company-dabbrev` 功能类似，用于补全其它 buffer 中的中文词语。
+2. `pyim-company-predict-words` 专门用于 Chinese-pyim 联想词的输入。
+
+只要用户正确安装了 `company-mode`，上述功能就默认激活了。另外，其它补全系统，
+比如 `auto-complete` 也可以简单的实现类似的功能，这里就不详细说明了。
 
 
 ---
