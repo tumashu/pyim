@@ -143,16 +143,27 @@ Chinese-pyim 使用一个比较 *粗糙* 的方法处理 *模糊音*，要了解
 
 # 其他 Tips #
 
-1. 如何快速切换全角标点与半角标点。
-   1. 第一种方法：使用命令 `pyim-toggle-full-width-punctuation`，全局切换。
-   2. 第二种方法：使用命令 `pyim-punctuation-translate-at-point` 只切换光标处标点的样式。
-   3. 第三种方法：设置变量 `pyim-punctuation-translate-char`。输入变量设定的字符会切换光标处标点的样式。
-2. 了解 Chinese-pyim 个人词频文件设置的细节：C-h v pyim-personal-file
-3. 了解 Chinese-pyim 词库设置细节：C-h v pyim-dicts
-4. 下面两个函数可以将汉字字符串转换为拼音字符串。
+## 如何快速切换全角标点与半角标点 ##
+1. 第一种方法：使用命令 `pyim-toggle-full-width-punctuation`，全局切换。
+2. 第二种方法：使用命令 `pyim-punctuation-translate-at-point` 只切换光标处标点的样式。
+3. 第三种方法：设置变量 `pyim-punctuation-translate-char`。输入变量设定的字符会切换光标处标点的样式。
+
+## 了解 Chinese-pyim 个人词频文件设置的细节 ##
+```
+C-h v pyim-personal-file
+```
+
+## 了解 Chinese-pyim 词库设置细节 ##
+```
+C-h v pyim-dicts
+```
+
+## 将汉字字符串转换为拼音字符串 ##
    1. `pyim-hanzi2pinyin` （考虑多音字）
    2. `pyim-hanzi2pinyin-simple`  （不考虑多音字）
-5. 可以定义类似下面的命令来实现快速切换词库的功能。
+
+## 实现快速切换词库的功能 ##
+可以自定义类似的命令：
 ```lisp
 (defun pyim-use-dict:bigdict ()
   (interactive)
@@ -163,7 +174,8 @@ Chinese-pyim 使用一个比较 *粗糙* 的方法处理 *模糊音*，要了解
   (pyim-restart-1 t))
 ```
 
-6. 与 Company-mode 配合使用，来补全中文。
+## Chinese-pyim 与 Company-mode 配合用于补全中文 ##
+
 由于中文不强制分词（英文用空格分词），所以 `company-mode` 自带的补全后端在补全中文时特别
 难用。Chinese-pyim 自带了两个 Company 补全后端，补全中文比较好使。
 
