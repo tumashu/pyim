@@ -301,11 +301,16 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
   :group 'chinese-pyim
   :type 'function)
 
-(defcustom pyim-predict-words-number 4
+(defcustom pyim-predict-words-number 30
   "设置获取多少个联想词条，如果设置为 nil
 或者 0 时，关闭联想功能。"
   :group 'chinese-pyim
   :type 'number)
+
+(defcustom pyim-predict-words-function 'pyim-company-complete
+  "使用什么函数来显示联想词，让用户选择。"
+  :group 'chinese-pyim
+  :type 'function)
 
 (defcustom pyim-page-length 9
   "每页显示的词条数目"
@@ -313,10 +318,6 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
   :type 'number)
 
 (defface pyim-string-face '((t (:underline t)))
-  "Face to show current string"
-  :group 'chinese-pyim)
-
-(defface pyim-predict-words-face '((t (:foreground "orange")))
   "Face to show current string"
   :group 'chinese-pyim)
 
@@ -450,6 +451,7 @@ If you don't like this funciton, set the variable to nil")
     pyim-current-str
     pyim-current-choices
     pyim-current-pos
+    ;; pyim-current-predict-words
     pyim-guidance-str
     pyim-translating
     pyim-overlay
@@ -1097,23 +1099,19 @@ beginning of line"
 保存到 personal-file 对应的 buffer。"
   (let((buf (cdr (assoc "buffer" (car pyim-buffer-list))))
        words)
-    ;; 联想得到的词条不能保存到 presonal-file 中，
-    ;; 因为联想得到的词条与当前拼音不对应，保存后会导致
-    ;; Chinese-pyim 运行不正常。
-    (unless (member word pyim-current-predict-words)
-      (with-current-buffer buf
-        (pyim-bisearch-word py (point-min) (point-max))
-        (if (string= (pyim-code-at-point) py)
-            (progn
-              (setq words (pyim-line-content)
-                    words (cons (car words) (delete-dups (append (list word)
-                                                                 (cdr words)))))
-              ;; (message "delete: %s" words))
-              (pyim-delete-line))
-          (forward-line 1)
-          (setq words (list py word)))
-        ;;    (message "insert: %s" words)
-        (insert (mapconcat 'identity words " ") "\n")))))
+    (with-current-buffer buf
+      (pyim-bisearch-word py (point-min) (point-max))
+      (if (string= (pyim-code-at-point) py)
+          (progn
+            (setq words (pyim-line-content)
+                  words (cons (car words) (delete-dups (append (list word)
+                                                               (cdr words)))))
+            ;; (message "delete: %s" words))
+            (pyim-delete-line))
+        (forward-line 1)
+        (setq words (list py word)))
+      ;;    (message "insert: %s" words)
+      (insert (mapconcat 'identity words " ") "\n"))))
 
 (defun pyim-create-word (word pylist)
   ;; (message "create: %s, %s" word pylist)
@@ -1159,17 +1157,17 @@ beginning of line"
         (setq chpy (nth pyim-pinyin-position pyim-pinyin-list))
         (pyim-rearrange-1 str (concat (car chpy) (cdr chpy))))
       (setq pyim-pinyin-position (+ pyim-pinyin-position (length str)))
-      (if (or (= pyim-pinyin-position (length pyim-pinyin-list))
-              ;; 联想得到的词条，实际拼音和当前拼音不一致，
-              ;; 需要特殊处理。
-              (member pyim-current-str pyim-current-predict-words))
+      (if (= pyim-pinyin-position (length pyim-pinyin-list))
                                         ; 如果是最后一个，检查
                                         ; 是不是在文件中，没有的话，创
                                         ; 建这个词
           (progn
             (if (not (member pyim-current-str (car pyim-current-choices)))
                 (pyim-create-word pyim-current-str pyim-pinyin-list))
-            (pyim-terminate-translation))
+            (pyim-terminate-translation)
+            ;; 使用其它命令，显示联想词让用户选择。
+            (when (functionp pyim-predict-words-function)
+              (funcall-interactively pyim-predict-words-function)))
         (setq pylist (nthcdr pyim-pinyin-position pyim-pinyin-list))
         (setq pyim-current-choices (list (pyim-get-choices pylist))
               pyim-current-pos 1)
@@ -1257,19 +1255,17 @@ beginning of line"
                                (pyim-bisearch-word code
                                                    (point-min)
                                                    (point-max)))))
+          ;; 搜索拼音对应词条的同时，也搜索与拼音关联性较高的“联想词条”。
+          ;; 因为搜索较大的拼音词库时耗时较多。这样做可以减少搜索次数。
           (when (and pyim-predict-words-number
                      (> pyim-predict-words-number 0)
-                     ;; 联想词条时，最起码需要两个汉字。
-                     ;; 也就是要求拼音字符串中必须包含 "-"。
-                     ;; BUG: 这种处理方式不太周全，
-                     ;;      需要进一步优化。
+                     ;; 联想词条时，最起码需要两个汉字。 也就是要求拼音字符串中必须包含 "-"。
+                     ;; BUG: 这种处理方式不太周全， 需要进一步优化。
                      (string-match-p "-" code))
-            ;; 联想得到的词条后期需要特殊处理，所以用一个
-            ;; 全局变量来纪录。
             (setq pyim-current-predict-words
                   (append (pyim-get-predict-words code)
                           predict-words)))))
-      (delete-dups (append words pyim-current-predict-words)))))
+      (delete-dups words))))
 
 (defun pyim-get-predict-words (code)
   "用于拼音联想输入，获取与当前拼音临近的几行中文词条，
@@ -1284,10 +1280,6 @@ beginning of line"
                   (< count max-line))
         (setq words (append words
                             (list (nth 1 (pyim-line-content)))))
-        (setq words
-              (mapcar (lambda (x)
-                        (propertize x 'face 'pyim-predict-words-face))
-                      words))
         (forward-line 1)
         (setq count (1+ count)))
       words)))
@@ -1843,6 +1835,26 @@ Return the input string."
     ;; 将文件按行排序，并删除重复的词条，运行两次。
     (pyim-update-dict-file t t)
     (pyim-update-dict-file t t)))
+
+(defun pyim-company-complete ()
+  "用于补全联想词的命令。"
+  (interactive)
+  (if (featurep 'company)
+      (progn (unless (member 'pyim-company-backend company-backends)
+               (add-to-list 'company-backends 'pyim-company-backend))
+             (company-complete))))
+
+(defun pyim-company-backend (command &optional arg &rest ignore)
+  "`company-mode' 补全后端，这个只用于联想词的选择。"
+  (interactive (list 'interactive))
+  (cl-case command
+    (interactive (company-begin-backend 'pyim-company-backend))
+    (prefix (and (featurep 'chinese-pyim)
+                 ;; 光标前字符是否时汉字？
+                 (string-match-p "\\cc" (char-to-string (char-before)))
+                 pyim-current-predict-words
+                 pyim-current-str))
+    (candidates pyim-current-predict-words)))
 
 (provide 'chinese-pyim)
 
