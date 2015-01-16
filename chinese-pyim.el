@@ -1871,6 +1871,7 @@ Return the input string."
      (and (featurep 'chinese-pyim)
           ;; 光标前字符是否时汉字？
           (string-match-p "\\cc" (char-to-string (char-before)))
+          (string-match-p "\\cc" pyim-current-str)
            pyim-current-str))
     (candidates
      (let* ((case-fold-search company-dabbrev-ignore-case)
