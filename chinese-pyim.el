@@ -1840,12 +1840,48 @@ Return the input string."
   "用于补全联想词的命令。"
   (interactive)
   (if (featurep 'company)
-      (progn (unless (member 'pyim-company-backend company-backends)
-               (add-to-list 'company-backends 'pyim-company-backend))
-             (company-complete))))
+      (let ((backends '(pyim-company-predict-words pyim-company-dabbrev)))
+        (unless (member backends company-backends)
+          (add-to-list 'company-backends backends))
+        (company-complete))))
 
-(defun pyim-company-backend (command &optional arg &rest ignore)
-  "`company-mode' 补全后端，这个只用于联想词的选择。"
+(defun pyim-company-dabbrev (command &optional arg &rest ignored)
+  "`company-mode' dabbrev 补全后端，是 `company-dabbrev'
+(包含在 `company-mode'中) 的衍生版本，通过与 Chinese-pyim 配合
+来补全中文（忽略非中文）。
+
+`pyim-company-dabbrev' 可以和 `company-dabbrev' 配合使用。具体细节请
+参考 Company-mode group backends 相关文档。"
+  (interactive (list 'interactive))
+  (cl-case command
+    (interactive (company-begin-backend 'pyim-company-dabbrev))
+    (prefix
+     (and (featurep 'chinese-pyim)
+          ;; 光标前字符是否时汉字？
+          (string-match-p "\\cc" (char-to-string (char-before)))
+          pyim-current-predict-words
+          pyim-current-str))
+    (candidates
+     (let* ((case-fold-search company-dabbrev-ignore-case)
+            (words (company-dabbrev--search
+                    (format "%s[^[:punct:][:blank:]\n]*\\>" arg)
+                    company-dabbrev-time-limit
+                    (pcase company-dabbrev-other-buffers
+                      (`t (list major-mode))
+                      (`all `all))))
+            (downcase-p
+             (if (eq company-dabbrev-downcase 'case-replace)
+                 case-replace
+               company-dabbrev-downcase)))
+       (if downcase-p
+           (mapcar 'downcase words)
+         words)))
+    (ignore-case company-dabbrev-ignore-case)
+    (duplicates t)))
+
+(defun pyim-company-predict-words (command &optional arg &rest ignore)
+  "`company-mode' 补全后端，只用于 Chinese-pyim 联想词补全，无其他
+作用。"
   (interactive (list 'interactive))
   (cl-case command
     (interactive (company-begin-backend 'pyim-company-backend))
