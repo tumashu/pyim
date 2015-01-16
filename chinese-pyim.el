@@ -317,10 +317,13 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
   :group 'chinese-pyim
   :type 'number)
 
-(defcustom pyim-predict-words-function 'pyim-company-complete
-  "使用什么函数来显示联想词，让用户选择。"
+(defcustom pyim-select-word-finish-hook 'pyim-company-complete
+  "Chinese-pyim 选词完成时运行的hook，
+
+Chinese-pyim 使用这个 hook 处理联想词，用户可以使用
+这个 hook 调用来调用外部的补全系统等工作。"
   :group 'chinese-pyim
-  :type 'function)
+  :type 'hook)
 
 (defcustom pyim-page-length 9
   "每页显示的词条数目"
@@ -1175,9 +1178,8 @@ beginning of line"
             (if (not (member pyim-current-str (car pyim-current-choices)))
                 (pyim-create-word pyim-current-str pyim-pinyin-list))
             (pyim-terminate-translation)
-            ;; 使用其它命令，显示联想词让用户选择。
-            (when (functionp pyim-predict-words-function)
-              (funcall-interactively pyim-predict-words-function)))
+            ;; Chinese-pyim 使用这个 hook 来处理联想词。
+            (run-hooks 'pyim-select-word-finish-hook))
         (setq pylist (nthcdr pyim-pinyin-position pyim-pinyin-list))
         (setq pyim-current-choices (list (pyim-get-choices pylist))
               pyim-current-pos 1)
@@ -1869,7 +1871,6 @@ Return the input string."
      (and (featurep 'chinese-pyim)
           ;; 光标前字符是否时汉字？
           (string-match-p "\\cc" (char-to-string (char-before)))
-          pyim-current-predict-words
           pyim-current-str))
     (candidates
      (let* ((case-fold-search company-dabbrev-ignore-case)
