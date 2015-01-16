@@ -311,7 +311,7 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
   :group 'chinese-pyim
   :type 'function)
 
-(defcustom pyim-predict-words-number 30
+(defcustom pyim-predict-words-number 10
   "设置获取多少个联想词条，如果设置为 nil
 或者 0 时，关闭联想功能。"
   :group 'chinese-pyim
