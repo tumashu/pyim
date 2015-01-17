@@ -1906,7 +1906,8 @@ Return the input string."
     (candidates
      (let* ((case-fold-search company-dabbrev-ignore-case)
             (words (company-dabbrev--search
-                    (format "%s[^[:punct:][:blank:]\n]*\\>" arg)
+                    ;; 最多补全六个中文字符，得到太长的中文字符串用处不大。
+                    (format "%s[^[:punct:][:blank:]\n]\\{1,6\\}" arg)
                     company-dabbrev-time-limit
                     (pcase company-dabbrev-other-buffers
                       (`t (list major-mode))
