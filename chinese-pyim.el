@@ -1308,19 +1308,21 @@ beginning of line"
 (defun pyim-get-predict-words (code)
   "用于拼音联想输入，获取与当前拼音临近的几行中文词条，
 如果一行中有多个词条，只取第一个词条。"
-  (let ((max-line pyim-predict-words-number)
-        (regexp (concat "^" (regexp-quote code)))
-        (count 0)
-        words)
-    (save-excursion
-      (forward-line 1)
-      (while (and (looking-at regexp)
-                  (< count max-line))
-        (setq words (append words
-                            (list (nth 1 (pyim-line-content)))))
+  (when (and pyim-predict-words-number
+             (> pyim-predict-words-number 0))
+    (let ((max-line pyim-predict-words-number)
+          (regexp (concat "^" (regexp-quote code)))
+          (count 0)
+          words)
+      (save-excursion
         (forward-line 1)
-        (setq count (1+ count)))
-      words)))
+        (while (and (looking-at regexp)
+                    (< count max-line))
+          (setq words (append words
+                              (list (nth 1 (pyim-line-content)))))
+          (forward-line 1)
+          (setq count (1+ count)))
+        words))))
 
 (defun pyim-get-char-code (char)
   "Get the code of the character CHAR"
