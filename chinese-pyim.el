@@ -1934,7 +1934,7 @@ Return the input string."
     (let ((backends '(pyim-company-predict-words pyim-company-dabbrev)))
       (unless (member backends company-backends)
         (add-to-list 'company-backends backends))
-      (company-complete))))
+      (company-manual-begin))))
 
 (defun pyim-company-dabbrev (command &optional arg &rest ignored)
   "`company-mode' dabbrev 补全后端，是 `company-dabbrev'
