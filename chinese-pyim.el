@@ -124,11 +124,18 @@
 ;; 3. 中文处理工具自带的dict。
 ;; 4. 其它。
 ;;
-;; Chinese-pyim 命令 `pyim-build-dict-from-chinese-word' 可以为中文词条添加拼音Code，
-;; 从而生成可用词库，但其工作的前提是：中文词条必须使用 *空格* 或者 *换行符* 强制隔开。
-;; 最后，将生成的词库按上述方法添加到 Chinese-pyim 中就可以了。
+;; Chinese-pyim 下面两个命令可以为中文词条添加拼音Code，从而生成可用词库：
 ;;
-;; 注意：每一个词库文件必须按行排序（准确的说，是按每一行的拼音code排序），
+;; 1. `pyim-article2dict-accuracy' （建议普通用户使用）
+;; 2. `pyim-article2dict-radical'  （造词方式非常激进，不建议普通用户使用）
+;;
+;; 注意：在运行上述两个命令之前，必须确保待转换的文章中，中文词汇已经使
+;; 用 *空格* 强制隔开。
+;;
+;; 最后将生成的词库按上述方法添加到 Chinese-pyim 中就可以了。
+;;
+;; ## 词库文件编辑后注意事项 ##
+;; 每一个词库文件必须按行排序（准确的说，是按每一行的拼音code排序），
 ;; 因为`Chinese-pyim' 寻找词条时，使用二分法来优化速度，而二分法工作的前提
 ;; 就是对文件按行排序。具体细节请参考：`pyim-bisearch-word' 。
 ;; 所以，当词库排序不正确时（比如：用户手动调整词库文件后），记得运行函数
@@ -1830,14 +1837,36 @@ Return the input string."
       (insert insert-string))))
 
 ;;;###autoload
-(defun pyim-build-dict-from-chinese-word ()
+(defun pyim-article2dict-accuracy ()
+  "将一篇中文文章转换为 Chinese-pyim 可以识别的拼音词库。
+这个命令不会机械的将汉字连接为词汇，所以得到的词库比较纯正。"
+  (interactive)
+  (pyim-article2dict-1 t))
+
+;;;###autoload
+(defun pyim-article2dict-radical ()
+  "将一篇中文文章转换为 Chinese-pyim 可以识别的拼音词库。
+会将连续出现的单个汉字字符合并成汉字字符串，比如：
+
+   “哪  狗  天”
+
+会被转换为：
+
+   “哪狗天”
+
+这种方式增加词条量的同时也可能会产生许多无意义的词汇，
+得到的词库不会很纯正，但词汇更丰富。"
+  (interactive)
+  (when (yes-or-no-p "这个命令不适合普通用户，是否继续？ ")
+    (pyim-article2dict-1 nil)))
+
+(defun pyim-article2dict-1 (accuracy)
   "将一篇中文文章转换为 Chinese-pyim 可以识别的拼音词库。
 其步骤为：
 1. 清除所有非汉语内容。
 2. 使用分词系统将文章分词。
 3. 将词条与词条之间用换行符分开。
 4. 为每一行的词条添加拼音。"
-  (interactive)
   (save-excursion
     (pyim-show-help
      "将一篇中文文章转换为 Chinese-pyim 可以识别的拼音词库。
@@ -1850,20 +1879,40 @@ Return the input string."
 4. 添加拼音：使用 emacs 打开 “目标文件.txt”，然后运行命令：M-x pyim-build-dict-from-chinese-word
 5. 保存文件
 
-另外，使用分词工具的目的是确保中文词语与词语之间用 *空格* 或者 *换行符* 强制隔开。比如：
+另外，使用分词工具的目的是确保中文词语与词语之间用 *空格* 强制隔开。比如：
 
     \"你好 吃饭 中文\"
 
 分词这个步骤不是必须步骤，如果你获得的文件已经满足上述条件，那么直接运行第4步就可以了。
 
-注意：当文件很大时，这个命令需要执行较长时间，据估计：生成5万词条的词库大约需要15分钟。"))
-  (when (and (yes-or-no-p "您上述准备工作是否已经完成？如果完成，请输入 yes 继续执行命令：")
-             (yes-or-no-p "注意：重复运行此命令会导致词库信息丢失！ 是否运行此命令？ "))
-    ;; 将所有的空白字符替换为换行符
+注意事项：当文件很大时，这个命令需要执行较长时间，据估计：生成5万词条的词库大约需要15分钟。"))
+  (when (and (yes-or-no-p "您上述准备工作是否已经完成？如果完成，请输入 yes 继续执行命令："))
+    ;; 删除所有英文单词以及标点符号。
     (goto-char (point-min))
-    (while (re-search-forward "[[:blank:]]+" nil t)
-      (replace-match "\n"))
-    ;; 删除空白行
+    (while (re-search-forward "[[:punct:]a-zA-Z0-9]+" nil t)
+      (replace-match ""))
+    ;; 当 `accuracy' 为 nil 时，`pyim-article2dict' 会将连续出现的
+    ;; 单个汉字字符合并成汉字字符串，比如： “哪  狗  天” 会被转换
+    ;; 为 “哪狗天”。增加词条量的同时也会产生许多无意义的词汇。
+    (if accuracy
+        (progn (goto-char (point-min))
+               (while (re-search-forward "[[:blank:]]+" nil t)
+                 (replace-match "\n")))
+      ;; 保护已经分开的词条。
+      (goto-char (point-min))
+      (while (re-search-forward "\\(\\cc\\cc+\\)" nil t)
+        (replace-match "@@\\1@@"))
+      ;; 删除所有的空白字符，这样做的目的是将单个的汉字
+      ;; 尽可能合并成汉字字符串，虽然这个字符串可能没有实际意义，
+      ;; 但比单个汉字更有用处。
+      (goto-char (point-min))
+      (while (re-search-forward "[[:blank:]]+" nil t)
+        (replace-match ""))
+      ;; 解除前面对词条的保护。
+      (goto-char (point-min))
+      (while (re-search-forward "@@+" nil t)
+        (replace-match "\n")))
+    ;; 删除多余空白行。
     (goto-char (point-min))
     (while (re-search-forward "\n+" nil t)
       (replace-match "\n"))

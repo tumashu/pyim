@@ -102,11 +102,18 @@ https://github.com/tumashu/chinese-pyim-bigdict/blob/master/pyim-bigdict.txt?raw
 3. 中文处理工具自带的dict。
 4. 其它。
 
-Chinese-pyim 命令 `pyim-build-dict-from-chinese-word` 可以为中文词条添加拼音Code，
-从而生成可用词库，但其工作的前提是：中文词条必须使用 *空格* 或者 *换行符* 强制隔开。
-最后，将生成的词库按上述方法添加到 Chinese-pyim 中就可以了。
+Chinese-pyim 下面两个命令可以为中文词条添加拼音Code，从而生成可用词库：
 
-注意：每一个词库文件必须按行排序（准确的说，是按每一行的拼音code排序），
+1. `pyim-article2dict-accuracy` （建议普通用户使用）
+2. `pyim-article2dict-radical`  （造词方式非常激进，不建议普通用户使用）
+
+注意：在运行上述两个命令之前，必须确保待转换的文章中，中文词汇已经使
+用 *空格* 强制隔开。
+
+最后将生成的词库按上述方法添加到 Chinese-pyim 中就可以了。
+
+## 词库文件编辑后注意事项 ##
+每一个词库文件必须按行排序（准确的说，是按每一行的拼音code排序），
 因为`Chinese-pyim` 寻找词条时，使用二分法来优化速度，而二分法工作的前提
 就是对文件按行排序。具体细节请参考：`pyim-bisearch-word` 。
 所以，当词库排序不正确时（比如：用户手动调整词库文件后），记得运行函数
