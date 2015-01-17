@@ -573,7 +573,7 @@ If you don't like this funciton, set the variable to nil")
       (add-to-list 'pyim-dicts dict t))
     ;; 将`pyim-dict'的设置保存到emacs配置文件中。
     (customize-save-variable 'pyim-dicts pyim-dicts)
-    (message "添加并保存 Chinese-pyim 输入法词库: (%s)，重启 emacs 后生效！" name)))
+    (message "添加并保存 Chinese-pyim 输入法词库: (%s)，运行 `pyim-restart' 命令或者重启 emacs 后生效！" name)))
 
 (defun pyim-show-help (string)
   "显示 Chinese-pyim 帮助信息，让用户快速的了解如何安装词库。"
