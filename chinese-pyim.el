@@ -564,7 +564,10 @@ If you don't like this funciton, set the variable to nil")
   (let (dict name file coding first-used)
     (setq name (read-from-minibuffer "请输入词库名称： "))
     (setq file (read-file-name "请选择词库文件： " "~/"))
-    (setq coding (completing-read "词库文件编码: " '("utf-8-unix" "cjk-dos")))
+    (setq coding (completing-read "词库文件编码: "
+                                  '("cjk-dos" "gb18030-dos") nil t nil nil "utf-8-unix"))
+    (unless (> (length coding))
+      (setq coding "utf-8-unix"))
     (setq first-used  (yes-or-no-p "是否让 Chinese-pyim 优先使用词库？ "))
     (setq dict `(:name ,name :file ,file :coding ,(intern coding)))
     (if first-used
