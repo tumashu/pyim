@@ -1860,13 +1860,12 @@ Return the input string."
     (pyim-show-help
      "将一篇中文文章转换为 Chinese-pyim 可以识别的拼音词库。
 1. 准备材料：准备好所需要的中文文章，比如：一本网络小说，将其转换为文本文件。
-2. 预处理：  打开文本文件，将文本文件另存为 UTF-8 格式。
-3. 分词处理：使用分词工具将上述文件中的中文词语用空格分开，这里只介绍（jieba）结巴分词工具。
+2. 分词处理：使用分词工具将上述文件中的中文词语用空格分开，这里只介绍（jieba）结巴分词工具。
    1. 安装教程请参考： https://github.com/fxsjy/jieba
-   2. 使用命令： python -m jieba -d \"  \" 源文件.txt  > 目标文件.txt
+   2. 使用命令： python -m jieba -d \" \" 源文件.txt  > 目标文件.txt
    3. 命令帮助： python -m jieba --help
-4. 添加拼音：使用 emacs 打开 “目标文件.txt”，然后运行命令：M-x pyim-build-dict-from-chinese-word
-5. 保存文件
+3. 添加拼音：使用 emacs 打开 “目标文件.txt”，然后运行命令：M-x pyim-build-dict-from-chinese-word
+4. 保存文件
 
 另外，使用分词工具的目的是确保中文词语与词语之间用 *空格* 强制隔开。比如：
 
