@@ -1874,83 +1874,86 @@ Return the input string."
 分词这个步骤不是必须步骤，如果你获得的文件已经满足上述条件，那么直接运行当前命令就可以了。
 
 注意事项：当文件很大时，这个命令需要执行较长时间，据估计：生成5万词条的词库大约需要15分钟。"))
-  (when (and (yes-or-no-p "您上述准备工作是否已经完成？如果完成，请输入 yes 继续执行命令："))
-    ;; 删除所有英文单词以及标点符号。
-    (goto-char (point-min))
-    (while (re-search-forward "[[:punct:]a-zA-Z0-9]+" nil t)
-      (replace-match "\n"))
-    ;; 当 `accuracy' 为 nil 时，`pyim-article2dict' 会将连续出现的
-    ;; 单个汉字字符合并成汉字字符串，比如： “哪  狗  天” 会被转换
-    ;; 为 “哪狗天”。增加词条量的同时也会产生许多无意义的词汇。
-    (cond ((eq object 'chars)
-           (goto-char (point-min))
-           (while (re-search-forward "\\cc\\cc+" nil t)
-             (replace-match ""))
-           ;; 将词条使用换行符隔开。
-           (goto-char (point-min))
-           (while (re-search-forward "[[:blank:]]+" nil t)
-             (replace-match "\n")))
-          ((eq object 'words)
-           (goto-char (point-min))
-           ;; 删除所有单个汉字字符，单个汉字字符的拼音词库非常容易获得。
-           ;; 将其删除后，将极大的减少词库转换时间。
-           (while (re-search-forward "\\CC\\cc\\CC" nil t)
-             (replace-match "\n"))
-           ;; 将词条使用换行符隔开。
-           (goto-char (point-min))
-           (while (re-search-forward "[[:blank:]]+" nil t)
-             (replace-match "\n"))
-           (goto-char (point-min))
-           (while (re-search-forward "\n\\cc\n" nil t)
-             (replace-match "\n")))
-          ((eq object 'misspell-words)
-           (goto-char (point-min))
-           ;; 删除现有词条，只保留单个汉语字符，将单个的汉语字符
-           ;; 组成字符串后，有可能得到新的词语，虽然这些词语可能
-           ;; 没有实际意义，但可以提升拼音输入法的体验。
-           (while (re-search-forward "\\cc\\cc+" nil t)
-             (replace-match "\n"))
-           (goto-char (point-min))
-           (while (re-search-forward "[[:blank:]]+" nil t)
-             (replace-match ""))
-           (goto-char (point-min))
-           (while (re-search-forward "[[:blank:]\n]+\\cc[[:blank:]\n]+" nil t)
-             (replace-match ""))
-           (goto-char (point-min))
-           ;; 删除大于4个字符的中文字符串，没什么用处。
-           (while (re-search-forward "\\cc\\{5,\\}" nil t)
-             (replace-match "\n"))))
-    ;; 删除多余空白行。
-    (goto-char (point-min))
-    (while (re-search-forward "\n+" nil t)
-      (replace-match "\n"))
-    ;; `pyim-article2dict' 处理大文件时运行时间很长
-    ;; 分阶段保存内容可以防止数据丢失。
-    (pyim-article2dict-write-stage-file "CleanStage-" t)
-    ;; 为每一行的词条添加拼音code
-    (goto-char (point-min))
-    (while (not (eobp))
-      (pyim-convert-current-line-to-dict-format)
-      (forward-line 1))
-    (pyim-article2dict-write-stage-file "ConvertStage-" t)
-    ;; 将文件按行排序，并删除重复的词条，运行两次。
-    (pyim-update-dict-file t t)
-    (pyim-article2dict-write-stage-file "SortStage-" t)
-    (pyim-update-dict-file t t)
-    (pyim-article2dict-write-stage-file "FinishStage-" t)))
+  (when (yes-or-no-p "您上述准备工作是否已经完成？如果完成，请输入 yes 继续执行命令：")
+    (let ((file (read-file-name "请选择需要转换的文本文件：")))
+      (with-temp-buffer
+        (insert-file-contents file)
+        ;; 删除所有英文单词以及标点符号。
+        (goto-char (point-min))
+        (while (re-search-forward "[[:punct:]a-zA-Z0-9]+" nil t)
+          (replace-match "\n"))
+        ;; 当 `accuracy' 为 nil 时，`pyim-article2dict' 会将连续出现的
+        ;; 单个汉字字符合并成汉字字符串，比如： “哪  狗  天” 会被转换
+        ;; 为 “哪狗天”。增加词条量的同时也会产生许多无意义的词汇。
+        (cond ((eq object 'chars)
+               (goto-char (point-min))
+               (while (re-search-forward "\\cc\\cc+" nil t)
+                 (replace-match ""))
+               ;; 将词条使用换行符隔开。
+               (goto-char (point-min))
+               (while (re-search-forward "[[:blank:]]+" nil t)
+                 (replace-match "\n")))
+              ((eq object 'words)
+               (goto-char (point-min))
+               ;; 删除所有单个汉字字符，单个汉字字符的拼音词库非常容易获得。
+               ;; 将其删除后，将极大的减少词库转换时间。
+               (while (re-search-forward "\\CC\\cc\\CC" nil t)
+                 (replace-match "\n"))
+               ;; 将词条使用换行符隔开。
+               (goto-char (point-min))
+               (while (re-search-forward "[[:blank:]]+" nil t)
+                 (replace-match "\n"))
+               (goto-char (point-min))
+               (while (re-search-forward "\n\\cc\n" nil t)
+                 (replace-match "\n")))
+              ((eq object 'misspell-words)
+               (goto-char (point-min))
+               ;; 删除现有词条，只保留单个汉语字符，将单个的汉语字符
+               ;; 组成字符串后，有可能得到新的词语，虽然这些词语可能
+               ;; 没有实际意义，但可以提升拼音输入法的体验。
+               (while (re-search-forward "\\cc\\cc+" nil t)
+                 (replace-match "\n"))
+               (goto-char (point-min))
+               (while (re-search-forward "[[:blank:]]+" nil t)
+                 (replace-match ""))
+               (goto-char (point-min))
+               (while (re-search-forward "[[:blank:]\n]+\\cc[[:blank:]\n]+" nil t)
+                 (replace-match ""))
+               (goto-char (point-min))
+               ;; 删除大于4个字符的中文字符串，没什么用处。
+               (while (re-search-forward "\\cc\\{5,\\}" nil t)
+                 (replace-match "\n"))))
+        ;; 删除多余空白行。
+        (goto-char (point-min))
+        (while (re-search-forward "\n+" nil t)
+          (replace-match "\n"))
+        ;; `pyim-article2dict' 处理大文件时运行时间很长
+        ;; 分阶段保存内容可以防止数据丢失。
+        (pyim-article2dict-write-stage-file file "CleanStage-" t)
+        ;; 为每一行的词条添加拼音code
+        (goto-char (point-min))
+        (while (not (eobp))
+          (pyim-convert-current-line-to-dict-format)
+          (forward-line 1))
+        (pyim-article2dict-write-stage-file file "ConvertStage-" t)
+        ;; 将文件按行排序，并删除重复的词条，运行两次。
+        (pyim-update-dict-file t t)
+        (pyim-article2dict-write-stage-file file "SortStage-" t)
+        (pyim-update-dict-file t t)
+        (pyim-article2dict-write-stage-file file "FinishStage-" t)))))
 
-(defun pyim-article2dict-write-stage-file (stage force)
+(defun pyim-article2dict-write-stage-file (file stage force)
   "将当前 buffer 的内容另存为一个 stage 文件。
 用于 `pyim-article2dict' 分阶段保存内容。"
-  (let (current-file file-stage)
-    (setq current-file (buffer-file-name))
-    (when (and current-file force)
+  (let ((file (expand-file-name file))
+        stage-file)
+    (when (and file stage force)
       (setq stage-file
-            (concat (file-name-directory current-file)
+            (concat (file-name-directory file)
                     (make-temp-name stage) "-"
-                    (file-name-nondirectory current-file)))
+                    (file-name-nondirectory file)))
       (write-region (point-min) (point-max) stage-file)
-      (message "将当前 buffer 的内容另存为文件：%s" stage-file))))
+      (message "将此阶段转换的结果另存为文件：%s" stage-file))))
 
 (defun pyim-company-complete ()
   "用于补全联想词的命令。"
