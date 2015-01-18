@@ -1878,7 +1878,7 @@ Return the input string."
     ;; 删除所有英文单词以及标点符号。
     (goto-char (point-min))
     (while (re-search-forward "[[:punct:]a-zA-Z0-9]+" nil t)
-      (replace-match " "))
+      (replace-match "\n"))
     ;; 当 `accuracy' 为 nil 时，`pyim-article2dict' 会将连续出现的
     ;; 单个汉字字符合并成汉字字符串，比如： “哪  狗  天” 会被转换
     ;; 为 “哪狗天”。增加词条量的同时也会产生许多无意义的词汇。
