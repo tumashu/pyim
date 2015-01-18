@@ -186,13 +186,13 @@ C-h v pyim-dicts
 
 `Chinese-pyim` 增加了两个 `company-mode` 补全后端来实现 *联想词* 输入功能：
 
-1. `pyim-company-dabbrev` 时 `company-dabbrev` 的扩展，适用于补全其它 buffer 中的中文词语。
-2. `pyim-company-predict-words` 从 Chinese-pyim 词库中搜索与当前中文词条相近的词条。
+1. `pyim-company-dabbrev` 是 `company-dabbrev` 的中文优化版，适用于补全其它 buffer 中的中文词语。
+2. `pyim-company-predict-words` 可以从 Chinese-pyim 词库中搜索与当前中文词条相近的词条。
 
 安装和使用方式：
 
-1. 安装 `company-mode` package。
-2. 在emacs配置中添加一行：
+1. 安装 `company-mode` 扩展包。
+2. 在 emacs 配置中添加如下几行代码：
 ```lisp
 (require 'chinese-pyim-company)
 ;; ;; 输入2个中文字符开始补全。
