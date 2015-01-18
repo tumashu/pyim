@@ -345,7 +345,7 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
   :type 'function)
 
 (defcustom pyim-predict-words-number 0
-  "设置获取多少个联想词条，如果设置为 nil
+  "设置最多可以搜索多少个联想词条，如果设置为 nil
 或者 0 时，关闭联想功能。"
   :group 'chinese-pyim
   :type 'number)
@@ -1300,37 +1300,8 @@ beginning of line"
                               (cdr
                                (pyim-bisearch-word code
                                                    (point-min)
-                                                   (point-max)))))
-          ;; 搜索拼音对应词条的同时，也搜索与拼音关联性较高的“联想词条”。
-          ;; 因为搜索较大的拼音词库时耗时较多。这样做可以减少搜索次数。
-          (when (and pyim-predict-words-number
-                     (> pyim-predict-words-number 0)
-                     ;; 联想词条时，最起码需要两个汉字。 也就是要求拼音字符串中必须包含 "-"。
-                     ;; BUG: 这种处理方式不太周全， 需要进一步优化。
-                     (string-match-p "-" code))
-            (setq pyim-current-predict-words
-                  (append (pyim-get-predict-words code)
-                          predict-words)))))
+                                                   (point-max)))))))
       (delete-dups words))))
-
-(defun pyim-get-predict-words (code)
-  "用于拼音联想输入，获取与当前拼音临近的几行中文词条，
-如果一行中有多个词条，只取第一个词条。"
-  (when (and pyim-predict-words-number
-             (> pyim-predict-words-number 0))
-    (let ((max-line pyim-predict-words-number)
-          (regexp (concat "^" (regexp-quote code)))
-          (count 0)
-          words)
-      (save-excursion
-        (forward-line 1)
-        (while (and (looking-at regexp)
-                    (< count max-line))
-          (setq words (append words
-                              (list (nth 1 (pyim-line-content)))))
-          (forward-line 1)
-          (setq count (1+ count)))
-        words))))
 
 (defun pyim-get-char-code (char)
   "Get the code of the character CHAR"
@@ -1972,6 +1943,32 @@ Return the input string."
     (ignore-case company-dabbrev-ignore-case)
     (duplicates t)))
 
+(defun pyim-get-predict-words (pinyin word)
+  "获取所有词库中以 `word' 开头的中文词条，用于拼音联想输入。
+`pinyin' 选项是为了在词库中快速定位，减少搜索时间。"
+  (when (and pyim-predict-words-number
+             (> pyim-predict-words-number 0)
+             (> (length pinyin) 0)
+             (> (length word) 0))
+    (let* ((limit pyim-predict-words-number)
+           (regexp (concat " +\\(" (regexp-quote word) "\\cc+\\)"))
+           (count 0)
+           predict-words)
+      (dolist (buf pyim-buffer-list)
+        (with-current-buffer (cdr (assoc "buffer" buf))
+          (pyim-bisearch-word pinyin (point-min) (point-max))
+          (when (string= (pyim-code-at-point) pinyin)
+            (save-excursion
+              (forward-line (- 0 limit))
+              (while (and (re-search-forward regexp nil t)
+                          (< count (* 2 limit)))
+                (setq predict-words (delete-dups
+                                     (append predict-words
+                                             (list (match-string 1)))))
+                (goto-char (match-end 0))
+                (setq count (1+ count)))))))
+      predict-words)))
+
 (defun pyim-company-predict-words (command &optional arg &rest ignore)
   "`company-mode' 补全后端，只用于 Chinese-pyim 联想词补全，无其他
 作用。"
@@ -1983,9 +1980,11 @@ Return the input string."
           ;; 光标前字符是否时汉字？
           (string-match-p "\\cc" (char-to-string (char-before)))
           (string-match-p "\\cc" pyim-current-str)
-          pyim-current-predict-words
+          pyim-current-key
           pyim-current-str))
-    (candidates pyim-current-predict-words)))
+    (candidates
+     (pyim-get-predict-words pyim-current-key
+                             pyim-current-str))))
 
 (provide 'chinese-pyim)
 
