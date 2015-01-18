@@ -1915,7 +1915,11 @@ Return the input string."
              (replace-match ""))
            (goto-char (point-min))
            (while (re-search-forward "[[:blank:]\n]+\\cc[[:blank:]\n]+" nil t)
-             (replace-match ""))))
+             (replace-match ""))
+           (goto-char (point-min))
+           ;; 删除大于4个字符的中文字符串，没什么用处。
+           (while (re-search-forward "\\cc\\{5,\\}" nil t)
+             (replace-match "\n"))))
     ;; 删除多余空白行。
     (goto-char (point-min))
     (while (re-search-forward "\n+" nil t)
