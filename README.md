@@ -104,8 +104,9 @@ https://github.com/tumashu/chinese-pyim-bigdict/blob/master/pyim-bigdict.txt?raw
 
 Chinese-pyim 下面两个命令可以为中文词条添加拼音Code，从而生成可用词库：
 
-1. `pyim-article2dict-accuracy` （建议普通用户使用）
-2. `pyim-article2dict-radical`  （造词方式非常激进，不建议普通用户使用）
+1. `pyim-article2dict-chars` 将文章中游离汉字字符转换为拼音词库。
+2. `pyim-article2dict-words` 将文章中中文词语转换为拼音词库。
+3. `pyim-article2dict-misspell-words` 将文章中连续的游离词组成字符串后，转换为拼音词库。
 
 注意：在运行上述两个命令之前，必须确保待转换的文章中，中文词汇已经使
 用 *空格* 强制隔开。

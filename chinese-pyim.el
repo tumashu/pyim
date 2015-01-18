@@ -126,8 +126,9 @@
 ;;
 ;; Chinese-pyim 下面两个命令可以为中文词条添加拼音Code，从而生成可用词库：
 ;;
-;; 1. `pyim-article2dict-accuracy' （建议普通用户使用）
-;; 2. `pyim-article2dict-radical'  （造词方式非常激进，不建议普通用户使用）
+;; 1. `pyim-article2dict-chars' 将文章中游离汉字字符转换为拼音词库。
+;; 2. `pyim-article2dict-words' 将文章中中文词语转换为拼音词库。
+;; 3. `pyim-article2dict-misspell-words' 将文章中连续的游离词组成字符串后，转换为拼音词库。
 ;;
 ;; 注意：在运行上述两个命令之前，必须确保待转换的文章中，中文词汇已经使
 ;; 用 *空格* 强制隔开。
@@ -1809,16 +1810,32 @@ Return the input string."
       (insert insert-string))))
 
 ;;;###autoload
-(defun pyim-article2dict-accuracy ()
+(defun pyim-article2dict-chars ()
   "将一篇中文文章转换为 Chinese-pyim 可以识别的拼音词库。
-这个命令不会机械的将汉字连接为词汇，所以得到的词库比较纯正。"
+这个命令只将文章中 *非词语* 中文字符转化为词库。
+
+这个命令可以得到一篇文章中常用单字词语的词频信息。"
   (interactive)
-  (pyim-article2dict-1 t))
+  (pyim-article2dict 'chars))
 
 ;;;###autoload
-(defun pyim-article2dict-radical ()
+(defun pyim-article2dict-words ()
   "将一篇中文文章转换为 Chinese-pyim 可以识别的拼音词库。
-会将连续出现的单个汉字字符合并成汉字字符串，比如：
+这个命令将文章中 *正确词语*，转化为词库。
+
+这个命令使用频率很低，原因有两点：
+1. 寻找准确的中文词条非常容易，一般不需要从一篇文章中通过分词的手段获得。
+2. 文章很大时，这个命令运行速度太慢。
+
+这个命令最大的用途就是为没有拼音的中文词库添加拼音code。"
+  (interactive)
+  (pyim-article2dict 'words))
+
+;;;###autoload
+(defun pyim-article2dict-misspell-words ()
+  "将一篇中文文章转换为 Chinese-pyim 可以识别的拼音词库。
+这个命令将文章中 *连续出现的独立汉字* 组合成中文字符串，
+然后将其转化为词库，例如：
 
    “哪  狗  天”
 
@@ -1826,13 +1843,13 @@ Return the input string."
 
    “哪狗天”
 
-这种方式增加词条量的同时也可能会产生许多无意义的词汇，
-得到的词库不会很纯正，但词汇更丰富。"
+有一句话说：“对的都一样，错的万万千”，对用户来说，这个命令可能
+最有用处，它可以增加许多新词，也许这些新词毫无意义，但其代表了一种
+输入习惯，可以提高输入体验。"
   (interactive)
-  (when (yes-or-no-p "这个命令不适合普通用户，是否继续？ ")
-    (pyim-article2dict-1 nil)))
+  (pyim-article2dict 'misspell-words))
 
-(defun pyim-article2dict-1 (accuracy)
+(defun pyim-article2dict (object)
   "将一篇中文文章转换为 Chinese-pyim 可以识别的拼音词库。
 其步骤为：
 1. 清除所有非汉语内容。
@@ -1862,33 +1879,49 @@ Return the input string."
     ;; 删除所有英文单词以及标点符号。
     (goto-char (point-min))
     (while (re-search-forward "[[:punct:]a-zA-Z0-9]+" nil t)
-      (replace-match ""))
+      (replace-match " "))
     ;; 当 `accuracy' 为 nil 时，`pyim-article2dict' 会将连续出现的
     ;; 单个汉字字符合并成汉字字符串，比如： “哪  狗  天” 会被转换
     ;; 为 “哪狗天”。增加词条量的同时也会产生许多无意义的词汇。
-    (if accuracy
-        (progn (goto-char (point-min))
-               (while (re-search-forward "[[:blank:]]+" nil t)
-                 (replace-match "\n")))
-      ;; 保护已经分开的词条。
-      (goto-char (point-min))
-      (while (re-search-forward "\\(\\cc\\cc+\\)" nil t)
-        (replace-match "@@\\1@@"))
-      ;; 删除所有的空白字符，这样做的目的是将单个的汉字
-      ;; 尽可能合并成汉字字符串，虽然这个字符串可能没有实际意义，
-      ;; 但比单个汉字更有用处。
-      (goto-char (point-min))
-      (while (re-search-forward "[[:blank:]]+" nil t)
-        (replace-match ""))
-      ;; 解除前面对词条的保护。
-      (goto-char (point-min))
-      (while (re-search-forward "@@+" nil t)
-        (replace-match "\n")))
+    (cond ((eq object 'chars)
+           (goto-char (point-min))
+           (while (re-search-forward "\\cc\\cc+" nil t)
+             (replace-match ""))
+           ;; 将词条使用换行符隔开。
+           (goto-char (point-min))
+           (while (re-search-forward "[[:blank:]]+" nil t)
+             (replace-match "\n")))
+          ((eq object 'words)
+           (goto-char (point-min))
+           ;; 删除所有单个汉字字符，单个汉字字符的拼音词库非常容易获得。
+           ;; 将其删除后，将极大的减少词库转换时间。
+           (while (re-search-forward "\\CC\\cc\\CC" nil t)
+             (replace-match "\n"))
+           ;; 将词条使用换行符隔开。
+           (goto-char (point-min))
+           (while (re-search-forward "[[:blank:]]+" nil t)
+             (replace-match "\n"))
+           (goto-char (point-min))
+           (while (re-search-forward "\n\\cc\n" nil t)
+             (replace-match "\n")))
+          ((eq object 'misspell-words)
+           (goto-char (point-min))
+           ;; 删除现有词条，只保留单个汉语字符，将单个的汉语字符
+           ;; 组成字符串后，有可能得到新的词语，虽然这些词语可能
+           ;; 没有实际意义，但可以提升拼音输入法的体验。
+           (while (re-search-forward "\\cc\\cc+" nil t)
+             (replace-match "\n"))
+           (goto-char (point-min))
+           (while (re-search-forward "[[:blank:]]+" nil t)
+             (replace-match ""))
+           (goto-char (point-min))
+           (while (re-search-forward "[[:blank:]\n]+\\cc[[:blank:]\n]+" nil t)
+             (replace-match ""))))
     ;; 删除多余空白行。
     (goto-char (point-min))
     (while (re-search-forward "\n+" nil t)
       (replace-match "\n"))
-    ;; `pyim-article2dict-1' 处理大文件时运行时间很长
+    ;; `pyim-article2dict' 处理大文件时运行时间很长
     ;; 分阶段保存内容可以防止数据丢失。
     (pyim-article2dict-write-stage-file "CleanStage-" t)
     ;; 为每一行的词条添加拼音code
@@ -1905,7 +1938,7 @@ Return the input string."
 
 (defun pyim-article2dict-write-stage-file (stage force)
   "将当前 buffer 的内容另存为一个 stage 文件。
-用于 `pyim-article2dict-1' 分阶段保存内容。"
+用于 `pyim-article2dict' 分阶段保存内容。"
   (let (current-file file-stage)
     (setq current-file (buffer-file-name))
     (when (and current-file force)
