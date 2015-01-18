@@ -1888,14 +1888,33 @@ Return the input string."
     (goto-char (point-min))
     (while (re-search-forward "\n+" nil t)
       (replace-match "\n"))
+    ;; `pyim-article2dict-1' 处理大文件时运行时间很长
+    ;; 分阶段保存内容可以防止数据丢失。
+    (pyim-article2dict-write-stage-file "CleanStage-" t)
     ;; 为每一行的词条添加拼音code
     (goto-char (point-min))
     (while (not (eobp))
       (pyim-convert-current-line-to-dict-format)
       (forward-line 1))
+    (pyim-article2dict-write-stage-file "ConvertStage-" t)
     ;; 将文件按行排序，并删除重复的词条，运行两次。
     (pyim-update-dict-file t t)
-    (pyim-update-dict-file t t)))
+    (pyim-article2dict-write-stage-file "SortStage-" t)
+    (pyim-update-dict-file t t)
+    (pyim-article2dict-write-stage-file "FinishStage-" t)))
+
+(defun pyim-article2dict-write-stage-file (stage force)
+  "将当前 buffer 的内容另存为一个 stage 文件。
+用于 `pyim-article2dict-1' 分阶段保存内容。"
+  (let (current-file file-stage)
+    (setq current-file (buffer-file-name))
+    (when (and current-file force)
+      (setq stage-file
+            (concat (file-name-directory current-file)
+                    (make-temp-name stage) "-"
+                    (file-name-nondirectory current-file)))
+      (write-region (point-min) (point-max) stage-file)
+      (message "将当前 buffer 的内容另存为文件：%s" stage-file))))
 
 (defun pyim-company-complete ()
   "用于补全联想词的命令。"
