@@ -2015,16 +2015,15 @@ Return the input string."
       (dolist (buf pyim-buffer-list)
         (with-current-buffer (cdr (assoc "buffer" buf))
           (pyim-bisearch-word pinyin (point-min) (point-max))
-          (when (string= (pyim-code-at-point) pinyin)
-            (save-excursion
-              (forward-line (- 0 limit))
-              (while (and (re-search-forward regexp nil t)
-                          (< count (* 2 limit)))
-                (setq predict-words (delete-dups
-                                     (append predict-words
-                                             (list (match-string 1)))))
-                (goto-char (match-end 0))
-                (setq count (1+ count)))))))
+          (save-excursion
+            (forward-line (- 0 limit))
+            (while (and (re-search-forward regexp nil t)
+                        (< count (* 2 limit)))
+              (setq predict-words (delete-dups
+                                   (append predict-words
+                                           (list (match-string 1)))))
+              (goto-char (match-end 0))
+              (setq count (1+ count))))))
       predict-words)))
 
 (defun pyim-company-predict-words (command &optional arg &rest ignore)
