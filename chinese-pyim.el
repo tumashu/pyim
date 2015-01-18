@@ -204,30 +204,24 @@
 ;;   (pyim-restart-1 t))
 ;; ```
 ;;
-;; ## Chinese-pyim 与 Company-mode 配合用于补全中文 ##
+;; ## Chinese-pyim 开启联想词输入模式 ##
 ;;
-;; 由于中文不强制分词（英文用空格分词），所以 `company-mode' 自带的补全后端在补全中文时特别
-;; 难用。Chinese-pyim 自带了两个 Company 补全后端，补全中文比较好使。
+;; `Chinese-pyim' 增加了两个 `company-mode' 补全后端来实现 *联想词* 输入功能：
 ;;
-;; 1. `pyim-company-dabbrev' 与 `company-dabbrev' 功能类似，用于补全其它 buffer 中的中文词语。
-;; 2. `pyim-company-predict-words' 专门用于 Chinese-pyim 联想词的输入。
+;; 1. `pyim-company-dabbrev' 时 `company-dabbrev' 的扩展，适用于补全其它 buffer 中的中文词语。
+;; 2. `pyim-company-predict-words' 从 Chinese-pyim 词库中搜索与当前中文词条相近的词条。
 ;;
-;; 注意：与 Chinese-pyim 配合使用时，`company-mode' 需要做以下配置：
+;; 安装和使用方式：
+;;
+;; 1. 安装 `company-mode' package。
+;; 2. 在emacs配置中添加一行：
 ;; ```lisp
-;; (require 'company)
-;; (require 'company-dabbrev)
-;; ;; 加快 Company 菜单弹出速度。
-;; (setq company-idle-delay 0.1)
-;; ;; 两个字符开始补全，与 Chinese-pyim 配合
-;; ;; 使用时这个选项必须开启。
-;; (setq company-minimum-prefix-length 2)
-;; (setq company-require-match nil)
-;; (setq company-selection-wrap-around t)
-;; (setq company-dabbrev-downcase nil)
-;; (setq company-dabbrev-ignore-case nil)
+;; (require 'chinese-pyim-company)
+;; ;; ;; 输入2个中文字符开始补全。
+;; ;; (setq pyim-company-minimum-prefix-length 2)
+;; ;; ;; 从词库中搜索10个联想词。
+;; ;; (setq pyim-company-predict-words-number 10)
 ;; ```
-;; 当然，`auto-complete' 也可以使用类似的方式实现上述功能，
-;; 这里就不详细说明了，有兴趣的同学自己折腾吧。
 
 ;;; Code:
 (require 'cl-lib)
@@ -345,13 +339,7 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
   :group 'chinese-pyim
   :type 'function)
 
-(defcustom pyim-predict-words-number 0
-  "设置最多可以搜索多少个联想词条，如果设置为 nil
-或者 0 时，关闭联想功能。"
-  :group 'chinese-pyim
-  :type 'number)
-
-(defcustom pyim-select-word-finish-hook 'pyim-company-complete
+(defcustom pyim-select-word-finish-hook nil
   "Chinese-pyim 选词完成时运行的hook，
 
 Chinese-pyim 使用这个 hook 处理联想词，用户可以使用
@@ -1954,94 +1942,6 @@ Return the input string."
                     (file-name-nondirectory file)))
       (write-region (point-min) (point-max) stage-file)
       (message "将此阶段转换的结果另存为文件：%s" stage-file))))
-
-(defun pyim-company-complete ()
-  "用于补全联想词的命令。"
-  (interactive)
-  (when (featurep 'company)
-    (unless company-mode
-      (company-mode))
-    (let ((backends '(pyim-company-predict-words pyim-company-dabbrev)))
-      (unless (member backends company-backends)
-        (add-to-list 'company-backends backends))
-      (company-manual-begin))))
-
-(defun pyim-company-dabbrev (command &optional arg &rest ignored)
-  "`company-mode' dabbrev 补全后端，是 `company-dabbrev'
-(包含在 `company-mode'中) 的衍生版本，通过与 Chinese-pyim 配合
-来补全中文（忽略非中文）。
-
-`pyim-company-dabbrev' 可以和 `company-dabbrev' 配合使用。具体细节请
-参考 Company-mode group backends 相关文档。"
-  (interactive (list 'interactive))
-  (cl-case command
-    (interactive (company-begin-backend 'pyim-company-dabbrev))
-    (prefix
-     (and (featurep 'chinese-pyim)
-          ;; 光标前字符是否时汉字？
-          (string-match-p "\\cc" (char-to-string (char-before)))
-          (string-match-p "\\cc" pyim-current-str)
-           pyim-current-str))
-    (candidates
-     (let* ((case-fold-search company-dabbrev-ignore-case)
-            (words (company-dabbrev--search
-                    ;; 最多补全六个中文字符，得到太长的中文字符串用处不大。
-                    (format "%s[^[:punct:][:blank:]\n]\\{1,6\\}" arg)
-                    company-dabbrev-time-limit
-                    (pcase company-dabbrev-other-buffers
-                      (`t (list major-mode))
-                      (`all `all))))
-            (downcase-p
-             (if (eq company-dabbrev-downcase 'case-replace)
-                 case-replace
-               company-dabbrev-downcase)))
-       (if downcase-p
-           (mapcar 'downcase words)
-         words)))
-    (ignore-case company-dabbrev-ignore-case)
-    (duplicates t)))
-
-(defun pyim-get-predict-words (pinyin word)
-  "获取所有词库中以 `word' 开头的中文词条，用于拼音联想输入。
-`pinyin' 选项是为了在词库中快速定位，减少搜索时间。"
-  (when (and pyim-predict-words-number
-             (> pyim-predict-words-number 0)
-             (> (length pinyin) 0)
-             (> (length word) 0))
-    (let* ((limit pyim-predict-words-number)
-           (regexp (concat " +\\(" (regexp-quote word) "\\cc+\\)"))
-           (count 0)
-           predict-words)
-      (dolist (buf pyim-buffer-list)
-        (with-current-buffer (cdr (assoc "buffer" buf))
-          (pyim-bisearch-word pinyin (point-min) (point-max))
-          (save-excursion
-            (forward-line (- 0 limit))
-            (while (and (re-search-forward regexp nil t)
-                        (< count (* 2 limit)))
-              (setq predict-words (delete-dups
-                                   (append predict-words
-                                           (list (match-string 1)))))
-              (goto-char (match-end 0))
-              (setq count (1+ count))))))
-      predict-words)))
-
-(defun pyim-company-predict-words (command &optional arg &rest ignore)
-  "`company-mode' 补全后端，只用于 Chinese-pyim 联想词补全，无其他
-作用。"
-  (interactive (list 'interactive))
-  (cl-case command
-    (interactive (company-begin-backend 'pyim-company-backend))
-    (prefix
-     (and (featurep 'chinese-pyim)
-          ;; 光标前字符是否时汉字？
-          (string-match-p "\\cc" (char-to-string (char-before)))
-          (string-match-p "\\cc" pyim-current-str)
-          pyim-current-key
-          pyim-current-str))
-    (candidates
-     (pyim-get-predict-words pyim-current-key
-                             pyim-current-str))))
 
 (provide 'chinese-pyim)
 

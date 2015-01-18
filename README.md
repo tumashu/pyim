@@ -182,30 +182,24 @@ C-h v pyim-dicts
   (pyim-restart-1 t))
 ```
 
-## Chinese-pyim 与 Company-mode 配合用于补全中文 ##
+## Chinese-pyim 开启联想词输入模式 ##
 
-由于中文不强制分词（英文用空格分词），所以 `company-mode` 自带的补全后端在补全中文时特别
-难用。Chinese-pyim 自带了两个 Company 补全后端，补全中文比较好使。
+`Chinese-pyim` 增加了两个 `company-mode` 补全后端来实现 *联想词* 输入功能：
 
-1. `pyim-company-dabbrev` 与 `company-dabbrev` 功能类似，用于补全其它 buffer 中的中文词语。
-2. `pyim-company-predict-words` 专门用于 Chinese-pyim 联想词的输入。
+1. `pyim-company-dabbrev` 时 `company-dabbrev` 的扩展，适用于补全其它 buffer 中的中文词语。
+2. `pyim-company-predict-words` 从 Chinese-pyim 词库中搜索与当前中文词条相近的词条。
 
-注意：与 Chinese-pyim 配合使用时，`company-mode` 需要做以下配置：
+安装和使用方式：
+
+1. 安装 `company-mode` package。
+2. 在emacs配置中添加一行：
 ```lisp
-(require 'company)
-(require 'company-dabbrev)
-;; 加快 Company 菜单弹出速度。
-(setq company-idle-delay 0.1)
-;; 两个字符开始补全，与 Chinese-pyim 配合
-;; 使用时这个选项必须开启。
-(setq company-minimum-prefix-length 2)
-(setq company-require-match nil)
-(setq company-selection-wrap-around t)
-(setq company-dabbrev-downcase nil)
-(setq company-dabbrev-ignore-case nil)
+(require 'chinese-pyim-company)
+;; ;; 输入2个中文字符开始补全。
+;; (setq pyim-company-minimum-prefix-length 2)
+;; ;; 从词库中搜索10个联想词。
+;; (setq pyim-company-predict-words-number 10)
 ```
-当然，`auto-complete` 也可以使用类似的方式实现上述功能，
-这里就不详细说明了，有兴趣的同学自己折腾吧。
 
 
 ---
