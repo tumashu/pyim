@@ -220,6 +220,13 @@
 ;; ;; ;; 从词库中搜索10个联想词。
 ;; ;; (setq pyim-company-predict-words-number 10)
 ;; ```
+;; ## 如何手动加入新词 ##
+;;
+;; 1. `pyim-create-word-without-pinyin' 用于编程环境，直接将一个中文词条加入个人词库。
+;; 2. `pyim-create-word-at-point' 如果用户已经高亮选择了某个中文字符串，那么这个命令直接将这个字符串加入个人词库。
+;;     否则，这个命令会提取光标前2个汉字和3个汉字，共组成2个中文字符串，并将这两个字符串加入个人词库。建议用户
+;;     可以将其绑定到某个快捷键上。
+;;
 
 ;;; Code:
 (require 'cl-lib)
@@ -1128,7 +1135,7 @@ beginning of line"
         (cons (substring fullpy 1)
               (substring abbpy 1))))))
 
-(defun pyim-intern-word (word py)
+(defun pyim-intern-word (word py &optional append)
   "这个函数用于保存用户词频，将参数拼音 `py' 对应的中文词条 `word'
 保存到 personal-file 对应的 buffer。"
   (let((buf (cdr (assoc "buffer" (car pyim-buffer-list))))
@@ -1137,9 +1144,13 @@ beginning of line"
       (pyim-bisearch-word py (point-min) (point-max))
       (if (string= (pyim-code-at-point) py)
           (progn
-            (setq words (pyim-line-content)
-                  words (cons (car words) (delete-dups (append (list word)
-                                                               (cdr words)))))
+            (setq words (pyim-line-content))
+            (setq words
+                  (cons (car words)
+                        (delete-dups
+                         (if append
+                             (append (cdr words)(list word))
+                           (append (list word) (cdr words))))))
             ;; (message "delete: %s" words))
             (pyim-delete-line))
         (forward-line 1)
@@ -1154,6 +1165,43 @@ beginning of line"
     (when py
       (pyim-intern-word word (car py))
       (pyim-intern-word word (cdr py)))))
+
+(defun pyim-create-word-without-pinyin (word)
+  "将中文词条 `word' 添加拼音后，保存到 personal-file 对应的
+buffer中，当前词条追加到已有词条之后。"
+  (mapc (lambda (py)
+          (unless (string-match-p "[^ a-z-]" py)
+            (pyim-intern-word word py t)))
+        (pyim-hanzi2pinyin word nil "-" t)))
+
+(defun pyim-chinese-string-at-point ()
+  "获取光标前可能的中文词条(两个字或者三个字的字符串)。
+BUG: 这个处理方式有点hack，会产生许多无意义的词条"
+  (save-excursion
+    (let* ((point (point))
+           (begin (- point 3))
+           (begin (if (> begin 0)
+                      begin
+                    (point-min)))
+           (string (buffer-substring-no-properties
+                    point begin)))
+      (mapcar (lambda (n)
+                (let ((str (unless (< (length string) (* -1 n))
+                             (substring string n))))
+                  (unless (and str (string-match-p "\\CC" str)) str)))
+              '(-2 -3)))))
+
+(defun pyim-create-word-at-point ()
+  "将光标当前的中文词语添加到个人词库中"
+  (interactive)
+  (let* ((words (if mark-active
+                    (list (buffer-substring-no-properties
+                           (region-beginning) (region-end)))
+                  (pyim-chinese-string-at-point))))
+    (dolist (word words)
+      (when (and word (> (length word) 1))
+        (pyim-create-word-without-pinyin word)
+        (message "将词条: \"%s\" 插入 personal file。" word)))))
 
 (defun pyim-rearrange (word pylist)
   ;; (message "rearrage: %s, %s" word pylist)
