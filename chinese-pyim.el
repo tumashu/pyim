@@ -1229,7 +1229,7 @@ BUG: 这个处理方式有点hack，会产生许多无意义的词条"
       (when (and string (> (length string) 1))
         (pyim-create-word-without-pinyin string)
         (unless silent
-          (message "将词条: \"%s\" 插入 personal file。" word))))))
+          (message "将词条: \"%s\" 插入 personal file。" string))))))
 
 (defun pyim-create-word-from-region ()
   "将高亮选择的字符串添加到个人词库，如果当前没有选择任何
