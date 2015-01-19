@@ -225,7 +225,7 @@
 ;; 1. `pyim-create-word-without-pinyin' 直接将一个中文词条加入个人词库的函数，用于编程环境。
 ;; 2. `pyim-create-word-at-point' 这个命令会提取光标前2个汉字和3个汉字，然后组成两个中文字符串，
 ;;     并将这两个字符串一同加入个人词库。
-;; 3  `pyim-create-word-from-region' 如果用户已经高亮选择了某个中文字符串，那么这个命令直接
+;; 3. `pyim-create-word-from-region' 如果用户已经高亮选择了某个中文字符串，那么这个命令直接
 ;;     将这个字符串加入个人词库，否则，这个命令会高亮选择光标前两个汉字字符，等待用户调整选区。
 ;;     建议用户为其设定一个快捷键。
 ;; 4. `pyim-automatic-generate-word' 将此选项设置为 t 时，Chinese-pyim 开启自动组词功能。
