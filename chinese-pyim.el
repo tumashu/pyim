@@ -176,7 +176,7 @@
 ;; ## 如何快速切换全角标点与半角标点 ##
 ;; 1. 第一种方法：使用命令 `pyim-toggle-full-width-punctuation'，全局切换。
 ;; 2. 第二种方法：使用命令 `pyim-punctuation-translate-at-point' 只切换光标处标点的样式。
-;; 3. 第三种方法：设置变量 `pyim-punctuation-translate-char'。输入变量设定的字符会切换光标处标点的样式。
+;; 3. 第三种方法：设置变量 `pyim-translate-char'。输入变量设定的字符会切换光标处标点的样式。
 ;;
 ;; ## 了解 Chinese-pyim 个人词频文件设置的细节 ##
 ;;```
@@ -223,14 +223,16 @@
 ;; ## 如何手动加词和删词 ##
 ;;
 ;; 1. `pyim-create-word-without-pinyin' 直接将一个中文词条加入个人词库的函数，用于编程环境。
-;; 2. `pyim-create-word-at-point' 这个命令会提取光标前2个汉字和3个汉字，然后组成两个中文字符串，
-;;     并将这两个字符串一同加入个人词库。
+;; 2. `pyim-create-word-at-point:<N>char' 这是一组命令，从光标前提取N个汉字字符组成字符串，
+;;     并将其加入个人词库。
 ;; 3. `pyim-create-word-from-region' 如果用户已经高亮选择了某个中文字符串，那么这个命令直接
 ;;     将这个字符串加入个人词库，否则，这个命令会高亮选择光标前两个汉字字符，等待用户调整选区。
 ;;     建议用户为其设定一个快捷键。
-;; 4. `pyim-automatic-generate-word' 将此选项设置为 t 时，Chinese-pyim 开启自动组词功能。
+;; 4. `pyim-translate-char' 以默认设置为例：在“我爱吃红烧肉”后输入“5v” 可以将“爱吃红烧肉”
+;;     这个词条保存到用户个人文件。
+;; 5. `pyim-automatic-generate-word' 将此选项设置为 t 时，Chinese-pyim 开启自动组词功能。
 ;;     实验特性，不建议普通用户使用，
-;; 5. `pyim-delete-word-from-personal-buffer' 从个人文件对应的 buffer 中删除当前高亮选择的词条。
+;; 6. `pyim-delete-word-from-personal-buffer' 从个人文件对应的 buffer 中删除当前高亮选择的词条。
 ;;
 
 ;;; Code:
@@ -326,9 +328,11 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
   :group 'chinese-pyim
   :type 'list)
 
-(defcustom pyim-punctuation-translate-char ?v
+(defcustom pyim-translate-char ?v
   "光标前面的字符为标点符号时，按这个字符可以切换前面的标点
-符号的样式（半角/全角）"
+符号的样式（半角/全角）
+
+当光标前面为中文字符串时，输入 <num>v 可以用于保存自定义词条。"
   :group 'chinese-pyim
   :type 'character)
 
@@ -410,7 +414,7 @@ Chinese-pyim 使用这个 hook 处理联想词，用户可以使用
 (defvar pyim-active-hook nil)
 
 (defvar pyim-stop-function nil)
-(defvar pyim-translate-function 'pyim-punctuation-translate)
+(defvar pyim-translate-function 'pyim-default-translate)
 (defvar pyim-add-completion-function nil)
 (defvar pyim-format-function 'pyim-format)
 (defvar pyim-handle-function 'pyim-handle-string)
@@ -1204,32 +1208,44 @@ buffer中，当前词条追加到已有词条之后。"
             (pyim-intern-word word py nil t)))
         (pyim-hanzi2pinyin word nil "-" t)))
 
-(defun pyim-chinese-string-at-point ()
-  "获取光标前可能的中文词条(两个字或者三个字的字符串)。
-BUG: 这个处理方式有点hack，会产生许多无意义的词条"
+(defun pyim-chinese-string-at-point (&optional number)
+  "获取光标一个中文字符串，字符数量为：`number'"
   (save-excursion
     (let* ((point (point))
-           (begin (- point 3))
+           (begin (- point number))
            (begin (if (> begin 0)
                       begin
                     (point-min)))
            (string (buffer-substring-no-properties
                     point begin)))
-      (mapcar (lambda (n)
-                (let ((str (unless (< (length string) (* -1 n))
-                             (substring string n))))
-                  (unless (and str (string-match-p "\\CC" str)) str)))
-              '(-2 -3)))))
+      (when (and string
+                 (= (length string) number)
+                 (not (string-match-p "\\CC" string)))
+        string))))
 
-(defun pyim-create-word-at-point (&optional silent)
-  "将光标当前的中文词语添加到个人词库中"
+(defun pyim-create-word-at-point (&optional number silent)
+  "将光标前字符数为 `number' 的中文字符串添加到个人词库中
+当 `silent' 设置为 t 是，不显示提醒信息。"
+  (let* ((string (pyim-chinese-string-at-point (or number 2))))
+    (when string
+      (pyim-create-word-without-pinyin string)
+      (unless silent
+        (message "将词条: \"%s\" 插入 personal file。" string)))))
+
+(defun pyim-create-word-at-point:2char ()
+  "将光标前2个中文字符组成的字符串加入个人词库。"
   (interactive)
-  (let* ((string-list (pyim-chinese-string-at-point)))
-    (dolist (string string-list)
-      (when (and string (> (length string) 1))
-        (pyim-create-word-without-pinyin string)
-        (unless silent
-          (message "将词条: \"%s\" 插入 personal file。" string))))))
+  (pyim-create-word-at-point 2))
+
+(defun pyim-create-word-at-point:3char ()
+  "将光标前3个中文字符组成的字符串加入个人词库。"
+  (interactive)
+  (pyim-create-word-at-point 3))
+
+(defun pyim-create-word-at-point:4char ()
+  "将光标前4个中文字符组成的字符串加入个人词库。"
+  (interactive)
+  (pyim-create-word-at-point 4))
 
 (defun pyim-create-word-from-region ()
   "将高亮选择的字符串添加到个人词库，如果当前没有选择任何
@@ -1310,13 +1326,13 @@ BUG: 这个处理方式有点hack，会产生许多无意义的词条"
             (pyim-terminate-translation)
             ;; 纪录连续输入的单个汉字，用于判断是否启动自动组词。
             (push pyim-current-str pyim-separate-char-history)
-            ;; 输入词语后，将词语前面的汉字机械的组成一个词条，
+            ;; 输入词语后，将词语前面的两个汉字机械的组成一个词条，
             ;; 然后保存到个人词库。
             ;; BUG: 这个地方需要进一步优化。
             (when (and pyim-automatic-generate-word
                        (> (length pyim-separate-char-history) 1)
                        (> (length pyim-current-str) 1))
-              (pyim-create-word-at-point t)
+              (pyim-create-word-at-point 2 t)
               (setq pyim-separate-char-history nil))
             ;; Chinese-pyim 使用这个 hook 来处理联想词。
             (run-hooks 'pyim-select-word-finish-hook))
@@ -1670,39 +1686,57 @@ Return the input string."
           (car punc)
         (nth 1 punc)))))
 
-(defun pyim-punctuation-translate (char)
-  (if pyim-punctuation-translate-p
-      (cond ((< char ? ) "")
-            (t (let* ((str (char-to-string char))
-                      (punc-list (assoc str pyim-punctuation-dict))
-                      (before-str (char-to-string (char-before)))
-                      (before-punc-list
-                       (cl-some (lambda (x)
-                                  (when (member before-str x) x))
-                                pyim-punctuation-dict))
-                      (before-punc-pos (cl-position before-str before-punc-list :test #'string=)))
-                 (cond
-                  ((member (char-before)
-                           pyim-punctuation-escape-list) str)
-                  ;; 当光标前面为英文标点时， 按 `pyim-punctuation-translate-char'
-                  ;; 对应的字符后， 自动将其转换为对应的中文标点。
-                  ((and (numberp before-punc-pos)
-                        (= before-punc-pos 0)
-                        (= char pyim-punctuation-translate-char))
-                   (delete-char -1)
-                   (pyim-return-proper-punctuation before-punc-list t))
-                  ;; 当光标前面为中文标点时， 按 `pyim-punctuation-translate-char'
-                  ;; 对应的字符后， 自动将其转换为对应的英文标点。
-                  ((and (numberp before-punc-pos)
-                        (> before-punc-pos 0)
-                        (= char pyim-punctuation-translate-char))
-                   (delete-char -1)
-                   (car before-punc-list))
-                  ;; 正常输入标点符号。
-                  (punc-list (pyim-return-proper-punctuation punc-list))
-                  ;; 当输入的字符不是标点符号时，原样插入。
-                  (t str)))))
-    (char-to-string char)))
+(defun pyim-default-translate (char)
+  (let* ((str (char-to-string char))
+         (punc-list (assoc str pyim-punctuation-dict))
+         (before-str (char-to-string (char-before)))
+         (before-punc-list
+          (cl-some (lambda (x)
+                     (when (member before-str x) x))
+                   pyim-punctuation-dict))
+         (before-punc-pos (cl-position before-str before-punc-list :test #'string=)))
+    (cond
+     ;; 空格之前的字符什么也不输入。
+     ((< char ? ) "")
+
+     ;; 这个部份与标点符号处理无关，主要用来保存用户自定义词条。
+     ;; 比如：在一个中文字符串后输入 2v，可以将 光标前两个中文字符
+     ;; 组成的字符串，保存到个人词库。
+     ((and (member (char-before) (number-sequence ?2 ?9))
+           (= char pyim-translate-char))
+      (delete-char -1)
+      (pyim-create-word-at-point
+       (string-to-number before-str))
+      "")
+
+     ;; 当关闭标点转换功能时，只输入半角标点。
+     ((not pyim-punctuation-translate-p) str)
+
+     ;; 默认设置为：数字之后的标点符号为半角。
+     ((member (char-before)
+              pyim-punctuation-escape-list) str)
+
+     ;; 当光标前面为英文标点时， 按 `pyim-translate-char'
+     ;; 对应的字符后， 自动将其转换为对应的中文标点。
+     ((and (numberp before-punc-pos)
+           (= before-punc-pos 0)
+           (= char pyim-translate-char))
+      (delete-char -1)
+      (pyim-return-proper-punctuation before-punc-list t))
+
+     ;; 当光标前面为中文标点时， 按 `pyim-translate-char'
+     ;; 对应的字符后， 自动将其转换为对应的英文标点。
+     ((and (numberp before-punc-pos)
+           (> before-punc-pos 0)
+           (= char pyim-translate-char))
+      (delete-char -1)
+      (car before-punc-list))
+
+     ;; 正常输入标点符号。
+     (punc-list (pyim-return-proper-punctuation punc-list))
+
+     ;; 当输入的字符不是标点符号时，原样插入。
+     (t str))))
 
 ;; 切换光标处标点的样式（全角 or 半角）
 (defun pyim-punctuation-translate-at-point ()
