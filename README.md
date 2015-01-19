@@ -198,7 +198,7 @@ C-h v pyim-dicts
 ;; ;; 从词库中搜索10个联想词。
 ;; (setq pyim-company-predict-words-number 10)
 ```
-## 如何手动加入新词 ##
+## 如何手动加词和删词 ##
 
 1. `pyim-create-word-without-pinyin` 直接将一个中文词条加入个人词库的函数，用于编程环境。
 2. `pyim-create-word-at-point` 这个命令会提取光标前2个汉字和3个汉字，然后组成两个中文字符串，
@@ -208,6 +208,7 @@ C-h v pyim-dicts
     建议用户为其设定一个快捷键。
 4. `pyim-automatic-generate-word` 将此选项设置为 t 时，Chinese-pyim 开启自动组词功能。
     实验特性，不建议普通用户使用，
+5. `pyim-delete-word-from-personal-buffer` 从个人文件对应的 buffer 中删除当前高亮选择的词条。
 
 
 

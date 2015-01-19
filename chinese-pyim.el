@@ -220,7 +220,7 @@
 ;; ;; ;; 从词库中搜索10个联想词。
 ;; ;; (setq pyim-company-predict-words-number 10)
 ;; ```
-;; ## 如何手动加入新词 ##
+;; ## 如何手动加词和删词 ##
 ;;
 ;; 1. `pyim-create-word-without-pinyin' 直接将一个中文词条加入个人词库的函数，用于编程环境。
 ;; 2. `pyim-create-word-at-point' 这个命令会提取光标前2个汉字和3个汉字，然后组成两个中文字符串，
@@ -230,6 +230,7 @@
 ;;     建议用户为其设定一个快捷键。
 ;; 4. `pyim-automatic-generate-word' 将此选项设置为 t 时，Chinese-pyim 开启自动组词功能。
 ;;     实验特性，不建议普通用户使用，
+;; 5. `pyim-delete-word-from-personal-buffer' 从个人文件对应的 buffer 中删除当前高亮选择的词条。
 ;;
 
 ;;; Code:
@@ -1149,9 +1150,14 @@ beginning of line"
         (cons (substring fullpy 1)
               (substring abbpy 1))))))
 
-(defun pyim-intern-word (word py &optional append)
+(defun pyim-intern-word (word py &optional append delete)
   "这个函数用于保存用户词频，将参数拼音 `py' 对应的中文词条 `word'
-保存到 personal-file 对应的 buffer。"
+保存到 personal-file 对应的 buffer。
+
+当 `append' 设置为 t 时，新词追加到已有词的后面。
+
+当`delete' 设置为 t 时，从上述 buffer 中删除参数拼音 `py' 对应
+的中文词条 `word'。"
   (let((buf (cdr (assoc "buffer" (car pyim-buffer-list))))
        words)
     (with-current-buffer buf
@@ -1159,18 +1165,21 @@ beginning of line"
       (if (string= (pyim-code-at-point) py)
           (progn
             (setq words (pyim-line-content))
-            (setq words
-                  (cons (car words)
-                        (delete-dups
-                         (if append
-                             (append (cdr words)(list word))
-                           (append (list word) (cdr words))))))
+            (if delete
+                (setq words (remove word words))
+              (setq words
+                    (cons (car words)
+                          (delete-dups
+                           (if append
+                               (append (cdr words) (list word))
+                             (append (list word) (cdr words)))))))
             ;; (message "delete: %s" words))
             (pyim-delete-line))
         (forward-line 1)
         (setq words (list py word)))
       ;;    (message "insert: %s" words)
-      (insert (mapconcat 'identity words " ") "\n"))))
+      (when (> (length words) 1)
+        (insert (mapconcat 'identity words " ") "\n")))))
 
 (defun pyim-create-word (word pylist)
   ;; (message "create: %s, %s" word pylist)
@@ -1186,6 +1195,13 @@ buffer中，当前词条追加到已有词条之后。"
   (mapc (lambda (py)
           (unless (string-match-p "[^ a-z-]" py)
             (pyim-intern-word word py t)))
+        (pyim-hanzi2pinyin word nil "-" t)))
+
+(defun pyim-delete-word (word)
+  "将中文词条 `word' 从 personal-file 对应的 buffer 中删除"
+  (mapc (lambda (py)
+          (unless (string-match-p "[^ a-z-]" py)
+            (pyim-intern-word word py nil t)))
         (pyim-hanzi2pinyin word nil "-" t)))
 
 (defun pyim-chinese-string-at-point ()
@@ -1235,6 +1251,18 @@ BUG: 这个处理方式有点hack，会产生许多无意义的词条"
     (push-mark (point))
     (backward-char 2)
     (setq mark-active t)))
+
+(defun pyim-delete-word-from-personal-buffer ()
+  "将高亮选择的字符从 personel-file 对应的 buffer 中删除。"
+  (interactive)
+  (if mark-active
+      (let ((string (buffer-substring-no-properties
+                     (region-beginning) (region-end))))
+        (when (and (< (length string) 6)
+                   (> (length string) 0))
+          (pyim-delete-word string)
+          (message "将词条: \"%s\" 从 personal file中删除。" string)))
+    (message "请首先高亮选择需要删除的词条。")))
 
 (defun pyim-rearrange (word pylist)
   ;; (message "rearrage: %s, %s" word pylist)
