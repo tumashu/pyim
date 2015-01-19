@@ -226,6 +226,7 @@
 ;; 2. `pyim-create-word-at-point' 如果用户已经高亮选择了某个中文字符串，那么这个命令直接将这个字符串加入个人词库。
 ;;     否则，这个命令会提取光标前2个汉字和3个汉字，共组成2个中文字符串，并将这两个字符串加入个人词库。建议用户
 ;;     可以将其绑定到某个快捷键上。
+;; 3. `pyim-automatic-generate-word' 将此选项设置为 t 时，Chinese-pyim 开启自动组词功能。
 ;;
 
 ;;; Code:
@@ -351,6 +352,12 @@ Chinese-pyim 使用这个 hook 处理联想词，用户可以使用
 这个 hook 调用来调用外部的补全系统等工作。"
   :group 'chinese-pyim
   :type 'hook)
+
+(defcustom pyim-automatic-generate-word nil
+  "自动组词功能，这个选项设置为 t 时，Chinese-pyim 会
+将当前光标前2个或者3个汉字组成的字符串，加入个人词库。"
+  :group 'chinese-pyim
+  :type 'boolean)
 
 (defcustom pyim-page-length 9
   "每页显示的词条数目"
@@ -1195,7 +1202,7 @@ BUG: 这个处理方式有点hack，会产生许多无意义的词条"
                   (unless (and str (string-match-p "\\CC" str)) str)))
               '(-2 -3)))))
 
-(defun pyim-create-word-at-point ()
+(defun pyim-create-word-at-point (&optional silent)
   "将光标当前的中文词语添加到个人词库中"
   (interactive)
   (let* ((words (if mark-active
@@ -1205,7 +1212,8 @@ BUG: 这个处理方式有点hack，会产生许多无意义的词条"
     (dolist (word words)
       (when (and word (> (length word) 1))
         (pyim-create-word-without-pinyin word)
-        (message "将词条: \"%s\" 插入 personal file。" word)))))
+        (unless silent
+          (message "将词条: \"%s\" 插入 personal file。" word))))))
 
 (defun pyim-rearrange (word pylist)
   ;; (message "rearrage: %s, %s" word pylist)
@@ -1251,10 +1259,16 @@ BUG: 这个处理方式有点hack，会产生许多无意义的词条"
             (if (not (member pyim-current-str (car pyim-current-choices)))
                 (pyim-create-word pyim-current-str pyim-pinyin-list))
             (pyim-terminate-translation)
-            ;; 纪录连续输入的汉字，用于自动组词。
-            (if (> (length pyim-current-str) 1)
-                (setq pyim-separate-char-history nil)
-              (push pyim-current-str pyim-separate-char-history))
+            ;; 纪录连续输入的单个汉字，用于判断是否启动自动组词。
+            (push pyim-current-str pyim-separate-char-history)
+            ;; 输入词语后，将词语前面的汉字机械的组成一个词条，
+            ;; 然后保存到个人词库。
+            ;; BUG: 这个地方需要进一步优化。
+            (when (and pyim-automatic-generate-word
+                       (> (length pyim-separate-char-history) 1)
+                       (> (length pyim-current-str) 1))
+              (pyim-create-word-at-point t)
+              (setq pyim-separate-char-history nil))
             ;; Chinese-pyim 使用这个 hook 来处理联想词。
             (run-hooks 'pyim-select-word-finish-hook))
         (setq pylist (nthcdr pyim-pinyin-position pyim-pinyin-list))
@@ -1701,6 +1715,9 @@ Return the input string."
     (pyim-make-char-table)
     (run-hooks 'pyim-load-hook)
     (message nil))
+
+  (when pyim-automatic-generate-word
+    (message "Chinese-pyim 自动组词功能已经开启，具体细节参考: `pyim-automatic-generate-word'。"))
 
   (unless (member 'pyim-save-personal-file kill-emacs-hook)
     (add-to-list 'kill-emacs-hook 'pyim-save-personal-file))

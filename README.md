@@ -204,6 +204,7 @@ C-h v pyim-dicts
 2. `pyim-create-word-at-point` 如果用户已经高亮选择了某个中文字符串，那么这个命令直接将这个字符串加入个人词库。
     否则，这个命令会提取光标前2个汉字和3个汉字，共组成2个中文字符串，并将这两个字符串加入个人词库。建议用户
     可以将其绑定到某个快捷键上。
+3. `pyim-automatic-generate-word` 将此选项设置为 t 时，Chinese-pyim 开启自动组词功能。
 
 
 
