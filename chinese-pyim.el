@@ -373,6 +373,10 @@ Chinese-pyim 使用这个 hook 处理联想词，用户可以使用
 (defvar pyim-current-key "" "已经输入的代码")
 (defvar pyim-current-str "" "当前选择的词条")
 
+(defvar pyim-separate-char-history nil
+  "纪录连续输入的单个汉字，当输入词组后，这个变量设置为 nil。
+这个变量主要用于自动组词功能。")
+
 (defvar pyim-current-choices nil
   "所有可选的词条，是一个list。
 1. CAR 部份是可选的词条，一般是一个字符串列表。
@@ -1247,6 +1251,10 @@ BUG: 这个处理方式有点hack，会产生许多无意义的词条"
             (if (not (member pyim-current-str (car pyim-current-choices)))
                 (pyim-create-word pyim-current-str pyim-pinyin-list))
             (pyim-terminate-translation)
+            ;; 纪录连续输入的汉字，用于自动组词。
+            (if (> (length pyim-current-str) 1)
+                (setq pyim-separate-char-history nil)
+              (push pyim-current-str pyim-separate-char-history))
             ;; Chinese-pyim 使用这个 hook 来处理联想词。
             (run-hooks 'pyim-select-word-finish-hook))
         (setq pylist (nthcdr pyim-pinyin-position pyim-pinyin-list))
