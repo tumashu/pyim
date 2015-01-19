@@ -195,8 +195,6 @@ C-h v pyim-dicts
 2. 在 emacs 配置中添加如下几行代码：
 ```lisp
 (require 'chinese-pyim-company)
-;; ;; 输入2个中文字符开始补全。
-;; (setq pyim-company-minimum-prefix-length 2)
 ;; ;; 从词库中搜索10个联想词。
 ;; (setq pyim-company-predict-words-number 10)
 ```

@@ -32,61 +32,66 @@
 (require 'company)
 (require 'company-dabbrev)
 
-(defcustom pyim-company-minimum-prefix-length 1
-  "设置输入几个字符时开始搜索联想词条。"
-  :group 'chinese-pyim
-  :type 'number)
-
 (defcustom pyim-company-predict-words-number 10
   "设置最多可以搜索多少个联想词条，如果设置为 nil
 或者 0 时，关闭联想功能。"
   :group 'chinese-pyim
   :type 'number)
 
-;; `company-mode' 开启了 `lexical-binding' ，所以需要特殊的方式
-;; 调整其行为，这里保存 company-frontends 默认设定。
-(defvar pyim-backup-company-frontends company-frontends)
-(defvar pyim-backup-company-idle-delay company-idle-delay)
-(defvar pyim-backup-company-minimum-prefix-length company-minimum-prefix-length)
-(defvar pyim-backup-company-selection-wrap-around company-selection-wrap-around)
-(defvar pyim-backup-company-require-match company-require-match)
+(defcustom pyim-company-variables
+  `((company-backends ,(nconc '((pyim-company-predict-words pyim-company-dabbrev))
+                              company-backends))
+    (company-idle-delay  0.1)
+    (company-minimum-prefix-length  2)
+    (company-selection-wrap-around  t)
+    (company-show-numbers t)
+    (company-dabbrev-downcase nil)
+    (company-dabbrev-ignore-case nil)
+    (company-require-match nil))
+  "`company-mode' 与 `Chinese-pyim' 配合时需要特别设置，
+这个 list 包含了需要设置的 `company-mode' 变量。"
+  :group 'chinese-pyim)
 
-(defun pyim-revert-company-default-setting ()
-  "恢复 `company-mode' 默认设置的函数。"
-  (setq company-frontends pyim-backup-company-frontends
-        company-idle-delay pyim-backup-company-idle-delay
-        company-minimum-prefix-length pyim-backup-company-minimum-prefix-length
-        company-selection-wrap-around pyim-backup-company-selection-wrap-around
-        company-require-match pyim-backup-company-require-match))
+(defun pyim-company-backup-variable (variable)
+  "创建变量 `pyim-<variale>-backup' ，用来保存变量 `variable' 原来的设定"
+  (if (boundp variable)
+      (set (intern (concat "pyim-" (symbol-name variable) "-backup"))
+           (symbol-value variable))
+    (error "Company-mode 默认变量备份失败！请确保 Company-mode 优先加载。")))
 
-(defun pyim-company-completion-cancelled-hook (x)
-  "`company-mode' 补全取消后，恢复 `company-mode' 原来的设置。"
-  (pyim-revert-company-default-setting)
+(defun pyim-company-revert-variable (variable)
+  "将变量 `variable' 设置为 `pyim-<variale>-backup' 的值。"
+  (when (boundp variable)
+    (let ((variable-backup (intern (concat "pyim-" (symbol-name variable) "-backup"))))
+      (if (boundp variable-backup)
+          (set variable (symbol-value variable-backup))
+        (message "变量还原失败,没有找到备份变量！")))))
+
+(defun pyim-company-revert-to-default-settings (x)
+  "`company-mode' 补全完成或者取消后，恢复 `company-mode' 原来的设置。"
+  (mapc 'pyim-company-revert-variable
+        (mapcar 'car pyim-company-variables))
   (remove-hook 'company-completion-cancelled-hook
-               'pyim-company-completion-cancelled-hook t))
-
-(defun pyim-company-completion-finished-hook (x)
-  "`company-mode' 补全完成后，恢复 `company-mode' 原来的设置。"
-  (pyim-revert-company-default-setting)
+               'pyim-company-revert-to-default-setting t)
   (remove-hook 'company-completion-finished-hook
-               'pyim-company-completion-finished-hook t))
+               'pyim-company-revert-to-default-setting t))
 
 ;;;###autoload
 (defun pyim-company-complete ()
   "`company-mode' 补全命令的包装函数，专门用户 `chinese-pyim'"
   (interactive)
   (unless company-mode (company-mode))
-  (setq company-backends
-        (append '((pyim-company-predict-words
-                   pyim-company-dabbrev)) pyim-backup-company-frontends)
-        company-minimum-prefix-length pyim-company-minimum-prefix-length
-        company-idle-delay 0.1
-        company-selection-wrap-around t
-        company-require-match nil)
+  ;; 保存 `company-mode' 变量原来的设定。
+  (mapc 'pyim-company-backup-variable
+        (mapcar 'car pyim-company-variables))
+  ;; 设置 `company-mode' 变量
+  (dolist (list pyim-company-variables)
+    (set (car list) (car (cdr list))))
+  ;; 当 `company-mode' 补全完成或者取消时，恢复原来设置。
   (add-hook 'company-completion-cancelled-hook
-            'pyim-company-completion-cancelled-hook t)
+            'pyim-company-revert-to-default-settings t)
   (add-hook 'company-completion-finished-hook
-            'pyim-company-completion-finished-hook t)
+            'pyim-company-revert-to-default-settings t)
   (company-manual-begin))
 
 ;; `Chinese-pyim' 选词结束后，调用 `pyim-company-complete'.
