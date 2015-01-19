@@ -222,11 +222,14 @@
 ;; ```
 ;; ## 如何手动加入新词 ##
 ;;
-;; 1. `pyim-create-word-without-pinyin' 用于编程环境，直接将一个中文词条加入个人词库。
-;; 2. `pyim-create-word-at-point' 如果用户已经高亮选择了某个中文字符串，那么这个命令直接将这个字符串加入个人词库。
-;;     否则，这个命令会提取光标前2个汉字和3个汉字，共组成2个中文字符串，并将这两个字符串加入个人词库。建议用户
-;;     可以将其绑定到某个快捷键上。
-;; 3. `pyim-automatic-generate-word' 将此选项设置为 t 时，Chinese-pyim 开启自动组词功能。
+;; 1. `pyim-create-word-without-pinyin' 直接将一个中文词条加入个人词库的函数，用于编程环境。
+;; 2. `pyim-create-word-at-point' 这个命令会提取光标前2个汉字和3个汉字，然后组成两个中文字符串，
+;;     并将这两个字符串一同加入个人词库。
+;; 3  `pyim-create-word-from-region' 如果用户已经高亮选择了某个中文字符串，那么这个命令直接
+;;     将这个字符串加入个人词库，否则，这个命令会高亮选择光标前两个汉字字符，等待用户调整选区。
+;;     建议用户为其设定一个快捷键。
+;; 4. `pyim-automatic-generate-word' 将此选项设置为 t 时，Chinese-pyim 开启自动组词功能。
+;;     实验特性，不建议普通用户使用，
 ;;
 
 ;;; Code:
@@ -1205,15 +1208,33 @@ BUG: 这个处理方式有点hack，会产生许多无意义的词条"
 (defun pyim-create-word-at-point (&optional silent)
   "将光标当前的中文词语添加到个人词库中"
   (interactive)
-  (let* ((words (if mark-active
-                    (list (buffer-substring-no-properties
-                           (region-beginning) (region-end)))
-                  (pyim-chinese-string-at-point))))
-    (dolist (word words)
-      (when (and word (> (length word) 1))
-        (pyim-create-word-without-pinyin word)
+  (let* ((string-list (pyim-chinese-string-at-point)))
+    (dolist (string string-list)
+      (when (and string (> (length string) 1))
+        (pyim-create-word-without-pinyin string)
         (unless silent
           (message "将词条: \"%s\" 插入 personal file。" word))))))
+
+(defun pyim-create-word-from-region ()
+  "将高亮选择的字符串添加到个人词库，如果当前没有选择任何
+字符串，那么选择光标前两个字符。"
+  (interactive)
+  (if mark-active
+      (let ((string (buffer-substring-no-properties
+                     (region-beginning) (region-end))))
+        (if (and (< (length string) 6)
+                 (> (length string) 0))
+            (progn
+              (pyim-create-word-without-pinyin string)
+              (message "将词条: \"%s\" 插入 personal file。" string))
+          (message "选择的字符串大于6个汉字，忽略。"))
+        (goto-char (region-end))
+        (deactivate-mark))
+    ;; 激活光标前两个字符大小的一个选区，
+    ;; 等待用户调整选区大小。
+    (push-mark (point))
+    (backward-char 2)
+    (setq mark-active t)))
 
 (defun pyim-rearrange (word pylist)
   ;; (message "rearrage: %s, %s" word pylist)
