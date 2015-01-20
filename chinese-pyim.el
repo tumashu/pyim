@@ -1712,7 +1712,15 @@ Return the input string."
      ;; 空白字符+`pyim-translate-trigger-char' 可以。
      ;; 来回切换 Chinese-pyim 中英文输入模式。
      ((and (string-match-p "[[:blank:]]" str-before-1)
+           (string-match-p "\\cc" str-before-2)
            (= char pyim-translate-trigger-char))
+      (pyim-toggle-input-ascii)
+      "")
+     ((and (string-match-p "[[:blank:]]" str-before-1)
+           (string-match-p "[[:blank:]]" str-before-2)
+           (string-match-p "[[:ascii:]]" str-before-3)
+           (= char pyim-translate-trigger-char))
+      (delete-char -1)
       (pyim-toggle-input-ascii)
       "")
 
