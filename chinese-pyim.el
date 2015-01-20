@@ -1291,17 +1291,6 @@ buffer中，当前词条追加到已有词条之后。"
 (defun pyim-rearrange-1 (word py)
   (pyim-intern-word word py))
 
-(defun pyim-han-stringp (str)
-  "Predicate whether the STR is a pinyin of a chinese character"
-  (let ((valid t)
-        (i 0))
-    (while (and (< i (length str)) valid)
-      (if (member (char-to-string (aref str i))
-                  (mapcar 'identity "vmpfwckzyjqdltxuognbhsrei'-a"))
-          (setq valid nil))
-      (setq i (1+ i)))
-    valid))
-
 ;;;  commands
 (defun pyim-select-current ()
   (interactive)
