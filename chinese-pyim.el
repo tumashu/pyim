@@ -377,6 +377,7 @@ Chinese-pyim 使用这个 hook 处理联想词，用户可以使用
   :group 'chinese-pyim)
 
 ;;;  variable declare
+(defvar pyim-title "灵拼" "Chinese-pyim 在 mode-line 中显示的名称。")
 (defvar pyim-buffer-name " *Chinese-pyim*")
 (defvar pyim-buffer-list nil
   "一个列表，用来保存词库文件与 buffer 的对应信息。
@@ -1766,7 +1767,10 @@ Return the input string."
   (setq pyim-punctuation-translate-p
         (not pyim-punctuation-translate-p))
   (if pyim-input-ascii
-      (message "Chinese-pyim 英文输入模式开启！")
+      (progn
+        (setq current-input-method-title (concat pyim-title "-英文"))
+        (message "Chinese-pyim 英文输入模式开启！"))
+    (setq current-input-method-title pyim-title)
     (message "Chinese-pyim 英文输入模式关闭！")))
 
 ;; 切换光标处标点的样式（全角 or 半角）
@@ -1843,7 +1847,7 @@ Return the input string."
     (message "Chinese-pyim 重启完成。")))
 
 ;;; 注册输入法
-(register-input-method "chinese-pyim" "euc-cn" 'pyim-start "[pyim]")
+(register-input-method "chinese-pyim" "euc-cn" 'pyim-start pyim-title)
 
 ;;;###autoload
 (defun pyim-hanzi2pinyin (string &optional shou-zi-mu separator return-list ignore-duo-yin-zi)
