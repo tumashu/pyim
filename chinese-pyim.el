@@ -387,6 +387,8 @@ Chinese-pyim 使用这个 hook 处理联想词，用户可以使用
 (defvar pyim-active-function nil)
 (defvar pyim-current-key "" "已经输入的代码")
 (defvar pyim-current-str "" "当前选择的词条")
+(defvar pyim-input-ascii nil
+  "是否开启 Chinese-pyim 英文输入模式。")
 
 (defvar pyim-separate-char-history nil
   "纪录连续输入的单个汉字，当输入词组后，这个变量设置为 nil。
@@ -1461,11 +1463,12 @@ buffer中，当前词条追加到已有词条之后。"
   "如果在 pyim-first-char 列表中，则查找相应的词条，否则停止转换，插入对应的字符"
   (interactive "*")
   ;; (message "%s" (current-buffer))
-  (if (if (pyim-string-emptyp pyim-current-key)
-          (member last-command-event
-                  (mapcar 'identity "abcdefghjklmnopqrstwxyz"))
-        (member last-command-event
-                (mapcar 'identity "vmpfwckzyjqdltxuognbhsrei'-a")))
+  (if (and (not pyim-input-ascii)
+           (if (pyim-string-emptyp pyim-current-key)
+               (member last-command-event
+                       (mapcar 'identity "abcdefghjklmnopqrstwxyz"))
+             (member last-command-event
+                     (mapcar 'identity "vmpfwckzyjqdltxuognbhsrei'-a"))))
       (progn
         (setq pyim-current-key (concat pyim-current-key (char-to-string last-command-event)))
         (funcall pyim-handle-function))
@@ -1705,6 +1708,13 @@ Return the input string."
      ;; 空格之前的字符什么也不输入。
      ((< char ? ) "")
 
+     ;; 空白字符+`pyim-translate-trigger-char' 可以。
+     ;; 来回切换 Chinese-pyim 中英文输入模式。
+     ((and (string-match-p "[[:blank:]]" str-before-1)
+           (= char pyim-translate-trigger-char))
+      (pyim-toggle-input-ascii)
+      "")
+
      ;; 这个部份与标点符号处理无关，主要用来快速保存用户自定义词条。
      ;; 比如：在一个中文字符串后输入 2v，可以将光标前两个中文字符
      ;; 组成的字符串，保存到个人词库。
@@ -1745,6 +1755,19 @@ Return the input string."
 
      ;; 当输入的字符不是标点符号时，原样插入。
      (t str))))
+
+(defun pyim-toggle-input-ascii ()
+  "Chinese-pyim 切换中英文输入模式。同时调整标点符号样式。"
+  (interactive)
+  (setq pyim-punctuation-translate-p
+        (not pyim-input-ascii))
+  (setq pyim-input-ascii
+        (not pyim-input-ascii))
+  (setq pyim-punctuation-translate-p
+        (not pyim-punctuation-translate-p))
+  (if pyim-input-ascii
+      (message "Chinese-pyim 英文输入模式开启！")
+    (message "Chinese-pyim 英文输入模式关闭！")))
 
 ;; 切换光标处标点的样式（全角 or 半角）
 (defun pyim-punctuation-translate-at-point ()
