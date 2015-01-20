@@ -1775,11 +1775,8 @@ Return the input string."
   (setq pyim-punctuation-translate-p
         (not pyim-punctuation-translate-p))
   (if pyim-input-ascii
-      (progn
-        (setq current-input-method-title (concat pyim-title "-英文"))
-        (message "Chinese-pyim 英文输入模式开启！"))
-    (setq current-input-method-title pyim-title)
-    (message "Chinese-pyim 英文输入模式关闭！")))
+      (setq current-input-method-title (concat pyim-title "-英文"))
+    (setq current-input-method-title pyim-title)))
 
 ;; 切换光标处标点的样式（全角 or 半角）
 (defun pyim-punctuation-translate-at-point ()
