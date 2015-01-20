@@ -99,8 +99,7 @@
 
 (defun pyim-company-dabbrev (command &optional arg &rest ignored)
   "`company-mode' dabbrev 补全后端，是 `company-dabbrev'
-(包含在 `company-mode'中) 的衍生版本，通过与 Chinese-pyim 配合
-来补全中文（忽略非中文）。
+的中文优化版，通过与 Chinese-pyim 配合来补全中文。
 
 `pyim-company-dabbrev' 可以和 `company-dabbrev' 配合使用。具体细节请
 参考 Company-mode group backends 相关文档。"
@@ -112,7 +111,7 @@
           ;; 光标前字符是否时汉字？
           (string-match-p "\\cc" (char-to-string (char-before)))
           (string-match-p "\\cc" pyim-current-str)
-           pyim-current-str))
+          pyim-current-str))
     (candidates
      (let* ((case-fold-search company-dabbrev-ignore-case)
             (words (company-dabbrev--search
