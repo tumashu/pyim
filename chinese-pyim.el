@@ -1716,15 +1716,6 @@ Return the input string."
      ;; 空格之前的字符什么也不输入。
      ((< char ? ) "")
 
-     ;; 空白字符+`pyim-translate-trigger-char' 可以关闭输入法。
-     ;; 方便用户输入英文。
-     ((and (string-match-p "[[:blank:]]" str-before-1)
-           (= char pyim-translate-trigger-char))
-      (delete-char -1)
-      ;; BUG: 会出现 `(overlayp nil)' 的错误。
-      (toggle-input-method)
-      "")
-
      ;; 这个部份与标点符号处理无关，主要用来快速保存用户自定义词条。
      ;; 比如：在一个中文字符串后输入 2v，可以将光标前两个中文字符
      ;; 组成的字符串，保存到个人词库。
