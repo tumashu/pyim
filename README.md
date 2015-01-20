@@ -154,7 +154,7 @@ Chinese-pyim 使用一个比较 *粗糙* 的方法处理 *模糊音*，要了解
 ## 如何快速切换全角标点与半角标点 ##
 1. 第一种方法：使用命令 `pyim-toggle-full-width-punctuation`，全局切换。
 2. 第二种方法：使用命令 `pyim-punctuation-translate-at-point` 只切换光标处标点的样式。
-3. 第三种方法：设置变量 `pyim-translate-char`。输入变量设定的字符会切换光标处标点的样式。
+3. 第三种方法：设置变量 `pyim-translate-trigger-char`。输入变量设定的字符会切换光标处标点的样式。
 
 ## 了解 Chinese-pyim 个人词频文件设置的细节 ##
 ```
@@ -206,8 +206,8 @@ C-h v pyim-dicts
 3. `pyim-create-word-from-region` 如果用户已经高亮选择了某个中文字符串，那么这个命令直接
     将这个字符串加入个人词库，否则，这个命令会高亮选择光标前两个汉字字符，等待用户调整选区。
     建议用户为其设定一个快捷键。
-4. `pyim-translate-char` 以默认设置为例：在“我爱吃红烧肉”后输入“5v” 可以将“爱吃红烧肉”
-    这个词条保存到用户个人文件。
+4. `pyim-translate-trigger-char` 以默认设置为例：在“我爱吃红烧肉”后输入“5v” 可以将
+    “爱吃红烧肉”这个词条保存到用户个人文件。
 5. `pyim-automatic-generate-word` 将此选项设置为 t 时，Chinese-pyim 开启自动组词功能。
     实验特性，不建议普通用户使用，
 6. `pyim-delete-word-from-personal-buffer` 从个人文件对应的 buffer 中删除当前高亮选择的词条。
