@@ -1686,51 +1686,70 @@ Return the input string."
           (car punc)
         (nth 1 punc)))))
 
+(defun pyim-char-before-to-string (num)
+  "得到光标前第 `num' 个字符，并将其转换为字符串。"
+  (let* ((point (point))
+         (point-before (- point num)))
+    (when (and (> point-before 0)
+               (char-before point-before))
+      (char-to-string (char-before point-before)))))
+
 (defun pyim-default-translate (char)
   (let* ((str (char-to-string char))
+         ;; 注意：`str' 是 *待输入* 的字符对应的字符串。
+         (str-before-1 (pyim-char-before-to-string 0))
+         (str-before-2 (pyim-char-before-to-string 1))
+         (str-before-3 (pyim-char-before-to-string 2))
+         (str-before-4 (pyim-char-before-to-string 3))
+         ;; 从标点词库中搜索与 `str' 对应的标点列表。
          (punc-list (assoc str pyim-punctuation-dict))
-         (before-str (char-to-string (char-before)))
-         (before-punc-list
+         ;; 从标点词库中搜索与 `str-before-1' 对应的标点列表。
+         (punc-list-before-1
           (cl-some (lambda (x)
-                     (when (member before-str x) x))
+                     (when (member str-before-1 x) x))
                    pyim-punctuation-dict))
-         (before-punc-pos (cl-position before-str before-punc-list :test #'string=)))
+         ;; `str-before-1' 在其对应的标点列表中的位置。
+         (punc-posit-before-1
+          (cl-position str-before-1 punc-list-before-1
+                       :test #'string=)))
     (cond
      ;; 空格之前的字符什么也不输入。
      ((< char ? ) "")
 
-     ;; 这个部份与标点符号处理无关，主要用来保存用户自定义词条。
-     ;; 比如：在一个中文字符串后输入 2v，可以将 光标前两个中文字符
+     ;; 这个部份与标点符号处理无关，主要用来快速保存用户自定义词条。
+     ;; 比如：在一个中文字符串后输入 2v，可以将光标前两个中文字符
      ;; 组成的字符串，保存到个人词库。
      ((and (member (char-before) (number-sequence ?2 ?9))
+           (string-match-p "\\cc" str-before-2)
            (= char pyim-translate-char))
       (delete-char -1)
       (pyim-create-word-at-point
-       (string-to-number before-str))
+       (string-to-number str-before-1))
       "")
 
-     ;; 当关闭标点转换功能时，只输入半角标点。
+     ;; 关闭标点转换功能时，只插入英文标点。
      ((not pyim-punctuation-translate-p) str)
 
-     ;; 默认设置为：数字之后的标点符号为半角。
+     ;; 当前字符属于 `pyim-punctuation-escape-list'时，
+     ;; 插入英文标点。
      ((member (char-before)
               pyim-punctuation-escape-list) str)
 
      ;; 当光标前面为英文标点时， 按 `pyim-translate-char'
      ;; 对应的字符后， 自动将其转换为对应的中文标点。
-     ((and (numberp before-punc-pos)
-           (= before-punc-pos 0)
+     ((and (numberp punc-posit-before-1)
+           (= punc-posit-before-1 0)
            (= char pyim-translate-char))
       (delete-char -1)
-      (pyim-return-proper-punctuation before-punc-list t))
+      (pyim-return-proper-punctuation punc-list-before-1 t))
 
      ;; 当光标前面为中文标点时， 按 `pyim-translate-char'
      ;; 对应的字符后， 自动将其转换为对应的英文标点。
-     ((and (numberp before-punc-pos)
-           (> before-punc-pos 0)
+     ((and (numberp punc-posit-before-1)
+           (> punc-posit-before-1 0)
            (= char pyim-translate-char))
       (delete-char -1)
-      (car before-punc-list))
+      (car punc-list-before-1))
 
      ;; 正常输入标点符号。
      (punc-list (pyim-return-proper-punctuation punc-list))
