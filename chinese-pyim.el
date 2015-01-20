@@ -1794,13 +1794,6 @@ Return the input string."
       (message "开启标点转换功能（使用全角标点）")
     (message "关闭标点转换功能（使用半角标点）")))
 
-;;;  一个快速插入英文的命令。
-(defun pyim-insert-ascii ()
-  (interactive)
-  (if current-input-method
-      (insert (read-no-blanks-input "自定义输入: "))
-    (call-interactively 'self-insert-command)))
-
 (defun pyim-restart ()
   "重启 Chinese-pyim，不建议用于编程环境。"
   (interactive)
