@@ -134,7 +134,7 @@ Chinese-pyim 的目标是： *尽最大的努力成为一个好用的 emacs 备�
 `pyim-update-dict-file' 重新对文件排序。
 
 ** 激活 Chinese-pyim
-#+BEGIN_SRC emace-lisp
+#+BEGIN_SRC emacs-lisp
 (setq default-input-method "chinese-pyim")
 (global-set-key (kbd "C-<SPC>") 'toggle-input-method)
 ;; (global-set-key (kbd "C-;") 'pyim-insert-ascii)
