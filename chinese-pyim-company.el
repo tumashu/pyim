@@ -23,6 +23,8 @@
 
 ;;; Commentary:
 ;;
+;;  注意: ** 不要手动编辑这个文件（这个文件是 tangle chinese-pyim.org 文件得到的） **
+;;
 ;;  这个包为 `Chinese-pyim' 添加中文词条 *联想* 功能，其使用方式：
 ;;
 ;;      (require 'chinese-pyim-company)
