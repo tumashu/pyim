@@ -4,6 +4,62 @@
 #+STARTUP: align fold nodlcheck oddeven intestate
 #+LANGUAGE: zh-CN
 #+OPTIONS: H:3 num:t toc:t \n:nil ::t |:t ^:t -:t f:t *:t tex:nil d:(HIDE) tags:not-in-toc
+#+PROPERTY: header-args:emacs-lisp :eval no
+
+* org-mode 配置                                                    :noexport:
+当本文档导出为 README 文档时，中文与中文之间的回车符会转化为空格符，对于中文而言，
+这些空格这是多余的，这里定义了一个清理函数，当 org 文件导出为 html 以及 markdown
+格式时，自动删除中文与中文之间不必要的空格。
+
+#+BEGIN_SRC emacs-lisp :results output silent :eval yes
+(defun eh-org-clean-space (text backend info)
+  "在export为HTML时，删除中文之间不必要的空格"
+  (when (org-export-derived-backend-p backend 'html)
+    (let ((regexp "[[:multibyte:]]")
+          (string text))
+      ;; org默认将一个换行符转换为空格，但中文不需要这个空格，删除。
+      (setq string
+            (replace-regexp-in-string
+             (format "\\(%s\\) *\n *\\(%s\\)" regexp regexp)
+             "\\1\\2" string))
+      ;; 删除粗体之前的空格
+      (setq string
+            (replace-regexp-in-string
+             (format "\\(%s\\) +\\(<\\)" regexp)
+             "\\1\\2" string))
+      ;; 删除粗体之后的空格
+      (setq string
+            (replace-regexp-in-string
+             (format "\\(>\\) +\\(%s\\)" regexp)
+             "\\1\\2" string))
+      string)))
+
+(add-to-list 'org-export-filter-paragraph-functions
+             'eh-org-clean-space)
+#+END_SRC
+
+添加一个 emacs 命令，用来 tangle 代码和导出 README。这里将当前文档
+导出为 marokdown 格式和 ascii 格式。前者用于 github，后者用于 emacs
+包管理器。
+#+BEGIN_SRC emacs-lisp :results output silent :eval yes
+(defun pyim-tangle ()
+  (interactive)
+  (org-export-to-file 'md "README.md")
+  (org-export-to-file 'ascii "README.txt")
+  (org-babel-tangle))
+#+END_SRC
+
+emacs 包管理系统显示源代码文件 Commentary 部分的信息，这里使用 org-mode
+自带的noweb 功能，将 ascii 格式的 README 文档插入到 Chinese-pyim.el 的
+Commentary 部分，便于维护一致的文档。
+#+NAME: insert-readme
+#+BEGIN_SRC emacs-lisp :results value silent :eval yes
+(if (file-exists-p "README.txt")
+    (with-temp-buffer
+      (insert-file-contents "README.txt")
+      (buffer-string))
+  "")
+#+END_SRC
 
 * 简介
 Chinese-pyim 是 Chinese Pinyin Input Method 的缩写。是emacs环境下的一个中文拼音输入法。
@@ -66,6 +122,36 @@ Chinese-pyim 的目标是： *尽最大的努力成为一个好用的 emacs 备�
 ;; (global-set-key (kbd "C-;") 'pyim-toggle-full-width-punctuation)
 ;; (global-set-key (kbd "C-;") 'pyim-punctuation-translate-at-point)
 #+END_SRC
+
+** 首次运行 Chinese-pyim                                           :noexport:
+ 如果用户没有安装任何词库，第一次运行会出现提示，以帮助用户安装词库，
+ 在 Chinese-pyim.el 中使用一个变量保存这些信息。
+
+ #+NAME: pyim-dict-help-string
+ #+BEGIN_SRC emacs-lisp :results value silent :noweb yes
+ (defvar pyim-dict-help-string
+   "Chinese-pyim 没有可用词库！！！
+
+ 拼音词库是 Chinese-pyim 使用顺手与否的关键。根据经验估计：
+ 1. 当词库词条超过100万时(词库文件>20M)，Chinese-pyim 选词频率大大降低。
+ 2. 当词库词条超过100万时，Chinese-pyim 中文输入体验可以达到搜狗输入法的80%%。
+
+ 赶时间的朋友可以直接下载其他 Chinese-pyim 用户现成的拼音词库，比如，某个同学
+ 自己使用的词库：BigDict，这个词库词条数量大于100万，文件大小大于20M，可以显著
+ 增强 Chinese-pyim 的输入体验，(注意：请使用另存为，不要直接点击链接)。
+
+   https://github.com/tumashu/chinese-pyim-bigdict/blob/master/pyim-bigdict.txt?raw=true
+
+ 下载上述拼音词库后，运行 `pyim-add-dict' ，按照命令提示，将词库文件信息添加到
+  `pyim-dicts' 中，最后运行命令 `pyim-restart' 或者重启emacs。。
+
+ 喜欢折腾的用户可以从下面几个途径获得 Chinese-pyim 更详细的信息。
+ 1. 使用 `C-h v pyim-dicts' 了解 `Chinese-pyim' 词库文件格式，
+ 2. 了解如何导入其它输入法的词库。
+    1. 使用 package 管理器查看 Chinese-pyim 包的简介
+    2. 阅读 chinese-pyim.el 文件 Commentary
+    3. 查看 Chinese-pyim 在线 README：https://github.com/tumashu/chinese-pyim")
+ #+END_SRC
 
 * 使用
 ** 常用快捷键
@@ -141,7 +227,7 @@ C-h v pyim-fuzzy-pinyin-adjust-function
 (setq pyim-company-predict-words-number 10)
 #+END_SRC
 
-* 其他 Tips
+* Tips
 ** Chinese-pyim 重要变量介绍
 1. `pyim-personal-file' Chinese-pyim 个人词频文件设置变量。
 2. `pyim-dicts'  Chinese-pyim 词库设置变量。
@@ -231,24 +317,6 @@ Chinese-pyim 下面两个命令可以为中文词条添加拼音Code，从而生
 1. `pyim-hanzi2pinyin' （考虑多音字）
 2. `pyim-hanzi2pinyin-simple'  （不考虑多音字）
 
-* 文档处理工具                                                     :noexport:
-#+BEGIN_SRC emacs-lisp :results output silent
-(defun pyim-tangle ()
-  (interactive)
-  (org-export-to-file 'md "README.md")
-  (org-export-to-file 'ascii "README.txt")
-  (org-babel-tangle))
-#+END_SRC
-
-#+NAME: insert-readme
-#+BEGIN_SRC emacs-lisp :results value silent :var readme-file="README.txt"
-(if (file-exists-p readme-file)
-    (with-temp-buffer
-      (insert-file-contents readme-file)
-      (buffer-string))
-  "")
-#+END_SRC
-
 * 代码                                                             :noexport:
 ** chinese-pyim.el
 *** 文件HEAD
@@ -288,7 +356,7 @@ Chinese-pyim 下面两个命令可以为中文词条添加拼音Code，从而生
 #+END_SRC
 
 *** 自定义变量
-#+BEGIN_SRC emacs-lisp :tangle chinese-pyim.el
+#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (require 'cl-lib)
 (require 'help-mode)
 
@@ -431,7 +499,7 @@ Chinese-pyim 使用这个 hook 处理联想词，用户可以使用
 #+END_SRC
 
 *** 内部变量
-#+BEGIN_SRC emacs-lisp :tangle chinese-pyim.el
+#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 ;;;  variable declare
 (defvar pyim-title "灵拼" "Chinese-pyim 在 mode-line 中显示的名称。")
 (defvar pyim-buffer-name " *Chinese-pyim*")
@@ -507,28 +575,7 @@ If you don't like this funciton, set the variable to nil")
 (defvar pyim-position nil)
 (defvar pyim-pinyin-list nil)
 
-(defvar pyim-dict-help-string
-  "Chinese-pyim 没有可用词库！！！
-
-拼音词库是 Chinese-pyim 使用顺手与否的关键。根据经验估计：
-1. 当词库词条超过100万时(词库文件>20M)，Chinese-pyim 选词频率大大降低。
-2. 当词库词条超过100万时，Chinese-pyim 中文输入体验可以达到搜狗输入法的80%。
-
-赶时间的朋友可以直接下载其他 Chinese-pyim 用户现成的拼音词库，比如，某个同学
-自己使用的词库：BigDict，这个词库词条数量大于100万，文件大小大于20M，可以显著
-增强 Chinese-pyim 的输入体验，(注意：请使用另存为，不要直接点击链接)。
-
-  https://github.com/tumashu/chinese-pyim-bigdict/blob/master/pyim-bigdict.txt?raw=true
-
-下载上述拼音词库后，运行 `pyim-add-dict' ，按照命令提示，将词库文件信息添加到
- `pyim-dicts' 中，最后运行命令 `pyim-restart' 或者重启emacs。。
-
-喜欢折腾的用户可以从下面几个途径获得 Chinese-pyim 更详细的信息。
-1. 使用 `C-h v pyim-dicts' 了解 `Chinese-pyim' 词库文件格式，
-2. 了解如何导入其它输入法的词库。
-   1. 使用 package 管理器查看 Chinese-pyim 包的简介
-   2. 阅读 chinese-pyim.el 文件 Commentary
-   3. 查看 Chinese-pyim 在线 README：https://github.com/tumashu/chinese-pyim")
+<<pyim-dict-help-string>>
 
 (defvar pyim-mode-map
   (let ((map (make-sparse-keymap))

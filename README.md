@@ -23,7 +23,7 @@
 <li><a href="#sec-7-6">7.6. [实验特性] 词语联想</a></li>
 </ul>
 </li>
-<li><a href="#sec-8">8. 其他 Tips</a>
+<li><a href="#sec-8">8. Tips</a>
 <ul>
 <li><a href="#sec-8-1">8.1. Chinese-pyim 重要变量介绍</a></li>
 <li><a href="#sec-8-2">8.2. 如何添加自定义拼音词库</a>
@@ -204,7 +204,7 @@ Chinese-pyim 使用一个比较 **粗糙** 的方法处理 **模糊音** ，要�
 
     (setq pyim-company-predict-words-number 10)
 
-# 其他 Tips<a id="sec-8"></a>
+# Tips<a id="sec-8"></a>
 
 ## Chinese-pyim 重要变量介绍<a id="sec-8-1"></a>
 
