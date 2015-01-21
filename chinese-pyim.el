@@ -25,10 +25,9 @@
 
 ;;; Commentary:
 ;;
-;; # 简介 #
+;; # 背景 #
 ;; Chinese-pyim 是 Chinese Pinyin Input Method 的缩写。是emacs环境下的一个中文拼音输入法。
 ;;
-;; # 背景 #
 ;; Chinese-pyim 的代码源自 emacs-eim。emacs-eim是一个emacs中文输入法框架，使用这
 ;; 个框架可以自定义输入法，emacs-eim 软件包本身就包含许多不同的中文输入法，比如：
 ;; 五笔输入法，仓颉输入法以及二笔输入法等等。
@@ -62,7 +61,7 @@
 ;; 1. Chinese-pyim 只是一个拼音输入法，安装配置方便快捷，默认只通过添加词库的方式优化输入法。
 ;; 2. Chinese-pyim 只使用最简单的文本词库格式，可以快速方便的利用其他输入法的词库。
 ;;
-;; # 安装 #
+;; # 安装 Chinese-pyim #
 ;; 1. 配置melpa源，参考：http://melpa.org/#/getting-started
 ;; 2. M-x package-install RET chinese-pyim RET
 ;; 3. 在emacs配置文件中（比如: ~/.emacs）添加如下代码：
@@ -70,9 +69,99 @@
 ;; ```lisp
 ;; (require 'chinese-pyim)
 ;; ```
-;; # 配置 #
+;; # 配置 Chinese-pyim #
+;; ## 添加词库文件 ##
+;; 可以使用三种方法为 Chinese-pyim 添加词库，具体方式请参考 “Tips:如何添加自定义词库” 章节。
 ;;
-;; ## 添加拼音词库 ##
+;; 注意：每一个词库文件必须按行排序（准确的说，是按每一行的拼音code排序），
+;; 因为`Chinese-pyim' 寻找词条时，使用二分法来优化速度，而二分法工作的前提
+;; 就是对文件按行排序。具体细节请参考：`pyim-bisearch-word' 。
+;; 所以，当词库排序不正确时（比如：用户手动调整词库文件后），记得运行函数
+;; `pyim-update-dict-file' 重新对文件排序。
+;;
+;; ## 激活 Chinese-pyim ##
+;;
+;; ```lisp
+;; (setq default-input-method "chinese-pyim")
+;; (global-set-key (kbd "C-<SPC>") 'toggle-input-method)
+;; ;; (global-set-key (kbd "C-;") 'pyim-insert-ascii)
+;; ;; (global-set-key (kbd "C-;") 'pyim-toggle-full-width-punctuation)
+;; ;; (global-set-key (kbd "C-;") 'pyim-punctuation-translate-at-point)
+;;
+;; ```
+;;
+;; # 使用 Chinese-pyim #
+;;
+;; # 常用快捷键 #
+;; |------+----------|
+;; | 按键 | 功能     |
+;; |------+----------|
+;; | C-n  | 向下翻页 |
+;; | C-p  | 向上翻页 |
+;; | C-c  | 取消输入 |
+;; | SPC  | 确定输入 |
+;; | RET  | 字母上屏 |
+;; |------+----------|
+;;
+;; # 设置模糊音 #
+;; Chinese-pyim 使用一个比较 *粗糙* 的方法处理 *模糊音*，要了解具体细节，请
+;; 运行： C-h v pyim-fuzzy-pinyin-adjust-function
+;;
+;; ## 切换全角标点与半角标点 ##
+;;
+;; 1. 第一种方法：使用命令 `pyim-toggle-full-width-punctuation'，全局切换。
+;; 2. 第二种方法：使用命令 `pyim-punctuation-translate-at-point' 只切换光标处标点的样式。
+;; 3. 第三种方法：设置变量 `pyim-translate-trigger-char'。输入变量设定的字符会切换光标处标点的样式。
+;;
+;; ## 手动加词和删词 ##
+;;
+;; 1. `pyim-create-word-without-pinyin' 直接将一个中文词条加入个人词库的函数，用于编程环境。
+;; 2. `pyim-create-word-at-point:<N>char' 这是一组命令，从光标前提取N个汉字字符组成字符串，
+;;     并将其加入个人词库。
+;; 3. `pyim-create-word-from-region' 如果用户已经高亮选择了某个中文字符串，那么这个命令直接
+;;     将这个字符串加入个人词库，否则，这个命令会高亮选择光标前两个汉字字符，等待用户调整选区。
+;;     建议用户为其设定一个快捷键。
+;; 4. `pyim-translate-trigger-char' 以默认设置为例：在“我爱吃红烧肉”后输入“5v” 可以将
+;;     “爱吃红烧肉”这个词条保存到用户个人文件。
+;; 5. `pyim-automatic-generate-word' 将此选项设置为 t 时，Chinese-pyim 开启自动组词功能。
+;;     实验特性，不建议普通用户使用，
+;; 6. `pyim-delete-word-from-personal-buffer' 从个人文件对应的 buffer 中删除当前高亮选择的词条。
+;;
+;; ## 快速切换词库 ##
+;; 用户可以自定义类似的命令来实现快速切换拼音词库。
+;; ```lisp
+;; (defun pyim-use-dict:bigdict ()
+;;   (interactive)
+;;   (setq pyim-dicts
+;;         '((:name "BigDict"
+;;                  :file "/path/to/pyim-bigdict.txt"
+;;                  :coding utf-8-unix)))
+;;   (pyim-restart-1 t))
+;; ```
+;; ## [ 实验特性 ] 词语联想 ##
+;;
+;; `Chinese-pyim' 增加了两个 `company-mode' 补全后端来实现 *联想词* 输入功能：
+;;
+;; 1. `pyim-company-dabbrev' 是 `company-dabbrev' 的中文优化版，适用于补全其它 buffer 中的中文词语。
+;; 2. `pyim-company-predict-words' 可以从 Chinese-pyim 词库中搜索与当前中文词条相近的词条。
+;;
+;; 安装和使用方式：
+;;
+;; 1. 安装 `company-mode' 扩展包。
+;; 2. 在 emacs 配置中添加如下几行代码：
+;; ```lisp
+;; (require 'chinese-pyim-company)
+;; ;; ;; 从词库中搜索10个联想词。
+;; ;; (setq pyim-company-predict-words-number 10)
+;;
+;; # Chinese-pyim 其他 Tips #
+;;
+;; ## Chinese-pyim 重要变量介绍 ##
+;;
+;; 1. `pyim-personal-file' Chinese-pyim 个人词频文件设置变量。
+;; 2. `pyim-dicts'  Chinese-pyim 词库设置变量。
+;;
+;; ## 如何添加自定义拼音词库 ##
 ;; Chinese-pyim 默认没有携带任何拼音词库，如果不配置拼音词库，Chinese-pyim将不能正常工作。
 ;; 这样做的原因有两个：
 ;;
@@ -135,29 +224,7 @@
 ;;
 ;; 最后将生成的词库按上述方法添加到 Chinese-pyim 中就可以了。
 ;;
-;; ## 词库文件编辑后注意事项 ##
-;; 每一个词库文件必须按行排序（准确的说，是按每一行的拼音code排序），
-;; 因为`Chinese-pyim' 寻找词条时，使用二分法来优化速度，而二分法工作的前提
-;; 就是对文件按行排序。具体细节请参考：`pyim-bisearch-word' 。
-;; 所以，当词库排序不正确时（比如：用户手动调整词库文件后），记得运行函数
-;; `pyim-update-dict-file' 重新对文件排序。
-;;
-;; ## 激活 Chinese-pyim ##
-;;
-;; ```lisp
-;; (setq default-input-method "chinese-pyim")
-;; (global-set-key (kbd "C-<SPC>") 'toggle-input-method)
-;; ;; (global-set-key (kbd "C-;") 'pyim-insert-ascii)
-;; ;; (global-set-key (kbd "C-;") 'pyim-toggle-full-width-punctuation)
-;; ;; (global-set-key (kbd "C-;") 'pyim-punctuation-translate-at-point)
-;;
-;; ```
-;; 切换全角半角标点符号使用命令: M-x pyim-toggle-full-width-punctuation
-;;
-;; Chinese-pyim 使用一个比较 *粗糙* 的方法处理 *模糊音*，要了解具体细节，请
-;; 运行： C-h v pyim-fuzzy-pinyin-adjust-function
-;;
-;; # 如何手动安装和管理词库 #
+;; ## 如何手动安装和管理词库 ##
 ;; 这里假设有两个词库文件：
 ;;
 ;; 1. /path/to/pyim-dict1.txt
@@ -170,70 +237,13 @@
 ;;       '((:name "dict1" :file "/path/to/pyim-dict1.txt" :coding gbk-dos)
 ;;         (:name "dict2" :file "/path/to/pyim-dict2.txt" :coding gbk-dos)))
 ;; ```
-;;
-;; # 其他 Tips #
-;;
-;; ## 如何快速切换全角标点与半角标点 ##
-;; 1. 第一种方法：使用命令 `pyim-toggle-full-width-punctuation'，全局切换。
-;; 2. 第二种方法：使用命令 `pyim-punctuation-translate-at-point' 只切换光标处标点的样式。
-;; 3. 第三种方法：设置变量 `pyim-translate-trigger-char'。输入变量设定的字符会切换光标处标点的样式。
-;;
-;; ## 了解 Chinese-pyim 个人词频文件设置的细节 ##
-;;```
-;; C-h v pyim-personal-file
-;;```
-;;
-;; ## 了解 Chinese-pyim 词库设置细节 ##
-;;```
-;;C-h v pyim-dicts
-;;```
+;; ```
 ;;
 ;; ## 将汉字字符串转换为拼音字符串 ##
-;;    1. `pyim-hanzi2pinyin' （考虑多音字）
-;;    2. `pyim-hanzi2pinyin-simple'  （不考虑多音字）
+;; 下面两个函数可以将中文字符串转换的拼音字符串或者列表，用于 emacs-lisp 编程。
 ;;
-;; ## 实现快速切换词库的功能 ##
-;; 可以自定义类似的命令：
-;; ```lisp
-;; (defun pyim-use-dict:bigdict ()
-;;   (interactive)
-;;   (setq pyim-dicts
-;;         '((:name "BigDict"
-;;                  :file "/path/to/pyim-bigdict.txt"
-;;                  :coding utf-8-unix)))
-;;   (pyim-restart-1 t))
-;; ```
-;;
-;; ## Chinese-pyim 开启联想词输入模式 ##
-;;
-;; `Chinese-pyim' 增加了两个 `company-mode' 补全后端来实现 *联想词* 输入功能：
-;;
-;; 1. `pyim-company-dabbrev' 是 `company-dabbrev' 的中文优化版，适用于补全其它 buffer 中的中文词语。
-;; 2. `pyim-company-predict-words' 可以从 Chinese-pyim 词库中搜索与当前中文词条相近的词条。
-;;
-;; 安装和使用方式：
-;;
-;; 1. 安装 `company-mode' 扩展包。
-;; 2. 在 emacs 配置中添加如下几行代码：
-;; ```lisp
-;; (require 'chinese-pyim-company)
-;; ;; ;; 从词库中搜索10个联想词。
-;; ;; (setq pyim-company-predict-words-number 10)
-;; ```
-;; ## 如何手动加词和删词 ##
-;;
-;; 1. `pyim-create-word-without-pinyin' 直接将一个中文词条加入个人词库的函数，用于编程环境。
-;; 2. `pyim-create-word-at-point:<N>char' 这是一组命令，从光标前提取N个汉字字符组成字符串，
-;;     并将其加入个人词库。
-;; 3. `pyim-create-word-from-region' 如果用户已经高亮选择了某个中文字符串，那么这个命令直接
-;;     将这个字符串加入个人词库，否则，这个命令会高亮选择光标前两个汉字字符，等待用户调整选区。
-;;     建议用户为其设定一个快捷键。
-;; 4. `pyim-translate-trigger-char' 以默认设置为例：在“我爱吃红烧肉”后输入“5v” 可以将
-;;     “爱吃红烧肉”这个词条保存到用户个人文件。
-;; 5. `pyim-automatic-generate-word' 将此选项设置为 t 时，Chinese-pyim 开启自动组词功能。
-;;     实验特性，不建议普通用户使用，
-;; 6. `pyim-delete-word-from-personal-buffer' 从个人文件对应的 buffer 中删除当前高亮选择的词条。
-;;
+;; 1. `pyim-hanzi2pinyin' （考虑多音字）
+;; 2. `pyim-hanzi2pinyin-simple'  （不考虑多音字）
 
 ;;; Code:
 (require 'cl-lib)
