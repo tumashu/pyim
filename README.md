@@ -1,45 +1,26 @@
-<div id="table-of-contents">
-<h2>&#30446;&#24405;</h2>
-<div id="text-table-of-contents">
-<ul>
-<li><a href="#sec-1">1. 简介</a></li>
-<li><a href="#sec-2">2. 背景</a></li>
-<li><a href="#sec-3">3. 目标</a></li>
-<li><a href="#sec-4">4. 特点</a></li>
-<li><a href="#sec-5">5. 安装</a></li>
-<li><a href="#sec-6">6. 配置</a>
-<ul>
-<li><a href="#sec-6-1">6.1. 添加词库文件</a></li>
-<li><a href="#sec-6-2">6.2. 激活 Chinese-pyim</a></li>
-</ul>
-</li>
-<li><a href="#sec-7">7. 使用</a>
-<ul>
-<li><a href="#sec-7-1">7.1. 常用快捷键</a></li>
-<li><a href="#sec-7-2">7.2. 设置模糊音</a></li>
-<li><a href="#sec-7-3">7.3. 切换全角标点与半角标点</a></li>
-<li><a href="#sec-7-4">7.4. 手动加词和删词</a></li>
-<li><a href="#sec-7-5">7.5. 快速切换词库</a></li>
-<li><a href="#sec-7-6">7.6. [实验特性] 词语联想</a></li>
-</ul>
-</li>
-<li><a href="#sec-8">8. Tips</a>
-<ul>
-<li><a href="#sec-8-1">8.1. Chinese-pyim 重要变量介绍</a></li>
-<li><a href="#sec-8-2">8.2. 如何添加自定义拼音词库</a>
-<ul>
-<li><a href="#sec-8-2-1">8.2.1. 第一种方式</a></li>
-<li><a href="#sec-8-2-2">8.2.2. 第二种方式</a></li>
-<li><a href="#sec-8-2-3">8.2.3. 第三种方式</a></li>
-</ul>
-</li>
-<li><a href="#sec-8-3">8.3. 如何手动安装和管理词库</a></li>
-<li><a href="#sec-8-4">8.4. 将汉字字符串转换为拼音字符串</a></li>
-</ul>
-</li>
-</ul>
-</div>
-</div>
+- [简介](#sec-1)
+- [背景](#sec-2)
+- [目标](#sec-3)
+- [特点](#sec-4)
+- [安装](#sec-5)
+- [配置](#sec-6)
+  - [添加词库文件](#sec-6-1)
+  - [激活 Chinese-pyim](#sec-6-2)
+- [使用](#sec-7)
+  - [常用快捷键](#sec-7-1)
+  - [设置模糊音](#sec-7-2)
+  - [切换全角标点与半角标点](#sec-7-3)
+  - [手动加词和删词](#sec-7-4)
+  - [快速切换词库](#sec-7-5)
+  - [[实验特性] 词语联想](#sec-7-6)
+- [Tips](#sec-8)
+  - [Chinese-pyim 重要变量介绍](#sec-8-1)
+  - [如何添加自定义拼音词库](#sec-8-2)
+    - [第一种方式](#sec-8-2-1)
+    - [第二种方式](#sec-8-2-2)
+    - [第三种方式](#sec-8-2-3)
+  - [如何手动安装和管理词库](#sec-8-3)
+  - [将汉字字符串转换为拼音字符串](#sec-8-4)
 
 
 # 简介<a id="sec-1"></a>
@@ -83,7 +64,9 @@ Chinese-pyim 的目标是： **尽最大的努力成为一个好用的 emacs 备
 2.  M-x package-install RET chinese-pyim RET
 3.  在emacs配置文件中（比如: ~/.emacs）添加如下代码：
 
-    (require 'chinese-pyim)
+```emacs-lisp
+(require 'chinese-pyim)
+```
 
 # 配置<a id="sec-6"></a>
 
@@ -96,11 +79,13 @@ Chinese-pyim 的目标是： **尽最大的努力成为一个好用的 emacs 备
 
 ## 激活 Chinese-pyim<a id="sec-6-2"></a>
 
-    (setq default-input-method "chinese-pyim")
-    (global-set-key (kbd "C-<SPC>") 'toggle-input-method)
-    ;; (global-set-key (kbd "C-;") 'pyim-insert-ascii)
-    ;; (global-set-key (kbd "C-;") 'pyim-toggle-full-width-punctuation)
-    ;; (global-set-key (kbd "C-;") 'pyim-punctuation-translate-at-point)
+```emace-lisp
+(setq default-input-method "chinese-pyim")
+(global-set-key (kbd "C-<SPC>") 'toggle-input-method)
+;; (global-set-key (kbd "C-;") 'pyim-insert-ascii)
+;; (global-set-key (kbd "C-;") 'pyim-toggle-full-width-punctuation)
+;; (global-set-key (kbd "C-;") 'pyim-punctuation-translate-at-point)
+```
 
 # 使用<a id="sec-7"></a>
 
@@ -178,13 +163,15 @@ Chinese-pyim 使用一个比较 **粗糙** 的方法处理 **模糊音** ，要�
 
 用户可以自定义类似的命令来实现快速切换拼音词库。
 
-    (defun pyim-use-dict:bigdict ()
-      (interactive)
-      (setq pyim-dicts
-            '((:name "BigDict"
-                     :file "/path/to/pyim-bigdict.txt"
-                     :coding utf-8-unix)))
-      (pyim-restart-1 t))
+```emacs-lisp
+(defun pyim-use-dict:bigdict ()
+  (interactive)
+  (setq pyim-dicts
+        '((:name "BigDict"
+                 :file "/path/to/pyim-bigdict.txt"
+                 :coding utf-8-unix)))
+  (pyim-restart-1 t))
+```
 
 ## [实验特性] 词语联想<a id="sec-7-6"></a>
 
@@ -198,11 +185,15 @@ Chinese-pyim 使用一个比较 **粗糙** 的方法处理 **模糊音** ，要�
 1.  安装 \`company-mode' 扩展包。
 2.  在 emacs 配置中添加如下几行代码：
 
-    (require 'chinese-pyim-company)
+```emacs-lisp
+(require 'chinese-pyim-company)
+```
 
 可以通过 pyim-company-predict-words-number 来设置联想词的数量，比如：从词库中搜索10个联想词可以设置为：。
 
-    (setq pyim-company-predict-words-number 10)
+```emacs-lisp
+(setq pyim-company-predict-words-number 10)
+```
 
 # Tips<a id="sec-8"></a>
 
@@ -277,9 +268,11 @@ Chinese-pyim 下面两个命令可以为中文词条添加拼音Code，从而生
 
 在~/.emacs文件中添加如下一行配置。
 
-    (setq pyim-dicts
-          '((:name "dict1" :file "/path/to/pyim-dict1.txt" :coding gbk-dos)
-            (:name "dict2" :file "/path/to/pyim-dict2.txt" :coding gbk-dos)))
+```emacs-lisp
+(setq pyim-dicts
+      '((:name "dict1" :file "/path/to/pyim-dict1.txt" :coding gbk-dos)
+        (:name "dict2" :file "/path/to/pyim-dict2.txt" :coding gbk-dos)))
+```
 
 ## 将汉字字符串转换为拼音字符串<a id="sec-8-4"></a>
 

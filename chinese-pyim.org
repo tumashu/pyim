@@ -42,10 +42,11 @@
 导出为 marokdown 格式和 ascii 格式。前者用于 github，后者用于 emacs
 包管理器。
 #+BEGIN_SRC emacs-lisp :results output silent :eval yes
+(require 'ox-gfm)
 (defun pyim-tangle ()
   (interactive)
   (let ((org-export-select-tags '("README" "readme")))
-    (org-export-to-file 'md "README.md")
+    (org-export-to-file 'gfm "README.md")
     (org-export-to-file 'ascii "README.txt")
     (org-babel-tangle)))
 #+END_SRC
