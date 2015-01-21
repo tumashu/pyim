@@ -198,8 +198,10 @@ Chinese-pyim 使用一个比较 **粗糙** 的方法处理 **模糊音** ，要�
 2.  在 emacs 配置中添加如下几行代码：
 
     (require 'chinese-pyim-company)
-    ;; ;; 从词库中搜索10个联想词。
-    ;; (setq pyim-company-predict-words-number 10)
+
+可以通过 pyim-company-predict-words-number 来设置联想词的数量，比如：从词库中搜索10个联想词可以设置为：。
+
+    (setq pyim-company-predict-words-number 10)
 
 # 其他 Tips<a id="sec-8"></a>
 
