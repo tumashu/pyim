@@ -318,9 +318,8 @@ Chinese-pyim 下面两个命令可以为中文词条添加拼音Code，从而生
 1. `pyim-hanzi2pinyin' （考虑多音字）
 2. `pyim-hanzi2pinyin-simple'  （不考虑多音字）
 
-* 代码                                                        :noexport:code:
-** chinese-pyim.el
-*** 文件HEAD
+* 代码：chinese-pyim.el                                       :noexport:code:
+** 文件HEAD
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 ;;; chinese-pyim.el --- Chinese pinyin input method
 
@@ -356,7 +355,7 @@ Chinese-pyim 下面两个命令可以为中文词条添加拼音Code，从而生
 ;;; Code:
 #+END_SRC
 
-*** 自定义变量
+** 自定义变量
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (require 'cl-lib)
 (require 'help-mode)
@@ -499,7 +498,7 @@ Chinese-pyim 使用这个 hook 处理联想词，用户可以使用
   :group 'chinese-pyim)
 #+END_SRC
 
-*** 内部变量
+** 内部变量
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 ;;;  variable declare
 (defvar pyim-title "灵拼" "Chinese-pyim 在 mode-line 中显示的名称。")
@@ -647,7 +646,7 @@ If you don't like this funciton, set the variable to nil")
   (make-variable-buffer-local var)
   (put var 'permanent-local t))
 #+END_SRC
-*** 函数和命令
+** 函数和命令
 #+BEGIN_SRC emacs-lisp :tangle chinese-pyim.el
 (defun pyim-create-template-dict (file)
   "生成模版词库。"
@@ -2239,7 +2238,7 @@ Return the input string."
 
 ;;; chinese-pyim.el ends here
 #+END_SRC
-** chinese-pyim-company.el
+* 代码：chinese-pyim-company.el                               :noexport:code:
 #+BEGIN_SRC emacs-lisp :tangle chinese-pyim-company.el
 ;;; chinese-pyim-company.el --- Integrate company-mode with Chinese-pyim
 
