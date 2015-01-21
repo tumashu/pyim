@@ -44,9 +44,10 @@
 #+BEGIN_SRC emacs-lisp :results output silent :eval yes
 (defun pyim-tangle ()
   (interactive)
-  (org-export-to-file 'md "README.md")
-  (org-export-to-file 'ascii "README.txt")
-  (org-babel-tangle))
+  (let ((org-export-select-tags '("README" "readme")))
+    (org-export-to-file 'md "README.md")
+    (org-export-to-file 'ascii "README.txt")
+    (org-babel-tangle)))
 #+END_SRC
 
 emacs 包管理系统显示源代码文件 Commentary 部分的信息，这里使用 org-mode
@@ -61,9 +62,9 @@ Commentary 部分，便于维护一致的文档。
   "")
 #+END_SRC
 
-* 简介
+* 简介                                                               :README:
 Chinese-pyim 是 Chinese Pinyin Input Method 的缩写。是emacs环境下的一个中文拼音输入法。
-* 背景
+* 背景                                                               :README:
 Chinese-pyim 的代码源自 emacs-eim。emacs-eim是一个emacs中文输入法框架，使用这
 个框架可以自定义输入法，emacs-eim 软件包本身就包含许多不同的中文输入法，比如：
 五笔输入法，仓颉输入法以及二笔输入法等等。
@@ -84,7 +85,7 @@ Window平台下的搜狗输入法，baidu输入法以及QQ输入法，linux平�
 
 所以，本人认为将 Chinese-eim 作为一个 *备用* 中文输入法是非常合适的，于是我 fork 了
 emacs-eim, 简化代码并更改名称为：chinese-pyim。
-* 目标
+* 目标                                                               :README:
 Chinese-pyim 的目标是： *尽最大的努力成为一个好用的 emacs 备用中文拼音输入法* 。
 具体可表现为三个方面：
 
@@ -92,10 +93,10 @@ Chinese-pyim 的目标是： *尽最大的努力成为一个好用的 emacs 备�
 2. Integration:  尽最大可能减少输入法切换频率，让中文输入不影响 emacs 的体验。
 3. Exchange:     尽最大可能简化 Chinese-pyim 使用其他优秀输入法的词库的难度和复杂度。
 
-* 特点
+* 特点                                                               :README:
 1. Chinese-pyim 只是一个拼音输入法，安装配置方便快捷，默认只通过添加词库的方式优化输入法。
 2. Chinese-pyim 只使用最简单的文本词库格式，可以快速方便的利用其他输入法的词库。
-* 安装
+* 安装                                                               :README:
 1. 配置melpa源，参考：http://melpa.org/#/getting-started
 2. M-x package-install RET chinese-pyim RET
 3. 在emacs配置文件中（比如: ~/.emacs）添加如下代码：
@@ -104,7 +105,7 @@ Chinese-pyim 的目标是： *尽最大的努力成为一个好用的 emacs 备�
 (require 'chinese-pyim)
 #+END_SRC
 
-* 配置
+* 配置                                                               :README:
 ** 添加词库文件
 可以使用三种方法为 Chinese-pyim 添加词库，具体方式请参考 [[如何添加自定义拼音词库]] 小结。
 
@@ -153,7 +154,7 @@ Chinese-pyim 的目标是： *尽最大的努力成为一个好用的 emacs 备�
     3. 查看 Chinese-pyim 在线 README：https://github.com/tumashu/chinese-pyim")
  #+END_SRC
 
-* 使用
+* 使用                                                               :README:
 ** 常用快捷键
 | 按键 | 功能     |
 |------+----------|
@@ -227,7 +228,7 @@ C-h v pyim-fuzzy-pinyin-adjust-function
 (setq pyim-company-predict-words-number 10)
 #+END_SRC
 
-* Tips
+* Tips                                                               :README:
 ** Chinese-pyim 重要变量介绍
 1. `pyim-personal-file' Chinese-pyim 个人词频文件设置变量。
 2. `pyim-dicts'  Chinese-pyim 词库设置变量。
@@ -317,7 +318,7 @@ Chinese-pyim 下面两个命令可以为中文词条添加拼音Code，从而生
 1. `pyim-hanzi2pinyin' （考虑多音字）
 2. `pyim-hanzi2pinyin-simple'  （不考虑多音字）
 
-* 代码                                                             :noexport:
+* 代码                                                        :noexport:code:
 ** chinese-pyim.el
 *** 文件HEAD
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
