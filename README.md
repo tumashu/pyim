@@ -33,7 +33,8 @@
 <li><a href="#sec-8-2-3">8.2.3. 第三种方式</a></li>
 </ul>
 </li>
-<li><a href="#sec-8-3">8.3. 将汉字字符串转换为拼音字符串</a></li>
+<li><a href="#sec-8-3">8.3. 如何手动安装和管理词库</a></li>
+<li><a href="#sec-8-4">8.4. 将汉字字符串转换为拼音字符串</a></li>
 </ul>
 </li>
 </ul>
@@ -267,7 +268,8 @@ Chinese-pyim 下面两个命令可以为中文词条添加拼音Code，从而生
 
 最后将生成的词库按上述方法添加到 Chinese-pyim 中就可以了。
 
-\## 如何手动安装和管理词库 ##
+## 如何手动安装和管理词库<a id="sec-8-3"></a>
+
 这里假设有两个词库文件：
 
 1.  /path/to/pyim-dict1.txt
@@ -279,7 +281,7 @@ Chinese-pyim 下面两个命令可以为中文词条添加拼音Code，从而生
           '((:name "dict1" :file "/path/to/pyim-dict1.txt" :coding gbk-dos)
             (:name "dict2" :file "/path/to/pyim-dict2.txt" :coding gbk-dos)))
 
-## 将汉字字符串转换为拼音字符串<a id="sec-8-3"></a>
+## 将汉字字符串转换为拼音字符串<a id="sec-8-4"></a>
 
 下面两个函数可以将中文字符串转换的拼音字符串或者列表，用于 emacs-lisp 编程。
 
