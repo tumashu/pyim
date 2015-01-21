@@ -189,7 +189,7 @@ Chinese-pyim 使用一个比较 **粗糙** 的方法处理 **模糊音** ，要�
 (require 'chinese-pyim-company)
 ```
 
-可以通过 pyim-company-predict-words-number 来设置联想词的数量，比如：从词库中搜索10个联想词可以设置为：。
+可以通过 pyim-company-predict-words-number 来设置联想词的数量，比如：从词库中搜索10个联想词可以设置为：
 
 ```emacs-lisp
 (setq pyim-company-predict-words-number 10)

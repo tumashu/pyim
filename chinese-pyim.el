@@ -254,7 +254,7 @@
 ;;   `----
 ;; 
 ;;   可以通过 pyim-company-predict-words-number 来设置联想词的数量，比如：
-;;   从词库中搜索10个联想词可以设置为：。
+;;   从词库中搜索10个联想词可以设置为：
 ;; 
 ;;   ,----
 ;;   | (setq pyim-company-predict-words-number 10)
