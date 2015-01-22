@@ -31,6 +31,7 @@
 ;;
 
 ;;; Code:
+
 (require 'company)
 (require 'company-dabbrev)
 

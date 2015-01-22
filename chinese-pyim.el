@@ -1014,7 +1014,6 @@ beginning of line"
           whole
         (pyim-page-end (pyim-add-completion))))))
 
-
 ;;;  handle function
 (defun pyim-handle-string ()
   (let ((str pyim-current-key)
