@@ -1875,15 +1875,6 @@ Return the input string."
      ;; 空格之前的字符什么也不输入。
      ((< char ? ) "")
 
-     ;; 空白字符+`pyim-translate-trigger-char' 可以。
-     ;; 来回切换 Chinese-pyim 中英文输入模式。
-     ((and (string-match-p "[[:blank:]]" str-before-1)
-           (string-match-p "[[:blank:]]" str-before-2)
-           (= char pyim-translate-trigger-char))
-      (delete-char -1)
-      (pyim-toggle-input-ascii)
-      "")
-
      ;; 这个部份与标点符号处理无关，主要用来快速保存用户自定义词条。
      ;; 比如：在一个中文字符串后输入 2v，可以将光标前两个中文字符
      ;; 组成的字符串，保存到个人词库。
