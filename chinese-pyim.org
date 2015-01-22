@@ -351,9 +351,7 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
 "
   :group 'chinese-pyim
   :type 'file)
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defcustom pyim-dicts nil
   "一个列表，用于保存 `Chinese-pyim' 的词库信息，每一个 element 都代表一条词库的信息。
 用户可以使用 `pyim-add-dict' 命令来添加词库信息，每一条词库信息都使用一个 plist 来
@@ -381,9 +379,7 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
 件后，记得运行 `pyim-update-dict-file' 来对文件排序。"
   :group 'chinese-pyim
   :type 'list)
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defcustom pyim-punctuation-dict
   '(("'" "‘" "’")
     ("\"" "“" "”")
@@ -419,9 +415,7 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
   "标点符号表。"
   :group 'chinese-pyim
   :type 'list)
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defcustom pyim-translate-trigger-char ?v
   "光标前面的字符为标点符号时，按这个字符可以切换前面的标点
 符号的样式（半角/全角）
@@ -527,16 +521,12 @@ Chinese-pyim 使用这个 hook 处理联想词，用户可以使用
 将当前光标前2个或者3个汉字组成的字符串，加入个人词库。"
   :group 'chinese-pyim
   :type 'boolean)
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defcustom pyim-page-length 9
   "每页显示的词条数目"
   :group 'chinese-pyim
   :type 'number)
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defface pyim-string-face '((t (:underline t)))
   "Face to show current string"
   :group 'chinese-pyim)
@@ -705,9 +695,7 @@ If you don't like this funciton, set the variable to nil")
           (message "自动创建 Chinese-pyim 文件: %s" file)))
     (error
      (warn "`Chinese-pyim' 模版词库创建失败！" ))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-dict-name-available-p (dict-name)
   "查询 `pyim-dicts' 中 `:name' 为 `dict-name' 的词库信息是否存在。
 这个函数主要用于词库 package。"
@@ -715,9 +703,7 @@ If you don't like this funciton, set the variable to nil")
              (let ((name (plist-get x :name)))
                (string= name dict-name)))
            pyim-dicts))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-dict-file-available-p (dict-file)
   "查询 `pyim-dicts' 中 `:file' 为 `dict-file' 的词库信息是否存在。
 这个函数主要用于词库 package。"
@@ -726,9 +712,7 @@ If you don't like this funciton, set the variable to nil")
                (string= (expand-file-name file)
                         (expand-file-name dict-file))))
            pyim-dicts))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-add-dict ()
   "为 `pyim-dicts' 添加词库信息，然后 `pyim-dicts' 将通过
 `customize-save-variable' 函数保存到用户emacs配置中"
@@ -758,9 +742,7 @@ If you don't like this funciton, set the variable to nil")
       (setq truncate-lines 1)
       (insert string)
       (goto-char (point-min)))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 ;;;  read file functions
 (defun pyim-load-file ()
   "为每一个词库文件创建一个buffer(这些buffer用户不可见)，然后将各个词库文件的内容插入
@@ -799,9 +781,7 @@ If you don't like this funciton, set the variable to nil")
         ;; 当用户没有设置词库信息时，弹出帮助信息。
         (pyim-show-help pyim-dict-help-string)))
     buflist))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-file-load-p (file buflist)
   "判断 file 是否已经加载"
   (cl-some (lambda (x)
@@ -816,9 +796,7 @@ If you don't like this funciton, set the variable to nil")
       (insert-file-contents file))
     `(("buffer" . ,(current-buffer))
       ("file" . ,file))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-save-personal-file ()
   "与 `pyim-personal-file' 文件对应的buffer在 `Chinese-pyim' 使用期间不断更新。
 这个函数将更新后的内容保存到`pyim-personal-file' 文件中，
@@ -844,9 +822,7 @@ If you don't like this funciton, set the variable to nil")
   (if (overlay-start pyim-overlay)
       (delete-region (overlay-start pyim-overlay)
                      (overlay-end pyim-overlay))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 ;;; steal from emms-compat.el. Is this a good idea?
 (when (not (fboundp 'emms-delete-if))
   (defun emms-delete-if (predicate seq)
@@ -867,29 +843,21 @@ whenever possible."
         (setq ptr (cdr ptr))
         (setq next (cdr ptr))))
     seq))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-subseq (list from &optional to)
   (if (null to) (nthcdr from list)
     (butlast (nthcdr from list) (- (length list) to))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-mod (x y)
   "like `mod', but when result is 0, return Y"
   (let ((base (mod x y)))
     (if (= base 0)
         y
       base)))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-string-emptyp (str)
   (not (string< "" str)))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-line-content (&optional seperaters omit-nulls)
   "用 SEPERATERS 分解当前行，所有参数传递给 split-string 函数"
   (let ((items   (split-string
@@ -899,21 +867,14 @@ whenever possible."
     (if omit-nulls
         (emms-delete-if 'pyim-string-emptyp items)
       items)))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defsubst pyim-delete-line ()
   (delete-region (line-beginning-position) (min (+ (line-end-position) 1)
                                                 (point-max))))
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defsubst pyim-append-string (str)
   "append STR to pyim-current-str"
   (setq pyim-current-str (concat pyim-current-str str)))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-dict-buffer-valid-p ()
   "粗略地确定当前 buffer 是否是一个有效的词库产生的 buffer。
 确定标准：
@@ -931,9 +892,7 @@ BUG: 这个函数需要进一步优化，使其判断更准确。"
         (beginning-of-line)
         (and (re-search-forward "[ \t]" (line-end-position) t)
              (re-search-forward "\\cc" (line-end-position) t))))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-bisearch-word (code start end)
   (let ((mid (/ (+ start end) 2))
         ccode)
@@ -947,9 +906,7 @@ BUG: 这个函数需要进一步优化，使其判断更准确。"
           (if (string< ccode code)
               (pyim-bisearch-word code mid end)
             (pyim-bisearch-word code start mid))))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-code-at-point ()
   "Before calling this function, be sure that the point is at the
 beginning of line"
@@ -957,9 +914,7 @@ beginning of line"
     (if (re-search-forward "[ \t]" (line-end-position) t)
         (buffer-substring-no-properties (line-beginning-position) (1- (point)))
       (error "文件类型错误！%s 的第 %d 行没有词条！" (buffer-name) (line-number-at-pos)))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-sort-and-remove-duplicates (words-list)
   "使用分词后的文章来制作拼音词库时，首先按照词条在文章中
 出现的频率对词条排序，然后再删除重复词条。"
@@ -972,9 +927,7 @@ beginning of line"
           (puthash x 1 count-table))))
     (sort list (lambda (a b) (> (gethash a count-table)
                                 (gethash b count-table))))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-remove-duplicates-word (&optional sort-by-freq)
   "制作拼音词库时，删除当前行重复出现的词条，
 当 `sort-by-freq' 为 t 时，首先按照当前行词条出现频率对词条排序，
@@ -1014,9 +967,7 @@ beginning of line"
           (message "%s for %s is not exists!" file bufname)
           (setq buflist (remove buf buflist)))))
     t))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-kill-buffers ()
   "删除所有词库文件对应的 buffer ，用于重启 Chinese-pyim 。"
   (let ((buflist pyim-buffer-list)
@@ -1031,43 +982,31 @@ beginning of line"
 (defun pyim-inactivate ()
   (interactive)
   (mapc 'kill-local-variable pyim-local-variable-list))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 ;;;  page format
 (defsubst pyim-choice (choice)
   (if (consp choice)
       (car choice)
     choice))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-add-completion ()
   "注意, pyim-add-completion-function 在没有完补全之前返回 nil, 在加完所
 有补全之后一定要返回一个 t"
   (if (functionp pyim-add-completion-function)
       (funcall pyim-add-completion-function)
     t))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-current-page ()
   (1+ (/ (1- pyim-current-pos) pyim-page-length)))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-total-page ()
   (1+ (/ (1- (length (car pyim-current-choices))) pyim-page-length)))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-page-start ()
   "计算当前所在页的第一个词条的位置"
   (let ((pos (min (length (car pyim-current-choices)) pyim-current-pos)))
     (1+ (- pos (pyim-mod pos pyim-page-length)))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-page-end (&optional finish)
   "计算当前所在页的最后一个词条的位置，如果 pyim-current-choices 用
 完，则检查是否有补全。如果 FINISH 为 non-nil，说明，补全已经用完了"
@@ -1105,9 +1044,7 @@ beginning of line"
                                       (replace-regexp-in-string
                                        "-" " " pyim-current-key)))
       (pyim-show))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-format-page ()
   "按当前位置，生成候选词条"
   (let* ((end (pyim-page-end))
@@ -1137,9 +1074,7 @@ beginning of line"
                                           c)))
                               choice) " ")))
     (pyim-show)))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-pylist-to-string (pylist)
   "把分解的拼音合并，以便进行查找"
   (mapconcat 'identity
@@ -1165,9 +1100,7 @@ beginning of line"
               (setq py (substring py 1))
             (setq shenmu "")))
         (cons shenmu py)))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-get-ym (py)
   "从一个拼音字符串中提出第一个韵母"
   (when (and py (string< "" py))
@@ -1185,9 +1118,7 @@ beginning of line"
           (setq py (concat (substring yunmu -1) py)
                 yunmu (substring yunmu 0 -1)))
       (cons yunmu py))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-get-charpy (py)
   "分解一个拼音字符串成声母和韵母。"
   (when (and py (string< "" py))
@@ -1198,9 +1129,7 @@ beginning of line"
               (and (string< "" (car ym)) (not (pyim-get chpy)))) ; 错误的拼音
           (cons sm "")
         (cons (cons (car sm) (car ym)) (cdr ym))))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 ;;; 处理输入的拼音
 (defun pyim-split-string (py)
   "把一个拼音字符串分解。如果含有 '，优先在这个位置中断，否则，自动分
@@ -1216,9 +1145,7 @@ beginning of line"
                                 (setq p (cdr chpy))))
                        pylist))
                    (split-string py "'")))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-validp (pylist)
   "检查得到的拼音是否含有声母为空，而韵母又不正确的拼音"
   (let ((valid t) py)
@@ -1229,9 +1156,7 @@ beginning of line"
                  (setq valid nil)
                (setq pylist (cdr pylist)))))
     valid))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-user-divide-pos (py)
   "检测出用户分割的位置"
   (setq py (replace-regexp-in-string "-" "" py))
@@ -1240,9 +1165,7 @@ beginning of line"
       (setq start (match-end 0))
       (setq poslist (append poslist (list (match-beginning 0)))))
     poslist))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-restore-user-divide (py pos)
   "按检测出的用户分解的位置，重新设置拼音"
   (let ((i 0) (shift 0) cur)
@@ -1279,9 +1202,7 @@ beginning of line"
         (setq words (pyim-possible-words wordspy)))
     (setq chars (pyim-get (concat (caar pylist) (cdar pylist)))
           choice (append words chars))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-possible-words (wordspy)
   "根据拼音得到可能的词组。例如：
   (pyim-possible-words '((\"p-y\" (\"p\" . \"in\") (\"y\" . \"\"))))
@@ -1297,9 +1218,7 @@ beginning of line"
                                             (propertize w 'py (list word)))
                                           (pyim-get word))))))
     words))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-possible-words-py (pylist)
   "所有可能的词组拼音。从第一个字开始，每个字断开形成一个拼音。如果是
 完整拼音，则给出完整的拼音，如果是给出声母，则为一个 CONS CELL，CAR 是
@@ -1329,9 +1248,7 @@ beginning of line"
               pys (append pys (list (cons smpy wordlist))))))
     ;; (message "%s: %s" pys wordlist))
     pys))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-match-word (wordlist wordspy)
   "给出一个词组列表和它的拼音列表，给出所有可能的词组，并加上一个 py
 属性。例如：
@@ -1361,17 +1278,13 @@ beginning of line"
         (if match
             (setq words (append words (list (propertize word 'py wordspy)))))))
     words))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-essential-py (py)
   "一个拼音中的主要部分，如果有声母返回声母，否则返回韵母"
   (if (string< "" (car py))
       (car py)
     (cdr py)))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 ;;;  create and rearrage
 (defun pyim-match-py (word pylist)
   (let (sym words fullpy abbpy chpy)
@@ -1427,9 +1340,7 @@ beginning of line"
       ;;    (message "insert: %s" words)
       (when (> (length words) 1)
         (insert (mapconcat 'identity words " ") "\n")))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-create-word (word pylist)
   ;; (message "create: %s, %s" word pylist)
   (let ((py (pyim-match-py word pylist))
@@ -1437,9 +1348,7 @@ beginning of line"
     (when py
       (pyim-intern-word word (car py))
       (pyim-intern-word word (cdr py)))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-create-word-without-pinyin (word)
   "将中文词条 `word' 添加拼音后，保存到 personal-file 对应的
 buffer中，当前词条追加到已有词条之后。"
@@ -1447,18 +1356,14 @@ buffer中，当前词条追加到已有词条之后。"
           (unless (string-match-p "[^ a-z-]" py)
             (pyim-intern-word word py t)))
         (pyim-hanzi2pinyin word nil "-" t)))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-delete-word (word)
   "将中文词条 `word' 从 personal-file 对应的 buffer 中删除"
   (mapc (lambda (py)
           (unless (string-match-p "[^ a-z-]" py)
             (pyim-intern-word word py nil t)))
         (pyim-hanzi2pinyin word nil "-" t)))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-chinese-string-at-point (&optional number)
   "获取光标一个中文字符串，字符数量为：`number'"
   (save-excursion
@@ -1473,9 +1378,7 @@ buffer中，当前词条追加到已有词条之后。"
                  (= (length string) number)
                  (not (string-match-p "\\CC" string)))
         string))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-create-word-at-point (&optional number silent)
   "将光标前字符数为 `number' 的中文字符串添加到个人词库中
 当 `silent' 设置为 t 是，不显示提醒信息。"
@@ -1484,30 +1387,22 @@ buffer中，当前词条追加到已有词条之后。"
       (pyim-create-word-without-pinyin string)
       (unless silent
         (message "将词条: \"%s\" 插入 personal file。" string)))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-create-word-at-point:2char ()
   "将光标前2个中文字符组成的字符串加入个人词库。"
   (interactive)
   (pyim-create-word-at-point 2))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-create-word-at-point:3char ()
   "将光标前3个中文字符组成的字符串加入个人词库。"
   (interactive)
   (pyim-create-word-at-point 3))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-create-word-at-point:4char ()
   "将光标前4个中文字符组成的字符串加入个人词库。"
   (interactive)
   (pyim-create-word-at-point 4))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-create-word-from-region ()
   "将高亮选择的字符串添加到个人词库，如果当前没有选择任何
 字符串，那么选择光标前两个字符。"
@@ -1528,9 +1423,7 @@ buffer中，当前词条追加到已有词条之后。"
     (push-mark (point))
     (backward-char 2)
     (setq mark-active t)))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-delete-word-from-personal-buffer ()
   "将高亮选择的字符从 personel-file 对应的 buffer 中删除。"
   (interactive)
@@ -1552,9 +1445,7 @@ buffer中，当前词条追加到已有词条之后。"
       (pyim-rearrange-1 word
                         (car py))
       (pyim-rearrange-1 word (cdr py)))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-rearrange-1 (word py)
   (pyim-intern-word word py))
 #+END_SRC
@@ -1598,9 +1489,7 @@ buffer中，当前词条追加到已有词条之后。"
         (setq pyim-current-choices (list (pyim-get-choices pylist))
               pyim-current-pos 1)
         (pyim-format-page)))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-number-select ()
   "如果没有可选项，插入数字，否则选择对应的词条"
   (interactive)
@@ -1618,9 +1507,7 @@ buffer中，当前词条追加到已有词条之后。"
           (pyim-select-current)))
     (pyim-append-string (char-to-string last-command-event))
     (pyim-terminate-translation)))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-next-page (arg)
   (interactive "p")
   (if (= (length pyim-current-key) 0)
@@ -1631,32 +1518,24 @@ buffer中，当前词条追加到已有词条之后。"
       (setq pyim-current-pos (if (> new 0) new 1)
             pyim-current-pos (pyim-page-start))
       (pyim-format-page))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-previous-page (arg)
   (interactive "p")
   (pyim-next-page (- arg)))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-quit-no-clear ()
   (interactive)
   (setq pyim-current-str (replace-regexp-in-string "-" ""
                                                    pyim-current-key))
   (pyim-terminate-translation))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-backward-kill-py ()
   (interactive)
   (string-match "['-][^'-]+$" pyim-current-key)
   (setq pyim-current-key
         (replace-match "" nil nil pyim-current-key))
   (pyim-handle-string))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-fuzzy-pinyin-adjust-1 ()
   (interactive)
   (cond
@@ -1696,15 +1575,11 @@ buffer中，当前词条追加到已有词条之后。"
                                                    (point-min)
                                                    (point-max)))))))
       (delete-dups words))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-get-char-code (char)
   "Get the code of the character CHAR"
   (symbol-value (intern-soft (char-to-string char) pyim-char-table)))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-make-char-table-1 (chars)
   (dolist (char chars)
     (let ((code (car char)))
@@ -1712,9 +1587,7 @@ buffer中，当前词条追加到已有词条之后。"
         (let* ((s (intern-soft c pyim-char-table))
                (py (and s (symbol-value s))))
           (set (intern c pyim-char-table) (append py (list code))))))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-make-char-table ()
   "Build pinyin char hashtable from quail/PY.el"
   (interactive)
@@ -1735,9 +1608,7 @@ buffer中，当前词条追加到已有词条之后。"
                          (replace-regexp-in-string
                           "\\(.\\)" "\\1_" hanzi-string)) "_"))))
         (pyim-make-char-table-1 pinyin-list)))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 ;;;  commands
 (defun pyim-delete-last-char ()
   (interactive)
@@ -1777,18 +1648,14 @@ Chinese-pyim 通过这个函数实现中文输入模式和英文输入模式的�
   (interactive)
   (setq pyim-current-str "")
   (pyim-terminate-translation))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-terminate-translation ()
   "Terminate the translation of the current key."
   (setq pyim-translating nil)
   (pyim-delete-region)
   (setq pyim-current-choices nil)
   (setq pyim-guidance-str ""))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-translate (char)
   (if (functionp pyim-translate-function)
       (funcall pyim-translate-function char)
@@ -1801,9 +1668,7 @@ Chinese-pyim 通过这个函数实现中文输入模式和英文输入模式的�
   (deactivate-input-method)
   (if (<= (minibuffer-depth) 1)
       (remove-hook 'minibuffer-exit-hook 'quail-exit-from-minibuffer)))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-setup-overlays ()
   (let ((pos (point)))
     (if (overlayp pyim-overlay)
@@ -1811,15 +1676,11 @@ Chinese-pyim 通过这个函数实现中文输入模式和英文输入模式的�
       (setq pyim-overlay (make-overlay pos pos))
       (if input-method-highlight-flag
           (overlay-put pyim-overlay 'face 'pyim-string-face)))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-delete-overlays ()
   (if (and (overlayp pyim-overlay) (overlay-start pyim-overlay))
       (delete-overlay pyim-overlay)))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-show ()
   (unless enable-multibyte-characters
     (setq pyim-current-key nil
@@ -1841,9 +1702,7 @@ Chinese-pyim 通过这个函数实现中文输入模式和英文输入模式的�
       ;; Show the guidance in echo area without logging.
       (let ((message-log-max nil))
         (message "%s" pyim-guidance-str)))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-make-guidance-frame ()
   "Make a new one-line frame for Quail guidance."
   (let* ((fparam (frame-parameters))
@@ -1858,9 +1717,7 @@ Chinese-pyim 通过这个函数实现中文输入模式和英文输入模式的�
                           (minibuffer)
                           (menu-bar-lines . 0) (tool-bar-lines . 0))
                         (cons (cons 'top newtop) fparam)))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-minibuffer-message (string)
   (message nil)
   (let ((point-max (point-max))
@@ -1902,9 +1759,7 @@ Chinese-pyim 通过这个函数实现中文输入模式和英文输入模式的�
         ;; conversion function should run this hook at a proper
         ;; timing.
         (run-hooks 'input-method-after-insert-chunk-hook)))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-start-translation (key)
   "Start translation of the typed character KEY by the current Quail package.
 Return the input string."
@@ -1959,9 +1814,7 @@ Return the input string."
     ;; Since KEY doesn't start any translation, just return it.
     ;; But translate KEY if necessary.
     (char-to-string key)))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-input-string-to-events (str)
   (let ((events (mapcar 'identity str)))
     (if (or (get-text-property 0 'advice str)
@@ -1969,18 +1822,14 @@ Return the input string."
         (setq events
               (nconc events (list (list 'pyim-advice str)))))
     events))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-advice (args)
   (interactive "e")
   (let* ((string (nth 1 args))
          (func (get-text-property 0 'advice string)))
     (if (functionp func)
         (funcall func string))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (global-set-key [pyim-advice] 'pyim-advice)
 #+END_SRC
 
@@ -2003,9 +1852,7 @@ Return the input string."
       (if switch-p
           (car punc)
         (nth 1 punc)))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-char-before-to-string (num)
   "得到光标前第 `num' 个字符，并将其转换为字符串。"
   (let* ((point (point))
@@ -2013,9 +1860,7 @@ Return the input string."
     (when (and (> point-before 0)
                (char-before point-before))
       (char-to-string (char-before point-before)))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-default-translate (char)
   (let* ((str (char-to-string char))
          ;; 注意：`str' 是 *待输入* 的字符对应的字符串。
@@ -2087,9 +1932,7 @@ Return the input string."
 
      ;; 当输入的字符不是标点符号时，原样插入。
      (t str))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-toggle-input-ascii ()
   "Chinese-pyim 切换中英文输入模式。同时调整标点符号样式。"
   (interactive)
@@ -2102,9 +1945,7 @@ Return the input string."
   (if pyim-input-ascii
       (setq current-input-method-title (concat pyim-title "-英文"))
     (setq current-input-method-title pyim-title)))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 ;; 切换光标处标点的样式（全角 or 半角）
 (defun pyim-punctuation-translate-at-point ()
   (interactive)
@@ -2118,9 +1959,7 @@ Return the input string."
       (if (string= current-char (car punc-list))
           (insert (pyim-return-proper-punctuation punc-list t))
         (insert (car punc-list))))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 ;;; 切换中英文标点符号
 (defun pyim-toggle-full-width-punctuation (arg)
   (interactive "P")
@@ -2140,15 +1979,11 @@ Return the input string."
   (let ((file-save-p
          (yes-or-no-p "正在重启 Chinese-pyim，需要保存 personal 文件的变动吗？ ")))
     (pyim-restart-1 file-save-p)))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-restart-1 (save-personal-file)
   "重启 Chinese-pyim，用于编程环境。"
   (pyim-start "Chinese-pyim" nil t save-personal-file))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-start (name &optional active-func restart save-personal-file)
   (interactive)
   (mapc 'kill-local-variable pyim-local-variable-list)
@@ -2185,9 +2020,7 @@ Return the input string."
       (funcall pyim-active-function))
   (when restart
     (message "Chinese-pyim 重启完成。")))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 ;;; 注册输入法
 (register-input-method "chinese-pyim" "euc-cn" 'pyim-start pyim-title)
 #+END_SRC
@@ -2257,16 +2090,12 @@ Return the input string."
     (if return-list
         output
       (mapconcat 'identity output " "))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 ;;;###autoload
 (defun pyim-hanzi2pinyin-simple (string &optional shou-zi-mu separator return-list)
   "简化版的 `pyim-hanzi2pinyin', 不处理多音字。"
   (pyim-hanzi2pinyin string shou-zi-mu separator t))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 ;;;###autoload
 (defun pyim-update-dict-file (&optional force sort-by-freq)
   "手动调整 Chinese-pyim 词库文件后，执行此命令可以：
@@ -2305,9 +2134,7 @@ Return the input string."
           (forward-line 1))
         (if (looking-at "^$")
             (delete-char -1))))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-convert-current-line-to-dict-format ()
   "将当前行对应的汉语词条转换为 Chinese-pyim 可以识别的词库格式（ni-hao 你好）。"
   (interactive)
@@ -2328,9 +2155,7 @@ Return the input string."
                (format "%s  %s" x line-content))) pinyin-list "\n"))
     (when (> (length insert-string) 1)
       (insert insert-string))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 ;;;###autoload
 (defun pyim-article2dict-chars ()
   "将一篇中文文章转换为 Chinese-pyim 可以识别的拼音词库。
@@ -2339,9 +2164,7 @@ Return the input string."
 这个命令可以得到一篇文章中常用单字词语的词频信息。"
   (interactive)
   (pyim-article2dict 'chars))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 ;;;###autoload
 (defun pyim-article2dict-words ()
   "将一篇中文文章转换为 Chinese-pyim 可以识别的拼音词库。
@@ -2354,9 +2177,7 @@ Return the input string."
 这个命令最大的用途就是为没有拼音的中文词库添加拼音code。"
   (interactive)
   (pyim-article2dict 'words))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 ;;;###autoload
 (defun pyim-article2dict-misspell-words ()
   "将一篇中文文章转换为 Chinese-pyim 可以识别的拼音词库。
@@ -2374,9 +2195,7 @@ Return the input string."
 输入习惯，可以提高输入体验。"
   (interactive)
   (pyim-article2dict 'misspell-words))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-article2dict (object)
   "将一篇中文文章转换为 Chinese-pyim 可以识别的拼音词库。
 其步骤为：
@@ -2469,9 +2288,7 @@ Return the input string."
         (pyim-article2dict-write-stage-file file "SortStage-" t)
         (pyim-update-dict-file t t)
         (pyim-article2dict-write-stage-file file "FinishStage-" t)))))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-article2dict-write-stage-file (file stage force)
   "将当前 buffer 的内容另存为一个 stage 文件。
 用于 `pyim-article2dict' 分阶段保存内容。"
@@ -2535,9 +2352,7 @@ Return the input string."
 #+BEGIN_SRC emacs-lisp :tangle chinese-pyim-company.el
 (require 'company)
 (require 'company-dabbrev)
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :tangle chinese-pyim-company.el
 (defcustom pyim-company-predict-words-number 10
   "设置最多可以搜索多少个联想词条，如果设置为 nil
 或者 0 时，关闭联想功能。"
@@ -2566,9 +2381,7 @@ Return the input string."
       (set (intern (concat "pyim-" (symbol-name variable) "-backup"))
            (symbol-value variable))
     (error "Company-mode 默认变量备份失败！请确保 Company-mode 优先加载。")))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :tangle chinese-pyim-company.el
 (defun pyim-company-revert-variable (variable)
   "将变量 `variable' 设置为 `pyim-<variale>-backup' 的值。"
   (when (boundp variable)

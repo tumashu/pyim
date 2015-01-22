@@ -874,7 +874,6 @@ whenever possible."
 (defsubst pyim-delete-line ()
   (delete-region (line-beginning-position) (min (+ (line-end-position) 1)
                                                 (point-max))))
-
 (defsubst pyim-append-string (str)
   "append STR to pyim-current-str"
   (setq pyim-current-str (concat pyim-current-str str)))
