@@ -441,10 +441,13 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
 
 #+NAME: pyim-work-with-org-speed-command
 #+BEGIN_SRC emacs-lisp :eval no
-(setq-default pyim-english-input-switch-function
-              `(lambda ()
-                 (and (bolp)
-                      (looking-at org-heading-regexp))))
+(defun pyim-org-speed-commands-active-p ()
+  (and (string= major-mode "org-mode")
+       (bolp) (looking-at org-heading-regexp)
+       org-use-speed-commands))
+
+(setq pyim-english-input-switch-function
+      'pyim-org-speed-commands-active-p)
 #+END_SRC
 
 Chinese-pyim 在插入字符之前，会运行 pyim-english-input-switch-function
