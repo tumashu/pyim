@@ -204,12 +204,9 @@
 ;;      函数，用于编程环境。
 ;;   2. `pyim-create-word-at-point:<N>char' 这是一组命令，从光标前提取N个汉
 ;;      字字符组成字符串，并将其加入个人词库。
-;;   3. `pyim-create-word-from-region' 如果用户已经高亮选择了某个中文字符串，
-;;      那么这个命令直接将这个字符串加入个人词库，否则，这个命令会高亮选择
-;;      光标前两个汉字字符，等待用户调整选区。建议用户为其设定一个快捷键。
-;;   4. `pyim-translate-trigger-char' 以默认设置为例：在“我爱吃红烧肉”后输
+;;   3. `pyim-translate-trigger-char' 以默认设置为例：在“我爱吃红烧肉”后输
 ;;      入“5v” 可以将“爱吃红烧肉”这个词条保存到用户个人文件。
-;;   5. `pyim-delete-word-from-personal-buffer' 从个人文件对应的 buffer 中
+;;   4. `pyim-delete-word-from-personal-buffer' 从个人文件对应的 buffer 中
 ;;      删除当前高亮选择的词条。
 ;; 
 ;; 
@@ -1387,27 +1384,6 @@ buffer中，当前词条追加到已有词条之后。"
   "将光标前4个中文字符组成的字符串加入个人词库。"
   (interactive)
   (pyim-create-word-at-point 4))
-
-(defun pyim-create-word-from-region ()
-  "将高亮选择的字符串添加到个人词库，如果当前没有选择任何
-字符串，那么选择光标前两个字符。"
-  (interactive)
-  (if mark-active
-      (let ((string (buffer-substring-no-properties
-                     (region-beginning) (region-end))))
-        (if (and (< (length string) 6)
-                 (> (length string) 0))
-            (progn
-              (pyim-create-word-without-pinyin string)
-              (message "将词条: \"%s\" 插入 personal file。" string))
-          (message "选择的字符串大于6个汉字，忽略。"))
-        (goto-char (region-end))
-        (deactivate-mark))
-    ;; 激活光标前两个字符大小的一个选区，
-    ;; 等待用户调整选区大小。
-    (push-mark (point))
-    (backward-char 2)
-    (setq mark-active t)))
 
 (defun pyim-delete-word-from-personal-buffer ()
   "将高亮选择的字符从 personel-file 对应的 buffer 中删除。"
