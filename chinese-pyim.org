@@ -37,7 +37,7 @@ Chinese-pyim 的代码源自 emacs-eim。emacs-eim是一个emacs中文输入法�
 发展(尤其是拼音输入法)特别依赖庞大的用户群体直接或者间接的提供优化输入法的信息。
 emacs 中文用户群体很难达到这种要求。另外各种平台下的中文输入法的高速发展，比如：
 Window平台下的搜狗输入法，baidu输入法以及QQ输入法，linux平台下的fcitx，ibus等等。
-也间接的抹杀了 emacs-eim 的开发动力，最终的结果就是：chinese-eim 在 2008 年之后
+也间接的抹杀了 emacs-eim 的开发动力，最终的结果就是：emacs-eim 在 2008 年之后
 几乎停止了开发。
 
 但是，外部的输入法与emacs配合不够默契，不断的切换输入法极大的损害了emacs那种
@@ -47,7 +47,7 @@ Window平台下的搜狗输入法，baidu输入法以及QQ输入法，linux平�
 2. *当 emacs-eim 拼音词库词条超过100万时，中文输入体验可以达到搜狗输入法的80%。*
 3. *随着使用时间的延长，emacs-eim会越来越好用（个人词库的积累）。*
 
-所以，本人认为将 Chinese-eim 作为一个 *备用* 中文输入法是非常合适的，于是我 fork 了
+所以，本人认为将 emacs-eim 作为一个 *备用* 中文输入法是非常合适的，于是我 fork 了
 emacs-eim, 简化代码并更改名称为：chinese-pyim。
 * 目标                                                               :README:
 Chinese-pyim 的目标是： *尽最大的努力成为一个好用的 emacs 备用中文拼音输入法* 。
