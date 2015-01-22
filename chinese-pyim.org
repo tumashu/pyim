@@ -4,7 +4,7 @@
 #+STARTUP: align fold nodlcheck oddeven intestate
 #+LANGUAGE: zh-CN
 #+OPTIONS: H:3 num:t toc:t \n:nil ::t |:t ^:t -:t f:t *:t tex:nil d:(HIDE) tags:not-in-toc
-#+PROPERTY: header-args:emacs-lisp :eval no
+#+PROPERTY: header-args:emacs-lisp :eval yes :results value silent
 * Chinese-pyim README                                                :README:
 ** 简介
  Chinese-pyim 是 Chinese Pinyin Input Method 的缩写。是emacs环境下的一个中文拼音输入法。
@@ -431,6 +431,67 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
   :type 'character)
 #+END_SRC
 
+许多时候，我们必须根据环境的具体情况来自动开启或者关闭中文输入，比如：当 org-mode 用户
+激活 speed commands 后，光标在A位置时：必须自动关闭中文输入功能，
+
+#+BEGIN_EXAMPLE
+,-A-** HEAD
+#+END_EXAMPLE
+
+而光标在B位置时，必须自动开启中文输入功能。
+#+BEGIN_EXAMPLE
+,** -B-HEAD
+#+END_EXAMPLE
+
+这时，我们可以使用下面类似的方式来实现这个功能：
+
+#+NAME: pyim-work-with-org-speed-command
+#+BEGIN_SRC emacs-lisp :eval no
+(setq-default pyim-english-input-switch-function
+              `(lambda ()
+                 (and (bolp)
+                      (looking-at org-heading-regexp))))
+#+END_SRC
+
+Chinese-pyim 在插入字符之前，会运行 pyim-english-input-switch-function
+对应的函数，当返回值为 t 时，Chinese-pyim 就会开启英文输入模式，当这个
+函数返回值为 nil 时，Chinese-pyim 就会开启中文输入模式。
+
+值得注意的是，pyim-toggle-input-ascii 这个命令也可以控制输入法是否开启英文
+输入模式，但两者使用的情况不同，用户一般将 pyim-toggle-input-ascii 绑定到
+特定的快捷键上，手动切换中英文输入模式。这个命令通过变量 pyim-input-ascii
+来实现切换。
+
+上述两种方式共同影响这英文输入模式的开启，Chinese-pyim 是通过下面这个语句
+来决定是否开启拼音模式，只要下面的语句返回值为 nil，英文输入模式就开启。
+所以直观的行为就是：
+
+| 自动开启 | 手动开启 | 最终的结果 |
+|----------+----------+------------|
+| NO       | YES      | YES        |
+| YES      | NO       | YES        |
+| NO       | NO       | NO         |
+
+
+#+BEGIN_EXAMPLE
+(and (not pyim-input-ascii)
+           (if (functionp pyim-english-input-switch-function)
+               (not (funcall pyim-english-input-switch-function))
+             t)
+           (if (pyim-string-emptyp pyim-current-key)
+               (member last-command-event
+                       (mapcar 'identity "abcdefghjklmnopqrstwxyz"))
+             (member last-command-event
+                     (mapcar 'identity "vmpfwckzyjqdltxuognbhsrei'-a"))))
+#+END_EXAMPLE
+
+#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
+(defcustom pyim-english-input-switch-function nil
+  "一个函数，其运行结果为 t 时，Chinese-pyim 开启英文输入功能。"
+  :group 'chinese-pyim
+  :type 'function)
+#+END_SRC
+
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defcustom pyim-fuzzy-pinyin-adjust-function
   'pyim-fuzzy-pinyin-adjust-1
@@ -600,6 +661,7 @@ If you don't like this funciton, set the variable to nil")
     pyim-current-choices
     pyim-current-pos
     ;; pyim-current-predict-words
+    pyim-english-input-switch-function
     pyim-guidance-str
     pyim-translating
     pyim-overlay
@@ -1687,12 +1749,17 @@ buffer中，当前词条追加到已有词条之后。"
     (pyim-terminate-translation)))
 #+END_SRC
 
+Chinese-pyim 通过这个函数实现中文输入模式和英文输入模式的切换。
+
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-self-insert-command ()
   "如果在 pyim-first-char 列表中，则查找相应的词条，否则停止转换，插入对应的字符"
   (interactive "*")
   ;; (message "%s" (current-buffer))
   (if (and (not pyim-input-ascii)
+           (if (functionp pyim-english-input-switch-function)
+               (not (funcall pyim-english-input-switch-function))
+             t)
            (if (pyim-string-emptyp pyim-current-key)
                (member last-command-event
                        (mapcar 'identity "abcdefghjklmnopqrstwxyz"))

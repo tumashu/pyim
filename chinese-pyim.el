@@ -475,6 +475,11 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
   :group 'chinese-pyim
   :type 'character)
 
+(defcustom pyim-english-input-switch-function nil
+  "一个函数，其运行结果为 t 时，Chinese-pyim 开启英文输入功能。"
+  :group 'chinese-pyim
+  :type 'function)
+
 (defcustom pyim-fuzzy-pinyin-adjust-function
   'pyim-fuzzy-pinyin-adjust-1
   "Chinese-pyim的核心并不能处理模糊音，这里提供了一个比较
@@ -653,6 +658,7 @@ If you don't like this funciton, set the variable to nil")
     pyim-current-choices
     pyim-current-pos
     ;; pyim-current-predict-words
+    pyim-english-input-switch-function
     pyim-guidance-str
     pyim-translating
     pyim-overlay
@@ -1604,6 +1610,9 @@ buffer中，当前词条追加到已有词条之后。"
   (interactive "*")
   ;; (message "%s" (current-buffer))
   (if (and (not pyim-input-ascii)
+           (if (functionp pyim-english-input-switch-function)
+               (not (funcall pyim-english-input-switch-function))
+             t)
            (if (pyim-string-emptyp pyim-current-key)
                (member last-command-event
                        (mapcar 'identity "abcdefghjklmnopqrstwxyz"))
