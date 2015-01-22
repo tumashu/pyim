@@ -132,9 +132,7 @@
     建议用户为其设定一个快捷键。
  4. `pyim-translate-trigger-char' 以默认设置为例：在“我爱吃红烧肉”后输入“5v” 可以将
     “爱吃红烧肉”这个词条保存到用户个人文件。
- 5. `pyim-automatic-generate-word' 将此选项设置为 t 时，Chinese-pyim 开启自动组词功能。
-    实验特性，不建议普通用户使用，
- 6. `pyim-delete-word-from-personal-buffer' 从个人文件对应的 buffer 中删除当前高亮选择的词条。
+ 5. `pyim-delete-word-from-personal-buffer' 从个人文件对应的 buffer 中删除当前高亮选择的词条。
 
 *** 快速切换词库
  用户可以自定义类似的命令来实现快速切换拼音词库。
@@ -537,10 +535,6 @@ Chinese-pyim 使用这个 hook 处理联想词，用户可以使用
 (defvar pyim-current-str "" "当前选择的词条")
 (defvar pyim-input-ascii nil
   "是否开启 Chinese-pyim 英文输入模式。")
-
-(defvar pyim-separate-char-history nil
-  "纪录连续输入的单个汉字，当输入词组后，这个变量设置为 nil。
-这个变量主要用于自动组词功能。")
 
 (defvar pyim-current-choices nil
   "所有可选的词条，是一个list。
@@ -1462,16 +1456,6 @@ buffer中，当前词条追加到已有词条之后。"
             (if (not (member pyim-current-str (car pyim-current-choices)))
                 (pyim-create-word pyim-current-str pyim-pinyin-list))
             (pyim-terminate-translation)
-            ;; 纪录连续输入的单个汉字，用于判断是否启动自动组词。
-            (push pyim-current-str pyim-separate-char-history)
-            ;; 输入词语后，将词语前面的两个汉字机械的组成一个词条，
-            ;; 然后保存到个人词库。
-            ;; BUG: 这个地方需要进一步优化。
-            (when (and pyim-automatic-generate-word
-                       (> (length pyim-separate-char-history) 1)
-                       (> (length pyim-current-str) 1))
-              (pyim-create-word-at-point 2 t)
-              (setq pyim-separate-char-history nil))
             ;; Chinese-pyim 使用这个 hook 来处理联想词。
             (run-hooks 'pyim-select-word-finish-hook))
         (setq pylist (nthcdr pyim-pinyin-position pyim-pinyin-list))
