@@ -262,7 +262,7 @@
  1. `pyim-hanzi2pinyin' （考虑多音字）
  2. `pyim-hanzi2pinyin-simple'  （不考虑多音字）
 
-* Chinese-pyim 开发者README                                  :noexport:devel:
+* Chinese-pyim 开发者README                                           :devel:
 ** 如何加载开发工具
 #+BEGIN_SRC emacs-lisp
 (require 'chinese-pyim-devtools)
@@ -283,7 +283,7 @@ M-x org-babel-execute-buffer
 
 然后在运行上述导出命令。
 
-* 代码：chinese-pyim.el                                       :noexport:code:
+* 代码：chinese-pyim.el                                                :code:
 ** 文件HEAD
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 ;;; chinese-pyim.el --- Chinese pinyin input method
@@ -2495,7 +2495,7 @@ Return the input string."
 
 ;;; chinese-pyim.el ends here
 #+END_SRC
-* 代码：chinese-pyim-company.el                               :noexport:code:
+* 代码：chinese-pyim-company.el                                        :code:
 #+BEGIN_SRC emacs-lisp :tangle chinese-pyim-company.el
 ;;; chinese-pyim-company.el --- Integrate company-mode with Chinese-pyim
 
@@ -2707,7 +2707,7 @@ Return the input string."
 
 ;;; chinese-pyim.el ends here
 #+END_SRC
-* 代码: chinese-pyim-devtools.el                              :code:noexport:
+* 代码: chinese-pyim-devtools.el                                       :code:
 ** 文件HEAD
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim-devtools.el
 ;;; chinese-pyim-devtools.el --- Tools for Chinese-pyim developers
