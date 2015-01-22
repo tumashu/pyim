@@ -456,28 +456,14 @@ Chinese-pyim 在插入字符之前，会运行 pyim-english-input-switch-functio
 特定的快捷键上，手动切换中英文输入模式。这个命令通过变量 pyim-input-ascii
 来实现切换。
 
-上述两种方式共同影响这英文输入模式的开启，Chinese-pyim 是通过下面这个语句
-来决定是否开启拼音模式，只要下面的语句返回值为 nil，英文输入模式就开启。
-所以直观的行为就是：
+Chinese-pyim 使用 pyim-input-chinese-p 函数来决定是否开启英文输入模式，
+上述两种方式共同影响 pyim-input-chinese-p 的结果，最终直观的行为是：
 
 | 自动开启 | 手动开启 | 最终的结果 |
 |----------+----------+------------|
 | NO       | YES      | YES        |
 | YES      | NO       | YES        |
 | NO       | NO       | NO         |
-
-
-#+BEGIN_EXAMPLE
-(and (not pyim-input-ascii)
-           (if (functionp pyim-english-input-switch-function)
-               (not (funcall pyim-english-input-switch-function))
-             t)
-           (if (pyim-string-emptyp pyim-current-key)
-               (member last-command-event
-                       (mapcar 'identity "abcdefghjklmnopqrstwxyz"))
-             (member last-command-event
-                     (mapcar 'identity "vmpfwckzyjqdltxuognbhsrei'-a"))))
-#+END_EXAMPLE
 
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defcustom pyim-english-input-switch-function nil
@@ -1623,22 +1609,25 @@ buffer中，当前词条追加到已有词条之后。"
 Chinese-pyim 通过这个函数实现中文输入模式和英文输入模式的切换。
 
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
+(defun pyim-input-chinese-p ()
+  "确定 Chinese-pyim 是否启动中文输入模式"
+  (and (not pyim-input-ascii)
+       (if (functionp pyim-english-input-switch-function)
+           (not (funcall pyim-english-input-switch-function)) t)
+       (if (pyim-string-emptyp pyim-current-key)
+           (member last-command-event
+                   (mapcar 'identity "abcdefghjklmnopqrstwxyz"))
+         (member last-command-event
+                 (mapcar 'identity "vmpfwckzyjqdltxuognbhsrei'-a")))))
+
 (defun pyim-self-insert-command ()
   "如果在 pyim-first-char 列表中，则查找相应的词条，否则停止转换，插入对应的字符"
   (interactive "*")
   ;; (message "%s" (current-buffer))
-  (if (and (not pyim-input-ascii)
-           (if (functionp pyim-english-input-switch-function)
-               (not (funcall pyim-english-input-switch-function))
-             t)
-           (if (pyim-string-emptyp pyim-current-key)
-               (member last-command-event
-                       (mapcar 'identity "abcdefghjklmnopqrstwxyz"))
-             (member last-command-event
-                     (mapcar 'identity "vmpfwckzyjqdltxuognbhsrei'-a"))))
-      (progn
-        (setq pyim-current-key (concat pyim-current-key (char-to-string last-command-event)))
-        (funcall pyim-handle-function))
+  (if (pyim-input-chinese-p)
+      (progn (setq pyim-current-key
+                   (concat pyim-current-key (char-to-string last-command-event)))
+             (funcall pyim-handle-function))
     (pyim-append-string (pyim-translate last-command-event))
     (pyim-terminate-translation)))
 #+END_SRC
@@ -2511,9 +2500,7 @@ Return the input string."
 
 #+BEGIN_SRC emacs-lisp :tangle chinese-pyim-company.el
 (provide 'chinese-pyim-company)
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :tangle chinese-pyim-company.el
 ;; Local Variables:
 ;; coding: utf-8-unix
 ;; End:

@@ -1604,22 +1604,25 @@ buffer中，当前词条追加到已有词条之后。"
     (setq pyim-current-str "")
     (pyim-terminate-translation)))
 
+(defun pyim-input-chinese-p ()
+  "确定 Chinese-pyim 是否启动中文输入模式"
+  (and (not pyim-input-ascii)
+       (if (functionp pyim-english-input-switch-function)
+           (not (funcall pyim-english-input-switch-function)) t)
+       (if (pyim-string-emptyp pyim-current-key)
+           (member last-command-event
+                   (mapcar 'identity "abcdefghjklmnopqrstwxyz"))
+         (member last-command-event
+                 (mapcar 'identity "vmpfwckzyjqdltxuognbhsrei'-a")))))
+
 (defun pyim-self-insert-command ()
   "如果在 pyim-first-char 列表中，则查找相应的词条，否则停止转换，插入对应的字符"
   (interactive "*")
   ;; (message "%s" (current-buffer))
-  (if (and (not pyim-input-ascii)
-           (if (functionp pyim-english-input-switch-function)
-               (not (funcall pyim-english-input-switch-function))
-             t)
-           (if (pyim-string-emptyp pyim-current-key)
-               (member last-command-event
-                       (mapcar 'identity "abcdefghjklmnopqrstwxyz"))
-             (member last-command-event
-                     (mapcar 'identity "vmpfwckzyjqdltxuognbhsrei'-a"))))
-      (progn
-        (setq pyim-current-key (concat pyim-current-key (char-to-string last-command-event)))
-        (funcall pyim-handle-function))
+  (if (pyim-input-chinese-p)
+      (progn (setq pyim-current-key
+                   (concat pyim-current-key (char-to-string last-command-event)))
+             (funcall pyim-handle-function))
     (pyim-append-string (pyim-translate last-command-event))
     (pyim-terminate-translation)))
 
