@@ -589,6 +589,42 @@ Chinese-pyim 插入字符之前，首先会运行 `pyim-english-input-switch-fun
 #+END_SRC
 
 ** 内部变量
+
+*** 词库文件 buffer
+Chinese-pyim 激活时，首先会使用 `pyim-load-file' 加载个人词频文件和普通词库文件，
+加载的过程简单来说就是：创建一个buffer，然后将词库文件的内容插入新创建的这个buffer。
+
+`pyim-load-file' 所做的工作就是：
+1. 首先创建一个 buffer，buffer 名为 `pyim-buffer-name'，Chinese-pyim 默认创建的 buffer
+   名称类似：
+   #+BEGIN_EXAMPLE
+   -空格-*Chinese-pyim*
+   -空格-*Chinese-pyim*-10000
+   #+END_EXAMPLE
+   这些buffer的名称前面都包含一个空格，所以在 emacs buffer列表中 *不可见* 。
+2. 将个人词频文件 `pyim-buffer-name' 的内容插入到已经创建的 buffer。
+3. 使用类似上述方法，递归的为每一个一般词库文件创建 buffer 并插入对应词库内容，
+   忽略不存在的文件和已经加载过的文件。
+4. 在运行的过程中，`pyim-load-file' 会创建一个词库文件名与 buffer 的对应表，其结构类似：
+   #+BEGIN_EXAMPLE
+   ((("buffer" . #<buffer  *Chinese-pyim*>) ("file" . "/path/to/pyim-personal.txt"))
+    (("buffer" . #<buffer  *Chinese-pyim*-431862>) ("file" . "/path/to/pyim-bigdict.txt"))
+    (("buffer" . #<buffer  *Chinese-pyim*-208698>) ("file" . "/path/to/chinese-pyim-prettydict-2.txt"))
+    (("buffer" . #<buffer  *Chinese-pyim*-810662>) ("file" . "/path/to/chinese-pyim-prettydict-1.txt")))
+   #+END_EXAMPLE
+5. `pyim-load-file' 函数执行结束后，返回值为上述对应表。
+
+当使用 `pyim-start' 或者 `pyim-restart' 命令激活  Chinese-pyim 时，上述对应表保存到变量 `pyim-buffer-list'。
+供 Chinese-pyim 后续使用。
+
+`pyim-buffer-list' 包含的第一个buffer，永远对应着个人词频文件，Chinese-pyim 使用 `pyim-save-personal-file'
+将 `pyim-buffer-list' 第一个 buffer 的内容保存到个人词频文件，这个命令用于更新个人词频文件。
+
+`pyim-check-buffers' 函数会检查 `pyim-buffer-list' 中的所有 buffer 是否存在，如果某个 buffer 不存在，
+这个函数会重新创建一个buffer，并插入对应词库文件的内容，如果对应词库文件也不存在，那么这个函数会删除这条纪录。
+
+而 `pyim-kill-buffers' 会删除 `pyim-buffer-list' 中所有的 buffer。这个函数用于重新启动输入法前的清理工作。
+
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 ;;;  variable declare
 (defvar pyim-title "灵拼" "Chinese-pyim 在 mode-line 中显示的名称。")
@@ -599,6 +635,9 @@ Chinese-pyim 插入字符之前，首先会运行 `pyim-english-input-switch-fun
 2. 每一个 alist 都包含两个部份：
    1. buffer 词库文件导入时创建的 buffer (用户不可见)。
    2. file   词库文件的路径。")
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defvar pyim-active-function nil)
 (defvar pyim-current-key "" "已经输入的代码")
 (defvar pyim-current-str "" "当前选择的词条")
