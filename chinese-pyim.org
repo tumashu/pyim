@@ -451,7 +451,7 @@ Chinese-pyim 在调用函数 `pyim-default-translate' 的时候进行标点符�
 *** 特殊功能触发字符（单字符快捷键）
 输入中文的时候，我们需要快速频繁的执行一些特定的命令，
 最直接的方法就是将上述命令绑定到一个容易按的快捷键上，但遗憾的是 emacs 大多数容易按
-的快捷键都 *名花有主* 了，甚至找一个的 “Ctrl＋单字符”的快捷键都不太容易，特殊功能触发
+的快捷键都 *名花有主* 了，甚至找一个 “Ctrl＋单字符”的快捷键都不太容易，特殊功能触发
 字符，可以帮助我们实现“单字符”快捷键，类似 org-mode 的 speed key。
 
 当前默认的触发字符是："v", 选择这个字符的理由是：
@@ -527,11 +527,11 @@ Chinese-pyim 插入字符之前，首先会运行 `pyim-english-input-switch-fun
 两者使用的情况是不同的，但两者都是通过影响 `pyim-input-chinese-p' 函数来
 实现切换目的，其最终结果为：
 
-| 自动开启英文输入 | 手动开启英文输入模式 | 最终结果 |
-|------------------+----------------------+----------|
-| NO               | YES                  | YES      |
-| YES              | NO                   | YES      |
-| NO               | NO                   | NO       |
+| 自动开启英文输入模式 | 手动开启英文输入模式 | 最终结果 |
+|----------------------+----------------------+----------|
+| NO                   | YES                  | YES      |
+| YES                  | NO                   | YES      |
+| NO                   | NO                   | NO       |
 
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defcustom pyim-english-input-switch-function nil
@@ -540,15 +540,16 @@ Chinese-pyim 插入字符之前，首先会运行 `pyim-english-input-switch-fun
   :type 'function)
 #+END_SRC
 
-*** 处理模糊音
+*** 模糊音处理
 'Chinese-pyim的核心并不能处理模糊音，这里提供了一个比较 *粗糙* 的方法来处理模糊音。
 
-假如：用户输入了一个错误的拼音“ying-gai”，用户可以通过快捷键运行这个函数，将“ing” 替换 “in”，
-得到 “yin-gai”对应的词语。
+假如：用户需要输入“应该”，其拼音为“ying-gai”，但用户确输入了一个错误的拼音“yin-gai”，
+这时，用户可以通过快捷键运行 `pyim-fuzzy-pinyin-adjust-function' ，将“in” 替换为 “ing”，
+得到 “ying-gai”对应的词语。
 
 这种处理方式能力有限，一次不能处理太多的模糊音，用户需要根据自己的需要，自定义模糊音处理函数。
 
-自定义模糊音处理函数可以参考：`pyim-pinyin-fuzzy-adjust-1 的定义方式。
+自定义模糊音处理函数可以参考：`pyim-pinyin-fuzzy-adjust-1'。
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defcustom pyim-fuzzy-pinyin-adjust-function
   'pyim-fuzzy-pinyin-adjust-1
