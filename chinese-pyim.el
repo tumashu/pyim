@@ -1877,9 +1877,6 @@ Return the input string."
     (run-hooks 'pyim-load-hook)
     (message nil))
 
-  (when pyim-automatic-generate-word
-    (message "Chinese-pyim 自动组词功能已经开启，具体细节参考: `pyim-automatic-generate-word'。"))
-
   (unless (member 'pyim-save-personal-file kill-emacs-hook)
     (add-to-list 'kill-emacs-hook 'pyim-save-personal-file))
 
