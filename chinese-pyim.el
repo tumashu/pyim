@@ -507,6 +507,8 @@ Chinese-pyim 内建的功能有：
 (defvar pyim-add-completion-function nil)
 (defvar pyim-format-function 'pyim-format)
 (defvar pyim-handle-function 'pyim-handle-string)
+(defvar pyim-position nil)
+(defvar pyim-pinyin-list nil)
 
 (defvar pyim-punctuation-escape-list (number-sequence ?0 ?9)
   "Punctuation will not insert after this characters.
@@ -534,8 +536,6 @@ If you don't like this funciton, set the variable to nil")
     "ang" "eng"))
 
 (defvar pyim-char-table (make-vector 1511 nil))
-(defvar pyim-position nil)
-(defvar pyim-pinyin-list nil)
 
 (defvar pyim-dict-help-string
   "Chinese-pyim 没有可用词库！！！

@@ -589,8 +589,7 @@ Chinese-pyim 插入字符之前，首先会运行 `pyim-english-input-switch-fun
 #+END_SRC
 
 ** 内部变量
-
-*** 词库文件 buffer
+*** 与词库加载相关的变量
 Chinese-pyim 激活时，首先会使用 `pyim-load-file' 加载个人词频文件和普通词库文件，
 加载的过程简单来说就是：创建一个buffer，然后将词库文件的内容插入新创建的这个buffer。
 
@@ -637,7 +636,7 @@ Chinese-pyim 激活时，首先会使用 `pyim-load-file' 加载个人词频文�
    2. file   词库文件的路径。")
 #+END_SRC
 
-*** 其它
+*** 其它变量
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defvar pyim-active-function nil)
 (defvar pyim-current-key "" "已经输入的代码")
@@ -668,7 +667,37 @@ Chinese-pyim 激活时，首先会使用 `pyim-load-file' 加载个人词频文�
 (defvar pyim-add-completion-function nil)
 (defvar pyim-format-function 'pyim-format)
 (defvar pyim-handle-function 'pyim-handle-string)
+(defvar pyim-position nil)
+(defvar pyim-pinyin-list nil)
+#+END_SRC
 
+*** 与标点符号转换相关的变量
+在使用 org-mode ，markdown 等轻量级标记语言撰写文档时，我们经常需要输入数字列表，比如：
+
+#+BEGIN_EXAMPLE
+1. item1
+2. item2
+3. item3
+#+END_EXAMPLE
+
+Chinese-pyim 使用 `pyim-punctuation-escape-list' 变量来支持这个特性，如果光标前的字符
+包含在这个列表内，那么输入标点时， Chinese-pyim 直接输入半角标点。`pyim-default-translate'
+函数处理具体的过程。
+
+当然，用户也可以使用 `pyim-toggle-full-width-punctuation' 来开启和关闭全角标点。其内部是
+通过变量`pyim-punctuation-translate-p' 来实现的，当这个变量的值为 t 时，输入全角标点，反之
+输入半角标点。
+
+而 `pyim-pair-punctuation-status' 用来纪录“成对”中文标点符号的输入状态。比如：
+#+BEGIN_EXAMPLE
+“”
+‘’
+#+END_EXAMPLE
+
+简单来说：如果第一次输入的标点是：（“）时，这个变量确保下一次输入的标点为（”）。
+
+具体过程可以参考： `pyim-return-proper-punctuation' 。
+#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defvar pyim-punctuation-escape-list (number-sequence ?0 ?9)
   "Punctuation will not insert after this characters.
 If you don't like this funciton, set the variable to nil")
@@ -679,7 +708,10 @@ If you don't like this funciton, set the variable to nil")
 (defvar pyim-pair-punctuation-status
   '(("\"" nil) ("'" nil))
   "成对标点符号切换状态")
+#+END_SRC
 
+*** 与拼音声母和韵母相关的变量。
+#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defvar pyim-shen-mu
   '("b" "p" "m" "f" "d" "t" "n" "l" "g" "k" "h"
     "j" "q" "x" "z" "c" "s" "zh" "ch" "sh" "r" "y" "w"))
@@ -693,13 +725,20 @@ If you don't like this funciton, set the variable to nil")
 (defvar pyim-valid-yun-mu
   '("a" "o" "e" "ai" "ei" "ui" "ao" "ou" "er" "an" "en"
     "ang" "eng"))
+#+END_SRC
 
+*** 与汉字/拼音相互转换相关的变量
+#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defvar pyim-char-table (make-vector 1511 nil))
-(defvar pyim-position nil)
-(defvar pyim-pinyin-list nil)
+#+END_SRC
 
+*** 纪录词库帮助信息的变量
+#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 <<pyim-dict-help-string>>
+#+END_SRC
 
+*** 与Chinese-pyim 快捷键设定相关的变量
+#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defvar pyim-mode-map
   (let ((map (make-sparse-keymap))
         (i ?\ ))
@@ -731,6 +770,10 @@ If you don't like this funciton, set the variable to nil")
     (define-key map "\C-g" 'pyim-quit-clear)
     map)
   "Keymap")
+#+END_SRC
+
+** 将变量转换为 local 变量
+#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 
 (defvar pyim-local-variable-list
   '(pyim-page-length
