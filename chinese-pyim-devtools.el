@@ -62,7 +62,10 @@
   (let ((org-export-select-tags '("README" "readme"))
         (org-export-filter-paragraph-functions '(pyim-devtools-org-clean-space))
         (readme-md "README.md")
-        (readme-ascii "README.txt"))
+        (readme-ascii "README.txt")
+        ;; 导出时用空格代替TAB键
+        (indent-tabs-mode nil)
+        (tab-width 4))
     (unless (file-exists-p readme-md)
       (write-region "" nil readme-md))
     (unless (file-exists-p readme-ascii)
@@ -82,5 +85,7 @@
 
 ;; Local Variables:
 ;; coding: utf-8-unix
+;; tab-width: 4
+;; indent-tabs-mode: nil
 ;; End:
 ;;; chinese-pyim-devtools.el ends here

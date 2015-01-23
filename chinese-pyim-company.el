@@ -180,6 +180,8 @@
 
 ;; Local Variables:
 ;; coding: utf-8-unix
+;; tab-width: 4
+;; indent-tabs-mode: nil
 ;; End:
 
 ;;; chinese-pyim.el ends here
