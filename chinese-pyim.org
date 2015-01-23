@@ -7,255 +7,256 @@
 #+PROPERTY: header-args:emacs-lisp :eval yes :results value silent
 * Chinese-pyim README                                                :README:
 ** 简介
- Chinese-pyim 是 Chinese Pinyin Input Method 的缩写。是emacs环境下的一个中文拼音输入法。
+Chinese-pyim 是 Chinese Pinyin Input Method 的缩写。是emacs环境下的一个中文拼音输入法。
 ** 背景
- Chinese-pyim 的代码源自 emacs-eim。emacs-eim是一个emacs中文输入法框架，使用这
- 个框架可以自定义输入法，emacs-eim 软件包本身就包含许多不同的中文输入法，比如：
- 五笔输入法，仓颉输入法以及二笔输入法等等。
+Chinese-pyim 的代码源自 emacs-eim。emacs-eim是一个emacs中文输入法框架，使用这
+个框架可以自定义输入法，emacs-eim 软件包本身就包含许多不同的中文输入法，比如：
+五笔输入法，仓颉输入法以及二笔输入法等等。
 
- 虽然 emacs-eim 很优秀。但遗憾的是，emacs-eim 并没有发展起来，因为：中文输入法的
- 发展(尤其是拼音输入法)特别依赖庞大的用户群体直接或者间接的提供优化输入法的信息。
- emacs 中文用户群体很难达到这种要求。另外各种平台下的中文输入法的高速发展，比如：
- Window平台下的搜狗输入法，baidu输入法以及QQ输入法，linux平台下的fcitx，ibus等等。
- 也间接的抹杀了 emacs-eim 的开发动力，最终的结果就是：emacs-eim 在 2008 年之后
- 几乎停止了开发。
+虽然 emacs-eim 很优秀。但遗憾的是，emacs-eim 并没有发展起来，因为：中文输入法的
+发展(尤其是拼音输入法)特别依赖庞大的用户群体直接或者间接的提供优化输入法的信息。
+emacs 中文用户群体很难达到这种要求。另外各种平台下的中文输入法的高速发展，比如：
+Window平台下的搜狗输入法，baidu输入法以及QQ输入法，linux平台下的fcitx，ibus等等。
+也间接的抹杀了 emacs-eim 的开发动力，最终的结果就是：emacs-eim 在 2008 年之后
+几乎停止了开发。
 
- 但是，外部的输入法与emacs配合不够默契，不断的切换输入法极大的损害了emacs那种
- *行云流水* 的体验。而本人在使用（或者叫折腾） emacs-eim 的过程中发现：
+但是，外部的输入法与emacs配合不够默契，不断的切换输入法极大的损害了emacs那种
+*行云流水* 的体验。而本人在使用（或者叫折腾） emacs-eim 的过程中发现：
 
- 1. *当 emacs-eim 拼音词库词条超过100万时，选词频率大大降低。*
- 2. *当 emacs-eim 拼音词库词条超过100万时，中文输入体验可以达到搜狗输入法的80%。*
- 3. *随着使用时间的延长，emacs-eim会越来越好用（个人词库的积累）。*
+1. *当 emacs-eim 拼音词库词条超过100万时，选词频率大大降低。*
+2. *当 emacs-eim 拼音词库词条超过100万时，中文输入体验可以达到搜狗输入法的80%。*
+3. *随着使用时间的延长，emacs-eim会越来越好用（个人词库的积累）。*
 
- 所以，本人认为将 emacs-eim 作为一个 *备用* 中文输入法是非常合适的，于是我 fork 了
- emacs-eim, 简化代码并更改名称为：chinese-pyim。
+所以，本人认为将 emacs-eim 作为一个 *备用* 中文输入法是非常合适的，于是我 fork 了
+emacs-eim, 简化代码并更改名称为：chinese-pyim。
 ** 目标
- Chinese-pyim 的目标是： *尽最大的努力成为一个好用的 emacs 备用中文拼音输入法* 。
- 具体可表现为三个方面：
+Chinese-pyim 的目标是： *尽最大的努力成为一个好用的 emacs 备用中文拼音输入法* 。
+具体可表现为三个方面：
 
- 1. Fallback:     当外部输入法不能使用时（比如：console，cygwin等），尽最大可能让 emacs 用户不必为输入中文而烦恼。
- 2. Integration:  尽最大可能减少输入法切换频率，让中文输入不影响 emacs 的体验。
- 3. Exchange:     尽最大可能简化 Chinese-pyim 使用其他优秀输入法的词库的难度和复杂度。
+1. Fallback:     当外部输入法不能使用时（比如：console，cygwin等），尽最大可能让 emacs 用户不必为输入中文而烦恼。
+2. Integration:  尽最大可能减少输入法切换频率，让中文输入不影响 emacs 的体验。
+3. Exchange:     尽最大可能简化 Chinese-pyim 使用其他优秀输入法的词库的难度和复杂度。
 
 ** 特点
- 1. Chinese-pyim 只是一个拼音输入法，安装配置方便快捷，默认只通过添加词库的方式优化输入法。
- 2. Chinese-pyim 只使用最简单的文本词库格式，可以快速方便的利用其他输入法的词库。
+1. Chinese-pyim 只是一个拼音输入法，安装配置方便快捷，默认只通过添加词库的方式优化输入法。
+2. Chinese-pyim 只使用最简单的文本词库格式，可以快速方便的利用其他输入法的词库。
 ** 安装
- 1. 配置melpa源，参考：http://melpa.org/#/getting-started
- 2. M-x package-install RET chinese-pyim RET
- 3. 在emacs配置文件中（比如: ~/.emacs）添加如下代码：
+1. 配置melpa源，参考：http://melpa.org/#/getting-started
+2. M-x package-install RET chinese-pyim RET
+3. 在emacs配置文件中（比如: ~/.emacs）添加如下代码：
 
- #+BEGIN_SRC emacs-lisp
- (require 'chinese-pyim)
- #+END_SRC
+#+BEGIN_SRC emacs-lisp
+(require 'chinese-pyim)
+#+END_SRC
 
 ** 配置
 *** 添加词库文件
- 可以使用三种方法为 Chinese-pyim 添加词库，具体方式请参考 [[如何添加自定义拼音词库]] 小结。
+可以使用三种方法为 Chinese-pyim 添加词库，具体方式请参考 [[如何添加自定义拼音词库]] 小结。
 
- 注意：每一个词库文件必须按行排序（准确的说，是按每一行的拼音code排序），
- 因为`Chinese-pyim' 寻找词条时，使用二分法来优化速度，而二分法工作的前提
- 就是对文件按行排序。具体细节请参考：`pyim-bisearch-word' 。
- 所以，当词库排序不正确时（比如：用户手动调整词库文件后），记得运行函数
- `pyim-update-dict-file' 重新对文件排序。
+注意：每一个词库文件必须按行排序（准确的说，是按每一行的拼音code排序），
+因为`Chinese-pyim' 寻找词条时，使用二分法来优化速度，而二分法工作的前提
+就是对文件按行排序。具体细节请参考：`pyim-bisearch-word' 。
+所以，当词库排序不正确时（比如：用户手动调整词库文件后），记得运行函数
+`pyim-update-dict-file' 重新对文件排序。
 
 *** 激活 Chinese-pyim
- #+BEGIN_SRC emacs-lisp
- (setq default-input-method "chinese-pyim")
- (global-set-key (kbd "C-<SPC>") 'toggle-input-method)
- ;; (global-set-key (kbd "C-;") 'pyim-insert-ascii)
- ;; (global-set-key (kbd "C-;") 'pyim-toggle-full-width-punctuation)
- ;; (global-set-key (kbd "C-;") 'pyim-punctuation-translate-at-point)
- #+END_SRC
+#+BEGIN_SRC emacs-lisp
+(setq default-input-method "chinese-pyim")
+(global-set-key (kbd "C-<SPC>") 'toggle-input-method)
+;; (global-set-key (kbd "C-;") 'pyim-insert-ascii)
+;; (global-set-key (kbd "C-;") 'pyim-toggle-full-width-punctuation)
+;; (global-set-key (kbd "C-;") 'pyim-punctuation-translate-at-point)
+#+END_SRC
 
 *** 首次运行 Chinese-pyim                                          :noexport:
- 如果用户没有安装任何词库，第一次运行会出现提示，以帮助用户安装词库，
- 在 Chinese-pyim.el 中使用一个变量保存这些信息。
+如果用户没有安装任何词库，第一次运行会出现提示，以帮助用户安装词库，
+在 Chinese-pyim.el 中使用一个变量保存这些信息。
 
- #+NAME: pyim-dict-help-string
- #+BEGIN_SRC emacs-lisp :results value silent :noweb yes
- (defvar pyim-dict-help-string
-   "Chinese-pyim 没有可用词库！！！
+#+NAME: pyim-dict-help-string
+#+BEGIN_SRC emacs-lisp :results value silent :noweb yes
+(defvar pyim-dict-help-string
+  "Chinese-pyim 没有可用词库！！！
 
- 拼音词库是 Chinese-pyim 使用顺手与否的关键。根据经验估计：
- 1. 当词库词条超过100万时(词库文件>20M)，Chinese-pyim 选词频率大大降低。
- 2. 当词库词条超过100万时，Chinese-pyim 中文输入体验可以达到搜狗输入法的80%%。
+拼音词库是 Chinese-pyim 使用顺手与否的关键。根据经验估计：
+1. 当词库词条超过100万时(词库文件>20M)，Chinese-pyim 选词频率大大降低。
+2. 当词库词条超过100万时，Chinese-pyim 中文输入体验可以达到搜狗输入法的80%%。
 
- 赶时间的朋友可以直接下载其他 Chinese-pyim 用户现成的拼音词库，比如，某个同学
- 自己使用的词库：BigDict，这个词库词条数量大约60万，文件大约20M，可以显著
- 增强 Chinese-pyim 的输入体验，(注意：请使用另存为，不要直接点击链接)。
+赶时间的朋友可以直接下载其他 Chinese-pyim 用户现成的拼音词库，比如，某个同学
+自己使用的词库：BigDict，这个词库词条数量大约60万，文件大约20M，可以显著
+增强 Chinese-pyim 的输入体验，(注意：请使用另存为，不要直接点击链接)。
 
-   https://github.com/tumashu/chinese-pyim-bigdict/blob/master/pyim-bigdict.txt?raw=true
+  https://github.com/tumashu/chinese-pyim-bigdict/blob/master/pyim-bigdict.txt?raw=true
 
- 下载上述拼音词库后，运行 `pyim-add-dict' ，按照命令提示，将词库文件信息添加到
-  `pyim-dicts' 中，最后运行命令 `pyim-restart' 或者重启emacs。。
+下载上述拼音词库后，运行 `pyim-add-dict' ，按照命令提示，将词库文件信息添加到
+ `pyim-dicts' 中，最后运行命令 `pyim-restart' 或者重启emacs。。
 
- 喜欢折腾的用户可以从下面几个途径获得 Chinese-pyim 更详细的信息。
- 1. 使用 `C-h v pyim-dicts' 了解 `Chinese-pyim' 词库文件格式，
- 2. 了解如何导入其它输入法的词库。
-    1. 使用 package 管理器查看 Chinese-pyim 包的简介
-    2. 阅读 chinese-pyim.el 文件 Commentary
-    3. 查看 Chinese-pyim 在线 README：https://github.com/tumashu/chinese-pyim")
- #+END_SRC
+喜欢折腾的用户可以从下面几个途径获得 Chinese-pyim 更详细的信息。
+1. 使用 `C-h v pyim-dicts' 了解 `Chinese-pyim' 词库文件格式，
+2. 了解如何导入其它输入法的词库。
+   1. 使用 package 管理器查看 Chinese-pyim 包的简介
+   2. 阅读 chinese-pyim.el 文件 Commentary
+   3. 查看 Chinese-pyim 在线 README：https://github.com/tumashu/chinese-pyim")
+#+END_SRC
 
 ** 使用
 *** 常用快捷键
- | 按键 | 功能     |
- |------+----------|
- | C-n  | 向下翻页 |
- | C-p  | 向上翻页 |
- | C-c  | 取消输入 |
- | SPC  | 确定输入 |
- | RET  | 字母上屏 |
+| 按键 | 功能     |
+|------+----------|
+| C-n  | 向下翻页 |
+| C-p  | 向上翻页 |
+| C-c  | 取消输入 |
+| SPC  | 确定输入 |
+| RET  | 字母上屏 |
 
 *** 设置模糊音
- Chinese-pyim 使用一个比较 *粗糙* 的方法处理 *模糊音* ，要了解具体细节，请
- 运行：
+Chinese-pyim 使用一个比较 *粗糙* 的方法处理 *模糊音* ，要了解具体细节，请
+运行：
 
- #+BEGIN_EXAMPLE
- C-h v pyim-fuzzy-pinyin-adjust-function
- #+END_EXAMPLE
+#+BEGIN_EXAMPLE
+C-h v pyim-fuzzy-pinyin-adjust-function
+#+END_EXAMPLE
 
 *** 切换全角标点与半角标点
 
- 1. 第一种方法：使用命令 `pyim-toggle-full-width-punctuation'，全局切换。
- 2. 第二种方法：使用命令 `pyim-punctuation-translate-at-point' 只切换光标处标点的样式。
- 3. 第三种方法：设置变量 `pyim-translate-trigger-char'。输入变量设定的字符会切换光标处标点的样式。
+1. 第一种方法：使用命令 `pyim-toggle-full-width-punctuation'，全局切换。
+2. 第二种方法：使用命令 `pyim-punctuation-translate-at-point' 只切换光标处标点的样式。
+3. 第三种方法：设置变量 `pyim-translate-trigger-char'。输入变量设定的字符会切换光标处标点的样式。
 
 *** 手动加词和删词
 
- 1. `pyim-create-word-without-pinyin' 直接将一个中文词条加入个人词库的函数，用于编程环境。
- 2. `pyim-create-word-at-point:<N>char' 这是一组命令，从光标前提取N个汉字字符组成字符串，
-    并将其加入个人词库。
- 3. `pyim-translate-trigger-char' 以默认设置为例：在“我爱吃红烧肉”后输入“5v” 可以将
-    “爱吃红烧肉”这个词条保存到用户个人文件。
- 4. `pyim-delete-word-from-personal-buffer' 从个人文件对应的 buffer 中删除当前高亮选择的词条。
+1. `pyim-create-word-without-pinyin' 直接将一个中文词条加入个人词库的函数，用于编程环境。
+2. `pyim-create-word-at-point:<N>char' 这是一组命令，从光标前提取N个汉字字符组成字符串，
+   并将其加入个人词库。
+3. `pyim-translate-trigger-char' 以默认设置为例：在“我爱吃红烧肉”后输入“5v” 可以将
+   “爱吃红烧肉”这个词条保存到用户个人文件。
+4. `pyim-delete-word-from-personal-buffer' 从个人文件对应的 buffer 中删除当前高亮选择的词条。
 
 *** 快速切换词库
- 用户可以自定义类似的命令来实现快速切换拼音词库。
+用户可以自定义类似的命令来实现快速切换拼音词库。
 
- #+BEGIN_SRC emacs-lisp
- (defun pyim-use-dict:bigdict ()
-   (interactive)
-   (setq pyim-dicts
-         '((:name "BigDict"
-                  :file "/path/to/pyim-bigdict.txt"
-                  :coding utf-8-unix)))
-   (pyim-restart-1 t))
- #+END_SRC
+#+BEGIN_SRC emacs-lisp
+(defun pyim-use-dict:bigdict ()
+  (interactive)
+  (setq pyim-dicts
+        '((:name "BigDict"
+                 :file "/path/to/pyim-bigdict.txt"
+                 :coding utf-8-unix)))
+  (pyim-restart-1 t))
+#+END_SRC
 
 *** [实验特性] 词语联想
 
- `Chinese-pyim' 增加了两个 `company-mode' 补全后端来实现 *联想词* 输入功能：
+`Chinese-pyim' 增加了两个 `company-mode' 补全后端来实现 *联想词* 输入功能：
 
- 1. `pyim-company-dabbrev' 是 `company-dabbrev' 的中文优化版，适用于补全其它 buffer 中的中文词语。
- 2. `pyim-company-predict-words' 可以从 Chinese-pyim 词库中搜索与当前中文词条相近的词条。
+1. `pyim-company-dabbrev' 是 `company-dabbrev' 的中文优化版，适用于补全其它 buffer 中的中文词语。
+2. `pyim-company-predict-words' 可以从 Chinese-pyim 词库中搜索与当前中文词条相近的词条。
 
- 安装和使用方式：
+安装和使用方式：
 
- 1. 安装 `company-mode' 扩展包。
- 2. 在 emacs 配置中添加如下几行代码：
+1. 安装 `company-mode' 扩展包。
+2. 在 emacs 配置中添加如下几行代码：
 
- #+BEGIN_SRC emacs-lisp
- (require 'chinese-pyim-company)
- #+END_SRC
+#+BEGIN_SRC emacs-lisp
+(require 'chinese-pyim-company)
+#+END_SRC
 
- 可以通过 pyim-company-predict-words-number 来设置联想词的数量，
- 比如：从词库中搜索10个联想词可以设置为：
+可以通过 pyim-company-predict-words-number 来设置联想词的数量，
+比如：从词库中搜索10个联想词可以设置为：
 
- #+BEGIN_SRC emacs-lisp
- (setq pyim-company-predict-words-number 10)
- #+END_SRC
+#+BEGIN_SRC emacs-lisp
+(setq pyim-company-predict-words-number 10)
+#+END_SRC
 
 ** Tips
 *** Chinese-pyim 重要变量介绍
- 1. `pyim-personal-file' Chinese-pyim 个人词频文件设置变量。
- 2. `pyim-dicts'  Chinese-pyim 词库设置变量。
+1. `pyim-personal-file' Chinese-pyim 个人词频文件设置变量。
+2. `pyim-dicts'  Chinese-pyim 词库设置变量。
 *** 如何添加自定义拼音词库
- Chinese-pyim 默认没有携带任何拼音词库，如果不配置拼音词库，Chinese-pyim将不能正常工作。
- 这样做的原因有两个：
+Chinese-pyim 默认没有携带任何拼音词库，如果不配置拼音词库，Chinese-pyim将不能正常工作。
+这样做的原因有两个：
 
- 1. 防止侵犯其他输入法的版权。
- 2. 防止自带词库质量太差，影响用户体验。
+1. 防止侵犯其他输入法的版权。
+2. 防止自带词库质量太差，影响用户体验。
 
- 用户可以使用下面两种方式，简单的获取质量比较好的词库：
+用户可以使用下面两种方式，简单的获取质量比较好的词库：
 **** 第一种方式
 
- 获取其他 Chinese-pyim 用户的拼音词库，比如，某个同学测试 Chinese-pyim 时创建了一个
- 中文拼音词库，词条数量大约60万，文件大约20M，(注意：请使用另存为，不要直接点击链接)。
+获取其他 Chinese-pyim 用户的拼音词库，比如，某个同学测试 Chinese-pyim 时创建了一个
+中文拼音词库，词条数量大约60万，文件大约20M，(注意：请使用另存为，不要直接点击链接)。
 
- https://github.com/tumashu/chinese-pyim-bigdict/blob/master/pyim-bigdict.txt?raw=true
+https://github.com/tumashu/chinese-pyim-bigdict/blob/master/pyim-bigdict.txt?raw=true
 
- 其他同学可以下载上述词库来体验一下超大词库为 Chinese-pyim 带来的巨大变化。
+其他同学可以下载上述词库来体验一下超大词库为 Chinese-pyim 带来的巨大变化。
 
- 下载上述词库后，运行 `pyim-add-dict' ，按照命令提示，将下载得到的词库文件信息添加
- 到 `pyim-dicts' 中，最后运行命令 `pyim-restart' 或者重启emacs。
+下载上述词库后，运行 `pyim-add-dict' ，按照命令提示，将下载得到的词库文件信息添加
+到 `pyim-dicts' 中，最后运行命令 `pyim-restart' 或者重启emacs。
 
 **** 第二种方式
 
- 使用词库转换工具将其他输入法的词库转化为Chinese-pyim使用的词库：这里只介绍windows平
- 台下的一个词库转换软件：
+使用词库转换工具将其他输入法的词库转化为Chinese-pyim使用的词库：这里只介绍windows平
+台下的一个词库转换软件：
 
- 1. 软件名称： "imewlconverter"
- 2. 中文名称：“深蓝词库转换”。
- 3. 下载地址： http://code.google.com/p/imewlconverter/
- 4. 依赖平台:  "Microsoft .NET Framework 2.0"
+1. 软件名称： "imewlconverter"
+2. 中文名称：“深蓝词库转换”。
+3. 下载地址： http://code.google.com/p/imewlconverter/
+4. 依赖平台:  "Microsoft .NET Framework 2.0"
 
- 首先从其他拼音输入法网站上获取所需词库，使用下述自定义输出格式转换词库文件，然后将转
- 换得到的内容保存到文件中。
+首先从其他拼音输入法网站上获取所需词库，使用下述自定义输出格式转换词库文件，然后将转
+换得到的内容保存到文件中。
 
- #+BEGIN_EXAMPLE
- shen,lan,ci,ku 深蓝词库
- #+END_EXAMPLE
+#+BEGIN_EXAMPLE
+shen,lan,ci,ku 深蓝词库
+#+END_EXAMPLE
 
- 将文件中所有","替换为"-"，得到的文件每一行都类似：
+将文件中所有","替换为"-"，得到的文件每一行都类似：
 
- #+BEGIN_EXAMPLE
- shen-lan-ci-ku 深蓝词库
- #+END_EXAMPLE
+#+BEGIN_EXAMPLE
+shen-lan-ci-ku 深蓝词库
+#+END_EXAMPLE
 
- 最后，使用命令 `pyim-add-dict' ，将转换得到的词库文件的信息添加到 `pyim-dicts' 中，
- 完成后运行命令 `pyim-restart' 或者重启emacs。
+最后，使用命令 `pyim-add-dict' ，将转换得到的词库文件的信息添加到 `pyim-dicts' 中，
+完成后运行命令 `pyim-restart' 或者重启emacs。
 
 **** 第三种方式
 
- 获取中文词条，然后添加拼音code。中文词条的获取途径很多，比如：
+获取中文词条，然后添加拼音code。中文词条的获取途径很多，比如：
 
- 1. 从其它输入法中导出。
- 2. 获取中文文章，通过分词系统分词得到。
- 3. 中文处理工具自带的dict。
- 4. 其它。
+1. 从其它输入法中导出。
+2. 获取中文文章，通过分词系统分词得到。
+3. 中文处理工具自带的dict。
+4. 其它。
 
- Chinese-pyim 下面两个命令可以为中文词条添加拼音Code，从而生成可用词库：
+Chinese-pyim 下面两个命令可以为中文词条添加拼音Code，从而生成可用词库：
 
- 1. `pyim-article2dict-chars' 将文章中游离汉字字符转换为拼音词库。
- 2. `pyim-article2dict-words' 将文章中中文词语转换为拼音词库。
- 3. `pyim-article2dict-misspell-words' 将文章中连续的游离词组成字符串后，转换为拼音词库。
+1. `pyim-article2dict-chars' 将文章中游离汉字字符转换为拼音词库。
+2. `pyim-article2dict-words' 将文章中中文词语转换为拼音词库。
+3. `pyim-article2dict-misspell-words' 将文章中连续的游离词组成字符串后，转换为拼音词库。
 
- 注意：在运行上述两个命令之前，必须确保待转换的文章中，中文词汇已经使
- 用 *空格* 强制隔开。
+注意：在运行上述两个命令之前，必须确保待转换的文章中，中文词汇已经使
+用 *空格* 强制隔开。
 
- 最后将生成的词库按上述方法添加到 Chinese-pyim 中就可以了。
+最后将生成的词库按上述方法添加到 Chinese-pyim 中就可以了。
 
 *** 如何手动安装和管理词库
- 这里假设有两个词库文件：
+这里假设有两个词库文件：
 
- 1. /path/to/pyim-dict1.txt
- 2. /path/to/pyim-dict2.txt
+1. /path/to/pyim-dict1.txt
+2. /path/to/pyim-dict2.txt
 
- 在~/.emacs文件中添加如下一行配置。
+在~/.emacs文件中添加如下一行配置。
 
- #+BEGIN_SRC emacs-lisp
- (setq pyim-dicts
-       '((:name "dict1" :file "/path/to/pyim-dict1.txt" :coding gbk-dos)
-         (:name "dict2" :file "/path/to/pyim-dict2.txt" :coding gbk-dos)))
- #+END_SRC
+#+NAME: pyim-dicts-example
+#+BEGIN_SRC emacs-lisp :eval no
+(setq pyim-dicts
+      '((:name "dict1" :file "/path/to/pyim-dict1.txt" :coding gbk-dos)
+        (:name "dict2" :file "/path/to/pyim-dict2.txt" :coding gbk-dos)))
+#+END_SRC
 
 *** 将汉字字符串转换为拼音字符串
- 下面两个函数可以将中文字符串转换的拼音字符串或者列表，用于 emacs-lisp 编程。
+下面两个函数可以将中文字符串转换的拼音字符串或者列表，用于 emacs-lisp 编程。
 
- 1. `pyim-hanzi2pinyin' （考虑多音字）
- 2. `pyim-hanzi2pinyin-simple'  （不考虑多音字）
+1. `pyim-hanzi2pinyin' （考虑多音字）
+2. `pyim-hanzi2pinyin-simple'  （不考虑多音字）
 
 * Chinese-pyim 开发者README                                           :devel:
 ** 如何加载开发工具
@@ -315,7 +316,7 @@ M-x org-babel-execute-buffer
 ;;; Code:
 #+END_SRC
 
-** 自定义变量
+** Require
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (require 'cl-lib)
 (require 'help-mode)
@@ -325,25 +326,73 @@ M-x org-babel-execute-buffer
   :group 'leim)
 #+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
-(defcustom pyim-personal-file (locate-user-emacs-file "pyim/pyim-personal.txt")
-  "这个文件用来保存用户曾经输入过的中文词条，和这些词条输入的先后顺序。
+** 自定义变量
+*** 词库文件格式
+Chinese-pyim 使用词库文件来保存各个拼音对应的中文词条，每一个词库文件都
+是简单的文本文件，其结构类似：
 
-随着 `Chinese-pyim' 使用时间的延长，这个文件会保存越来越多的用户个人常用的词条，
-相应的 `Chinese-pyim' 也会越来越顺手，所以：建议用户做好备份，同时也提醒用户注
-意保护隐私，不要随意将这个文件泄露他人。
+#+BEGIN_SRC org
+ni-bu-hao 你不好
+ni-hao  你好 妮好 你豪
+#+END_SRC
 
-这个文件的格式与 `Chinese-pyim' 词库的格式完全一致，`Chinese-pyim' 使用与词库一样
-的方法处理这个文件，同时，当输入法搜索词条时，这个文件里的词条最先使用。但是，这个
-文件不是让用户添加自定义词库的。因为：emacs关闭之前，`Chinese-pyim' 会自动
-更新这个文件，将编辑过的内容覆盖，所以不建议普通用户手动编辑这个文件，
+第一个空格之前的内容为拼音code，第一个空格之后为中文词条列表。
+拼音词库也不处理中文标点符号。
+
+注意：词库文件必须按行排序（准确的说，是按每一行的 code 排序），因为
+`Chinese-pyim' 为优化搜索速度，使用二分法寻找词条，而二分法工作的前提就是对
+文件按行排序。具体细节请参考：`pyim-bisearch-word' 。当用户手动调整词库文
+件后，记得运行 `pyim-update-dict-file' 来对文件排序。
+
+虽然我们只使用一种词库文件格式，但 Chinese-pyim 定义了两种词库类型，用于不同的目的：
+
+*** 个人文件
+个人文件用来保存用户曾经输入过的中文词条以及这些词条输入的先后顺序（也就是词频信息）。
+Chinese-pyim 搜索中文词条时，个人文件里的词条优先显示。我们使用变量 `pyim-personal-file'
+来保存个人文件的路径，在使用 pyim-load-file 加载词库文件的时候，如果这个文件不存在，
+Chinese-pyim 会使用函数：`pyim-create-template-dict' 自动创建这个文件。
+
+个人文件使用上述词库文件的格式来保存上述信息，将其独立出来的原因是：
+1. 随着 `Chinese-pyim' 使用时间的延长，个人文件会保存越来越多的用户常用的词条，属于
+   用户隐私，提醒用户不要随意将这个文件泄露他人。
+2. 个人文件的内容在 Chinese-pyim 使用过程中频繁的变动。
+3. 随着个人文件的积累，Chinese-pyim 会越来越顺手，所以个人文件需要用户经常备份。
+
+值得注意的是：不建议用户 *手动编辑* 这个文件，因为：每次 emacs 关闭之前，emacs会运行
+命令：`pyim-save-personal-file' 来更新这个文件，编辑过的内容将会被覆盖。
+
 BUG：当用户错误的将这个变量设定为其他重要文件时，也存在文件内容破坏的风险。
 
-如果用户需要手动为 `Chinese-pyim' 添加新词条，请使用其自带的词库功能，具体请参
-考变量 `pyim-dicts'。
-
 当这个文件中的词条数量增长到一定程度，用户可以直接将这个文件转换为词库。
-"
+
+*** 普通词库文件
+普通词库文件，也可以叫做共享词库文件，与个人文件相比，普通词库文件的特点是：
+1. 词条数量巨大：普通词库文件中往往包含大量的词条信息（可能超过50万）。
+2. 内容变化很小：用户一般不需要编辑普通词库文件（词库开发除外），所以其内容一般不会发生改变。
+3. 普通词库文件适宜在不同用户之间共享，便于制作词库包。
+
+我们使用变量 `pyim-dicts' 来设定普通词库信息，`pyim-dict' 是一个列表，纪录了各个
+词库文件的信息，比如：
+1. `:name' 给词库文件取一个名字，暂时没有用处，未来构建词库包时可能用到。
+2. `:file' 词库文件的路径。
+3. `:coding' 词库文件的编码，词库文件是一个文本文件，window系统一般使用 GBK
+    编码来保存中文，而Linux系统一般使用 UTF-8 编码来保存中文，emacs 似乎不能
+    自动识别中文编码，所以要求用户明确告知词库文件使用什么编码来保存。
+
+一个简单的词库设定例子为：
+#+BEGIN_SRC emacs-lisp :eval no :noweb yes
+<<pyim-dicts-example>>
+#+END_SRC
+
+*** 标点符号列表
+因为常用的标点符号数量不多，所以 Chinese-pyim 没有使用文件词库来处理
+半角标点符号和全角标点符号，而是使用一个变量 `pyim-punctuation-dict' 来处理
+标点符号样式的转换，这个变量是一个alist。在调用函数 `pyim-default-translate'
+的时候进行标点符号格式的转换。
+
+#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
+(defcustom pyim-personal-file (locate-user-emacs-file "pyim/pyim-personal.txt")
+  "这个文件用来保存用户曾经输入过的中文词条，和这些词条输入的先后顺序。"
   :group 'chinese-pyim
   :type 'file)
 
@@ -359,19 +408,7 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
 其中：
 1. `:name'   代表词库名称，用户可以按照喜好来确定。
 2. `:coding' 表示词库文件使用的编码。
-3. `:file'   表示词库文件，
-
-每一个词库文件都是简单的文本文件。文件每一行都类似：
-
-    ni-hao 你好 拟好
-
-第一个空格之前的内容为code（拼音），第一个空格之后为中文词条列表。
-`Chinese-pyim' 词库不使用其他特殊格式，词库也不处理中文标点符号。
-
-但要注意：词库文件必须按行排序（准确的说，是按每一行的 code 排序），因为
-`Chinese-pyim' 寻找词条时，使用二分法来优化速度，而二分法工作的前提就是对
-文件按行排序。具体细节请参考：`pyim-bisearch-word' 。当用户手动调整词库文
-件后，记得运行 `pyim-update-dict-file' 来对文件排序。"
+3. `:file'   表示词库文件，"
   :group 'chinese-pyim
   :type 'list)
 
@@ -410,7 +447,11 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
   "标点符号表。"
   :group 'chinese-pyim
   :type 'list)
+#+END_SRC
 
+*** 转换触发字符
+
+#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defcustom pyim-translate-trigger-char ?v
   "光标前面的字符为标点符号时，按这个字符可以切换前面的标点
 符号的样式（半角/全角）
@@ -420,14 +461,15 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
   :type 'character)
 #+END_SRC
 
-许多时候，我们必须根据环境的具体情况来自动开启或者关闭中文输入，比如：当 org-mode 用户
-激活 speed commands 后，光标在A位置时：必须自动关闭中文输入功能，
+*** 按照特定编辑环境自动开启英文输入模式。
+许多时候，我们必须根据特定的编辑环境来自动开启英文输入模式，比如：当 org-mode 用户
+激活 speed commands 后，光标在A位置时：需要自动关闭中文输入功能，方便运行快捷命令。
 
 #+BEGIN_EXAMPLE
-,-A-** HEAD
+-A-** HEAD
 #+END_EXAMPLE
 
-而光标在B位置时，必须自动开启中文输入功能。
+而光标在B位置时，需要自动开启中文输入功能，方便输入中文。
 #+BEGIN_EXAMPLE
 ,** -B-HEAD
 #+END_EXAMPLE
@@ -445,23 +487,23 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
       'pyim-org-speed-commands-active-p)
 #+END_SRC
 
-Chinese-pyim 在插入字符之前，会运行 pyim-english-input-switch-function
+Chinese-pyim 插入字符之前，首先会运行 `pyim-english-input-switch-function'
 对应的函数，当返回值为 t 时，Chinese-pyim 就会开启英文输入模式，当这个
-函数返回值为 nil 时，Chinese-pyim 就会开启中文输入模式。
+函数返回值为 nil 时，Chinese-pyim 就会关闭英文输入模式，这个主要用于根据
+编辑环境的特点自动切换中英文输入模式。
 
-值得注意的是，pyim-toggle-input-ascii 这个命令也可以控制输入法是否开启英文
-输入模式，但两者使用的情况不同，用户一般将 pyim-toggle-input-ascii 绑定到
-特定的快捷键上，手动切换中英文输入模式。这个命令通过变量 pyim-input-ascii
-来实现切换。
+`pyim-toggle-input-ascii' 这个命令也可以控制输入法是否开启英文输入模式，
+但 `pyim-toggle-input-ascii' 用于手动切换，需要用户将 pyim-toggle-input-ascii
+绑定到特定的快捷键上，这个命令通过变量 `pyim-input-ascii' 来实现切换。
 
-Chinese-pyim 使用 pyim-input-chinese-p 函数来决定是否开启英文输入模式，
-上述两种方式共同影响 pyim-input-chinese-p 的结果，最终直观的行为是：
+两者使用的情况是不同的，但两者都是通过影响 `pyim-input-chinese-p' 函数来
+实现切换目的，其最终结果为：
 
-| 自动开启 | 手动开启 | 最终的结果 |
-|----------+----------+------------|
-| NO       | YES      | YES        |
-| YES      | NO       | YES        |
-| NO       | NO       | NO         |
+| 自动开启英文输入 | 手动开启英文输入模式 | 最终结果 |
+|------------------+----------------------+----------|
+| NO               | YES                  | YES      |
+| YES              | NO                   | YES      |
+| NO               | NO                   | NO       |
 
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defcustom pyim-english-input-switch-function nil
@@ -470,42 +512,43 @@ Chinese-pyim 使用 pyim-input-chinese-p 函数来决定是否开启英文输入
   :type 'function)
 #+END_SRC
 
+*** 处理模糊音
+'Chinese-pyim的核心并不能处理模糊音，这里提供了一个比较 *粗糙* 的方法来处理模糊音。
+
+假如：用户输入了一个错误的拼音“ying-gai”，用户可以通过快捷键运行这个函数，将“ing” 替换 “in”，
+得到 “yin-gai”对应的词语。
+
+这种处理方式能力有限，一次不能处理太多的模糊音，用户需要根据自己的需要，自定义模糊音处理函数。
+
+自定义模糊音处理函数可以参考：`pyim-pinyin-fuzzy-adjust-1 的定义方式。
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defcustom pyim-fuzzy-pinyin-adjust-function
   'pyim-fuzzy-pinyin-adjust-1
-  "Chinese-pyim的核心并不能处理模糊音，这里提供了一个比较
- ,*粗糙* 的方法来处理模糊音。
-
-假如：用户输入了一个错误的拼音“ying-gai”，用户可以通过快
-捷键运行一个函数，将“ing” 替换 “in”，得到 “yin-gai”
-对应的词语。
-
-这种处理方式能力有限，一次不能处理太多的模糊音，用户需要根据
-自己的需要，自定义模糊音处理函数。
-
-模糊音处理函数可以参考：`pyim-pinyin-fuzzy-adjust-1'
-"
+  "设定糢糊音处理函数"
   :group 'chinese-pyim
   :type 'function)
 #+END_SRC
 
+*** 选择中文词条完成后执行的hook
+当用户选择了一个中文词条后，执行这个hook，如果用户使用 `chinese-pyim-company' ：
+
+#+BEGIN_SRC emacs-lisp :eval no
+(require 'chinese-pyim-company)
+#+END_SRC
+
+那么：Chinese-pyim 会使用这个 hook 调用补全命令：`pyim-company-complete' ，
+来补全与当前词条相似的联想词，以及在其它buffer中搜索与当前词条相似的词条。
+
+这个方式也可以用于中英文翻译等用途，有兴趣的同学可以自己折腾。
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defcustom pyim-select-word-finish-hook nil
-  "Chinese-pyim 选词完成时运行的hook，
-
-Chinese-pyim 使用这个 hook 处理联想词，用户可以使用
-这个 hook 调用来调用外部的补全系统等工作。"
+  "Chinese-pyim 选词完成时运行的hook，"
   :group 'chinese-pyim
   :type 'hook)
 #+END_SRC
 
+*** 其它
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
-(defcustom pyim-automatic-generate-word nil
-  "自动组词功能，这个选项设置为 t 时，Chinese-pyim 会
-将当前光标前2个或者3个汉字组成的字符串，加入个人词库。"
-  :group 'chinese-pyim
-  :type 'boolean)
-
 (defcustom pyim-page-length 9
   "每页显示的词条数目"
   :group 'chinese-pyim

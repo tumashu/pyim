@@ -378,23 +378,7 @@
   :group 'leim)
 
 (defcustom pyim-personal-file (locate-user-emacs-file "pyim/pyim-personal.txt")
-  "这个文件用来保存用户曾经输入过的中文词条，和这些词条输入的先后顺序。
-
-随着 `Chinese-pyim' 使用时间的延长，这个文件会保存越来越多的用户个人常用的词条，
-相应的 `Chinese-pyim' 也会越来越顺手，所以：建议用户做好备份，同时也提醒用户注
-意保护隐私，不要随意将这个文件泄露他人。
-
-这个文件的格式与 `Chinese-pyim' 词库的格式完全一致，`Chinese-pyim' 使用与词库一样
-的方法处理这个文件，同时，当输入法搜索词条时，这个文件里的词条最先使用。但是，这个
-文件不是让用户添加自定义词库的。因为：emacs关闭之前，`Chinese-pyim' 会自动
-更新这个文件，将编辑过的内容覆盖，所以不建议普通用户手动编辑这个文件，
-BUG：当用户错误的将这个变量设定为其他重要文件时，也存在文件内容破坏的风险。
-
-如果用户需要手动为 `Chinese-pyim' 添加新词条，请使用其自带的词库功能，具体请参
-考变量 `pyim-dicts'。
-
-当这个文件中的词条数量增长到一定程度，用户可以直接将这个文件转换为词库。
-"
+  "这个文件用来保存用户曾经输入过的中文词条，和这些词条输入的先后顺序。"
   :group 'chinese-pyim
   :type 'file)
 
@@ -410,19 +394,7 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
 其中：
 1. `:name'   代表词库名称，用户可以按照喜好来确定。
 2. `:coding' 表示词库文件使用的编码。
-3. `:file'   表示词库文件，
-
-每一个词库文件都是简单的文本文件。文件每一行都类似：
-
-    ni-hao 你好 拟好
-
-第一个空格之前的内容为code（拼音），第一个空格之后为中文词条列表。
-`Chinese-pyim' 词库不使用其他特殊格式，词库也不处理中文标点符号。
-
-但要注意：词库文件必须按行排序（准确的说，是按每一行的 code 排序），因为
-`Chinese-pyim' 寻找词条时，使用二分法来优化速度，而二分法工作的前提就是对
-文件按行排序。具体细节请参考：`pyim-bisearch-word' 。当用户手动调整词库文
-件后，记得运行 `pyim-update-dict-file' 来对文件排序。"
+3. `:file'   表示词库文件，"
   :group 'chinese-pyim
   :type 'list)
 
@@ -477,34 +449,14 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
 
 (defcustom pyim-fuzzy-pinyin-adjust-function
   'pyim-fuzzy-pinyin-adjust-1
-  "Chinese-pyim的核心并不能处理模糊音，这里提供了一个比较
- *粗糙* 的方法来处理模糊音。
-
-假如：用户输入了一个错误的拼音“ying-gai”，用户可以通过快
-捷键运行一个函数，将“ing” 替换 “in”，得到 “yin-gai”
-对应的词语。
-
-这种处理方式能力有限，一次不能处理太多的模糊音，用户需要根据
-自己的需要，自定义模糊音处理函数。
-
-模糊音处理函数可以参考：`pyim-pinyin-fuzzy-adjust-1'
-"
+  "设定糢糊音处理函数"
   :group 'chinese-pyim
   :type 'function)
 
 (defcustom pyim-select-word-finish-hook nil
-  "Chinese-pyim 选词完成时运行的hook，
-
-Chinese-pyim 使用这个 hook 处理联想词，用户可以使用
-这个 hook 调用来调用外部的补全系统等工作。"
+  "Chinese-pyim 选词完成时运行的hook，"
   :group 'chinese-pyim
   :type 'hook)
-
-(defcustom pyim-automatic-generate-word nil
-  "自动组词功能，这个选项设置为 t 时，Chinese-pyim 会
-将当前光标前2个或者3个汉字组成的字符串，加入个人词库。"
-  :group 'chinese-pyim
-  :type 'boolean)
 
 (defcustom pyim-page-length 9
   "每页显示的词条数目"
