@@ -370,7 +370,7 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
 2. 内容变化很小：用户一般不需要编辑普通词库文件（词库开发除外），所以其内容一般不会发生改变。
 3. 普通词库文件适宜在不同用户之间共享，便于制作词库包。
 
-我们使用变量 `pyim-dicts' 来设定普通词库信息，`pyim-dict' 是一个列表，纪录了各个
+我们使用变量 `pyim-dicts' 来设定普通词库信息，`pyim-dict' 是一个列表，记录了各个
 词库文件的信息，比如：
 1. `:name' 给词库文件取一个名字，暂时没有用处，未来构建词库包时可能用到。
 2. `:file' 词库文件的路径。
@@ -620,7 +620,7 @@ Chinese-pyim 激活时，首先会使用 `pyim-load-file' 加载个人词频文�
 将 `pyim-buffer-list' 第一个 buffer 的内容保存到个人词频文件，这个命令用于更新个人词频文件。
 
 `pyim-check-buffers' 函数会检查 `pyim-buffer-list' 中的所有 buffer 是否存在，如果某个 buffer 不存在，
-这个函数会重新创建一个buffer，并插入对应词库文件的内容，如果对应词库文件也不存在，那么这个函数会删除这条纪录。
+这个函数会重新创建一个buffer，并插入对应词库文件的内容，如果对应词库文件也不存在，那么这个函数会删除这条记录。
 
 而 `pyim-kill-buffers' 会删除 `pyim-buffer-list' 中所有的 buffer。这个函数用于重新启动输入法前的清理工作。
 
@@ -688,7 +688,7 @@ Chinese-pyim 使用 `pyim-punctuation-escape-list' 变量来支持这个特性�
 通过变量`pyim-punctuation-translate-p' 来实现的，当这个变量的值为 t 时，输入全角标点，反之
 输入半角标点。
 
-而 `pyim-pair-punctuation-status' 用来纪录“成对”中文标点符号的输入状态。比如：
+而 `pyim-pair-punctuation-status' 用来记录“成对”中文标点符号的输入状态。比如：
 #+BEGIN_EXAMPLE
 “”
 ‘’
@@ -755,7 +755,7 @@ Chinese-pyim 在特定的时候需要读取一个汉字的拼音，
 (defvar pyim-char-table (make-vector 1511 nil))
 #+END_SRC
 
-*** 纪录词库帮助信息的变量
+*** 记录词库帮助信息的变量
 这个变量用于保存词库设置帮助信息，当用户没有安装词库时，函数 `pyim-show-help'
 会弹出一个窗口来显示这些信息。
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
