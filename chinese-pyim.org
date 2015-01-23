@@ -727,12 +727,37 @@ If you don't like this funciton, set the variable to nil")
     "ang" "eng"))
 #+END_SRC
 
-*** 与汉字/拼音相互转换相关的变量
+*** 与汉字到拼音转换相关的变量
+Chinese-pyim 在特定的时候需要读取一个汉字的拼音，
+这个工作由两个函数处理，而这两个函数的联系就是 `pyim-char-table’
+
+1. `pyim-make-char-table' ： 这个函数通过解析 quail/PY.el 文件中的拼音和汉字的对应列表，其结构类似：
+    #+BEGIN_EXAMPLE
+    (quail-define-rules
+    ("a" "阿啊呵腌嗄锕吖")
+    ("ai" "爱哀挨碍埃癌艾唉矮哎皑蔼隘暧霭捱嗳瑷嫒锿嗌砹")
+    ("an" "安案按暗岸俺谙黯鞍氨庵桉鹌胺铵揞犴埯")
+    ("ang" "昂肮盎")
+    ("ao" "奥澳傲熬敖凹袄懊坳嗷拗鏖骜鳌翱岙廒遨獒聱媪螯鏊")
+    ("ba" "把八吧巴爸罢拔叭芭霸靶扒疤跋坝笆耙粑灞茇菝魃岜捌钯鲅")
+    ("bai" "百白败摆伯拜柏呗掰捭佰稗")
+    ("ban" "办半版般班板伴搬扮斑颁瓣拌扳绊阪坂瘢钣舨癍")
+    ...
+    )
+    #+END_EXAMPLE
+    然后生成一个新的对应表，用 `pyim-char-table' 保存。这个新的对应表比较容易处理。
+2. `pyim-get-char-code' 从 `pyim-char-table' 查询得到一个汉字字符的拼音，比如：
+    #+BEGIN_EXAMPLE
+    (pyim-get-char-code ?行) -> ("hang" "xing")
+    #+END_EXAMPLE
+
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defvar pyim-char-table (make-vector 1511 nil))
 #+END_SRC
 
 *** 纪录词库帮助信息的变量
+这个变量用于保存词库设置帮助信息，当用户没有安装词库时，函数 `pyim-show-help'
+会弹出一个窗口来显示这些信息。
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 <<pyim-dict-help-string>>
 #+END_SRC
