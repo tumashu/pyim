@@ -82,7 +82,6 @@ Chinese-pyim 的目标是： **尽最大的努力成为一个好用的 emacs 备
 ```emacs-lisp
 (setq default-input-method "chinese-pyim")
 (global-set-key (kbd "C-<SPC>") 'toggle-input-method)
-;; (global-set-key (kbd "C-;") 'pyim-insert-ascii)
 ;; (global-set-key (kbd "C-;") 'pyim-toggle-full-width-punctuation)
 ;; (global-set-key (kbd "C-;") 'pyim-punctuation-translate-at-point)
 ```
