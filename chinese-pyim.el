@@ -477,6 +477,7 @@ Chinese-pyim 内建的功能有：
 2. 每一个 alist 都包含两个部份：
    1. buffer 词库文件导入时创建的 buffer (用户不可见)。
    2. file   词库文件的路径。")
+
 (defvar pyim-active-function nil)
 (defvar pyim-current-key "" "已经输入的代码")
 (defvar pyim-current-str "" "当前选择的词条")
@@ -490,9 +491,6 @@ Chinese-pyim 内建的功能有：
 2. CDR 部分是一个 Association list。通常含有这样的内容：
    1. pos 上次选择的位置
    2. completion 下一个可能的字母（如果 pyim-do-completion 为 t）")
-
-(defvar pyim-current-predict-words nil
-  "用来纪录联想得到的词条，有利于将联想词和正常词分开处理。")
 
 (defvar pyim-current-pos nil "当前选择的词条在 pyim-current-choices 中的位置")
 (defvar pyim-guidance-str "" "显示可选词条的字符串")
@@ -601,7 +599,6 @@ If you don't like this funciton, set the variable to nil")
     pyim-current-str
     pyim-current-choices
     pyim-current-pos
-    ;; pyim-current-predict-words
     pyim-english-input-switch-function
     pyim-guidance-str
     pyim-translating
