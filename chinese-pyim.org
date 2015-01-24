@@ -869,8 +869,7 @@ Chinese-pyim 在特定的时候需要读取一个汉字的拼音，
 与之对应的buffer。最后返回一个包含所有buffer对象以及词库文件名的alist。
 
 `pyim-personal-file' 文件最先导入。然后按照先后顺序导入 `pyim-dicts' 中定义的词库
-排在最前面的词库首先被加载，相同的词库文件只加载一次。
-"
+排在最前面的词库首先被加载，相同的词库文件只加载一次。"
   (let ((personal-file (expand-file-name pyim-personal-file))
         (dicts-list pyim-dicts)
         (bufname pyim-buffer-name)
@@ -884,20 +883,12 @@ Chinese-pyim 在特定的时候需要读取一个汉字的拼音，
       (setq buflist (append buflist (list buf)))
       (if dicts-list
           (dolist (dict dicts-list)
-            (cond
-             ((and (listp dict) (plist-get dict :file))
-              (setq file (expand-file-name (plist-get dict :file)))
-              (setq coding (plist-get dict :coding))
-              (if (and (file-exists-p file)
-                       (not (pyim-file-load-p file buflist)))
-                  (setq buflist (append buflist (list (pyim-read-file file bufname coding))))
-                (message "忽略导入重复的词库文件：%s。" file)))
-             ((stringp dict)
-              (setq file (expand-file-name dict))
-              (if (and (file-exists-p file)
-                       (not (pyim-file-load-p file buflist)))
-                  (setq buflist (append buflist (list (pyim-read-file file bufname))))
-                (message "忽略导入重复的词库文件：%s。" file)))))
+            (setq file (expand-file-name (plist-get dict :file)))
+            (setq coding (plist-get dict :coding))
+            (if (and (file-exists-p file)
+                     (not (pyim-file-load-p file buflist)))
+                (setq buflist (append buflist (list (pyim-read-file file bufname coding))))
+              (message "忽略导入重复的词库文件：%s。" file)))
         ;; 当用户没有设置词库信息时，弹出帮助信息。
         (pyim-show-help pyim-dict-help-string)))
     buflist))
