@@ -922,27 +922,6 @@ Chinese-pyim 在特定的时候需要读取一个汉字的拼音，
       (delete-region (overlay-start pyim-overlay)
                      (overlay-end pyim-overlay))))
 
-;;; steal from emms-compat.el. Is this a good idea?
-(when (not (fboundp 'emms-delete-if))
-  (defun emms-delete-if (predicate seq)
-    "Remove all items satisfying PREDICATE in SEQ.
-This is a destructive function: it reuses the storage of SEQ
-whenever possible."
-    ;; remove from car
-    (while (when (funcall predicate (car seq))
-             (setq seq (cdr seq))))
-    ;; remove from cdr
-    (let ((ptr seq)
-          (next (cdr seq)))
-      (while next
-        (when (funcall predicate (car next))
-          (setcdr ptr (if (consp next)
-                          (cdr next)
-                        nil)))
-        (setq ptr (cdr ptr))
-        (setq next (cdr ptr))))
-    seq))
-
 (defun pyim-subseq (list from &optional to)
   (if (null to) (nthcdr from list)
     (butlast (nthcdr from list) (- (length list) to))))
@@ -964,7 +943,7 @@ whenever possible."
                    (line-beginning-position)
                    (line-end-position)) seperaters)))
     (if omit-nulls
-        (emms-delete-if 'pyim-string-emptyp items)
+        (cl-delete-if 'pyim-string-emptyp items)
       items)))
 
 (defsubst pyim-delete-line ()
