@@ -655,8 +655,6 @@ Chinese-pyim 激活时，首先会使用 `pyim-load-file' 加载个人词频文�
 (defvar pyim-guidance-str "" "显示可选词条的字符串")
 (defvar pyim-translating nil "记录是否在转换状态")
 (defvar pyim-overlay nil "显示当前选择词条的 overlay")
-(defvar pyim-guidance-frame nil)
-(defvar pyim-guidance-buf nil)
 
 (defvar pyim-load-hook nil)
 (defvar pyim-active-hook nil)
@@ -805,8 +803,6 @@ Chinese-pyim 在特定的时候需要读取一个汉字的拼音，
     pyim-guidance-str
     pyim-translating
     pyim-overlay
-    pyim-guidance-frame
-    pyim-guidance-buf
 
     pyim-load-hook
     pyim-active-hook
@@ -1748,21 +1744,6 @@ Chinese-pyim 通过这个函数实现中文输入模式和英文输入模式的�
       ;; Show the guidance in echo area without logging.
       (let ((message-log-max nil))
         (message "%s" pyim-guidance-str)))))
-
-(defun pyim-make-guidance-frame ()
-  "Make a new one-line frame for Quail guidance."
-  (let* ((fparam (frame-parameters))
-         (top (cdr (assq 'top fparam)))
-         (border (cdr (assq 'border-width fparam)))
-         (internal-border (cdr (assq 'internal-border-width fparam)))
-         (newtop (- top
-                    (frame-char-height) (* internal-border 2) (* border 2))))
-    (if (< newtop 0)
-        (setq newtop (+ top (frame-pixel-height) internal-border border)))
-    (make-frame (append '((user-position . t) (height . 1)
-                          (minibuffer)
-                          (menu-bar-lines . 0) (tool-bar-lines . 0))
-                        (cons (cons 'top newtop) fparam)))))
 
 (defun pyim-minibuffer-message (string)
   (message nil)
