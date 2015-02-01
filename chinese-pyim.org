@@ -638,7 +638,6 @@ Chinese-pyim 激活时，首先会使用 `pyim-load-file' 加载个人词频文�
 
 *** 其它变量
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
-(defvar pyim-active-function nil)
 (defvar pyim-current-key "" "已经输入的代码")
 (defvar pyim-current-str "" "当前选择的词条")
 (defvar pyim-input-ascii nil
@@ -662,11 +661,6 @@ Chinese-pyim 激活时，首先会使用 `pyim-load-file' 加载个人词频文�
 (defvar pyim-load-hook nil)
 (defvar pyim-active-hook nil)
 
-(defvar pyim-stop-function nil)
-(defvar pyim-translate-function 'pyim-default-translate)
-(defvar pyim-add-completion-function nil)
-(defvar pyim-format-function 'pyim-format)
-(defvar pyim-handle-function 'pyim-handle-string)
 (defvar pyim-position nil)
 (defvar pyim-pinyin-list nil)
 #+END_SRC
@@ -816,12 +810,6 @@ Chinese-pyim 在特定的时候需要读取一个汉字的拼音，
 
     pyim-load-hook
     pyim-active-hook
-
-    pyim-translate-function
-    pyim-format-function
-    pyim-handle-function
-    pyim-add-completion-function
-    pyim-stop-function
 
     input-method-function
     inactivate-current-input-method-function
@@ -1069,13 +1057,6 @@ beginning of line"
       (car choice)
     choice))
 
-(defun pyim-add-completion ()
-  "注意, pyim-add-completion-function 在没有完补全之前返回 nil, 在加完所
-有补全之后一定要返回一个 t"
-  (if (functionp pyim-add-completion-function)
-      (funcall pyim-add-completion-function)
-    t))
-
 (defun pyim-current-page ()
   (1+ (/ (1- pyim-current-pos) pyim-page-length)))
 
@@ -1098,7 +1079,7 @@ beginning of line"
         last
       (if finish
           whole
-        (pyim-page-end (pyim-add-completion))))))
+        (pyim-page-end t)))))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
@@ -1664,7 +1645,7 @@ buffer中，当前词条追加到已有词条之后。"
   (if (> (length pyim-current-key) 1)
       (progn
         (setq pyim-current-key (substring pyim-current-key 0 -1))
-        (funcall pyim-handle-function))
+        (pyim-handle-string))
     (setq pyim-current-str "")
     (pyim-terminate-translation)))
 #+END_SRC
@@ -1690,7 +1671,7 @@ Chinese-pyim 通过这个函数实现中文输入模式和英文输入模式的�
   (if (pyim-input-chinese-p)
       (progn (setq pyim-current-key
                    (concat pyim-current-key (char-to-string last-command-event)))
-             (funcall pyim-handle-function))
+             (pyim-handle-string))
     (pyim-append-string (pyim-translate last-command-event))
     (pyim-terminate-translation)))
 #+END_SRC
@@ -1707,11 +1688,6 @@ Chinese-pyim 通过这个函数实现中文输入模式和英文输入模式的�
   (pyim-delete-region)
   (setq pyim-current-choices nil)
   (setq pyim-guidance-str ""))
-
-(defun pyim-translate (char)
-  (if (functionp pyim-translate-function)
-      (funcall pyim-translate-function char)
-    (char-to-string char)))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
@@ -1913,7 +1889,7 @@ Return the input string."
                (char-before point-before))
       (char-to-string (char-before point-before)))))
 
-(defun pyim-default-translate (char)
+(defun pyim-translate (char)
   (let* ((str (char-to-string char))
          ;; 注意：`str' 是 *待输入* 的字符对应的字符串。
          (str-before-1 (pyim-char-before-to-string 0))
@@ -2056,8 +2032,6 @@ Return the input string."
   (when (eq (selected-window) (minibuffer-window))
     (add-hook 'minibuffer-exit-hook 'pyim-exit-from-minibuffer))
   (run-hooks 'pyim-active-hook)
-  (if (functionp pyim-active-function)
-      (funcall pyim-active-function))
   (when restart
     (message "Chinese-pyim 重启完成。")))
 
