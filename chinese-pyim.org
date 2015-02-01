@@ -1585,6 +1585,50 @@ buffer中，当前词条追加到已有词条之后。"
                                                    (point-max)))))))
       (delete-dups words))))
 
+#+END_SRC
+
+`pyim-get-char-code' 用来获得一个汉字字符的拼音， 例如：
+#+BEGIN_SRC emacs-lisp :eval yes :results value scalar replace
+(pyim-get-char-code ?我)
+#+END_SRC
+
+#+RESULTS:
+: ("wo")
+
+函数 `pyim-make-char-table-1' 参数 `chars’的形式类似：
+#+BEGIN_EXAMPLE
+(("ni" "你尼呢腻")
+ ("wo" "我握涡卧龌"))
+#+END_EXAMPLE
+
+最终得到一个汉字到拼音的 *hash table* : `pyim-char-table'，这个 hash table 可以用 *一个列表* 直观的表示为：
+
+#+BEGIN_EXAMPLE
+(('我 '("wo"))
+ ('你 '("ni"))
+ ('行 '("xing" "hang"))
+ ('大 '("da")))
+#+END_EXAMPLE
+
+多音字对应的拼音列表中包含这个多音字所有的拼音字符串。
+
+函数 `pyim-make-char-table' 是函数 `pyim-make-char-table-1' 的包装，其运行过程大体为：
+1. 使用 regexp 解析  "quail/PY.el" 文件中的汉字拼音信息。
+2. 将上述汉字拼音信息 *按行处理* ，转换为下述类似的列表结构。
+   #+BEGIN_EXAMPLE
+   (("ni" "你尼呢腻"))
+   #+END_EXAMPLE
+3. 使用 `pyim-make-char-table-1' 处理得到的列表。
+
+这个例子中的语句用于调试上述三个函数。
+#+BEGIN_EXAMPLE
+;; (setq pyim-char-table nil)
+;; (pyim-make-char-table-1 '(("ni" "你呢泥")))
+;; (pyim-make-char-table)
+;; (pyim-get-char-code ?你)
+#+END_EXAMPLE
+
+#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defun pyim-get-char-code (char)
   "Get the code of the character CHAR"
   (symbol-value (intern-soft (char-to-string char) pyim-char-table)))
@@ -1592,10 +1636,14 @@ buffer中，当前词条追加到已有词条之后。"
 (defun pyim-make-char-table-1 (chars)
   (dolist (char chars)
     (let ((code (car char)))
-      (dolist (c (cdr char))
-        (let* ((s (intern-soft c pyim-char-table))
-               (py (and s (symbol-value s))))
-          (set (intern c pyim-char-table) (append py (list code))))))))
+      (mapc (lambda (c)
+              (let* ((str (char-to-string c))
+                     (s (intern-soft str pyim-char-table))
+                     (py (and s (symbol-value s))))
+                (set (intern str pyim-char-table)
+                     (cl-remove-duplicates
+                      (append py (list code)) :test #'equal))))
+            (car (cdr char))))))
 
 (defun pyim-make-char-table ()
   "Build pinyin char hashtable from quail/PY.el"
@@ -1606,17 +1654,8 @@ buffer中，当前词条追加到已有词条之后。"
     (while (re-search-forward
             "^[[:space:]]*([[:space:]]*\"\\([a-z]+\\)\"[[:space:]]*\"\\([^\"]+\\)\"[[:space:]]*)[[:space:]]*$" nil t)
       (let ((pinyin (match-string 1))
-            (hanzi-string (substring-no-properties (match-string 2)))
-            pinyin-list)
-        (setq pinyin-list
-              (list
-               (append (list pinyin)
-                       (split-string
-                        (replace-regexp-in-string
-                         "_$" ""
-                         (replace-regexp-in-string
-                          "\\(.\\)" "\\1_" hanzi-string)) "_"))))
-        (pyim-make-char-table-1 pinyin-list)))))
+            (hanzi-string (substring-no-properties (match-string 2))))
+        (pyim-make-char-table-1 `((,pinyin ,hanzi-string)))))))
 
 ;;;  commands
 (defun pyim-delete-last-char ()
