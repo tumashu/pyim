@@ -1644,14 +1644,17 @@ buffer中，当前词条追加到已有词条之后。"
 (defun pyim-make-char-table ()
   "Build pinyin char hashtable from quail/PY.el"
   (interactive)
-  (with-temp-buffer
-    (insert-file-contents (locate-library "quail/PY.el"))
-    (goto-char (point-min))
-    (while (re-search-forward
-            "^[[:space:]]*([[:space:]]*\"\\([a-z]+\\)\"[[:space:]]*\"\\([^\"]+\\)\"[[:space:]]*)[[:space:]]*$" nil t)
-      (let ((pinyin (match-string 1))
-            (hanzi-string (substring-no-properties (match-string 2))))
-        (pyim-make-char-table-1 `((,pinyin ,hanzi-string)))))))
+  (let ((file (locate-library "quail/PY.el")))
+    (if file
+        (with-temp-buffer
+          (insert-file-contents file)
+          (goto-char (point-min))
+          (while (re-search-forward
+                  "^[[:space:]]*([[:space:]]*\"\\([a-z]+\\)\"[[:space:]]*\"\\([^\"]+\\)\"[[:space:]]*)[[:space:]]*$" nil t)
+            (let ((pinyin (match-string 1))
+                  (hanzi-string (substring-no-properties (match-string 2))))
+              (pyim-make-char-table-1 `((,pinyin ,hanzi-string))))))
+      (warn "Emacs 官方自带的文件: quail/PY.el 不存在，用户可能没有安装 emacs<VERSION>-el 软件包。"))))
 
 ;;;  commands
 (defun pyim-delete-last-char ()
