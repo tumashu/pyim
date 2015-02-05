@@ -247,6 +247,84 @@ M-x org-babel-execute-buffer
 
 然后在运行上述导出命令。
 
+* 输入法启动和重启等相关操作
+Chinese-pyim 使用 emacs 官方自带的输入法框架来启动输入法和重启输入法。
+所以我们首先需要使用 leim 自带的命令 `register-input-method' 注册一个输入法。
+#+NAME: register-input-method
+#+BEGIN_SRC emacs-lisp :noweb yes
+;;; 注册输入法
+(register-input-method "chinese-pyim" "euc-cn" 'pyim-start pyim-title)
+#+END_SRC
+
+真正启动 Chinese-pyim 的命令是 `pyim-start' ，这个命令运行时，做如下工作：
+1. 重置 Chinese-pyim 所有变量。
+2. 使用 `pyim-load-file’加载词库文件，具体细节请参考：[[#load-dicts]]
+3. 使用 `pyim-make-char-table' 创建汉字到拼音的 hash table，具体细节请参考：[[#make-char-table]]
+4. 运行 `pyim-load-hook'。
+5. 将 `pyim-save-personal-file' 命令添加到 `kill-emacs-hook'
+   emacs 关闭之前将个人词频 buffer 的内容保存到个人词频文件。
+   具体细节请参考：[[save-personal-file]]。
+6. 设定 leim 变量： `input-method-function' 和 `deactivate-current-input-method-function'
+7. 运行 `pyim-active-hook'
+
+`pyim-start' 先后会运行两个 hook，所以我们需要事先定义：
+
+#+NAME: variables-load-hook-and-active-hook
+#+BEGIN_SRC emacs-lisp :noweb yes
+(defvar pyim-load-hook nil)
+(defvar pyim-active-hook nil)
+#+END_SRC
+
+`pyim-restart' 用于重启 Chinese-pyim，其过程和 `pyim-start' 类似，不同之处有：
+1. 输入法重启之前会询问用户，是否保存个人词频信息。
+2. 重启之前会使用函数 `pyim-kill-buffers' 删除所有的词库 buffer，具体请参考： [[pyim-kill-buffers]]
+
+#+NAME: functions-pyim-start-and-restart
+#+BEGIN_SRC emacs-lisp :noweb yes
+(defun pyim-start (name &optional active-func restart save-personal-file)
+  (interactive)
+  (mapc 'kill-local-variable pyim-local-variable-list)
+  (mapc 'make-local-variable pyim-local-variable-list)
+  ;; 重启时，kill 所有已经打开的 buffer。
+  (when (and restart save-personal-file)
+    (pyim-save-personal-file))
+  (when restart
+    (pyim-kill-buffers)
+    (setq pyim-buffer-list nil))
+  (unless (and pyim-buffer-list
+               (pyim-check-buffers)
+               (not restart))
+    (setq pyim-buffer-list (pyim-load-file))
+    (pyim-make-char-table)
+    (run-hooks 'pyim-load-hook)
+    (message nil))
+
+  (unless (member 'pyim-save-personal-file kill-emacs-hook)
+    (add-to-list 'kill-emacs-hook 'pyim-save-personal-file))
+
+  (setq input-method-function 'pyim-input-method)
+  (setq deactivate-current-input-method-function 'pyim-inactivate)
+  ;; (setq describe-current-input-method-function 'pyim-help)
+  ;; If we are in minibuffer, turn off the current input method
+  ;; before exiting.
+  (when (eq (selected-window) (minibuffer-window))
+    (add-hook 'minibuffer-exit-hook 'pyim-exit-from-minibuffer))
+  (run-hooks 'pyim-active-hook)
+  (when restart
+    (message "Chinese-pyim 重启完成。")))
+
+(defun pyim-restart ()
+  "重启 Chinese-pyim，不建议用于编程环境。"
+  (interactive)
+  (let ((file-save-p
+         (yes-or-no-p "正在重启 Chinese-pyim，需要保存 personal 文件的变动吗？ ")))
+    (pyim-restart-1 file-save-p)))
+
+(defun pyim-restart-1 (save-personal-file)
+  "重启 Chinese-pyim，用于编程环境。"
+  (pyim-start "Chinese-pyim" nil t save-personal-file))
+#+END_SRC
+
 * 词库文件相关操作
 ** 自定义词库
 *** 词库文件格式
@@ -336,6 +414,9 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
 #+END_SRC
 
 ** 加载词库
+   :PROPERTIES:
+   :CUSTOM_ID: load-dicts
+   :END:
 Chinese-pyim 激活时，首先会使用 `pyim-load-file' 加载个人词频文件和普通词库文件，
 如果个人词频文件不存在时，Chinese-pyim 会使用函数：`pyim-create-template-dict' 自动创建这个文件。
 如果用户没有设定 `pyim-dicts'， `pyim-load-file' 会使用函数： `pyim-show-help' 弹出帮助信息。
@@ -479,6 +560,7 @@ file的对应表。
 
 `pyim-buffer-list' 包含的第一个buffer，永远对应着个人词频文件，Chinese-pyim 使用 `pyim-save-personal-file'
 将 `pyim-buffer-list' 第一个 buffer 的内容保存到个人词频文件，这个命令用于更新个人词频文件。
+<<save-personal-file>>
 
 #+NAME: functions-save-personal-file
 #+BEGIN_SRC emacs-lisp :noweb yes
@@ -505,6 +587,7 @@ file的对应表。
 这个函数会重新创建一个buffer，并插入对应词库文件的内容，如果对应词库文件也不存在，那么这个函数会删除这条记录。
 
 而 `pyim-kill-buffers' 会删除 `pyim-buffer-list' 中所有的 buffer。这个函数用于重新启动输入法前的清理工作。
+<<pyim-kill-buffers>>
 
 #+NAME: functions-check-or-delete-dicts-buffer
 #+BEGIN_SRC emacs-lisp :noweb yes
@@ -789,6 +872,348 @@ buffer中，当前词条追加到已有词条之后。"
   (pyim-intern-word word py))
 #+END_SRC
 
+* 标点符号相关操作
+常用的标点符号数量不多，所以 Chinese-pyim 没有使用文件而是使用一个变量
+`pyim-punctuation-dict' 来设置标点符号对应表，这个变量是一个 alist 列表。
+
+#+NAME: pyim-punctuation-dict
+#+BEGIN_SRC emacs-lisp :noweb yes
+(defcustom pyim-punctuation-dict
+  '(("'" "‘" "’")
+    ("\"" "“" "”")
+    ("_" "――")
+    ("^" "……")
+    ("]" "】")
+    ("[" "【")
+    ("@" "◎")
+    ("?" "？")
+    (">" "》")
+    ("=" "＝")
+    ("<" "《")
+    (";" "；")
+    (":" "：")
+    ("/" "、")
+    ("." "。")
+    ("-" "－")
+    ("," "，")
+    ("+" "＋")
+    ("*" "×")
+    (")" "）")
+    ("(" "（")
+    ("&" "※")
+    ("%" "％")
+    ("$" "￥")
+    ("#" "＃")
+    ("!" "！")
+    ("`" "・")
+    ("~" "～")
+    ("}" "』")
+    ("|" "÷")
+    ("{" "『"))
+  "标点符号表。"
+  :group 'chinese-pyim
+  :type 'list)
+#+END_SRC
+
+Chinese-pyim 在运行过程中调用函数 `pyim-translate' 进行标点符号格式的转换。
+
+#+NAME: functions-translate
+#+BEGIN_SRC emacs-lisp :noweb yes
+(defun pyim-translate (char)
+  (let* ((str (char-to-string char))
+         ;; 注意：`str' 是 *待输入* 的字符对应的字符串。
+         (str-before-1 (pyim-char-before-to-string 0))
+         (str-before-2 (pyim-char-before-to-string 1))
+         (str-before-3 (pyim-char-before-to-string 2))
+         (str-before-4 (pyim-char-before-to-string 3))
+         ;; 从标点词库中搜索与 `str' 对应的标点列表。
+         (punc-list (assoc str pyim-punctuation-dict))
+         ;; 从标点词库中搜索与 `str-before-1' 对应的标点列表。
+         (punc-list-before-1
+          (cl-some (lambda (x)
+                     (when (member str-before-1 x) x))
+                   pyim-punctuation-dict))
+         ;; `str-before-1' 在其对应的标点列表中的位置。
+         (punc-posit-before-1
+          (cl-position str-before-1 punc-list-before-1
+                       :test #'string=)))
+    (cond
+     ;; 空格之前的字符什么也不输入。
+     ((< char ? ) "")
+
+     ;; 这个部份与标点符号处理无关，主要用来快速保存用户自定义词条。
+     ;; 比如：在一个中文字符串后输入 2v，可以将光标前两个中文字符
+     ;; 组成的字符串，保存到个人词库。
+     ((and (member (char-before) (number-sequence ?2 ?9))
+           (string-match-p "\\cc" str-before-2)
+           (= char pyim-translate-trigger-char))
+      (delete-char -1)
+      (pyim-create-word-at-point
+       (string-to-number str-before-1))
+      "")
+
+     ;; 关闭标点转换功能时，只插入英文标点。
+     ((not pyim-punctuation-translate-p) str)
+
+     ;; 当前字符属于 `pyim-punctuation-escape-list'时，
+     ;; 插入英文标点。
+     ((member (char-before)
+              pyim-punctuation-escape-list) str)
+
+     ;; 当光标前面为英文标点时， 按 `pyim-translate-trigger-char'
+     ;; 对应的字符后， 自动将其转换为对应的中文标点。
+     ((and (numberp punc-posit-before-1)
+           (= punc-posit-before-1 0)
+           (= char pyim-translate-trigger-char))
+      (delete-char -1)
+      (pyim-return-proper-punctuation punc-list-before-1 t))
+
+     ;; 当光标前面为中文标点时， 按 `pyim-translate-trigger-char'
+     ;; 对应的字符后， 自动将其转换为对应的英文标点。
+     ((and (numberp punc-posit-before-1)
+           (> punc-posit-before-1 0)
+           (= char pyim-translate-trigger-char))
+      (delete-char -1)
+      (car punc-list-before-1))
+
+     ;; 正常输入标点符号。
+     (punc-list (pyim-return-proper-punctuation punc-list))
+
+     ;; 当输入的字符不是标点符号时，原样插入。
+     (t str))))
+
+(defun pyim-char-before-to-string (num)
+  "得到光标前第 `num' 个字符，并将其转换为字符串。"
+  (let* ((point (point))
+         (point-before (- point num)))
+    (when (and (> point-before 0)
+               (char-before point-before))
+      (char-to-string (char-before point-before)))))
+#+END_SRC
+
+当用户使用 org-mode 以及 markdown 等轻量级标记语言撰写文档时，常常需要输入数字列表，比如：
+
+#+BEGIN_EXAMPLE
+1. item1
+2. item2
+3. item3
+#+END_EXAMPLE
+
+在这种情况下，数字后面输入句号必须是半角句号而不是全角句号，Chinese-pyim 调用 `pyim-translate' 时，
+会检测光标前面的字符，如果这个字符属于 `pyim-punctuation-escape-list' ，Chinese-pyim 将输入
+半角标点，具体细节见：`pyim-translate'
+
+#+NAME: pyim-punctuation-escape-list
+#+BEGIN_SRC emacs-lisp :noweb
+(defvar pyim-punctuation-escape-list (number-sequence ?0 ?9)
+  "Punctuation will not insert after this characters.
+If you don't like this funciton, set the variable to nil")
+#+END_SRC
+
+用户可以使用 `pyim-toggle-full-width-punctuation' 全局的控制输入的标点符号是半角标点还是全角标点。
+
+#+NAME: pyim-toggle-full-width-punctuation
+#+BEGIN_SRC emacs-lisp :noweb yes
+;;; 切换中英文标点符号
+(defun pyim-toggle-full-width-punctuation (arg)
+  (interactive "P")
+  (setq pyim-punctuation-translate-p
+        (if (null arg)
+            (not pyim-punctuation-translate-p)
+          (> (prefix-numeric-value arg) 0)))
+  (if pyim-punctuation-translate-p
+      (message "开启标点转换功能（使用全角标点）")
+    (message "关闭标点转换功能（使用半角标点）")))
+#+END_SRC
+
+每次运行这个命令，都会反转变量 `pyim-punctuation-translate-p' 的取值，`pyim-translate' 会检测
+`pyim-punctuation-translate-p' 的取值，当取值为 t 时，`pyim-translate' 转换标点符号，从而
+输入全角标点，反之，`pyim-translate' 忽略转换，从而输入半角标点。
+
+#+NAME: pyim-punctuation-translate-p
+#+BEGIN_SRC emacs-lisp :noweb yes
+(defvar pyim-punctuation-translate-p t
+  "*Non-nil means will translate punctuation.")
+#+END_SRC
+
+用户也可以使用命令 `pyim-punctuation-translate-at-point' 来切换 *光标前* 标点符号的样式。
+
+#+NAME: pyim-punctuation-translate-at-point
+#+BEGIN_SRC emacs-lisp :noweb yes
+;; 切换光标处标点的样式（全角 or 半角）
+(defun pyim-punctuation-translate-at-point ()
+  (interactive)
+  (let* ((current-char (char-to-string (preceding-char)))
+         (punc-list
+          (cl-some (lambda (x)
+                     (when (member current-char x) x))
+                   pyim-punctuation-dict)))
+    (when punc-list
+      (delete-char -1)
+      (if (string= current-char (car punc-list))
+          (insert (pyim-return-proper-punctuation punc-list t))
+        (insert (car punc-list))))))
+#+END_SRC
+
+使用上述命令切换光标前标点符号的样式时，我们使用函数 `pyim-return-proper-punctuation'
+来处理成对的全角标点符号， 比如：
+
+#+BEGIN_EXAMPLE
+“”
+‘’
+#+END_EXAMPLE
+这个函数的参数是一个标点符号对应表，类似：
+
+#+BEGIN_EXAMPLE
+("." "。")
+#+END_EXAMPLE
+
+第一个元素为半角标点，第二个和第三个元素（如果有）为对应的全角标点。
+
+#+BEGIN_SRC emacs-lisp :results value scalar replace
+(list (pyim-return-proper-punctuation '("'" "‘" "’"))
+      (pyim-return-proper-punctuation '("'" "‘" "’")))
+#+END_SRC
+
+#+RESULTS:
+: ("’" "‘")
+
+简单来说，定义这个函数的目的是为了实现类似的功能：如果第一次输入的标点是：（‘）时，
+那么下一次输入的标点就是（’）。
+
+#+NAME: pyim-return-proper-punctuation
+#+BEGIN_SRC emacs-lisp :noweb yes
+;; 处理标点符号
+(defun pyim-return-proper-punctuation (punc-list &optional before)
+  "返回合适的标点符号，`punc-list'为标点符号列表，其格式类似：
+      `(\",\" \"，\") 或者：`(\"'\" \"‘\" \"’\")
+当 `before' 为 t 时，只返回切换之前的结果，这个用来获取切换之前
+的标点符号。"
+  (let* ((str (car punc-list))
+         (punc (cdr punc-list))
+         (switch-p (cdr (assoc str pyim-pair-punctuation-status))))
+    (if (= (safe-length punc) 1)
+        (car punc)
+      (if before
+          (setq switch-p (not switch-p))
+        (setf (cdr (assoc str pyim-pair-punctuation-status))
+              (not switch-p)))
+      (if switch-p
+          (car punc)
+        (nth 1 punc)))))
+
+#+END_SRC
+
+函数 `pyim-return-proper-punctuation' 内部，我们使用变量 `pyim-pair-punctuation-status'
+来记录“成对”中文标点符号的状态。
+
+#+NAME: pyim-pair-punctuation-status
+#+BEGIN_SRC emacs-lisp :noweb yes
+(defvar pyim-pair-punctuation-status
+  '(("\"" nil) ("'" nil))
+  "成对标点符号切换状态")
+#+END_SRC
+
+* 特殊功能触发字符（单字符快捷键）相关操作
+输入中文的时候，我们需要快速频繁的执行一些特定的命令，
+最直接的方法就是将上述命令绑定到一个容易按的快捷键上，但遗憾的是 emacs 大多数容易按
+的快捷键都 *名花有主* 了，甚至找一个 “Ctrl＋单字符”的快捷键都不太容易，特殊功能触发
+字符，可以帮助我们实现“单字符”快捷键，类似 org-mode 的 speed key。
+
+默认情况下，我们可以使用特殊功能触发字符执行下面两个操作：
+1. 快速切换中英文标点符号的样式：当光标前的字符是一个标点符号时，按"v"可以切换这个标点的样式。
+   比如：光标在A处的时候，按 "v" 可以将A前面的全角逗号转换为半角逗号。
+   #+BEGIN_EXAMPLE
+   你好，-A-
+   #+END_EXAMPLE
+   按 "v" 后
+   #+BEGIN_EXAMPLE
+   你好,-A-
+   #+END_EXAMPLE
+2. 快速将光标前的词条添加到词库：当光标前的字符是中文字符时，按 "num" + "v" 可以将光标前 num 个中文汉字
+   组成的词条添加到个人词频文件中，比如：当光标在A处时，按"4v"可以将“的红烧肉”这个词条加入个人词频文件，默认
+   num不超过9。
+   #+BEGIN_EXAMPLE
+   我爱吃美味的红烧肉-A-
+   #+END_EXAMPLE
+
+值得注意的是，这种方式如果添加的功能太多，会造成许多潜在的冲突。
+
+用户可以使用变量 `pyim-translate-trigger-char' 来设置触发字符，
+默认的触发字符是："v", 选择这个字符的理由是：
+
+1. "v" 不是有效的声母，不会对中文输入造成太大的影响。
+2. "v" 字符很容易按。
+
+#+NAME: pyim-translate-trigger-char
+#+BEGIN_SRC emacs-lisp :noweb yes
+(defcustom pyim-translate-trigger-char ?v
+  "用于触发特殊操作的字符，相当与单字快捷键。
+
+Chinese-pyim 内建的功能有：
+1. 光标前面的字符为标点符号时，按这个字符可以切换前面的标
+   点符号的样式（半角/全角）
+2. 当光标前面为中文字符串时，输入 <num>v 可以用于保存自定义词条。"
+  :group 'chinese-pyim
+  :type 'character)
+#+END_SRC
+
+Chinese-pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。
+当待输入的字符是触发字符时，`pyim-translate' 根据光标前的字符的不同
+来调用不同的功能，具体见 `pyim-translate' ：
+
+#+BEGIN_SRC emacs-lisp :noweb yes
+<<functions-translate>>
+#+END_SRC
+
+* 模糊音处理相关操作
+'Chinese-pyim的核心并不能处理模糊音，这里提供了一个比较 *粗糙* 的方法来处理模糊音。
+
+假如：用户需要输入“应该”，其拼音为“ying-gai”，但用户确输入了一个错误的拼音“yin-gai”，
+这时，用户可以通过快捷键运行 `pyim-fuzzy-pinyin-adjust-function' ，将“in” 替换为 “ing”，
+得到 “ying-gai”对应的词语。
+
+#+NAME: pyim-fuzzy-pinyin-adjust-function
+#+BEGIN_SRC emacs-lisp :noweb yes
+(defcustom pyim-fuzzy-pinyin-adjust-function
+  'pyim-fuzzy-pinyin-adjust-1
+  "设定糢糊音处理函数"
+  :group 'chinese-pyim
+  :type 'function)
+#+END_SRC
+
+这种处理方式能力有限，一次不能处理太多的模糊音，用户需要根据自己的需要，自定义模糊音处理函数。
+
+自定义模糊音处理函数可以参考：`pyim-pinyin-fuzzy-adjust-1'。
+
+#+NAME: pyim-fuzzy-pinyin-adjust-1
+#+BEGIN_SRC emacs-lisp :noweb yes
+(defun pyim-fuzzy-pinyin-adjust-1 ()
+  (interactive)
+  (cond
+   ((string-match-p "eng" pyim-current-key)
+    (setq pyim-current-key
+          (replace-regexp-in-string "eng" "en" pyim-current-key)))
+   ((string-match-p "en[^g]*" pyim-current-key)
+    (setq pyim-current-key
+          (replace-regexp-in-string "en" "eng" pyim-current-key))))
+  (cond
+   ((string-match-p "ing" pyim-current-key)
+    (setq pyim-current-key
+          (replace-regexp-in-string "ing" "in" pyim-current-key)))
+   ((string-match-p "in[^g]*" pyim-current-key)
+    (setq pyim-current-key
+          (replace-regexp-in-string "in" "ing" pyim-current-key))))
+  (cond
+   ((string-match-p "un" pyim-current-key)
+    (setq pyim-current-key
+          (replace-regexp-in-string "un" "ong" pyim-current-key)))
+   ((string-match-p "ong" pyim-current-key)
+    (setq pyim-current-key
+          (replace-regexp-in-string "ong" "un" pyim-current-key))))
+  (pyim-handle-string))
+#+END_SRC
+
 * 拼音字符串相关操作
 拼音字符串操作主要做两方面的工作： （1） 将拼音字符串分解为拼音列表。  （2）将拼音列表合并成拼音字符串。
 
@@ -1000,7 +1425,9 @@ Chinese-pyim 使用函数 `pyim-pylist-to-string' 将一个拼音列表合并为
 #+END_SRC
 
 * 拼音查询的相关操作
-*** 与汉字到拼音转换相关的变量
+  :PROPERTIES:
+  :CUSTOM_ID: make-char-table
+  :END:
 Chinese-pyim 在特定的时候需要读取一个汉字的拼音，这个工作由下面几个函数完成：
 
 函数 `pyim-get-char-code' 从 `pyim-char-table' 查询得到一个汉字字符的拼音， 例如：
@@ -1095,8 +1522,44 @@ Chinese-pyim 在特定的时候需要读取一个汉字的拼音，这个工作�
       (warn "Emacs 官方自带的文件: quail/PY.el 不存在，用户可能没有安装 emacs<VERSION>-el 软件包。"))))
 #+END_SRC
 
+* 快捷键设定相关操作
+#+NAME: pyim-mode-map
+#+BEGIN_SRC emacs-lisp :noweb yes
+(defvar pyim-mode-map
+  (let ((map (make-sparse-keymap))
+        (i ?\ ))
+    (while (< i 127)
+      (define-key map (char-to-string i) 'pyim-self-insert-command)
+      (setq i (1+ i)))
+    (setq i 128)
+    (while (< i 256)
+      (define-key map (vector i) 'pyim-self-insert-command)
+      (setq i (1+ i)))
+    (dolist (i (number-sequence ?1 ?9))
+      (define-key map (char-to-string i) 'pyim-number-select))
+    (define-key map " " 'pyim-select-current)
+    (define-key map [backspace] 'pyim-delete-last-char)
+    (define-key map (kbd "M-DEL") 'pyim-backward-kill-py)
+    (define-key map (kbd "M-g") (lambda ()
+                                  (interactive)
+                                  (funcall pyim-fuzzy-pinyin-adjust-function)))
+    (define-key map [delete] 'pyim-delete-last-char)
+    (define-key map "\177" 'pyim-delete-last-char)
+    (define-key map "\C-n" 'pyim-next-page)
+    (define-key map "\C-p" 'pyim-previous-page)
+    (define-key map "=" 'pyim-next-page)
+    (define-key map "-" 'pyim-previous-page)
+    (define-key map "\M-n" 'pyim-next-page)
+    (define-key map "\M-p" 'pyim-previous-page)
+    (define-key map "\C-m" 'pyim-quit-no-clear)
+    (define-key map "\C-c" 'pyim-quit-clear)
+    (define-key map "\C-g" 'pyim-quit-clear)
+    map)
+  "Keymap")
+#+END_SRC
+
 * 代码：chinese-pyim.el                                                :code:
-** 文件HEAD
+** Head and Require
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 ;;; chinese-pyim.el --- Chinese pinyin input method
 
@@ -1130,10 +1593,6 @@ Chinese-pyim 在特定的时候需要读取一个汉字的拼音，这个工作�
 ;; <<insert-readme()>>
 
 ;;; Code:
-#+END_SRC
-
-** Require
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (require 'cl-lib)
 (require 'help-mode)
 (require 'chinese-pyim-dictools)
@@ -1144,95 +1603,18 @@ Chinese-pyim 在特定的时候需要读取一个汉字的拼音，这个工作�
 #+END_SRC
 
 ** 自定义变量
-*** 标点符号列表
-因为常用的标点符号数量不多，所以 Chinese-pyim 没有使用文件而是使用一个变量
-`pyim-punctuation-dict' 来设置标点符号对应表，这个变量是一个 alist 列表。
-
-Chinese-pyim 在调用函数 `pyim-default-translate' 的时候进行标点符号格式的转换。
-
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 <<pyim-personal-file>>
 
 <<pyim-dicts>>
 
-(defcustom pyim-punctuation-dict
-  '(("'" "‘" "’")
-    ("\"" "“" "”")
-    ("_" "――")
-    ("^" "……")
-    ("]" "】")
-    ("[" "【")
-    ("@" "◎")
-    ("?" "？")
-    (">" "》")
-    ("=" "＝")
-    ("<" "《")
-    (";" "；")
-    (":" "：")
-    ("/" "、")
-    ("." "。")
-    ("-" "－")
-    ("," "，")
-    ("+" "＋")
-    ("*" "×")
-    (")" "）")
-    ("(" "（")
-    ("&" "※")
-    ("%" "％")
-    ("$" "￥")
-    ("#" "＃")
-    ("!" "！")
-    ("`" "・")
-    ("~" "～")
-    ("}" "』")
-    ("|" "÷")
-    ("{" "『"))
-  "标点符号表。"
-  :group 'chinese-pyim
-  :type 'list)
+<<pyim-punctuation-dict>>
+
+<<pyim-translate-trigger-char>>
+
+<<pyim-fuzzy-pinyin-adjust-function>>
+
 #+END_SRC
-
-*** 特殊功能触发字符（单字符快捷键）
-输入中文的时候，我们需要快速频繁的执行一些特定的命令，
-最直接的方法就是将上述命令绑定到一个容易按的快捷键上，但遗憾的是 emacs 大多数容易按
-的快捷键都 *名花有主* 了，甚至找一个 “Ctrl＋单字符”的快捷键都不太容易，特殊功能触发
-字符，可以帮助我们实现“单字符”快捷键，类似 org-mode 的 speed key。
-
-当前默认的触发字符是："v", 选择这个字符的理由是：
-
-1. "v" 不是有效的声母，不会对中文输入造成太大的影响。
-2. "v" 字符很容易按。
-
-默认情况下，我们可以使用特殊功能触发字符执行下面两个操作：
-1. 快速切换中英文标点符号的样式：当光标前的字符是一个标点符号时，按"v"可以切换这个标点的样式。
-   比如：光标在A处的时候，按 "v" 可以将A前面的全角逗号转换为半角逗号。
-   #+BEGIN_EXAMPLE
-   你好，-A-
-   #+END_EXAMPLE
-   按 "v" 后
-   #+BEGIN_EXAMPLE
-   你好,-A-
-   #+END_EXAMPLE
-2. 快速将光标前的词条添加到词库：当光标前的字符是中文字符时，按 "num" + "v" 可以将光标前 num 个中文汉字
-   组成的词条添加到个人词频文件中，比如：当光标在A处时，按"4v"可以将“的红烧肉”这个词条加入个人词频文件，默认
-   num不超过9。
-   #+BEGIN_EXAMPLE
-   我爱吃美味的红烧肉-A-
-   #+END_EXAMPLE
-
-值得注意的是，这种方式如果添加的功能太多，会造成许多潜在的冲突。
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
-(defcustom pyim-translate-trigger-char ?v
-  "用于触发特殊操作的字符，相当与单字快捷键。
-
-Chinese-pyim 内建的功能有：
-1. 光标前面的字符为标点符号时，按这个字符可以切换前面的标
-   点符号的样式（半角/全角）
-2. 当光标前面为中文字符串时，输入 <num>v 可以用于保存自定义词条。"
-  :group 'chinese-pyim
-  :type 'character)
-#+END_SRC
-
 *** 按照特定编辑环境自动开启英文输入模式。
 许多时候，我们必须根据特定的编辑环境来自动开启英文输入模式，比如：当 org-mode 用户
 激活 speed commands 后，光标在A位置时：需要自动关闭中文输入功能，方便运行快捷命令。
@@ -1284,24 +1666,6 @@ Chinese-pyim 插入字符之前，首先会运行 `pyim-english-input-switch-fun
   :type 'function)
 #+END_SRC
 
-*** 模糊音处理
-'Chinese-pyim的核心并不能处理模糊音，这里提供了一个比较 *粗糙* 的方法来处理模糊音。
-
-假如：用户需要输入“应该”，其拼音为“ying-gai”，但用户确输入了一个错误的拼音“yin-gai”，
-这时，用户可以通过快捷键运行 `pyim-fuzzy-pinyin-adjust-function' ，将“in” 替换为 “ing”，
-得到 “ying-gai”对应的词语。
-
-这种处理方式能力有限，一次不能处理太多的模糊音，用户需要根据自己的需要，自定义模糊音处理函数。
-
-自定义模糊音处理函数可以参考：`pyim-pinyin-fuzzy-adjust-1'。
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
-(defcustom pyim-fuzzy-pinyin-adjust-function
-  'pyim-fuzzy-pinyin-adjust-1
-  "设定糢糊音处理函数"
-  :group 'chinese-pyim
-  :type 'function)
-#+END_SRC
-
 *** 选择中文词条完成后执行的hook
 当用户选择了一个中文词条后，执行这个hook，如果用户使用 `chinese-pyim-company' ：
 
@@ -1343,9 +1707,6 @@ Chinese-pyim 插入字符之前，首先会运行 `pyim-english-input-switch-fun
 
 <<pyim-dict-help-string>>
 
-#+END_SRC
-*** 其它变量
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 (defvar pyim-current-key "" "已经输入的代码")
 (defvar pyim-current-str "" "当前选择的词条")
 (defvar pyim-input-ascii nil
@@ -1364,85 +1725,19 @@ Chinese-pyim 插入字符之前，首先会运行 `pyim-english-input-switch-fun
 (defvar pyim-translating nil "记录是否在转换状态")
 (defvar pyim-overlay nil "显示当前选择词条的 overlay")
 
-(defvar pyim-load-hook nil)
-(defvar pyim-active-hook nil)
-
 (defvar pyim-position nil)
 (defvar pyim-pinyin-list nil)
-#+END_SRC
 
-*** 与标点符号转换相关的变量
-在使用 org-mode ，markdown 等轻量级标记语言撰写文档时，我们经常需要输入数字列表，比如：
+<<variables-load-hook-and-active-hook>>
 
-#+BEGIN_EXAMPLE
-1. item1
-2. item2
-3. item3
-#+END_EXAMPLE
+<<pyim-punctuation-translate-p>>
 
-Chinese-pyim 使用 `pyim-punctuation-escape-list' 变量来支持这个特性，如果光标前的字符
-包含在这个列表内，那么输入标点时， Chinese-pyim 直接输入半角标点。`pyim-default-translate'
-函数处理具体的过程。
+<<pyim-pair-punctuation-status>>
 
-当然，用户也可以使用 `pyim-toggle-full-width-punctuation' 来开启和关闭全角标点。其内部是
-通过变量`pyim-punctuation-translate-p' 来实现的，当这个变量的值为 t 时，输入全角标点，反之
-输入半角标点。
+<<pyim-punctuation-escape-list>>
 
-而 `pyim-pair-punctuation-status' 用来记录“成对”中文标点符号的输入状态。比如：
-#+BEGIN_EXAMPLE
-“”
-‘’
-#+END_EXAMPLE
+<<pyim-mode-map>>
 
-简单来说：如果第一次输入的标点是：（“）时，这个变量确保下一次输入的标点为（”）。
-
-具体过程可以参考： `pyim-return-proper-punctuation' 。
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
-(defvar pyim-punctuation-escape-list (number-sequence ?0 ?9)
-  "Punctuation will not insert after this characters.
-If you don't like this funciton, set the variable to nil")
-
-(defvar pyim-punctuation-translate-p t
-  "*Non-nil means will translate punctuation.")
-
-(defvar pyim-pair-punctuation-status
-  '(("\"" nil) ("'" nil))
-  "成对标点符号切换状态")
-#+END_SRC
-
-*** 与Chinese-pyim 快捷键设定相关的变量
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
-(defvar pyim-mode-map
-  (let ((map (make-sparse-keymap))
-        (i ?\ ))
-    (while (< i 127)
-      (define-key map (char-to-string i) 'pyim-self-insert-command)
-      (setq i (1+ i)))
-    (setq i 128)
-    (while (< i 256)
-      (define-key map (vector i) 'pyim-self-insert-command)
-      (setq i (1+ i)))
-    (dolist (i (number-sequence ?1 ?9))
-      (define-key map (char-to-string i) 'pyim-number-select))
-    (define-key map " " 'pyim-select-current)
-    (define-key map [backspace] 'pyim-delete-last-char)
-    (define-key map (kbd "M-DEL") 'pyim-backward-kill-py)
-    (define-key map (kbd "M-g") (lambda ()
-                                  (interactive)
-                                  (funcall pyim-fuzzy-pinyin-adjust-function)))
-    (define-key map [delete] 'pyim-delete-last-char)
-    (define-key map "\177" 'pyim-delete-last-char)
-    (define-key map "\C-n" 'pyim-next-page)
-    (define-key map "\C-p" 'pyim-previous-page)
-    (define-key map "=" 'pyim-next-page)
-    (define-key map "-" 'pyim-previous-page)
-    (define-key map "\M-n" 'pyim-next-page)
-    (define-key map "\M-p" 'pyim-previous-page)
-    (define-key map "\C-m" 'pyim-quit-no-clear)
-    (define-key map "\C-c" 'pyim-quit-clear)
-    (define-key map "\C-g" 'pyim-quit-clear)
-    map)
-  "Keymap")
 #+END_SRC
 
 ** 将变量转换为 local 变量
@@ -1503,6 +1798,15 @@ If you don't like this funciton, set the variable to nil")
 
 ;;; char code
 <<functions-get-char-code>>
+
+;;; punctuation manupulate
+<<functions-translate>>
+
+<<pyim-return-proper-punctuation>>
+
+<<pyim-punctuation-translate-at-point>>
+
+<<pyim-toggle-full-width-punctuation>>
 
 (defsubst pyim-append-string (str)
   "append STR to pyim-current-str"
@@ -1818,30 +2122,7 @@ If you don't like this funciton, set the variable to nil")
         (replace-match "" nil nil pyim-current-key))
   (pyim-handle-string))
 
-(defun pyim-fuzzy-pinyin-adjust-1 ()
-  (interactive)
-  (cond
-   ((string-match-p "eng" pyim-current-key)
-    (setq pyim-current-key
-          (replace-regexp-in-string "eng" "en" pyim-current-key)))
-   ((string-match-p "en[^g]*" pyim-current-key)
-    (setq pyim-current-key
-          (replace-regexp-in-string "en" "eng" pyim-current-key))))
-  (cond
-   ((string-match-p "ing" pyim-current-key)
-    (setq pyim-current-key
-          (replace-regexp-in-string "ing" "in" pyim-current-key)))
-   ((string-match-p "in[^g]*" pyim-current-key)
-    (setq pyim-current-key
-          (replace-regexp-in-string "in" "ing" pyim-current-key))))
-  (cond
-   ((string-match-p "un" pyim-current-key)
-    (setq pyim-current-key
-          (replace-regexp-in-string "un" "ong" pyim-current-key)))
-   ((string-match-p "ong" pyim-current-key)
-    (setq pyim-current-key
-          (replace-regexp-in-string "ong" "un" pyim-current-key))))
-  (pyim-handle-string))
+<<pyim-fuzzy-pinyin-adjust-1>>
 #+END_SRC
 
 
@@ -2048,98 +2329,11 @@ Return the input string."
         (funcall func string))))
 
 (global-set-key [pyim-advice] 'pyim-advice)
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
-;; 处理标点符号
-(defun pyim-return-proper-punctuation (punc-list &optional before)
-  "返回合适的标点符号，`punc-list'为标点符号列表，其格式类似：
-      `(\",\" \"，\") 或者：`(\"'\" \"‘\" \"’\")
-当 `before' 为 t 时，只返回切换之前的结果，这个用来获取切换之前
-的标点符号。"
-  (let* ((str (car punc-list))
-         (punc (cdr punc-list))
-         (switch-p (cdr (assoc str pyim-pair-punctuation-status))))
-    (if (= (safe-length punc) 1)
-        (car punc)
-      (if before
-          (setq switch-p (not switch-p))
-        (setf (cdr (assoc str pyim-pair-punctuation-status))
-              (not switch-p)))
-      (if switch-p
-          (car punc)
-        (nth 1 punc)))))
+<<functions-pyim-start-and-restart>>
 
-(defun pyim-char-before-to-string (num)
-  "得到光标前第 `num' 个字符，并将其转换为字符串。"
-  (let* ((point (point))
-         (point-before (- point num)))
-    (when (and (> point-before 0)
-               (char-before point-before))
-      (char-to-string (char-before point-before)))))
+<<register-input-method>>
 
-(defun pyim-translate (char)
-  (let* ((str (char-to-string char))
-         ;; 注意：`str' 是 *待输入* 的字符对应的字符串。
-         (str-before-1 (pyim-char-before-to-string 0))
-         (str-before-2 (pyim-char-before-to-string 1))
-         (str-before-3 (pyim-char-before-to-string 2))
-         (str-before-4 (pyim-char-before-to-string 3))
-         ;; 从标点词库中搜索与 `str' 对应的标点列表。
-         (punc-list (assoc str pyim-punctuation-dict))
-         ;; 从标点词库中搜索与 `str-before-1' 对应的标点列表。
-         (punc-list-before-1
-          (cl-some (lambda (x)
-                     (when (member str-before-1 x) x))
-                   pyim-punctuation-dict))
-         ;; `str-before-1' 在其对应的标点列表中的位置。
-         (punc-posit-before-1
-          (cl-position str-before-1 punc-list-before-1
-                       :test #'string=)))
-    (cond
-     ;; 空格之前的字符什么也不输入。
-     ((< char ? ) "")
-
-     ;; 这个部份与标点符号处理无关，主要用来快速保存用户自定义词条。
-     ;; 比如：在一个中文字符串后输入 2v，可以将光标前两个中文字符
-     ;; 组成的字符串，保存到个人词库。
-     ((and (member (char-before) (number-sequence ?2 ?9))
-           (string-match-p "\\cc" str-before-2)
-           (= char pyim-translate-trigger-char))
-      (delete-char -1)
-      (pyim-create-word-at-point
-       (string-to-number str-before-1))
-      "")
-
-     ;; 关闭标点转换功能时，只插入英文标点。
-     ((not pyim-punctuation-translate-p) str)
-
-     ;; 当前字符属于 `pyim-punctuation-escape-list'时，
-     ;; 插入英文标点。
-     ((member (char-before)
-              pyim-punctuation-escape-list) str)
-
-     ;; 当光标前面为英文标点时， 按 `pyim-translate-trigger-char'
-     ;; 对应的字符后， 自动将其转换为对应的中文标点。
-     ((and (numberp punc-posit-before-1)
-           (= punc-posit-before-1 0)
-           (= char pyim-translate-trigger-char))
-      (delete-char -1)
-      (pyim-return-proper-punctuation punc-list-before-1 t))
-
-     ;; 当光标前面为中文标点时， 按 `pyim-translate-trigger-char'
-     ;; 对应的字符后， 自动将其转换为对应的英文标点。
-     ((and (numberp punc-posit-before-1)
-           (> punc-posit-before-1 0)
-           (= char pyim-translate-trigger-char))
-      (delete-char -1)
-      (car punc-list-before-1))
-
-     ;; 正常输入标点符号。
-     (punc-list (pyim-return-proper-punctuation punc-list))
-
-     ;; 当输入的字符不是标点符号时，原样插入。
-     (t str))))
 
 (defun pyim-toggle-input-ascii ()
   "Chinese-pyim 切换中英文输入模式。同时调整标点符号样式。"
@@ -2154,78 +2348,6 @@ Return the input string."
       (setq current-input-method-title (concat pyim-title "-英文"))
     (setq current-input-method-title pyim-title)))
 
-;; 切换光标处标点的样式（全角 or 半角）
-(defun pyim-punctuation-translate-at-point ()
-  (interactive)
-  (let* ((current-char (char-to-string (preceding-char)))
-         (punc-list
-          (cl-some (lambda (x)
-                     (when (member current-char x) x))
-                   pyim-punctuation-dict)))
-    (when punc-list
-      (delete-char -1)
-      (if (string= current-char (car punc-list))
-          (insert (pyim-return-proper-punctuation punc-list t))
-        (insert (car punc-list))))))
-
-;;; 切换中英文标点符号
-(defun pyim-toggle-full-width-punctuation (arg)
-  (interactive "P")
-  (setq pyim-punctuation-translate-p
-        (if (null arg)
-            (not pyim-punctuation-translate-p)
-          (> (prefix-numeric-value arg) 0)))
-  (if pyim-punctuation-translate-p
-      (message "开启标点转换功能（使用全角标点）")
-    (message "关闭标点转换功能（使用半角标点）")))
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
-(defun pyim-restart ()
-  "重启 Chinese-pyim，不建议用于编程环境。"
-  (interactive)
-  (let ((file-save-p
-         (yes-or-no-p "正在重启 Chinese-pyim，需要保存 personal 文件的变动吗？ ")))
-    (pyim-restart-1 file-save-p)))
-
-(defun pyim-restart-1 (save-personal-file)
-  "重启 Chinese-pyim，用于编程环境。"
-  (pyim-start "Chinese-pyim" nil t save-personal-file))
-
-(defun pyim-start (name &optional active-func restart save-personal-file)
-  (interactive)
-  (mapc 'kill-local-variable pyim-local-variable-list)
-  (mapc 'make-local-variable pyim-local-variable-list)
-  ;; 重启时，kill 所有已经打开的 buffer。
-  (when (and restart save-personal-file)
-    (pyim-save-personal-file))
-  (when restart
-    (pyim-kill-buffers)
-    (setq pyim-buffer-list nil))
-  (unless (and pyim-buffer-list
-               (pyim-check-buffers)
-               (not restart))
-    (setq pyim-buffer-list (pyim-load-file))
-    (pyim-make-char-table)
-    (run-hooks 'pyim-load-hook)
-    (message nil))
-
-  (unless (member 'pyim-save-personal-file kill-emacs-hook)
-    (add-to-list 'kill-emacs-hook 'pyim-save-personal-file))
-
-  (setq input-method-function 'pyim-input-method)
-  (setq deactivate-current-input-method-function 'pyim-inactivate)
-  ;; (setq describe-current-input-method-function 'pyim-help)
-  ;; If we are in minibuffer, turn off the current input method
-  ;; before exiting.
-  (when (eq (selected-window) (minibuffer-window))
-    (add-hook 'minibuffer-exit-hook 'pyim-exit-from-minibuffer))
-  (run-hooks 'pyim-active-hook)
-  (when restart
-    (message "Chinese-pyim 重启完成。")))
-
-;;; 注册输入法
-(register-input-method "chinese-pyim" "euc-cn" 'pyim-start pyim-title)
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
