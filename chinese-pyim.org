@@ -325,7 +325,7 @@ Chinese-pyim 使用 emacs 官方自带的输入法框架来启动输入法和重
   (pyim-start "Chinese-pyim" nil t save-personal-file))
 #+END_SRC
 
-* 词库文件相关操作
+* 处理词库文件
 ** 自定义词库
 *** 词库文件格式
 Chinese-pyim 使用词库文件来保存各个拼音对应的中文词条，每一个词库文件都
@@ -872,7 +872,7 @@ buffer中，当前词条追加到已有词条之后。"
   (pyim-intern-word word py))
 #+END_SRC
 
-* 标点符号相关操作
+* 处理标点符号
 常用的标点符号数量不多，所以 Chinese-pyim 没有使用文件而是使用一个变量
 `pyim-punctuation-dict' 来设置标点符号对应表，这个变量是一个 alist 列表。
 
@@ -1114,7 +1114,177 @@ If you don't like this funciton, set the variable to nil")
   "成对标点符号切换状态")
 #+END_SRC
 
-* 特殊功能触发字符（单字符快捷键）相关操作
+* 处理输入法选词框
+Chinese-pyim 默认使用 minibuffer 作为选词框，其基本原理就是，通过 *待选词列表*
+构建为一个字符串，然后使用 `message' 命令在 minibuffer 中显示这个字符串。
+用户可以根据这个字符串的提示，来执行相应的动作，比如按空格选择第一个词条或者
+按数字选择这个数字对应的词条。
+比如：
+
+#+BEGIN_EXAMPLE
+"1. 你好 2. 倪皓 3. 你 4.泥 ..."
+#+END_EXAMPLE
+
+Chinese-pyim 使用 `pyim-current-choices' 来保存 *待选词列表* ，我们以 "nihao" 对应的
+ `pyim-current-choices' 的值为例，来说明选词框相关的操作函数。
+
+#+BEGIN_SRC emacs-lisp :results value output replace
+(#("你好" 0 2 (py ("ni-hao"))) #("倪皓" 0 2 (py ("ni-hao"))) "泥" "你" "呢" "拟" "逆" "腻" "妮" "怩" "溺" "尼" "禰" "齯" "麑" "鲵" "蜺" "衵" "薿" "旎" "睨" "铌" "昵" "匿" "倪" "霓" "暱" "柅" "猊" "郳" "輗" "坭" "惄" "堄" "儗" "伲" "祢" "慝")
+#+END_SRC
+
+变量 `pyim-guidance-str' 来保存需要在选词框（minibuffer）中显示的字符串，而变量
+ `pyim-current-pos' 纪录当前选择的词条在 `pyim-current-choices' 中的位置，如果当前选择的
+词条为“倪皓”，那么其取值为2，如果当前选择的词条为“腻”，其取值为8。
+
+#+NAME: variables-guidance
+#+BEGIN_SRC emacs-lisp :noweb yes
+(defvar pyim-guidance-str "" "显示可选词条的字符串")
+(defvar pyim-current-pos nil "当前选择的词条在 pyim-current-choices 中的位置")
+#+END_SRC
+
+ *待选词列表* 一般都很长，不可能在一行中完全显示，所以 Chinese-pyim 使用了 page 的概念，比如，
+上面的 “nihao” 的 *待选词列表* 就可以逻辑的分成5页：
+
+#+BEGIN_EXAMPLE
+("你好"  倪皓"  "泥"  "你"  "呢"  "拟"  "逆"  "腻"  "妮"   ;第1页
+ "怩"    "溺"   "尼"  "禰"  "齯"  "麑"  "鲵"  "蜺"  "衵"   ;第2页
+ "薿"    "旎"   "睨"  "铌"  "昵"  "匿"  "倪"  "霓"  "暱"   ;第3页
+ "柅"    "猊"   "郳"  "輗"  "坭"  "惄"  "堄"  "儗"  "伲"   ;第4页
+ "祢"    "慝"                                              ;第5页)
+#+END_EXAMPLE
+
+用户可以使用变量 `pyim-page-length' 自定义每一页显示词条的数量，默认设置为9。
+#+NAME: pyim-page-length
+#+BEGIN_SRC emacs-lisp :noweb yes
+(defcustom pyim-page-length 9
+  "每页显示的词条数目"
+  :group 'chinese-pyim
+  :type 'number)
+#+END_SRC
+
+`pyim-current-pos' 的取值以及 `pyim-page-length' 的设定值，两者共同决定了 Chinese-pyim 需要
+显示哪一页，我们以一个表格来表示上述 *待选词列表* ：
+
+|       |          |       |         |      |      |      |      |      |          |
+|-------+----------+-------+---------+------+------+------+------+------+----------|
+| 第1页 | "你好"   | 倪皓" | "泥"    | "你" | "呢" | "拟" | "逆" | "腻" | "妮"     |
+| 第2页 | "怩"     | "溺"  | "尼"    | "禰" | "齯" | "麑" | "鲵" | "蜺" | "衵"     |
+| 第3页 | -B- "薿" | "旎"  | -A-"睨" | "铌" | "昵" | "匿" | "倪" | "霓" | -E- "暱" |
+| 第4页 | "柅"     | "猊"  | "郳"    | "輗" | "坭" | "惄" | "堄" | "儗" | "伲"     |
+| 第5页 | "祢"     | "慝"  |         |      |      |      |      |      |          |
+
+假设 `pyim-current-pos' 为 A 所在的位置。那么：
+1. 函数 `pyim-current-page' 返回值为3， 说明当前 page 为第3页。
+2. 函数 `pyim-total-page'  返回值为5，说明 page 共有5页。
+3. 函数 `pyim-page-start' 返回 B 所在的位置。
+4. 函数 `pyim-page-end' 返回 E 所在的位置。
+5. 函数 `pyim-format-page' 会从 `pyim-current-choices' 中提取一个sublist:
+   #+BEGIN_EXAMPLE
+   ("薿" "旎" "睨" "铌" "昵" "匿" "倪" "霓" "暱")
+   #+END_EXAMPLE
+   这个 sublist 的起点为  `pyim-page-start' 的返回值，终点为 `pyim-page-end' 的返回值。
+   然后使用这个 sublist 来构建 `pyim-guidance-str' :
+   #+BEGIN_EXAMPLE
+   "1. 薿 2.旎 3.睨 4.铌 5.昵 6.匿 7.倪 8.霓 9.暱"
+   #+END_EXAMPLE
+
+`pyim-next-page' 这个命令用来翻页，其基本原理就是改变 `pyim-current-pos'的取值，假设一次只翻一页，
+那么这个函数所做的工作就是：
+1. 首先将 `pyim-current-pos' 增加 `pyim-page-length' ，确保其指定的位置在下一页。
+2. 然后将 `pyim-current-pos' 的值设定为 `pyim-page-start' 的返回值，确保 `pyim-current-pos'
+   的取值为下一页第一个词条的位置。
+3. 最后调用 `pyim-format-page' 来更新 `pyim-guidance-str' 。
+
+#+NAME: functions-format-page
+#+BEGIN_SRC emacs-lisp :noweb yes
+;;;  page format
+(defun pyim-subseq (list from &optional to)
+  (if (null to) (nthcdr from list)
+    (butlast (nthcdr from list) (- (length list) to))))
+
+(defun pyim-mod (x y)
+  "like `mod', but when result is 0, return Y"
+  (let ((base (mod x y)))
+    (if (= base 0)
+        y
+      base)))
+
+(defsubst pyim-choice (choice)
+  (if (consp choice)
+      (car choice)
+    choice))
+
+(defun pyim-current-page ()
+  (1+ (/ (1- pyim-current-pos) pyim-page-length)))
+
+(defun pyim-total-page ()
+  (1+ (/ (1- (length (car pyim-current-choices))) pyim-page-length)))
+
+(defun pyim-page-start ()
+  "计算当前所在页的第一个词条的位置"
+  (let ((pos (min (length (car pyim-current-choices)) pyim-current-pos)))
+    (1+ (- pos (pyim-mod pos pyim-page-length)))))
+
+(defun pyim-page-end (&optional finish)
+  "计算当前所在页的最后一个词条的位置，如果 pyim-current-choices 用
+完，则检查是否有补全。如果 FINISH 为 non-nil，说明，补全已经用完了"
+  (let* ((whole (length (car pyim-current-choices)))
+         (len pyim-page-length)
+         (pos pyim-current-pos)
+         (last (+ (- pos (pyim-mod pos len)) len)))
+    (if (< last whole)
+        last
+      (if finish
+          whole
+        (pyim-page-end t)))))
+
+(defun pyim-format-page ()
+  "按当前位置，生成候选词条"
+  (let* ((end (pyim-page-end))
+         (start (1- (pyim-page-start)))
+         (choices (car pyim-current-choices))
+         (choice (pyim-subseq choices start end))
+         (pos (1- (min pyim-current-pos (length choices))))
+         (i 0) rest)
+    (setq pyim-current-str (concat (substring pyim-current-str 0 pyim-pinyin-position)
+                                   (pyim-choice (nth pos choices)))
+          rest (mapconcat (lambda (py)
+                            (concat (car py) (cdr py)))
+                          (nthcdr (length pyim-current-str) pyim-pinyin-list)
+                          "'"))
+    (if (string< "" rest)
+        (setq pyim-current-str (concat pyim-current-str rest)))
+    (setq pyim-guidance-str
+          (format "%s[%d/%d]: %s"
+                  (replace-regexp-in-string "-" " " pyim-current-key)
+                  (pyim-current-page) (pyim-total-page)
+                  (mapconcat 'identity
+                             (mapcar
+                              (lambda (c)
+                                (format "%d.%s " (setq i (1+ i))
+                                        (if (consp c)
+                                            (concat (car c) (cdr c))
+                                          c)))
+                              choice) " ")))
+    (pyim-show)))
+
+(defun pyim-next-page (arg)
+  (interactive "p")
+  (if (= (length pyim-current-key) 0)
+      (progn
+        (pyim-append-string (pyim-translate last-command-event))
+        (pyim-terminate-translation))
+    (let ((new (+ pyim-current-pos (* pyim-page-length arg) 1)))
+      (setq pyim-current-pos (if (> new 0) new 1)
+            pyim-current-pos (pyim-page-start))
+      (pyim-format-page))))
+
+(defun pyim-previous-page (arg)
+  (interactive "p")
+  (pyim-next-page (- arg)))
+#+END_SRC
+
+* 处理特殊功能触发字符（单字符快捷键）
 输入中文的时候，我们需要快速频繁的执行一些特定的命令，
 最直接的方法就是将上述命令绑定到一个容易按的快捷键上，但遗憾的是 emacs 大多数容易按
 的快捷键都 *名花有主* 了，甚至找一个 “Ctrl＋单字符”的快捷键都不太容易，特殊功能触发
@@ -1166,7 +1336,7 @@ Chinese-pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。
 <<functions-translate>>
 #+END_SRC
 
-* 模糊音处理相关操作
+* 处理模糊音
 'Chinese-pyim的核心并不能处理模糊音，这里提供了一个比较 *粗糙* 的方法来处理模糊音。
 
 假如：用户需要输入“应该”，其拼音为“ying-gai”，但用户确输入了一个错误的拼音“yin-gai”，
@@ -1214,7 +1384,7 @@ Chinese-pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。
   (pyim-handle-string))
 #+END_SRC
 
-* 拼音字符串相关操作
+* 拼音字符串分解与合并
 拼音字符串操作主要做两方面的工作： （1） 将拼音字符串分解为拼音列表。  （2）将拼音列表合并成拼音字符串。
 
 在这之前，Chinese-pyim 定义了三个变量：
@@ -1424,7 +1594,7 @@ Chinese-pyim 使用函数 `pyim-pylist-to-string' 将一个拼音列表合并为
              "-"))
 #+END_SRC
 
-* 拼音查询的相关操作
+* 查询某个汉字的拼音code
   :PROPERTIES:
   :CUSTOM_ID: make-char-table
   :END:
@@ -1522,7 +1692,7 @@ Chinese-pyim 在特定的时候需要读取一个汉字的拼音，这个工作�
       (warn "Emacs 官方自带的文件: quail/PY.el 不存在，用户可能没有安装 emacs<VERSION>-el 软件包。"))))
 #+END_SRC
 
-* 快捷键设定相关操作
+* 快捷键设定
 #+NAME: pyim-mode-map
 #+BEGIN_SRC emacs-lisp :noweb yes
 (defvar pyim-mode-map
@@ -1614,6 +1784,8 @@ Chinese-pyim 在特定的时候需要读取一个汉字的拼音，这个工作�
 
 <<pyim-fuzzy-pinyin-adjust-function>>
 
+<<pyim-page-length>>
+
 #+END_SRC
 *** 按照特定编辑环境自动开启英文输入模式。
 许多时候，我们必须根据特定的编辑环境来自动开启英文输入模式，比如：当 org-mode 用户
@@ -1686,11 +1858,6 @@ Chinese-pyim 插入字符之前，首先会运行 `pyim-english-input-switch-fun
 
 *** 其它
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
-(defcustom pyim-page-length 9
-  "每页显示的词条数目"
-  :group 'chinese-pyim
-  :type 'number)
-
 (defface pyim-string-face '((t (:underline t)))
   "Face to show current string"
   :group 'chinese-pyim)
@@ -1720,13 +1887,13 @@ Chinese-pyim 插入字符之前，首先会运行 `pyim-english-input-switch-fun
    1. pos 上次选择的位置
    2. completion 下一个可能的字母（如果 pyim-do-completion 为 t）")
 
-(defvar pyim-current-pos nil "当前选择的词条在 pyim-current-choices 中的位置")
-(defvar pyim-guidance-str "" "显示可选词条的字符串")
 (defvar pyim-translating nil "记录是否在转换状态")
 (defvar pyim-overlay nil "显示当前选择词条的 overlay")
 
 (defvar pyim-position nil)
 (defvar pyim-pinyin-list nil)
+
+<<variables-guidance>>
 
 <<variables-load-hook-and-active-hook>>
 
@@ -1819,50 +1986,11 @@ Chinese-pyim 插入字符之前，首先会运行 `pyim-english-input-switch-fun
       (delete-region (overlay-start pyim-overlay)
                      (overlay-end pyim-overlay))))
 
-(defun pyim-subseq (list from &optional to)
-  (if (null to) (nthcdr from list)
-    (butlast (nthcdr from list) (- (length list) to))))
-
-(defun pyim-mod (x y)
-  "like `mod', but when result is 0, return Y"
-  (let ((base (mod x y)))
-    (if (= base 0)
-        y
-      base)))
-
 (defun pyim-inactivate ()
   (interactive)
   (mapc 'kill-local-variable pyim-local-variable-list))
 
-;;;  page format
-(defsubst pyim-choice (choice)
-  (if (consp choice)
-      (car choice)
-    choice))
-
-(defun pyim-current-page ()
-  (1+ (/ (1- pyim-current-pos) pyim-page-length)))
-
-(defun pyim-total-page ()
-  (1+ (/ (1- (length (car pyim-current-choices))) pyim-page-length)))
-
-(defun pyim-page-start ()
-  "计算当前所在页的第一个词条的位置"
-  (let ((pos (min (length (car pyim-current-choices)) pyim-current-pos)))
-    (1+ (- pos (pyim-mod pos pyim-page-length)))))
-
-(defun pyim-page-end (&optional finish)
-  "计算当前所在页的最后一个词条的位置，如果 pyim-current-choices 用
-完，则检查是否有补全。如果 FINISH 为 non-nil，说明，补全已经用完了"
-  (let* ((whole (length (car pyim-current-choices)))
-         (len pyim-page-length)
-         (pos pyim-current-pos)
-         (last (+ (- pos (pyim-mod pos len)) len)))
-    (if (< last whole)
-        last
-      (if finish
-          whole
-        (pyim-page-end t)))))
+<<functions-format-page>>
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
@@ -1888,37 +2016,6 @@ Chinese-pyim 插入字符之前，首先会运行 `pyim-english-input-switch-fun
                                       (replace-regexp-in-string
                                        "-" " " pyim-current-key)))
       (pyim-show))))
-
-(defun pyim-format-page ()
-  "按当前位置，生成候选词条"
-  (let* ((end (pyim-page-end))
-         (start (1- (pyim-page-start)))
-         (choices (car pyim-current-choices))
-         (choice (pyim-subseq choices start end))
-         (pos (1- (min pyim-current-pos (length choices))))
-         (i 0) rest)
-    (setq pyim-current-str (concat (substring pyim-current-str 0 pyim-pinyin-position)
-                                   (pyim-choice (nth pos choices)))
-          rest (mapconcat (lambda (py)
-                            (concat (car py) (cdr py)))
-                          (nthcdr (length pyim-current-str) pyim-pinyin-list)
-                          "'"))
-    (if (string< "" rest)
-        (setq pyim-current-str (concat pyim-current-str rest)))
-    (setq pyim-guidance-str
-          (format "%s[%d/%d]: %s"
-                  (replace-regexp-in-string "-" " " pyim-current-key)
-                  (pyim-current-page) (pyim-total-page)
-                  (mapconcat 'identity
-                             (mapcar
-                              (lambda (c)
-                                (format "%d.%s " (setq i (1+ i))
-                                        (if (consp c)
-                                            (concat (car c) (cdr c))
-                                          c)))
-                              choice) " ")))
-    (pyim-show)))
-
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
@@ -2093,21 +2190,6 @@ Chinese-pyim 插入字符之前，首先会运行 `pyim-english-input-switch-fun
           (pyim-select-current)))
     (pyim-append-string (char-to-string last-command-event))
     (pyim-terminate-translation)))
-
-(defun pyim-next-page (arg)
-  (interactive "p")
-  (if (= (length pyim-current-key) 0)
-      (progn
-        (pyim-append-string (pyim-translate last-command-event))
-        (pyim-terminate-translation))
-    (let ((new (+ pyim-current-pos (* pyim-page-length arg) 1)))
-      (setq pyim-current-pos (if (> new 0) new 1)
-            pyim-current-pos (pyim-page-start))
-      (pyim-format-page))))
-
-(defun pyim-previous-page (arg)
-  (interactive "p")
-  (pyim-next-page (- arg)))
 
 (defun pyim-quit-no-clear ()
   (interactive)
