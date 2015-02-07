@@ -1288,16 +1288,7 @@ Chinese-pyim 使用 `pyim-current-choices' 来保存 *待选词列表* ，我们
          (start (1- (pyim-page-start)))
          (choices (car pyim-current-choices))
          (choice (pyim-subseq choices start end))
-         (pos (1- (min pyim-current-pos (length choices))))
-         (i 0) rest)
-    (setq pyim-current-str (concat (substring pyim-current-str 0 pyim-pinyin-position)
-                                   (pyim-choice (nth pos choices)))
-          rest (mapconcat (lambda (py)
-                            (concat (car py) (cdr py)))
-                          (nthcdr (length pyim-current-str) pyim-pinyin-list)
-                          "'"))
-    (if (string< "" rest)
-        (setq pyim-current-str (concat pyim-current-str rest)))
+         (i 0))
     (setq pyim-guidance-str
           (format "%s[%d/%d]: %s"
                   (replace-regexp-in-string "-" " " pyim-current-key)
@@ -1309,8 +1300,7 @@ Chinese-pyim 使用 `pyim-current-choices' 来保存 *待选词列表* ，我们
                                         (if (consp c)
                                             (concat (car c) (cdr c))
                                           c)))
-                              choice) " ")))
-    (pyim-show)))
+                              choice) " ")))))
 
 (defun pyim-next-page (arg)
   (interactive "p")
@@ -1321,7 +1311,9 @@ Chinese-pyim 使用 `pyim-current-choices' 来保存 *待选词列表* ，我们
     (let ((new (+ pyim-current-pos (* pyim-page-length arg) 1)))
       (setq pyim-current-pos (if (> new 0) new 1)
             pyim-current-pos (pyim-page-start))
-      (pyim-format-page))))
+      (pyim-update-current-str)
+      (pyim-format-page)
+      (pyim-show))))
 
 (defun pyim-previous-page (arg)
   (interactive "p")
@@ -2094,13 +2086,32 @@ Chinese-pyim 插入字符之前，首先会运行 `pyim-english-input-switch-fun
                    (setq pyim-current-choices (list (delete-dups (pyim-get-choices pyim-pinyin-list))))
                    (when  (car pyim-current-choices)
                      (setq pyim-current-pos 1)
+                     (pyim-update-current-str)
                      (pyim-format-page)
+                     (pyim-show)
                      t)))
       (setq pyim-current-str (replace-regexp-in-string "-" "" pyim-current-key))
       (setq pyim-guidance-str (format "%s"
                                       (replace-regexp-in-string
                                        "-" " " pyim-current-key)))
       (pyim-show))))
+
+(defun pyim-update-current-str ()
+  "update `pyim-current-str'"
+  (let* ((end (pyim-page-end))
+         (start (1- (pyim-page-start)))
+         (choices (car pyim-current-choices))
+         (choice (pyim-subseq choices start end))
+         (pos (1- (min pyim-current-pos (length choices))))
+         rest)
+    (setq pyim-current-str (concat (substring pyim-current-str 0 pyim-pinyin-position)
+                                   (pyim-choice (nth pos choices)))
+          rest (mapconcat (lambda (py)
+                            (concat (car py) (cdr py)))
+                          (nthcdr (length pyim-current-str) pyim-pinyin-list)
+                          "'"))
+    (if (string< "" rest)
+        (setq pyim-current-str (concat pyim-current-str rest)))))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
@@ -2256,7 +2267,9 @@ Chinese-pyim 插入字符之前，首先会运行 `pyim-english-input-switch-fun
         (setq pylist (nthcdr pyim-pinyin-position pyim-pinyin-list))
         (setq pyim-current-choices (list (pyim-get-choices pylist))
               pyim-current-pos 1)
-        (pyim-format-page)))))
+        (pyim-update-current-str)
+        (pyim-format-page)
+        (pyim-show)))))
 
 (defun pyim-number-select ()
   "如果没有可选项，插入数字，否则选择对应的词条"
