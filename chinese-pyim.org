@@ -313,6 +313,11 @@ Chinese-pyim 使用 emacs 官方自带的输入法框架来启动输入法和重
   (when restart
     (message "Chinese-pyim 重启完成。")))
 
+(defun pyim-exit-from-minibuffer ()
+  (deactivate-input-method)
+  (if (<= (minibuffer-depth) 1)
+      (remove-hook 'minibuffer-exit-hook 'quail-exit-from-minibuffer)))
+
 (defun pyim-restart ()
   "重启 Chinese-pyim，不建议用于编程环境。"
   (interactive)
@@ -1114,9 +1119,48 @@ If you don't like this funciton, set the variable to nil")
   "成对标点符号切换状态")
 #+END_SRC
 
-* 处理输入法选词框
+* 备选词条的显示方式
+Chinese-pyim 使用两种方式显示备选词项，让用户选择词条：
+1. 使用 emacs overlay 对象，在光标处显示 *第一个* 备选词条。
+2. 在 minibuffer 中显示一个备选词条菜单。
+** 在光标处添加一个 overlay，显示 *第一个* 可选词条。
+Chinese-pyim 使用变量 `pyim-overlay' 来保存创建的 overlay。
+
+#+NAME: pyim-overlay
+#+BEGIN_SRC emacs-lisp :noweb yes
+(defvar pyim-overlay nil "显示当前选择词条的 overlay")
+#+END_SRC
+
+并定义了两个函数来设置 overlay 和删除 overlay，Chinese-pyim 在 `pyim-input-method' 中调用这两个函数。
+1. `pyim-setup-overlays' 创建 overlay 并使用变量 `pyim-overlay' 保存，
+   创建时将 overlay 的 face 属性设置为 `pyim-string-face' 。用户可以使用这个变量来自定义 face。
+2. `pyim-delete-overlays' 删除 `pyim-overlay' 保存的 overlay 。
+
+#+NAME: pyim-string-face
+#+BEGIN_SRC emacs-lisp :noweb yes
+(defface pyim-string-face '((t (:underline t)))
+  "Face to show current string"
+  :group 'chinese-pyim)
+#+END_SRC
+
+#+NAME: functions-setup-and-delete-overlay
+#+BEGIN_SRC emacs-lisp :noweb yes
+(defun pyim-setup-overlays ()
+  (let ((pos (point)))
+    (if (overlayp pyim-overlay)
+        (move-overlay pyim-overlay pos pos)
+      (setq pyim-overlay (make-overlay pos pos))
+      (if input-method-highlight-flag
+          (overlay-put pyim-overlay 'face 'pyim-string-face)))))
+
+(defun pyim-delete-overlays ()
+  (if (and (overlayp pyim-overlay) (overlay-start pyim-overlay))
+      (delete-overlay pyim-overlay)))
+#+END_SRC
+
+** 构建 minibuffer 中显示的文本： `pyim-guidance-str' 。
 Chinese-pyim 默认使用 minibuffer 作为选词框，其基本原理就是，通过 *待选词列表*
-构建为一个字符串，然后使用 `message' 命令在 minibuffer 中显示这个字符串。
+构建为一个字符串，然后使用类似 `message' 的命令在 minibuffer 中显示这个字符串。
 用户可以根据这个字符串的提示，来执行相应的动作，比如按空格选择第一个词条或者
 按数字选择这个数字对应的词条。
 比如：
@@ -1132,7 +1176,7 @@ Chinese-pyim 使用 `pyim-current-choices' 来保存 *待选词列表* ，我们
 (#("你好" 0 2 (py ("ni-hao"))) #("倪皓" 0 2 (py ("ni-hao"))) "泥" "你" "呢" "拟" "逆" "腻" "妮" "怩" "溺" "尼" "禰" "齯" "麑" "鲵" "蜺" "衵" "薿" "旎" "睨" "铌" "昵" "匿" "倪" "霓" "暱" "柅" "猊" "郳" "輗" "坭" "惄" "堄" "儗" "伲" "祢" "慝")
 #+END_SRC
 
-变量 `pyim-guidance-str' 来保存需要在选词框（minibuffer）中显示的字符串，而变量
+变量 `pyim-guidance-str' 来保存需要在 minibuffer 选词框中显示的字符串，而变量
  `pyim-current-pos' 纪录当前选择的词条在 `pyim-current-choices' 中的位置，如果当前选择的
 词条为“倪皓”，那么其取值为2，如果当前选择的词条为“腻”，其取值为8。
 
@@ -1162,7 +1206,7 @@ Chinese-pyim 使用 `pyim-current-choices' 来保存 *待选词列表* ，我们
   :type 'number)
 #+END_SRC
 
-`pyim-current-pos' 的取值以及 `pyim-page-length' 的设定值，两者共同决定了 Chinese-pyim 需要
+`pyim-current-pos' 的取值以及 `pyim-page-length' 的设定值，共同决定了 Chinese-pyim 需要
 显示哪一页，我们以一个表格来表示上述 *待选词列表* ：
 
 |       |          |       |         |      |      |      |      |      |          |
@@ -1183,17 +1227,17 @@ Chinese-pyim 使用 `pyim-current-choices' 来保存 *待选词列表* ，我们
    ("薿" "旎" "睨" "铌" "昵" "匿" "倪" "霓" "暱")
    #+END_EXAMPLE
    这个 sublist 的起点为  `pyim-page-start' 的返回值，终点为 `pyim-page-end' 的返回值。
-   然后使用这个 sublist 来构建 `pyim-guidance-str' :
+   然后使用这个 sublist 来构建类似下面的字符串，并保存到变量 `pyim-guidance-str' 。
    #+BEGIN_EXAMPLE
    "1. 薿 2.旎 3.睨 4.铌 5.昵 6.匿 7.倪 8.霓 9.暱"
    #+END_EXAMPLE
 
-`pyim-next-page' 这个命令用来翻页，其基本原理就是改变 `pyim-current-pos'的取值，假设一次只翻一页，
+`pyim-next-page' 这个命令用来翻页，其原理是：改变 `pyim-current-pos'的取值，假设一次只翻一页，
 那么这个函数所做的工作就是：
 1. 首先将 `pyim-current-pos' 增加 `pyim-page-length' ，确保其指定的位置在下一页。
 2. 然后将 `pyim-current-pos' 的值设定为 `pyim-page-start' 的返回值，确保 `pyim-current-pos'
    的取值为下一页第一个词条的位置。
-3. 最后调用 `pyim-format-page' 来更新 `pyim-guidance-str' 。
+3. 最后调用 `pyim-format-page' 来重新设置 `pyim-guidance-str' 。
 
 #+NAME: functions-format-page
 #+BEGIN_SRC emacs-lisp :noweb yes
@@ -1282,6 +1326,57 @@ Chinese-pyim 使用 `pyim-current-choices' 来保存 *待选词列表* ，我们
 (defun pyim-previous-page (arg)
   (interactive "p")
   (pyim-next-page (- arg)))
+#+END_SRC
+
+** 更新选词框和 inline 备选词条
+当`pyim-guidance-str' 构建完成后，Chinese-pyim 使用函数 `pyim-show' 重新显示选词框，
+与此同时，函数 `pyim-show' 也会更新光标处显示的备选词条，具体方式是：
+1. 从光标处删除原来的备选词条
+2. 插入新的备选词条
+3. 使用 `move-overlay' 函数调整 `pyim-overlay' 中保存的 overlay，让其符合新的备选词条。
+
+#+NAME: functions-show-overlay-and-guidance
+#+BEGIN_SRC emacs-lisp :noweb yes
+(defun pyim-show ()
+  (unless enable-multibyte-characters
+    (setq pyim-current-key nil
+          pyim-current-str nil)
+    (error "Can't input characters in current unibyte buffer"))
+  (pyim-delete-region)
+  (insert pyim-current-str)
+  (move-overlay pyim-overlay (overlay-start pyim-overlay) (point))
+  ;; Then, show the guidance.
+  (when (and (not input-method-use-echo-area)
+             (null unread-command-events)
+             (null unread-post-input-method-events))
+    (if (eq (selected-window) (minibuffer-window))
+        ;; Show the guidance in the next line of the currrent
+        ;; minibuffer.
+        (pyim-minibuffer-message
+         (format "  [%s]\n%s"
+                 current-input-method-title pyim-guidance-str))
+      ;; Show the guidance in echo area without logging.
+      (let ((message-log-max nil))
+        (message "%s" pyim-guidance-str)))))
+
+(defsubst pyim-delete-region ()
+  "Delete the text in the current translation region of E+."
+  (if (overlay-start pyim-overlay)
+      (delete-region (overlay-start pyim-overlay)
+                     (overlay-end pyim-overlay))))
+
+(defun pyim-minibuffer-message (string)
+  (message nil)
+  (let ((point-max (point-max))
+        (inhibit-quit t))
+    (save-excursion
+      (goto-char point-max)
+      (insert string))
+    (sit-for 1000000)
+    (delete-region point-max (point-max))
+    (when quit-flag
+      (setq quit-flag nil
+            unread-command-events '(7)))))
 #+END_SRC
 
 * 处理特殊功能触发字符（单字符快捷键）
@@ -1786,6 +1881,8 @@ Chinese-pyim 在特定的时候需要读取一个汉字的拼音，这个工作�
 
 <<pyim-page-length>>
 
+<<pyim-string-face>>
+
 #+END_SRC
 *** 按照特定编辑环境自动开启英文输入模式。
 许多时候，我们必须根据特定的编辑环境来自动开启英文输入模式，比如：当 org-mode 用户
@@ -1856,13 +1953,6 @@ Chinese-pyim 插入字符之前，首先会运行 `pyim-english-input-switch-fun
   :type 'hook)
 #+END_SRC
 
-*** 其它
-#+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
-(defface pyim-string-face '((t (:underline t)))
-  "Face to show current string"
-  :group 'chinese-pyim)
-#+END_SRC
-
 ** 内部变量
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
 ;;;  variable declare
@@ -1888,7 +1978,8 @@ Chinese-pyim 插入字符之前，首先会运行 `pyim-english-input-switch-fun
    2. completion 下一个可能的字母（如果 pyim-do-completion 为 t）")
 
 (defvar pyim-translating nil "记录是否在转换状态")
-(defvar pyim-overlay nil "显示当前选择词条的 overlay")
+
+<<pyim-overlay>>
 
 (defvar pyim-position nil)
 (defvar pyim-pinyin-list nil)
@@ -1980,12 +2071,6 @@ Chinese-pyim 插入字符之前，首先会运行 `pyim-english-input-switch-fun
   (setq pyim-current-str (concat pyim-current-str str)))
 
 ;;;  common functions
-(defsubst pyim-delete-region ()
-  "Delete the text in the current translation region of E+."
-  (if (overlay-start pyim-overlay)
-      (delete-region (overlay-start pyim-overlay)
-                     (overlay-end pyim-overlay))))
-
 (defun pyim-inactivate ()
   (interactive)
   (mapc 'kill-local-variable pyim-local-variable-list))
@@ -2258,58 +2343,10 @@ Chinese-pyim 通过这个函数实现中文输入模式和英文输入模式的�
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
-;;;  Core function of input method (stole from quail)
-(defun pyim-exit-from-minibuffer ()
-  (deactivate-input-method)
-  (if (<= (minibuffer-depth) 1)
-      (remove-hook 'minibuffer-exit-hook 'quail-exit-from-minibuffer)))
+<<functions-setup-and-delete-overlay>>
 
-(defun pyim-setup-overlays ()
-  (let ((pos (point)))
-    (if (overlayp pyim-overlay)
-        (move-overlay pyim-overlay pos pos)
-      (setq pyim-overlay (make-overlay pos pos))
-      (if input-method-highlight-flag
-          (overlay-put pyim-overlay 'face 'pyim-string-face)))))
+<<functions-show-overlay-and-guidance>>
 
-(defun pyim-delete-overlays ()
-  (if (and (overlayp pyim-overlay) (overlay-start pyim-overlay))
-      (delete-overlay pyim-overlay)))
-
-(defun pyim-show ()
-  (unless enable-multibyte-characters
-    (setq pyim-current-key nil
-          pyim-current-str nil)
-    (error "Can't input characters in current unibyte buffer"))
-  (pyim-delete-region)
-  (insert pyim-current-str)
-  (move-overlay pyim-overlay (overlay-start pyim-overlay) (point))
-  ;; Then, show the guidance.
-  (when (and (not input-method-use-echo-area)
-             (null unread-command-events)
-             (null unread-post-input-method-events))
-    (if (eq (selected-window) (minibuffer-window))
-        ;; Show the guidance in the next line of the currrent
-        ;; minibuffer.
-        (pyim-minibuffer-message
-         (format "  [%s]\n%s"
-                 current-input-method-title pyim-guidance-str))
-      ;; Show the guidance in echo area without logging.
-      (let ((message-log-max nil))
-        (message "%s" pyim-guidance-str)))))
-
-(defun pyim-minibuffer-message (string)
-  (message nil)
-  (let ((point-max (point-max))
-        (inhibit-quit t))
-    (save-excursion
-      (goto-char point-max)
-      (insert string))
-    (sit-for 1000000)
-    (delete-region point-max (point-max))
-    (when quit-flag
-      (setq quit-flag nil
-            unread-command-events '(7)))))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :noweb yes :tangle chinese-pyim.el
@@ -2415,7 +2452,6 @@ Return the input string."
 <<functions-pyim-start-and-restart>>
 
 <<register-input-method>>
-
 
 (defun pyim-toggle-input-ascii ()
   "Chinese-pyim 切换中英文输入模式。同时调整标点符号样式。"
