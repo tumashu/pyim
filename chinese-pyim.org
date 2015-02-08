@@ -642,8 +642,7 @@ file的对应表。
                                    (pyim-bisearch-word code
                                                        (point-min)
                                                        (point-max)))))
-            (message "%s 可能不是一个有效的词库 buffer，忽略。"
-                     (buffer-name (current-buffer))))))
+            (message "%s 可能不是一个有效的词库 buffer，忽略。" (buffer-name)))))
       (delete-dups words))))
 
 (defun pyim-dict-buffer-valid-p ()
