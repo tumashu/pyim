@@ -629,6 +629,16 @@ file的对应表。
 这个工作由函数 `pyim-get' 完成，其基本原理是： 递归的搜索 `pyim-buffer-list' 中所有的 buffer，
 将得到的搜索结果汇总成一个列表，去除重复后返回：
 
+在搜索 buffer 之前，Chinese-pyim 会使用函数 `pyim-dict-buffer-valid-p' 大致的判断当前 buffer 是否
+时一个有效的词库 buffer，有效词库 buffer 的判断标准为：
+1. buffer 必须多于5行。
+2. buffer 中间一行必须包含空格或者TAB。
+2. buffer 中间一行必须包含中文字符(\\cc)。
+
+由于 chinese-pyim 文本词库没有包含 meta 信息，所以这个函数只能粗略的做出判断，另外这个函数使
+用 `count-lines' 计算行数，我限定其参数 END 不超过 20000, 这样可以优化性能，防止输入法卡顿。
+
+BUG: 这个函数需要进一步优化，使其判断更准确。
 #+NAME: function-get-words
 #+BEGIN_SRC emacs-lisp :noweb yes
 (defun pyim-get (code)
