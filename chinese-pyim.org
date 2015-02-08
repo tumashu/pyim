@@ -315,8 +315,8 @@ Chinese-pyim 使用 emacs 官方自带的输入法框架来启动输入法和重
 
 (defun pyim-exit-from-minibuffer ()
   (deactivate-input-method)
-  (if (<= (minibuffer-depth) 1)
-      (remove-hook 'minibuffer-exit-hook 'quail-exit-from-minibuffer)))
+  (when (<= (minibuffer-depth) 1)
+    (remove-hook 'minibuffer-exit-hook 'quail-exit-from-minibuffer)))
 
 (defun pyim-restart ()
   "重启 Chinese-pyim，不建议用于编程环境。"
