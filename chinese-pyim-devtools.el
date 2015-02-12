@@ -64,41 +64,18 @@
 
 ;; #+END_SRC
 
-;; ** 自定义 tangle  代码和 export 文档的命令
-;; 添加一个 emacs 命令，用来 tangle 代码和导出 README。这里将当前文档
-;; 导出为 marokdown 格式和 ascii 格式。前者用于 github，后者用于 emacs
-;; 包管理器。
-
+;; ** 自定义生成 README 的命令
+;; 添加一个 emacs 命令，用来导出 README，用于 Github。
 ;; #+BEGIN_SRC emacs-lisp
 ;;;###autoload
-(defun pyim-devtools-tangle-and-export ()
-  "专门用于 Chinese-pyim 文档导出和代码 tango 的命令。"
+(defun pyim-devtools-generate-readme ()
+  "生成 Chinese-pyim README。"
   (interactive)
-  (let ((org-export-select-tags '("README" "readme"))
+  (let ((org-export-select-tags '("README"))
         (org-export-filter-paragraph-functions '(pyim-devtools-org-clean-space))
-        (readme-md "README.md")
-        (readme-ascii "README.txt")
-        ;; 导出时用空格代替TAB键
         (indent-tabs-mode nil)
         (tab-width 4))
-    (unless (file-exists-p readme-md)
-      (write-region "" nil readme-md))
-    (unless (file-exists-p readme-ascii)
-      (write-region "" nil readme-ascii))
-    (org-export-to-file 'gfm "README.md")
-    (org-export-to-file 'ascii "README.txt")
-    (org-babel-tangle)))
-;; #+END_SRC
-
-;; ** 通过 noweb 功能，将 README 文档的内容添加到代码文件中。
-;; 这里首先定义一个函数，用于返回一个文件的内容，其作用类似sh命令：cat
-;; #+BEGIN_SRC emacs-lisp
-(defun pyim-devtools-return-file-content (file-name)
-  "返回一个文件的内容，作用类似sh命令：cat"
-  (let ((file (expand-file-name file-name)))
-    (with-temp-buffer
-      (insert-file-contents file)
-      (buffer-string))))
+    (org-export-to-file 'gfm "README.md")))
 ;; #+END_SRC
 
 ;;; Footer:
