@@ -25,10 +25,11 @@
 ;; Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 ;;; Commentary:
-;; ** 简介
+;; * Chinese-pyim 使用说明
+;; ** 简介                                                              :README:
 ;; Chinese-pyim 是 Chinese Pinyin Input Method 的缩写。是emacs环境下的一个中文拼音输入法。
 
-;; ** 背景
+;; ** 背景                                                              :README:
 ;; Chinese-pyim 的代码源自 emacs-eim。emacs-eim是一个emacs中文输入法框架，使用这
 ;; 个框架可以自定义输入法，emacs-eim 软件包本身就包含许多不同的中文输入法，比如：
 ;; 五笔输入法，仓颉输入法以及二笔输入法等等。
@@ -50,7 +51,7 @@
 ;; 所以，本人认为将 emacs-eim 作为一个 *备用* 中文输入法是非常合适的，于是我 fork 了
 ;; emacs-eim, 简化代码并更改名称为：chinese-pyim。
 
-;; ** 目标
+;; ** 目标                                                              :README:
 ;; Chinese-pyim 的目标是： *尽最大的努力成为一个好用的 emacs 备用中文拼音输入法* 。
 ;; 具体可表现为三个方面：
 
@@ -58,11 +59,11 @@
 ;; 2. Integration:  尽最大可能减少输入法切换频率，让中文输入不影响 emacs 的体验。
 ;; 3. Exchange:     尽最大可能简化 Chinese-pyim 使用其他优秀输入法的词库的难度和复杂度。
 
-;; ** 特点
+;; ** 特点                                                              :README:
 ;; 1. Chinese-pyim 只是一个拼音输入法，安装配置方便快捷，默认只通过添加词库的方式优化输入法。
 ;; 2. Chinese-pyim 只使用最简单的文本词库格式，可以快速方便的利用其他输入法的词库。
 
-;; ** 安装
+;; ** 安装                                                              :README:
 ;; 1. 配置melpa源，参考：http://melpa.org/#/getting-started
 ;; 2. M-x package-install RET chinese-pyim RET
 ;; 3. 在emacs配置文件中（比如: ~/.emacs）添加如下代码：
@@ -71,7 +72,7 @@
 ;; (require 'chinese-pyim)
 ;; #+END_EXAMPLE
 
-;; ** 配置
+;; ** 配置                                                              :README:
 ;; *** 添加词库文件
 ;; 可以使用三种方法为 Chinese-pyim 添加词库，具体方式请参考 [[如何添加自定义拼音词库]] 小结。
 
@@ -90,7 +91,7 @@
 ;; (global-set-key (kbd "C-;") 'pyim-punctuation-translate-at-point)
 ;; #+END_EXAMPLE
 
-;; ** 使用
+;; ** 使用                                                              :README:
 ;; *** 常用快捷键
 ;; | 按键 | 功能     |
 ;; |------+----------|
@@ -159,7 +160,7 @@
 ;; (setq pyim-company-predict-words-number 10)
 ;; #+END_EXAMPLE
 
-;; ** Tips
+;; ** Tips                                                              :README:
 ;; *** Chinese-pyim 重要变量介绍
 ;; 1. `pyim-personal-file' Chinese-pyim 个人词频文件设置变量。
 ;; 2. `pyim-dicts'  Chinese-pyim 词库设置变量。
