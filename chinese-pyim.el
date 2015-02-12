@@ -25,7 +25,6 @@
 ;; Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 ;;; Commentary:
-
 ;; ** 简介
 ;; Chinese-pyim 是 Chinese Pinyin Input Method 的缩写。是emacs环境下的一个中文拼音输入法。
 
@@ -262,7 +261,6 @@
 
 ;; ** defcustom
 ;; #+BEGIN_SRC emacs-lisp
-;;; defcustom
 (defgroup chinese-pyim nil
   "Chinese pinyin input method"
   :group 'leim)
@@ -362,7 +360,6 @@ Chinese-pyim 内建的功能有：
 
 ;; ** defvar
 ;; #+BEGIN_SRC emacs-lisp
-;; variables
 (defvar pyim-title "灵拼" "Chinese-pyim 在 mode-line 中显示的名称。")
 (defvar pyim-buffer-name " *Chinese-pyim*")
 (defvar pyim-buffer-list nil
@@ -987,6 +984,28 @@ beginning of line"
       (pyim-intern-word word (car py))
       (pyim-intern-word word (cdr py)))))
 
+(defun pyim-match-py (word pylist)
+  (let (sym words fullpy abbpy chpy)
+    (when (> (length word) 1)
+      (if (stringp (car pylist))        ; if is full pinyin
+          (progn (setq fullpy (car pylist))
+                 (cons fullpy (mapconcat 'identity
+                                         (mapcar 'pyim-essential-py
+                                                 (pyim-split-string (replace-regexp-in-string "-" "'" fullpy)))
+                                         "-")))
+        (dotimes (i (length word))
+          (setq chpy (car pylist)
+                pylist (cdr pylist))
+          (setq abbpy (concat abbpy "-"
+                              (if (string< "" (car chpy))
+                                  (car chpy) (cdr chpy))))
+          (if (string< "" (cdr chpy))
+              (setq fullpy (concat fullpy "-" (car chpy) (cdr chpy)))
+            (setq fullpy (concat fullpy "-"
+                                 (car (pyim-get-char-code (aref word i)))))))
+        (cons (substring fullpy 1)
+              (substring abbpy 1))))))
+
 (defun pyim-create-word-without-pinyin (word)
   "将中文词条 `word' 添加拼音后，保存到 personal-file 对应的
 buffer中，当前词条追加到已有词条之后。"
@@ -1567,7 +1586,22 @@ buffer中，当前词条追加到已有词条之后。"
   (pyim-handle-string))
 ;; #+END_SRC
 
-;; ** 拼音字符串分解与合并
+;; ** 从一个拼音字符串获得其待选词的列表
+;; 从一个拼音字符串获取其待选词列表，大致可以分成3个步骤：
+;; 1. 分解这个拼音字符串，得到一个拼音列表。
+;;    #+BEGIN_EXAMPLE
+;;    woaimeinv -> (("w" . "o") ("" . "ai") ("m" . "ei") ("n" . "v"))
+;;    #+END_EXAMPLE
+;; 2. 将拼音列表排列组合，得到多个词语拼音，并用列表表示。
+;;    #+BEGIN_EXAMPLE
+;;    (("p" . "in") ("y" . "in") ("sh" . "") ("r" . ""))
+;;    => ("pin-yin"  ;; 完整的拼音
+;;        ("p-y-sh" ("p" . "in") ("y" . "in") ("sh" . "")) ;; 不完整的拼音
+;;        ("p-y-sh-r" ("p" . "in") ("y" . "in") ("sh" . "") ("r" . "")) ;; 不完整的拼音
+;;        )
+;;    #+END_EXAMPLE
+;; 3. 递归的查询上述多个词语拼音，将得到的结果合并为待选词的列表。
+;; *** 拼音字符串分解与合并
 ;; 拼音字符串操作主要做两方面的工作： （1） 将拼音字符串分解为拼音列表。  （2）将拼音列表合并成拼音字符串。
 
 ;; 在这之前，Chinese-pyim 定义了三个变量：
@@ -1761,6 +1795,109 @@ buffer中，当前词条追加到已有词条之后。"
              "-"))
 ;; #+END_SRC
 
+;; *** 获得词语拼音并进一步查询得到备选词列表
+;; #+BEGIN_SRC emacs-lisp
+(defun pyim-get-choices (pylist)
+  "得到可能的词组和汉字。例如：
+
+ (pyim-get-choices  (pyim-split-string \"pin-yin\"))
+  => (#(\"拼音\" 0 2 (py (\"pin-yin\"))) \"拼\" \"品\" \"贫\" \"苹\" \"聘\" \"频\" \"拚\" \"颦\" \"牝\" \"嫔\" \"姘\" \"嚬\")
+
+ (pyim-get-choices  (pyim-split-string \"pin-yin\"))
+ => (#(\"拼音\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) #(\"贫铀\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) #(\"聘用\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) \"拼\" \"品\" \"贫\" \"苹\" \"聘\" \"频\" \"拚\" \"颦\" \"牝\" \"嫔\" \"姘\" \"嚬\")
+
+"
+  (let (choice words chars wordspy choice)
+    (setq wordspy (pyim-possible-words-py pylist))
+    (if wordspy
+        (setq words (pyim-possible-words wordspy)))
+    (setq chars (pyim-get (concat (caar pylist) (cdar pylist)))
+          choice (append words chars))))
+
+(defun pyim-possible-words (wordspy)
+  "根据拼音得到可能的词组。例如：
+  (pyim-possible-words '((\"p-y\" (\"p\" . \"in\") (\"y\" . \"\"))))
+    => (#(\"拼音\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) #(\"贫铀\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) #(\"聘用\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))))
+
+"
+  (let (words)
+    (dolist (word (reverse wordspy))
+      (if (listp word)
+          (setq words (append words (pyim-match-word (pyim-get (car word))
+                                                     (cdr word))))
+        (setq words (append words (mapcar (lambda (w)
+                                            (propertize w 'py (list word)))
+                                          (pyim-get word))))))
+    words))
+
+(defun pyim-possible-words-py (pylist)
+  "所有可能的词组拼音。从第一个字开始，每个字断开形成一个拼音。如果是
+完整拼音，则给出完整的拼音，如果是给出声母，则为一个 CONS CELL，CAR 是
+拼音，CDR 是拼音列表。例如：
+
+ (setq foo-pylist (pyim-split-string \"pin-yin-sh-r\"))
+  => ((\"p\" . \"in\") (\"y\" . \"in\") (\"sh\" . \"\") (\"r\" . \"\"))
+
+ (pyim-possible-words-py foo-pylist)
+  => (\"pin-yin\" (\"p-y-sh\" (\"p\" . \"in\") (\"y\" . \"in\") (\"sh\" . \"\")) (\"p-y-sh-r\" (\"p\" . \"in\") (\"y\" . \"in\") (\"sh\" . \"\") (\"r\" . \"\")))
+ "
+  (let (pys fullpy smpy wordlist (full t))
+    (if (string< "" (cdar pylist))
+        (setq fullpy (concat (caar pylist) (cdar pylist))
+              smpy (pyim-essential-py (car pylist)))
+      (setq smpy (caar pylist)
+            full nil))
+    (setq wordlist (list (car pylist)))
+    (dolist (py (cdr pylist))
+      (setq wordlist (append wordlist (list py)))
+      (if (and full (string< "" (cdr py)))
+          (setq fullpy (concat fullpy "-" (car py) (cdr py))
+                smpy (concat smpy "-" (pyim-essential-py py))
+                pys (append pys (list fullpy)))
+        (setq full nil
+              smpy (concat smpy "-" (pyim-essential-py py))
+              pys (append pys (list (cons smpy wordlist))))))
+    ;; (message "%s: %s" pys wordlist))
+    pys))
+
+(defun pyim-essential-py (py)
+  "一个拼音中的主要部分，如果有声母返回声母，否则返回韵母"
+  (if (string< "" (car py))
+      (car py)
+    (cdr py)))
+
+(defun pyim-match-word (wordlist wordspy)
+  "给出一个词组列表和它的拼音列表，给出所有可能的词组，并加上一个 py
+属性。例如：
+
+ (pyim-get \"p-y\")
+  => (\"拼音\" \"番禺\" \"培养\" \"培育\" \"配药\" \"彭阳\" \"朋友\" \"偏远\" \"便宜\" \"片语\" \"飘扬\" \"漂移\" \"漂游\" \"贫铀\" \"聘用\" \"平阳\" \"平遥\" \"平邑\" \"平阴\" \"平舆\" \"平原\" \"平远\" \"濮阳\")
+
+ (pyim-match-word (pyim-get \"p-y\") '((\"p\" . \"in\") (\"y\" . \"\")))
+  => (#(\"拼音\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) #(\"贫铀\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) #(\"聘用\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))))
+
+"
+  (let (words)
+    (dolist (word wordlist)
+      ;;      (message "word: %s" word)
+      (let ((match t) py pys (tmppy wordspy))
+        (dotimes (i (length wordspy))
+          (setq py (car tmppy)
+                tmppy (cdr tmppy))
+          ;; (message "py: %s" py)
+          (when (string< "" (cdr py))
+            (let (chmatch)
+              (dolist (chpy (pyim-get-char-code (aref word i)))
+                (if (string= (cdr (pyim-get-sm chpy)) (cdr py))
+                    (setq chmatch t)))
+              (or chmatch (setq match nil)))))
+        ;; (message "%d: py: %s, match: %s" i py match))
+        (if match
+            (setq words (append words (list (propertize word 'py wordspy)))))))
+    words))
+
+;; #+END_SRC
+
 ;; ** 查询某个汉字的拼音code
 ;;   :PROPERTIES:
 ;;   :CUSTOM_ID: make-char-table
@@ -1906,128 +2043,7 @@ buffer中，当前词条追加到已有词条之后。"
     (if (string< "" rest)
         (setq pyim-current-str (concat pyim-current-str rest)))))
 
-;;;  词组选择解析
-(defun pyim-get-choices (pylist)
-  "得到可能的词组和汉字。例如：
-
- (pyim-get-choices  (pyim-split-string \"pin-yin\"))
-  => (#(\"拼音\" 0 2 (py (\"pin-yin\"))) \"拼\" \"品\" \"贫\" \"苹\" \"聘\" \"频\" \"拚\" \"颦\" \"牝\" \"嫔\" \"姘\" \"嚬\")
-
- (pyim-get-choices  (pyim-split-string \"pin-yin\"))
- => (#(\"拼音\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) #(\"贫铀\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) #(\"聘用\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) \"拼\" \"品\" \"贫\" \"苹\" \"聘\" \"频\" \"拚\" \"颦\" \"牝\" \"嫔\" \"姘\" \"嚬\")
-
-"
-  (let (choice words chars wordspy choice)
-    (setq wordspy (pyim-possible-words-py pylist))
-    (if wordspy
-        (setq words (pyim-possible-words wordspy)))
-    (setq chars (pyim-get (concat (caar pylist) (cdar pylist)))
-          choice (append words chars))))
-
-(defun pyim-possible-words (wordspy)
-  "根据拼音得到可能的词组。例如：
-  (pyim-possible-words '((\"p-y\" (\"p\" . \"in\") (\"y\" . \"\"))))
-    => (#(\"拼音\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) #(\"贫铀\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) #(\"聘用\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))))
-
-"
-  (let (words)
-    (dolist (word (reverse wordspy))
-      (if (listp word)
-          (setq words (append words (pyim-match-word (pyim-get (car word))
-                                                     (cdr word))))
-        (setq words (append words (mapcar (lambda (w)
-                                            (propertize w 'py (list word)))
-                                          (pyim-get word))))))
-    words))
-
-(defun pyim-possible-words-py (pylist)
-  "所有可能的词组拼音。从第一个字开始，每个字断开形成一个拼音。如果是
-完整拼音，则给出完整的拼音，如果是给出声母，则为一个 CONS CELL，CAR 是
-拼音，CDR 是拼音列表。例如：
-
- (setq foo-pylist (pyim-split-string \"pin-yin-sh-r\"))
-  => ((\"p\" . \"in\") (\"y\" . \"in\") (\"sh\" . \"\") (\"r\" . \"\"))
-
- (pyim-possible-words-py foo-pylist)
-  => (\"pin-yin\" (\"p-y-sh\" (\"p\" . \"in\") (\"y\" . \"in\") (\"sh\" . \"\")) (\"p-y-sh-r\" (\"p\" . \"in\") (\"y\" . \"in\") (\"sh\" . \"\") (\"r\" . \"\")))
- "
-  (let (pys fullpy smpy wordlist (full t))
-    (if (string< "" (cdar pylist))
-        (setq fullpy (concat (caar pylist) (cdar pylist))
-              smpy (pyim-essential-py (car pylist)))
-      (setq smpy (caar pylist)
-            full nil))
-    (setq wordlist (list (car pylist)))
-    (dolist (py (cdr pylist))
-      (setq wordlist (append wordlist (list py)))
-      (if (and full (string< "" (cdr py)))
-          (setq fullpy (concat fullpy "-" (car py) (cdr py))
-                smpy (concat smpy "-" (pyim-essential-py py))
-                pys (append pys (list fullpy)))
-        (setq full nil
-              smpy (concat smpy "-" (pyim-essential-py py))
-              pys (append pys (list (cons smpy wordlist))))))
-    ;; (message "%s: %s" pys wordlist))
-    pys))
-
-(defun pyim-match-word (wordlist wordspy)
-  "给出一个词组列表和它的拼音列表，给出所有可能的词组，并加上一个 py
-属性。例如：
-
- (pyim-get \"p-y\")
-  => (\"拼音\" \"番禺\" \"培养\" \"培育\" \"配药\" \"彭阳\" \"朋友\" \"偏远\" \"便宜\" \"片语\" \"飘扬\" \"漂移\" \"漂游\" \"贫铀\" \"聘用\" \"平阳\" \"平遥\" \"平邑\" \"平阴\" \"平舆\" \"平原\" \"平远\" \"濮阳\")
-
- (pyim-match-word (pyim-get \"p-y\") '((\"p\" . \"in\") (\"y\" . \"\")))
-  => (#(\"拼音\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) #(\"贫铀\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) #(\"聘用\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))))
-
-"
-  (let (words)
-    (dolist (word wordlist)
-      ;;      (message "word: %s" word)
-      (let ((match t) py pys (tmppy wordspy))
-        (dotimes (i (length wordspy))
-          (setq py (car tmppy)
-                tmppy (cdr tmppy))
-          ;; (message "py: %s" py)
-          (when (string< "" (cdr py))
-            (let (chmatch)
-              (dolist (chpy (pyim-get-char-code (aref word i)))
-                (if (string= (cdr (pyim-get-sm chpy)) (cdr py))
-                    (setq chmatch t)))
-              (or chmatch (setq match nil)))))
-        ;; (message "%d: py: %s, match: %s" i py match))
-        (if match
-            (setq words (append words (list (propertize word 'py wordspy)))))))
-    words))
-
-(defun pyim-essential-py (py)
-  "一个拼音中的主要部分，如果有声母返回声母，否则返回韵母"
-  (if (string< "" (car py))
-      (car py)
-    (cdr py)))
-
 ;;;  create and rearrage
-(defun pyim-match-py (word pylist)
-  (let (sym words fullpy abbpy chpy)
-    (when (> (length word) 1)
-      (if (stringp (car pylist))        ; if is full pinyin
-          (progn (setq fullpy (car pylist))
-                 (cons fullpy (mapconcat 'identity
-                                         (mapcar 'pyim-essential-py
-                                                 (pyim-split-string (replace-regexp-in-string "-" "'" fullpy)))
-                                         "-")))
-        (dotimes (i (length word))
-          (setq chpy (car pylist)
-                pylist (cdr pylist))
-          (setq abbpy (concat abbpy "-"
-                              (if (string< "" (car chpy))
-                                  (car chpy) (cdr chpy))))
-          (if (string< "" (cdr chpy))
-              (setq fullpy (concat fullpy "-" (car chpy) (cdr chpy)))
-            (setq fullpy (concat fullpy "-"
-                                 (car (pyim-get-char-code (aref word i)))))))
-        (cons (substring fullpy 1)
-              (substring abbpy 1))))))
 
 ;;;  commands
 (defun pyim-select-current ()
