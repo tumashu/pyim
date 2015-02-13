@@ -78,8 +78,6 @@ Chinese-pyim 的目标是： **尽最大的努力成为一个好用的 emacs 备
 
 ### 激活 Chinese-pyim<a id="sec-1-6-2" name="sec-1-6-2"></a>
 
-,x
-
     (setq default-input-method "chinese-pyim")
     (global-set-key (kbd "C-<SPC>") 'toggle-input-method)
     (global-set-key (kbd "C-;") 'pyim-toggle-full-width-punctuation)
