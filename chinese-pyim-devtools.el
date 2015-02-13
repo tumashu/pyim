@@ -32,6 +32,7 @@
 (require 'org)
 (require 'ox)
 (require 'ox-gfm)
+(require 'lentic-doc)
 ;; #+END_SRC
 
 ;; ** 定义一个 org 导出过滤器，处理中文文档中的多余空格
@@ -64,18 +65,52 @@
 
 ;; #+END_SRC
 
-;; ** 自定义生成 README 的命令
-;; 添加一个 emacs 命令，用来导出 README，用于 Github。
+;; ** 用于生成 chinese-pyim 相关文档的命令
+;; 1. 生成 Github README
+;; 2. 生成 Chinese-pyim 代码的说明文档（html文档），帮助开发者理解代码。
+
 ;; #+BEGIN_SRC emacs-lisp
-;;;###autoload
-(defun pyim-devtools-generate-readme ()
-  "生成 Chinese-pyim README。"
+(defun pyim-devtools-generate-documents ()
   (interactive)
-  (let ((org-export-select-tags '("README"))
-        (org-export-filter-paragraph-functions '(pyim-devtools-org-clean-space))
-        (indent-tabs-mode nil)
-        (tab-width 4))
-    (org-export-to-file 'gfm "README.md")))
+  (pyim-devtools-generate-readme-document)
+  (pyim-devtools-generate-devel-document))
+
+(defun pyim-devtools-generate-readme-document ()
+  (interactive)
+  (lentic-doc-orgify-package 'chinese-pyim)
+  (with-current-buffer
+      (find-file-noselect
+       (concat (f-parent (locate-library (symbol-name 'chinese-pyim)))
+               "/chinese-pyim.org"))
+    (let ((org-export-filter-paragraph-functions '(pyim-devtools-org-clean-space))
+          (org-export-select-tags '("README"))
+          (indent-tabs-mode nil)
+          (tab-width 4))
+      (org-export-to-file 'gfm "README.md"))))
+
+(defun pyim-devtools-generate-devel-document ()
+  (interactive)
+  (lentic-doc-orgify-package 'chinese-pyim)
+  (with-current-buffer
+      (find-file-noselect
+       (concat (f-parent (locate-library (symbol-name 'chinese-pyim)))
+               "/chinese-pyim.org"))
+    (let ((org-export-filter-paragraph-functions '(pyim-devtools-org-clean-space))
+          (indent-tabs-mode nil)
+          (tab-width 4))
+      (org-html-export-to-html))))
+
+(defvar pyim-devtools-devel-document-file
+  (concat
+   (f-parent
+    (locate-library "chinese-pyim.el"))
+   "/chinese-pyim.html"))
+
+;;;###autoload
+(defun pyim-devtools-view-devel-document ()
+  (interactive)
+  (pyim-devtools-generate-documents)
+  (browse-url-of-file pyim-devtools-devel-document-file))
 ;; #+END_SRC
 
 ;;; Footer:
