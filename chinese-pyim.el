@@ -345,6 +345,10 @@ Chinese-pyim 内建的功能有：
   "Face to show current string"
   :group 'chinese-pyim)
 
+(defface pyim-minibuffer-string-face '((t (:background "gray")))
+  "Face to current string show in minibuffer"
+  :group 'chinese-pyim)
+
 (defcustom pyim-english-input-switch-function nil
   "一个函数，其运行结果为 t 时，Chinese-pyim 开启英文输入功能。"
   :group 'chinese-pyim
@@ -462,6 +466,8 @@ If you don't like this funciton, set the variable to nil")
     (define-key map "\177" 'pyim-delete-last-char)
     (define-key map "\C-n" 'pyim-next-page)
     (define-key map "\C-p" 'pyim-previous-page)
+    (define-key map "\C-f" 'pyim-next-word)
+    (define-key map "\C-b" 'pyim-previous-word)
     (define-key map "=" 'pyim-next-page)
     (define-key map "-" 'pyim-previous-page)
     (define-key map "\M-n" 'pyim-next-page)
@@ -1733,12 +1739,13 @@ Return the input string."
           whole
         (pyim-page-end t)))))
 
-(defun pyim-format-page ()
+(defun pyim-format-page (&optional hightlight-current)
   "按当前位置，生成候选词条"
   (let* ((end (pyim-page-end))
          (start (1- (pyim-page-start)))
          (choices (car pyim-current-choices))
          (choice (pyim-subseq choices start end))
+         (pos (- (min pyim-current-pos (length choices)) start))
          (i 0))
     (setq pyim-guidance-str
           (format "%s[%d/%d]: %s"
@@ -1747,10 +1754,17 @@ Return the input string."
                   (mapconcat 'identity
                              (mapcar
                               (lambda (c)
-                                (format "%d.%s " (setq i (1+ i))
-                                        (if (consp c)
-                                            (concat (car c) (cdr c))
-                                          c)))
+                                (setq i (1+ i))
+                                (let (str)
+                                  (setq str (if (consp c)
+                                                (concat (car c) (cdr c))
+                                              c))
+                                  ;; 高亮当前选择的词条，用于 `pyim-next-word'
+                                  (setq str (if (and hightlight-current
+                                                     (= i pos))
+                                                (propertize str 'face 'pyim-minibuffer-string-face)
+                                              str))
+                                  (format "%d.%s " i str)))
                               choice) " ")))))
 
 (defun pyim-next-page (arg)
@@ -1769,6 +1783,22 @@ Return the input string."
 (defun pyim-previous-page (arg)
   (interactive "p")
   (pyim-next-page (- arg)))
+
+(defun pyim-next-word (arg)
+  (interactive "p")
+  (if (= (length pyim-current-key) 0)
+      (progn
+        (pyim-append-string (pyim-translate last-command-event))
+        (pyim-terminate-translation))
+    (let ((new (+ pyim-current-pos arg)))
+      (setq pyim-current-pos (if (> new 0) new 1))
+      (pyim-update-current-str)
+      (pyim-format-page t)
+      (pyim-show))))
+
+(defun pyim-previous-word (arg)
+  (interactive "p")
+  (pyim-next-word (- arg)))
 ;; #+END_SRC
 
 ;; *** 更新选词框和 inline 备选词条
