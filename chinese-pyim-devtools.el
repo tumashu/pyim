@@ -30,6 +30,7 @@
 ;; ** 加载必要的库文件
 ;; #+BEGIN_SRC emacs-lisp
 (require 'org)
+(require 'org-table)
 (require 'ox)
 (require 'ox-gfm)
 (require 'lentic-doc)
@@ -96,6 +97,7 @@
        (concat (f-parent (locate-library (symbol-name 'chinese-pyim)))
                "/chinese-pyim.org"))
     (let ((org-export-filter-paragraph-functions '(pyim-devtools-org-clean-space))
+          (org-export-headline-levels 7)
           (indent-tabs-mode nil)
           (tab-width 4))
       (org-html-export-to-html))))
