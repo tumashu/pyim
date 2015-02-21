@@ -1,7 +1,8 @@
 ;;; chinese-pyim-devtools.el --- Tools for Chinese-pyim developers
 
+;;; Header:
 ;; Copyright 2015 Feng Shu
-;;
+
 ;; Author: Feng Shu <tumashu@163.com>
 ;; URL: https://github.com/tumashu/chinese-pyim
 ;; Version: 0.0.1
@@ -11,28 +12,36 @@
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation; either version 2, or (at your option)
 ;; any later version.
-;;
+
 ;; This program is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
-;;
+
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program; if not, write to the Free Software
 ;; Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 ;;; Commentary:
-;;
-;; 注意: ** 不要手动编辑这个文件（这个文件是 tangle chinese-pyim.org 文件得到的） **
-;;
 ;; 这个文件包含开发 Chinese-pyim 时需要的函数和命令。
-;;
+
 ;;; Code:
 
+;; ** 加载必要的库文件
+;; #+BEGIN_SRC emacs-lisp
 (require 'org)
+(require 'org-table)
 (require 'ox)
 (require 'ox-gfm)
+(require 'lentic-doc)
+;; #+END_SRC
 
+;; ** 定义一个 org 导出过滤器，处理中文文档中的多余空格
+;; 当本文档导出为 README 文档时，中文与中文之间的回车符会转化为空格符，对于中文而言，
+;; 这些空格这是多余的，这里定义了一个导出过滤器，当 org 文件导出为 html 以及 markdown
+;; 格式时，自动删除中文与中文之间不必要的空格。
+
+;; #+BEGIN_SRC emacs-lisp
 (defun pyim-devtools-org-clean-space (text backend info)
   "在export为HTML时，删除中文之间不必要的空格"
   (when (org-export-derived-backend-p backend 'html)
@@ -55,37 +64,67 @@
              "\\1\\2" string))
       string)))
 
-;;;###autoload
-(defun pyim-devtools-tangle-and-export ()
-  "专门用于 Chinese-pyim 文档导出和代码 tango 的命令。"
+;; #+END_SRC
+
+;; ** 用于生成 chinese-pyim 相关文档的命令
+;; 1. 生成 Github README
+;; 2. 生成 Chinese-pyim 代码的说明文档（html文档），帮助开发者理解代码。
+
+;; #+BEGIN_SRC emacs-lisp
+(defun pyim-devtools-generate-documents ()
   (interactive)
-  (let ((org-export-select-tags '("README" "readme"))
-        (org-export-filter-paragraph-functions '(pyim-devtools-org-clean-space))
-        (readme-md "README.md")
-        (readme-ascii "README.txt")
-        ;; 导出时用空格代替TAB键
-        (indent-tabs-mode nil)
-        (tab-width 4))
-    (unless (file-exists-p readme-md)
-      (write-region "" nil readme-md))
-    (unless (file-exists-p readme-ascii)
-      (write-region "" nil readme-ascii))
-    (org-export-to-file 'gfm "README.md")
-    (org-export-to-file 'ascii "README.txt")
-    (org-babel-tangle)))
+  (pyim-devtools-generate-readme-document)
+  (pyim-devtools-generate-devel-document))
 
-(defun pyim-devtools-return-file-content (file-name)
-  "返回一个文件的内容，作用类似sh命令：cat"
-  (let ((file (expand-file-name file-name)))
-    (with-temp-buffer
-      (insert-file-contents file)
-      (buffer-string))))
+(defun pyim-devtools-generate-readme-document ()
+  (interactive)
+  (lentic-doc-orgify-package 'chinese-pyim)
+  (with-current-buffer
+      (find-file-noselect
+       (concat (f-parent (locate-library (symbol-name 'chinese-pyim)))
+               "/chinese-pyim.org"))
+    (let ((org-export-filter-paragraph-functions '(pyim-devtools-org-clean-space))
+          (org-export-select-tags '("README"))
+          (indent-tabs-mode nil)
+          (tab-width 4))
+      (org-export-to-file 'gfm "README.md"))))
 
+(defun pyim-devtools-generate-devel-document ()
+  (interactive)
+  (lentic-doc-orgify-package 'chinese-pyim)
+  (with-current-buffer
+      (find-file-noselect
+       (concat (f-parent (locate-library (symbol-name 'chinese-pyim)))
+               "/chinese-pyim.org"))
+    (let ((org-export-filter-paragraph-functions '(pyim-devtools-org-clean-space))
+          (org-export-headline-levels 7)
+          (indent-tabs-mode nil)
+          (tab-width 4))
+      (org-html-export-to-html))))
+
+(defvar pyim-devtools-devel-document-file
+  (concat
+   (f-parent
+    (locate-library "chinese-pyim.el"))
+   "/chinese-pyim.html"))
+
+;;;###autoload
+(defun pyim-devtools-view-devel-document ()
+  (interactive)
+  (pyim-devtools-generate-documents)
+  (browse-url-of-file pyim-devtools-devel-document-file))
+;; #+END_SRC
+
+;;; Footer:
+;; #+BEGIN_SRC emacs-lisp
 (provide 'chinese-pyim-devtools)
 
 ;; Local Variables:
 ;; coding: utf-8-unix
 ;; tab-width: 4
 ;; indent-tabs-mode: nil
+;; lentic-init: lentic-orgel-org-init
 ;; End:
+
 ;;; chinese-pyim-devtools.el ends here
+;; #+END_SRC
