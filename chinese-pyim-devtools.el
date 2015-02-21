@@ -31,8 +31,9 @@
 ;; #+BEGIN_SRC emacs-lisp
 (require 'org)
 (require 'org-table)
-(require 'ox)
-(require 'ox-gfm)
+(require 'ox-html)
+(require 'lentic)
+(require 'lentic-org)
 (require 'lentic-doc)
 ;; #+END_SRC
 
@@ -87,7 +88,9 @@
           (org-export-select-tags '("README"))
           (indent-tabs-mode nil)
           (tab-width 4))
-      (org-export-to-file 'gfm "README.md"))))
+      (if (featurep 'ox-gfm)
+          (org-export-to-file 'gfm "README.md")
+        (message "README.md 导出失败，请首先安装加载 ox-gfm")))))
 
 (defun pyim-devtools-generate-devel-document ()
   (interactive)
