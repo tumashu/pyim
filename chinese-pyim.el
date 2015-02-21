@@ -258,7 +258,6 @@
 ;; 2. `pyim-hanzi2pinyin-simple'  （不考虑多音字）
 
 ;;; Code:
-
 ;; ** require + defcustom + defvar
 ;; #+BEGIN_SRC emacs-lisp
 (require 'cl-lib)
@@ -518,28 +517,36 @@ If you don't like this funciton, set the variable to nil")
 ;; #+END_SRC
 ;; ** 输入法启动和重启
 ;; Chinese-pyim 使用 emacs 官方自带的输入法框架来启动输入法和重启输入法。
-;; 所以我们首先需要使用 leim 自带的命令 `register-input-method' 注册一个输入法。
+;; 所以我们首先需要使用 emacs 自带的命令 `register-input-method' 注册一个
+;; 输入法。
 
 ;; #+BEGIN_SRC emacs-lisp
 ;;; 注册输入法
 (register-input-method "chinese-pyim" "euc-cn" 'pyim-start pyim-title)
 ;; #+END_SRC
 
-;; 真正启动 Chinese-pyim 的命令是 `pyim-start' ，这个命令运行时，做如下工作：
-;; 1. 重置 Chinese-pyim 所有变量。
+;; 真正启动 Chinese-pyim 的命令是 `pyim-start' ，这个命令做如下工作：
+;; 1. 重置 `pyim-local-variable-list' 中所有的 local 变量。
 ;; 2. 使用 `pyim-load-file’加载词库文件，具体细节请参考：[[#load-dicts]]
-;; 3. 使用 `pyim-make-char-table' 创建汉字到拼音的 hash table，具体细节请参考：[[#make-char-table]]
-;; 4. 运行 `pyim-load-hook'。
-;; 5. 将 `pyim-save-personal-file' 命令添加到 `kill-emacs-hook'
-;;    emacs 关闭之前将个人词频 buffer 的内容保存到个人词频文件。
-;;    具体细节请参考：[[save-personal-file]]。
-;; 6. 设定 leim 变量： `input-method-function' 和 `deactivate-current-input-method-function'
+;; 3. 使用 `pyim-make-char-table' 创建汉字到拼音的 hash table，具体细节请
+;;    参考：[[#make-char-table]]
+;; 4. 运行hook： `pyim-load-hook'。
+;; 5. 将 `pyim-save-personal-file' 命令添加到 `kill-emacs-hook' emacs 关
+;;    闭之前将个人词频 buffer 的内容保存到个人词频文件。具体细节请参考：
+;;    [[save-personal-file]]。
+;; 6. 设定变量：
+;;    1. `input-method-function'
+;;    2. `deactivate-current-input-method-function'
 ;; 7. 运行 `pyim-active-hook'
 
 ;; `pyim-start' 先后会运行两个 hook，所以我们需要事先定义：
 
-;; `pyim-restart' 用于重启 Chinese-pyim，其过程和 `pyim-start' 类似，不同之处有：1. 输入法重启之前会询问用户，是否保存个人词频信息。
-;; 2. 重启之前会使用函数 `pyim-kill-buffers' 删除所有的词库 buffer，具体请参考： [[pyim-kill-buffers]]
+;; `pyim-restart' 用于重启 Chinese-pyim，其过程和 `pyim-start' 类似，不同
+;; 之处有：
+
+;; 1. 输入法重启之前会询问用户，是否保存个人词频信息。
+;; 2. 重启之前会使用函数 `pyim-kill-buffers' 删除所有的词库 buffer，具体
+;;    请参考： [[pyim-kill-buffers]]
 
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-start (name &optional active-func restart save-personal-file)
@@ -601,84 +608,87 @@ If you don't like this funciton, set the variable to nil")
 ;; ni-hao  你好 妮好 你豪
 ;; #+END_EXAMPLE
 
-;; 第一个空格之前的内容为拼音code，第一个空格之后为中文词条列表。
-;; 拼音词库也不处理中文标点符号。
+;; 第一个空白字符之前的内容为拼音code，空白字符之后为中文词条列表。
+;; 拼音词库 *不处理* 中文标点符号。
 
 ;; 注意：词库文件必须按行排序（准确的说，是按每一行的 code 排序），因为
 ;; `Chinese-pyim' 为优化搜索速度，使用二分法寻找词条，而二分法工作的前提就是对
 ;; 文件按行排序。具体细节请参考：`pyim-bisearch-word' 。当用户手动调整词库文
 ;; 件后，记得运行 `pyim-update-dict-file' 来对文件排序。
 
-;; 虽然我们只使用一种词库文件格式，但 Chinese-pyim 定义了两种词库类型，用于不同的目的：
-
 ;; **** 个人词频文件
-;; 个人词频文件用来保存用户曾经输入过的中文词条以及这些词条输入的先后顺序（也就是词频信息）。
-;; Chinese-pyim 搜索中文词条时，个人词频文件里的词条优先显示。我们使用变量 `pyim-personal-file'
-;; 来保存个人词频文件的路径:
+;; 虽然 Chinese-pyim 只使用一种词库文件格式，但定义了两种词库类型，用于不
+;; 同的目的：
+;; 1. 个人词频文件
+;; 2. 普通词库文件
+
+;; 个人词频文件用来保存用户曾经输入过的中文词条以及这些词条输入的先后顺序
+;; （也就是词频信息）。Chinese-pyim 搜索中文词条时，个人词频文件里的词条
+;; 优先显示。我们使用变量 `pyim-personal-file' 来保存个人词频文件的路径:
 
 ;; 个人词频文件使用上述词库文件的格式来保存上述信息，将其独立出来的原因是：
-;; 1. 随着 `Chinese-pyim' 使用时间的延长，个人词频文件会保存越来越多的用户常用的词条，属于
-;;    用户隐私，提醒用户不要随意将这个文件泄露他人。
+;; 1. 随着 `Chinese-pyim' 使用时间的延长，个人词频文件会保存越来越多的用
+;;    户常用的词条，属于用户隐私（提醒用户不要随意将这个文件泄露他人）。
 ;; 2. 个人词频文件的内容在 Chinese-pyim 使用过程中频繁的变动。
-;; 3. 随着个人词频文件的积累，Chinese-pyim 会越来越顺手，所以个人词频文件需要用户经常备份。
+;; 3. 随着个人词频文件的积累，Chinese-pyim 会越来越顺手，所以个人词频文件
+;;    需要用户经常备份。
 
-;; 值得注意的是：不建议用户 *手动编辑* 这个文件，因为：每次 emacs 关闭之前，emacs会运行
-;; 命令：`pyim-save-personal-file' 来更新这个文件，编辑过的内容将会被覆盖。
+;; 值得注意的是：不建议用户 *手动编辑* 这个文件，因为：每次 emacs 关闭之
+;; 前，emacs 会运行命令：`pyim-save-personal-file' 来更新这个文件，编辑过
+;; 的内容将会被覆盖。
 
 ;; BUG：当用户错误的将这个变量设定为其他重要文件时，也存在文件内容破坏的风险。
 
 ;; 当这个文件中的词条数量增长到一定程度，用户可以直接将这个文件转换为词库。
 
 ;; **** 普通词库文件
-;; 普通词库文件，也可以叫做共享词库文件，与个人词频文件相比，普通词库文件的特点是：
+;; 普通词库文件，也可以叫做共享词库文件，与个人词频文件相比，普通词库文件
+;; 有如下特点：
 ;; 1. 词条数量巨大：普通词库文件中往往包含大量的词条信息（可能超过50万）。
-;; 2. 内容变化很小：用户一般不需要编辑普通词库文件（词库开发除外），所以其内容一般不会发生改变。
-;; 3. 普通词库文件适宜在不同用户之间共享，便于制作词库包。
+;; 2. 内容变化很小：用户一般不需要编辑普通词库文件（开发词库的用户除外），
+;;    所以普通词库文件的内容一般不会发生改变。
+;; 3. 普通词库文件适宜制作词库包，在用户之间共享。
 
-;; 我们使用变量 `pyim-dicts' 来设定普通词库信息：
-
-;; `pyim-dict' 是一个列表，记录了各个
-;; 词库文件的信息，比如：
-;; 1. `:name' 给词库文件取一个名字，暂时没有用处，未来构建词库包时可能用到。
-;; 2. `:file' 词库文件的路径。
-;; 3. `:coding' 词库文件的编码，词库文件是一个文本文件，window系统一般使用 GBK
-;;     编码来保存中文，而Linux系统一般使用 UTF-8 编码来保存中文，emacs 似乎不能
-;;     自动识别中文编码，所以要求用户明确告知词库文件使用什么编码来保存。
-
-;; 一个简单的词库设定例子为：
+;; 我们使用变量 `pyim-dicts' 来设定普通词库文件的信息：
+;; 1. `:name' 用户给词库设定的名称，暂时没有用处，未来可能用于构建词库包。
+;; 2. `:file' 词库文件的绝对路径。
+;; 3. `:coding' 词库文件的编码，词库文件是一个文本文件，window系统一般使
+;;    用 GBK 编码来保存中文，而Linux系统一般使用 UTF-8 编码来保存中文，
+;;    emacs 似乎不能自动识别中文编码，所以要求用户明确告知词库文件使用什
+;;    么编码来保存。
 
 ;; *** 加载词库
 ;;    :PROPERTIES:
 ;;    :CUSTOM_ID: load-dicts
 ;;    :END:
-;; Chinese-pyim 激活时，首先会使用 `pyim-load-file' 加载个人词频文件和普通词库文件，
-;; 如果个人词频文件不存在时，Chinese-pyim 会使用函数：`pyim-create-template-dict' 自动创建这个文件。
-;; 如果用户没有设定 `pyim-dicts'， `pyim-load-file' 会使用函数： `pyim-show-help' 弹出帮助信息。
-;; 我们定义一个变量来保存上述帮助信息。
+;; Chinese-pyim 激活时，首先会使用 `pyim-load-file' 加载个人词频文件和普
+;; 通词库文件，如果个人词频文件不存在时，Chinese-pyim 会使用函数：
+;; `pyim-create-template-dict' 自动创建这个文件。如果用户没有设定
+;; `pyim-dicts'， `pyim-load-file' 会使用函数： `pyim-show-help' 弹出帮助
+;; 信息。我们使用变量 `pyim-dict-help-string' 来保存词库帮助信息。
 
-;; 加载的过程简单来说就是：创建一个buffer，然后将词库文件的内容插入新创建的这个buffer，同时得到buffer和
-;; file的对应表。
-
-;; `pyim-load-file' 所做的工作就是：
-;; 1. 首先创建一个 buffer，buffer 名为 `pyim-buffer-name'，Chinese-pyim 默认创建的 buffer
-;;    名称类似：
+;; `pyim-load-file' 加载词库简单来说就是：创建一个buffer，然后将词
+;; 库文件的内容插入新创建的这个buffer，同时得到buffer和file的对应表。
+;; 具体过程为：
+;; 1. 首先创建一个 buffer，buffer 的名称源自 `pyim-buffer-name'，
+;;    Chinese-pyim 默认创建的 buffer 名称类似：
 ;;    #+BEGIN_EXAMPLE
 ;;    -空格-*Chinese-pyim*
 ;;    -空格-*Chinese-pyim*-10000
 ;;    #+END_EXAMPLE
 ;;    这些buffer的名称前面都包含一个空格，所以在 emacs buffer列表中 *不可见* 。
-;; 2. 将个人词频文件 `pyim-buffer-name' 的内容插入到已经创建的 buffer。
-;; 3. 使用类似上述方法，递归的为每一个一般词库文件创建 buffer 并插入对应词库内容，
-;;    忽略不存在的文件和已经加载过的文件。
-;; 4. 在运行的过程中，`pyim-load-file' 会创建一个词库文件名与 buffer 的对应表，其结构类似：
+;; 2. 将个人词频文件 `pyim-personal-file' 的内容插入到已经创建的 buffer。
+;; 3. 使用类似上述方法，递归的为每个普通词库文件创建 buffer 并插入对应词
+;;    库文件的内容，忽略不存在的文件和已经加载过的文件。
+;; 4. 在运行的过程中，`pyim-load-file' 会创建一个词库文件名与 buffer 的对
+;;    应表，其结构类似：
 ;;    #+BEGIN_EXAMPLE
 ;;    ((("buffer" . #<buffer  *Chinese-pyim*>) ("file" . "/path/to/pyim-personal.txt"))
 ;;     (("buffer" . #<buffer  *Chinese-pyim*-431862>) ("file" . "/path/to/pyim-bigdict.txt"))
 ;;     (("buffer" . #<buffer  *Chinese-pyim*-208698>) ("file" . "/path/to/chinese-pyim-prettydict-2.txt"))
 ;;     (("buffer" . #<buffer  *Chinese-pyim*-810662>) ("file" . "/path/to/chinese-pyim-prettydict-1.txt")))
 ;;    #+END_EXAMPLE
-;; 5. `pyim-load-file' 函数执行结束后，返回值为上述对应表。
-
+;; 5. 函数执行结束后，返回值为上述对应表。
 
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-create-template-dict (file)
@@ -758,7 +768,6 @@ If you don't like this funciton, set the variable to nil")
 ;; 将 `pyim-buffer-list' 第一个 buffer 的内容保存到个人词频文件，这个命令用于更新个人词频文件。
 ;; <<save-personal-file>>
 
-
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-save-personal-file ()
   "与 `pyim-personal-file' 文件对应的buffer在 `Chinese-pyim' 使用期间不断更新。
@@ -784,7 +793,6 @@ If you don't like this funciton, set the variable to nil")
 
 ;; 而 `pyim-kill-buffers' 会删除 `pyim-buffer-list' 中所有的 buffer。这个函数用于重新启动输入法前的清理工作。
 ;; <<pyim-kill-buffers>>
-
 
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-check-buffers ()
@@ -816,18 +824,21 @@ If you don't like this funciton, set the variable to nil")
 ;; #+END_SRC
 
 ;; *** 从词库中搜索中文词条
-;; 当个人词频文件以及普通词库文件加载完成后， Chinese-pyim 就可以搜索某个拼音字符串对应的中文词条了，
-;; 这个工作由函数 `pyim-get' 完成，其基本原理是： 递归的搜索 `pyim-buffer-list' 中所有的 buffer，
-;; 将得到的搜索结果汇总成一个列表，去除重复后返回：
+;; 当个人词频文件以及普通词库文件加载完成后， Chinese-pyim 就可以搜索某个
+;; 拼音字符串对应的中文词条了，这个工作由函数 `pyim-get' 完成，其基本原理
+;; 是：递归的搜索 `pyim-buffer-list' 中所有的 buffer，将得到的搜索结果汇
+;; 总成一个列表，去除重复元素后返回。
 
-;; 在搜索 buffer 之前，Chinese-pyim 会使用函数 `pyim-dict-buffer-valid-p' 大致的判断当前 buffer 是否
-;; 时一个有效的词库 buffer，有效词库 buffer 的判断标准为：
+;; 在搜索 buffer 之前，Chinese-pyim 会使用函数 `pyim-dict-buffer-valid-p'
+;; 大致的判断当前 buffer 是否是一个有效的词库 buffer，判断标准为：
+
 ;; 1. buffer 必须多于5行。
 ;; 2. buffer 中间一行必须包含空格或者TAB。
 ;; 2. buffer 中间一行必须包含中文字符(\\cc)。
 
-;; 由于 chinese-pyim 文本词库没有包含 meta 信息，所以这个函数只能粗略的做出判断，另外这个函数使
-;; 用 `count-lines' 计算行数，我限定其参数 END 不超过 20000, 这样可以优化性能，防止输入法卡顿。
+;; 由于 chinese-pyim 文本词库没有包含 meta 信息，所以这个函数只能粗略的做
+;; 出判断，另外这个函数使用 `count-lines' 计算行数，我限定其参数 END 不超
+;; 过 20000, 这样可以优化性能，防止输入法卡顿。
 
 ;; BUG: 这个函数需要进一步优化，使其判断更准确。
 
@@ -866,17 +877,21 @@ BUG: 这个函数需要进一步优化，使其判断更准确。"
              (re-search-forward "\\cc" (line-end-position) t))))))
 ;; #+END_SRC
 
-;; `pyim-buffer-list' 中每一个 buffer 都使用函数：`pyim-bisearch-word' 来搜索，其具体方式是：
+;; `pyim-buffer-list' 中每一个 buffer 都使用函数：`pyim-bisearch-word' 来
+;; 搜索，其具体方式是：
+
 ;; 1. 获取 buffer 的 max-point 和 min-point
 ;; 2. 将光标移动到上述两个值的中间。
 ;; 3. 使用 `pyim-code-at-point' 获取当前行的拼音字符串。
-;; 4. 比较上述拼音字符串和待搜索的字符串，来决定搜索 buffer 的上半部份还是下半部份。
-;; 5. 这样递归的操作，最终会将光标移动到 buffer 的某一行，这一行中的拼音字符串和待搜索的拼音字符串一致。
-;; 6. 最后使用 `pyim-line-content' 返回当前行的内容，其结果是一个列表，类似：
+;; 4. 比较上述拼音字符串和待搜索的字符串，来决定搜索 buffer 的上半部份还
+;;    是下半部份。
+;; 5. 这样递归的操作，最终会将光标移动到 buffer 的某一行，这一行中的拼音
+;;    字符串和待搜索的拼音字符串一致。
+;; 6. 最后使用 `pyim-line-content' 返回当前行的内容，其结果是一个列表，类
+;;    似：
 ;;    #+BEGIN_EXAMPLE
 ;;    ("ni-hao" "你好" "你号" ...)
 ;;    #+END_EXAMPLE
-
 
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-bisearch-word (code start end)
@@ -915,17 +930,24 @@ beginning of line"
   (not (string< "" str)))
 ;; #+END_SRC
 
-;; `pyim-bisearch-word' 是 Chinese-pyim 搜索词条的最基本最核心的函数，只要涉及到搜索词条，必须调用这个函数。
+;; `pyim-bisearch-word' 是 Chinese-pyim 搜索词条的最基本最核心的函数，只
+;; 要涉及到搜索词条，必须调用这个函数。
+
 ;; *** 保存词条，删除词条以及调整词条位置
 ;; Chinese-pyim 不会更改普通词库文件的内容，只会将运行过程中的词频信息保存到个人词频文件，这个过程
 ;; 分为两步：
 ;; 1. 调整个人词频文件对应的 buffer 的内容，这个过程的核心函数是 `pyim-intern-word'。
 ;; 2. 将 buffer 的内容保存到个人词频文件，这个使用函数 `pyim-save-personal-file' 完成。
 
-;; `pyim-intern-word' 的工作原理和 `pyim-get' 类似， 只不过 `pyim-intern-word' 只搜索第一个 buffer，也就是
-;; 个人词频文件对应的 buffer ，并且搜索到拼音code对应的那一行后不是直接返回这一行的内容，而是做如下工作：
-;; 1. 获取当前行的信息，格式为一个list
-;; 2. 将参数 `word' 对应的词条和上述list合并（向前追加，向后追加或者从list中删除word）。
+;; `pyim-intern-word' 的工作原理和 `pyim-get' 类似， 只不过
+;; `pyim-intern-word' 只搜索个人词频文件对应的 buffer ，搜索到结果后做如
+;; 下工作：
+
+;; 1. 获取当前行的信息，并其格式为一个list
+;; 2. 将参数 `word' 对应的词条和上述list合并
+;;    1. 向前追加（用于词频调整功能）
+;;    2. 向后追加（用于造词功能）
+;;    3. 从list中删除word （用于删词功能）
 ;; 3. 使用 `pyim-delete-line' 删除当前行
 ;; 4. 将合并后的list转换为词库格式后，再写入当前行。
 
@@ -934,18 +956,20 @@ beginning of line"
 ;; 2. 将一个中文词条从个人词频文件中删除（删词功能）
 ;; 3. 调整一个中文词条选项的位置（词频调整功能）
 
-;; 造词功能：
-;; 1. `pyim-create-word' 当用户选择了一个词库中不存在的中文词条时，`pyim-select-current' 会调用这个函数来自动造词。
-;; 2. `pyim-create-word-at-point' 这个命令会提取光标前 `number' 个中文字符，将其组成字符串后，加入个人词频文件。
-;;    在执行过程中，参数 `pyim-create-word-without-pinyin' 被调用，其工作流程是：
+;; **** 造词功能
+;; 1. `pyim-create-word' 当用户选择了一个词库中不存在的中文词条时，
+;;    `pyim-select-current' 会调用这个函数来自动造词。
+;; 2. `pyim-create-word-at-point' 这个命令会提取光标前 `number' 个中文字
+;;    符，将其组成字符串后，加入个人词频文件。在执行过程中，参数
+;;    `pyim-create-word-without-pinyin' 被调用，其工作流程是：
 ;;    1. 使用 `chinese-hanzi2pinyin' 获取中文词条的拼音。
 ;;    2. 然后调用 `pyim-intern-word' 保存词条，多音字重复操作，比如：
 ;;       #+BEGIN_EXAMPLE
 ;;       yin-hang 银行
 ;;       yin-xing 银行
 ;;       #+END_EXAMPLE
-;; 3. `pyim-create-word-at-point:<NUM>char' 这组命令是 `pyim-create-word-at-point' 的包装命令。
-
+;; 3. `pyim-create-word-at-point:<NUM>char' 这组命令是
+;;    `pyim-create-word-at-point' 的包装命令。
 
 ;; #+BEGIN_SRC emacs-lisp
 (defsubst pyim-delete-line ()
@@ -1061,7 +1085,9 @@ buffer中，当前词条追加到已有词条之后。"
   (pyim-create-word-at-point 4))
 ;; #+END_SRC
 
-;; `pyim-delete-word-from-personal-buffer' 从个人词频 buffer 中删除用户高亮选择的词条。
+;; **** 删词功能
+;; `pyim-delete-word-from-personal-buffer' 从个人词频 buffer 中删除用户高
+;; 亮选择的词条。
 
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-delete-word (word)
@@ -1084,11 +1110,11 @@ buffer中，当前词条追加到已有词条之后。"
     (message "请首先高亮选择需要删除的词条。")))
 ;; #+END_SRC
 
+;; **** 词频调整功能
 ;; 用户使用 Chinese-pyim 时，会在 emacs minibuffer 中显示一个词条选择菜单，当用户通过词条选择菜单
 ;; 选择了一个词条时， `pyim-select-current' 函数会调用 `pyim-rearrange' 和 `pyim-rearrange-1’来
 ;; 调整这个词条的位置，将其排在词条选择菜单的首位，这两个 *词频调整* 的函数功能其内部工作原理
 ;; 和 *造词功能* 很相似。
-
 
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-rearrange (word pylist)
@@ -1104,6 +1130,36 @@ buffer中，当前词条追加到已有词条之后。"
 ;; #+END_SRC
 
 ;; ** 生成拼音字符串 `pyim-current-key'
+;; Chinese-pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
+;; `input-method-function' 设置为 `pyim-input-method' ，这个变量
+;; 会影响 `read-event' 的行为。
+
+;; 当输入字符时，`read-event' 会被调用，`read-event' 调用的过程中，
+;; 会执行 `pyim-input-method' 这个函数。`pyim-input-method' 又调用函数
+;; `pyim-start-translation'
+
+;; `pyim-start-translation' 这个函数较复杂，作许多低层工作，但它的一个重
+;; 要流程是：
+;; 1. 使用函数 `read-key-sequence' 得到 key-sequence
+;; 2. 使用函数 `lookup-key' 查询 pyim-mode-map 中，上述 key-sequence 对应
+;;    的命令。
+;; 3. 如果查询得到的命令是 'pyim-self-insert-command' 时，
+;;    `pyim-start-translation' 会调用这个函数。
+
+;; 'pyim-self-insert-command' 这个函数的核心工作就是将用户输入的字符，组
+;; 合成拼音字符串并保存到变量 `pyim-current-key' 中。
+
+;; 中英文输入模式切换功能也是在 'pyim-self-insert-command' 中实现。
+
+;; 这个部份的代码涉及许多 emacs 低层函数，相对复杂，不容易理解，有兴趣的
+;; 朋友可以参考：
+;; 1. `quail-input-method' 相关函数。
+;; 2. elisp 手册相关章节:
+;;    1. [[Invoking the Input Method]]
+;;    2. [[Input Methods]]
+;;    3. [[Miscellaneous Event Input Features]]
+;;    4. [[Reading One Event]]
+
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-input-method (key)
   (if (or buffer-read-only
@@ -1123,17 +1179,12 @@ buffer中，当前词条追加到已有词条之后。"
                        (> (length input-string) 0))
               (if input-method-exit-on-first-char
                   (list (aref input-string 0))
-                (pyim-input-string-to-events input-string))))
+                (mapcar 'identity input-string))))
         (pyim-delete-overlays)
-        (set-buffer-modified-p modified-p)
-        ;; Run this hook only when the current input method doesn't
-        ;; require conversion. When conversion is required, the
-        ;; conversion function should run this hook at a proper
-        ;; timing.
-        (run-hooks 'input-method-after-insert-chunk-hook)))))
+        (set-buffer-modified-p modified-p)))))
 
 (defun pyim-start-translation (key)
-  "Start translation of the typed character KEY by the current Quail package.
+  "Start translation of the typed character KEY by Chinese-pyim.
 Return the input string."
   ;; Check the possibility of translating KEY.
   ;; If KEY is nil, we can anyway start translation.
@@ -1187,23 +1238,6 @@ Return the input string."
     ;; But translate KEY if necessary.
     (char-to-string key)))
 
-(defun pyim-input-string-to-events (str)
-  (let ((events (mapcar 'identity str)))
-    (if (or (get-text-property 0 'advice str)
-            (next-single-property-change 0 'advice str))
-        (setq events
-              (nconc events (list (list 'pyim-advice str)))))
-    events))
-
-(defun pyim-advice (args)
-  (interactive "e")
-  (let* ((string (nth 1 args))
-         (func (get-text-property 0 'advice string)))
-    (if (functionp func)
-        (funcall func string))))
-
-(global-set-key [pyim-advice] 'pyim-advice)
-
 (defun pyim-input-chinese-p ()
   "确定 Chinese-pyim 是否启动中文输入模式"
   (and (not pyim-input-ascii)
@@ -1232,29 +1266,16 @@ Return the input string."
   (pyim-delete-region)
   (setq pyim-current-choices nil)
   (setq pyim-guidance-str ""))
-
-(defun pyim-toggle-input-ascii ()
-  "Chinese-pyim 切换中英文输入模式。同时调整标点符号样式。"
-  (interactive)
-  (setq pyim-punctuation-translate-p
-        (not pyim-input-ascii))
-  (setq pyim-input-ascii
-        (not pyim-input-ascii))
-  (setq pyim-punctuation-translate-p
-        (not pyim-punctuation-translate-p))
-  (if pyim-input-ascii
-      (setq current-input-method-title (concat pyim-title "-英文"))
-    (setq current-input-method-title pyim-title)))
 ;; #+END_SRC
 
 ;; ** 处理拼音字符串 `pyim-current-key'
-;; *** 核心过程：拼音字符串->待选词列表
+;; *** 拼音字符串 -> 待选词列表
 ;; 从一个拼音字符串获取其待选词列表，大致可以分成3个步骤：
 ;; 1. 分解这个拼音字符串，得到一个拼音列表。
 ;;    #+BEGIN_EXAMPLE
 ;;    woaimeinv -> (("w" . "o") ("" . "ai") ("m" . "ei") ("n" . "v"))
 ;;    #+END_EXAMPLE
-;; 2. 将拼音列表排列组合，得到多个词语拼音，并用列表表示。
+;; 2. 将拼音列表排列组合，得到多个词语的拼音，并用列表表示。
 ;;    #+BEGIN_EXAMPLE
 ;;    (("p" . "in") ("y" . "in") ("sh" . "") ("r" . ""))
 ;;    => ("pin-yin"  ;; 完整的拼音
@@ -1262,9 +1283,11 @@ Return the input string."
 ;;        ("p-y-sh-r" ("p" . "in") ("y" . "in") ("sh" . "") ("r" . "")) ;; 不完整的拼音
 ;;        )
 ;;    #+END_EXAMPLE
-;; 3. 递归的查询上述多个词语拼音，将得到的结果合并为待选词的列表。
-;; **** 拼音字符串分解与合并
-;; 拼音字符串操作主要做两方面的工作： （1） 将拼音字符串分解为拼音列表。  （2）将拼音列表合并成拼音字符串。
+;; 3. 递归的查询上述多个词语拼音，将得到的结果合并为待选词列表。
+;; **** 分解拼音字符串
+;; 拼音字符串操作主要做两方面的工作：
+;; 1. 将拼音字符串分解为拼音列表。
+;; 2. 将拼音列表合并成拼音字符串。
 
 ;; 在这之前，Chinese-pyim 定义了三个变量：
 ;; 1. 声母表： `pyim-shen-mu'
@@ -1277,20 +1300,19 @@ Return the input string."
 ;; (pyim-split-string "woaimeinv")
 ;; #+END_EXAMPLE
 
-;; #+RESULTS:
+;; 结果为:
 ;; : (("w" . "o") ("" . "ai") ("m" . "ei") ("n" . "v"))
 
 ;; 这个过程通过递归的调用 `pyim-get-charpy' 来实现，整个过程类似用菜刀切黄瓜片，将一个拼音字符串逐渐切开。比如：
-
 
 ;; #+BEGIN_EXAMPLE
 ;; (pyim-get-charpy "woaimeinv")
 ;; #+END_EXAMPLE
 
-;; #+RESULTS:
+;; 结果为:
 ;; : (("w" . "o") . "aimeinv")
 
-;; 递归的过程类似：
+;; 一个完整的递归过程类似：
 ;; #+BEGIN_EXAMPLE
 ;; "woaimeinv"
 ;; (("w" . "o") . "aimeinv")
@@ -1307,14 +1329,14 @@ Return the input string."
 ;; (pyim-get-sm "woaimeinv")
 ;; #+END_EXAMPLE
 
-;; #+RESULTS:
+;; 结果为:
 ;; : ("w" . "oaimeinv")
 
 ;; #+BEGIN_EXAMPLE
 ;; (pyim-get-ym "oaimeinv")
 ;; #+END_EXAMPLE
 
-;; #+RESULTS:
+;; 结果为:
 ;; : ("o" . "aimeinv")
 
 ;; 当用户输入一个错误的拼音时，`pyim-split-string' 会产生一个声母为空而韵母又不正确的拼音列表 ，比如：
@@ -1323,7 +1345,7 @@ Return the input string."
 ;; (pyim-split-string "ua")
 ;; #+END_EXAMPLE
 
-;; #+RESULTS:
+;; 结果为:
 ;; : (("" . "ua"))
 
 ;; 这种错误可以使用函数 `pyim-validp' 来检测。
@@ -1334,20 +1356,22 @@ Return the input string."
 ;;       (pyim-validp (pyim-split-string "wua")))
 ;; #+END_EXAMPLE
 
-;; #+RESULTS:
+;; 结果为:
 ;; : (nil t t t)
 
-;; Chinese-pyim 使用函数 `pyim-pylist-to-string' 将一个拼音列表合并为拼音字符串，这个可以认为是 `pyim-split-string' 的反向操作。
-;; 主要用户构建拼音字符串。
+;; Chinese-pyim 使用函数 `pyim-pylist-to-string' 将一个拼音列表合并为拼音
+;; 字符串，这个可以认为是 `pyim-split-string' 的反向操作。构建得到的拼音
+;; 字符串用于搜索词条。
 
 ;; #+BEGIN_EXAMPLE
 ;; (pyim-pylist-to-string '(("w" . "o") ("" . "ai") ("m" . "ei") ("n" . "v")))
 ;; #+END_EXAMPLE
 
-;; #+RESULTS:
+;; 结果为:
 ;; : "wo-ai-mei-nv"
 
-;; 最后： `pyim-user-divide-pos' 和 `pyim-restore-user-divide' 用来处理隔音符，比如： xi'an
+;; 最后： `pyim-user-divide-pos' 和 `pyim-restore-user-divide' 用来处理隔
+;; 音符，比如： xi'an
 
 ;; #+BEGIN_SRC emacs-lisp
 ;; 将汉字的拼音分成声母和其它
@@ -1560,7 +1584,12 @@ Return the input string."
 
 ;; #+END_SRC
 
-;; *** 核心函数：拼音字符串处理
+;; *** 核心函数：拼音字符串处理函数
+;; `pyim-handle-string' 这个函数是一个重要的 *核心函数* ，其大致工作流程为：
+;; 1. 查询拼音字符串 `pyim-current-key' 得到： 待选词列表
+;;    `pyim-current-choices' 和 当前选择的词条 `pyim-current-key'
+;; 2. 显示备选词条和选择备选词等待用户选择。
+
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-handle-string ()
   (let ((str pyim-current-key)
@@ -1609,10 +1638,10 @@ Return the input string."
 ;; #+END_SRC
 
 ;; ** 显示备选词条和选择备选词
-;; Chinese-pyim 使用两种方式显示备选词项，让用户选择词条：
-;; 1. 使用 emacs overlay 对象，在光标处显示 *第一个* 备选词条。
+;; Chinese-pyim 使用两种方式显示备选词条：
+;; 1. 使用 emacs overlay 对象，在光标处显示 *当前选择的* 备选词条。
 ;; 2. 在 minibuffer 中显示一个备选词条菜单。
-;; *** 在光标处添加一个 overlay，显示 *第一个* 可选词条。
+;; *** 在光标处添加一个 overlay，显示 *当前选择的* 备选词条。
 ;; Chinese-pyim 使用变量 `pyim-overlay' 来保存创建的 overlay。
 
 ;; 并定义了两个函数来设置 overlay 和删除 overlay，Chinese-pyim 在 `pyim-input-method' 中调用这两个函数。
@@ -1634,30 +1663,32 @@ Return the input string."
       (delete-overlay pyim-overlay)))
 ;; #+END_SRC
 
-;; *** 构建 minibuffer 中显示的文本： `pyim-guidance-str' 。
-;; Chinese-pyim 默认使用 minibuffer 作为选词框，其基本原理就是，通过 *待选词列表*
-;; 构建为一个字符串，然后使用类似 `message' 的命令在 minibuffer 中显示这个字符串。
-;; 用户可以根据这个字符串的提示，来执行相应的动作，比如按空格选择第一个词条或者
-;; 按数字选择这个数字对应的词条。
-;; 比如：
+;; *** 构建 minibuffer 中显示的词条菜单字符串： `pyim-guidance-str' 。
+;; Chinese-pyim 默认使用 minibuffer 作为选词框，其基本原理就是，通过 
+;; *待选词列表* 构建为一个字符串，然后使用类似 `message' 的命令在 minibuffer
+;; 中显示这个字符串。用户可以根据这个字符串的提示，来执行相应的动作，比如
+;; 按空格确认当前选择的词条或者按数字选择这个数字对应的词条。比如：
 
 ;; #+BEGIN_EXAMPLE
 ;; "1. 你好 2. 倪皓 3. 你 4.泥 ..."
 ;; #+END_EXAMPLE
 
-;; Chinese-pyim 使用 `pyim-current-choices' 来保存 *待选词列表* ，我们以 "nihao" 对应的
-;;  `pyim-current-choices' 的值为例，来说明选词框相关的操作函数。
+;; Chinese-pyim 使用 `pyim-current-choices' 来保存 *待选词列表* ，我们以
+;; "nihao" 对应的 `pyim-current-choices' 的值为例，来说明选词框相关的操作
+;; 函数。
 
 ;; #+BEGIN_EXAMPLE
 ;; (#("你好" 0 2 (py ("ni-hao"))) #("倪皓" 0 2 (py ("ni-hao"))) "泥" "你" "呢" "拟" "逆" "腻" "妮" "怩" "溺" "尼" "禰" "齯" "麑" "鲵" "蜺" "衵" "薿" "旎" "睨" "铌" "昵" "匿" "倪" "霓" "暱" "柅" "猊" "郳" "輗" "坭" "惄" "堄" "儗" "伲" "祢" "慝")
 ;; #+END_EXAMPLE
 
-;; 变量 `pyim-guidance-str' 来保存需要在 minibuffer 选词框中显示的字符串，而变量
-;;  `pyim-current-pos' 纪录当前选择的词条在 `pyim-current-choices' 中的位置，如果当前选择的
-;; 词条为“倪皓”，那么其取值为2，如果当前选择的词条为“腻”，其取值为8。
+;; 变量 `pyim-guidance-str' 用来保存需要在 minibuffer 选词框中显示的词条
+;;  菜单字符串，而变量 `pyim-current-pos' 纪录当前选择的词条在
+;;  `pyim-current-choices' 中的位置，如果当前选择的词条为“倪皓”，那么其取
+;;  值为2，如果当前选择的词条为“腻”，其取值为8。
 
-;;  *待选词列表* 一般都很长，不可能在一行中完全显示，所以 Chinese-pyim 使用了 page 的概念，比如，
-;; 上面的 “nihao” 的 *待选词列表* 就可以逻辑的分成5页：
+;;  *待选词列表* 一般都很长，不可能在一行中完全显示，所以 Chinese-pyim 使
+;;  用了 page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以逻辑的分
+;;  成5页：
 
 ;; #+BEGIN_EXAMPLE
 ;; ("你好"  倪皓"  "泥"  "你"  "呢"  "拟"  "逆"  "腻"  "妮"   ;第1页
@@ -1667,10 +1698,11 @@ Return the input string."
 ;;  "祢"    "慝"                                              ;第5页)
 ;; #+END_EXAMPLE
 
-;; 用户可以使用变量 `pyim-page-length' 自定义每一页显示词条的数量，默认设置为9。
+;; 用户可以使用变量 `pyim-page-length' 自定义每一页显示词条的数量，默认设
+;; 置为9。
 
-;; `pyim-current-pos' 的取值以及 `pyim-page-length' 的设定值，共同决定了 Chinese-pyim 需要
-;; 显示哪一页，我们以一个表格来表示上述 *待选词列表* ：
+;; `pyim-current-pos' 的取值以及 `pyim-page-length' 的设定值，共同决定了
+;; Chinese-pyim 需要显示哪一页，我们以一个表格来表示上述 *待选词列表* ：
 
 ;; |       |          |       |         |      |      |      |      |      |          |
 ;; |-------+----------+-------+---------+------+------+------+------+------+----------|
@@ -1685,23 +1717,25 @@ Return the input string."
 ;; 2. 函数 `pyim-total-page'  返回值为5，说明 page 共有5页。
 ;; 3. 函数 `pyim-page-start' 返回 B 所在的位置。
 ;; 4. 函数 `pyim-page-end' 返回 E 所在的位置。
-;; 5. 函数 `pyim-format-page' 会从 `pyim-current-choices' 中提取一个sublist:
+;; 5. 函数 `pyim-format-page' 会从 `pyim-current-choices' 中提取一个
+;;    sublist:
 ;;    #+BEGIN_EXAMPLE
 ;;    ("薿" "旎" "睨" "铌" "昵" "匿" "倪" "霓" "暱")
 ;;    #+END_EXAMPLE
-;;    这个 sublist 的起点为  `pyim-page-start' 的返回值，终点为 `pyim-page-end' 的返回值。
-;;    然后使用这个 sublist 来构建类似下面的字符串，并保存到变量 `pyim-guidance-str' 。
+;;    这个 sublist 的起点为  `pyim-page-start' 的返回值，终点为
+;;    `pyim-page-end' 的返回值。然后使用这个 sublist 来构建类似下面的字符
+;;    串，并保存到变量 `pyim-guidance-str' 。
 ;;    #+BEGIN_EXAMPLE
 ;;    "1. 薿 2.旎 3.睨 4.铌 5.昵 6.匿 7.倪 8.霓 9.暱"
 ;;    #+END_EXAMPLE
 
-;; `pyim-next-page' 这个命令用来翻页，其原理是：改变 `pyim-current-pos'的取值，假设一次只翻一页，
-;; 那么这个函数所做的工作就是：
-;; 1. 首先将 `pyim-current-pos' 增加 `pyim-page-length' ，确保其指定的位置在下一页。
-;; 2. 然后将 `pyim-current-pos' 的值设定为 `pyim-page-start' 的返回值，确保 `pyim-current-pos'
-;;    的取值为下一页第一个词条的位置。
+;; `pyim-next-page' 这个命令用来翻页，其原理是：改变 `pyim-current-pos'的
+;; 取值，假设一次只翻一页，那么这个函数所做的工作就是：
+;; 1. 首先将 `pyim-current-pos' 增加 `pyim-page-length' ，确保其指定的位
+;;    置在下一页。
+;; 2. 然后将 `pyim-current-pos' 的值设定为 `pyim-page-start' 的返回值，确
+;;    保 `pyim-current-pos' 的取值为下一页第一个词条的位置。
 ;; 3. 最后调用 `pyim-format-page' 来重新设置 `pyim-guidance-str' 。
-
 
 ;; #+BEGIN_SRC emacs-lisp
 ;;;  page format
@@ -1807,12 +1841,15 @@ Return the input string."
   (pyim-next-word (- arg)))
 ;; #+END_SRC
 
-;; *** 更新选词框和 inline 备选词条
-;; 当`pyim-guidance-str' 构建完成后，Chinese-pyim 使用函数 `pyim-show' 重新显示选词框，
-;; 与此同时，函数 `pyim-show' 也会更新光标处显示的备选词条，具体方式是：
+;; *** 更新选词框和 inline 当前选择的备选词条
+;; 当`pyim-guidance-str' 构建完成后，Chinese-pyim 使用函数 `pyim-show' 重
+;; 新显示选词框。
+
+;; 同时，函数 `pyim-show' 也会更新光标处显示的备选词条，具体方式是：
 ;; 1. 从光标处删除原来的备选词条
-;; 2. 插入新的备选词条
-;; 3. 使用 `move-overlay' 函数调整 `pyim-overlay' 中保存的 overlay，让其符合新的备选词条。
+;; 2. 插入新的备选词条字符串 `pyim-current-str'
+;; 3. 使用 `move-overlay' 函数调整 `pyim-overlay' 中保存的 overlay，让其
+;;    符合新的备选词条。
 
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-show ()
@@ -2058,7 +2095,7 @@ Return the input string."
 ;;       (pyim-return-proper-punctuation '("'" "‘" "’")))
 ;; #+END_EXAMPLE
 
-;; #+RESULTS:
+;; 结果为:
 ;; : ("’" "‘")
 
 ;; 简单来说，定义这个函数的目的是为了实现类似的功能：如果第一次输入的标点是：（‘）时，
@@ -2136,7 +2173,7 @@ Return the input string."
 ;; (pyim-get-char-code ?我)
 ;; #+END_EXAMPLE
 
-;; #+RESULTS:
+;; 结果为:
 ;; : ("wo")
 
 ;; 函数 `pyim-make-char-table-1' 参数 `chars’的形式类似：
@@ -2153,7 +2190,7 @@ Return the input string."
 ;;  ('大 '("da")))
 ;; #+END_EXAMPLE
 
-;; 我们用全局变量 `pyim-char-table' 来保存这个 *hash table* ，所以我们需要定义全局变量： `pyim-char-table'：
+;; 我们用全局变量 `pyim-char-table' 来保存这个 *hash table* 。
 
 ;; 函数 `pyim-make-char-table' 是函数 `pyim-make-char-table-1' 的包装，其运行过程大体为：
 ;; 1. 使用 regexp 解析  "quail/PY.el" 文件中的汉字拼音信息，这个文件的结构类似：
@@ -2219,7 +2256,7 @@ Return the input string."
 ;; #+END_SRC
 
 ;; ** 与拼音输入相关的用户命令
-;; *** 删除拼音字符串的最后一个字符
+;; *** 删除拼音字符串最后一个字符
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-delete-last-char ()
   (interactive)
@@ -2231,7 +2268,7 @@ Return the input string."
     (pyim-terminate-translation)))
 ;; #+END_SRC
 
-;; *** 删除拼音字符串种最后一个拼音
+;; *** 删除拼音字符串最后一个拼音
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-backward-kill-py ()
   (interactive)
@@ -2241,6 +2278,21 @@ Return the input string."
   (pyim-handle-string))
 ;; #+END_SRC
 
+;; *** 取消当前输入
+;; #+BEGIN_SRC emacs-lisp
+(defun pyim-quit-clear ()
+  (interactive)
+  (setq pyim-current-str "")
+  (pyim-terminate-translation))
+;; #+END_SRC
+;; *** 字母上屏
+;; #+BEGIN_SRC emacs-lisp
+(defun pyim-quit-no-clear ()
+  (interactive)
+  (setq pyim-current-str (replace-regexp-in-string "-" ""
+                                                   pyim-current-key))
+  (pyim-terminate-translation))
+;; #+END_SRC
 ;; *** 处理模糊音
 ;; 'Chinese-pyim的核心并不能处理模糊音，这里提供了一个比较 *粗糙* 的方法来处理模糊音。
 
@@ -2280,24 +2332,28 @@ Return the input string."
   (pyim-handle-string))
 ;; #+END_SRC
 
-;; *** 其他
+;; *** Chinese-pyim 取消激活
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-inactivate ()
   (interactive)
   (mapc 'kill-local-variable pyim-local-variable-list))
-
-(defun pyim-quit-no-clear ()
-  (interactive)
-  (setq pyim-current-str (replace-regexp-in-string "-" ""
-                                                   pyim-current-key))
-  (pyim-terminate-translation))
-
-(defun pyim-quit-clear ()
-  (interactive)
-  (setq pyim-current-str "")
-  (pyim-terminate-translation))
 ;; #+END_SRC
 
+;; *** 切换中英文输入模式
+;; #+BEGIN_SRC emacs-lisp
+(defun pyim-toggle-input-ascii ()
+  "Chinese-pyim 切换中英文输入模式。同时调整标点符号样式。"
+  (interactive)
+  (setq pyim-punctuation-translate-p
+        (not pyim-input-ascii))
+  (setq pyim-input-ascii
+        (not pyim-input-ascii))
+  (setq pyim-punctuation-translate-p
+        (not pyim-punctuation-translate-p))
+  (if pyim-input-ascii
+      (setq current-input-method-title (concat pyim-title "-英文"))
+    (setq current-input-method-title pyim-title)))
+;; #+END_SRC
 ;;; Footer:
 ;; #+BEGIN_SRC emacs-lisp
 (provide 'chinese-pyim)
@@ -2311,4 +2367,3 @@ Return the input string."
 
 ;;; chinese-pyim.el ends here
 ;; #+END_SRC
-
