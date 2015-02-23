@@ -170,6 +170,14 @@
 ;; #+END_EXAMPLE
 
 ;; ** Tips                                                              :README:
+;; *** 如何查看 Chinese-pyim 文档。
+;; Chinese－-pyim 开发使用 lentic 文学编程模式，代码文档隐藏在comment中，如
+;; 果用户喜欢阅读 html 格式的文档，可以使用下面的命令：
+
+;; #+BEGIN_EXAMPLE
+;; M-x pyim-devtools-view-devel-document
+;; #+END_EXAMPLE
+
 ;; *** 如何添加自定义拼音词库
 ;; Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面三种方式，获取
 ;; 质量较好的拼音词库：
