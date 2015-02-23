@@ -1615,6 +1615,29 @@ Return the input string."
                                        "-" " " pyim-current-key)))
       (pyim-show))))
 
+;; #+END_SRC
+
+;; ** 处理当前需要插入字符串 `pyim-current-str'
+;; Chinese-pyim 使用变量 `pyim-current-str' 保存 *当前需要在 buffer 中插
+;; 入的字符串* 。
+
+;; 处理 `pyim-current-str' 的代码分散在多个函数中，可以按照下面的方式分类：
+;; 1. 英文字符串：Chinese-pyim 没有找到相应的候选词时（比如：用户输入错
+;;    误的拼音），`pyim-current-str' 的值与 `pyim-current-key' 大致相同。
+;;    相关代码很简单，分散在 `pyim-handle-string' 或者
+;;    `pyim-append-string' 等相关函数。
+;; 2. 汉字或者拼音和汉字的混合：当 Chinese-pyim 找到相应的候选词条时，
+;;    `pyim-current-str' 的值可以是完全的中文词条，比如：
+;;    #+BEGIN_EXAMPLE
+;;    你好
+;;    #+END_EXAMPLE
+;;    或者中文词条＋拼音的混合新式，比如：
+;;    #+BEGIN_EXAMPLE
+;;    你好bj
+;;    #+END_EXAMPLE
+;;    这部份代码相对复杂，使用 `pyim-update-current-key' 专门处理。
+
+;; #+BEGIN_SRC emacs-lisp
 (defsubst pyim-append-string (str)
   "append STR to pyim-current-str"
   (setq pyim-current-str (concat pyim-current-str str)))
@@ -1637,11 +1660,14 @@ Return the input string."
         (setq pyim-current-str (concat pyim-current-str rest)))))
 ;; #+END_SRC
 
-;; ** 显示备选词条和选择备选词
-;; Chinese-pyim 使用两种方式显示备选词条：
-;; 1. 使用 emacs overlay 对象，在光标处显示 *当前选择的* 备选词条。
-;; 2. 在 minibuffer 中显示一个备选词条菜单。
-;; *** 在光标处添加一个 overlay，显示 *当前选择的* 备选词条。
+;; Chinese-pyim 调用 `pyim-show' 函数的时候，将 `pyim-current-key' 插入
+;; *待输入buffer* 。插入的同时，Chinese-pyim 会使用 emacs overlay 机制，
+;; 改变插入字符串的face，具体方式是：
+;; 1. 从光标处清楚原来的字符串。
+;; 2. 插入 `pyim-current-str'
+;; 3. 使用 `move-overlay' 函数调整 `pyim-overlay' 中保存的 overlay，让其
+;;    符合新插入的字符串。
+
 ;; Chinese-pyim 使用变量 `pyim-overlay' 来保存创建的 overlay。
 
 ;; 并定义了两个函数来设置 overlay 和删除 overlay，Chinese-pyim 在 `pyim-input-method' 中调用这两个函数。
@@ -1663,7 +1689,8 @@ Return the input string."
       (delete-overlay pyim-overlay)))
 ;; #+END_SRC
 
-;; *** 构建 minibuffer 中显示的词条菜单字符串： `pyim-guidance-str' 。
+;; ** 显示和选择备选词条
+;; *** 构建词条菜单字符串： `pyim-guidance-str' 。
 ;; Chinese-pyim 默认使用 minibuffer 作为选词框，其基本原理就是，通过 
 ;; *待选词列表* 构建为一个字符串，然后使用类似 `message' 的命令在 minibuffer
 ;; 中显示这个字符串。用户可以根据这个字符串的提示，来执行相应的动作，比如
@@ -1841,15 +1868,11 @@ Return the input string."
   (pyim-next-word (- arg)))
 ;; #+END_SRC
 
-;; *** 更新选词框和 inline 当前选择的备选词条
+;; *** 显示选词框
 ;; 当`pyim-guidance-str' 构建完成后，Chinese-pyim 使用函数 `pyim-show' 重
-;; 新显示选词框。
+;; 新显示选词框，
 
-;; 同时，函数 `pyim-show' 也会更新光标处显示的备选词条，具体方式是：
-;; 1. 从光标处删除原来的备选词条
-;; 2. 插入新的备选词条字符串 `pyim-current-str'
-;; 3. 使用 `move-overlay' 函数调整 `pyim-overlay' 中保存的 overlay，让其
-;;    符合新的备选词条。
+;; (注：`pyim-show' 同时会插入 `pyim-current-str')
 
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-show ()
@@ -1894,7 +1917,7 @@ Return the input string."
             unread-command-events '(7)))))
 ;; #+END_SRC
 
-;; *** 备选词选择命令
+;; *** 选择备选词
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-select-current ()
   (interactive)
