@@ -1137,7 +1137,8 @@ buffer中，当前词条追加到已有词条之后。"
   (pyim-intern-word word py))
 ;; #+END_SRC
 
-;; ** 生成拼音字符串 `pyim-current-key'
+;; ** 生成 `pyim-current-key' 并插入 `pyim-current-str'
+;; *** 生成拼音字符串 `pyim-current-key' 
 ;; Chinese-pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
 ;; `input-method-function' 设置为 `pyim-input-method' ，这个变量
 ;; 会影响 `read-event' 的行为。
@@ -1154,7 +1155,7 @@ buffer中，当前词条追加到已有词条之后。"
 ;; 3. 如果查询得到的命令是 'pyim-self-insert-command' 时，
 ;;    `pyim-start-translation' 会调用这个函数。
 
-;; 'pyim-self-insert-command' 这个函数的核心工作就是将用户输入的字符，组
+;; `pyim-self-insert-command' 这个函数的核心工作就是将用户输入的字符，组
 ;; 合成拼音字符串并保存到变量 `pyim-current-key' 中。
 
 ;; 中英文输入模式切换功能也是在 'pyim-self-insert-command' 中实现。
@@ -1167,6 +1168,16 @@ buffer中，当前词条追加到已有词条之后。"
 ;;    2. [[Input Methods]]
 ;;    3. [[Miscellaneous Event Input Features]]
 ;;    4. [[Reading One Event]]
+
+;; *** 在待输入 buffer 中插入 `pyim-current-str'
+;; `pyim-self-insert-command' 会调用 `pyim-handle-string' 来处理
+;; `pyim-current-key'，得到对应的 `pyim-current-str'，然后，
+;; `pyim-start-translation' 返回 `pyim-current-str' 的取值。
+
+;; 在 `pyim-input-method' 函数内部，`pyim-start-translation' 返回值分解为
+;; event list。
+
+;; 最后，emacs 低层函数 read-event 将这个 list 插入 *待输入buffer* 。
 
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-input-method (key)
@@ -1668,20 +1679,22 @@ Return the input string."
         (setq pyim-current-str (concat pyim-current-str rest)))))
 ;; #+END_SRC
 
-;; Chinese-pyim 调用 `pyim-show' 函数的时候，将 `pyim-current-key' 插入
-;; *待输入buffer* 。插入的同时，Chinese-pyim 会使用 emacs overlay 机制，
-;; 改变插入字符串的face，具体方式是：
-;; 1. 从光标处清楚原来的字符串。
-;; 2. 插入 `pyim-current-str'
-;; 3. 使用 `move-overlay' 函数调整 `pyim-overlay' 中保存的 overlay，让其
-;;    符合新插入的字符串。
+;; Chinese-pyim 会使用 emacs overlay 机制在 *待输入buffer* 光标处高亮显示
+;; `pyim-current-str'，让用户快速了解当前输入的字符串，具体方式是：
+;; 1. 在 `pyim-input-method' 中调用 `pyim-setup-overlays' 创建 overlay ，并
+;;    使用变量 `pyim-overlay' 保存，创建时将 overlay 的 face 属性设置为
+;;    `pyim-string-face' ，用户可以使用这个变量来自定义 face。
+;; 2. 使用函数 `pyim-show' 高亮显示 `pyim-current-str'
+;;    1. 清除光标处原来的字符串。
+;;    2. 插入 `pyim-current-str'
+;;    3. 使用 `move-overlay' 函数调整变量 `pyim-overlay' 中保存的 overlay，
+;;       让其符合新插入的字符串。
+;; 3. 在 `pyim-input-method' 中调用 `pyim-delete-overlays' ，删除
+;;    `pyim-overlay' 中保存的 overlay，这个函数同时也删除了 overlay 中包
+;;    含的文本 `pyim-current-str'。
 
-;; Chinese-pyim 使用变量 `pyim-overlay' 来保存创建的 overlay。
-
-;; 并定义了两个函数来设置 overlay 和删除 overlay，Chinese-pyim 在 `pyim-input-method' 中调用这两个函数。
-;; 1. `pyim-setup-overlays' 创建 overlay 并使用变量 `pyim-overlay' 保存，
-;;    创建时将 overlay 的 face 属性设置为 `pyim-string-face' 。用户可以使用这个变量来自定义 face。
-;; 2. `pyim-delete-overlays' 删除 `pyim-overlay' 保存的 overlay 。
+;; 真正在 *待输入buffer* 插入 `pyim-current-str' 字符串的函数是
+;; `read-event'，具体见 `pyim-input-method' 相关说明。
 
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-setup-overlays ()
@@ -1699,7 +1712,7 @@ Return the input string."
 
 ;; ** 显示和选择备选词条
 ;; *** 构建词条菜单字符串： `pyim-guidance-str' 。
-;; Chinese-pyim 默认使用 minibuffer 作为选词框，其基本原理就是，通过 
+;; Chinese-pyim 默认使用 minibuffer 作为选词框，其基本原理就是，通过
 ;; *待选词列表* 构建为一个字符串，然后使用类似 `message' 的命令在 minibuffer
 ;; 中显示这个字符串。用户可以根据这个字符串的提示，来执行相应的动作，比如
 ;; 按空格确认当前选择的词条或者按数字选择这个数字对应的词条。比如：
