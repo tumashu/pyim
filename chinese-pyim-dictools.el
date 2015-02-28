@@ -278,7 +278,10 @@
    1. 安装教程请参考： https://github.com/fxsjy/jieba
    2. 使用命令： python -m jieba -d \" \" 源文件.txt  > 目标文件.txt
    3. 命令帮助： python -m jieba --help
-3. 添加拼音：使用 emacs 打开 “目标文件.txt”，然后运行命令：M-x pyim-build-dict-from-chinese-word
+3. 添加拼音：使用 emacs 打开 “目标文件.txt”，然后按照用户需求运行下面3个命令：
+   1. `pyim-article2dict-chars'
+   2. `pyim-article2dict-words'
+   3. `pyim-article2dict-misspell-words'
 4. 保存文件
 
 另外，使用分词工具的目的是确保中文词语与词语之间用 *空格* 强制隔开。比如：
