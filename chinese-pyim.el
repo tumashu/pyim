@@ -1138,7 +1138,7 @@ buffer中，当前词条追加到已有词条之后。"
 ;; #+END_SRC
 
 ;; ** 生成 `pyim-current-key' 并插入 `pyim-current-str'
-;; *** 生成拼音字符串 `pyim-current-key' 
+;; *** 生成拼音字符串 `pyim-current-key'
 ;; Chinese-pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
 ;; `input-method-function' 设置为 `pyim-input-method' ，这个变量
 ;; 会影响 `read-event' 的行为。
@@ -2296,7 +2296,11 @@ Return the input string."
             (let ((pinyin (match-string 1))
                   (hanzi-string (substring-no-properties (match-string 2))))
               (pyim-make-char-table-1 `((,pinyin ,hanzi-string))))))
-      (warn "Emacs 官方自带的文件: quail/PY.el 不存在，用户可能没有安装 emacs<VERSION>-el 软件包。"))))
+      (warn "没有找到 Emacs 自带文件: quail/PY.el，用户可能没有安装 emacs<VERSION>-el 软件包。
+此时， Chinese-pyim 可以正常输入词条，但下面几个功能失效：
+1. 词频调整功能
+2. 汉字到拼音转换功能
+3. 词条添加和删除功能"))))
 ;; #+END_SRC
 
 ;; ** 与拼音输入相关的用户命令
