@@ -1952,7 +1952,7 @@ Return the input string."
                                 (make-string (/ (- (string-width pyim-guidance-str) pos) 2) (decode-char 'ucs #x2501))
                                 "\n"
                                 (substring pyim-guidance-str (+ pos 2)))))
-              (pyim-show-tooltip pyim-guidance-str))
+              (pyim-show-tooltip pyim-guidance-str (overlay-start pyim-overlay)))
           (message "%s" pyim-guidance-str))))))
 
 (defsubst pyim-delete-region ()
@@ -1984,23 +1984,19 @@ Return the input string."
                 (not (fboundp 'x-show-tip))))))
 
 ;;; borrow from completion-ui
-(defun pyim-frame-posn-at-point (&optional position window)
+(defun pyim-frame-posn-at-point (position)
   "Return pixel position of top left corner of glyph at POSITION,
 relative to top left corner of frame containing WINDOW. Defaults
 to the position of point in the selected window."
-  (unless window (setq window (selected-window)))
-  (unless position
-    (setq position ; 减去 pyim-current-str 的 length 可以防止选词框颤动。
-          (- (window-point window)
-             (length pyim-current-str))))
-  (let ((x-y (posn-x-y (posn-at-point position window)))
-        (edges (window-inside-pixel-edges window)))
+  (let* ((window (selected-window))
+         (x-y (posn-x-y (posn-at-point position window)))
+         (edges (window-inside-pixel-edges window)))
     (cons (+ (car x-y) (car edges))
           (+ (cdr x-y) (cadr edges)))))
 
-(defun pyim-show-tooltip (text)
+(defun pyim-show-tooltip (text position)
   "Show tooltip text near cursor."
-  (let ((pos (pyim-frame-posn-at-point))
+  (let ((pos (pyim-frame-posn-at-point position))
         (fg (face-attribute 'pyim-tooltip-face :foreground nil 'tooltip))
         (bg (face-attribute 'pyim-tooltip-face :background nil 'tooltip))
         (params tooltip-frame-parameters)
