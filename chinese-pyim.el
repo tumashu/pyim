@@ -1876,12 +1876,13 @@ Return the input string."
                                                 (concat (car c) (cdr c))
                                               c))
                                   ;; 高亮当前选择的词条，用于 `pyim-next-word'
-                                  (setq str (if (and hightlight-current
-                                                     (= i pos))
-                                                (propertize (format "[%s]" str)
-                                                            'face 'pyim-minibuffer-string-face)
-                                              str))
-                                  (format "%d.%s " i str)))
+                                  (if (and hightlight-current
+                                           (= i pos))
+                                      (format "%d.%s " i
+                                              (propertize
+                                               (concat "[" str "]")
+                                               'face 'pyim-minibuffer-string-face))
+                                    (format "%d. %s  " i str))))
                               choice) " ")))))
 
 (defun pyim-next-page (arg)
