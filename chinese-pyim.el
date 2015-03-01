@@ -384,12 +384,11 @@ Chinese-pyim 内建的功能有：
   :group 'chinese-pyim
   :type 'hook)
 
-(defcustom pyim-use-tooltip (not (or noninteractive
-                                     emacs-basic-display
-                                     (not (display-graphic-p))
-                                     (not (fboundp 'x-show-tip))))
-  "如何显示 Chinese-pyim 选词框，取值为 t 时，使用 tooltip 显示选词框，
-取值为 nil 时，使用 minibuffer 显示选词框。"
+(defcustom pyim-use-tooltip  t
+  "如何显示 Chinese-pyim 选词框，当取值为 t 并且 *tooltip 功能可以正常使用*
+时，使用 tooltip 显示选词框，当取值为 nil 时，使用 minibuffer 显示选词框。
+
+具体细节请参考函数 `pyim-use-tooltip-p' ."
   :group 'chinese-pyim)
 
 (defvar pyim-title "灵拼" "Chinese-pyim 在 mode-line 中显示的名称。")
@@ -1307,7 +1306,7 @@ Return the input string."
   (pyim-delete-region)
   (setq pyim-current-choices nil)
   (setq pyim-guidance-str "")
-  (when pyim-use-tooltip
+  (when (pyim-use-tooltip-p)
     (x-hide-tip)))
 ;; #+END_SRC
 
@@ -1919,7 +1918,7 @@ Return the input string."
 
 ;; *** 显示选词框
 ;; 当`pyim-guidance-str' 构建完成后，Chinese-pyim 使用函数 `pyim-show' 重
-;; 新显示选词框，`pyim-show' 会根据 `pyim-use-tooltip' 的取值来决定使用
+;; 新显示选词框，`pyim-show' 会根据函数 `pyim-use-tooltip-p' 的返回值来决定使用
 ;; 哪种方式来显示选词框（minibuffer 或者 tooltip ）。
 
 ;; #+BEGIN_SRC emacs-lisp
@@ -1943,7 +1942,7 @@ Return the input string."
                  current-input-method-title pyim-guidance-str))
       ;; Show the guidance in echo area without logging.
       (let ((message-log-max nil))
-        (if pyim-use-tooltip
+        (if (pyim-use-tooltip-p)
             (let ((pos (string-match ": " pyim-guidance-str)))
               (if pos
                   (setq pyim-guidance-str
@@ -1973,6 +1972,15 @@ Return the input string."
     (when quit-flag
       (setq quit-flag nil
             unread-command-events '(7)))))
+
+(defun pyim-use-tooltip-p ()
+  "当这个函数返回值为 t 时，Chinese-pyim 使用 toolkit显示选词框，
+返回值为 nil 时，使用 minibuffer 显示选词框。"
+  (and pyim-use-tooltip
+       (not (or noninteractive
+                emacs-basic-display
+                (not (display-graphic-p))
+                (not (fboundp 'x-show-tip))))))
 
 ;;; borrow from completion-ui
 (defun pyim-frame-posn-at-point (&optional position window)
