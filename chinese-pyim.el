@@ -106,6 +106,14 @@
 ;; | C-c 或 C-g      | 取消输入         |
 ;; | TAB             | 模糊音调整       |
 
+;; *** 让选词框跟随光标
+;; Chinese-pyim 可以使用 emacs tooltip 功能在 *光标处* 显示一个选词框，
+;; 用户可以通过下面的设置来开启这个功能。
+
+;; #+BEGIN_EXAMPLE
+;; (setq pyim-use-tooltip t)
+;; #+END_EXAMPLE
+
 ;; *** 设置模糊音
 ;; Chinese-pyim 使用一个比较 *粗糙* 的方法处理 *模糊音* ，要了解具体细节，
 ;; 请运行：
