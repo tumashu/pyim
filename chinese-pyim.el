@@ -366,7 +366,7 @@ Chinese-pyim 内建的功能有：
   "Face to show current string"
   :group 'chinese-pyim)
 
-(defface pyim-minibuffer-string-face '((t (:background "gray")))
+(defface pyim-minibuffer-string-face '((t (:background "gray40")))
   "Face to current string show in minibuffer"
   :group 'chinese-pyim)
 
