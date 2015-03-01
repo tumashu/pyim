@@ -1878,7 +1878,8 @@ Return the input string."
                                   ;; 高亮当前选择的词条，用于 `pyim-next-word'
                                   (setq str (if (and hightlight-current
                                                      (= i pos))
-                                                (propertize str 'face 'pyim-minibuffer-string-face)
+                                                (propertize (format "[%s]" str)
+                                                            'face 'pyim-minibuffer-string-face)
                                               str))
                                   (format "%d.%s " i str)))
                               choice) " ")))))
