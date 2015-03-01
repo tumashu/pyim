@@ -1988,7 +1988,10 @@ Return the input string."
 relative to top left corner of frame containing WINDOW. Defaults
 to the position of point in the selected window."
   (unless window (setq window (selected-window)))
-  (unless position (setq position (window-point window)))
+  (unless position
+    (setq position ; 减去 pyim-current-str 的 length 可以防止选词框颤动。
+          (- (window-point window)
+             (length pyim-current-str))))
   (let ((x-y (posn-x-y (posn-at-point position window)))
         (edges (window-inside-pixel-edges window)))
     (cons (+ (car x-y) (car edges))
