@@ -362,6 +362,10 @@ Chinese-pyim 内建的功能有：
   "Face to current string show in minibuffer"
   :group 'chinese-pyim)
 
+(defface pyim-tooltip-face '((((class color)) :inherit tooltip))
+  "face to display items"
+  :group 'chinese-pyim)
+
 (defcustom pyim-english-input-switch-function nil
   "一个函数，其运行结果为 t 时，Chinese-pyim 开启英文输入功能。"
   :group 'chinese-pyim
@@ -371,6 +375,14 @@ Chinese-pyim 内建的功能有：
   "Chinese-pyim 选词完成时运行的hook，"
   :group 'chinese-pyim
   :type 'hook)
+
+(defcustom pyim-use-tooltip (not (or noninteractive
+                                     emacs-basic-display
+                                     (not (display-graphic-p))
+                                     (not (fboundp 'x-show-tip))))
+  "如何显示 Chinese-pyim 选词框，取值为 t 时，使用 tooltip 显示选词框，
+取值为 nil 时，使用 minibuffer 显示选词框。"
+  :group 'chinese-pyim)
 
 (defvar pyim-title "灵拼" "Chinese-pyim 在 mode-line 中显示的名称。")
 (defvar pyim-buffer-name " *Chinese-pyim*")
@@ -456,6 +468,8 @@ Chinese-pyim 内建的功能有：
 (defvar pyim-punctuation-escape-list (number-sequence ?0 ?9)
   "Punctuation will not insert after this characters.
 If you don't like this funciton, set the variable to nil")
+
+(defvar pyim-tooltip-timeout 15)
 
 (defvar pyim-mode-map
   (let ((map (make-sparse-keymap))
@@ -1284,7 +1298,9 @@ Return the input string."
   (setq pyim-translating nil)
   (pyim-delete-region)
   (setq pyim-current-choices nil)
-  (setq pyim-guidance-str ""))
+  (setq pyim-guidance-str "")
+  (when pyim-use-tooltip
+    (x-hide-tip)))
 ;; #+END_SRC
 
 ;; ** 处理拼音字符串 `pyim-current-key'
@@ -1712,10 +1728,14 @@ Return the input string."
 
 ;; ** 显示和选择备选词条
 ;; *** 构建词条菜单字符串： `pyim-guidance-str' 。
-;; Chinese-pyim 默认使用 minibuffer 作为选词框，其基本原理就是，通过
-;; *待选词列表* 构建为一个字符串，然后使用类似 `message' 的命令在 minibuffer
-;; 中显示这个字符串。用户可以根据这个字符串的提示，来执行相应的动作，比如
-;; 按空格确认当前选择的词条或者按数字选择这个数字对应的词条。比如：
+;; Chinese-pyim 内建两种方式显示选词框：
+
+;; 1. 使用 `pyim-minibuffer-message' 函数在 minibuffer 中显示选词框。
+;; 2. 使用 `pyim-show-tooltip' 函数在光标处创建一个 tooltip 来显示选词框。
+
+;; 两种方式的基本原理相同：通过 *待选词列表* 构建为一个字符串，然后显示这个字符串。
+;; 用户可以根据这个字符串的提示，来执行相应的动作，比如按空格确认当前选择的词条或
+;; 者按数字选择这个数字对应的词条。比如：
 
 ;; #+BEGIN_EXAMPLE
 ;; "1. 你好 2. 倪皓 3. 你 4.泥 ..."
@@ -1891,9 +1911,8 @@ Return the input string."
 
 ;; *** 显示选词框
 ;; 当`pyim-guidance-str' 构建完成后，Chinese-pyim 使用函数 `pyim-show' 重
-;; 新显示选词框，
-
-;; (注：`pyim-show' 同时会插入 `pyim-current-str')
+;; 新显示选词框，`pyim-show' 会根据 `pyim-use-tooltip' 的取值来决定使用
+;; 哪种方式来显示选词框（minibuffer 或者 tooltip ）。
 
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-show ()
@@ -1916,7 +1935,17 @@ Return the input string."
                  current-input-method-title pyim-guidance-str))
       ;; Show the guidance in echo area without logging.
       (let ((message-log-max nil))
-        (message "%s" pyim-guidance-str)))))
+        (if pyim-use-tooltip
+            (let ((pos (string-match ": " pyim-guidance-str)))
+              (if pos
+                  (setq pyim-guidance-str
+                        (concat (substring pyim-guidance-str 0 pos)
+                                "\n"
+                                (make-string (/ (- (string-width pyim-guidance-str) pos) 2) (decode-char 'ucs #x2501))
+                                "\n"
+                                (substring pyim-guidance-str (+ pos 2)))))
+              (pyim-show-tooltip pyim-guidance-str))
+          (message "%s" pyim-guidance-str))))))
 
 (defsubst pyim-delete-region ()
   "Delete the text in the current translation region of E+."
@@ -1936,6 +1965,55 @@ Return the input string."
     (when quit-flag
       (setq quit-flag nil
             unread-command-events '(7)))))
+
+;;; borrow from completion-ui
+(defun pyim-frame-posn-at-point (&optional position window)
+  "Return pixel position of top left corner of glyph at POSITION,
+relative to top left corner of frame containing WINDOW. Defaults
+to the position of point in the selected window."
+  (unless window (setq window (selected-window)))
+  (unless position (setq position (window-point window)))
+  (let ((x-y (posn-x-y (posn-at-point position window)))
+        (edges (window-inside-pixel-edges window)))
+    (cons (+ (car x-y) (car edges))
+          (+ (cdr x-y) (cadr edges)))))
+
+(defun pyim-show-tooltip (text)
+  "Show tooltip text near cursor."
+  (let ((pos (pyim-frame-posn-at-point))
+        (fg (face-attribute 'pyim-tooltip-face :foreground nil 'tooltip))
+        (bg (face-attribute 'pyim-tooltip-face :background nil 'tooltip))
+        (params tooltip-frame-parameters)
+        ;; seem the top position should add 65 pixel to make
+        ;; the text display under the baseline of cursor
+        (top-adjust 65)
+        (frame-height (frame-pixel-height))
+        (frame-width (frame-pixel-width))
+        (lines (split-string text "\n"))
+        width height left top)
+    (setq width (* (frame-char-width) (apply 'max (mapcar 'string-width lines)))
+          height (* (frame-char-height) (length lines)))
+    (setq left (frame-parameter nil 'left)
+          top (frame-parameter nil 'top))
+    ;; if the cursor is at near the right frame fringe or at bottom
+    ;; of the bottom fringe, move the frame to
+    ;; -frame-width or -frame-height from right or bottom
+    (if (< (- frame-width (car pos)) width)
+        (setq left (+ left (max 0 (- frame-width width))))
+      (setq left (+ left (car pos))))
+    (if (< (- frame-height (cdr pos)) (+ height top-adjust))
+        (setq top (+ top (max 0 (- frame-height height))))
+      (setq top (+ top (cdr pos))))
+    (setq top (+ top top-adjust))
+    (when (stringp fg)
+      (setq params (append params `((foreground-color . ,fg)
+                                    (border-color . ,fg)))))
+    (when (stringp bg)
+      (setq params (append params `((background-color . ,bg)))))
+    (setq params (append params `((left . ,left) (top . ,top))))
+    (x-show-tip (propertize text 'face 'pyim-tooltip-face)
+                nil params pyim-tooltip-timeout)))
+
 ;; #+END_SRC
 
 ;; *** 选择备选词
