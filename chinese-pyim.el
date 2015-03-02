@@ -1877,11 +1877,11 @@ Return the input string."
                                   ;; 高亮当前选择的词条，用于 `pyim-next-word'
                                   (if (and hightlight-current
                                            (= i pos))
-                                      (format "%d.%s " i
+                                      (format "%d.%s" i
                                               (propertize
                                                (concat "[" str "]")
                                                'face 'pyim-minibuffer-string-face))
-                                    (format "%d. %s  " i str))))
+                                    (format "%d. %s " i str))))
                               choice) " ")))))
 
 (defun pyim-next-page (arg)
