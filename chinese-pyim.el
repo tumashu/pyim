@@ -1001,7 +1001,7 @@ beginning of line"
 ;;    `pyim-create-word-at-point' 的包装命令。
 
 ;; #+BEGIN_SRC emacs-lisp
-(defsubst pyim-delete-line ()
+(defun pyim-delete-line ()
   (delete-region (line-beginning-position) (min (+ (line-end-position) 1)
                                                 (point-max))))
 
@@ -1680,7 +1680,7 @@ Return the input string."
 ;;    这部份代码相对复杂，使用 `pyim-update-current-key' 专门处理。
 
 ;; #+BEGIN_SRC emacs-lisp
-(defsubst pyim-append-string (str)
+(defun pyim-append-string (str)
   "append STR to pyim-current-str"
   (setq pyim-current-str (concat pyim-current-str str)))
 
@@ -1825,7 +1825,7 @@ Return the input string."
         y
       base)))
 
-(defsubst pyim-choice (choice)
+(defun pyim-choice (choice)
   (if (consp choice)
       (car choice)
     choice))
@@ -1959,7 +1959,7 @@ Return the input string."
                             nil 15 nil nil nil 40))
           (message "%s" pyim-guidance-str))))))
 
-(defsubst pyim-delete-region ()
+(defun pyim-delete-region ()
   "Delete the text in the current translation region of E+."
   (if (overlay-start pyim-overlay)
       (delete-region (overlay-start pyim-overlay)
