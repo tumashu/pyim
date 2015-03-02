@@ -457,7 +457,7 @@ Chinese-pyim 内建的功能有：
 
 (defvar pyim-overlay nil "显示当前选择词条的 overlay")
 
-(defvar pyim-position nil)
+(defvar pyim-pinyin-position nil)
 (defvar pyim-pinyin-list nil)
 
 (defvar pyim-guidance-str "" "显示可选词条的字符串")
