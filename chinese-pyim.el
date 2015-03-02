@@ -7,7 +7,7 @@
 ;; Author: Ye Wenbin <wenbinye@163.com>, Feng Shu <tumashu@163.com>
 ;; URL: https://github.com/tumashu/chinese-pyim
 ;; Version: 0.0.1
-;; Package-Requires: ((cl-lib "0.5"))
+;; Package-Requires: ((cl-lib "0.5")(pos-tip "0.4"))
 ;; Keywords: convenience, Chinese, pinyin, input-method
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -278,6 +278,7 @@
 ;; #+BEGIN_SRC emacs-lisp
 (require 'cl-lib)
 (require 'help-mode)
+(require 'pos-tip)
 (require 'chinese-pyim-dictools)
 
 (defgroup chinese-pyim nil
@@ -475,8 +476,6 @@ Chinese-pyim 内建的功能有：
 (defvar pyim-punctuation-escape-list (number-sequence ?0 ?9)
   "Punctuation will not insert after this characters.
 If you don't like this funciton, set the variable to nil")
-
-(defvar pyim-tooltip-timeout 15)
 
 (defvar pyim-mode-map
   (let ((map (make-sparse-keymap))
@@ -1739,7 +1738,7 @@ Return the input string."
 ;; Chinese-pyim 内建两种方式显示选词框：
 
 ;; 1. 使用 `pyim-minibuffer-message' 函数在 minibuffer 中显示选词框。
-;; 2. 使用 `pyim-show-tooltip' 函数在光标处创建一个 tooltip 来显示选词框。
+;; 2. 使用 `pos-tip-show' 函数在光标处创建一个 tooltip 来显示选词框。
 
 ;; 两种方式的基本原理相同：通过 *待选词列表* 构建为一个字符串，然后显示这个字符串。
 ;; 用户可以根据这个字符串的提示，来执行相应的动作，比如按空格确认当前选择的词条或
@@ -1954,7 +1953,10 @@ Return the input string."
                                 (make-string (/ (- (string-width pyim-guidance-str) pos) 2) (decode-char 'ucs #x2501))
                                 "\n"
                                 (substring pyim-guidance-str (+ pos 2)))))
-              (pyim-show-tooltip pyim-guidance-str (overlay-start pyim-overlay)))
+              (pos-tip-show pyim-guidance-str
+                            'pyim-tooltip-face
+                            (overlay-start pyim-overlay)
+                            nil 15 nil nil nil 40))
           (message "%s" pyim-guidance-str))))))
 
 (defsubst pyim-delete-region ()
@@ -1984,54 +1986,6 @@ Return the input string."
                 emacs-basic-display
                 (not (display-graphic-p))
                 (not (fboundp 'x-show-tip))))))
-
-;;; borrow from completion-ui
-(defun pyim-frame-posn-at-point (position)
-  "Return pixel position of top left corner of glyph at POSITION,
-relative to top left corner of frame containing WINDOW. Defaults
-to the position of point in the selected window."
-  (let* ((window (selected-window))
-         (x-y (posn-x-y (posn-at-point position window)))
-         (edges (window-inside-pixel-edges window)))
-    (cons (+ (car x-y) (car edges))
-          (+ (cdr x-y) (cadr edges)))))
-
-(defun pyim-show-tooltip (text position)
-  "Show tooltip text near cursor."
-  (let ((pos (pyim-frame-posn-at-point position))
-        (fg (face-attribute 'pyim-tooltip-face :foreground nil 'tooltip))
-        (bg (face-attribute 'pyim-tooltip-face :background nil 'tooltip))
-        (params tooltip-frame-parameters)
-        ;; seem the top position should add 65 pixel to make
-        ;; the text display under the baseline of cursor
-        (top-adjust 65)
-        (frame-height (frame-pixel-height))
-        (frame-width (frame-pixel-width))
-        (lines (split-string text "\n"))
-        width height left top)
-    (setq width (* (frame-char-width) (apply 'max (mapcar 'string-width lines)))
-          height (* (frame-char-height) (length lines)))
-    (setq left (frame-parameter nil 'left)
-          top (frame-parameter nil 'top))
-    ;; if the cursor is at near the right frame fringe or at bottom
-    ;; of the bottom fringe, move the frame to
-    ;; -frame-width or -frame-height from right or bottom
-    (if (< (- frame-width (car pos)) width)
-        (setq left (+ left (max 0 (- frame-width width))))
-      (setq left (+ left (car pos))))
-    (if (< (- frame-height (cdr pos)) (+ height top-adjust))
-        (setq top (+ top (max 0 (- frame-height height))))
-      (setq top (+ top (cdr pos))))
-    (setq top (+ top top-adjust))
-    (when (stringp fg)
-      (setq params (append params `((foreground-color . ,fg)
-                                    (border-color . ,fg)))))
-    (when (stringp bg)
-      (setq params (append params `((background-color . ,bg)))))
-    (setq params (append params `((left . ,left) (top . ,top))))
-    (x-show-tip (propertize text 'face 'pyim-tooltip-face)
-                nil params pyim-tooltip-timeout)))
-
 ;; #+END_SRC
 
 ;; *** 选择备选词
