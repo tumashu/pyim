@@ -26,6 +26,8 @@
 ;; 这个文件包含了制作，分发以及管理 Chinese-pyim 词库文件需要的工具
 
 ;;; Code:
+;; ** Require
+(require 'cl-lib)
 
 ;; ** 汉字到拼音的转换工具
 ;; `pyim-hanzi2pinyin' 和 `pyim-hanzi2pinyin-simple' 可以将一个中文字符串转换为拼音字符串
