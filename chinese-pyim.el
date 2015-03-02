@@ -7,7 +7,7 @@
 ;; Author: Ye Wenbin <wenbinye@163.com>, Feng Shu <tumashu@163.com>
 ;; URL: https://github.com/tumashu/chinese-pyim
 ;; Version: 0.0.1
-;; Package-Requires: ((cl-lib "0.5")(lentic "0.6"))
+;; Package-Requires: ((cl-lib "0.5"))
 ;; Keywords: convenience, Chinese, pinyin, input-method
 
 ;; This program is free software; you can redistribute it and/or modify
