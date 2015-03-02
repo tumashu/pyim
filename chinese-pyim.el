@@ -1977,7 +1977,7 @@ Return the input string."
             unread-command-events '(7)))))
 
 (defun pyim-use-tooltip-p ()
-  "当这个函数返回值为 t 时，Chinese-pyim 使用 toolkit显示选词框，
+  "当这个函数返回值为 t 时，Chinese-pyim 使用 tooltip 显示选词框，
 返回值为 nil 时，使用 minibuffer 显示选词框。"
   (and pyim-use-tooltip
        (not (or noninteractive
