@@ -1307,7 +1307,7 @@ Return the input string."
   (setq pyim-current-choices nil)
   (setq pyim-guidance-str "")
   (when (pyim-use-tooltip-p)
-    (x-hide-tip)))
+    (pos-tip-hide)))
 ;; #+END_SRC
 
 ;; ** 处理拼音字符串 `pyim-current-key'
