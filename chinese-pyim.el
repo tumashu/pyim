@@ -1965,7 +1965,7 @@ Return the input string."
               (pos-tip-show-no-propertize pyim-guidance-str
                                           pyim-tooltip-color
                                           (overlay-start pyim-overlay)
-                                          nil 15 nil nil nil 40))
+                                          nil 15 nil nil nil nil 35))
           (message "%s" pyim-guidance-str))))))
 
 (defun pyim-delete-region ()
