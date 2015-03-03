@@ -371,8 +371,17 @@ Chinese-pyim 内建的功能有：
   "Face to current string show in minibuffer"
   :group 'chinese-pyim)
 
-(defface pyim-tooltip-face '((((class color)) :inherit tooltip))
-  "face to display items"
+(defcustom pyim-tooltip-color nil
+  "设置 tooltip 选词框的颜色，设置格式为：
+
+    (FOREGROUND-COLOR . BACKGROUND-COLOR)
+
+例如：
+
+   (\"white\" . \"black\")
+
+如果这个变量设置为 nil，默认将使用变量 `pos-tip-foreground-color' 来指定
+前景颜色，使用变量 `pos-tip-background-color' 来指定背景颜色。"
   :group 'chinese-pyim)
 
 (defcustom pyim-english-input-switch-function nil
@@ -1954,7 +1963,7 @@ Return the input string."
                                 "\n"
                                 (substring pyim-guidance-str (+ pos 2)))))
               (pos-tip-show-no-propertize pyim-guidance-str
-                                          'pyim-tooltip-face
+                                          pyim-tooltip-color
                                           (overlay-start pyim-overlay)
                                           nil 15 nil nil nil 40))
           (message "%s" pyim-guidance-str))))))
