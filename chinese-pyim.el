@@ -1738,7 +1738,7 @@ Return the input string."
 ;; Chinese-pyim 内建两种方式显示选词框：
 
 ;; 1. 使用 `pyim-minibuffer-message' 函数在 minibuffer 中显示选词框。
-;; 2. 使用 `pos-tip-show' 函数在光标处创建一个 tooltip 来显示选词框。
+;; 2. 使用 `pos-tip-show-no-propertize' 函数在光标处创建一个 tooltip 来显示选词框。
 
 ;; 两种方式的基本原理相同：通过 *待选词列表* 构建为一个字符串，然后显示这个字符串。
 ;; 用户可以根据这个字符串的提示，来执行相应的动作，比如按空格确认当前选择的词条或
@@ -1953,10 +1953,10 @@ Return the input string."
                                 (make-string (/ (- (string-width pyim-guidance-str) pos) 2) (decode-char 'ucs #x2501))
                                 "\n"
                                 (substring pyim-guidance-str (+ pos 2)))))
-              (pos-tip-show pyim-guidance-str
-                            'pyim-tooltip-face
-                            (overlay-start pyim-overlay)
-                            nil 15 nil nil nil 40))
+              (pos-tip-show-no-propertize pyim-guidance-str
+                                          'pyim-tooltip-face
+                                          (overlay-start pyim-overlay)
+                                          nil 15 nil nil nil 40))
           (message "%s" pyim-guidance-str))))))
 
 (defun pyim-delete-region ()
