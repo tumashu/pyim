@@ -525,12 +525,11 @@ If you don't like this funciton, set the variable to nil")
 ;; ** 将变量转换为 local 变量
 ;; #+BEGIN_SRC emacs-lisp
 (defvar pyim-local-variable-list
-  '(pyim-page-length
-
-    pyim-current-key
+  '(pyim-current-key
     pyim-current-str
     pyim-current-choices
     pyim-current-pos
+    pyim-input-ascii
     pyim-english-input-switch-function
     pyim-guidance-str
     pyim-translating
@@ -543,7 +542,9 @@ If you don't like this funciton, set the variable to nil")
     inactivate-current-input-method-function
     describe-current-input-method-function
 
+    pyim-punctuation-translate-p
     pyim-pair-punctuation-status
+    pyim-punctuation-escape-list
 
     pyim-pinyin-list
     pyim-pinyin-position)
