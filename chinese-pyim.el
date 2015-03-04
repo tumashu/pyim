@@ -358,7 +358,7 @@ Chinese-pyim 内建的功能有：
   :group 'chinese-pyim
   :type 'function)
 
-(defcustom pyim-page-length 9
+(defcustom pyim-page-length 5
   "每页显示的词条数目"
   :group 'chinese-pyim
   :type 'number)
@@ -1957,11 +1957,13 @@ Return the input string."
             (let ((pos (string-match ": " pyim-guidance-str)))
               (if pos
                   (setq pyim-guidance-str
-                        (concat (substring pyim-guidance-str 0 pos)
-                                "\n"
-                                (make-string (/ (- (string-width pyim-guidance-str) pos) 2) (decode-char 'ucs #x2501))
-                                "\n"
-                                (substring pyim-guidance-str (+ pos 2)))))
+                        (concat
+                         (propertize
+                          (format (format "%%-%ds" (- (string-width pyim-guidance-str) pos))
+                                  (substring pyim-guidance-str 0 pos))
+                          'face '(:underline t))
+                         "\n"
+                         (substring pyim-guidance-str (+ pos 2)))))
               (pos-tip-show-no-propertize pyim-guidance-str
                                           pyim-tooltip-color
                                           (overlay-start pyim-overlay)
