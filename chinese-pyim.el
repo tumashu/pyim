@@ -1957,13 +1957,9 @@ Return the input string."
             (let ((pos (string-match ": " pyim-guidance-str)))
               (if pos
                   (setq pyim-guidance-str
-                        (concat
-                         (propertize
-                          (format (format "%%-%ds" (- (string-width pyim-guidance-str) pos))
-                                  (substring pyim-guidance-str 0 pos))
-                          'face '(:underline t))
-                         "\n"
-                         (substring pyim-guidance-str (+ pos 2)))))
+                        (format "=> %s\n%s"
+                                (substring pyim-guidance-str 0 pos)
+                                (substring pyim-guidance-str (+ pos 2)))))
               (pos-tip-show-no-propertize pyim-guidance-str
                                           pyim-tooltip-color
                                           (overlay-start pyim-overlay)
