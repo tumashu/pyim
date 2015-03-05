@@ -198,7 +198,7 @@
 
 ;; https://github.com/tumashu/chinese-pyim-bigdict/blob/master/pyim-bigdict.txt?raw=true
 
-;; 下载上述词库后，运行 `pyim-add-dict' ，按照命令提示，将下载得到的词库
+;; 下载上述词库后，运行 `pyim-dicts-manager' ，按照命令提示，将下载得到的词库
 ;; 文件信息添加到 `pyim-dicts' 中，最后运行命令 `pyim-restart' 或者重启
 ;; emacs，这个词库使用 `utf-8-unix' 编码。
 
@@ -225,7 +225,7 @@
 ;; shen-lan-ci-ku 深蓝词库
 ;; #+END_EXAMPLE
 
-;; 最后，使用命令 `pyim-add-dict' ，将转换得到的词库文件的信息添加到 `pyim-dicts' 中，
+;; 最后，运行 `pyim-dicts-manager' ，按照命令提示，将转换得到的词库文件的信息添加到 `pyim-dicts' 中，
 ;; 完成后运行命令 `pyim-restart' 或者重启emacs。
 
 ;; **** 第三种方式
@@ -292,8 +292,8 @@
 
 (defcustom pyim-dicts nil
   "一个列表，用于保存 `Chinese-pyim' 的词库信息，每一个 element 都代表一条词库的信息。
-用户可以使用 `pyim-add-dict' 命令来添加词库信息，每一条词库信息都使用一个 plist 来
-表示，比如：
+用户可以使用词库管理命令 `pyim-dicts-manager' 来添加词库信息，每一条词库信息都使用一个
+plist 来表示，比如：
 
     (:name \"100万大词库\"
      :file \"/path/to/pinyin-bigdict.txt\"
@@ -425,29 +425,6 @@ Chinese-pyim 内建的功能有：
     "ang" "eng"))
 
 (defvar pyim-char-table (make-vector 1511 nil))
-
-(defvar pyim-dict-help-string
-  "Chinese-pyim 没有可用词库！！！
-
-拼音词库是 Chinese-pyim 使用顺手与否的关键。根据经验估计：
-1. 当词库词条超过100万时(词库文件>20M)，Chinese-pyim 选词频率大大降低。
-2. 当词库词条超过100万时，Chinese-pyim 中文输入体验可以达到搜狗输入法的80%%。
-
-赶时间的朋友可以直接下载其他 Chinese-pyim 用户现成的拼音词库，比如，某个同学
-自己使用的词库：BigDict，这个词库词条数量大约60万，文件大约20M，可以显著
-增强 Chinese-pyim 的输入体验，(注意：请使用另存为，不要直接点击链接)。
-
-  https://github.com/tumashu/chinese-pyim-bigdict/blob/master/pyim-bigdict.txt?raw=true
-
-下载上述拼音词库后，运行 `pyim-add-dict' ，按照命令提示，将词库文件信息添加到
- `pyim-dicts' 中，最后运行命令 `pyim-restart' 或者重启emacs。。
-
-喜欢折腾的用户可以从下面几个途径获得 Chinese-pyim 更详细的信息。
-1. 使用 `C-h v pyim-dicts' 了解 `Chinese-pyim' 词库文件格式，
-2. 了解如何导入其它输入法的词库。
-   1. 使用 package 管理器查看 Chinese-pyim 包的简介
-   2. 阅读 chinese-pyim.el 文件 Commentary
-   3. 查看 Chinese-pyim 在线 README：https://github.com/tumashu/chinese-pyim")
 
 (defvar pyim-current-key "" "已经输入的代码")
 (defvar pyim-current-str "" "当前选择的词条")
@@ -703,8 +680,7 @@ If you don't like this funciton, set the variable to nil")
 ;; Chinese-pyim 激活时，首先会使用 `pyim-load-file' 加载个人词频文件和普
 ;; 通词库文件，如果个人词频文件不存在时，Chinese-pyim 会使用函数：
 ;; `pyim-create-template-dict' 自动创建这个文件。如果用户没有设定
-;; `pyim-dicts'， `pyim-load-file' 会使用函数： `pyim-show-help' 弹出帮助
-;; 信息。我们使用变量 `pyim-dict-help-string' 来保存词库帮助信息。
+;; `pyim-dicts'， `pyim-load-file' 会弹出警告信息，告知用户安装词库的命令。
 
 ;; `pyim-load-file' 加载词库简单来说就是：创建一个buffer，然后将词
 ;; 库文件的内容插入新创建的这个buffer，同时得到buffer和file的对应表。
@@ -781,7 +757,7 @@ If you don't like this funciton, set the variable to nil")
                 (setq buflist (append buflist (list (pyim-read-file file bufname coding))))
               (message "忽略导入重复的词库文件：%s。" file)))
         ;; 当用户没有设置词库信息时，弹出帮助信息。
-        (pyim-show-help pyim-dict-help-string)))
+        (warn "Chinese-pyim 没有安装词库，请运行词库管理命令 `pyim-dicts-manager' 来安装词库。")))
     buflist))
 
 (defun pyim-file-load-p (file buflist)

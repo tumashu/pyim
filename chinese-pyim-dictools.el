@@ -379,11 +379,103 @@
 ;; 为 Chinese-pyim 添加词库文件或者删除词库文件，以及对 Chinese-pyim 当前使用的词库文件进行排序。
 
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-add-dict ()
-  "为 `pyim-dicts' 添加词库信息，然后 `pyim-dicts' 将通过
- `customize-save-variable' 函数保存到用户emacs配置中"
+(defun pyim-dicts-manager-refresh ()
+  "Refresh the contents of the *pyim-dict-manager* buffer."
   (interactive)
-  (let (dict name file coding first-used)
+  (with-current-buffer "*pyim-dict-manager*"
+    (let ((inhibit-read-only t)
+          (dicts-list pyim-dicts)
+          (truncate-lines t)
+          (format-string "%-4s %-15s %-15s %-60s\n")
+          (i 1))
+      (erase-buffer)
+      (if (not pyim-dicts)
+          (insert "拼音词库是 Chinese-pyim 使用顺手与否的关键。根据经验估计：
+
+1. 当词库词条超过100万时 (词库文件>20M)，Chinese-pyim 选词频率大大降低。
+2. 当词库词条超过100万时，Chinese-pyim 中文输入体验可以达到搜狗输入法的80%。
+
+赶时间的朋友可以直接下载其他 Chinese-pyim 用户现成的拼音词库，比如，某个同学
+自己使用的词库：BigDict，这个词库词条数量大约60万，文件大约20M，可以显著
+增强 Chinese-pyim 的输入体验，(注意：请使用另存为，不要直接点击链接)。
+
+  https://github.com/tumashu/chinese-pyim-bigdict/blob/master/pyim-bigdict.txt?raw=true
+
+下载上述拼音词库后，运行 `pyim-dicts-manager' ，按照命令提示，添加词库并重启输入法。
+
+喜欢折腾的用户可以从下面几个途径获得 Chinese-pyim 更详细的信息。
+1. 使用 `C-h v pyim-dicts' 了解 `Chinese-pyim' 词库文件格式，
+2. 了解如何导入其它输入法的词库。
+   1. 使用 package 管理器查看 Chinese-pyim 包的简介
+   2. 阅读 chinese-pyim.el 文件 Commentary
+   3. 查看 Chinese-pyim 在线 README：https://github.com/tumashu/chinese-pyim\n")
+
+        (insert (propertize (format format-string "序号" "词库名称" "Coding" "词库文件")
+                            'face '(foreground-color . "ForestGreen")))
+        (insert (propertize (format format-string  "----" "------------"  "------------" "---------\n")
+                            'face '(foreground-color . "ForestGreen")))
+        (dolist (dict dicts-list)
+          (let ((name (plist-get dict :name))
+                (file (plist-get dict :file))
+                (coding (plist-get dict :coding)))
+            (insert (propertize (format format-string i name coding file)
+                                'id i 'name name 'file file 'coding coding)))
+          (setq i (1+ i))))
+      (insert (propertize "\n\n操作命令：[I] 添加词库  [D] 删除词库  [P] 向上移动  [N] 向下移动  [g] 刷新  [s] 保存  [R] 重启输入法\n"
+                          'face '(foreground-color . "yellow"))))))
+
+(defun pyim-dicts-manager-delete-dict ()
+  "从 `pyim-dicts' 中删除当前行对应的词库信息。"
+  (interactive)
+  (let ((id (get-text-property (point) 'id))
+        (line (line-number-at-pos)))
+    (when (yes-or-no-p "确定要删除词库吗? ")
+      (setq pyim-dicts (delq (nth (1- id) pyim-dicts) pyim-dicts))
+      (pyim-dicts-manager-refresh)
+      (goto-line line))))
+
+(defun pyim-dicts-manager-dict-position-up ()
+  "向上移动词库。"
+  (interactive)
+  (let* ((id (get-text-property (point) 'id))
+         (dict1 (nth (- id 1) pyim-dicts))
+         (dict2 (nth (- id 2) pyim-dicts))
+         (length (length pyim-dicts))
+         (line (line-number-at-pos)))
+    (when (> id 1)
+      (setf (nth (- id 1) pyim-dicts) dict2)
+      (setf (nth (- id 2) pyim-dicts) dict1)
+      (pyim-dicts-manager-refresh)
+      (goto-line line)
+      (forward-line -1))))
+
+(defun pyim-dicts-manager-dict-position-down ()
+  "向下移动词库。"
+  (interactive)
+  (let* ((id (get-text-property (point) 'id))
+         (dict1 (nth (- id 1) pyim-dicts))
+         (dict2 (nth id pyim-dicts))
+         (length (length pyim-dicts))
+         (line (line-number-at-pos)))
+    (when (< id length)
+      (setf (nth (1- id) pyim-dicts) dict2)
+      (setf (nth id pyim-dicts) dict1)
+      (pyim-dicts-manager-refresh)
+      (goto-line line)
+      (forward-line))))
+
+(defun pyim-dicts-manager-save-dict-info ()
+  "使用 `customize-save-variable' 函数将 `pyim-dicts' 保存到 ~/.emacs 文件中。"
+  (interactive)
+  ;; 将`pyim-dict'的设置保存到emacs配置文件中。
+  (customize-save-variable 'pyim-dicts pyim-dicts)
+  (message "将 Chinese-pyim 词库配置信息保存到 ~/.emacs 文件。"))
+
+(defun pyim-dicts-manager-add-dict ()
+  "为 `pyim-dicts' 添加词库信息。"
+  (interactive)
+  (let ((line (line-number-at-pos))
+        dict name file coding first-used)
     (setq name (read-from-minibuffer "请输入词库名称： "))
     (setq file (read-file-name "请选择词库文件： " "~/"))
     (setq coding (completing-read "词库文件编码: "
@@ -394,9 +486,29 @@
     (if first-used
         (add-to-list 'pyim-dicts dict)
       (add-to-list 'pyim-dicts dict t))
-    ;; 将`pyim-dict'的设置保存到emacs配置文件中。
-    (customize-save-variable 'pyim-dicts pyim-dicts)
-    (message "添加并保存 Chinese-pyim 输入法词库: (%s)，运行 `pyim-restart' 命令或者重启 emacs 后生效！" name)))
+    (pyim-dicts-manager-refresh)
+    (goto-line line)))
+
+(define-derived-mode pyim-dicts-manager-mode special-mode "pyim-dicts-manager"
+  "Major mode for managing Chinese-pyim dicts"
+  (read-only-mode)
+  (define-key pyim-dicts-manager-mode-map (kbd "D") 'pyim-dicts-manager-delete-dict)
+  (define-key pyim-dicts-manager-mode-map (kbd "g") 'pyim-dicts-manager-refresh)
+  (define-key pyim-dicts-manager-mode-map (kbd "I") 'pyim-dicts-manager-add-dict)
+  (define-key pyim-dicts-manager-mode-map (kbd "N") 'pyim-dicts-manager-dict-position-down)
+  (define-key pyim-dicts-manager-mode-map (kbd "P") 'pyim-dicts-manager-dict-position-up)
+  (define-key pyim-dicts-manager-mode-map (kbd "s") 'pyim-dicts-manager-save-dict-info)
+  (define-key pyim-dicts-manager-mode-map (kbd "R") 'pyim-restart))
+
+;;;###autoload
+(defun pyim-dicts-manager ()
+  "Chinese-pyim 词库管理器。"
+  (interactive)
+  (let ((buffer (get-buffer-create "*pyim-dict-manager*")))
+    (pyim-dicts-manager-refresh)
+    (switch-to-buffer buffer)
+    (pyim-dicts-manager-mode)))
+
 ;; #+END_SRC
 
 ;; ** TODO 词库 package 制作工具
