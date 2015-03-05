@@ -432,7 +432,8 @@
     (when (yes-or-no-p "确定要删除词库吗? ")
       (setq pyim-dicts (delq (nth (1- id) pyim-dicts) pyim-dicts))
       (pyim-dicts-manager-refresh)
-      (goto-line line))))
+      (goto-char (point-min))
+      (forward-line (- line 1)))))
 
 (defun pyim-dicts-manager-dict-position-up ()
   "向上移动词库。"
@@ -446,8 +447,8 @@
       (setf (nth (- id 1) pyim-dicts) dict2)
       (setf (nth (- id 2) pyim-dicts) dict1)
       (pyim-dicts-manager-refresh)
-      (goto-line line)
-      (forward-line -1))))
+      (goto-char (point-min))
+      (forward-line (- line 2)))))
 
 (defun pyim-dicts-manager-dict-position-down ()
   "向下移动词库。"
@@ -461,8 +462,8 @@
       (setf (nth (1- id) pyim-dicts) dict2)
       (setf (nth id pyim-dicts) dict1)
       (pyim-dicts-manager-refresh)
-      (goto-line line)
-      (forward-line))))
+      (goto-char (point-min))
+      (forward-line line))))
 
 (defun pyim-dicts-manager-save-dict-info ()
   "使用 `customize-save-variable' 函数将 `pyim-dicts' 保存到 ~/.emacs 文件中。"
@@ -487,7 +488,8 @@
         (add-to-list 'pyim-dicts dict)
       (add-to-list 'pyim-dicts dict t))
     (pyim-dicts-manager-refresh)
-    (goto-line line)))
+    (goto-char (point-min))
+    (forward-line (- line 1))))
 
 (define-derived-mode pyim-dicts-manager-mode special-mode "pyim-dicts-manager"
   "Major mode for managing Chinese-pyim dicts"
