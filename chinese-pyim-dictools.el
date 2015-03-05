@@ -384,10 +384,12 @@
 ;; 5. 重启输入法。
 
 ;; #+BEGIN_SRC emacs-lisp
+(defvar pyim-dicts-manager-buffer-name "*pyim-dict-manager*")
+
 (defun pyim-dicts-manager-refresh ()
   "Refresh the contents of the *pyim-dict-manager* buffer."
   (interactive)
-  (with-current-buffer "*pyim-dict-manager*"
+  (with-current-buffer pyim-dicts-manager-buffer-name
     (let ((inhibit-read-only t)
           (dicts-list pyim-dicts)
           (truncate-lines t)
@@ -432,43 +434,46 @@
 (defun pyim-dicts-manager-delete-dict ()
   "从 `pyim-dicts' 中删除当前行对应的词库信息。"
   (interactive)
-  (let ((id (get-text-property (point) 'id))
-        (line (line-number-at-pos)))
-    (when (yes-or-no-p "确定要删除词库吗? ")
-      (setq pyim-dicts (delq (nth (1- id) pyim-dicts) pyim-dicts))
-      (pyim-dicts-manager-refresh)
-      (goto-char (point-min))
-      (forward-line (- line 1)))))
+  (when (string= (buffer-name) pyim-dicts-manager-buffer-name)
+    (let ((id (get-text-property (point) 'id))
+          (line (line-number-at-pos)))
+      (when (yes-or-no-p "确定要删除词库吗? ")
+        (setq pyim-dicts (delq (nth (1- id) pyim-dicts) pyim-dicts))
+        (pyim-dicts-manager-refresh)
+        (goto-char (point-min))
+        (forward-line (- line 1))))))
 
 (defun pyim-dicts-manager-dict-position-up ()
   "向上移动词库。"
   (interactive)
-  (let* ((id (get-text-property (point) 'id))
-         (dict1 (nth (- id 1) pyim-dicts))
-         (dict2 (nth (- id 2) pyim-dicts))
-         (length (length pyim-dicts))
-         (line (line-number-at-pos)))
-    (when (> id 1)
-      (setf (nth (- id 1) pyim-dicts) dict2)
-      (setf (nth (- id 2) pyim-dicts) dict1)
-      (pyim-dicts-manager-refresh)
-      (goto-char (point-min))
-      (forward-line (- line 2)))))
+  (when (string= (buffer-name) pyim-dicts-manager-buffer-name)
+    (let* ((id (get-text-property (point) 'id))
+           (dict1 (nth (- id 1) pyim-dicts))
+           (dict2 (nth (- id 2) pyim-dicts))
+           (length (length pyim-dicts))
+           (line (line-number-at-pos)))
+      (when (> id 1)
+        (setf (nth (- id 1) pyim-dicts) dict2)
+        (setf (nth (- id 2) pyim-dicts) dict1)
+        (pyim-dicts-manager-refresh)
+        (goto-char (point-min))
+        (forward-line (- line 2))))))
 
 (defun pyim-dicts-manager-dict-position-down ()
   "向下移动词库。"
   (interactive)
-  (let* ((id (get-text-property (point) 'id))
-         (dict1 (nth (- id 1) pyim-dicts))
-         (dict2 (nth id pyim-dicts))
-         (length (length pyim-dicts))
-         (line (line-number-at-pos)))
-    (when (< id length)
-      (setf (nth (1- id) pyim-dicts) dict2)
-      (setf (nth id pyim-dicts) dict1)
-      (pyim-dicts-manager-refresh)
-      (goto-char (point-min))
-      (forward-line line))))
+  (when (string= (buffer-name) pyim-dicts-manager-buffer-name)
+    (let* ((id (get-text-property (point) 'id))
+           (dict1 (nth (- id 1) pyim-dicts))
+           (dict2 (nth id pyim-dicts))
+           (length (length pyim-dicts))
+           (line (line-number-at-pos)))
+      (when (< id length)
+        (setf (nth (1- id) pyim-dicts) dict2)
+        (setf (nth id pyim-dicts) dict1)
+        (pyim-dicts-manager-refresh)
+        (goto-char (point-min))
+        (forward-line line)))))
 
 (defun pyim-dicts-manager-save-dict-info ()
   "使用 `customize-save-variable' 函数将 `pyim-dicts' 保存到 ~/.emacs 文件中。"
@@ -480,21 +485,22 @@
 (defun pyim-dicts-manager-add-dict ()
   "为 `pyim-dicts' 添加词库信息。"
   (interactive)
-  (let ((line (line-number-at-pos))
-        dict name file coding first-used)
-    (setq name (read-from-minibuffer "请输入词库名称： "))
-    (setq file (read-file-name "请选择词库文件： " "~/"))
-    (setq coding (completing-read "词库文件编码: "
-                                  '("utf-8-unix" "cjk-dos" "gb18030-dos")
-                                  nil t nil nil "utf-8-unix"))
-    (setq first-used  (yes-or-no-p "是否让 Chinese-pyim 优先使用词库？ "))
-    (setq dict `(:name ,name :file ,file :coding ,(intern coding)))
-    (if first-used
-        (add-to-list 'pyim-dicts dict)
-      (add-to-list 'pyim-dicts dict t))
-    (pyim-dicts-manager-refresh)
-    (goto-char (point-min))
-    (forward-line (- line 1))))
+  (when (string= (buffer-name) pyim-dicts-manager-buffer-name)
+    (let ((line (line-number-at-pos))
+          dict name file coding first-used)
+      (setq name (read-from-minibuffer "请输入词库名称： "))
+      (setq file (read-file-name "请选择词库文件： " "~/"))
+      (setq coding (completing-read "词库文件编码: "
+                                    '("utf-8-unix" "cjk-dos" "gb18030-dos")
+                                    nil t nil nil "utf-8-unix"))
+      (setq first-used  (yes-or-no-p "是否让 Chinese-pyim 优先使用词库？ "))
+      (setq dict `(:name ,name :file ,file :coding ,(intern coding)))
+      (if first-used
+          (add-to-list 'pyim-dicts dict)
+        (add-to-list 'pyim-dicts dict t))
+      (pyim-dicts-manager-refresh)
+      (goto-char (point-min))
+      (forward-line (- line 1)))))
 
 (define-derived-mode pyim-dicts-manager-mode special-mode "pyim-dicts-manager"
   "Major mode for managing Chinese-pyim dicts"
@@ -511,11 +517,10 @@
 (defun pyim-dicts-manager ()
   "Chinese-pyim 词库管理器。"
   (interactive)
-  (let ((buffer (get-buffer-create "*pyim-dict-manager*")))
+  (let ((buffer (get-buffer-create pyim-dicts-manager-buffer-name)))
     (pyim-dicts-manager-refresh)
     (switch-to-buffer buffer)
     (pyim-dicts-manager-mode)))
-
 ;; #+END_SRC
 
 ;; ** TODO 词库 package 制作工具
