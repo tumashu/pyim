@@ -375,8 +375,13 @@
       (message "将此阶段转换的结果另存为文件：%s" stage-file))))
 ;; #+END_SRC
 
-;; ** TODO 词库文件管理工具
-;; 为 Chinese-pyim 添加词库文件或者删除词库文件，以及对 Chinese-pyim 当前使用的词库文件进行排序。
+;; ** Chinese-pyim 词库管理工具
+;; 为 Chinese-pyim 添加一个简单的词库管理工具 `pyim-dicts-manager' ，可以方便的执行下列命令：
+;; 1. 添加词库。
+;; 2. 删除词库。
+;; 3. 向上和向下移动词库。
+;; 4. 保存词库设置。
+;; 5. 重启输入法。
 
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-dicts-manager-refresh ()
