@@ -503,12 +503,33 @@
       (goto-char (point-min))
       (forward-line (- line 1)))))
 
+(defun pyim-dicts-manager-add-example-dict ()
+  "下载并安装用于测试目的的样例词库。"
+  (interactive)
+  (let ((dict-name "Big-Dict-1")
+        (dict-url "https://github.com/tumashu/chinese-pyim-bigdict/blob/master/pyim-bigdict.txt?raw=true")
+        (dict-file (expand-file-name
+                    (concat (file-name-directory
+                             pyim-personal-file)
+                            "pyim-bigdict.txt"))))
+    (when (yes-or-no-p (format "从网址 (%s) 下载安装样例词库？ " dict-url))
+      (unless (file-exists-p dict-file)
+        (url-copy-file dict-url dict-file))
+      (when (and (file-exists-p dict-file)
+                 (not (pyim-dict-file-available-p dict-file)))
+        (add-to-list 'pyim-dicts
+                     `(:name ,dict-name
+                             :file ,dict-file
+                             :coding utf-8-unix) t))
+      (pyim-dicts-manager-refresh))))
+
 (define-derived-mode pyim-dicts-manager-mode special-mode "pyim-dicts-manager"
   "Major mode for managing Chinese-pyim dicts"
   (read-only-mode)
   (define-key pyim-dicts-manager-mode-map (kbd "D") 'pyim-dicts-manager-delete-dict)
   (define-key pyim-dicts-manager-mode-map (kbd "g") 'pyim-dicts-manager-refresh)
   (define-key pyim-dicts-manager-mode-map (kbd "I") 'pyim-dicts-manager-add-dict)
+  (define-key pyim-dicts-manager-mode-map (kbd "X") 'pyim-dicts-manager-add-example-dict)
   (define-key pyim-dicts-manager-mode-map (kbd "N") 'pyim-dicts-manager-dict-position-down)
   (define-key pyim-dicts-manager-mode-map (kbd "P") 'pyim-dicts-manager-dict-position-up)
   (define-key pyim-dicts-manager-mode-map (kbd "s") 'pyim-dicts-manager-save-dict-info)
