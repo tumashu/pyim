@@ -506,22 +506,23 @@
 (defun pyim-dicts-manager-add-example-dict ()
   "下载并安装用于测试目的的样例词库。"
   (interactive)
-  (let ((dict-name "Big-Dict-1")
-        (dict-url "https://github.com/tumashu/chinese-pyim-bigdict/blob/master/pyim-bigdict.txt?raw=true")
-        (dict-file (expand-file-name
-                    (concat (file-name-directory
-                             pyim-personal-file)
-                            "pyim-bigdict.txt"))))
-    (when (yes-or-no-p (format "从网址 (%s) 下载安装样例词库？ " dict-url))
-      (unless (file-exists-p dict-file)
-        (url-copy-file dict-url dict-file))
-      (when (and (file-exists-p dict-file)
-                 (not (pyim-dict-file-available-p dict-file)))
-        (add-to-list 'pyim-dicts
-                     `(:name ,dict-name
-                             :file ,dict-file
-                             :coding utf-8-unix) t))
-      (pyim-dicts-manager-refresh))))
+  (when (string= (buffer-name) pyim-dicts-manager-buffer-name)
+    (let ((dict-name "BigDict-01")
+          (dict-url "https://github.com/tumashu/chinese-pyim-bigdict/blob/master/pyim-bigdict.txt?raw=true")
+          (dict-file (expand-file-name
+                      (concat (file-name-directory
+                               pyim-personal-file)
+                              "pyim-bigdict.txt"))))
+      (when (yes-or-no-p (format "从网址 (%s) 下载安装样例词库？ " dict-url))
+        (unless (file-exists-p dict-file)
+          (url-copy-file dict-url dict-file))
+        (when (and (file-exists-p dict-file)
+                   (not (pyim-dict-file-available-p dict-file)))
+          (add-to-list 'pyim-dicts
+                       `(:name ,dict-name
+                               :file ,dict-file
+                               :coding utf-8-unix) t))
+        (pyim-dicts-manager-refresh)))))
 
 (define-derived-mode pyim-dicts-manager-mode special-mode "pyim-dicts-manager"
   "Major mode for managing Chinese-pyim dicts"
