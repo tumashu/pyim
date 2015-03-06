@@ -394,8 +394,14 @@
           (dicts-list pyim-dicts)
           (truncate-lines t)
           (format-string "%-4s %-15s %-15s %-60s\n")
+          (face-attr '((foreground-color . "DarkOrange2")
+                       (bold . t)))
           (i 1))
       (erase-buffer)
+      (insert (propertize (format format-string "序号" "词库名称" "Coding" "词库文件")
+                          'face face-attr))
+      (insert (propertize (format format-string  "----" "------------"  "------------" "------------------------------\n")
+                          'face face-attr))
       (if (not pyim-dicts)
           (insert "拼音词库是 Chinese-pyim 使用顺手与否的关键。根据经验估计：
 
@@ -416,11 +422,6 @@
    1. 使用 package 管理器查看 Chinese-pyim 包的简介
    2. 阅读 chinese-pyim.el 文件 Commentary
    3. 查看 Chinese-pyim 在线 README：https://github.com/tumashu/chinese-pyim\n")
-
-        (insert (propertize (format format-string "序号" "词库名称" "Coding" "词库文件")
-                            'face '(foreground-color . "ForestGreen")))
-        (insert (propertize (format format-string  "----" "------------"  "------------" "---------\n")
-                            'face '(foreground-color . "ForestGreen")))
         (dolist (dict dicts-list)
           (let ((name (plist-get dict :name))
                 (file (plist-get dict :file))
@@ -429,7 +430,7 @@
                                 'id i 'name name 'file file 'coding coding)))
           (setq i (1+ i))))
       (insert (propertize "\n\n操作命令：[I] 添加词库  [D] 删除词库  [P] 向上移动  [N] 向下移动  [g] 刷新  [s] 保存  [R] 重启输入法\n"
-                          'face '(foreground-color . "yellow"))))))
+                          'face face-attr)))))
 
 (defun pyim-dicts-manager-delete-dict ()
   "从 `pyim-dicts' 中删除当前行对应的词库信息。"
