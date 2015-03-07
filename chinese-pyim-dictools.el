@@ -392,7 +392,6 @@
   (with-current-buffer pyim-dicts-manager-buffer-name
     (let ((inhibit-read-only t)
           (dicts-list pyim-dicts)
-          (truncate-lines t)
           (format-string "%-4s %-15s %-15s %-60s\n")
           (face-attr '((foreground-color . "DarkOrange2")
                        (bold . t)))
@@ -543,7 +542,8 @@
   (let ((buffer (get-buffer-create pyim-dicts-manager-buffer-name)))
     (pyim-dicts-manager-refresh)
     (switch-to-buffer buffer)
-    (pyim-dicts-manager-mode)))
+    (pyim-dicts-manager-mode)
+    (setq truncate-lines t)))
 ;; #+END_SRC
 
 ;; ** TODO 词库 package 制作工具
