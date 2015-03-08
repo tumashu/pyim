@@ -403,7 +403,7 @@
                        (bold . t)))
           (i 1))
       (erase-buffer)
-      (insert (propertize (format format-string "序号" "启用"  "词库名称" "Coding" "词库文件")
+      (insert (propertize (format format-string "序号" "启用" "Coding" "词库名称" "词库文件")
                           'face face-attr))
       (insert (propertize (format format-string  "----" "----" "------------"  "------------" "------------------------------\n")
                           'face face-attr))
@@ -438,7 +438,7 @@
                 (coding (plist-get dict :coding)))
             (insert (propertize (format format-string i
                                         (if disable "no" "yes")
-                                        name coding file)
+                                        coding name file)
                                 'id i 'disable disable 'name name 'file file 'coding coding)))
           (setq i (1+ i))))
       (insert (propertize "
