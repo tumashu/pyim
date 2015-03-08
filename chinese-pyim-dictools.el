@@ -450,7 +450,7 @@
   (when (string= (buffer-name) pyim-dicts-manager-buffer-name)
     (let* ((id (get-text-property (point) 'id))
            (disable (get-text-property (point) 'disable))
-           (dict (copy-list (nth (1- id) pyim-dicts)))
+           (dict (cl-copy-list (nth (1- id) pyim-dicts)))
            (disable (plist-get dict :disable))
            (line (line-number-at-pos)))
       (setf (nth (1- id) pyim-dicts) (plist-put dict :disable (not disable)))
