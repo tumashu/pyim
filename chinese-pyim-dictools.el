@@ -385,6 +385,12 @@
 
 ;; #+BEGIN_SRC emacs-lisp
 (defvar pyim-dicts-manager-buffer-name "*pyim-dict-manager*")
+(defvar pyim-dicts-manager-scel2pyim-command nil
+  "设置 scel2pyim 命令字符串，比如：
+
+    \"~/project/scel2pyim/scel2pyim %i %o\"
+
+命令执行的时候，%i 替换为输入文件，%o 替换为输出文件。")
 
 (defun pyim-dicts-manager-refresh ()
   "Refresh the contents of the *pyim-dict-manager* buffer."
@@ -510,6 +516,45 @@
   ;; 将`pyim-dict'的设置保存到emacs配置文件中。
   (customize-save-variable 'pyim-dicts pyim-dicts)
   (message "将 Chinese-pyim 词库配置信息保存到 ~/.emacs 文件。"))
+
+(defun pyim-dicts-manager-import-scel-directory ()
+  "导入某个目录中所有搜狗细胞词库的命令。"
+  (interactive)
+  (when (string= (buffer-name) pyim-dicts-manager-buffer-name)
+    (let* ((line (line-number-at-pos))
+           (dir (read-directory-name "请选择搜狗细胞词库所在的目录： " "~/"))
+           (files (directory-files dir t ".*\\.scel")))
+      (dolist (file files)
+        (pyim-dicts-manager-import-scel-file-1 file))
+      (pyim-dicts-manager-refresh)
+      (goto-char (point-min))
+      (forward-line (- line 1)))))
+
+(defun pyim-dicts-manager-import-scel-file ()
+  "导入搜狗细胞词库文件的命令"
+  (interactive)
+  (when (string= (buffer-name) pyim-dicts-manager-buffer-name)
+    (let ((line (line-number-at-pos))
+          (file (read-file-name "请选择需要导入的搜狗细胞词库文件： " "~/")))
+      (pyim-dicts-manager-import-scel-file-1 file)
+      (pyim-dicts-manager-refresh)
+      (goto-char (point-min))
+      (forward-line (- line 1)))))
+
+(defun pyim-dicts-manager-import-scel-file-1 (file)
+  (let* ((filename (file-name-base file))
+         (output-file (expand-file-name
+                       (concat (file-name-directory
+                                pyim-personal-file) filename ".pyim"))))
+    (when pyim-dicts-manager-scel2pyim-command
+      (shell-command
+       (replace-regexp-in-string
+        "%i" (shell-quote-argument file)
+        (replace-regexp-in-string
+         "%o" (shell-quote-argument output-file)
+         pyim-dicts-manager-scel2pyim-command t t) t t) nil)
+      (add-to-list 'pyim-dicts
+                   `(:name ,filename :file ,output-file :coding utf-8) t))))
 
 (defun pyim-dicts-manager-add-dict ()
   "为 `pyim-dicts' 添加词库信息。"
