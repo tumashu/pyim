@@ -392,14 +392,14 @@
   (with-current-buffer pyim-dicts-manager-buffer-name
     (let ((inhibit-read-only t)
           (dicts-list pyim-dicts)
-          (format-string "%-4s %-15s %-15s %-60s\n")
+          (format-string "%-4s %-4s %-15s %-15s %-60s\n")
           (face-attr '((foreground-color . "DarkOrange2")
                        (bold . t)))
           (i 1))
       (erase-buffer)
-      (insert (propertize (format format-string "序号" "词库名称" "Coding" "词库文件")
+      (insert (propertize (format format-string "序号" "启用"  "词库名称" "Coding" "词库文件")
                           'face face-attr))
-      (insert (propertize (format format-string  "----" "------------"  "------------" "------------------------------\n")
+      (insert (propertize (format format-string  "----" "----" "------------"  "------------" "------------------------------\n")
                           'face face-attr))
       (if (not pyim-dicts)
           (insert "拼音词库是 Chinese-pyim 使用顺手与否的关键。根据经验估计：
@@ -426,14 +426,36 @@
    2. 阅读 chinese-pyim.el 文件 Commentary
    3. 查看 Chinese-pyim 在线 README：https://github.com/tumashu/chinese-pyim\n")
         (dolist (dict dicts-list)
-          (let ((name (plist-get dict :name))
+          (let ((disable (plist-get dict :disable))
+                (name (plist-get dict :name))
                 (file (plist-get dict :file))
                 (coding (plist-get dict :coding)))
-            (insert (propertize (format format-string i name coding file)
-                                'id i 'name name 'file file 'coding coding)))
+            (insert (propertize (format format-string i
+                                        (if disable "no" "yes")
+                                        name coding file)
+                                'id i 'disable disable 'name name 'file file 'coding coding)))
           (setq i (1+ i))))
-      (insert (propertize "\n\n操作命令：[I] 添加词库  [D] 删除词库  [P] 向上移动  [N] 向下移动  [g] 刷新  [s] 保存  [R] 重启输入法\n"
+      (insert (propertize "
+操作命令：[I] 添加词库  [D] 删除词库   [P] 向上移动   [N] 向下移动  [g] 刷新页面
+          [s] 保存配置  [R] 重启输入法 [C-c C-c] 禁用/启用当前词库"
                           'face face-attr)))))
+
+(defun pyim-dicts-manager-toggle-enable-dict (&optional enable)
+  "启用当前行对应的词库。"
+  (interactive)
+  (when (string= (buffer-name) pyim-dicts-manager-buffer-name)
+    (let* ((id (get-text-property (point) 'id))
+           (disable (get-text-property (point) 'disable))
+           (dict (nth (1- id) pyim-dicts))
+           (disable (plist-get dict :disable))
+           (line (line-number-at-pos)))
+      (setf (nth (1- id) pyim-dicts) (plist-put dict :disable (not disable)))
+      (if (not disable)
+          (message "禁用当前词库")
+        (message "启用当前词库"))
+      (pyim-dicts-manager-refresh)
+      (goto-char (point-min))
+      (forward-line (- line 1)))))
 
 (defun pyim-dicts-manager-delete-dict ()
   "从 `pyim-dicts' 中删除当前行对应的词库信息。"
@@ -540,7 +562,8 @@
   (define-key pyim-dicts-manager-mode-map (kbd "N") 'pyim-dicts-manager-dict-position-down)
   (define-key pyim-dicts-manager-mode-map (kbd "P") 'pyim-dicts-manager-dict-position-up)
   (define-key pyim-dicts-manager-mode-map (kbd "s") 'pyim-dicts-manager-save-dict-info)
-  (define-key pyim-dicts-manager-mode-map (kbd "R") 'pyim-restart))
+  (define-key pyim-dicts-manager-mode-map (kbd "R") 'pyim-restart)
+  (define-key pyim-dicts-manager-mode-map (kbd "C-c C-c") 'pyim-dicts-manager-toggle-enable-dict))
 
 ;;;###autoload
 (defun pyim-dicts-manager ()
