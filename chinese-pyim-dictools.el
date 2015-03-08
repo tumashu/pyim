@@ -546,11 +546,14 @@
          (output-file (expand-file-name
                        (concat (file-name-directory
                                 pyim-personal-file) input-filename ".pyim"))))
-    (if (call-process pyim-dicts-manager-scel2pyim-command
-                      nil "*pyim-dicts-import*" nil input-file output-file)
-        (add-to-list 'pyim-dicts
-                     `(:name ,input-filename :file ,output-file :coding utf-8) t)
-      (message "搜狗词库文件：%s 转换失败。" input-file))))
+    (if (not (pyim-dict-file-available-p output-file))
+        (if (and (call-process pyim-dicts-manager-scel2pyim-command
+                               nil "*pyim-dicts-import*" nil input-file output-file)
+                 (file-exists-p output-file))
+            (add-to-list 'pyim-dicts
+                         `(:name ,input-filename :file ,output-file :coding utf-8) t)
+          (message "搜狗词库文件：%s 转换失败。" input-file))
+      (message "这个词库文件似乎已经导入。"))))
 
 (defun pyim-dicts-manager-add-dict ()
   "为 `pyim-dicts' 添加词库信息。"
