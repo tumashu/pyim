@@ -385,12 +385,7 @@
 
 ;; #+BEGIN_SRC emacs-lisp
 (defvar pyim-dicts-manager-buffer-name "*pyim-dict-manager*")
-(defvar pyim-dicts-manager-scel2pyim-command nil
-  "设置 scel2pyim 命令字符串，比如：
-
-    \"~/project/scel2pyim/scel2pyim %i %o 1>/dev/null\"
-
-命令执行的时候，%i 将被替换为输入文件，%o 将被替换为输出文件。")
+(defvar pyim-dicts-manager-scel2pyim-command "scel2pyim" "设置 scel2pyim 命令")
 
 (defun pyim-dicts-manager-refresh ()
   "Refresh the contents of the *pyim-dict-manager* buffer."
@@ -542,19 +537,16 @@
       (forward-line (- line 1)))))
 
 (defun pyim-dicts-manager-import-sogou-dict-file-1 (file)
-  (let* ((filename (file-name-base file))
+  (let* ((input-file (expand-file-name file))
+         (input-filename (file-name-base input-file))
          (output-file (expand-file-name
                        (concat (file-name-directory
-                                pyim-personal-file) filename ".pyim"))))
-    (when pyim-dicts-manager-scel2pyim-command
-      (shell-command
-       (replace-regexp-in-string
-        "%i" (shell-quote-argument file)
-        (replace-regexp-in-string
-         "%o" (shell-quote-argument output-file)
-         pyim-dicts-manager-scel2pyim-command t t) t t) nil)
-      (add-to-list 'pyim-dicts
-                   `(:name ,filename :file ,output-file :coding utf-8) t))))
+                                pyim-personal-file) input-filename ".pyim"))))
+    (if (call-process pyim-dicts-manager-scel2pyim-command
+                      nil "*pyim-dicts-import*" nil input-file output-file)
+        (add-to-list 'pyim-dicts
+                     `(:name ,input-filename :file ,output-file :coding utf-8) t)
+      (message "搜狗词库文件：%s 转换失败。" input-file))))
 
 (defun pyim-dicts-manager-add-dict ()
   "为 `pyim-dicts' 添加词库信息。"
