@@ -440,7 +440,7 @@
                                 'id i 'disable disable 'name name 'file file 'coding coding)))
           (setq i (1+ i))))
       (insert (propertize "
-操作命令：[I] 添加词库  [D] 删除词库   [P] 向上移动   [N] 向下移动  [g] 刷新页面
+操作命令：[A] 添加词库  [D] 删除词库   [P] 向上移动   [N] 向下移动  [g] 刷新页面
           [s] 保存配置  [R] 重启输入法 [C-c C-c] 禁用/启用当前词库"
                           'face face-attr)))))
 
@@ -598,13 +598,15 @@
   (read-only-mode)
   (define-key pyim-dicts-manager-mode-map (kbd "D") 'pyim-dicts-manager-delete-dict)
   (define-key pyim-dicts-manager-mode-map (kbd "g") 'pyim-dicts-manager-refresh)
-  (define-key pyim-dicts-manager-mode-map (kbd "I") 'pyim-dicts-manager-add-dict)
-  (define-key pyim-dicts-manager-mode-map (kbd "X") 'pyim-dicts-manager-add-example-dict)
+  (define-key pyim-dicts-manager-mode-map (kbd "A") 'pyim-dicts-manager-add-dict)
+  (define-key pyim-dicts-manager-mode-map (kbd "i f") 'pyim-dicts-manager-import-sogou-dict-file)
+  (define-key pyim-dicts-manager-mode-map (kbd "i d") 'pyim-dicts-manager-import-sogou-dict-directory)
+  (define-key pyim-dicts-manager-mode-map (kbd "i e") 'pyim-dicts-manager-add-example-dict)
   (define-key pyim-dicts-manager-mode-map (kbd "N") 'pyim-dicts-manager-dict-position-down)
   (define-key pyim-dicts-manager-mode-map (kbd "P") 'pyim-dicts-manager-dict-position-up)
   (define-key pyim-dicts-manager-mode-map (kbd "s") 'pyim-dicts-manager-save-dict-info)
-  (define-key pyim-dicts-manager-mode-map (kbd "R") 'pyim-restart)
-  (define-key pyim-dicts-manager-mode-map (kbd "C-c C-c") 'pyim-dicts-manager-toggle-enable-dict))
+  (define-key pyim-dicts-manager-mode-map (kbd "C-c C-c") 'pyim-dicts-manager-toggle-enable-dict)
+  (define-key pyim-dicts-manager-mode-map (kbd "R") 'pyim-restart))
 
 ;;;###autoload
 (defun pyim-dicts-manager ()
