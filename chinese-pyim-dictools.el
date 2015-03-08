@@ -393,14 +393,17 @@
   (with-current-buffer pyim-dicts-manager-buffer-name
     (let ((inhibit-read-only t)
           (dicts-list pyim-dicts)
-          (format-string "%-4s %-4s %-15s %-15s %-60s\n")
+          (format-string "%-4s %-4s %-11s %-25s %-60s\n")
           (face-attr '((foreground-color . "DarkOrange2")
                        (bold . t)))
           (i 1))
       (erase-buffer)
-      (insert (propertize (format format-string "序号" "启用" "Coding" "词库名称" "词库文件")
+      (insert (propertize (format format-string "序号" "启用" "Coding"    "词库名称" "词库文件")
                           'face face-attr))
-      (insert (propertize (format format-string  "----" "----" "------------"  "------------" "------------------------------\n")
+      (insert (propertize (format format-string
+                                  "----" "----" "----------"
+                                  "---------------"
+                                  "------------------------------\n")
                           'face face-attr))
       (if (not pyim-dicts)
           (insert "拼音词库是 Chinese-pyim 使用顺手与否的关键。根据经验估计：
