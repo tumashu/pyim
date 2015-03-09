@@ -1951,14 +1951,12 @@ Return the input string."
 (defun pyim-pos-tip-show (string position)
   "在 `position' 位置，使用 pos-tip 显示字符串 `string' 。"
   (let* ((frame (window-frame (selected-window)))
-         (max-width (pos-tip-x-display-width frame))
-         (max-height (pos-tip-x-display-height frame))
          (w-h (pos-tip-string-width-height string)))
     (pos-tip-show-no-propertize pyim-guidance-str
                                 pyim-tooltip-color
                                 position
                                 nil 15
-                                (pos-tip-tooltip-width (car w-h) (frame-char-width frame))
+                                (pos-tip-tooltip-width (+ 6 (car w-h)) (frame-char-width frame))
                                 (pos-tip-tooltip-height (cdr w-h) (frame-char-height frame) frame)
                                 nil nil 35)))
 
