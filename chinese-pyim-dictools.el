@@ -543,9 +543,12 @@
 (defun pyim-dicts-manager-import-sogou-dict-file-1 (file)
   (let* ((input-file (expand-file-name file))
          (input-filename (file-name-base input-file))
-         (output-file (expand-file-name
-                       (concat (file-name-directory
-                                pyim-personal-file) input-filename ".pyim"))))
+         (output-dir (expand-file-name
+                      (concat (file-name-directory
+                               pyim-personal-file) "dicts/")))
+         (output-file (concat output-dir input-filename ".pyim")))
+    (unless (file-exists-p output-dir)
+      (make-directory output-dir t))
     (if (not (pyim-dict-file-available-p output-file))
         (if (and (call-process pyim-dicts-manager-scel2pyim-command
                                nil "*pyim-dicts-import*" nil input-file output-file)
