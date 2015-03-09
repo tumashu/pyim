@@ -1726,7 +1726,7 @@ Return the input string."
 ;; Chinese-pyim 内建两种方式显示选词框：
 
 ;; 1. 使用 `pyim-minibuffer-message' 函数在 minibuffer 中显示选词框。
-;; 2. 使用 `pos-tip-show-no-propertize' 函数在光标处创建一个 tooltip 来显示选词框。
+;; 2. 使用 `pyim-pos-tip-show' 函数在光标处创建一个 tooltip 来显示选词框。
 
 ;; 两种方式的基本原理相同：通过 *待选词列表* 构建为一个字符串，然后显示这个字符串。
 ;; 用户可以根据这个字符串的提示，来执行相应的动作，比如按空格确认当前选择的词条或
@@ -1939,10 +1939,7 @@ Return the input string."
                         (format "=> %s\n%s"
                                 (substring pyim-guidance-str 0 pos)
                                 (substring pyim-guidance-str (+ pos 2)))))
-              (pos-tip-show-no-propertize pyim-guidance-str
-                                          pyim-tooltip-color
-                                          (overlay-start pyim-overlay)
-                                          nil 15 nil nil nil nil 35))
+              (pyim-pos-tip-show pyim-guidance-str (overlay-start pyim-overlay)))
           (message "%s" pyim-guidance-str))))))
 
 (defun pyim-delete-region ()
@@ -1950,6 +1947,20 @@ Return the input string."
   (if (overlay-start pyim-overlay)
       (delete-region (overlay-start pyim-overlay)
                      (overlay-end pyim-overlay))))
+
+(defun pyim-pos-tip-show (string position)
+  "在 `position' 位置，使用 pos-tip 显示字符串 `string' 。"
+  (let* ((frame (window-frame (selected-window)))
+         (max-width (pos-tip-x-display-width frame))
+         (max-height (pos-tip-x-display-height frame))
+         (w-h (pos-tip-string-width-height string)))
+    (pos-tip-show-no-propertize pyim-guidance-str
+                                pyim-tooltip-color
+                                position
+                                nil 15
+                                (pos-tip-tooltip-width (car w-h) (frame-char-width frame))
+                                (pos-tip-tooltip-height (cdr w-h) (frame-char-height frame) frame)
+                                nil nil 35)))
 
 (defun pyim-minibuffer-message (string)
   (message nil)
