@@ -401,6 +401,11 @@ Chinese-pyim 内建的功能有：
 具体细节请参考函数 `pyim-use-tooltip-p' ."
   :group 'chinese-pyim)
 
+(defcustom pyim-tooltip-additional-pixel-width 100
+  "当使用 tooltip 显示选词框时，由于字体设置等原因，偶尔会出现词条显示不全
+的问题，这时，用户可以通过设置这个变量，来进一步增大 tooltip 的宽度(pixel)。"
+  :group 'chinese-pyim)
+
 (defvar pyim-title "灵拼" "Chinese-pyim 在 mode-line 中显示的名称。")
 (defvar pyim-buffer-name " *Chinese-pyim*")
 (defvar pyim-buffer-list nil
@@ -1956,7 +1961,8 @@ Return the input string."
                                 pyim-tooltip-color
                                 position
                                 nil 15
-                                (pos-tip-tooltip-width (+ 6 (car w-h)) (frame-char-width frame))
+                                (+ (pos-tip-tooltip-width (car w-h) (frame-char-width frame))
+                                   pyim-tooltip-additional-pixel-width)
                                 (pos-tip-tooltip-height (cdr w-h) (frame-char-height frame) frame)
                                 nil nil 35)))
 
