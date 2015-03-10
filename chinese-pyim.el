@@ -565,6 +565,26 @@ If you don't like this funciton, set the variable to nil")
 ;;    请参考： [[pyim-kill-buffers]]
 
 ;; #+BEGIN_SRC emacs-lisp
+(defun pyim-add-dict (name file coding first-used)
+  "为 `pyim-dicts' 添加词库信息，然后 `pyim-dicts' 将通过
+`customize-save-variable' 函数保存到用户emacs配置中"
+  (interactive
+   (let ((name (read-from-minibuffer "请输入词库名称： "))
+         (file (read-file-name "请选择词库文件： " "~/"))
+         (coding (completing-read "词库文件编码: "
+                                  '("utf-8-unix" "cjk-dos" "gb18030-dos")
+                                  nil t nil nil "utf-8-unix"))
+         (first-used  (yes-or-no-p "是否让 Chinese-pyim 优先使用词库？ ")))
+     (list name file coding first-used)))
+    (let (dict)
+    (setq dict `(:name ,name :file ,file :coding ,(intern coding)))
+    (if first-used
+        (add-to-list 'pyim-dicts dict)
+      (add-to-list 'pyim-dicts dict t)))
+    ;; 将`pyim-dict'的设置保存到emacs配置文件中。
+    (customize-save-variable 'pyim-dicts pyim-dicts)
+    (pyim-restart))
+
 (defun pyim-start (name &optional active-func restart save-personal-file)
   (interactive)
   (mapc 'kill-local-variable pyim-local-variable-list)
