@@ -178,6 +178,13 @@
 ;; #+END_EXAMPLE
 
 ;; ** Tips                                                              :README:
+
+;; *** 选词框弹出位置不合理或者选词框内容显示不全
+;; 可以通过设置 `pyim-tooltip-width-adjustment' 变量来手动校正。
+
+;; 1. 选词框内容显示不全：增大变量值
+;; 2. 选词框弹出位置不合理：减小变量值
+
 ;; *** 如何查看 Chinese-pyim 文档。
 ;; Chinese－-pyim 开发使用 lentic 文学编程模式，代码文档隐藏在comment中，如
 ;; 果用户喜欢阅读 html 格式的文档，可以使用下面的命令：
@@ -401,9 +408,13 @@ Chinese-pyim 内建的功能有：
 具体细节请参考函数 `pyim-use-tooltip-p' ."
   :group 'chinese-pyim)
 
-(defcustom pyim-tooltip-additional-pixel-width 0
-  "当使用 tooltip 显示选词框时，由于字体设置等原因，偶尔会出现词条显示不全
-的问题，这时，用户可以通过设置这个变量，来进一步增大 tooltip 的宽度(pixel)。"
+(defcustom pyim-tooltip-width-adjustment 0
+  "手动校正 tooltip 选词框的宽度
+
+由于字体设置等原因，tooltip 选词框实际宽度会比 *预期宽度* 偏大或者偏小，
+这时，有可能会出现选词框词条显示不全或者选词框弹出位置不合理等问题。
+
+用户可以通过增大或者减小这个变量来手动校正 tooltip 的宽度，单位为 pixel。"
   :group 'chinese-pyim)
 
 (defvar pyim-title "灵拼" "Chinese-pyim 在 mode-line 中显示的名称。")
@@ -1961,7 +1972,7 @@ Return the input string."
                                 pyim-tooltip-color
                                 position nil 15
                                 (+ (pos-tip-tooltip-width length (frame-char-width frame))
-                                   pyim-tooltip-additional-pixel-width)
+                                   pyim-tooltip-width-adjustment)
                                 (pos-tip-tooltip-height 2 (frame-char-height frame) frame)
                                 nil nil 35)))
 
