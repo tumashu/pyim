@@ -292,7 +292,13 @@
   "Chinese pinyin input method"
   :group 'leim)
 
-(defcustom pyim-personal-file (locate-user-emacs-file "pyim/pyim-personal.txt")
+(defcustom pyim-directory (locate-user-emacs-file "pyim/")
+  "一个目录，用于保存与 Chinese-pyim 相关的文件。"
+  :group 'chinese-pyim)
+
+(defcustom pyim-personal-file
+  (concat (file-name-as-directory pyim-directory)
+          "pyim-personal.txt")
   "这个文件用来保存用户曾经输入过的中文词条，和这些词条输入的先后顺序。"
   :group 'chinese-pyim
   :type 'file)
@@ -312,6 +318,12 @@ plist 来表示，比如：
 3. `:file'   表示词库文件，"
   :group 'chinese-pyim
   :type 'list)
+
+(defcustom pyim-dicts-directory
+  (concat (file-name-as-directory pyim-directory)
+          "dicts/")
+  "一个目录，用于保存 Chinese-pyim 词库管理器下载或者导入的词库文件"
+  :group 'chinese-pyim)
 
 (defcustom pyim-punctuation-dict
   '(("'" "‘" "’")

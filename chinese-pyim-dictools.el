@@ -543,12 +543,10 @@
 (defun pyim-dicts-manager-import-sogou-dict-file-1 (file)
   (let* ((input-file (expand-file-name file))
          (input-filename (file-name-base input-file))
-         (output-dir (expand-file-name
-                      (concat (file-name-directory
-                               pyim-personal-file) "dicts/")))
-         (output-file (concat output-dir input-filename ".pyim")))
-    (unless (file-exists-p output-dir)
-      (make-directory output-dir t))
+         (output-file (expand-file-name
+                       (concat (file-name-as-directory
+                                pyim-dicts-directory)
+                               input-filename ".pyim"))))
     (if (not (pyim-dict-file-available-p output-file))
         (if (and (call-process pyim-dicts-manager-scel2pyim-command
                                nil "*pyim-dicts-import*" nil input-file output-file)
@@ -585,8 +583,8 @@
     (let ((dict-name "BigDict-01")
           (dict-url "http://tumashu.github.io/chinese-pyim-bigdict/pyim-bigdict.pyim")
           (dict-file (expand-file-name
-                      (concat (file-name-directory
-                               pyim-personal-file)
+                      (concat (file-name-as-directory
+                               pyim-dicts-directory)
                               "pyim-bigdict.pyim"))))
       (when (yes-or-no-p (format "从网址 (%s) 下载安装样例词库？ " dict-url))
         (unless (file-exists-p dict-file)
@@ -618,6 +616,8 @@
 (defun pyim-dicts-manager ()
   "Chinese-pyim 词库管理器。"
   (interactive)
+  (unless (file-exists-p pyim-dicts-directory)
+    (make-directory pyim-dicts-directory t))
   (let ((buffer (get-buffer-create pyim-dicts-manager-buffer-name)))
     (pyim-dicts-manager-refresh)
     (switch-to-buffer buffer)
