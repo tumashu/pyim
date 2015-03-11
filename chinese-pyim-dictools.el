@@ -587,7 +587,7 @@
           (dict-file (expand-file-name
                       (concat (file-name-directory
                                pyim-personal-file)
-                              "pyim-bigdict.txt"))))
+                              "pyim-bigdict.pyim"))))
       (when (yes-or-no-p (format "从网址 (%s) 下载安装样例词库？ " dict-url))
         (unless (file-exists-p dict-file)
           (url-copy-file dict-url dict-file))
