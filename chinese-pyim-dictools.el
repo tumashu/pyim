@@ -415,11 +415,11 @@
 自己使用的词库：BigDict，这个词库词条数量大约60万，文件大约20M，可以显著
 增强 Chinese-pyim 的输入体验，(注意：请使用另存为，不要直接点击链接)。
 
-  http://tumashu.github.io/chinese-pyim-bigdict/pyim-bigdict.txt
+  http://tumashu.github.io/chinese-pyim-bigdict/pyim-bigdict.pyim
 
 或者：
 
-  https://github.com/tumashu/chinese-pyim-bigdict/blob/gh-pages/pyim-bigdict.txt?raw=true
+  https://github.com/tumashu/chinese-pyim-bigdict/blob/gh-pages/pyim-bigdict.pyim?raw=true
 
 下载上述拼音词库后，运行 `pyim-dicts-manager' ，按照命令提示，添加词库并重启输入法。
 
@@ -583,7 +583,7 @@
   (interactive)
   (when (string= (buffer-name) pyim-dicts-manager-buffer-name)
     (let ((dict-name "BigDict-01")
-          (dict-url "http://tumashu.github.io/chinese-pyim-bigdict/pyim-bigdict.txt")
+          (dict-url "http://tumashu.github.io/chinese-pyim-bigdict/pyim-bigdict.pyim")
           (dict-file (expand-file-name
                       (concat (file-name-directory
                                pyim-personal-file)
