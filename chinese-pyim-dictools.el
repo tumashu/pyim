@@ -411,20 +411,11 @@
 1. 当词库词条超过100万时 (词库文件>20M)，Chinese-pyim 选词频率大大降低。
 2. 当词库词条超过100万时，Chinese-pyim 中文输入体验可以达到搜狗输入法的80%。
 
-赶时间的朋友可以直接下载其他 Chinese-pyim 用户现成的拼音词库，比如，某个同学
-自己使用的词库：BigDict，这个词库词条数量大约60万，文件大约20M，可以显著
-增强 Chinese-pyim 的输入体验，(注意：请使用另存为，不要直接点击链接)。
-
-  http://tumashu.github.io/chinese-pyim-bigdict/pyim-bigdict.pyim
-
-或者：
-
-  https://github.com/tumashu/chinese-pyim-bigdict/blob/gh-pages/pyim-bigdict.pyim?raw=true
-
-下载上述拼音词库后，运行 `pyim-dicts-manager' ，按照命令提示，添加词库并重启输入法。
+想快速体验 Chinese-pyim 输入法的用户可以使用词库导入命令下载安装样例词库
+或者导入搜狗输入法词库。
 
 喜欢折腾的用户可以从下面几个途径获得 Chinese-pyim 更详细的信息。
-1. 使用 `C-h v pyim-dicts' 了解 `Chinese-pyim' 词库文件格式，
+1. 使用 `C-h v pyim-dicts' 了解 `Chinese-pyim' 词库文件格式。
 2. 了解如何导入其它输入法的词库。
    1. 使用 package 管理器查看 Chinese-pyim 包的简介
    2. 阅读 chinese-pyim.el 文件 Commentary
