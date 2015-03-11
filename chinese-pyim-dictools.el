@@ -441,7 +441,11 @@
           (setq i (1+ i))))
       (insert (propertize "
 操作命令：[A] 添加词库  [D] 删除词库   [P] 向上移动   [N] 向下移动  [g] 刷新页面
-          [s] 保存配置  [R] 重启输入法 [C-c C-c] 禁用/启用当前词库"
+          [s] 保存配置  [R] 重启输入法 [C-c C-c] 禁用/启用当前词库
+
+词库导入：[i e] 下载并安装样例词库(用于测试)
+          [i f] 导入一个搜狗输入法词库
+          [i d] 导入一个目录中所有的搜狗输入法词库"
                           'face face-attr)))))
 
 (defun pyim-dicts-manager-toggle-enable-dict (&optional enable)
