@@ -1224,9 +1224,7 @@ buffer中，当前词条追加到已有词条之后。"
       (list key)
     ;; (message "call with key: %c" key)
     (pyim-setup-overlays)
-    (let ((modified-p (buffer-modified-p))
-          (buffer-undo-list t)
-          (inhibit-modification-hooks t))
+    (with-silent-modifications
       (unwind-protect
           (let ((input-string (pyim-start-translation key)))
             ;; (message "input-string: %s" input-string)
@@ -1236,8 +1234,7 @@ buffer中，当前词条追加到已有词条之后。"
               (if input-method-exit-on-first-char
                   (list (aref input-string 0))
                 (mapcar 'identity input-string))))
-        (pyim-delete-overlays)
-        (set-buffer-modified-p modified-p)))))
+        (pyim-delete-overlays)))))
 
 (defun pyim-start-translation (key)
   "Start translation of the typed character KEY by Chinese-pyim.
