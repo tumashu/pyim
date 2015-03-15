@@ -2306,7 +2306,8 @@ Return the input string."
 
 ;; 我们用全局变量 `pyim-char-table' 来保存这个 *hash table* 。
 
-;; 函数 `pyim-make-char-table' 是函数 `pyim-make-char-table-1' 的包装，其运行过程大体为：
+;; 函数 `pyim-make-char-table-quail/PY' 是函数 `pyim-make-char-table-1' 的包装，
+;; 这个函数是一个 *历史函数* ，已经没有作用了，仅仅用于学习，其运行过程大体为：
 ;; 1. 使用 regexp 解析  "quail/PY.el" 文件中的汉字拼音信息，这个文件的结构类似：
 ;;    #+BEGIN_EXAMPLE
 ;;    (quail-define-rules
@@ -2326,6 +2327,10 @@ Return the input string."
 ;;    (("ni" "你尼呢腻"))
 ;;    #+END_EXAMPLE
 ;; 3. 使用 `pyim-make-char-table-1' 处理得到的列表。
+;;
+;; 函数 `pyim-make-char-table' 也是函数 `pyim-make-char-table-1' 的包装，
+;; 其过程简单来说就是使用 `pyim-make-char-table-1' 函数处理变量
+;; `pyim-pinyin-pymap' 中保存的拼音汉字对应信息。
 
 ;; 这个例子中的语句用于调试上述三个函数。
 ;; #+BEGIN_EXAMPLE
@@ -2354,7 +2359,14 @@ Return the input string."
             (car (cdr char))))))
 
 (defun pyim-make-char-table ()
-  "Build pinyin char hashtable from quail/PY.el"
+  "Build pinyin char hashtable from `pyim-pinyin-pymap'
+in package `chinese-pyim-pymap'"
+  (require 'chinese-pyim-pymap)
+  (pyim-make-char-table-1 pyim-pinyin-pymap))
+
+(defun pyim-make-char-table-from-quail/PY ()
+  "Build pinyin char hashtable from quail/PY.el，
+这个函数暂时没有用处。"
   (interactive)
   (let ((file (locate-library "quail/PY.el")))
     (if file
