@@ -287,6 +287,7 @@
 (require 'help-mode)
 (require 'pos-tip)
 (require 'chinese-pyim-dictools)
+(require 'chinese-pyim-pymap)
 
 (defgroup chinese-pyim nil
   "Chinese pinyin input method"
@@ -2361,7 +2362,6 @@ Return the input string."
 (defun pyim-make-char-table ()
   "Build pinyin char hashtable from `pyim-pinyin-pymap'
 in package `chinese-pyim-pymap'"
-  (require 'chinese-pyim-pymap)
   (pyim-make-char-table-1 pyim-pinyin-pymap))
 
 (defun pyim-make-char-table-from-quail/PY ()
