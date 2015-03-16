@@ -29,12 +29,14 @@
 
 ;; ** 加载必要的库文件
 ;; #+BEGIN_SRC emacs-lisp
+(require 'chinese-pyim)
 (require 'org)
 (require 'org-table)
 (require 'ox-html)
 (require 'lentic)
 (require 'lentic-org)
 (require 'lentic-doc)
+(require 'ox-gfm)
 ;; #+END_SRC
 
 ;; ** 定义一个 org 导出过滤器，处理中文文档中的多余空格
@@ -88,17 +90,15 @@
           (org-export-select-tags '("README"))
           (indent-tabs-mode nil)
           (tab-width 4))
-      (if (featurep 'ox-gfm)
-          (org-export-to-file 'gfm "README.md")
-        (message "README.md 导出失败，请首先安装加载 ox-gfm")))))
+      (org-export-to-file 'gfm "README.md"))))
 
 (defun pyim-devtools-generate-devel-document ()
   (interactive)
   (lentic-doc-orgify-package 'chinese-pyim)
   (with-current-buffer
       (find-file-noselect
-       (concat (f-parent (locate-library (symbol-name 'chinese-pyim)))
-               "/chinese-pyim.org"))
+       (concat (f-parent (locate-library (symbol-name 'chinese-pyim-core)))
+               "/chinese-pyim-core.org"))
     (let ((org-export-filter-paragraph-functions '(pyim-devtools-org-clean-space))
           (org-export-headline-levels 7)
           (indent-tabs-mode nil)
@@ -109,7 +109,7 @@
   (concat
    (f-parent
     (locate-library "chinese-pyim.el"))
-   "/chinese-pyim.html"))
+   "/chinese-pyim-core.html"))
 
 ;;;###autoload
 (defun pyim-devtools-view-devel-document ()

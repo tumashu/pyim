@@ -30,6 +30,7 @@
 
 ;;; Code:
 ;; #+BEGIN_SRC emacs-lisp
+(require 'chinese-pyim)
 (require 'company)
 (require 'company-dabbrev)
 

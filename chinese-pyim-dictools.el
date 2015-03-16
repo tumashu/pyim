@@ -28,6 +28,8 @@
 ;;; Code:
 ;; ** Require
 (require 'cl-lib)
+(require 'chinese-pyim-pymap)
+(require 'chinese-pyim-core)
 
 ;; ** 汉字到拼音的转换工具
 ;; `pyim-hanzi2pinyin' 和 `pyim-hanzi2pinyin-simple' 可以将一个中文字符串转换为拼音字符串
