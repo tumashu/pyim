@@ -95,21 +95,35 @@
 (defun pyim-devtools-generate-devel-document ()
   (interactive)
   (lentic-doc-orgify-package 'chinese-pyim)
-  (with-current-buffer
-      (find-file-noselect
-       (concat (f-parent (locate-library (symbol-name 'chinese-pyim-core)))
-               "/chinese-pyim-core.org"))
-    (let ((org-export-filter-paragraph-functions '(pyim-devtools-org-clean-space))
-          (org-export-headline-levels 7)
-          (indent-tabs-mode nil)
-          (tab-width 4))
-      (org-html-export-to-html))))
+  (let* ((directory (f-parent (locate-library (symbol-name 'chinese-pyim))))
+         (org-export-filter-paragraph-functions '(pyim-devtools-org-clean-space))
+         (indent-tabs-mode nil)
+         (tab-width 4)
+         (org-publish-project-alist
+          `(("chinese-pyim-doc"
+             :base-directory ,directory
+             :base-extension "org"
+             :select-tags ("devel")
+             :with-toc t
+             :makeindex nil
+             :auto-sitemap nil
+             :sitemap-ignore-case t
+             :html-extension "html"
+             :publishing-directory ,directory
+             :publishing-function (org-html-publish-to-html)
+             :headline-levels 7
+             :auto-preamble t
+             :htmlized-source nil
+             :section-numbers t
+             :table-of-contents t
+             :recursive t))))
+    (org-publish-project "chinese-pyim-doc" t)))
 
 (defvar pyim-devtools-devel-document-file
   (concat
    (f-parent
     (locate-library "chinese-pyim.el"))
-   "/chinese-pyim-core.html"))
+   "/chinese-pyim.html"))
 
 ;;;###autoload
 (defun pyim-devtools-view-devel-document ()
