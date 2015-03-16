@@ -167,13 +167,12 @@ Chinese-pyim 内建的功能有：
 具体细节请参考函数 `pyim-use-tooltip-p' ."
   :group 'chinese-pyim)
 
-(defcustom pyim-tooltip-width-adjustment 0
-  "手动校正 tooltip 选词框的宽度
+(defcustom pyim-tooltip-width-adjustment 1.2
+  "校正 tooltip 选词框宽度的数值，表示校正后的宽度是未校正前宽度的倍数。
 
 由于字体设置等原因，tooltip 选词框实际宽度会比 *预期宽度* 偏大或者偏小，
-这时，有可能会出现选词框词条显示不全或者选词框弹出位置不合理等问题。
-
-用户可以通过增大或者减小这个变量来手动校正 tooltip 的宽度，单位为 pixel。"
+这时，有可能会出现选词框词条显示不全或者选词框弹出位置不合理等问题。用户可以通过
+增大或者减小这个变量来改变 tooltip 选词框的宽度，取值大概在 0.5 ~ 2.0 范围之内。"
   :group 'chinese-pyim)
 
 (defvar pyim-title "灵拼" "Chinese-pyim 在 mode-line 中显示的名称。")
@@ -1727,8 +1726,8 @@ Return the input string."
     (pos-tip-show-no-propertize pyim-guidance-str
                                 pyim-tooltip-color
                                 position nil 15
-                                (+ (pos-tip-tooltip-width length (frame-char-width frame))
-                                   pyim-tooltip-width-adjustment)
+                                (round (* (pos-tip-tooltip-width length (frame-char-width frame))
+                                          pyim-tooltip-width-adjustment))
                                 (pos-tip-tooltip-height 2 (frame-char-height frame) frame)
                                 nil nil 35)))
 
