@@ -32,6 +32,7 @@
 (require 'chinese-pyim)
 (require 'org)
 (require 'org-table)
+(require 'ox-publish)
 (require 'ox-html)
 (require 'lentic)
 (require 'lentic-org)
@@ -104,6 +105,7 @@
              :base-directory ,directory
              :base-extension "org"
              :select-tags ("devel")
+             :exclude "autoloads"
              :with-toc t
              :makeindex nil
              :auto-sitemap nil
