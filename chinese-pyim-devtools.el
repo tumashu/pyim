@@ -119,7 +119,8 @@
              :section-numbers t
              :table-of-contents t
              :recursive t))))
-    (org-publish-project "chinese-pyim-doc" t)))
+    (org-publish-project "chinese-pyim-doc" t)
+    (copy-file "chinese-pyim.html" "index.html" t)))
 
 (defvar pyim-devtools-devel-document-file
   (concat
