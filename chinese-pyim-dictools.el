@@ -187,9 +187,8 @@
             first-char total-char currw)
         (goto-char (point-min))
         (perform-replace "[ \t]+$" "" nil t nil nil nil (point-min) (point-max))
-        (sort-regexp-fields nil "^.*$" "[a-z-]+[ ]+"
-                            (point-min)
-                            (point-max))
+        (pyim-sort-dict-region (point-min)
+                               (point-max))
         (goto-char (point-min))
         (while (not (eobp))
           (if (looking-at "^[ \t]*$")     ; 如果有空行，删除
@@ -205,6 +204,17 @@
           (forward-line 1))
         (if (looking-at "^$")
             (delete-char -1))))))
+
+(defun pyim-sort-dict-region (start end)
+  "将词库 buffer 中 `start' 和 `end' 范围内的词条信息按照拼音code排序
+当 unix 工具 sort 存在时，优先使用这个工具，否则使用emacs自带函数
+`sort-regexp-fields'。"
+  (if (and (executable-find "sort")
+           (executable-find "env"))
+      (call-process-region start end
+                           "env" t t nil "LC_ALL=C"
+                           "sort" "-k1,1" "-s")
+    (sort-regexp-fields nil "^.*$" "[a-z-]+[ ]+" start end)))
 
 (defun pyim-convert-current-line-to-dict-format ()
   "将当前行对应的汉语词条转换为 Chinese-pyim 可以识别的词库格式（ni-hao 你好）。"
