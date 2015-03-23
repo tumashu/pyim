@@ -135,32 +135,32 @@
 
 ;; ** 词库文件生成工具
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-sort-and-remove-duplicates (words-list)
-  "使用分词后的文章来制作拼音词库时，首先按照词条在文章中
-出现的频率对词条排序，然后再删除重复词条。"
-  (let ((list (cl-remove-duplicates words-list :test #'equal))
-        (count-table (make-hash-table :test #'equal)))
+(defun pyim-sort-words-by-freq (words-list)
+  "按照词条出现频率对词条列表排序，频率高词条的排在最前面。"
+  (let ((count-table (make-hash-table :test #'equal)))
     (dolist (x words-list)
       (let ((value (gethash x count-table)))
         (if value
             (puthash x (1+ value) count-table)
           (puthash x 1 count-table))))
-    (sort list (lambda (a b) (> (gethash a count-table)
-                                (gethash b count-table))))))
+    (sort words-list (lambda (a b) (> (gethash a count-table)
+                                      (gethash b count-table))))))
 
 (defun pyim-remove-duplicates-word (&optional sort-by-freq)
   "制作拼音词库时，删除当前行重复出现的词条，
 当 `sort-by-freq' 为 t 时，首先按照当前行词条出现频率对词条排序，
 然后再删除重复词条，用于：从中文文章构建词库。"
   (interactive)
-  (let* (words-list length)
-    (setq words-list (pyim-line-content " "))
-    (setq length (length words-list))
-    (setq words-list
-          (if sort-by-freq
-              (cons (car words-list) ;; 拼音必须排在第一位
-                    (pyim-sort-and-remove-duplicates (cdr words-list)))
-            (cl-remove-duplicates words-list :test #'equal)))
+  (let* ((words-list (pyim-line-content " "))
+         (length (length words-list)))
+    (when sort-by-freq
+      (setq words-list
+            (cons (car words-list) ;; 拼音必须排在第一位
+                  (pyim-sort-words-freq (cdr words-list)))))
+    ;; cl-lib 中类似的函数 *不可以* 使用，
+    ;; 因为，在删除重复元素的时候，列表
+    ;; 前面的元素优先被删除。
+    (delete-dups words-list)
     (when (> length (length words-list))
       (pyim-delete-line)
       (insert (mapconcat 'identity words-list " "))
