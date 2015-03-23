@@ -156,7 +156,7 @@
     (when sort-by-freq
       (setq words-list
             (cons (car words-list) ;; 拼音必须排在第一位
-                  (pyim-sort-words-freq (cdr words-list)))))
+                  (pyim-sort-words-by-freq (cdr words-list)))))
     ;; cl-lib 中类似的函数 *不可以* 使用，
     ;; 因为，在删除重复元素的时候，列表
     ;; 前面的元素优先被删除。
