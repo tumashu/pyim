@@ -23,21 +23,25 @@
 ;; Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 ;;; Commentary:
-;; 这个文件包含开发 Chinese-pyim 时需要的函数和命令。
+;; 这个文件包含了 Chinese-pyim 开发相关的命令，比如：
+;; 1. 生成 GitHub README
+;; 2. 生成代码 html 文档
+;; 3. 其它
+
 
 ;;; Code:
 
 ;; ** 加载必要的库文件
 ;; #+BEGIN_SRC emacs-lisp
 (require 'chinese-pyim)
-(require 'org)
-(require 'org-table)
-(require 'ox-publish)
-(require 'ox-html)
+(require 'org-webpage)
 (require 'lentic)
 (require 'lentic-org)
 (require 'lentic-doc)
 (require 'ox-gfm)
+(require 'ox-org)
+(require 'owp-web-server)
+(require 'eh-website)
 ;; #+END_SRC
 
 ;; ** 定义一个 org 导出过滤器，处理中文文档中的多余空格
@@ -75,64 +79,63 @@
 ;; 2. 生成 Chinese-pyim 代码的说明文档（html文档），帮助开发者理解代码。
 
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-devtools-generate-documents ()
-  (interactive)
-  (pyim-devtools-generate-readme-document)
-  (pyim-devtools-generate-devel-document))
+(defun pyim-path (&optional filename)
+  (concat (file-name-directory
+           (locate-library "chinese-pyim")) (or filename "")))
 
-(defun pyim-devtools-generate-readme-document ()
+(setq pyim-website-org-webpage-config
+      `("chinese-pyim"
+        :repository-directory ,(pyim-path)
+        :site-domain "http://tumashu.github.com/chinese-pyim"
+        :site-main-title "Chinese-pyim"
+        :site-sub-title "(一个 emacs 环境下的中文拼音输入法)"
+        :repository-org-branch "master"
+        :repository-html-branch "gh-pages"
+        :default-category "documents"
+        :theme (worg killjs)
+        :personal-github-link "https://github.com/tumashu/chinese-pyim"
+        :personal-avatar "/media/img/horse.jpg"
+        :personal-duoshuo-shortname "tumashu-website"
+        :preparation-function pyim-preparation-org-files
+        :repo-files-function owp/repo-all-files
+        :org-export-function pyim-org-export-function
+        :web-server-docroot "~/.emacs.d/org-webpage-server/chinese-pyim"
+        :web-server-port 9876
+        ))
+
+(add-to-list 'owp/project-config-alist
+             pyim-website-org-webpage-config)
+
+(defun pyim-devtools-generate-readme-and-index ()
   (interactive)
+  (let* ((el-file (concat (f-parent (locate-library (symbol-name 'chinese-pyim)))
+                          "/chinese-pyim.el"))
+         (org-file (concat (file-name-sans-extension el-file) ".org")))
+    (lentic-doc-orgify-if-necessary el-file)
+    (if (file-exists-p org-file)
+        (with-current-buffer (find-file-noselect org-file)
+          (let ((org-export-filter-paragraph-functions '(pyim-devtools-org-clean-space))
+                (org-export-select-tags '("README"))
+                (indent-tabs-mode nil)
+                (tab-width 4))
+            (org-export-to-file 'gfm "README.md")
+            (org-export-to-file 'org "index.org")))
+      (message "Generate README fail!!!"))))
+
+(defun pyim-org-export-function ()
+  "A function with can export org file to html."
+  (let ((org-export-filter-paragraph-functions
+         '(pyim-devtools-org-clean-space))
+        (org-export-select-tags '("README" "devel"))
+        (indent-tabs-mode nil)
+        (tab-width 4))
+    (org-export-as 'html nil nil t nil)))
+
+(defun pyim-preparation-org-files ()
+  "Generate org files by lentic."
+  (message "Generating org files by lentic ...")
   (lentic-doc-orgify-package 'chinese-pyim)
-  (with-current-buffer
-      (find-file-noselect
-       (concat (f-parent (locate-library (symbol-name 'chinese-pyim)))
-               "/chinese-pyim.org"))
-    (let ((org-export-filter-paragraph-functions '(pyim-devtools-org-clean-space))
-          (org-export-select-tags '("README"))
-          (indent-tabs-mode nil)
-          (tab-width 4))
-      (org-export-to-file 'gfm "README.md"))))
-
-(defun pyim-devtools-generate-devel-document ()
-  (interactive)
-  (lentic-doc-orgify-package 'chinese-pyim)
-  (let* ((directory (f-parent (locate-library (symbol-name 'chinese-pyim))))
-         (org-export-filter-paragraph-functions '(pyim-devtools-org-clean-space))
-         (indent-tabs-mode nil)
-         (tab-width 4)
-         (org-publish-project-alist
-          `(("chinese-pyim-doc"
-             :base-directory ,directory
-             :base-extension "org"
-             :select-tags ("devel")
-             :exclude "autoloads"
-             :with-toc t
-             :makeindex nil
-             :auto-sitemap nil
-             :sitemap-ignore-case t
-             :html-extension "html"
-             :publishing-directory ,directory
-             :publishing-function (org-html-publish-to-html)
-             :headline-levels 7
-             :auto-preamble t
-             :htmlized-source nil
-             :section-numbers t
-             :table-of-contents t
-             :recursive t))))
-    (org-publish-project "chinese-pyim-doc" t)
-    (copy-file "chinese-pyim.html" "index.html" t)))
-
-(defvar pyim-devtools-devel-document-file
-  (concat
-   (f-parent
-    (locate-library "chinese-pyim.el"))
-   "/chinese-pyim.html"))
-
-;;;###autoload
-(defun pyim-devtools-view-devel-document ()
-  (interactive)
-  (pyim-devtools-generate-documents)
-  (browse-url-of-file pyim-devtools-devel-document-file))
+  (pyim-devtools-generate-readme-and-index))
 ;; #+END_SRC
 
 ;;; Footer:

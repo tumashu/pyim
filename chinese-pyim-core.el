@@ -25,7 +25,12 @@
 ;; Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 ;;; Commentary:
-;; Chinese-pyim (Chinese pinyin input method) 输入法核心代码文件。
+;; Chinese pyim 输入法的核心文件，包含了输入法的基本功能函数，比如：
+;; 1. 加载和搜索词库
+;; 2. 处理拼音字符串
+;; 3. 处理备选词条
+;; 4. 显示备选词条
+;; 5. 其它
 
 ;;; Code:
 ;; ** require + defcustom + defvar

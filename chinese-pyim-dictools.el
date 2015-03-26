@@ -23,13 +23,23 @@
 ;; Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 ;;; Commentary:
-;; 这个文件包含了制作，分发以及管理 Chinese-pyim 词库文件需要的工具
+
+;; 这个文件主要包含与词库文件管理相关的一些命令和函数，比如：
+;; 1. 词库管理器
+;; 2. 词库文件制作
+;; 3. 词库文件更新
+;; 4. 汉字转拼音
+;; 5. 其它
+
 
 ;;; Code:
 ;; ** Require
+
+;; #+BEGIN_SRC emacs-lisp
 (require 'cl-lib)
 (require 'chinese-pyim-pymap)
 (require 'chinese-pyim-core)
+;; #+END_SRC
 
 ;; ** 汉字到拼音的转换工具
 ;; `pyim-hanzi2pinyin' 和 `pyim-hanzi2pinyin-simple' 可以将一个中文字符串转换为拼音字符串

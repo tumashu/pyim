@@ -279,46 +279,6 @@
 ;; 1. `pyim-hanzi2pinyin' （考虑多音字）
 ;; 2. `pyim-hanzi2pinyin-simple'  （不考虑多音字）
 
-;; * Chinese-pyim 开发文档
-;; ** Chinese-pyim Core                                                  :devel:
-;; chinese-pyim-core.el 是 Chinese pyim 输入法的核心文件，包含了输入法的基本功能函数，比如：
-;; 1. 加载和搜索词库
-;; 2. 处理拼音字符串
-;; 3. 处理备选词条
-;; 4. 显示备选词条
-;; 5. 其它
-
-;; 具体细节请参考： [[file:chinese-pyim-core.org]]
-
-;; ** Chinese-pyim dict tools                                            :devel:
-;; chinese-pyim-dictools.el 主要包含与词库文件管理相关的一些命令和函数，比如：
-;; 1. 词库管理器
-;; 2. 词库文件制作
-;; 3. 词库文件更新
-;; 4. 汉字转拼音
-;; 5. 其它
-
-;; 具体细节请参考：[[file:chinese-pyim-dictools.org]]
-
-;; ** Chinese-pyim develop tools                                         :devel:
-;; chinese-pyim-devtools.el 包含了 Chinese-pyim 开发相关的命令，比如：
-;; 1. 生成 GitHub README
-;; 2. 生成代码 html 文档
-;; 3. 其它
-
-;; 具体细节请参考：[[file:chinese-pyim-devtools.org]]
-
-;; ** Chinese-pyim company                                               :devel:
-;; chinese-pyim-company.el 包含了两个 company 补全后端，与 Chinese-pyim 配合使用
-;; 可以比较方便的补全中文词条。
-
-;; 具体细节请参考：[[file:chinese-pyim-company.org]]
-
-;; ** Chinese-pyim pymap                                                 :devel:
-;; chinese-pyim-pymap.el 包含了与 quail/PY.el 文件内容相似的 "拼音-汉字" 对照表，
-;; 这个对照表用来实现拼音查询功能，即，查询某个汉字对应的拼音代码。
-
-;; 具体细节请参考：[[file:chinese-pyim-pymap.org]]
 
 ;;; Code:
 ;; #+BEGIN_SRC emacs-lisp

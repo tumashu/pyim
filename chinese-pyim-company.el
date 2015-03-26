@@ -22,7 +22,9 @@
 ;; Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 ;;; Commentary:
-;; 这个包为 `Chinese-pyim' 添加中文词条 *联想* 功能，其使用方式：
+;; 这个文件包含了两个 company 补全后端，与 Chinese-pyim 配合使用
+;; 可以比较方便的补全中文词条。
+
 
 ;; #+BEGIN_EXAMPLE
 ;; (require 'chinese-pyim-company)
