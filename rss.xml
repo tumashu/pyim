@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Chinese-pyim</title>
+    <link>http://tumashu.github.com/chinese-pyim</link>
+    <description>(一个 emacs 环境下的中文拼音输入法)</description>
+    <pubDate>五, 03  4月 2015 00:13:33 CST</pubDate>
+    <lastBuildDate>五, 03  4月 2015 00:13:33 CST</lastBuildDate>
+    <docs>http://www.rssboard.org/rss-specification</docs>
+    <generator>org-webpage static site generator (https://github.com/tumashu/org-webpage)</generator>
+<item>
+<title>chinese-pyim-company</title>
+<link>http://tumashu.github.com/chinese-pyim/documents/2015/04/03/chinese-pyim-company/</link>
+<description>No Description</description>
+<pubDate>2015-04-02</pubDate>
+<guid>http://tumashu.github.com/chinese-pyim/documents/2015/04/03/chinese-pyim-company/</guid>
+</item>
+<item>
+<title>chinese-pyim-core</title>
+<link>http://tumashu.github.com/chinese-pyim/documents/2015/04/03/chinese-pyim-core/</link>
+<description>No Description</description>
+<pubDate>2015-04-02</pubDate>
+<guid>http://tumashu.github.com/chinese-pyim/documents/2015/04/03/chinese-pyim-core/</guid>
+</item>
+<item>
+<title>chinese-pyim-devtools</title>
+<link>http://tumashu.github.com/chinese-pyim/documents/2015/04/03/chinese-pyim-devtools/</link>
+<description>No Description</description>
+<pubDate>2015-04-02</pubDate>
+<guid>http://tumashu.github.com/chinese-pyim/documents/2015/04/03/chinese-pyim-devtools/</guid>
+</item>
+<item>
+<title>chinese-pyim-pymap</title>
+<link>http://tumashu.github.com/chinese-pyim/documents/2015/04/03/chinese-pyim-pymap/</link>
+<description>No Description</description>
+<pubDate>2015-04-02</pubDate>
+<guid>http://tumashu.github.com/chinese-pyim/documents/2015/04/03/chinese-pyim-pymap/</guid>
+</item>
+<item>
+<title>chinese-pyim-dictools</title>
+<link>http://tumashu.github.com/chinese-pyim/documents/2015/04/03/chinese-pyim-dictools/</link>
+<description>No Description</description>
+<pubDate>2015-04-02</pubDate>
+<guid>http://tumashu.github.com/chinese-pyim/documents/2015/04/03/chinese-pyim-dictools/</guid>
+</item>
+<item>
+<title>chinese-pyim</title>
+<link>http://tumashu.github.com/chinese-pyim/documents/2015/04/03/chinese-pyim/</link>
+<description>No Description</description>
+<pubDate>2015-02-11</pubDate>
+<guid>http://tumashu.github.com/chinese-pyim/documents/2015/04/03/chinese-pyim/</guid>
+</item>
+</channel>
+</rss>
