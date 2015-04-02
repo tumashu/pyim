@@ -96,7 +96,7 @@
 ;; *** 常用快捷键
 ;; | 输入法快捷键    | 功能             |
 ;; |-----------------+------------------|
-;; | C-n 或 M-c 或 + | 向下翻页         |
+;; | C-n 或 M-n 或 + | 向下翻页         |
 ;; | C-p 或 M-p 或 - | 向上翻页         |
 ;; | C-f             | 选择下一个备选词 |
 ;; | C-b             | 选择上一个备选词 |
@@ -186,11 +186,9 @@
 
 ;; *** 如何查看 Chinese-pyim 文档。
 ;; Chinese－-pyim 开发使用 lentic 文学编程模式，代码文档隐藏在comment中，如
-;; 果用户喜欢阅读 html 格式的文档，可以使用下面的命令：
+;; 果用户喜欢阅读 html 格式的文档，可以查看在线文档；
 
-;; #+BEGIN_EXAMPLE
-;; M-x pyim-devtools-view-devel-document
-;; #+END_EXAMPLE
+;;   http://tumashu.github.io/chinese-pyim/
 
 ;; *** 如何添加自定义拼音词库
 ;; Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面三种方式，获取
@@ -202,7 +200,7 @@
 ;; 时创建了一个中文拼音词库，词条数量大约60万，文件大约20M，(注意：请使用
 ;; 另存为，不要直接点击链接)。
 
-;; https://github.com/tumashu/chinese-pyim-bigdict/blob/master/pyim-bigdict.txt?raw=true
+;;    http://tumashu.github.io/chinese-pyim-bigdict/pyim-bigdict.pyim
 
 ;; 下载上述词库后，运行 `pyim-dicts-manager' ，按照命令提示，将下载得到的词库
 ;; 文件信息添加到 `pyim-dicts' 中，最后运行命令 `pyim-restart' 或者重启

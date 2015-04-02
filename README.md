@@ -105,7 +105,7 @@ Chinese-pyim 的目标是： **尽最大的努力成为一个好用的 emacs 备
 
 <tbody>
 <tr>
-<td class="left">C-n 或 M-c 或 +</td>
+<td class="left">C-n 或 M-n 或 +</td>
 <td class="left">向下翻页</td>
 </tr>
 
@@ -220,9 +220,9 @@ Chinese-pyim 使用一个比较 **粗糙** 的方法处理 **模糊音** ，要�
 
 ### 如何查看 Chinese-pyim 文档。<a id="sec-1-8-2" name="sec-1-8-2"></a>
 
-Chinese－-pyim 开发使用 lentic 文学编程模式，代码文档隐藏在comment中，如果用户喜欢阅读 html 格式的文档，可以使用下面的命令：
+Chinese－-pyim 开发使用 lentic 文学编程模式，代码文档隐藏在comment中，如果用户喜欢阅读 html 格式的文档，可以查看在线文档；
 
-    M-x pyim-devtools-view-devel-document
+<http://tumashu.github.io/chinese-pyim/>
 
 ### 如何添加自定义拼音词库<a id="sec-1-8-3" name="sec-1-8-3"></a>
 
@@ -233,7 +233,7 @@ Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面三�
     获取其他 Chinese-pyim 用户的拼音词库，比如，某个同学测试 Chinese-pyim
     时创建了一个中文拼音词库，词条数量大约60万，文件大约20M，(注意：请使用另存为，不要直接点击链接)。
 
-    <https://github.com/tumashu/chinese-pyim-bigdict/blob/master/pyim-bigdict.txt?raw=true>
+    <http://tumashu.github.io/chinese-pyim-bigdict/pyim-bigdict.pyim>
 
     下载上述词库后，运行 \`pyim-dicts-manager' ，按照命令提示，将下载得到的词库文件信息添加到 \`pyim-dicts' 中，最后运行命令 \`pyim-restart' 或者重启
     emacs，这个词库使用 \`utf-8-unix' 编码。
