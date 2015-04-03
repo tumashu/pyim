@@ -98,7 +98,7 @@
         :personal-avatar "/media/img/horse.jpg"
         :personal-duoshuo-shortname "tumashu-website"
         :preparation-function pyim-preparation-org-files
-        :repo-files-function owp/repo-all-files
+        :addition-files-function owp/git-ignored-files
         :org-export-function pyim-org-export-function
         :web-server-docroot "~/.emacs.d/org-webpage-server/chinese-pyim"
         :web-server-port 9876
