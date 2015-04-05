@@ -72,6 +72,25 @@
              "\\1\\2" string))
       string)))
 
+(defun pyim-devtools-replace-org-head (regexp replace-string)
+  "replace org head matched `regexp' to string `replace-string'"
+  (org-map-entries
+   (lambda ()
+     (let ((head (org-get-heading t t)))
+       (when (string-match-p regexp head)
+         (delete-region (+ (line-beginning-position) 2)
+                        (line-end-position))
+         (goto-char (line-end-position))
+         (insert (concat " " replace-string)))))))
+
+(defun pyim-devtools-org-preprocess (backend)
+  "This function replace some org head, used by `org-export-before-processing-hook'"
+  (save-excursion
+    (when (eq backend 'html)
+      (pyim-devtools-replace-org-head "Header" "Header :noexport:")
+      (pyim-devtools-replace-org-head "Footer" "Footer :noexport:")
+      (pyim-devtools-replace-org-head "Commentary" "简要介绍")
+      (pyim-devtools-replace-org-head "Code" "代码说明"))))
 ;; #+END_SRC
 
 ;; ** 用于生成 chinese-pyim 相关文档的命令
@@ -125,7 +144,9 @@
 
 (defun pyim-org-export-function ()
   "A function with can export org file to html."
-  (let ((org-export-filter-paragraph-functions
+  (let ((org-export-before-processing-hook
+         '(pyim-devtools-org-preprocess))
+        (org-export-filter-paragraph-functions
          '(pyim-devtools-org-clean-space))
         (org-export-select-tags '("README" "devel"))
         (indent-tabs-mode nil)
