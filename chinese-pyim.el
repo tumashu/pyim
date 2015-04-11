@@ -25,9 +25,13 @@
 
 ;;; Commentary:
 ;; * Chinese-pyim 使用说明
+;; ** 截图                                                              :README:
+;; [[./snapshots/pyim-linux-x-with-toolkit.png]]
+
 ;; ** 简介                                                              :README:
 ;; Chinese-pyim (Chinese Pinyin Input Method) 是 emacs 环境下的一个中文拼
 ;; 音输入法。
+
 
 ;; ** 背景                                                              :README:
 ;; Chinese-pyim 的代码源自 emacs-eim。
