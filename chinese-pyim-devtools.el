@@ -156,6 +156,17 @@
 (defun pyim-preparation-org-files ()
   "Generate org files by lentic."
   (message "Generating org files by lentic ...")
+  (mapc #'(lambda (el-file)
+            (let* ((org-file (concat (file-name-sans-extension el-file) ".org"))
+                   (el-buffer (get-file-buffer el-file))
+                   (org-buffer (get-file-buffer org-file)))
+              (when el-buffer
+                (with-current-buffer el-buffer
+                  (kill-buffer)))
+              (when org-buffer
+                (with-current-buffer org-buffer
+                  (kill-buffer)))))
+        (lentic-doc-all-files-of-package (symbol-name 'chinese-pyim)))
   (lentic-doc-orgify-package 'chinese-pyim)
   (pyim-devtools-generate-readme-and-index))
 ;; #+END_SRC
