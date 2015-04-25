@@ -952,10 +952,10 @@ buffer中，当前词条追加到已有词条之后。"
 ;; 朋友可以参考：
 ;; 1. `quail-input-method' 相关函数。
 ;; 2. elisp 手册相关章节:
-;;    1. [[Invoking the Input Method]]
-;;    2. [[Input Methods]]
-;;    3. [[Miscellaneous Event Input Features]]
-;;    4. [[Reading One Event]]
+;;    1. Invoking the Input Method
+;;    2. Input Methods
+;;    3. Miscellaneous Event Input Features
+;;    4. Reading One Event
 
 ;; *** 在待输入 buffer 中插入 `pyim-current-str'
 ;; `pyim-self-insert-command' 会调用 `pyim-handle-string' 来处理
