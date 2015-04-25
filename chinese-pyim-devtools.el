@@ -113,7 +113,7 @@
         :default-category "documents"
         :theme (worg killjs)
         :force-absolute-url t
-        :personal-github-link "https://github.com/tumashu/chinese-pyim"
+        :source-browse-url ("GitHub" "https://github.com/tumashu/chinese-pyim")
         :personal-avatar "/media/img/horse.jpg"
         :personal-duoshuo-shortname "tumashu-website"
         :preparation-function pyim-preparation-org-files
