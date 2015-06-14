@@ -71,71 +71,135 @@
 ;; #+RESULTS:
 ;; : ("hangchang" "hc" "hang-chang" ("hang-chang") ("h-c"))
 
+
+;; `pyim-hanzi2pinyin' 函数使用 “排列组合” 函数 `pyim-permutate-list' 来处理多音字，
+;; 这个函数所做工作类似：
+
+;; #+BEGIN_EXAMPLE
+;; (cl-prettyprint
+;;  (pyim-permutate-list
+;;   '(("a" "b")
+;;     ("c" "d")
+;;     ("e" "f" "g"))))
+
+;; OUTPUT:
+
+;; (("a" "c" "e")
+;;  ("a" "c" "f")
+;;  ("a" "c" "g")
+;;  ("a" "d" "e")
+;;  ("a" "d" "f")
+;;  ("a" "d" "g")
+;;  ("b" "c" "e")
+;;  ("b" "c" "f")
+;;  ("b" "c" "g")
+;;  ("b" "d" "e")
+;;  ("b" "d" "f")
+;;  ("b" "d" "g"))
+;; #+END_EXAMPLE
+
+
 ;; #+BEGIN_SRC emacs-lisp
 ;;;###autoload
 (defun pyim-hanzi2pinyin (string &optional shou-zi-mu separator return-list ignore-duo-yin-zi)
   "将汉字字符串转换为对应的拼音字符串, 如果 `shou-zi-mu' 设置为t,转换仅得到拼音
 首字母字符串。如果 `ignore-duo-yin-zi' 设置为t, 遇到多音字时，只使用第一个拼音。
-其它拼音忽略。"
-  (let (string-list pinyin-list output)
+其它拼音忽略。
+
+BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，结果会包含多余的连接符：
+比如： '你=好' --> 'ni-=-hao'"
+  (let (string-list pinyins-list pinyins-list-permutated)
 
     ;; 确保 `pyim-char-table' 已经生成。
     (unless (pyim-get-char-code ?文)
       (pyim-make-char-table))
 
     ;; 将汉字字符串转换为字符list，英文原样输出。
-    (setq string-list (split-string
-                       (replace-regexp-in-string
-                        "\\(\\cc\\)" "@@@@\\1@@@@" string)
-                       "@@@@"))
-    ;; 删除空字符串
-    (setq string-list (cl-remove-if #'(lambda (x)
-                                        (= (length x) 0)) string-list))
+    ;; 比如： “Hello银行” -> ("Hello" "银" "行")
+    (setq string-list
+          (split-string
+           (replace-regexp-in-string
+            "\\(\\cc\\)" "@@@@\\1@@@@" string)
+           "@@@@"))
+
+    ;; 删除 `string-list' 中的空字符串
+    (setq string-list
+          (cl-remove-if
+           #'(lambda (x)
+               (= (length x) 0)) string-list))
 
     ;; 将上述汉字字符串里面的所有汉字转换为与之对应的拼音list。
-    (setq pinyin-list (mapcar (lambda (str)
-                                (cond
-                                 ((> (length str) 1) (list str))
-                                 ((and (> (length str) 0)
-                                       (string-match-p "\\cc" str))
-                                  (or (pyim-get-char-code (string-to-char str)) (list str)))
-                                 ((> (length str) 0) (list str)))) string-list))
+    ;; 比如： ("Hello" "银" "行") -> (("Hello") ("yin") ("hang" "xing"))
+    (setq pinyins-list
+          (mapcar
+           #'(lambda (str)
+               (cond
+                ((> (length str) 1) (list str))
+                ((and (> (length str) 0)
+                      (string-match-p "\\cc" str))
+                 (or (pyim-get-char-code (string-to-char str)) (list str)))
+                ((> (length str) 0) (list str))))
+           string-list))
 
-    ;; 通过排列组合的方式将 pinyin-list 转化为拼音字符串列表。
-    (setq output
-          (if ignore-duo-yin-zi
-              (list (mapconcat 'identity
-                               (mapcar
-                                (lambda (x)
-                                  (if shou-zi-mu
-                                      (substring (car x) 0 1)
-                                    (car x))) pinyin-list)
-                               (or separator "")))
-            (cl-remove-duplicates
-             (let ((result '("")))
-               (cl-loop for i in pinyin-list
-                        do (setq result
-                                 (cl-loop for j in i
-                                          append (cl-loop for k in result
-                                                          collect (concat k (if shou-zi-mu (substring j 0 1) j)
-                                                                          (or separator "")))))) result)
-             :test (lambda (x y) (or (null y) (equal x y)))
-             :from-end t)))
+    ;; 通过排列组合的方式, 重排 pinyins-list。
+    ;; 比如：(("Hello") ("yin") ("hang" "xing")) -> (("Hello" "yin" "hang") ("Hello" "yin" "xing"))
+    (setq pinyins-list-permutated (pyim-permutate-list pinyins-list))
 
-    ;; 清理多余的拼音连接符，这个处理方式有点hack。需要优化。
-    (setq output (mapcar (lambda (x)
-                           (replace-regexp-in-string
-                            "- " " " x)) output))
-    (setq output (mapcar (lambda (x)
-                           (replace-regexp-in-string
-                            "-$" "" x)) output))
-    (setq output (mapcar (lambda (x)
-                           (replace-regexp-in-string
-                            " -" " " x)) output))
-    ;; 返回字符串或者列表
-    (if return-list
-        output
-      (mapconcat 'identity output " "))))
+    ;; 返回拼音字符串或者拼音列表
+    (let ((list (mapcar
+                 #'(lambda (x)
+                     (mapconcat
+                      #'(lambda (str)
+                          (if shou-zi-mu
+                              (substring str 0 1)
+                            str))
+                      x separator))
+                 (if ignore-duo-yin-zi
+                     (list (car pinyins-list-permutated))
+                   pinyins-list-permutated))))
+      (if return-list
+          list
+        (mapconcat #'identity list " ")))))
+
+(defun pyim-permutate-list (list)
+  "使用排列组合的方式重新排列 `list'，这个函数由 ‘二中’ 提供。
+`pyim-hanzi2pinyin' 默认使用这个函数。"
+  (let ((list-head (car list))
+        (list-tail (cdr list)))
+    (cond ((null list-tail)
+           (loop for element0 in list-head
+                 append (cons (cons element0 nil) nil)))
+          (t (loop for element in list-head
+                   append (mapcar (lambda (l) (cons element l))
+                                  (pyim-permutate-list list-tail)))))))
+
+(defun pyim-permutate-list2 (list)
+  "使用排列组合的方式重新排列 `list'，这个函数由 ’翀/ty‘ 提供。
+
+注意：`pyim-hanzi2pinyin' 没有使用这个函数，主要原因是兼容问题：
+`pyim-hanzi2pinyin' 使用这个函数时，得到的结果与老版本不一致
+（排列顺序有差异）。"
+  (cond ((null list) nil)
+        ((null (cdr list))  (car list))
+        (t (pyim-permutate-list2-internal
+            (car list)
+            (pyim-permutate-list2 (cdr list))))))
+
+(defun pyim-permutate-list2-internal (one two)
+  "`pyim-permutate-list2' 的内部函数。"
+  (let (return)
+    (if (null two)
+        one
+      (mapc #'(lambda (item1)
+                (mapc #'(lambda (item2)
+                          (setq return
+                                (cons (if (listp item2)
+                                          (append (list item1) item2)
+                                        (list item1 item2))
+                                      return)))
+                      two))
+            one)
+      return)))
 
 ;;;###autoload
 (defun pyim-hanzi2pinyin-simple (string &optional shou-zi-mu separator return-list)
