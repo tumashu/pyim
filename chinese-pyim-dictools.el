@@ -86,8 +86,8 @@
     ;; 将汉字字符串转换为字符list，英文原样输出。
     (setq string-list (split-string
                        (replace-regexp-in-string
-                        "\\(\\cc\\)" "-\\1-" string)
-                       "-"))
+                        "\\(\\cc\\)" "@@@@\\1@@@@" string)
+                       "@@@@"))
     ;; 删除空字符串
     (setq string-list (cl-remove-if #'(lambda (x)
                                         (= (length x) 0)) string-list))
