@@ -177,29 +177,27 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
   "使用排列组合的方式重新排列 `list'，这个函数由 ’翀/ty‘ 提供。
 
 注意：`pyim-hanzi2pinyin' 没有使用这个函数，主要原因是兼容问题：
-`pyim-hanzi2pinyin' 使用这个函数时，得到的结果与老版本不一致
-（排列顺序有差异）。"
-  (cond ((null list) nil)
-        ((null (cdr list))  (car list))
-        (t (pyim-permutate-list2-internal
-            (car list)
-            (pyim-permutate-list2 (cdr list))))))
+`pyim-hanzi2pinyin' 使用这个函数时，得到的结果与老版本不一致,
+排列顺序有差异。"
+  (pyim-permutate-list2-internal (car list) (cdr list)))
 
 (defun pyim-permutate-list2-internal (one two)
   "`pyim-permutate-list2' 的内部函数。"
   (let (return)
-    (if (null two)
+    (if (null (car two))
         one
       (mapc #'(lambda (item1)
                 (mapc #'(lambda (item2)
                           (setq return
-                                (cons (if (listp item2)
-                                          (append (list item1) item2)
-                                        (list item1 item2))
-                                      return)))
-                      two))
+                                (cons
+                                 (if (listp item1)
+                                     (append item1 (list item2))
+                                   (list item1 item2))
+                                 return)))
+                      (car two)))
             one)
-      return)))
+      (setq one return)
+      (pyim-permutate-list2-internal one (cdr two)))))
 
 ;;;###autoload
 (defun pyim-hanzi2pinyin-simple (string &optional shou-zi-mu separator return-list)
