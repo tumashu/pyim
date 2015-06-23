@@ -731,5 +731,12 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
 ;; #+BEGIN_SRC emacs-lisp
 (provide 'chinese-pyim-dictools)
 
+;; Local Variables:
+;; coding: utf-8-unix
+;; tab-width: 4
+;; indent-tabs-mode: nil
+;; lentic-init: lentic-orgel-org-init
+;; End:
+
 ;;; chinese-pyim-dictools.el ends here
 ;; #+END_SRC
