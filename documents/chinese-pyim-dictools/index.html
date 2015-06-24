@@ -114,72 +114,135 @@
 </pre>
 </div>
 
+
+<p>
+`pyim-hanzi2pinyin' 函数使用 “排列组合” 函数 `pyim-permutate-list' 来处理多音字，这个函数所做工作类似：
+</p>
+
+<pre class="example">
+(cl-prettyprint
+ (pyim-permutate-list
+  '(("a" "b")
+    ("c" "d")
+    ("e" "f" "g"))))
+
+OUTPUT:
+
+(("a" "c" "e")
+ ("a" "c" "f")
+ ("a" "c" "g")
+ ("a" "d" "e")
+ ("a" "d" "f")
+ ("a" "d" "g")
+ ("b" "c" "e")
+ ("b" "c" "f")
+ ("b" "c" "g")
+ ("b" "d" "e")
+ ("b" "d" "f")
+ ("b" "d" "g"))
+</pre>
+
+
 <div class="org-src-container">
 
 <pre class="src src-emacs-lisp"><span style="color: #8B8989; font-style: italic;">;;;</span><span style="color: #8B8989; font-style: italic;">###</span><span style="color: #8B8989; font-style: italic;">autoload</span>
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-hanzi2pinyin</span> (string <span style="color: #D8FA3C;">&amp;optional</span> shou-zi-mu separator return-list ignore-duo-yin-zi)
   <span style="color: #61CE3C;">"&#23558;&#27721;&#23383;&#23383;&#31526;&#20018;&#36716;&#25442;&#20026;&#23545;&#24212;&#30340;&#25340;&#38899;&#23383;&#31526;&#20018;, &#22914;&#26524; `</span><span style="color: #61CE3C;">shou-zi-mu</span><span style="color: #61CE3C;">' &#35774;&#32622;&#20026;t,&#36716;&#25442;&#20165;&#24471;&#21040;&#25340;&#38899;</span>
 <span style="color: #61CE3C;">&#39318;&#23383;&#27597;&#23383;&#31526;&#20018;&#12290;&#22914;&#26524; `</span><span style="color: #61CE3C;">ignore-duo-yin-zi</span><span style="color: #61CE3C;">' &#35774;&#32622;&#20026;t, &#36935;&#21040;&#22810;&#38899;&#23383;&#26102;&#65292;&#21482;&#20351;&#29992;&#31532;&#19968;&#20010;&#25340;&#38899;&#12290;</span>
-<span style="color: #61CE3C;">&#20854;&#23427;&#25340;&#38899;&#24573;&#30053;&#12290;"</span>
-  (<span style="color: #FBDE2D;">let</span> (string-list pinyin-list output)
+<span style="color: #61CE3C;">&#20854;&#23427;&#25340;&#38899;&#24573;&#30053;&#12290;</span>
+
+<span style="color: #61CE3C;">BUG: &#24403; `</span><span style="color: #61CE3C;">string</span><span style="color: #61CE3C;">' &#20013;&#21253;&#21547;&#20854;&#23427;&#26631;&#28857;&#31526;&#21495;&#65292;&#24182;&#19988;&#35774;&#32622; `</span><span style="color: #61CE3C;">separator</span><span style="color: #61CE3C;">' &#26102;&#65292;&#32467;&#26524;&#20250;&#21253;&#21547;&#22810;&#20313;&#30340;&#36830;&#25509;&#31526;&#65306;</span>
+<span style="color: #61CE3C;">&#27604;&#22914;&#65306; '&#20320;=&#22909;' --&gt; 'ni-=-hao'"</span>
+  (<span style="color: #FBDE2D;">let</span> (string-list pinyins-list pinyins-list-permutated)
 
     <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#30830;&#20445; `</span><span style="color: #8B8989; font-style: italic;">pyim-char-table</span><span style="color: #8B8989; font-style: italic;">' &#24050;&#32463;&#29983;&#25104;&#12290;</span>
     (<span style="color: #FBDE2D;">unless</span> (pyim-get-char-code ?&#25991;)
       (pyim-make-char-table))
 
     <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#23558;&#27721;&#23383;&#23383;&#31526;&#20018;&#36716;&#25442;&#20026;&#23383;&#31526;list&#65292;&#33521;&#25991;&#21407;&#26679;&#36755;&#20986;&#12290;</span>
-    (<span style="color: #FBDE2D;">setq</span> string-list (split-string
-                       (replace-regexp-in-string
-                        <span style="color: #61CE3C;">"</span><span style="color: #61CE3C;">\\</span><span style="color: #61CE3C;">(</span><span style="color: #61CE3C;">\\cc</span><span style="color: #61CE3C;">\\</span><span style="color: #61CE3C;">)</span><span style="color: #61CE3C;">"</span> <span style="color: #61CE3C;">"-\\1-"</span> string)
-                       <span style="color: #61CE3C;">"-"</span>))
-    <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#21024;&#38500;&#31354;&#23383;&#31526;&#20018;</span>
-    (<span style="color: #FBDE2D;">setq</span> string-list (cl-remove-if #'(lambda (x)
-                                        (= (length x) 0)) <span style="color: #ff69b4;">string-list))</span>
+    <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#27604;&#22914;&#65306; &#8220;Hello&#38134;&#34892;&#8221; -&gt; ("Hello" "&#38134;" "&#34892;")</span>
+    (<span style="color: #FBDE2D;">setq</span> string-list
+          (split-string
+           (replace-regexp-in-string
+            <span style="color: #61CE3C;">"</span><span style="color: #61CE3C;">\\</span><span style="color: #61CE3C;">(</span><span style="color: #61CE3C;">\\cc</span><span style="color: #61CE3C;">\\</span><span style="color: #61CE3C;">)</span><span style="color: #61CE3C;">"</span> <span style="color: #61CE3C;">"@@@@\\1@@@@"</span> string)
+           <span style="color: #61CE3C;">"@@@@"</span>))
+
+    <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#21024;&#38500; `</span><span style="color: #8B8989; font-style: italic;">string-list</span><span style="color: #8B8989; font-style: italic;">' &#20013;&#30340;&#31354;&#23383;&#31526;&#20018;</span>
+    (<span style="color: #FBDE2D;">setq</span> string-list
+          (cl-remove-if
+           #'(lambda (x)
+               (= (length x) 0)) <span style="color: #ff69b4;">string-list))</span>
 
     <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#23558;&#19978;&#36848;&#27721;&#23383;&#23383;&#31526;&#20018;&#37324;&#38754;&#30340;&#25152;&#26377;&#27721;&#23383;&#36716;&#25442;&#20026;&#19982;&#20043;&#23545;&#24212;&#30340;&#25340;&#38899;list&#12290;</span>
-    (<span style="color: #FBDE2D;">setq</span> pinyin-list (mapcar (<span style="color: #FBDE2D;">lambda</span> (str)
-                                (<span style="color: #FBDE2D;">cond</span>
-                                 ((&gt; (length str) 1) (list str))
-                                 ((<span style="color: #FBDE2D;">and</span> (&gt; (length str) 0)
-                                       (string-match-p <span style="color: #61CE3C;">"\\cc"</span> str))
-                                  (<span style="color: #FBDE2D;">or</span> (pyim-get-char-code (string-to-char str)) (list str)))
-                                 ((&gt; (length str) 0) (list str)))) <span style="color: #ff69b4;">string-list))</span>
+    <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#27604;&#22914;&#65306; ("Hello" "&#38134;" "&#34892;") -&gt; (("Hello") ("yin") ("hang" "xing"))</span>
+    (<span style="color: #FBDE2D;">setq</span> pinyins-list
+          (mapcar
+           #'(lambda (str)
+               (<span style="color: #FBDE2D;">cond</span>
+                ((&gt; (length str) 1) (list str))
+                ((<span style="color: #FBDE2D;">and</span> (&gt; (length str) 0)
+                      (string-match-p <span style="color: #61CE3C;">"\\cc"</span> str))
+                 (<span style="color: #FBDE2D;">or</span> (pyim-get-char-code (string-to-char str)) (list str)))
+                ((&gt; (length str) 0) (list str))))
+           string-list))
 
-    <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#36890;&#36807;&#25490;&#21015;&#32452;&#21512;&#30340;&#26041;&#24335;&#23558; pinyin-list &#36716;&#21270;&#20026;&#25340;&#38899;&#23383;&#31526;&#20018;&#21015;&#34920;&#12290;</span>
-    (<span style="color: #FBDE2D;">setq</span> output
-          (<span style="color: #FBDE2D;">if</span> ignore-duo-yin-zi
-              (list (mapconcat 'identity
-                               (mapcar
-                                (<span style="color: #FBDE2D;">lambda</span> (x)
-                                  (<span style="color: #FBDE2D;">if</span> shou-zi-mu
-                                      (substring (car x) 0 1)
-                                    (car x))) <span style="color: #ff69b4;">pinyin-list)</span>
-                               (<span style="color: #FBDE2D;">or</span> separator <span style="color: #61CE3C;">""</span>)))
-            (cl-remove-duplicates
-             (<span style="color: #FBDE2D;">let</span> ((result '(<span style="color: #61CE3C;">""</span>)))
-               (<span style="color: #FBDE2D;">cl-loop</span> for i in pinyin-list
-                        do (<span style="color: #FBDE2D;">setq</span> result
-                                 (<span style="color: #FBDE2D;">cl-loop</span> for j in i
-                                          append (<span style="color: #FBDE2D;">cl-loop</span> for k in result
-                                                          collect (concat k (<span style="color: #FBDE2D;">if</span> shou-zi-mu (substring j 0 1) j)
-                                                                          (<span style="color: #FBDE2D;">or</span> separator <span style="color: #61CE3C;">""</span>)))))) <span style="color: #ff69b4;">result)</span>
-             <span style="color: #FF6400;">:test</span> (<span style="color: #FBDE2D;">lambda</span> (x y) (<span style="color: #FBDE2D;">or</span> (null y) (equal x y)))
-             <span style="color: #FF6400;">:from-end</span> t)))
+    <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#36890;&#36807;&#25490;&#21015;&#32452;&#21512;&#30340;&#26041;&#24335;, &#37325;&#25490; pinyins-list&#12290;</span>
+    <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#27604;&#22914;&#65306;(("Hello") ("yin") ("hang" "xing")) -&gt; (("Hello" "yin" "hang") ("Hello" "yin" "xing"))</span>
+    (<span style="color: #FBDE2D;">setq</span> pinyins-list-permutated (pyim-permutate-list pinyins-list))
 
-    <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#28165;&#29702;&#22810;&#20313;&#30340;&#25340;&#38899;&#36830;&#25509;&#31526;&#65292;&#36825;&#20010;&#22788;&#29702;&#26041;&#24335;&#26377;&#28857;hack&#12290;&#38656;&#35201;&#20248;&#21270;&#12290;</span>
-    (<span style="color: #FBDE2D;">setq</span> output (mapcar (<span style="color: #FBDE2D;">lambda</span> (x)
-                           (replace-regexp-in-string
-                            <span style="color: #61CE3C;">"- "</span> <span style="color: #61CE3C;">" "</span> x)) <span style="color: #ff69b4;">output))</span>
-    (<span style="color: #FBDE2D;">setq</span> output (mapcar (<span style="color: #FBDE2D;">lambda</span> (x)
-                           (replace-regexp-in-string
-                            <span style="color: #61CE3C;">"-$"</span> <span style="color: #61CE3C;">""</span> x)) <span style="color: #ff69b4;">output))</span>
-    (<span style="color: #FBDE2D;">setq</span> output (mapcar (<span style="color: #FBDE2D;">lambda</span> (x)
-                           (replace-regexp-in-string
-                            <span style="color: #61CE3C;">" -"</span> <span style="color: #61CE3C;">" "</span> x)) <span style="color: #ff69b4;">output))</span>
-    <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#36820;&#22238;&#23383;&#31526;&#20018;&#25110;&#32773;&#21015;&#34920;</span>
-    (<span style="color: #FBDE2D;">if</span> return-list
-        output
-      (mapconcat 'identity output <span style="color: #61CE3C;">" "</span>))))
+    <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#36820;&#22238;&#25340;&#38899;&#23383;&#31526;&#20018;&#25110;&#32773;&#25340;&#38899;&#21015;&#34920;</span>
+    (<span style="color: #FBDE2D;">let</span> ((list (mapcar
+                 #'(lambda (x)
+                     (mapconcat
+                      #'(lambda (str)
+                          (<span style="color: #FBDE2D;">if</span> shou-zi-mu
+                              (substring str 0 1)
+                            str))
+                      x separator))
+                 (<span style="color: #FBDE2D;">if</span> ignore-duo-yin-zi
+                     (list (car pinyins-list-permutated))
+                   pinyins-list-permutated))))
+      (<span style="color: #FBDE2D;">if</span> return-list
+          list
+        (mapconcat #'identity list <span style="color: #61CE3C;">" "</span>)))))
+
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-permutate-list</span> (list)
+  <span style="color: #61CE3C;">"&#20351;&#29992;&#25490;&#21015;&#32452;&#21512;&#30340;&#26041;&#24335;&#37325;&#26032;&#25490;&#21015; `</span><span style="color: #61CE3C;">list</span><span style="color: #61CE3C;">'&#65292;&#36825;&#20010;&#20989;&#25968;&#30001; &#8216;&#20108;&#20013;&#8217; &#25552;&#20379;&#12290;</span>
+<span style="color: #61CE3C;">`</span><span style="color: #61CE3C;">pyim-hanzi2pinyin</span><span style="color: #61CE3C;">' &#40664;&#35748;&#20351;&#29992;&#36825;&#20010;&#20989;&#25968;&#12290;"</span>
+  (<span style="color: #FBDE2D;">let</span> ((list-head (car list))
+        (list-tail (cdr list)))
+    (<span style="color: #FBDE2D;">cond</span> ((null list-tail)
+           (<span style="color: #FBDE2D;">loop</span> for element0 in list-head
+                 append (cons (cons element0 nil) nil)))
+          (t (<span style="color: #FBDE2D;">loop</span> for element in list-head
+                   append (mapcar (<span style="color: #FBDE2D;">lambda</span> (l) (cons element l))
+                                  (pyim-permutate-list list-tail)))))))
+
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-permutate-list2</span> (list)
+  <span style="color: #61CE3C;">"&#20351;&#29992;&#25490;&#21015;&#32452;&#21512;&#30340;&#26041;&#24335;&#37325;&#26032;&#25490;&#21015; `</span><span style="color: #61CE3C;">list</span><span style="color: #61CE3C;">'&#65292;&#36825;&#20010;&#20989;&#25968;&#30001; &#8217;&#32704;/ty&#8216; &#25552;&#20379;&#12290;</span>
+
+<span style="color: #61CE3C;">&#27880;&#24847;&#65306;`</span><span style="color: #61CE3C;">pyim-hanzi2pinyin</span><span style="color: #61CE3C;">' &#27809;&#26377;&#20351;&#29992;&#36825;&#20010;&#20989;&#25968;&#65292;&#20027;&#35201;&#21407;&#22240;&#26159;&#20860;&#23481;&#38382;&#39064;&#65306;</span>
+<span style="color: #61CE3C;">`</span><span style="color: #61CE3C;">pyim-hanzi2pinyin</span><span style="color: #61CE3C;">' &#20351;&#29992;&#36825;&#20010;&#20989;&#25968;&#26102;&#65292;&#24471;&#21040;&#30340;&#32467;&#26524;&#19982;&#32769;&#29256;&#26412;&#19981;&#19968;&#33268;,</span>
+<span style="color: #61CE3C;">&#25490;&#21015;&#39034;&#24207;&#26377;&#24046;&#24322;&#12290;"</span>
+  (pyim-permutate-list2-internal (car list) (cdr list)))
+
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-permutate-list2-internal</span> (one two)
+  <span style="color: #61CE3C;">"`</span><span style="color: #61CE3C;">pyim-permutate-list2</span><span style="color: #61CE3C;">' &#30340;&#20869;&#37096;&#20989;&#25968;&#12290;"</span>
+  (<span style="color: #FBDE2D;">let</span> (<span style="color: #FBDE2D;">return</span>)
+    (<span style="color: #FBDE2D;">if</span> (null (car two))
+        one
+      (mapc #'(lambda (item1)
+                (mapc #'(lambda (item2)
+                          (<span style="color: #FBDE2D;">setq</span> return
+                                (cons
+                                 (<span style="color: #FBDE2D;">if</span> (listp item1)
+                                     (append item1 (list item2))
+                                   (list item1 item2))
+                                 return)))
+                      (car two)))
+            one)
+      (<span style="color: #FBDE2D;">setq</span> one return)
+      (pyim-permutate-list2-internal one (cdr two)))))
 
 <span style="color: #8B8989; font-style: italic;">;;;</span><span style="color: #8B8989; font-style: italic;">###</span><span style="color: #8B8989; font-style: italic;">autoload</span>
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-hanzi2pinyin-simple</span> (string <span style="color: #D8FA3C;">&amp;optional</span> shou-zi-mu separator return-list)
@@ -741,8 +804,8 @@ Chinese-pyim 打算使用 emacs package 来分发词库包。
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2015-04-27</span>
-        <span title="last modification date" class="post-info">2015-04-11</span>
+        <span title="post date" class="post-info">2015-06-25</span>
+        <span title="last modification date" class="post-info">2015-06-25</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>
