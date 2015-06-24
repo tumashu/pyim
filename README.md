@@ -23,7 +23,7 @@
     - [如何手动安装和管理词库](#如何手动安装和管理词库)
     - [将汉字字符串转换为拼音字符串](#将汉字字符串转换为拼音字符串)
 
-# Chinese-pyim 使用说明<a id="orgheadline27"></a>
+# Chinese-pyim 使用说明<a id="orgheadline28"></a>
 
 ## 截图<a id="orgheadline1"></a>
 
@@ -212,7 +212,7 @@ Chinese-pyim 使用一个比较 **粗糙** 的方法处理 **模糊音** ，要�
 
     (setq pyim-company-predict-words-number 10)
 
-## Tips<a id="orgheadline26"></a>
+## Tips<a id="orgheadline27"></a>
 
 ### 选词框弹出位置不合理或者选词框内容显示不全<a id="orgheadline18"></a>
 
@@ -227,11 +227,11 @@ Chinese－-pyim 开发使用 lentic 文学编程模式，代码文档隐藏在co
 
 <http://tumashu.github.io/chinese-pyim/>
 
-### 如何添加自定义拼音词库<a id="orgheadline23"></a>
+### 如何添加自定义拼音词库<a id="orgheadline24"></a>
 
 Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面三种方式，获取质量较好的拼音词库：
 
-1.  第一种方式
+1.  第一种方式 (懒人推荐使用)
 
     获取其他 Chinese-pyim 用户的拼音词库，比如，某个同学测试 Chinese-pyim
     时创建了一个中文拼音词库，词条数量大约60万，文件大约20M，(注意：请使用另存为，不要直接点击链接)。
@@ -241,7 +241,7 @@ Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面三�
     下载上述词库后，运行 \`pyim-dicts-manager' ，按照命令提示，将下载得到的词库文件信息添加到 \`pyim-dicts' 中，最后运行命令 \`pyim-restart' 或者重启
     emacs，这个词库使用 \`utf-8-unix' 编码。
 
-2.  第二种方式
+2.  第二种方式 (Windows 用户推荐使用)
 
     使用词库转换工具将其他输入法的词库转化为Chinese-pyim使用的词库：这里只介绍windows平台下的一个词库转换软件：
 
@@ -260,7 +260,21 @@ Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面三�
 
     最后，运行 \`pyim-dicts-manager' ，按照命令提示，将转换得到的词库文件的信息添加到 \`pyim-dicts' 中，完成后运行命令 \`pyim-restart' 或者重启emacs。
 
-3.  第三种方式
+3.  第三种方式 (Linux & Unix 用户推荐使用)
+
+    E-Neo 同学编写了一个简单的词库转换工具: [scel2pyim](https://github.com/E-Neo/scel2pyi) ,
+    这个小工具可以直接将搜狗输入法的细胞词库转换为 Chinese-pyim 使用的文本词库，
+    pyim-dicts-manager 中 “导入搜狗输入法细胞词库” 功能就是依靠这个工具实现。
+
+    1.  软件名称： "scel2pyim"
+    2.  下载地址：<https://github.com/E-Neo/scel2pyim>
+    3.  编写语言： "C"
+
+    按照说明安装好 scel2pyim 后，将scel2pyim命令所在的目录添加到系统PATH，或者在 emacs 配置文件中添加代码：
+
+        (setq pyim-dicts-manager-scel2pyim-command "/path/to/scel2pyim")
+
+4.  第四种方式 (喜欢折腾的人推荐使用)
 
     获取中文词条，然后使用命令为词条添加拼音code。中文词条的获取途径很多，比如：
 
@@ -280,7 +294,7 @@ Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面三�
 
     最后将生成的词库按上述方法添加到 Chinese-pyim 中就可以了。
 
-### 如何手动安装和管理词库<a id="orgheadline24"></a>
+### 如何手动安装和管理词库<a id="orgheadline25"></a>
 
 这里假设有两个词库文件：
 
@@ -298,7 +312,7 @@ Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面三�
 1.  必须使用词库文件的绝对路径。
 2.  正确设置coding，否则会出现乱码。
 
-### 将汉字字符串转换为拼音字符串<a id="orgheadline25"></a>
+### 将汉字字符串转换为拼音字符串<a id="orgheadline26"></a>
 
 下面两个函数可以将中文字符串转换的拼音字符串或者列表，用于 emacs-lisp
 编程。

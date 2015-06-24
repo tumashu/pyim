@@ -198,7 +198,7 @@
 ;; Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面三种方式，获取
 ;; 质量较好的拼音词库：
 
-;; **** 第一种方式
+;; **** 第一种方式 (懒人推荐使用)
 
 ;; 获取其他 Chinese-pyim 用户的拼音词库，比如，某个同学测试 Chinese-pyim
 ;; 时创建了一个中文拼音词库，词条数量大约60万，文件大约20M，(注意：请使用
@@ -210,7 +210,7 @@
 ;; 文件信息添加到 `pyim-dicts' 中，最后运行命令 `pyim-restart' 或者重启
 ;; emacs，这个词库使用 `utf-8-unix' 编码。
 
-;; **** 第二种方式
+;; **** 第二种方式 (Windows 用户推荐使用)
 
 ;; 使用词库转换工具将其他输入法的词库转化为Chinese-pyim使用的词库：这里只介绍windows平
 ;; 台下的一个词库转换软件：
@@ -236,7 +236,23 @@
 ;; 最后，运行 `pyim-dicts-manager' ，按照命令提示，将转换得到的词库文件的信息添加到 `pyim-dicts' 中，
 ;; 完成后运行命令 `pyim-restart' 或者重启emacs。
 
-;; **** 第三种方式
+;; **** 第三种方式 (Linux & Unix 用户推荐使用)
+;; E-Neo 同学编写了一个简单的词库转换工具: [[https://github.com/E-Neo/scel2pyi][scel2pyim]] ,
+;; 这个小工具可以直接将搜狗输入法的细胞词库转换为 Chinese-pyim 使用的文本词库，
+;; pyim-dicts-manager 中 “导入搜狗输入法细胞词库” 功能就是依靠这个工具实现。
+
+;; 1. 软件名称： "scel2pyim"
+;; 2. 下载地址： https://github.com/E-Neo/scel2pyim
+;; 3. 编写语言： "C"
+
+;; 按照说明安装好 scel2pyim 后，将scel2pyim命令所在的目录添加到系统PATH，或者在 emacs 配置文件中
+;; 添加代码：
+
+;; #+BEGIN_EXAMPLE
+;; (setq pyim-dicts-manager-scel2pyim-command "/path/to/scel2pyim")
+;; #+END_EXAMPLE
+
+;; **** 第四种方式 (喜欢折腾的人推荐使用)
 ;; 获取中文词条，然后使用命令为词条添加拼音code。中文词条的获取途径很多，比如：
 
 ;; 1. 从其它输入法中导出。
