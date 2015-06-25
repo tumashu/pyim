@@ -752,18 +752,26 @@ beginning of line"
 ;; 2. 将一个中文词条从个人词频文件中删除（删词功能）
 ;; 3. 调整一个中文词条选项的位置（词频调整功能）
 
-;; **** 造词功能
-;; 1. `pyim-create-word' 当用户选择了一个词库中不存在的中文词条时，
-;;    `pyim-select-current' 会调用这个函数来自动造词。
+;; **** 造词功能和词频调整功能
+;; 1. `pyim-create-or-rearrange-word' 当用户选择了一个词库中不存在的中文词条时，
+;;    `pyim-select-current' 会调用这个函数来自动造词。其工作流程是：
+;;     1. 使用 `chinese-hanzi2pinyin' 获取中文词条的拼音。
+;;     2. 然后调用 `pyim-intern-word' 保存词条，多音字重复操作，比如：
+;;
+;;        #+BEGIN_EXAMPLE
+;;        yin-hang 银行
+;;        yin-xing 银行
+;;        #+END_EXAMPLE
+;;
+;;     另外，这个函数也用于 *词频调整*  。
+;;
+;;     BUG：这种处理方式最大的问题是 *无法正确处理* 多音字，从而导致
+;;     chinese-pyim 个人文件 *不纯洁*  :-)，但不影响使用。Emacs-eim
+;;     使用的方式不存在这种问题，但其增加了代码的复杂度，并且灵活性太差
+;;     增加高级功能，比如 “词语联想”，时存在问题。
+;;
 ;; 2. `pyim-create-word-at-point' 这个命令会提取光标前 `number' 个中文字
-;;    符，将其组成字符串后，加入个人词频文件。在执行过程中，参数
-;;    `pyim-create-word-without-pinyin' 被调用，其工作流程是：
-;;    1. 使用 `chinese-hanzi2pinyin' 获取中文词条的拼音。
-;;    2. 然后调用 `pyim-intern-word' 保存词条，多音字重复操作，比如：
-;;       #+BEGIN_EXAMPLE
-;;       yin-hang 银行
-;;       yin-xing 银行
-;;       #+END_EXAMPLE
+;;     符，将其组成字符串后，调用 `pyim-create-word' 将其加入个人词频文件。
 ;; 3. `pyim-create-word-at-point:<NUM>char' 这组命令是
 ;;    `pyim-create-word-at-point' 的包装命令。
 
@@ -803,43 +811,23 @@ beginning of line"
       (when (> (length words) 1)
         (insert (mapconcat 'identity words " ") "\n")))))
 
-(defun pyim-create-word (word pylist)
-  ;; (message "create: %s, %s" word pylist)
-  (let ((py (pyim-match-py word pylist))
-        words)
-    (when py
-      (pyim-intern-word word (car py))
-      (pyim-intern-word word (cdr py)))))
-
-(defun pyim-match-py (word pylist)
-  (let (sym words fullpy abbpy chpy)
-    (when (> (length word) 1)
-      (if (stringp (car pylist))        ; if is full pinyin
-          (progn (setq fullpy (car pylist))
-                 (cons fullpy (mapconcat 'identity
-                                         (mapcar 'pyim-essential-py
-                                                 (pyim-split-string (replace-regexp-in-string "-" "'" fullpy)))
-                                         "-")))
-        (dotimes (i (length word))
-          (setq chpy (car pylist)
-                pylist (cdr pylist))
-          (setq abbpy (concat abbpy "-"
-                              (if (string< "" (car chpy))
-                                  (car chpy) (cdr chpy))))
-          (if (string< "" (cdr chpy))
-              (setq fullpy (concat fullpy "-" (car chpy) (cdr chpy)))
-            (setq fullpy (concat fullpy "-"
-                                 (car (pyim-get-char-code (aref word i)))))))
-        (cons (substring fullpy 1)
-              (substring abbpy 1))))))
-
-(defun pyim-create-word-without-pinyin (word)
+(defun pyim-create-or-rearrange-word (word &optional rearrange-word)
   "将中文词条 `word' 添加拼音后，保存到 personal-file 对应的
-buffer中，当前词条追加到已有词条之后。"
+buffer中，当前词条追加到已有词条之后。`pyim-create-or-rearrange-word'会调用
+`pyim-hanzi2pinyin' 来获取中文词条的拼音code。
+
+BUG：无法有效的处理多音字。"
+  ;; 添加词库： ”拼音“ - ”中文词条“
   (mapc (lambda (py)
           (unless (string-match-p "[^ a-z-]" py)
-            (pyim-intern-word word py t)))
-        (pyim-hanzi2pinyin word nil "-" t)))
+            (pyim-intern-word word py (not rearrange-word))))
+        (pyim-hanzi2pinyin word nil "-" t))
+
+  ;; 添加词库： ”拼音首字母“ - ”中文词条“
+  (mapc (lambda (py)
+          (unless (string-match-p "[^ a-z-]" py)
+            (pyim-intern-word word py (not rearrange-word))))
+        (pyim-hanzi2pinyin word t "-" t)))
 
 (defun pyim-chinese-string-at-point (&optional number)
   "获取光标一个中文字符串，字符数量为：`number'"
@@ -861,7 +849,7 @@ buffer中，当前词条追加到已有词条之后。"
 当 `silent' 设置为 t 是，不显示提醒信息。"
   (let* ((string (pyim-chinese-string-at-point (or number 2))))
     (when string
-      (pyim-create-word-without-pinyin string)
+      (pyim-create-or-rearrange-word string)
       (unless silent
         (message "将词条: \"%s\" 插入 personal file。" string)))))
 
@@ -904,25 +892,6 @@ buffer中，当前词条追加到已有词条之后。"
           (pyim-delete-word string)
           (message "将词条: \"%s\" 从 personal file中删除。" string)))
     (message "请首先高亮选择需要删除的词条。")))
-;; #+END_SRC
-
-;; **** 词频调整功能
-;; 用户使用 Chinese-pyim 时，会在 emacs minibuffer 中显示一个词条选择菜单，当用户通过词条选择菜单
-;; 选择了一个词条时， `pyim-select-current' 函数会调用 `pyim-rearrange' 和 `pyim-rearrange-1’来
-;; 调整这个词条的位置，将其排在词条选择菜单的首位，这两个 *词频调整* 的函数功能其内部工作原理
-;; 和 *造词功能* 很相似。
-
-;; #+BEGIN_SRC emacs-lisp
-(defun pyim-rearrange (word pylist)
-  ;; (message "rearrage: %s, %s" word pylist)
-  (let ((py (pyim-match-py word pylist)))
-    (when py
-      (pyim-rearrange-1 word
-                        (car py))
-      (pyim-rearrange-1 word (cdr py)))))
-
-(defun pyim-rearrange-1 (word py)
-  (pyim-intern-word word py))
 ;; #+END_SRC
 
 ;; ** 生成 `pyim-current-key' 并插入 `pyim-current-str'
@@ -1293,12 +1262,10 @@ Return the input string."
   "得到可能的词组和汉字。例如：
 
  (pyim-get-choices  (pyim-split-string \"pin-yin\"))
-  => (#(\"拼音\" 0 2 (py (\"pin-yin\"))) \"拼\" \"品\" \"贫\" \"苹\" \"聘\" \"频\" \"拚\" \"颦\" \"牝\" \"嫔\" \"姘\" \"嚬\")
+  => (\"拼音\" \"拼\" \"品\" \"贫\" \"苹\" \"聘\" \"频\" \"拚\" \"颦\" \"牝\" \"嫔\" \"姘\" \"嚬\")
 
  (pyim-get-choices  (pyim-split-string \"pin-yin\"))
- => (#(\"拼音\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) #(\"贫铀\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) #(\"聘用\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) \"拼\" \"品\" \"贫\" \"苹\" \"聘\" \"频\" \"拚\" \"颦\" \"牝\" \"嫔\" \"姘\" \"嚬\")
-
-"
+ => (\"拼音\" \"贫铀\" \"聘用\" \"拼\" \"品\" \"贫\" \"苹\" \"聘\" \"频\" \"拚\" \"颦\" \"牝\" \"嫔\" \"姘\" \"嚬\")"
   (let (choice words chars wordspy choice)
     (setq wordspy (pyim-possible-words-py pylist))
     (if wordspy
@@ -1309,17 +1276,13 @@ Return the input string."
 (defun pyim-possible-words (wordspy)
   "根据拼音得到可能的词组。例如：
   (pyim-possible-words '((\"p-y\" (\"p\" . \"in\") (\"y\" . \"\"))))
-    => (#(\"拼音\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) #(\"贫铀\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) #(\"聘用\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))))
-
+    => (\"拼音\" \"贫铀\" \"聘用\")
 "
   (let (words)
     (dolist (word (reverse wordspy))
       (if (listp word)
-          (setq words (append words (pyim-match-word (pyim-get (car word))
-                                                     (cdr word))))
-        (setq words (append words (mapcar (lambda (w)
-                                            (propertize w 'py (list word)))
-                                          (pyim-get word))))))
+          (setq words (append words (pyim-get (car word))))
+        (setq words (append words (pyim-get word)))))
     words))
 
 (defun pyim-possible-words-py (pylist)
@@ -1357,37 +1320,6 @@ Return the input string."
   (if (string< "" (car py))
       (car py)
     (cdr py)))
-
-(defun pyim-match-word (wordlist wordspy)
-  "给出一个词组列表和它的拼音列表，给出所有可能的词组，并加上一个 py
-属性。例如：
-
- (pyim-get \"p-y\")
-  => (\"拼音\" \"番禺\" \"培养\" \"培育\" \"配药\" \"彭阳\" \"朋友\" \"偏远\" \"便宜\" \"片语\" \"飘扬\" \"漂移\" \"漂游\" \"贫铀\" \"聘用\" \"平阳\" \"平遥\" \"平邑\" \"平阴\" \"平舆\" \"平原\" \"平远\" \"濮阳\")
-
- (pyim-match-word (pyim-get \"p-y\") '((\"p\" . \"in\") (\"y\" . \"\")))
-  => (#(\"拼音\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) #(\"贫铀\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))) #(\"聘用\" 0 2 (py ((\"p\" . \"in\") (\"y\" . \"\")))))
-
-"
-  (let (words)
-    (dolist (word wordlist)
-      ;;      (message "word: %s" word)
-      (let ((match t) py pys (tmppy wordspy))
-        (dotimes (i (length wordspy))
-          (setq py (car tmppy)
-                tmppy (cdr tmppy))
-          ;; (message "py: %s" py)
-          (when (string< "" (cdr py))
-            (let (chmatch)
-              (dolist (chpy (pyim-get-char-code (aref word i)))
-                (if (string= (cdr (pyim-get-sm chpy)) (cdr py))
-                    (setq chmatch t)))
-              (or chmatch (setq match nil)))))
-        ;; (message "%d: py: %s, match: %s" i py match))
-        (if match
-            (setq words (append words (list (propertize word 'py wordspy)))))))
-    words))
-
 ;; #+END_SRC
 
 ;; *** 核心函数：拼音字符串处理函数
@@ -1768,11 +1700,8 @@ Return the input string."
         (setq pyim-current-str (pyim-translate last-command-event))
         (pyim-terminate-translation))
     (let ((str (pyim-choice (nth (1- pyim-current-pos) (car pyim-current-choices))))
-          chpy pylist)
-      (if (> (length str) 1)            ; 重排
-          (pyim-rearrange str (get-text-property 0 'py str))
-        (setq chpy (nth pyim-pinyin-position pyim-pinyin-list))
-        (pyim-rearrange-1 str (concat (car chpy) (cdr chpy))))
+          pylist)
+      (pyim-create-or-rearrange-word str t)
       (setq pyim-pinyin-position (+ pyim-pinyin-position (length str)))
       (if (= pyim-pinyin-position (length pyim-pinyin-list))
                                         ; 如果是最后一个，检查
@@ -1780,7 +1709,7 @@ Return the input string."
                                         ; 建这个词
           (progn
             (if (not (member pyim-current-str (car pyim-current-choices)))
-                (pyim-create-word pyim-current-str pyim-pinyin-list))
+                (pyim-create-or-rearrange-word pyim-current-str))
             (pyim-terminate-translation)
             ;; Chinese-pyim 使用这个 hook 来处理联想词。
             (run-hooks 'pyim-select-word-finish-hook))
