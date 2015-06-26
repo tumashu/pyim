@@ -108,58 +108,60 @@
 
 BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，结果会包含多余的连接符：
 比如： '你=好' --> 'ni-=-hao'"
-  (let (string-list pinyins-list pinyins-list-permutated)
+  (if (not (string-match-p "\\cc" string))
+      string
+    (let (string-list pinyins-list pinyins-list-permutated)
 
-    ;; 确保 `pyim-char-table' 已经生成。
-    (unless (pyim-get-char-code ?文)
-      (pyim-make-char-table))
+      ;; 确保 `pyim-char-table' 已经生成。
+      (unless (pyim-get-char-code ?文)
+        (pyim-make-char-table))
 
-    ;; 将汉字字符串转换为字符list，英文原样输出。
-    ;; 比如： “Hello银行” -> ("Hello" "银" "行")
-    (setq string-list
-          (split-string
-           (replace-regexp-in-string
-            "\\(\\cc\\)" "@@@@\\1@@@@" string)
-           "@@@@"))
+      ;; 将汉字字符串转换为字符list，英文原样输出。
+      ;; 比如： “Hello银行” -> ("Hello" "银" "行")
+      (setq string-list
+            (split-string
+             (replace-regexp-in-string
+              "\\(\\cc\\)" "@@@@\\1@@@@" string)
+             "@@@@"))
 
-    ;; 删除 `string-list' 中的空字符串
-    (setq string-list
-          (cl-remove-if
-           #'(lambda (x)
-               (= (length x) 0)) string-list))
+      ;; 删除 `string-list' 中的空字符串
+      (setq string-list
+            (cl-remove-if
+             #'(lambda (x)
+                 (= (length x) 0)) string-list))
 
-    ;; 将上述汉字字符串里面的所有汉字转换为与之对应的拼音list。
-    ;; 比如： ("Hello" "银" "行") -> (("Hello") ("yin") ("hang" "xing"))
-    (setq pinyins-list
-          (mapcar
-           #'(lambda (str)
-               (cond
-                ((> (length str) 1) (list str))
-                ((and (> (length str) 0)
-                      (string-match-p "\\cc" str))
-                 (or (pyim-get-char-code (string-to-char str)) (list str)))
-                ((> (length str) 0) (list str))))
-           string-list))
+      ;; 将上述汉字字符串里面的所有汉字转换为与之对应的拼音list。
+      ;; 比如： ("Hello" "银" "行") -> (("Hello") ("yin") ("hang" "xing"))
+      (setq pinyins-list
+            (mapcar
+             #'(lambda (str)
+                 (cond
+                  ((> (length str) 1) (list str))
+                  ((and (> (length str) 0)
+                        (string-match-p "\\cc" str))
+                   (or (pyim-get-char-code (string-to-char str)) (list str)))
+                  ((> (length str) 0) (list str))))
+             string-list))
 
-    ;; 通过排列组合的方式, 重排 pinyins-list。
-    ;; 比如：(("Hello") ("yin") ("hang" "xing")) -> (("Hello" "yin" "hang") ("Hello" "yin" "xing"))
-    (setq pinyins-list-permutated (pyim-permutate-list pinyins-list))
+      ;; 通过排列组合的方式, 重排 pinyins-list。
+      ;; 比如：(("Hello") ("yin") ("hang" "xing")) -> (("Hello" "yin" "hang") ("Hello" "yin" "xing"))
+      (setq pinyins-list-permutated (pyim-permutate-list pinyins-list))
 
-    ;; 返回拼音字符串或者拼音列表
-    (let ((list (mapcar
-                 #'(lambda (x)
-                     (mapconcat
-                      #'(lambda (str)
-                          (if shou-zi-mu
-                              (substring str 0 1)
-                            str))
-                      x separator))
-                 (if ignore-duo-yin-zi
-                     (list (car pinyins-list-permutated))
-                   pinyins-list-permutated))))
-      (if return-list
-          list
-        (mapconcat #'identity list " ")))))
+      ;; 返回拼音字符串或者拼音列表
+      (let ((list (mapcar
+                   #'(lambda (x)
+                       (mapconcat
+                        #'(lambda (str)
+                            (if shou-zi-mu
+                                (substring str 0 1)
+                              str))
+                        x separator))
+                   (if ignore-duo-yin-zi
+                       (list (car pinyins-list-permutated))
+                     pinyins-list-permutated))))
+        (if return-list
+            list
+          (mapconcat #'identity list " "))))))
 
 (defun pyim-permutate-list (list)
   "使用排列组合的方式重新排列 `list'，这个函数由 ‘二中’ 提供。
