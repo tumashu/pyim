@@ -230,10 +230,10 @@
 ;; 使用词库转换工具将其他输入法的词库转化为Chinese-pyim使用的词库：这里只介绍windows平
 ;; 台下的一个词库转换软件：
 
-;; 1. 软件名称： "imewlconverter"
-;; 2. 中文名称：“深蓝词库转换”。
-;; 3. 下载地址： http://code.google.com/p/imewlconverter/
-;; 4. 依赖平台:  "Microsoft .NET Framework 2.0"
+;; 1. 软件名称： imewlconverter
+;; 2. 中文名称： 深蓝词库转换
+;; 3. 下载地址： https://github.com/studyzy/imewlconverter
+;; 4. 依赖平台： Microsoft .NET Framework 2.0
 
 ;; 首先从其他拼音输入法网站上获取所需词库，使用下述自定义输出格式转换词库文件，然后将转
 ;; 换得到的内容保存到文件中。
@@ -252,13 +252,13 @@
 ;; 完成后运行命令 `pyim-restart' 或者重启emacs。
 
 ;; **** 第三种方式 (Linux & Unix 用户推荐使用)
-;; E-Neo 同学编写了一个简单的词库转换工具: [[https://github.com/E-Neo/scel2pyi][scel2pyim]] ,
+;; E-Neo 同学编写了一个简单的词库转换工具: [[https://github.com/E-Neo/scel2pyim][scel2pyim]] ,
 ;; 这个小工具可以直接将搜狗输入法的细胞词库转换为 Chinese-pyim 使用的文本词库，
 ;; pyim-dicts-manager 中 “导入搜狗输入法细胞词库” 功能就是依靠这个工具实现。
 
-;; 1. 软件名称： "scel2pyim"
+;; 1. 软件名称： scel2pyim
 ;; 2. 下载地址： https://github.com/E-Neo/scel2pyim
-;; 3. 编写语言： "C"
+;; 3. 编写语言： C语言
 
 ;; 按照说明安装好 scel2pyim 后，将scel2pyim命令所在的目录添加到系统PATH，或者在 emacs 配置文件中
 ;; 添加代码：
