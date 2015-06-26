@@ -1285,10 +1285,17 @@ Return the input string."
     (if cur (setq py (concat py "'")))  ; the last char is `''
     py))
 
-(defun pyim-pylist-to-string (pylist)
-  "把分解的拼音合并，以便进行查找"
+(defun pyim-pylist-to-string (pylist &optional shou-zi-mu)
+  "把分解的拼音合并，以便进行查找, 当 `shou-zi-mu' 设置为 t
+时，生成拼音首字母字符串，比如 p-y。"
   (mapconcat 'identity
-             (mapcar (lambda (w) (concat (car w) (cdr w))) pylist)
+             (mapcar
+              #'(lambda (w)
+                  (let ((py (concat (car w) (cdr w))))
+                    (if shou-zi-mu
+                        (substring py 0 1)
+                      py)))
+              pylist)
              "-"))
 ;; #+END_SRC
 
@@ -1302,19 +1309,26 @@ Return the input string."
 
  (pyim-get-choices  (pyim-split-string \"pin-yin\"))
  => (\"拼音\" \"贫铀\" \"聘用\" \"拼\" \"品\" \"贫\" \"苹\" \"聘\" \"频\" \"拚\" \"颦\" \"牝\" \"嫔\" \"姘\" \"嚬\")"
-  (let (choice words words-predicted chars wordspy choice)
+  (let (choice words words-predicted-1 words-predicted-2 chars wordspy choice)
     (setq wordspy (pyim-possible-words-py pylist))
-    (if wordspy
-        (setq words (pyim-possible-words wordspy)
-              words-predicted
-              (when pyim-include-predict-words
-                (pyim-predict
-                 (pyim-pylist-to-string pylist)))))
+    (when wordspy
+      (setq words (pyim-possible-words wordspy)
+            ;; 如果输入 "ni-hao" ，那么搜索拼音与 "ni-hao" 类似的词条作为联想词。
+            words-predicted-1 (when pyim-include-predict-words
+                                (pyim-predict
+                                 (pyim-pylist-to-string pylist)))
+            ;; 如果输入 "ni-hao" ，那么同时搜索 code 为 "n-h" 的词条做为联想词。
+            words-predicted-2 (when pyim-include-predict-words
+                                (pyim-get
+                                 (pyim-pylist-to-string pylist t)))))
     (setq chars (pyim-get (concat (caar pylist) (cdar pylist)))
           choice (append words
                          (unless words
                            (list (car chars)))
-                         words-predicted chars))))
+                         words-predicted-1
+                         words-predicted-2
+                         chars))
+    (delq nil choice)))
 
 (defun pyim-possible-words (wordspy)
   "根据拼音得到可能的词组。例如：
