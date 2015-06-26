@@ -129,6 +129,10 @@ Chinese-pyim 内建的功能有：
   :group 'chinese-pyim
   :type 'function)
 
+(defcustom pyim-include-predict-words t
+  "是否开启词语联想功能。"
+  :group 'chinese-pyim)
+
 (defcustom pyim-page-length 5
   "每页显示的词条数目"
   :group 'chinese-pyim
@@ -640,7 +644,7 @@ If you don't like this funciton, set the variable to nil")
 
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-get (code)
-  (let (words predict-words)
+  (let (words)
     (when (and (stringp code) (string< "" code))
       (dolist (buf pyim-buffer-list)
         (with-current-buffer (cdr (assoc "buffer" buf))
@@ -652,6 +656,25 @@ If you don't like this funciton, set the variable to nil")
                                                        (point-max)))))
             (message "%s 可能不是一个有效的词库 buffer，忽略。" (buffer-name)))))
       (delete-dups words))))
+
+(defun pyim-predict (code)
+  "得到 `code' 对应的联想词。"
+  (let ((count 0)
+        predicted-words)
+    (when (and (stringp code) (string< "" code))
+      (dolist (buf pyim-buffer-list)
+        (with-current-buffer (cdr (assoc "buffer" buf))
+          (when (pyim-dict-buffer-valid-p)
+            (pyim-bisearch-word code (point-min) (point-max))
+            (save-excursion
+              (while (and (string-match-p "[a-z]+-[a-z]+" code)
+                          (re-search-forward (concat "^" code) nil t)
+                          (< count 10))
+                (setq predicted-words
+                      (append predicted-words
+                              (cdr (pyim-line-content))))
+                (setq count (1+ count)))))))
+      (delete-dups predicted-words))))
 
 (defun pyim-dict-buffer-valid-p ()
   "粗略地确定当前 buffer 是否是一个有效的词库产生的 buffer。
@@ -1279,12 +1302,19 @@ Return the input string."
 
  (pyim-get-choices  (pyim-split-string \"pin-yin\"))
  => (\"拼音\" \"贫铀\" \"聘用\" \"拼\" \"品\" \"贫\" \"苹\" \"聘\" \"频\" \"拚\" \"颦\" \"牝\" \"嫔\" \"姘\" \"嚬\")"
-  (let (choice words chars wordspy choice)
+  (let (choice words words-predicted chars wordspy choice)
     (setq wordspy (pyim-possible-words-py pylist))
     (if wordspy
-        (setq words (pyim-possible-words wordspy)))
+        (setq words (pyim-possible-words wordspy)
+              words-predicted
+              (when pyim-include-predict-words
+                (pyim-predict
+                 (pyim-pylist-to-string pylist)))))
     (setq chars (pyim-get (concat (caar pylist) (cdar pylist)))
-          choice (append words chars))))
+          choice (append words
+                         (unless words
+                           (list (car chars)))
+                         words-predicted chars))))
 
 (defun pyim-possible-words (wordspy)
   "根据拼音得到可能的词组。例如：
@@ -1716,7 +1746,7 @@ Return the input string."
           pylist)
       (pyim-create-or-rearrange-word str t)
       (setq pyim-pinyin-position (+ pyim-pinyin-position (length str)))
-      (if (= pyim-pinyin-position (length pyim-pinyin-list))
+      (if (>= pyim-pinyin-position (length pyim-pinyin-list))
                                         ; 如果是最后一个，检查
                                         ; 是不是在文件中，没有的话，创
                                         ; 建这个词
