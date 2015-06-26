@@ -125,6 +125,21 @@
 ;; C-h v pyim-fuzzy-pinyin-adjust-function
 ;; #+END_EXAMPLE
 
+;; *** 词语联想
+;; Chinese-pyim *内置* 了词语联想功能，其基本原理为：
+
+;; 1. 如果输入 "ni-hao" ，那么搜索拼音与 "ni-hao" 类似的词条作为联想词。
+;; 2. 如果输入 "ni-hao" ，那么同时搜索 code 为 "n-h" 的词条做为联想词。
+
+;; 词语联想功能默认开启，但有时候会导致输入法卡顿，用户可以通过下面的方式关闭：
+
+;; #+BEGIN_EXAMPLE
+;; (setq pyim-include-predict-words nil)
+;; #+END_EXAMPLE
+
+;; 另外，Chinese-pyim 也可以通过 Company 框架来实现词语联想，
+;; 具体请参考： [[使用 Company 框架来补全联想词（实验特性）]]
+
 ;; *** 切换全角标点与半角标点
 
 ;; 1. 第一种方法：使用命令 `pyim-toggle-full-width-punctuation'，全局切换。
@@ -157,7 +172,7 @@
 ;;   (pyim-restart-1 t))
 ;; #+END_EXAMPLE
 
-;; *** [实验特性] 词语联想
+;; *** 使用 Company 框架来补全联想词（实验特性）
 
 ;; `Chinese-pyim' 增加了两个 `company-mode' 后端来实现 *联想词* 输入功能：
 
