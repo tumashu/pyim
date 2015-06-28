@@ -138,7 +138,7 @@
 ;; 比如：
 
 ;; #+BEGIN_EXAMPLE
-;; (setq pyim-enable-words-predict '(pinyin-similar pinyin-shouzimu)
+;; (setq pyim-enable-words-predict '(pinyin-similar pinyin-shouzimu))
 ;; #+END_EXAMPLE
 
 ;; 词语联想功能默认开启，但有时候会导致输入法卡顿，用户可以通过下面的方式关闭：
