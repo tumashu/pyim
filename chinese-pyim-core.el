@@ -1311,21 +1311,31 @@ Return the input string."
  => (\"拼音\" \"贫铀\" \"聘用\" \"拼\" \"品\" \"贫\" \"苹\" \"聘\" \"频\" \"拚\" \"颦\" \"牝\" \"嫔\" \"姘\" \"嚬\")"
   (let ((py-str (pyim-pylist-to-string pylist))
         (py-str-shouzimu (pyim-pylist-to-string pylist t))
-        choice words words-predicted-1 words-predicted-2 words-predicted-3 chars wordspy)
-    (setq words (pyim-get py-str) ; 搜索严格匹配输入拼音的词条。
-          ;; 如果输入 "ni-hao" ，那么搜索拼音与 "ni-hao" 类似的词条作为联想词。
-          words-predicted-1 (when pyim-include-predict-words
-                              (pyim-predict py-str))
-          ;; 如果输入 "ni-hao" ，那么同时搜索 code 为 "n-h" 的词条做为联想词。
-          words-predicted-2 (when pyim-include-predict-words
-                              (pyim-get py-str-shouzimu)))
+        choice words words-predicted-1 words-predicted-2
+        words-predicted-3 chars wordspy)
+
+    ;; 搜索严格匹配输入拼音的词条。
+    (setq words (pyim-get py-str))
+
+    ;; 如果输入 "ni-hao" ，搜索拼音与 "ni-hao" 类似的词条作为联想词。
+    (when pyim-include-predict-words
+      (setq words-predicted-1 (pyim-predict py-str)))
+
+    ;; 如果输入 "ni-hao" ，搜索 code 为 "n-h" 的词条做为联想词。
+    (when pyim-include-predict-words
+      (setq words-predicted-2 (pyim-get py-str-shouzimu)))
+
+    ;; 将输入的拼音按照声母和韵母打散，得到尽可能多的拼音组合，
+    ;; 查询这些拼音组合，得到的词条做为联想词。
     (setq wordspy (pyim-possible-words-py pylist))
-    (when wordspy
-      ;; 将输入的拼音按照声母和韵母打散，得到尽可能多的拼音组合，
-      ;; 查询这些拼音组合，得到的词条做为联想词。
-      words-predicted-3 (pyim-possible-words wordspy))
-    (setq chars (pyim-get (concat (caar pylist) (cdar pylist)))
-          choice (append words
+    (when (and wordspy pyim-include-predict-words)
+      (setq words-predicted-3 (pyim-possible-words wordspy)))
+
+    ;; 依次搜索每个拼音对应的汉字。
+    (setq chars (pyim-get (concat (caar pylist) (cdar pylist))))
+
+    ;; 将上述搜索得到的词条合并。
+    (setq choice (append words
                          ;; 没有严格匹配的词条时，设置第一个被选词为字符，
                          ;; 这样可以减少不可预期的联想词带来的视觉压力。
                          (unless words
