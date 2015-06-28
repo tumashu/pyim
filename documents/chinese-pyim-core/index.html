@@ -205,8 +205,15 @@ Chinese pyim 输入法的核心文件，包含了输入法的基本功能函数�
   <span style="color: #FF6400;">:group</span> 'chinese-pyim
   <span style="color: #FF6400;">:type</span> 'function)
 
-(<span style="color: #FBDE2D;">defcustom</span> <span style="color: #D8FA3C;">pyim-include-predict-words</span> t
-  <span style="color: #61CE3C;">"&#26159;&#21542;&#24320;&#21551;&#35789;&#35821;&#32852;&#24819;&#21151;&#33021;&#12290;"</span>
+(<span style="color: #FBDE2D;">defcustom</span> <span style="color: #D8FA3C;">pyim-enable-words-predict</span>
+  '(pinyin-similar pinyin-shouzimu pinyin-znabc)
+  <span style="color: #61CE3C;">"&#19968;&#20010; list&#65292;&#29992;&#20110;&#35774;&#32622;&#35789;&#35821;&#32852;&#24819;&#26041;&#24335;&#65292;&#24403;&#21069;&#25903;&#25345;&#65306;</span>
+
+<span style="color: #61CE3C;">1. `</span><span style="color: #61CE3C;">pinyin-similar</span><span style="color: #61CE3C;">' &#25628;&#32034;&#25340;&#38899;&#31867;&#20284;&#30340;&#35789;&#26465;&#20570;&#20026;&#32852;&#24819;&#35789;&#12290;</span>
+<span style="color: #61CE3C;">2. `</span><span style="color: #61CE3C;">pinyin-shouzimu</span><span style="color: #61CE3C;">' &#25628;&#32034;&#25340;&#38899;&#39318;&#23383;&#27597;&#23545;&#24212;&#30340;&#35789;&#26465;&#20570;&#20026;&#32852;&#24819;&#35789;&#12290;</span>
+<span style="color: #61CE3C;">3. `</span><span style="color: #61CE3C;">pinyin-znabc</span><span style="color: #61CE3C;">' &#31867;&#20284;&#26234;&#33021;ABC&#30340;&#35789;&#35821;&#32852;&#24819;(&#28304;&#20110; emacs-eim)&#12290;</span>
+
+<span style="color: #61CE3C;">&#24403;&#36825;&#20010;&#21464;&#37327;&#35774;&#32622;&#20026; nil &#26102;&#65292;&#20851;&#38381;&#35789;&#35821;&#32852;&#24819;&#21151;&#33021;&#12290;"</span>
   <span style="color: #FF6400;">:group</span> 'chinese-pyim)
 
 (<span style="color: #FBDE2D;">defcustom</span> <span style="color: #D8FA3C;">pyim-page-length</span> 5
@@ -1599,26 +1606,52 @@ Chinese-pyim 使用函数 `pyim-pylist-to-string' 将一个拼音列表合并为
 
 <span style="color: #61CE3C;"> (pyim-get-choices  (pyim-split-string \"pin-yin\"))</span>
 <span style="color: #61CE3C;"> =&gt; (\"&#25340;&#38899;\" \"&#36139;&#38080;\" \"&#32856;&#29992;\" \"&#25340;\" \"&#21697;\" \"&#36139;\" \"&#33529;\" \"&#32856;\" \"&#39057;\" \"&#25306;\" \"&#39078;\" \"&#29277;\" \"&#23252;\" \"&#23000;\" \"&#22188;\")"</span>
-  (<span style="color: #FBDE2D;">let</span> (choice words words-predicted-1 words-predicted-2 chars wordspy choice)
+  (<span style="color: #FBDE2D;">let</span> ((py-str (pyim-pylist-to-string pylist))
+        (py-str-shouzimu (pyim-pylist-to-string pylist t))
+        choice words words-predicted chars wordspy)
+
+    <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#25628;&#32034;&#20005;&#26684;&#21305;&#37197;&#36755;&#20837;&#25340;&#38899;&#30340;&#35789;&#26465;&#12290;</span>
+    (<span style="color: #FBDE2D;">setq</span> words (pyim-get py-str))
+
+    <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#22914;&#26524;&#36755;&#20837; "ni-hao" &#65292;&#25628;&#32034;&#25340;&#38899;&#19982; "ni-hao" &#31867;&#20284;&#30340;&#35789;&#26465;&#20316;&#20026;&#32852;&#24819;&#35789;&#12290;</span>
+    (<span style="color: #FBDE2D;">when</span> (member 'pinyin-similar pyim-enable-words-predict)
+      (<span style="color: #FBDE2D;">push</span> `(pinyin-similar ,@(pyim-predict py-str)) words-predicted))
+
+    <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#22914;&#26524;&#36755;&#20837; "ni-hao" &#65292;&#25628;&#32034; code &#20026; "n-h" &#30340;&#35789;&#26465;&#20570;&#20026;&#32852;&#24819;&#35789;&#12290;</span>
+    (<span style="color: #FBDE2D;">when</span> (member 'pinyin-shouzimu pyim-enable-words-predict)
+      (<span style="color: #FBDE2D;">push</span> `(pinyin-shouzimu ,@(pyim-get py-str-shouzimu)) words-predicted))
+
+    <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#23558;&#36755;&#20837;&#30340;&#25340;&#38899;&#25353;&#29031;&#22768;&#27597;&#21644;&#38901;&#27597;&#25171;&#25955;&#65292;&#24471;&#21040;&#23613;&#21487;&#33021;&#22810;&#30340;&#25340;&#38899;&#32452;&#21512;&#65292;</span>
+    <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#26597;&#35810;&#36825;&#20123;&#25340;&#38899;&#32452;&#21512;&#65292;&#24471;&#21040;&#30340;&#35789;&#26465;&#20570;&#20026;&#32852;&#24819;&#35789;&#12290;</span>
     (<span style="color: #FBDE2D;">setq</span> wordspy (pyim-possible-words-py pylist))
-    (<span style="color: #FBDE2D;">when</span> wordspy
-      (<span style="color: #FBDE2D;">setq</span> words (pyim-possible-words wordspy)
-            <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#22914;&#26524;&#36755;&#20837; "ni-hao" &#65292;&#37027;&#20040;&#25628;&#32034;&#25340;&#38899;&#19982; "ni-hao" &#31867;&#20284;&#30340;&#35789;&#26465;&#20316;&#20026;&#32852;&#24819;&#35789;&#12290;</span>
-            words-predicted-1 (<span style="color: #FBDE2D;">when</span> pyim-include-predict-words
-                                (pyim-predict
-                                 (pyim-pylist-to-string pylist)))
-            <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#22914;&#26524;&#36755;&#20837; "ni-hao" &#65292;&#37027;&#20040;&#21516;&#26102;&#25628;&#32034; code &#20026; "n-h" &#30340;&#35789;&#26465;&#20570;&#20026;&#32852;&#24819;&#35789;&#12290;</span>
-            words-predicted-2 (<span style="color: #FBDE2D;">when</span> pyim-include-predict-words
-                                (pyim-get
-                                 (pyim-pylist-to-string pylist t)))))
-    (<span style="color: #FBDE2D;">setq</span> chars (pyim-get (concat (caar pylist) (cdar pylist)))
-          choice (append words
-                         (<span style="color: #FBDE2D;">unless</span> words
-                           (list (car chars)))
-                         words-predicted-1
-                         words-predicted-2
-                         chars))
-    (delq nil choice)))
+    (<span style="color: #FBDE2D;">when</span> (<span style="color: #FBDE2D;">and</span> wordspy (member 'pinyin-znabc pyim-enable-words-predict))
+      (<span style="color: #FBDE2D;">push</span> `(pinyin-znabc ,@(pyim-possible-words wordspy)) words-predicted))
+
+    <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20381;&#27425;&#25628;&#32034;&#27599;&#20010;&#25340;&#38899;&#23545;&#24212;&#30340;&#27721;&#23383;&#12290;</span>
+    (<span style="color: #FBDE2D;">setq</span> chars (pyim-get (concat (caar pylist) (cdar pylist))))
+
+    <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#23558;&#19978;&#36848;&#25628;&#32034;&#24471;&#21040;&#30340;&#35789;&#26465;&#21512;&#24182;&#12290;</span>
+    (<span style="color: #FBDE2D;">setq</span> choice (pyim-flatten-list
+                  `(,words
+                    <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#27809;&#26377;&#20005;&#26684;&#21305;&#37197;&#30340;&#35789;&#26465;&#26102;&#65292;&#35774;&#32622;&#31532;&#19968;&#20010;&#34987;&#36873;&#35789;&#20026;&#23383;&#31526;&#65292;</span>
+                    <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#36825;&#26679;&#21487;&#20197;&#20943;&#23569;&#19981;&#21487;&#39044;&#26399;&#30340;&#32852;&#24819;&#35789;&#24102;&#26469;&#30340;&#35270;&#35273;&#21387;&#21147;&#12290;</span>
+                    ,(<span style="color: #FBDE2D;">unless</span> words
+                       (list (car chars)))
+                    <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#32852;&#24819;&#35789;</span>
+                    ,(mapcar
+                      #'(lambda (x)
+                          (cdr (assoc x words-predicted)))
+                      pyim-enable-words-predict)
+                    <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#27721;&#23383;&#23383;&#31526;</span>
+                    ,chars)))
+    (delete-dups (delq nil choice))))
+
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-flatten-list</span> (my-list)
+  (<span style="color: #FBDE2D;">cond</span>
+   ((null my-list) nil)
+   ((atom my-list) (list my-list))
+   (t (append (pyim-flatten-list (car my-list))
+              (pyim-flatten-list (cdr my-list))))))
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-possible-words</span> (wordspy)
   <span style="color: #61CE3C;">"&#26681;&#25454;&#25340;&#38899;&#24471;&#21040;&#21487;&#33021;&#30340;&#35789;&#32452;&#12290;&#20363;&#22914;&#65306;</span>
@@ -2814,8 +2847,8 @@ Chinese-pyim 在特定的时候需要读取一个汉字的拼音，这个工作�
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2015-06-26</span>
-        <span title="last modification date" class="post-info">2015-06-26</span>
+        <span title="post date" class="post-info">2015-06-29</span>
+        <span title="last modification date" class="post-info">2015-06-29</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>

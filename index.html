@@ -293,20 +293,29 @@ C-h v pyim-fuzzy-pinyin-adjust-function
 <h4 id="orgheadline15"><span class="section-number-4">1.8.4</span> 词语联想</h4>
 <div class="outline-text-4" id="text-1-8-4">
 <p>
-Chinese-pyim <b>内置</b>了词语联想功能，其基本原理为：
+Chinese-pyim <b>内置</b>了3种词语联想方式：
 </p>
 
 <ol class="org-ol">
-<li>如果输入 "ni-hao" ，那么搜索拼音与 "ni-hao" 类似的词条作为联想词。</li>
-<li>如果输入 "ni-hao" ，那么同时搜索 code 为 "n-h" 的词条做为联想词。</li>
+<li>`pinyin-similar' 搜索拼音类似的词条做为联想词，如果输入 "ni-hao" ，那么搜索拼音与 "ni-hao" 类似的词条（比如："ni-hao-a"）作为联想词。</li>
+<li>`pinyin-shouzimu' 搜索拼音首字母对应的词条做为联想词，如果输入 "ni-hao" ，那么同时搜索 code 为 "n-h" 的词条做为联想词。</li>
+<li>`pinyin-znabc' 类似智能ABC的词语联想(源于 emacs-eim)。</li>
 </ol>
+
+<p>
+比如：
+</p>
+
+<pre class="example">
+(setq pyim-enable-words-predict '(pinyin-similar pinyin-shouzimu)
+</pre>
 
 <p>
 词语联想功能默认开启，但有时候会导致输入法卡顿，用户可以通过下面的方式关闭：
 </p>
 
 <pre class="example">
-(setq pyim-include-predict-words nil)
+(setq pyim-enable-words-predict nil)
 </pre>
 
 <p>
