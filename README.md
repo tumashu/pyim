@@ -171,14 +171,19 @@ Chinese-pyim 使用一个比较 **粗糙** 的方法处理 **模糊音** ，要�
 
 ### 词语联想<a id="orgheadline13"></a>
 
-Chinese-pyim **内置** 了词语联想功能，其基本原理为：
+Chinese-pyim **内置** 了3种词语联想方式：
 
-1.  如果输入 "ni-hao" ，那么搜索拼音与 "ni-hao" 类似的词条作为联想词。
-2.  如果输入 "ni-hao" ，那么同时搜索 code 为 "n-h" 的词条做为联想词。
+1.  \`pinyin-similar' 搜索拼音类似的词条做为联想词，如果输入 "ni-hao" ，那么搜索拼音与 "ni-hao" 类似的词条（比如："ni-hao-a"）作为联想词。
+2.  \`pinyin-shouzimu' 搜索拼音首字母对应的词条做为联想词，如果输入 "ni-hao" ，那么同时搜索 code 为 "n-h" 的词条做为联想词。
+3.  \`pinyin-znabc' 类似智能ABC的词语联想(源于 emacs-eim)。
+
+比如：
+
+    (setq pyim-enable-words-predict '(pinyin-similar pinyin-shouzimu)
 
 词语联想功能默认开启，但有时候会导致输入法卡顿，用户可以通过下面的方式关闭：
 
-    (setq pyim-include-predict-words nil)
+    (setq pyim-enable-words-predict nil)
 
 另外，Chinese-pyim 也可以通过 Company 框架来实现词语联想，具体请参考： 1.8.8
 

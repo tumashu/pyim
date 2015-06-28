@@ -129,8 +129,15 @@ Chinese-pyim 内建的功能有：
   :group 'chinese-pyim
   :type 'function)
 
-(defcustom pyim-include-predict-words t
-  "是否开启词语联想功能。"
+(defcustom pyim-enable-words-predict
+  '(pinyin-similar pinyin-shouzimu pinyin-znabc)
+  "一个 list，用于设置词语联想方式，当前支持：
+
+1. `pinyin-similar' 搜索拼音类似的词条做为联想词。
+2. `pinyin-shouzimu' 搜索拼音首字母对应的词条做为联想词。
+3. `pinyin-znabc' 类似智能ABC的词语联想(源于 emacs-eim)。
+
+当这个变量设置为 nil 时，关闭词语联想功能。"
   :group 'chinese-pyim)
 
 (defcustom pyim-page-length 5
@@ -1311,40 +1318,50 @@ Return the input string."
  => (\"拼音\" \"贫铀\" \"聘用\" \"拼\" \"品\" \"贫\" \"苹\" \"聘\" \"频\" \"拚\" \"颦\" \"牝\" \"嫔\" \"姘\" \"嚬\")"
   (let ((py-str (pyim-pylist-to-string pylist))
         (py-str-shouzimu (pyim-pylist-to-string pylist t))
-        choice words words-predicted-1 words-predicted-2
-        words-predicted-3 chars wordspy)
+        choice words words-predicted chars wordspy)
 
     ;; 搜索严格匹配输入拼音的词条。
     (setq words (pyim-get py-str))
 
     ;; 如果输入 "ni-hao" ，搜索拼音与 "ni-hao" 类似的词条作为联想词。
-    (when pyim-include-predict-words
-      (setq words-predicted-1 (pyim-predict py-str)))
+    (when (member 'pinyin-similar pyim-enable-words-predict)
+      (push `(pinyin-similar ,@(pyim-predict py-str)) words-predicted))
 
     ;; 如果输入 "ni-hao" ，搜索 code 为 "n-h" 的词条做为联想词。
-    (when pyim-include-predict-words
-      (setq words-predicted-2 (pyim-get py-str-shouzimu)))
+    (when (member 'pinyin-shouzimu pyim-enable-words-predict)
+      (push `(pinyin-shouzimu ,@(pyim-get py-str-shouzimu)) words-predicted))
 
     ;; 将输入的拼音按照声母和韵母打散，得到尽可能多的拼音组合，
     ;; 查询这些拼音组合，得到的词条做为联想词。
     (setq wordspy (pyim-possible-words-py pylist))
-    (when (and wordspy pyim-include-predict-words)
-      (setq words-predicted-3 (pyim-possible-words wordspy)))
+    (when (and wordspy (member 'pinyin-znabc pyim-enable-words-predict))
+      (push `(pinyin-znabc ,@(pyim-possible-words wordspy)) words-predicted))
 
     ;; 依次搜索每个拼音对应的汉字。
     (setq chars (pyim-get (concat (caar pylist) (cdar pylist))))
 
     ;; 将上述搜索得到的词条合并。
-    (setq choice (append words
-                         ;; 没有严格匹配的词条时，设置第一个被选词为字符，
-                         ;; 这样可以减少不可预期的联想词带来的视觉压力。
-                         (unless words
-                           (list (car chars)))
-                         words-predicted-1
-                         words-predicted-2
-                         words-predicted-3
-                         chars))
+    (setq choice (pyim-flatten-list
+                  `(,words
+                    ;; 没有严格匹配的词条时，设置第一个被选词为字符，
+                    ;; 这样可以减少不可预期的联想词带来的视觉压力。
+                    ,(unless words
+                       (list (car chars)))
+                    ;; 联想词
+                    ,(mapcar
+                      #'(lambda (x)
+                          (cdr (assoc x words-predicted)))
+                      pyim-enable-words-predict)
+                    ;; 汉字字符
+                    ,chars)))
     (delete-dups (delq nil choice))))
+
+(defun pyim-flatten-list (my-list)
+  (cond
+   ((null my-list) nil)
+   ((atom my-list) (list my-list))
+   (t (append (pyim-flatten-list (car my-list))
+              (pyim-flatten-list (cdr my-list))))))
 
 (defun pyim-possible-words (wordspy)
   "根据拼音得到可能的词组。例如：
