@@ -265,6 +265,12 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
                                (point-max))
         (goto-char (point-min))
         (while (not (eobp))
+          (if (looking-at "^[a-z-].*\\cc+.*\\|^;+.*coding") ; 删除只包含 code，但没有词条的行
+              (forward-line 1)
+            (pyim-delete-line)))
+
+        (goto-char (point-min))
+        (while (not (eobp))
           (if (looking-at "^[ \t]*$")     ; 如果有空行，删除
               (pyim-delete-line)
             (setq currw (pyim-code-at-point))
@@ -519,6 +525,7 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
       (insert (propertize "
 操作命令：[A] 添加词库  [D] 删除词库   [P] 向上移动   [N] 向下移动  [g] 刷新页面
           [s] 保存配置  [R] 重启输入法 [C-c C-c] 禁用/启用当前词库
+          [M] 将所有的词库文件合并为一个词库文件
 
 词库导入：[i e] 下载并安装样例词库(用于测试)
           [i f] 导入一个搜狗输入法词库
@@ -678,6 +685,52 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
                                :coding utf-8-unix) t))
         (pyim-dicts-manager-refresh)))))
 
+(defun pyim-dicts-manager-merge-all ()
+  "将词库管理器中所有词库合并，并添加生成的词库文件。
+词库合并可以优化 Chinese-pyim 的速度。"
+  (interactive)
+  (let ((dicts-list pyim-dicts)
+        (dict-name "Dicts-Merged")
+        (buffer (get-buffer-create "*pyim-merged-dict*"))
+        (dict-file (expand-file-name
+                    (concat (file-name-as-directory
+                             pyim-dicts-directory)
+                            "pyim-dicts-merged.pyim")))
+        file coding disable)
+    (when (and dicts-list (yes-or-no-p "确定将所有词库合并为一个词库吗? "))
+      (dolist (dict dicts-list)
+        (setq file (expand-file-name (plist-get dict :file)))
+        (setq coding (plist-get dict :coding))
+        (setq disable (plist-get dict :disable))
+        (if (and (not disable)
+                 (file-exists-p file))
+            (with-current-buffer buffer
+              (if coding
+                  (let ((coding-system-for-read coding))
+                    (insert-file-contents file))
+                (insert-file-contents file))
+              (goto-char (point-max))
+              (insert "\n"))))
+
+      (with-current-buffer buffer
+        (goto-char (point-min))
+        (while (re-search-forward "^;+.*coding:.*" nil t)
+          (replace-match "" nil t))
+        (goto-char (point-min))
+        (pyim-update-dict-file t)
+        (goto-char (point-min))
+        (pyim-update-dict-file t)
+        (goto-char (point-min))
+        (insert";; -*- coding: utf-8 -*-\n")
+        (write-file dict-file)
+        (kill-buffer))
+
+      (setq pyim-dicts
+            `((:name ,dict-name
+                     :file ,dict-file
+                     :coding utf-8-unix)))
+      (pyim-dicts-manager-refresh))))
+
 (define-derived-mode pyim-dicts-manager-mode special-mode "pyim-dicts-manager"
   "Major mode for managing Chinese-pyim dicts"
   (read-only-mode)
@@ -691,7 +744,8 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
   (define-key pyim-dicts-manager-mode-map (kbd "P") 'pyim-dicts-manager-dict-position-up)
   (define-key pyim-dicts-manager-mode-map (kbd "s") 'pyim-dicts-manager-save-dict-info)
   (define-key pyim-dicts-manager-mode-map (kbd "C-c C-c") 'pyim-dicts-manager-toggle-enable-dict)
-  (define-key pyim-dicts-manager-mode-map (kbd "R") 'pyim-restart))
+  (define-key pyim-dicts-manager-mode-map (kbd "R") 'pyim-restart)
+  (define-key pyim-dicts-manager-mode-map (kbd "M") 'pyim-dicts-manager-merge-all))
 
 ;;;###autoload
 (defun pyim-dicts-manager ()
