@@ -673,15 +673,24 @@ If you don't like this funciton, set the variable to nil")
         (with-current-buffer (cdr (assoc "buffer" buf))
           (when (pyim-dict-buffer-valid-p)
             (pyim-bisearch-word code (point-min) (point-max))
-            (save-excursion
-              (while (and (string-match-p "[a-z]+-[a-z]+" code)
-                          (re-search-forward (concat "^" code) nil t)
-                          (< count 10))
-                (setq predicted-words
-                      (append predicted-words
-                              (cdr (pyim-line-content))))
-                (setq count (1+ count)))))))
-      (delete-dups predicted-words))))
+            (let ((begin (point))
+                  (end (progn
+                         (while (and (string-match-p "[a-z]+-[a-z]+" code)
+                                     (re-search-forward (concat "^" code) nil t)
+                                     (< count 10))
+                           (setq count (1+ count)))
+                         (end-of-line)
+                         (point))))
+              (setq predicted-words
+                    (append predicted-words
+                            (pyim-mulitline-content begin end)))))))
+      (delete-dups
+       (delq nil
+             (mapcar
+              #'(lambda (x)
+                  (when (string-match-p "\\cc" x) ; Delete pinyin code
+                    x))
+              predicted-words))))))
 
 (defun pyim-dict-buffer-valid-p ()
   "粗略地确定当前 buffer 是否是一个有效的词库产生的 buffer。
@@ -748,6 +757,21 @@ beginning of line"
                   (buffer-substring-no-properties
                    (line-beginning-position)
                    (line-end-position)) seperaters)))
+    (if omit-nulls
+        (cl-delete-if 'pyim-string-emptyp items)
+      items)))
+
+(defun pyim-mulitline-content (begin end &optional seperaters omit-nulls)
+  "用 SEPERATERS 分解当前 buffer 中，`begin' 到 `end' 之间的内容，
+所有参数传递给 split-string 函数，这个函数用于搜索联想词函数 `pyim-predict' 。"
+  (let ((items (split-string
+                (buffer-substring-no-properties
+                 (if (> begin (point-min))
+                     begin
+                   (point-min))
+                 (if (< end (point-max))
+                     end
+                   (point-max))) (or seperaters "\n+\\| +"))))
     (if omit-nulls
         (cl-delete-if 'pyim-string-emptyp items)
       items)))
