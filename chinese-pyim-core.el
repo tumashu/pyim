@@ -130,7 +130,7 @@ Chinese-pyim 内建的功能有：
   :type 'function)
 
 (defcustom pyim-enable-words-predict
-  '(pinyin-similar pinyin-shouzimu pinyin-znabc)
+  '(pinyin-similar)
   "一个 list，用于设置词语联想方式，当前支持：
 
 1. `pinyin-similar' 搜索拼音类似的词条做为联想词。
