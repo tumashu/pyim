@@ -666,45 +666,45 @@ If you don't like this funciton, set the variable to nil")
 
 (defun pyim-predict (code)
   "得到 `code' 对应的联想词。"
-  (let ((count 0)
-        predicted-words)
-    (when (and (stringp code) (string< "" code))
+  (let ((regexp (pyim-predict-build-regexp code))
+        words-list predicted-words)
+    (when (and (stringp code)
+               (string< "" code)
+               (string-match-p "[a-z]+-[a-z]+" code))
       (dolist (buf pyim-buffer-list)
         (with-current-buffer (cdr (assoc "buffer" buf))
           (when (pyim-dict-buffer-valid-p)
             (pyim-bisearch-word code (point-min) (point-max))
-            (let* ((regexp (pyim-predict-build-regexp code))
-                   (begin (when (re-search-forward regexp nil t)
+            (let* ((begin (when (re-search-forward regexp nil t)
                             (beginning-of-line)
                             (point)))
-                   (end (progn
-                          (while (and (string-match-p "[a-z]+-[a-z]+" code)
-                                      (re-search-forward regexp nil t)
-                                      (< count 10))
-                            (setq count (1+ count)))
-                          (end-of-line)
-                          (point))))
+                   ;; 提取20行内容来获取分析联想词，太多的联想词
+                   ;; 用处不大，还会使输入法响应速度减慢(经验数字)。
+                   (end (progn (forward-line 20)
+                               (end-of-line)
+                               (point))))
               (when begin
-                (setq predicted-words
-                      (append predicted-words
-                              (pyim-mulitline-content begin end))))))))
-      (delete-dups
-       (delq nil
-             (mapcar
-              #'(lambda (x)
-                  (when (string-match-p "\\cc" x) ; Delete pinyin code
-                    x))
-              predicted-words))))))
+                (setq words-list
+                      (append words-list
+                              (pyim-multiline-content begin end))))))))
+      (dolist (line-words words-list)
+        (when (string-match-p regexp (car line-words))
+          (let ((line-words (cdr line-words)))
+            (dolist (word line-words)
+              (when (and (stringp word)
+                         (> (length word) 0))
+                (push word predicted-words))))))
+      (delete-dups (reverse predicted-words)))))
 
 (defun pyim-predict-build-regexp (code)
   "从`code' 构建一个 regexp，用于搜索联想词，
-比如：ni-hao-si-j --> ^ni-hao-si[a-z]*-j[a-z]*"
+比如：ni-hao-si-j --> ^ni-hao[a-z]*-si[a-z]*-j[a-z]*"
   (let ((count 0))
     (concat "^"
             (mapconcat
              #'(lambda (x)
                  (setq count (+ count 1))
-                 (if (> count 2)
+                 (if (> count 1)
                      (concat x "[a-z]*")
                    x))
              (split-string code "-") "-"))))
@@ -778,9 +778,12 @@ beginning of line"
         (cl-delete-if 'pyim-string-emptyp items)
       items)))
 
-(defun pyim-mulitline-content (begin end &optional seperaters omit-nulls)
-  "用 SEPERATERS 分解当前 buffer 中，`begin' 到 `end' 之间的内容，
-所有参数传递给 split-string 函数，这个函数用于搜索联想词函数 `pyim-predict' 。"
+(defun pyim-multiline-content (begin end &optional seperaters omit-nulls)
+  "将当前 buffer 中，`begin' 到 `end' 之间的内容分解，生成一个 list，
+这个函数用于搜索联想词函数 `pyim-predict' 。"
+  ;;  ni-hao 你好 倪浩         (("ni-hao" "你好" "倪浩")
+  ;;  ni-hao-a 你好啊    -->    ("ni-hao-a" "你好啊")
+  ;;  ni-hao-b 你好吧           ("ni-hao-ba" "你好吧"))
   (let ((items (split-string
                 (buffer-substring-no-properties
                  (if (> begin (point-min))
@@ -788,10 +791,14 @@ beginning of line"
                    (point-min))
                  (if (< end (point-max))
                      end
-                   (point-max))) (or seperaters "\n+\\| +"))))
-    (if omit-nulls
-        (cl-delete-if 'pyim-string-emptyp items)
-      items)))
+                   (point-max))) "\n")))
+    (mapcar
+     #'(lambda (x)
+         (let ((line-items (split-string x (or seperaters " "))))
+           (if omit-nulls
+               (cl-delete-if 'pyim-string-emptyp line-items)
+             line-items)))
+     items)))
 
 (defun pyim-string-emptyp (str)
   (not (string< "" str)))
