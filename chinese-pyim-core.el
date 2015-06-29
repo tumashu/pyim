@@ -673,16 +673,17 @@ If you don't like this funciton, set the variable to nil")
         (with-current-buffer (cdr (assoc "buffer" buf))
           (when (pyim-dict-buffer-valid-p)
             (pyim-bisearch-word code (point-min) (point-max))
-            (let ((begin (when (re-search-forward (concat "^" code) nil t)
-                           (beginning-of-line)
-                           (point)))
-                  (end (progn
-                         (while (and (string-match-p "[a-z]+-[a-z]+" code)
-                                     (re-search-forward (concat "^" code) nil t)
-                                     (< count 10))
-                           (setq count (1+ count)))
-                         (end-of-line)
-                         (point))))
+            (let* ((regexp (pyim-predict-build-regexp code))
+                   (begin (when (re-search-forward regexp nil t)
+                            (beginning-of-line)
+                            (point)))
+                   (end (progn
+                          (while (and (string-match-p "[a-z]+-[a-z]+" code)
+                                      (re-search-forward regexp nil t)
+                                      (< count 10))
+                            (setq count (1+ count)))
+                          (end-of-line)
+                          (point))))
               (when begin
                 (setq predicted-words
                       (append predicted-words
@@ -694,6 +695,19 @@ If you don't like this funciton, set the variable to nil")
                   (when (string-match-p "\\cc" x) ; Delete pinyin code
                     x))
               predicted-words))))))
+
+(defun pyim-predict-build-regexp (code)
+  "从`code' 构建一个 regexp，用于搜索联想词，
+比如：ni-hao-si-j --> ^ni-hao-si[a-z]*-j[a-z]*"
+  (let ((count 0))
+    (concat "^"
+            (mapconcat
+             #'(lambda (x)
+                 (setq count (+ count 1))
+                 (if (> count 2)
+                     (concat x "[a-z]*")
+                   x))
+             (split-string code "-") "-"))))
 
 (defun pyim-dict-buffer-valid-p ()
   "粗略地确定当前 buffer 是否是一个有效的词库产生的 buffer。
