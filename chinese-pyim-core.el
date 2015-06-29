@@ -698,13 +698,13 @@ If you don't like this funciton, set the variable to nil")
 
 (defun pyim-predict-build-regexp (code)
   "从`code' 构建一个 regexp，用于搜索联想词，
-比如：ni-hao-si-j --> ^ni-hao-si[a-z]*-j[a-z]*"
+比如：ni-hao-si-j --> ^ni-hao[a-z]*-si[a-z]*-j[a-z]*"
   (let ((count 0))
     (concat "^"
             (mapconcat
              #'(lambda (x)
                  (setq count (+ count 1))
-                 (if (> count 2)
+                 (if (> count 1)
                      (concat x "[a-z]*")
                    x))
              (split-string code "-") "-"))))
