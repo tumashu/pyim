@@ -673,7 +673,9 @@ If you don't like this funciton, set the variable to nil")
         (with-current-buffer (cdr (assoc "buffer" buf))
           (when (pyim-dict-buffer-valid-p)
             (pyim-bisearch-word code (point-min) (point-max))
-            (let ((begin (point))
+            (let ((begin (when (re-search-forward (concat "^" code) nil t)
+                           (beginning-of-line)
+                           (point)))
                   (end (progn
                          (while (and (string-match-p "[a-z]+-[a-z]+" code)
                                      (re-search-forward (concat "^" code) nil t)
@@ -681,9 +683,10 @@ If you don't like this funciton, set the variable to nil")
                            (setq count (1+ count)))
                          (end-of-line)
                          (point))))
-              (setq predicted-words
-                    (append predicted-words
-                            (pyim-mulitline-content begin end)))))))
+              (when begin
+                (setq predicted-words
+                      (append predicted-words
+                              (pyim-mulitline-content begin end))))))))
       (delete-dups
        (delq nil
              (mapcar
