@@ -320,6 +320,31 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
     (when (> (length insert-string) 1)
       (insert insert-string))))
 
+;;                          (("a" "b")
+;;                           ("b" "c")
+;; ("a" "b" "c" "d" "e") ->  ("c" "d")
+;;                           ("d" "e")
+;;                           ("e" nil))
+(defun pyim-guessdict-list-convert (my-list)
+  (cond
+   ((null my-list) nil)
+   ((atom my-list) (list my-list))
+   (t (append (list (list (car my-list) (car (cdr my-list))))
+              (pyim-guessdict-list-convert (cdr my-list))))))
+
+;;                      你好 天空
+;; "你好 天空 大地" ->  天空 大地
+;;                      大地
+(defun pyim-convert-current-line-to-guessdict-format ()
+  (interactive)
+  (let* ((string (mapconcat
+                  #'(lambda (x)
+                      (mapconcat #'identity x " "))
+                  (pyim-guessdict-list-convert (pyim-line-content nil t))
+                  "\n")))
+    (delete-region (line-beginning-position) (line-end-position))
+    (insert string)))
+
 ;;;###autoload
 (defun pyim-article2dict-chars ()
   "将一篇中文文章转换为 Chinese-pyim 可以识别的拼音词库。
@@ -359,6 +384,12 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
 输入习惯，可以提高输入体验。"
   (interactive)
   (pyim-article2dict 'misspell-words))
+
+;;;###autoload
+(defun pyim-article2dict-guessdict ()
+  "将一篇中文文章转换为 Chinese-pyim 可以识别的guessdict。"
+  (interactive)
+  (pyim-article2dict 'guessdict))
 
 (defun pyim-article2dict (object)
   "将一篇中文文章转换为 Chinese-pyim 可以识别的拼音词库。
@@ -436,7 +467,8 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
                (goto-char (point-min))
                ;; 删除大于4个字符的中文字符串，没什么用处。
                (while (re-search-forward "\\cc\\{5,\\}" nil t)
-                 (replace-match "\n"))))
+                 (replace-match "\n")))
+              ((eq object 'guessdict) t))
         ;; 删除多余空白行。
         (goto-char (point-min))
         (while (re-search-forward "\n+" nil t)
@@ -447,7 +479,9 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
         ;; 为每一行的词条添加拼音code
         (goto-char (point-min))
         (while (not (eobp))
-          (pyim-convert-current-line-to-dict-format)
+          (if (eq object 'guessdict)
+              (pyim-convert-current-line-to-guessdict-format)
+            (pyim-convert-current-line-to-dict-format))
           (forward-line 1))
         (pyim-article2dict-write-stage-file file "ConvertStage-" t)
         ;; 将文件按行排序，并删除重复的词条，运行两次。
