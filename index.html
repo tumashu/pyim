@@ -293,21 +293,31 @@ C-h v pyim-fuzzy-pinyin-adjust-function
 <h4 id="orgheadline15"><span class="section-number-4">1.8.4</span> 词语联想</h4>
 <div class="outline-text-4" id="text-1-8-4">
 <p>
-Chinese-pyim <b>内置</b>了3种词语联想方式：
+Chinese-pyim <b>内置</b>了4种词语联想方式：
 </p>
 
 <ol class="org-ol">
 <li>`pinyin-similar' 搜索拼音类似的词条做为联想词，如果输入 "ni-hao" ，那么搜索拼音与 "ni-hao" 类似的词条（比如："ni-hao-a"）作为联想词。</li>
 <li>`pinyin-shouzimu' 搜索拼音首字母对应的词条做为联想词，如果输入 "ni-hao" ，那么同时搜索 code 为 "n-h" 的词条做为联想词。</li>
 <li>`pinyin-znabc' 类似智能ABC的词语联想(源于 emacs-eim)。</li>
+<li><p>
+`guess-words' 以上次输入的词条为 code，然后在 guessdict 中搜索，用搜索得到的词条来提高输入法识别精度。
+</p>
+
+<p>
+注意：这个方法需要用户安装 guessdict 词库，
+     guessdict 词库文件可以用 `pyim-article2dict-guessdict'
+     命令生成。
+</p></li>
 </ol>
+
 
 <p>
 比如：
 </p>
 
 <pre class="example">
-(setq pyim-enable-words-predict '(pinyin-similar pinyin-shouzimu)
+(setq pyim-enable-words-predict '(pinyin-similar pinyin-shouzimu guess-words))
 </pre>
 
 <p>
@@ -532,6 +542,7 @@ pyim-dicts-manager 中 “导入搜狗输入法细胞词库” 功能就是依�
 <li>`pyim-article2dict-chars' 将文章中游离汉字字符转换为拼音词库。</li>
 <li>`pyim-article2dict-words' 将文章中中文词语转换为拼音词库。</li>
 <li>`pyim-article2dict-misspell-words' 将文章中连续的游离词组成字符串后，转换为拼音词库。</li>
+<li>`pyim-article2dict-guessdict' 将文章中词条转换为 guessdict词库。</li>
 </ol>
 
 <p>
