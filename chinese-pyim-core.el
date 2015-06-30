@@ -1427,9 +1427,14 @@ Return the input string."
     ;; 如果上一次输入词条 "你好" ，那么以 “你好” 为 code，从 guessdict 词库中搜索词条
     ;; 将搜索得到的词条的拼音与 *当前输入的拼音* 进行比较，类似或者精确匹配的词条作为联想词。
     (when (member 'guess-words pyim-enable-words-predict)
-      (let ((words (pyim-get pyim-last-input-word t)))
+      (let* ((words (pyim-get pyim-last-input-word t))
+             ;; 当 `words' 包含的元素太多时，后面处理会极其缓慢，
+             ;; 这里取 `words' 的一个子集来提高输入法的响应。
+             (words (if (> (length words) 200)
+                        (pyim-sublist words 1 200)
+                      words)))
         (dolist (word words)
-          (let ((pinyins (pyim-hanzi2pinyin word nil "-" t)))
+          (let* ((pinyins (pyim-hanzi2pinyin word nil "-" t)))
             (when (cl-some
                    #'(lambda (x)
                        (string-match-p (pyim-predict-build-regexp py-str) x))
@@ -1467,6 +1472,16 @@ Return the input string."
                     ;; 汉字字符
                     ,chars)))
     (delete-dups (delq nil choice))))
+
+(defun pyim-sublist (list start end)
+  "Return a section of LIST, from START to END.
+Counting starts at 1."
+  (let (rtn (c start))
+    (setq list (nthcdr (1- start) list))
+    (while (and list (<= c end))
+      (push (pop list) rtn)
+      (setq c (1+ c)))
+    (nreverse rtn)))
 
 (defun pyim-flatten-list (my-list)
   (cond
