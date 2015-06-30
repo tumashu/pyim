@@ -387,7 +387,17 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
 
 ;;;###autoload
 (defun pyim-article2dict-guessdict ()
-  "将一篇中文文章转换为 Chinese-pyim 可以识别的guessdict。"
+  "将一篇中文文章转换为 Chinese-pyim 可以识别的 guessdict。
+
+Guessdict 词库是 Chinese-pyim 用于词语联想的一种词库，其结构与普通词库
+类似，唯一不同的是，guessdict 词库的 code 是中文，而不是拼音，例如：
+
+   我爱 北京 美女 旅游
+   我们 去哪 去看海
+
+Guessdict 用来保存，一个中文词条（code）后面经常跟随出现的词条。当用户输入
+前一次输入：我爱，再输入拼音 lv 时，Chinese-pyim 会匹配词条： 旅游。这样就
+可以降低用户翻页的频率不同。"
   (interactive)
   (pyim-article2dict 'guessdict))
 
@@ -396,8 +406,8 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
 其步骤为：
 1. 清除所有非汉语内容。
 2. 使用分词系统将文章分词。
-3. 将词条与词条之间用换行符分开。
-4. 为每一行的词条添加拼音。"
+3. 将词条与词条之间用换行符分开（对于普通词库）。
+4. 为每一行的词条添加拼音（对于普通词库）。"
   (save-excursion
     (pyim-show-help
      "将一篇中文文章转换为 Chinese-pyim 可以识别的拼音词库。
@@ -406,10 +416,11 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
    1. 安装教程请参考： https://github.com/fxsjy/jieba
    2. 使用命令： python -m jieba -d \" \" 源文件.txt  > 目标文件.txt
    3. 命令帮助： python -m jieba --help
-3. 添加拼音：使用 emacs 打开 “目标文件.txt”，然后按照用户需求运行下面3个命令：
+3. 添加拼音：运行下面4个命令
    1. `pyim-article2dict-chars'
    2. `pyim-article2dict-words'
    3. `pyim-article2dict-misspell-words'
+   3. `pyim-article2dict-guessdict'
 4. 保存文件
 
 另外，使用分词工具的目的是确保中文词语与词语之间用 *空格* 强制隔开。比如：

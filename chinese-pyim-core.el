@@ -62,12 +62,14 @@ plist 来表示，比如：
 
     (:name \"100万大词库\"
      :file \"/path/to/pinyin-bigdict.txt\"
-     :coding utf-8-unix)
+     :coding utf-8-unix
+     :dict-type pinyin-dict)
 
 其中：
-1. `:name'   代表词库名称，用户可以按照喜好来确定。
-2. `:coding' 表示词库文件使用的编码。
-3. `:file'   表示词库文件，"
+1. `:name'      代表词库名称，用户可以按照喜好来确定。
+2. `:coding'    表示词库文件使用的编码。
+3. `:file'      表示词库文件，
+4. `:dict-type' 表示词库文件是普通词库文件还是 guessdict 词库文件。"
   :group 'chinese-pyim
   :type 'list)
 
@@ -136,8 +138,12 @@ Chinese-pyim 内建的功能有：
 1. `pinyin-similar' 搜索拼音类似的词条做为联想词。
 2. `pinyin-shouzimu' 搜索拼音首字母对应的词条做为联想词。
 3. `pinyin-znabc' 类似智能ABC的词语联想(源于 emacs-eim)。
-4. `guess-words' 以上次输入的词条为 code，从 guessdict 中搜索联想词
-                 注意：这个方法需要用户安装 guessdict 词库。
+4. `guess-words' 以上次输入的词条为 code，然后在 guessdict 中搜索，
+                 用搜索得到的词条来提高输入法识别精度。
+
+                 注意：这个方法需要用户安装 guessdict 词库，
+                       guessdict 词库文件可以用 `pyim-article2dict-guessdict'
+                       命令生成。
 
 当这个变量设置为 nil 时，关闭词语联想功能。"
   :group 'chinese-pyim)
@@ -430,6 +436,7 @@ If you don't like this funciton, set the variable to nil")
 ;; 同的目的：
 ;; 1. 个人词频文件
 ;; 2. 普通词库文件
+;; 3. Guessdict词库文件
 
 ;; 个人词频文件用来保存用户曾经输入过的中文词条以及这些词条输入的先后顺序
 ;; （也就是词频信息）。Chinese-pyim 搜索中文词条时，个人词频文件里的词条
@@ -450,7 +457,7 @@ If you don't like this funciton, set the variable to nil")
 
 ;; 当这个文件中的词条数量增长到一定程度，用户可以直接将这个文件转换为词库。
 
-;; **** 普通词库文件
+;; **** 普通词库文件 和 Guessdict词库
 ;; 普通词库文件，也可以叫做共享词库文件，与个人词频文件相比，普通词库文件
 ;; 有如下特点：
 ;; 1. 词条数量巨大：普通词库文件中往往包含大量的词条信息（可能超过50万）。
@@ -458,13 +465,23 @@ If you don't like this funciton, set the variable to nil")
 ;;    所以普通词库文件的内容一般不会发生改变。
 ;; 3. 普通词库文件适宜制作词库包，在用户之间共享。
 
-;; 我们使用变量 `pyim-dicts' 来设定普通词库文件的信息：
+;; Guessdict词库用于词语联想，它与普通词库文件有类似的特征，唯一不同的是：
+;; Guessdict词库的 code 是中文，而不是拼音。
+
+;; #+BEGIN_EXAMPLE
+;; 我爱 北京 美女 旅游
+;; 我们 去哪 去看海
+;; #+END_EXAMPLE
+
+;; 我们使用变量 `pyim-dicts' 来设定普通词库文件和 guessdict 词库的信息：
 ;; 1. `:name' 用户给词库设定的名称，暂时没有用处，未来可能用于构建词库包。
 ;; 2. `:file' 词库文件的绝对路径。
 ;; 3. `:coding' 词库文件的编码，词库文件是一个文本文件，window系统一般使
 ;;    用 GBK 编码来保存中文，而Linux系统一般使用 UTF-8 编码来保存中文，
 ;;    emacs 似乎不能自动识别中文编码，所以要求用户明确告知词库文件使用什
 ;;    么编码来保存。
+;; 4. `:dict-type' 当前词库文件是普通词库还是 guessdict 词库，普通词库
+;;     设置为 pinyin-dict，guessdict 词库设置为 guess-dict。
 
 ;; *** 加载词库
 ;;    :PROPERTIES:

@@ -126,7 +126,7 @@
 ;; #+END_EXAMPLE
 
 ;; *** 词语联想
-;; Chinese-pyim *内置* 了3种词语联想方式：
+;; Chinese-pyim *内置* 了4种词语联想方式：
 
 ;; 1. `pinyin-similar' 搜索拼音类似的词条做为联想词，
 ;;     如果输入 "ni-hao" ，那么搜索拼音与 "ni-hao" 类似的词条
@@ -134,11 +134,18 @@
 ;; 2. `pinyin-shouzimu' 搜索拼音首字母对应的词条做为联想词，
 ;;     如果输入 "ni-hao" ，那么同时搜索 code 为 "n-h" 的词条做为联想词。
 ;; 3. `pinyin-znabc' 类似智能ABC的词语联想(源于 emacs-eim)。
+;; 4. `guess-words' 以上次输入的词条为 code，然后在 guessdict 中搜索，
+;;                  用搜索得到的词条来提高输入法识别精度。
+
+;;                  注意：这个方法需要用户安装 guessdict 词库，
+;;                       guessdict 词库文件可以用 `pyim-article2dict-guessdict'
+;;                       命令生成。
+
 
 ;; 比如：
 
 ;; #+BEGIN_EXAMPLE
-;; (setq pyim-enable-words-predict '(pinyin-similar pinyin-shouzimu))
+;; (setq pyim-enable-words-predict '(pinyin-similar pinyin-shouzimu guess-words))
 ;; #+END_EXAMPLE
 
 ;; 词语联想功能默认开启，但有时候会导致输入法卡顿，用户可以通过下面的方式关闭：
@@ -291,6 +298,7 @@
 ;; 2. `pyim-article2dict-words' 将文章中中文词语转换为拼音词库。
 ;; 3. `pyim-article2dict-misspell-words' 将文章中连续的游离词组成字符串后，
 ;;    转换为拼音词库。
+;; 4. `pyim-article2dict-guessdict' 将文章中词条转换为 guessdict词库。
 
 ;; 注意：在运行上述两个命令之前，必须确保待转换的文章中，中文词汇已经使用
 ;; *空格* 强制隔开。
