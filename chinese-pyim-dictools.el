@@ -229,12 +229,14 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
          (length (length words-list)))
     (when sort-by-freq
       (setq words-list
-            (cons (car words-list) ;; 拼音必须排在第一位
+            (cons (car words-list) ;; code必须排在第一位
                   (pyim-sort-words-by-freq (cdr words-list)))))
-    ;; cl-lib 中类似的函数 *不可以* 使用，
-    ;; 因为，在删除重复元素的时候，列表
-    ;; 前面的元素优先被删除。
-    (delete-dups words-list)
+
+    ;; 删除重复词条的时候，要注意删除顺序。
+    (cl-delete-duplicates
+     words-list
+     :test #'equal :from-end t)
+
     (when (> length (length words-list))
       (pyim-delete-line)
       (insert (mapconcat 'identity words-list " "))
