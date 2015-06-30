@@ -130,12 +130,14 @@ Chinese-pyim 内建的功能有：
   :type 'function)
 
 (defcustom pyim-enable-words-predict
-  '(pinyin-similar)
+  '(pinyin-similar guess-words)
   "一个 list，用于设置词语联想方式，当前支持：
 
 1. `pinyin-similar' 搜索拼音类似的词条做为联想词。
 2. `pinyin-shouzimu' 搜索拼音首字母对应的词条做为联想词。
 3. `pinyin-znabc' 类似智能ABC的词语联想(源于 emacs-eim)。
+4. `guess-words' 以上次输入的词条为 code，从 guessdict 中搜索联想词
+                 注意：这个方法需要用户安装 guessdict 词库。
 
 当这个变量设置为 nil 时，关闭词语联想功能。"
   :group 'chinese-pyim)
@@ -218,6 +220,7 @@ Chinese-pyim 内建的功能有：
 
 (defvar pyim-current-key "" "已经输入的代码")
 (defvar pyim-current-str "" "当前选择的词条")
+(defvar pyim-last-input-word "" "保存上一次输入过的词条，用于实现某种词语联想功能。")
 (defvar pyim-input-ascii nil
   "是否开启 Chinese-pyim 英文输入模式。")
 
@@ -1390,7 +1393,8 @@ Return the input string."
  => (\"拼音\" \"贫铀\" \"聘用\" \"拼\" \"品\" \"贫\" \"苹\" \"聘\" \"频\" \"拚\" \"颦\" \"牝\" \"嫔\" \"姘\" \"嚬\")"
   (let ((py-str (pyim-pylist-to-string pylist))
         (py-str-shouzimu (pyim-pylist-to-string pylist t))
-        choice words words-predicted chars wordspy)
+        choice words guess-words-accurate guess-words-similar
+        words-predicted chars wordspy)
 
     ;; 搜索严格匹配输入拼音的词条。
     (setq words (pyim-get py-str))
@@ -1403,6 +1407,23 @@ Return the input string."
     (when (member 'pinyin-shouzimu pyim-enable-words-predict)
       (push `(pinyin-shouzimu ,@(pyim-get py-str-shouzimu)) words-predicted))
 
+    ;; 如果上一次输入词条 "你好" ，那么以 “你好” 为 code，从 guessdict 词库中搜索词条
+    ;; 将搜索得到的词条的拼音与 *当前输入的拼音* 进行比较，类似或者精确匹配的词条作为联想词。
+    (when (member 'guess-words pyim-enable-words-predict)
+      (let ((words (pyim-get pyim-last-input-word t)))
+        (dolist (word words)
+          (let ((pinyins (pyim-hanzi2pinyin word nil "-" t)))
+            (when (cl-some
+                   #'(lambda (x)
+                       (string-match-p (pyim-predict-build-regexp py-str) x))
+                   pinyins)
+              (push word guess-words-similar))
+            (when (cl-some
+                   #'(lambda (x)
+                       (string= py-str x))
+                   pinyins)
+              (push word guess-words-accurate))))))
+
     ;; 将输入的拼音按照声母和韵母打散，得到尽可能多的拼音组合，
     ;; 查询这些拼音组合，得到的词条做为联想词。
     (setq wordspy (pyim-possible-words-py pylist))
@@ -1414,12 +1435,14 @@ Return the input string."
 
     ;; 将上述搜索得到的词条合并。
     (setq choice (pyim-flatten-list
-                  `(,words
+                  `(,guess-words-accurate
+                    ,words
                     ;; 没有严格匹配的词条时，设置第一个被选词为字符，
                     ;; 这样可以减少不可预期的联想词带来的视觉压力。
                     ,(unless words
                        (list (car chars)))
                     ;; 联想词
+                    ,guess-words-similar
                     ,(mapcar
                       #'(lambda (x)
                           (cdr (assoc x words-predicted)))
@@ -1872,6 +1895,7 @@ Return the input string."
           (progn
             (if (not (member pyim-current-str (car pyim-current-choices)))
                 (pyim-create-or-rearrange-word pyim-current-str))
+            (setq pyim-last-input-word pyim-current-str)
             (pyim-terminate-translation)
             ;; Chinese-pyim 使用这个 hook 来处理联想词。
             (run-hooks 'pyim-select-word-finish-hook))
