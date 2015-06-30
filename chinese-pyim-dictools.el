@@ -522,17 +522,18 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
   (with-current-buffer pyim-dicts-manager-buffer-name
     (let ((inhibit-read-only t)
           (dicts-list pyim-dicts)
-          (format-string "%-4s %-4s %-11s %-25s %-60s\n")
+          (format-string "%-4s %-4s %-11s %-25s %-60s %-4s\n")
           (face-attr '((foreground-color . "DarkOrange2")
                        (bold . t)))
           (i 1))
       (erase-buffer)
-      (insert (propertize (format format-string "序号" "启用" "Coding"    "词库名称" "词库文件")
+      (insert (propertize (format format-string "序号" "启用" "Coding"    "词库名称" "词库文件" "词库类型")
                           'face face-attr))
       (insert (propertize (format format-string
                                   "----" "----" "----------"
                                   "---------------"
-                                  "------------------------------\n")
+                                  "------------------------------------------"
+                                  "--------------\n")
                           'face face-attr))
       (if (not pyim-dicts)
           (insert "拼音词库是 Chinese-pyim 使用顺手与否的关键。根据经验估计：
@@ -553,11 +554,12 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
           (let ((disable (plist-get dict :disable))
                 (name (plist-get dict :name))
                 (file (plist-get dict :file))
-                (coding (plist-get dict :coding)))
+                (coding (plist-get dict :coding))
+                (dict-type (plist-get dict :dict-type)))
             (insert (propertize (format format-string i
                                         (if disable "no" "yes")
-                                        coding name file)
-                                'id i 'disable disable 'name name 'file file 'coding coding)))
+                                        coding name file dict-type)
+                                'id i 'disable disable 'name name 'file file 'coding coding dict-type 'dict-type)))
           (setq i (1+ i))))
       (insert (propertize "
 操作命令：[A] 添加词库  [D] 删除词库   [P] 向上移动   [N] 向下移动  [g] 刷新页面
@@ -677,7 +679,7 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
                                nil "*pyim-dicts-import*" nil input-file output-file)
                  (file-exists-p output-file))
             (add-to-list 'pyim-dicts
-                         `(:name ,input-filename :file ,output-file :coding utf-8) t)
+                         `(:name ,input-filename :file ,output-file :coding utf-8 :dict-type 'dict) t)
           (message "搜狗词库文件：%s 转换失败。" input-file))
       (message "这个词库文件似乎已经导入。"))))
 
@@ -692,8 +694,14 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
       (setq coding (completing-read "词库文件编码: "
                                     '("utf-8-unix" "cjk-dos" "gb18030-dos")
                                     nil t nil nil "utf-8-unix"))
+      (setq dict-type (completing-read "词库类型: "
+                                       '("pinyin-dict" "guess-dict")
+                                       nil t nil nil "pinyin-dict"))
       (setq first-used  (yes-or-no-p "是否让 Chinese-pyim 优先使用词库？ "))
-      (setq dict `(:name ,name :file ,file :coding ,(intern coding)))
+      (setq dict `(:name ,name
+                         :file ,file
+                         :coding ,(intern coding)
+                         :dict-type ,(intern dict-type)))
       (if first-used
           (add-to-list 'pyim-dicts dict)
         (add-to-list 'pyim-dicts dict t))
@@ -719,7 +727,8 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
           (add-to-list 'pyim-dicts
                        `(:name ,dict-name
                                :file ,dict-file
-                               :coding utf-8-unix) t))
+                               :coding utf-8-unix
+                               :dict-type dict) t))
         (pyim-dicts-manager-refresh)))))
 
 (defun pyim-dicts-manager-merge-all ()
@@ -739,7 +748,9 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
         (setq file (expand-file-name (plist-get dict :file)))
         (setq coding (plist-get dict :coding))
         (setq disable (plist-get dict :disable))
+        (setq dict-type (plist-get dict :dict-type))
         (if (and (not disable)
+                 (eq dict-type 'dict)
                  (file-exists-p file))
             (with-current-buffer buffer
               (if coding
@@ -765,7 +776,8 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
       (setq pyim-dicts
             `((:name ,dict-name
                      :file ,dict-file
-                     :coding utf-8-unix)))
+                     :coding utf-8-unix
+                     :dict-type dict)))
       (pyim-dicts-manager-refresh))))
 
 (define-derived-mode pyim-dicts-manager-mode special-mode "pyim-dicts-manager"

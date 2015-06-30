@@ -530,7 +530,7 @@ If you don't like this funciton, set the variable to nil")
   (let ((personal-file (expand-file-name pyim-personal-file))
         (dicts-list pyim-dicts)
         (bufname pyim-buffer-name)
-        buflist buf file coding disable)
+        buflist buf file coding disable dict-type)
     (save-excursion
       (unless (file-exists-p personal-file)
         ;; 如果 `pyim-personal-file' 对应的文件不存在，
@@ -543,10 +543,11 @@ If you don't like this funciton, set the variable to nil")
             (setq file (expand-file-name (plist-get dict :file)))
             (setq coding (plist-get dict :coding))
             (setq disable (plist-get dict :disable))
+            (setq dict-type (plist-get dict :dict-type))
             (if (and (not disable)
                      (file-exists-p file)
                      (not (pyim-file-load-p file buflist)))
-                (setq buflist (append buflist (list (pyim-read-file file bufname coding))))
+                (setq buflist (append buflist (list (pyim-read-file file bufname coding dict-type))))
               (message "忽略导入重复的词库文件：%s。" file)))
         ;; 当用户没有设置词库信息时，弹出帮助信息。
         (warn "Chinese-pyim 没有安装词库，请运行词库管理命令 `pyim-dicts-manager' 来安装词库。")))
@@ -558,14 +559,15 @@ If you don't like this funciton, set the variable to nil")
              (rassoc file x))
            buflist))
 
-(defun pyim-read-file (file name &optional coding)
+(defun pyim-read-file (file name &optional coding dict-type)
   (with-current-buffer (generate-new-buffer name)
     (if coding
         (let ((coding-system-for-read coding))
           (insert-file-contents file))
       (insert-file-contents file))
     `(("buffer" . ,(current-buffer))
-      ("file" . ,file))))
+      ("file" . ,file)
+      ("dict-type" . ,dict-type))))
 ;; #+END_SRC
 
 ;; 当使用 `pyim-start' 或者 `pyim-restart' 命令激活  Chinese-pyim 时，上述对应表保存到变量 `pyim-buffer-list'。
@@ -650,10 +652,22 @@ If you don't like this funciton, set the variable to nil")
 ;; BUG: 这个函数需要进一步优化，使其判断更准确。
 
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-get (code)
-  (let (words)
+(defun pyim-get (code &optional search-from-guessdict)
+  (let (words buffer-list)
     (when (and (stringp code) (string< "" code))
       (dolist (buf pyim-buffer-list)
+        (let ((dict-type (cdr (assoc "dict-type" buf))))
+          ;; Search from dict
+          (when (and (not search-from-guessdict)
+                     (or (null dict-type)
+                         (eq dict-type 'pinyin-dict)))
+            (push buf buffer-list))
+          ;; Search from guessdict
+          (when (and search-from-guessdict
+                     (eq dict-type 'guess-dict))
+            (push buf buffer-list))))
+      (setq buffer-list (reverse buffer-list))
+      (dolist (buf buffer-list)
         (with-current-buffer (cdr (assoc "buffer" buf))
           (if (pyim-dict-buffer-valid-p)
               (setq words (append words
@@ -664,14 +678,24 @@ If you don't like this funciton, set the variable to nil")
             (message "%s 可能不是一个有效的词库 buffer，忽略。" (buffer-name)))))
       (delete-dups words))))
 
-(defun pyim-predict (code)
+(defun pyim-predict (code &optional search-from-guessdict)
   "得到 `code' 对应的联想词。"
   (let ((regexp (pyim-predict-build-regexp code))
-        words-list predicted-words)
+        buffer-list words-list predicted-words)
+    (dolist (buf pyim-buffer-list)
+      (let ((dict-type (cdr (assoc "dict-type" buf))))
+        (when (and (not search-from-guessdict)
+                   (or (null dict-type)
+                       (eq dict-type 'pinyin-dict)))
+          (push buf buffer-list))
+        (when (and search-from-guessdict
+                   (eq dict-type 'guess-dict))
+          (push buf buffer-list))))
+    (setq buffer-list (reverse buffer-list))
     (when (and (stringp code)
                (string< "" code)
                (string-match-p "[a-z]+-[a-z]+" code))
-      (dolist (buf pyim-buffer-list)
+      (dolist (buf buffer-list)
         (with-current-buffer (cdr (assoc "buffer" buf))
           (when (pyim-dict-buffer-valid-p)
             (pyim-bisearch-word code (point-min) (point-max))
