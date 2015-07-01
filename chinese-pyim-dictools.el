@@ -101,16 +101,20 @@
 
 ;; #+BEGIN_SRC emacs-lisp
 ;;;###autoload
-(defun pyim-hanzi2pinyin (string &optional shou-zi-mu separator return-list ignore-duo-yin-zi)
+(defun pyim-hanzi2pinyin (string &optional shou-zi-mu separator
+                                 return-list ignore-duo-yin-zi adjuct-duo-yin-zi)
   "将汉字字符串转换为对应的拼音字符串, 如果 `shou-zi-mu' 设置为t,转换仅得到拼音
-首字母字符串。如果 `ignore-duo-yin-zi' 设置为t, 遇到多音字时，只使用第一个拼音。
-其它拼音忽略。
+首字母字符串。当 `return-list' 设置为 t 时，返回一个拼音列表，这个列表包含词条的一个
+或者多个拼音（词条包含多音字时）；如果 `ignore-duo-yin-zi' 设置为t, 遇到多音字时，
+只使用第一个拼音，其它拼音忽略；当 `adjuct-duo-yin-zi' 设置为t时，pyim-hanzi2pinyin
+会使用 Chinese-pyim 已安装的词库来校正多音字，但这个功能有一定的限制，词库中不存在
+的词条不能较正。
 
 BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，结果会包含多余的连接符：
 比如： '你=好' --> 'ni-=-hao'"
   (if (not (string-match-p "\\cc" string))
       string
-    (let (string-list pinyins-list pinyins-list-permutated)
+    (let (string-list pinyins-list pinyins-list-permutated pinyins-list-adjusted)
 
       ;; 确保 `pyim-char-table' 已经生成。
       (unless (pyim-get-char-code ?文)
@@ -153,18 +157,38 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
       ;; 比如：(("Hello") ("yin") ("hang" "xing")) -> (("Hello" "yin" "hang") ("Hello" "yin" "xing"))
       (setq pinyins-list-permutated (pyim-permutate-list pinyins-list))
 
+      ;; 使用 Chinese-pyim 的安装的词库来校正多音字。
+      (when adjuct-duo-yin-zi
+        (unless pyim-buffer-list ;确保 pyim-get 可以运行
+          (pyim-kill-buffers)
+          (pyim-load-file))
+        (dolist (pinyin-list pinyins-list-permutated)
+          (let* ((py-str (mapconcat #'identity pinyin-list "-"))
+                 (words-from-dicts
+                  ;; pyim-buffer-list 中第一个 buffer 对应的是个人词库文件
+                  ;; 个人词库文件中的词条，极有可能存在 *多音字污染*。
+                  ;; 这是由 Chinese-pyim 保存词条的机制决定的。
+                  (pyim-get py-str nil t)))
+            (when (member string words-from-dicts)
+              (push pinyin-list pinyins-list-adjusted))))
+        (setq pinyins-list-adjusted
+              (nreverse pinyins-list-adjusted)))
+
       ;; 返回拼音字符串或者拼音列表
-      (let ((list (mapcar
-                   #'(lambda (x)
-                       (mapconcat
-                        #'(lambda (str)
-                            (if shou-zi-mu
-                                (substring str 0 1)
-                              str))
-                        x separator))
-                   (if ignore-duo-yin-zi
-                       (list (car pinyins-list-permutated))
-                     pinyins-list-permutated))))
+      (let* ((pinyins-list
+              (or pinyins-list-adjusted
+                  pinyins-list-permutated))
+             (list (mapcar
+                    #'(lambda (x)
+                        (mapconcat
+                         #'(lambda (str)
+                             (if shou-zi-mu
+                                 (substring str 0 1)
+                               str))
+                         x separator))
+                    (if ignore-duo-yin-zi
+                        (list (car pinyins-list))
+                      pinyins-list))))
         (if return-list
             list
           (mapconcat #'identity list " "))))))

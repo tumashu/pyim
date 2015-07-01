@@ -672,10 +672,19 @@ If you don't like this funciton, set the variable to nil")
 ;; BUG: 这个函数需要进一步优化，使其判断更准确。
 
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-get (code &optional search-from-guessdict)
-  (let (words buffer-list)
+(defun pyim-get (code &optional search-from-guessdict ignore-personal-buffer)
+  (let ((all-buffer-list
+         (if ignore-personal-buffer
+             ;; 设置 `ignore-personal-buffer' 为 t 时，用于多音字校正。
+             ;; pyim-buffer-list 中第一个 buffer 对应的是个人词库文件
+             ;; 个人词库文件中的词条极有可能存在 *多音字污染*。
+             ;; 不适合用于多音字校正，这是由 Chinese-pyim 保存词条的
+             ;; 机制决定的。
+             (cdr pyim-buffer-list)
+           pyim-buffer-list))
+        words buffer-list)
     (when (and (stringp code) (string< "" code))
-      (dolist (buf pyim-buffer-list)
+      (dolist (buf all-buffer-list)
         (let ((dict-type (cdr (assoc "dict-type" buf))))
           ;; Search from dict
           (when (and (not search-from-guessdict)
