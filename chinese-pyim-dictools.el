@@ -119,29 +119,35 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
       ;; 将汉字字符串转换为字符list，英文原样输出。
       ;; 比如： “Hello银行” -> ("Hello" "银" "行")
       (setq string-list
-            (split-string
-             (replace-regexp-in-string
-              "\\(\\cc\\)" "@@@@\\1@@@@" string)
-             "@@@@"))
-
-      ;; 删除 `string-list' 中的空字符串
-      (setq string-list
-            (cl-remove-if
-             #'(lambda (x)
-                 (= (length x) 0)) string-list))
+            (if (string-match-p "\\CC" string)
+                ;; 处理中英文混合的情况
+                (split-string
+                 (replace-regexp-in-string
+                  "\\(\\cc\\)" "@@@@\\1@@@@" string)
+                 "@@@@")
+              ;; 如果词条只包含中文，使用`string-to-vector'
+              ;; 这样处理速度比较快。
+              (string-to-vector string)))
 
       ;; 将上述汉字字符串里面的所有汉字转换为与之对应的拼音list。
       ;; 比如： ("Hello" "银" "行") -> (("Hello") ("yin") ("hang" "xing"))
-      (setq pinyins-list
-            (mapcar
-             #'(lambda (str)
-                 (cond
-                  ((> (length str) 1) (list str))
-                  ((and (> (length str) 0)
-                        (string-match-p "\\cc" str))
-                   (or (pyim-get-char-code (string-to-char str)) (list str)))
-                  ((> (length str) 0) (list str))))
-             string-list))
+      (mapc
+       #'(lambda (str)
+           ;; `string-to-vector' 得到的是 char vector, 需要将其转换为 string。
+           (when (numberp str)
+             (setq str (char-to-string str)))
+           (cond
+            ((> (length str) 1)
+             (push (list str) pinyins-list))
+            ((and (> (length str) 0)
+                  (string-match-p "\\cc" str))
+             (push (or (pyim-get-char-code (string-to-char str))
+                       (list str))
+                   pinyins-list))
+            ((> (length str) 0)
+             (push (list str) pinyins-list))))
+       string-list)
+      (setq pinyins-list (nreverse pinyins-list))
 
       ;; 通过排列组合的方式, 重排 pinyins-list。
       ;; 比如：(("Hello") ("yin") ("hang" "xing")) -> (("Hello" "yin" "hang") ("Hello" "yin" "xing"))
@@ -180,7 +186,9 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
 
 注意：`pyim-hanzi2pinyin' 没有使用这个函数，主要原因是兼容问题：
 `pyim-hanzi2pinyin' 使用这个函数时，得到的结果与老版本不一致,
-排列顺序有差异。"
+排列顺序有差异。
+
+BUG: 当 list 只有一个元素时，行为和预期的不一致。"
   (pyim-permutate-list2-internal (car list) (cdr list)))
 
 (defun pyim-permutate-list2-internal (one two)
