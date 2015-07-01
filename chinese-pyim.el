@@ -135,20 +135,21 @@
 ;;     如果输入 "ni-hao" ，那么同时搜索 code 为 "n-h" 的词条做为联想词。
 ;; 3. `pinyin-znabc' 类似智能ABC的词语联想(源于 emacs-eim)。
 ;; 4. `guess-words' 以上次输入的词条为 code，然后在 guessdict 中搜索，
-;;                  用搜索得到的词条来提高输入法识别精度。
+;;     用搜索得到的词条来提高输入法识别精度。
 
-;;                  注意：这个方法需要用户安装 guessdict 词库，
-;;                       guessdict 词库文件可以用 `pyim-article2dict-guessdict'
-;;                       命令生成。
+;;     注意：这个方法需要用户安装 guessdict 词库，guessdict 词库文件可以
+;;     用 `pyim-article2dict-guessdict' 命令生成，不想折腾的用户也可以从
+;;     下面的地址下载样例词库：(注意：请使用另存为，不要直接点击链接)。
 
+;;     http://tumashu.github.io/chinese-pyim-guessdict/pyim-guessdict.gpyim
 
-;; 比如：
+;; Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的代码来调整设置，比如：
 
 ;; #+BEGIN_EXAMPLE
 ;; (setq pyim-enable-words-predict '(pinyin-similar pinyin-shouzimu guess-words))
 ;; #+END_EXAMPLE
 
-;; 词语联想功能默认开启，但有时候会导致输入法卡顿，用户可以通过下面的方式关闭：
+;; 开启词语联想功能有时候会导致输入法卡顿，用户可以通过下面的方式关闭：
 
 ;; #+BEGIN_EXAMPLE
 ;; (setq pyim-enable-words-predict nil)
