@@ -968,7 +968,10 @@ BUG：无法有效的处理多音字。"
            (delq nil
                  (mapcar
                   #'(lambda (py)
-                      (when (member word (pyim-get py))
+                      ;; pyim-buffer-list 中第一个 buffer 对应的是个人词库文件
+                      ;; 个人词库文件中的词条，极有可能存在 *多音字污染*。
+                      ;; 这是由 Chinese-pyim 保存词条的机制决定的。
+                      (when (member word (pyim-get py nil t))
                         py))
                   pinyins))
            pinyins))))
