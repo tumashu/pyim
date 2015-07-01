@@ -948,8 +948,7 @@ buffer中，当前词条追加到已有词条之后。`pyim-create-or-rearrange-
 `pyim-hanzi2pinyin' 来获取中文词条的拼音code。
 
 BUG：无法有效的处理多音字。"
-
-  (let ((pinyins (pyim-hanzi2pinyin word nil "-" t)))
+  (let ((pinyins (pyim-hanzi2pinyin word nil "-" t nil t))) ;使用了多音字校正
     (mapc #'(lambda (py)
               (unless (string-match-p "[^ a-z-]" py)
                 ;; 添加词库： ”拼音“ - ”中文词条“
@@ -962,19 +961,7 @@ BUG：无法有效的处理多音字。"
                                    (split-string py "-")
                                    "-")
                                   (not rearrange-word))))
-          (or
-           ;; 使用现有的拼音词库来校正多音字，这样做可以减少
-           ;; 个人词库文件的 “污染”。
-           (delq nil
-                 (mapcar
-                  #'(lambda (py)
-                      ;; pyim-buffer-list 中第一个 buffer 对应的是个人词库文件
-                      ;; 个人词库文件中的词条，极有可能存在 *多音字污染*。
-                      ;; 这是由 Chinese-pyim 保存词条的机制决定的。
-                      (when (member word (pyim-get py nil t))
-                        py))
-                  pinyins))
-           pinyins))))
+          pinyins)))
 
 (defun pyim-chinese-string-at-point (&optional number)
   "获取光标一个中文字符串，字符数量为：`number'"
