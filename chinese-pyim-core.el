@@ -1430,11 +1430,11 @@ Return the input string."
       (let* ((words (pyim-get pyim-last-input-word t))
              ;; 当 `words' 包含的元素太多时，后面处理会极其缓慢，
              ;; 这里取 `words' 的一个子集来提高输入法的响应。
-             (words (if (> (length words) 200)
+             (words (if (> (length words) 1000)
                         (pyim-sublist words 1 200)
                       words)))
         (dolist (word words)
-          (let* ((pinyins (pyim-hanzi2pinyin word nil "-" t)))
+          (let ((pinyins (pyim-hanzi2pinyin word nil "-" t)))
             (when (cl-some
                    #'(lambda (x)
                        (string-match-p (pyim-predict-build-regexp py-str) x))
@@ -1444,7 +1444,12 @@ Return the input string."
                    #'(lambda (x)
                        (string= py-str x))
                    pinyins)
-              (push word guess-words-accurate))))))
+              (push word guess-words-accurate)))))
+
+      (setq guess-words-accurate (reverse guess-words-accurate))
+      ;; 合并到联想词一起处理，这样用户就可以通过 `pyim-enable-words-predict'
+      ;; 来决定哪一类联想词优先显示。
+      (push `(guess-words ,@(reverse guess-words-similar)) words-predicted))
 
     ;; 将输入的拼音按照声母和韵母打散，得到尽可能多的拼音组合，
     ;; 查询这些拼音组合，得到的词条做为联想词。
@@ -1456,21 +1461,20 @@ Return the input string."
     (setq chars (pyim-get (concat (caar pylist) (cdar pylist))))
 
     ;; 将上述搜索得到的词条合并。
-    (setq choice (pyim-flatten-list
-                  `(,guess-words-accurate
-                    ,words
-                    ;; 没有严格匹配的词条时，设置第一个被选词为字符，
-                    ;; 这样可以减少不可预期的联想词带来的视觉压力。
-                    ,(unless words
+    (setq choice `(,@guess-words-accurate
+                   ,@words
+                   ;; 没有严格匹配的词条时，设置第一个被选词为字符，
+                   ;; 这样可以减少不可预期的联想词带来的视觉压力。
+                   ,@(unless words
                        (list (car chars)))
-                    ;; 联想词
-                    ,guess-words-similar
-                    ,(mapcar
-                      #'(lambda (x)
-                          (cdr (assoc x words-predicted)))
-                      pyim-enable-words-predict)
-                    ;; 汉字字符
-                    ,chars)))
+                   ;; 联想词
+                   ,@(pyim-flatten-list
+                      (mapcar
+                       #'(lambda (x)
+                           (cdr (assoc x words-predicted)))
+                       pyim-enable-words-predict))
+                   ;; 汉字字符
+                   ,@chars))
     (delete-dups (delq nil choice))))
 
 (defun pyim-sublist (list start end)
