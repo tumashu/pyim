@@ -1427,13 +1427,10 @@ Return the input string."
     ;; 如果上一次输入词条 "你好" ，那么以 “你好” 为 code，从 guessdict 词库中搜索词条
     ;; 将搜索得到的词条的拼音与 *当前输入的拼音* 进行比较，类似或者精确匹配的词条作为联想词。
     (when (member 'guess-words pyim-enable-words-predict)
-      (let* ((words (pyim-get pyim-last-input-word t))
-             ;; 当 `words' 包含的元素太多时，后面处理会极其缓慢，
-             ;; 这里取 `words' 的一个子集来提高输入法的响应。
-             (words (if (> (length words) 1000)
-                        (pyim-sublist words 1 200)
-                      words)))
-        (dolist (word words)
+      (let ((words (pyim-get pyim-last-input-word t))
+            (count 0))
+        (while words
+          (setq word (pop words))
           (let ((pinyins (pyim-hanzi2pinyin word nil "-" t)))
             (when (cl-some
                    #'(lambda (x)
@@ -1444,7 +1441,12 @@ Return the input string."
                    #'(lambda (x)
                        (string= py-str x))
                    pinyins)
-              (push word guess-words-accurate)))))
+              (push word guess-words-accurate)))
+          ;; 当 `words' 包含的元素太多时，后面处理会极其缓慢，
+          ;; 这里通过限制循环次数来提高输入法的响应。
+          (setq count (1+ count))
+          (when (> count 1000)
+            (setq words nil))))
 
       (setq guess-words-accurate (reverse guess-words-accurate))
       ;; 合并到联想词一起处理，这样用户就可以通过 `pyim-enable-words-predict'
