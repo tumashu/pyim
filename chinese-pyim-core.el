@@ -2002,18 +2002,26 @@ Counting starts at 1."
       "")
 
      ;; 关闭标点转换功能时，只插入英文标点。
-     ((not pyim-punctuation-translate-p) str)
+     ((not pyim-punctuation-translate-p)
+      ;; `pyim-last-input-word' 保存的词条用于词语联想，
+      ;; 逻辑上，当输入标点符号后，保存的词条已经失效，
+      ;; 应该将其清空。
+      (setq pyim-last-input-word nil)
+      str)
 
      ;; 当前字符属于 `pyim-punctuation-escape-list'时，
      ;; 插入英文标点。
      ((member (char-before)
-              pyim-punctuation-escape-list) str)
+              pyim-punctuation-escape-list)
+      (setq pyim-last-input-word nil)
+      str)
 
      ;; 当光标前面为英文标点时， 按 `pyim-translate-trigger-char'
      ;; 对应的字符后， 自动将其转换为对应的中文标点。
      ((and (numberp punc-posit-before-1)
            (= punc-posit-before-1 0)
            (= char pyim-translate-trigger-char))
+      (setq pyim-last-input-word nil)
       (delete-char -1)
       (pyim-return-proper-punctuation punc-list-before-1 t))
 
@@ -2022,11 +2030,14 @@ Counting starts at 1."
      ((and (numberp punc-posit-before-1)
            (> punc-posit-before-1 0)
            (= char pyim-translate-trigger-char))
+      (setq pyim-last-input-word nil)
       (delete-char -1)
       (car punc-list-before-1))
 
      ;; 正常输入标点符号。
-     (punc-list (pyim-return-proper-punctuation punc-list))
+     (punc-list
+      (setq pyim-last-input-word nil)
+      (pyim-return-proper-punctuation punc-list))
 
      ;; 当输入的字符不是标点符号时，原样插入。
      (t str))))
