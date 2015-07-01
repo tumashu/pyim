@@ -159,9 +159,8 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
 
       ;; 使用 Chinese-pyim 的安装的词库来校正多音字。
       (when adjuct-duo-yin-zi
-        (unless pyim-buffer-list ;确保 pyim-get 可以运行
-          (pyim-kill-buffers)
-          (pyim-load-file))
+        (unless pyim-buffer-list ;确保 pyim-get 可以正常运行
+          (setq pyim-buffer-list (pyim-load-file)))
         (dolist (pinyin-list pinyins-list-permutated)
           (let* ((py-str (mapconcat #'identity pinyin-list "-"))
                  (words-from-dicts
