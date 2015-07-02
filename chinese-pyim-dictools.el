@@ -258,20 +258,26 @@ BUG: 当 list 只有一个元素时，行为和预期的不一致。"
 当 `sort-by-freq' 为 t 时，首先按照当前行词条出现频率对词条排序，
 然后再删除重复词条，用于：从中文文章构建词库。"
   (interactive)
-  (let* ((words-list (pyim-line-content " "))
+  (let* ((line-content (pyim-line-content " "))
+         (code (car line-content)) ;; 编码和词条分开操作，因为在guessdict词库中，编码是中文。
+         (words-list (cdr line-content))
          (length (length words-list)))
+    ;; 从文章中构建词库时，首先会将词条按照出现频率
+    ;; 排序，这样频率高的词条就会排在前面。
     (when sort-by-freq
       (setq words-list
-            (cons (car words-list) ;; code必须排在第一位
-                  (pyim-sort-words-by-freq (cdr words-list)))))
+            (pyim-sort-words-by-freq words-list)))
 
     ;; 删除重复词条的时候，要注意删除顺序。
-    (cl-delete-duplicates
-     words-list
-     :test #'equal :from-end t)
+    (setq words-list
+          (cl-delete-duplicates
+           words-list
+           :test #'equal :from-end t))
 
     (when (> length (length words-list))
       (pyim-delete-line)
+      (insert code)
+      (insert " ")
       (insert (mapconcat 'identity words-list " "))
       (insert "\n")
       (goto-char (line-beginning-position)))))
