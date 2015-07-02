@@ -331,12 +331,52 @@
 ;; 1. `pyim-hanzi2pinyin' （考虑多音字）
 ;; 2. `pyim-hanzi2pinyin-simple'  （不考虑多音字）
 
+;; *** 中文分词
+;; Chinese-pyim 包含了一个简单的分词函数：`pyim-split-chinese-string'. 这个函数
+;; 使用暴力匹配模式来分词，所以，*不能检测出* Chinese-pyim 词库中不存在的中文词条。
+;; 另外，这个函数的分词速度比较慢，仅仅适用于中文短句的分词，不适用于文章分词。
+;; 根据评估，20个汉字组成的字符串需要大约0.3s， 40个汉字消耗1s，随着字符串长度的
+;; 增大消耗的时间呈几何倍数增加。
+
+;; 举例来说：
+
+;; #+BEGIN_EXAMPLE
+;;                   (("天安" 5 7)
+;; 我爱北京天安门 ->  ("天安门" 5 8)
+;;                    ("北京" 3 5)
+;;                    ("我爱" 1 3))
+;; #+END_EXAMPLE
+
+;; 其中，每一个词条列表中包含三个元素，第一个元素为词条本身，第二个元素为词条
+;; 相对于字符串的起始位置，第三个元素为词条结束位置。
+
+;; *** 获取光标处的中文词条
+;; Chinese-pyim 包含了一个简单的命令：`pyim-get-words-list-at-point', 这个命令
+;; 可以得到光标处的 *英文* 或者 *中文* 词条的 *列表*，这个命令依赖分词函数：
+;; `pyim-split-chinese-string'。
+
+;; *** 让 `forward-word' 和 `back-backward’ 在中文环境下正常工作
+;; 中文词语没有强制用空格分词，所以 emacs 内置的命令 `forward-word' 和 `backward-word'
+;; 在中文环境不能按用户预期的样子执行，而是 forward/backward “句子” ，Chinese-pyim
+;; 自带的两个命令可以在中文环境下正常工作：
+
+;; 1. `pyim-forward-word
+;; 2. `pyim-backward-word
+
+;; 用户只需将其绑定到快捷键上就可以了，比如：
+
+;; #+BEGIN_EXAMPLE
+;; (global-set-key (kbd "M-f") 'pyim-forward-word)
+;; (global-set-key (kbd "M-b") 'pyim-backward-word)
+;; #+END_EXAMPLE
+
 
 ;;; Code:
 ;; #+BEGIN_SRC emacs-lisp
 (require 'chinese-pyim-pymap)
 (require 'chinese-pyim-core)
 (require 'chinese-pyim-dictools)
+(require 'chinese-pyim-utils)
 ;; #+END_SRC
 
 ;;; Footer:
