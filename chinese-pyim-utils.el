@@ -115,8 +115,6 @@
 
     (cond
      ((and str (not (string-match-p "\\CC" str)))
-      (unless pyim-buffer-list ;确保 pyim-get 可以正常运行
-        (setq pyim-buffer-list (pyim-load-file)))
       (setq words-alist
             (pyim-split-chinese-string str))
       (dolist (word-list words-alist)
@@ -176,6 +174,12 @@
          ((null my-list) nil)
          (t (append (get-possible-words-internal my-list number)
                     (get-possible-words (cdr my-list) (1+ number)))))))
+
+    ;; 如果 Chinese-pyim 词库没有加载，加载 Chinese-pyim 词库，
+    ;; 确保 pyim-get 可以正常运行。
+    (unless pyim-buffer-list
+      (setq pyim-buffer-list (pyim-load-file)))
+
     (let ((string-alist
            (get-possible-words
             (mapcar #'char-to-string
