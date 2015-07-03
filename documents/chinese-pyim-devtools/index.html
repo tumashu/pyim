@@ -180,7 +180,13 @@
   (<span style="color: #FBDE2D;">interactive</span>)
   (<span style="color: #FBDE2D;">let*</span> ((el-file (concat (f-parent (locate-library (symbol-name 'chinese-pyim)))
                           <span style="color: #61CE3C;">"/chinese-pyim.el"</span>))
-         (org-file (concat (file-name-sans-extension el-file) <span style="color: #61CE3C;">".org"</span>)))
+         (org-file (concat (file-name-sans-extension el-file) <span style="color: #61CE3C;">".org"</span>))
+         (el-file-buffer (get-file-buffer el-file))
+         (org-file-buffer (get-file-buffer org-file)))
+    (<span style="color: #FBDE2D;">when</span> el-file-buffer
+      (kill-buffer el-file-buffer))
+    (<span style="color: #FBDE2D;">when</span> org-file-buffer
+      (kill-buffer org-file-buffer))
     (lentic-doc-orgify-if-necessary el-file)
     (<span style="color: #FBDE2D;">if</span> (file-exists-p org-file)
         (<span style="color: #FBDE2D;">with-current-buffer</span> (find-file-noselect org-file)
@@ -211,11 +217,9 @@
                    (el-buffer (get-file-buffer el-file))
                    (org-buffer (get-file-buffer org-file)))
               (<span style="color: #FBDE2D;">when</span> el-buffer
-                (<span style="color: #FBDE2D;">with-current-buffer</span> el-buffer
-                  (kill-buffer)))
+                (kill-buffer el-buffer))
               (<span style="color: #FBDE2D;">when</span> org-buffer
-                (<span style="color: #FBDE2D;">with-current-buffer</span> org-buffer
-                  (kill-buffer)))))
+                (kill-buffer org-buffer))))
         (lentic-doc-all-files-of-package (symbol-name 'chinese-pyim)))
   (lentic-doc-orgify-package 'chinese-pyim)
   (pyim-devtools-generate-readme-and-index))
@@ -229,8 +233,8 @@
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2015-06-30</span>
-        <span title="last modification date" class="post-info">2015-06-30</span>
+        <span title="post date" class="post-info">2015-07-03</span>
+        <span title="last modification date" class="post-info">2015-07-03</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>

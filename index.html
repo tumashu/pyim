@@ -34,7 +34,7 @@
 <h2>&#30446;&#24405;</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgheadline29">1. Chinese-pyim 使用说明</a>
+<li><a href="#orgheadline32">1. Chinese-pyim 使用说明</a>
 <ul>
 <li><a href="#orgheadline1">1.1. 截图</a></li>
 <li><a href="#orgheadline2">1.2. 简介</a></li>
@@ -60,13 +60,16 @@
 <li><a href="#orgheadline14">1.8.8. 使用 Company 框架来补全联想词（实验特性）</a></li>
 </ul>
 </li>
-<li><a href="#orgheadline28">1.9. Tips</a>
+<li><a href="#orgheadline31">1.9. Tips</a>
 <ul>
 <li><a href="#orgheadline20">1.9.1. 选词框弹出位置不合理或者选词框内容显示不全</a></li>
 <li><a href="#orgheadline21">1.9.2. 如何查看 Chinese-pyim 文档。</a></li>
 <li><a href="#orgheadline7">1.9.3. 如何添加自定义拼音词库</a></li>
 <li><a href="#orgheadline26">1.9.4. 如何手动安装和管理词库</a></li>
 <li><a href="#orgheadline27">1.9.5. 将汉字字符串转换为拼音字符串</a></li>
+<li><a href="#orgheadline28">1.9.6. 中文分词</a></li>
+<li><a href="#orgheadline29">1.9.7. 获取光标处的中文词条</a></li>
+<li><a href="#orgheadline30">1.9.8. 让 `forward-word' 和 `back-backward’ 在中文环境下正常工作</a></li>
 </ul>
 </li>
 </ul>
@@ -74,8 +77,8 @@
 </ul>
 </div>
 </div>
-<div id="outline-container-orgheadline29" class="outline-2">
-<h2 id="orgheadline29"><span class="section-number-2">1</span> Chinese-pyim 使用说明</h2>
+<div id="outline-container-orgheadline32" class="outline-2">
+<h2 id="orgheadline32"><span class="section-number-2">1</span> Chinese-pyim 使用说明</h2>
 <div class="outline-text-2" id="text-1">
 </div><div id="outline-container-orgheadline1" class="outline-3">
 <h3 id="orgheadline1"><span class="section-number-3">1.1</span> 截图</h3>
@@ -305,15 +308,16 @@ Chinese-pyim <b>内置</b>了4种词语联想方式：
 </p>
 
 <p>
-注意：这个方法需要用户安装 guessdict 词库，
-     guessdict 词库文件可以用 `pyim-article2dict-guessdict'
-     命令生成。
+注意：这个方法需要用户安装 guessdict 词库，guessdict 词库文件可以用 `pyim-article2dict-guessdict' 命令生成，不想折腾的用户也可以从下面的地址下载样例词库：(注意：请使用另存为，不要直接点击链接)。
+</p>
+
+<p>
+<a href="http://tumashu.github.io/chinese-pyim-guessdict/pyim-guessdict.gpyim">http://tumashu.github.io/chinese-pyim-guessdict/pyim-guessdict.gpyim</a>
 </p></li>
 </ol>
 
-
 <p>
-比如：
+Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的代码来调整设置，比如：
 </p>
 
 <pre class="example">
@@ -321,7 +325,7 @@ Chinese-pyim <b>内置</b>了4种词语联想方式：
 </pre>
 
 <p>
-词语联想功能默认开启，但有时候会导致输入法卡顿，用户可以通过下面的方式关闭：
+开启词语联想功能有时候会导致输入法卡顿，用户可以通过下面的方式关闭：
 </p>
 
 <pre class="example">
@@ -413,8 +417,8 @@ Chinese-pyim <b>内置</b>了4种词语联想方式：
 </div>
 </div>
 
-<div id="outline-container-orgheadline28" class="outline-3">
-<h3 id="orgheadline28"><span class="section-number-3">1.9</span> Tips</h3>
+<div id="outline-container-orgheadline31" class="outline-3">
+<h3 id="orgheadline31"><span class="section-number-3">1.9</span> Tips</h3>
 <div class="outline-text-3" id="text-1-9">
 </div><div id="outline-container-orgheadline20" class="outline-4">
 <h4 id="orgheadline20"><span class="section-number-4">1.9.1</span> 选词框弹出位置不合理或者选词框内容显示不全</h4>
@@ -600,6 +604,69 @@ pyim-dicts-manager 中 “导入搜狗输入法细胞词库” 功能就是依�
 <li>`pyim-hanzi2pinyin' （考虑多音字）</li>
 <li>`pyim-hanzi2pinyin-simple'  （不考虑多音字）</li>
 </ol>
+</div>
+</div>
+
+<div id="outline-container-orgheadline28" class="outline-4">
+<h4 id="orgheadline28"><span class="section-number-4">1.9.6</span> 中文分词</h4>
+<div class="outline-text-4" id="text-1-9-6">
+<p>
+Chinese-pyim 包含了一个简单的分词函数：`pyim-split-chinese-string'. 这个函数使用暴力匹配模式来分词，所以，*不能检测出* Chinese-pyim 词库中不存在的中文词条。另外，这个函数的分词速度比较慢，仅仅适用于中文短句的分词，不适用于文章分词。根据评估，20个汉字组成的字符串需要大约0.3s， 40个汉字消耗1s，随着字符串长度的增大消耗的时间呈几何倍数增加。
+</p>
+
+<p>
+举例来说：
+</p>
+
+<pre class="example">
+                  (("天安" 5 7)
+我爱北京天安门 -&gt;  ("天安门" 5 8)
+                   ("北京" 3 5)
+                   ("我爱" 1 3))
+</pre>
+
+<p>
+其中，每一个词条列表中包含三个元素，第一个元素为词条本身，第二个元素为词条相对于字符串的起始位置，第三个元素为词条结束位置。
+</p>
+
+<p>
+另外一个分词相关的函数是 `pyim-split-chinese-string2string', 这个函数仅仅将一个中文字符串分词，在分词的位置用空格或者用户自定义的分隔符隔开，然后返回新的字符串。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline29" class="outline-4">
+<h4 id="orgheadline29"><span class="section-number-4">1.9.7</span> 获取光标处的中文词条</h4>
+<div class="outline-text-4" id="text-1-9-7">
+<p>
+Chinese-pyim 包含了一个简单的命令：`pyim-get-words-list-at-point', 这个命令可以得到光标处的<b>英文</b>或者<b>中文</b>词条的 *列表*，这个命令依赖分词函数：
+`pyim-split-chinese-string'。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline30" class="outline-4">
+<h4 id="orgheadline30"><span class="section-number-4">1.9.8</span> 让 `forward-word' 和 `back-backward’ 在中文环境下正常工作</h4>
+<div class="outline-text-4" id="text-1-9-8">
+<p>
+中文词语没有强制用空格分词，所以 emacs 内置的命令 `forward-word' 和 `backward-word'
+在中文环境不能按用户预期的样子执行，而是 forward/backward “句子” ，Chinese-pyim
+自带的两个命令可以在中文环境下正常工作：
+</p>
+
+<ol class="org-ol">
+<li>`pyim-forward-word</li>
+<li>`pyim-backward-word</li>
+</ol>
+
+<p>
+用户只需将其绑定到快捷键上就可以了，比如：
+</p>
+
+<pre class="example">
+(global-set-key (kbd "M-f") 'pyim-forward-word)
+(global-set-key (kbd "M-b") 'pyim-backward-word)
+</pre>
 </div>
 </div>
 </div>
