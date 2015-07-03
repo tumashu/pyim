@@ -203,7 +203,6 @@
 (provide 'chinese-pyim-utils)
 
 ;; Local Variables:
-;; no-byte-compile: t
 ;; coding: utf-8-unix
 ;; tab-width: 4
 ;; indent-tabs-mode: nil
