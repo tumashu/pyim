@@ -157,7 +157,7 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
 
       ;; 通过排列组合的方式, 重排 pinyins-list。
       ;; 比如：(("Hello") ("yin") ("hang" "xing")) -> (("Hello" "yin" "hang") ("Hello" "yin" "xing"))
-      (setq pinyins-list-permutated (pyim-permutate-list pinyins-list))
+      (setq pinyins-list-permutated (pyim-permutate-list2 pinyins-list))
 
       ;; 使用 Chinese-pyim 的安装的词库来校正多音字。
       (when adjuct-duo-yin-zi
@@ -196,7 +196,7 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
 
 (defun pyim-permutate-list (list)
   "使用排列组合的方式重新排列 `list'，这个函数由 ‘二中’ 提供。
-`pyim-hanzi2pinyin' 默认使用这个函数。"
+注：`pyim-hanzi2pinyin' 没有使用这个函数(速度稍微有点慢)。"
   (let ((list-head (car list))
         (list-tail (cdr list)))
     (cond ((null list-tail)
@@ -208,29 +208,22 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
 
 (defun pyim-permutate-list2 (list)
   "使用排列组合的方式重新排列 `list'，这个函数由 ’翀/ty‘ 提供。
-
-注意：`pyim-hanzi2pinyin' 没有使用这个函数，主要原因是兼容问题：
-`pyim-hanzi2pinyin' 使用这个函数时，得到的结果与老版本不一致,
-排列顺序有差异。
-
-BUG: 当 list 只有一个元素时，行为和预期的不一致。"
-  (pyim-permutate-list2-internal (car list) (cdr list)))
+`pyim-hanzi2pinyin' 默认使用这个函数。"
+  (if (= (length list) 1)
+      (mapcar #'list (car list))
+    (pyim-permutate-list2-internal (car list) (cdr list))))
 
 (defun pyim-permutate-list2-internal (one two)
   "`pyim-permutate-list2' 的内部函数。"
   (let (return)
     (if (null (car two))
         one
-      (mapc #'(lambda (item1)
-                (mapc #'(lambda (item2)
-                          (setq return
-                                (cons
-                                 (if (listp item1)
-                                     (append item1 (list item2))
-                                   (list item1 item2))
-                                 return)))
-                      (car two)))
-            one)
+      (dolist (x1 one)
+        (dolist (x2 (car two))
+          (push (if (listp x1)
+                    (append x1 (list x2))
+                  (list x1 x2))
+                return)))
       (setq one return)
       (pyim-permutate-list2-internal one (cdr two)))))
 
