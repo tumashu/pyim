@@ -130,7 +130,13 @@
   (interactive)
   (let* ((el-file (concat (f-parent (locate-library (symbol-name 'chinese-pyim)))
                           "/chinese-pyim.el"))
-         (org-file (concat (file-name-sans-extension el-file) ".org")))
+         (org-file (concat (file-name-sans-extension el-file) ".org"))
+         (el-file-buffer (get-file-buffer el-file))
+         (org-file-buffer (get-file-buffer org-file)))
+    (when el-file-buffer
+      (kill-buffer el-file-buffer))
+    (when org-file-buffer
+      (kill-buffer org-file-buffer))
     (lentic-doc-orgify-if-necessary el-file)
     (if (file-exists-p org-file)
         (with-current-buffer (find-file-noselect org-file)
@@ -161,11 +167,9 @@
                    (el-buffer (get-file-buffer el-file))
                    (org-buffer (get-file-buffer org-file)))
               (when el-buffer
-                (with-current-buffer el-buffer
-                  (kill-buffer)))
+                (kill-buffer el-buffer))
               (when org-buffer
-                (with-current-buffer org-buffer
-                  (kill-buffer)))))
+                (kill-buffer org-buffer))))
         (lentic-doc-all-files-of-package (symbol-name 'chinese-pyim)))
   (lentic-doc-orgify-package 'chinese-pyim)
   (pyim-devtools-generate-readme-and-index))
