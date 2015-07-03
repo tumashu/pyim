@@ -1409,7 +1409,7 @@ Return the input string."
  => (\"拼音\" \"贫铀\" \"聘用\" \"拼\" \"品\" \"贫\" \"苹\" \"聘\" \"频\" \"拚\" \"颦\" \"牝\" \"嫔\" \"姘\" \"嚬\")"
   (let ((py-str (pyim-pylist-to-string pylist))
         (py-str-shouzimu (pyim-pylist-to-string pylist t))
-        choice words guess-words-accurate guess-words-similar
+        choice words word guess-words-accurate guess-words-similar
         words-predicted chars wordspy)
 
     ;; 搜索严格匹配输入拼音的词条。

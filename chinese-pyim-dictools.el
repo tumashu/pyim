@@ -738,7 +738,7 @@ Guessdict 用来保存，一个中文词条（code）后面经常跟随出现的
   (interactive)
   (when (string= (buffer-name) pyim-dicts-manager-buffer-name)
     (let ((line (line-number-at-pos))
-          dict name file coding first-used)
+          dict name file coding first-used dict-type)
       (setq name (read-from-minibuffer "请输入词库名称： "))
       (setq file (read-file-name "请选择词库文件： " "~/"))
       (setq coding (completing-read "词库文件编码: "
@@ -792,7 +792,7 @@ Guessdict 用来保存，一个中文词条（code）后面经常跟随出现的
                     (concat (file-name-as-directory
                              pyim-dicts-directory)
                             "pyim-dicts-merged.pyim")))
-        file coding disable)
+        file coding disable dict-type)
     (when (and dicts-list (yes-or-no-p "确定将所有词库合并为一个词库吗? "))
       (dolist (dict dicts-list)
         (setq file (expand-file-name (plist-get dict :file)))
