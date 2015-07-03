@@ -137,11 +137,13 @@
                       (- current-pos str-beginning-pos)
                       (- str-end-pos current-pos)))))))
 
-(defun pyim-split-chinese-string (chinese-string)
+(defun pyim-split-chinese-string (chinese-string &optional max-word-length)
   "一个基于 Chinese-pyim 的中文分词函数。这个函数可以将中文字符
 串 `chinese-string' 分词，得到一个词条 alist，这个 alist 的元素
 都是列表，其中第一个元素为分词得到的词条，第二个元素为词条相对于
-字符串中的起始位置，第三个元素为结束位置。
+字符串中的起始位置，第三个元素为结束位置。分词时，默认词条不超过
+6个字符，用户可以通过 `max-word-length' 来自定义，但值得注意的是：
+这个值设置越大，分词速度越慢。
 
 注意事项：
 1. 这个工具使用暴力匹配模式来分词，*不能检测出* Chinese-pyim 词库
@@ -163,7 +165,8 @@
          (t (append
              (let* ((str (mapconcat #'identity my-list ""))
                     (length (length str)))
-               (list (list str number (+ number length))))
+               (when (<= length (or max-word-length 6))
+                 (list (list str number (+ number length)))))
              (get-possible-words-internal
               (reverse (cdr (reverse my-list))) number)))))
        (get-possible-words
@@ -199,6 +202,45 @@
 
 ;; (let ((str "医生随时都有可能被患者及其家属反咬一口"))
 ;;   (pyim-split-chinese-string str))
+
+(defun pyim-split-chinese-string2string (string &optional prefer-short-word
+                                                separator max-word-length)
+  "将一个中文字符串分词，并且在分词的位置插入空格或者自定义分隔符 `separator'，
+较长的词条优先使用，如果 `prefer-short-word' 设置为 t，则优先使用较短的词条。
+最长词条默认不超过6个字符，用户可以通 `max-word-length' 来自定义词条的最大长度，
+但值得注意的是，这个值设置越大，分词速度越慢。"
+  (let ((str-length (length string))
+        (word-list (cl-delete-duplicates
+                    ;;  判断两个词条在字符串中的位置
+                    ;;  是否冲突，如果冲突，仅保留一个，
+                    ;;  删除其它。
+                    (pyim-split-chinese-string string max-word-length)
+                    :test #'(lambda (x1 x2)
+                              (let ((begin1 (nth 1 x1))
+                                    (begin2 (nth 1 x2))
+                                    (end1 (nth 2 x1))
+                                    (end2 (nth 2 x2)))
+                                (not (or (<= end1 begin2)
+                                         (<= end2 begin1)))))
+                    :from-end prefer-short-word))
+        position-list result)
+
+    ;; 提取词条相对于字符串的位置信息。
+    (dolist (word word-list)
+      (push (nth 1 word) position-list)
+      (push (nth 2 word) position-list))
+
+    ;; 将位置信息由小到大排序。
+    (setq position-list
+          (cl-delete-duplicates (sort position-list #'<)))
+
+    ;; 在分词的位置插入空格或者用户指定的分隔符。
+    (dotimes (i str-length)
+      (when (member (1+ i) position-list)
+        (push (or separator " ") result))
+      (push (substring string i (1+ i))  result))
+    (setq result (nreverse result))
+    (mapconcat #'identity result "")))
 
 ;; #+END_SRC
 
