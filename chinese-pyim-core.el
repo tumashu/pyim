@@ -702,16 +702,29 @@ If you don't like this funciton, set the variable to nil")
                         (car (gethash (intern code)
                                       (cadr (assoc "buffer-cache" buf-cache)))))))
         ;; 如果从缓存中找不到 code 对应的词条，则获取 code 所在的范围，
-        ;; 比如： 如果搜索 ni-hao, 那么，搜索 n 和 o 两个 code 在 buffer
+        ;; 比如： 如果搜索 ni-hao-b, 那么，搜索 ni 和 nh 在 buffer
         ;; 中的位置，这两个 code 的位置可以减少后面搜索词库 buffer 花费的时间。
         (dolist (buf-cache pyim-buffer-cache-list)
           (unless words
-            (let* ((begin (string-to-char (substring code 0 1)))
-                   (end (1+ begin))
+            (let* ((begin-char1 (string-to-char code))
+                   (begin-char2
+                    (when (> (length code) 1)
+                      (string-to-char (substring code 1))))
+                   (begin-str
+                    (if (and begin-char2
+                             (>= begin-char2 ?a))
+                        (substring code 0 2)
+                      (substring code  0 1)))
+                   (end-str
+                    (if (and begin-char2
+                             (>= begin-char2 ?a))
+                        (concat (char-to-string begin-char1)
+                                (char-to-string (1+ begin-char2)))
+                      (char-to-string (1+ begin-char1))))
                    (words-ht  (cadr (assoc "buffer-cache" buf-cache))))
               (push `(,(cdr (assoc "buffer" buf-cache))
-                      ,(cadr (gethash (intern (string begin)) words-ht))
-                      ,(cadr (gethash (intern (string end)) words-ht)))
+                      ,(cadr (gethash (intern begin-str) words-ht))
+                      ,(cadr (gethash (intern end-str) words-ht)))
                     nearby-codes-positions)))))
       ;; 直接用二分法搜索词库 buffer（速度比较慢）。
       (unless words
@@ -744,18 +757,22 @@ If you don't like this funciton, set the variable to nil")
 
 (defun pyim-get-codes-in-personal-buffer ()
   (let ((buffer (cdr (assoc "buffer" (car pyim-buffer-list))))
+        (letters (mapcar
+                  #'(lambda (x)
+                      (string x))
+                  "abcdefghijklmnopqrstuvwxyz"))
         result)
     (with-current-buffer buffer
       (goto-char (point-min))
       (while (not (eobp))
         (push (pyim-code-at-point) result)
         (forward-line 1)))
-    ;; 加入26个字母code，用于缩小搜索范围。
+    ;; 加入code: aa-zz，用于缩小搜索范围。
     (setq result
           (append (mapcar
                    #'(lambda (x)
-                       (string x))
-                   "abcdefghjklmnopqrstwxyz")
+                       (mapconcat #'identity x ""))
+                   (pyim-permutate-list2 (list letters letters)))
                   result))
     (cl-delete-duplicates (nreverse result)
                           :test #'string= :from-end t)))
