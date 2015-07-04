@@ -682,9 +682,7 @@ If you don't like this funciton, set the variable to nil")
 ;; BUG: 这个函数需要进一步优化，使其判断更准确。
 
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-get (code &optional search-from-guessdict
-                      ignore-personal-buffer
-                      search-from-buffer-cache)
+(defun pyim-get (code &optional search-from-guessdict ignore-personal-buffer)
   (let ((all-buffer-list
          (if ignore-personal-buffer
              ;; 设置 `ignore-personal-buffer' 为 t 时，用于多音字校正。
@@ -694,17 +692,29 @@ If you don't like this funciton, set the variable to nil")
              ;; 机制决定的。
              (cdr pyim-buffer-list)
            pyim-buffer-list))
-        words buffer-list)
+        words nearby-codes-positions buffer-list)
     (when (and (stringp code) (string< "" code))
-      (if (and search-from-buffer-cache
-               pyim-buffer-cache-list)
-          ;; 从 buffer cache 中查询词条，速度比较快。
-          (dolist (buf-cache pyim-buffer-cache-list)
-            (setq words
-                  (append words
-                          (gethash (intern code)
-                                   (cadr (assoc "buffer-cache" buf-cache))))))
-
+      (when pyim-buffer-cache-list
+        ;; 直接从 buffer cache 中查询词条，速度很快。
+        (dolist (buf-cache pyim-buffer-cache-list)
+          (setq words
+                (append words
+                        (car (gethash (intern code)
+                                      (cadr (assoc "buffer-cache" buf-cache)))))))
+        ;; 如果从缓存中找不到 code 对应的词条，则获取 code 所在的范围，
+        ;; 比如： 如果搜索 ni-hao, 那么，搜索 n 和 o 两个 code 在 buffer
+        ;; 中的位置，这两个 code 的位置可以减少后面搜索词库 buffer 花费的时间。
+        (dolist (buf-cache pyim-buffer-cache-list)
+          (unless words
+            (let* ((begin (string-to-char (substring code 0 1)))
+                   (end (1+ begin))
+                   (words-ht  (cadr (assoc "buffer-cache" buf-cache))))
+              (push `(,(cdr (assoc "buffer" buf-cache))
+                      ,(cadr (gethash (intern (string begin)) words-ht))
+                      ,(cadr (gethash (intern (string end)) words-ht)))
+                    nearby-codes-positions)))))
+      ;; 直接用二分法搜索词库 buffer（速度比较慢）。
+      (unless words
         (dolist (buf all-buffer-list)
           (let ((dict-type (cdr (assoc "dict-type" buf))))
             ;; Search from dict
@@ -718,21 +728,44 @@ If you don't like this funciton, set the variable to nil")
               (push buf buffer-list))))
         (setq buffer-list (reverse buffer-list))
         (dolist (buf buffer-list)
-          (with-current-buffer (cdr (assoc "buffer" buf))
-            (if (pyim-dict-buffer-valid-p)
-                (setq words (append words
-                                    (cdr
-                                     (pyim-bisearch-word code
-                                                         (point-min)
-                                                         (point-max)))))
-              (message "%s 可能不是一个有效的词库 buffer，忽略。" (buffer-name))))))
+          (let* ((buffer (cdr (assoc "buffer" buf)))
+                 (positions (cdr (assoc buffer nearby-codes-positions)))
+                 (point1 (car positions)) ;从缓存中获取的上界限
+                 (point2 (cadr positions))) ;从缓存中获取的下界限
+            (with-current-buffer buffer
+              (if (pyim-dict-buffer-valid-p)
+                  (setq words (append words
+                                      (cdr
+                                       (pyim-bisearch-word code
+                                                           (or point1 (point-min))
+                                                           (or point2 (point-max))))))
+                (message "%s 可能不是一个有效的词库 buffer，忽略。" (buffer-name)))))))
       (delete-dups words))))
 
-(defun pyim-cache-dict-buffer (&optional max-word-length min-word-length)
-  "构建普通词库文件的缓存，用于加快查询速度，主要用于对访问速度要求高的中文字
-符串分词功能。`max-word-length' 和 `min-word-length' 用于设定进入缓存的词条的
-最大长度和最小长度。"
+(defun pyim-get-codes-in-personal-buffer ()
+  (let ((buffer (cdr (assoc "buffer" (car pyim-buffer-list))))
+        result)
+    (with-current-buffer buffer
+      (goto-char (point-min))
+      (while (not (eobp))
+        (push (pyim-code-at-point) result)
+        (forward-line 1)))
+    ;; 加入26个字母code，用于缩小搜索范围。
+    (setq result
+          (append (mapcar
+                   #'(lambda (x)
+                       (string x))
+                   "abcdefghjklmnopqrstwxyz")
+                  result))
+    (cl-delete-duplicates (nreverse result)
+                          :test #'string= :from-end t)))
+
+(defun pyim-cache-dict-buffer ()
+  "根据个人词库文件中的 codes，来构建普通词库文件的缓存，用于加快查询速度，
+主要用于对访问速度要求高的中文字符串分词功能。"
+  (interactive)
   (let ((all-buffer-list (cdr pyim-buffer-list))
+        (codes-used-freq (pyim-get-codes-in-personal-buffer))
         result)
     (dolist (buf all-buffer-list)
       ;; 这里仅仅 cache 普通词库 buffer，忽略 cache 个人词库文件 buffer 和
@@ -747,22 +780,18 @@ If you don't like this funciton, set the variable to nil")
         (when (or (null dict-type)
                   (eq dict-type 'pinyin-dict))
           (with-current-buffer buffer
-            (let ((index-table (make-hash-table :size 10000)))
+            (let ((index-table (make-hash-table :size 5000)))
               (when (pyim-dict-buffer-valid-p)
-                (goto-char (point-min))
-                (while (not (eobp))
-                  (let* ((code (pyim-code-at-point))
-                         (code-length (length (split-string code "-")))
-                         (words (cdr (pyim-line-content))))
-                    (when (and (>= code-length (or min-word-length 1))
-                               (<= code-length (or max-word-length 6)))
-                      (puthash (intern code)
-                               words index-table)))
-                  (forward-line))
-                (push `(("buffer" . ,(buffer-name buffer))
+                (dolist (code codes-used-freq)
+                  (puthash (intern code)
+                           (list (cdr (pyim-bisearch-word code
+                                                          (point-min)
+                                                          (point-max)))
+                                 (point))
+                           index-table))
+                (push `(("buffer" . ,buffer)
                         ("buffer-cache" ,index-table))
-                      result)))))))
-    result))
+                      pyim-buffer-cache-list)))))))))
 
 (defun pyim-predict (code &optional search-from-guessdict)
   "得到 `code' 对应的联想词。"
