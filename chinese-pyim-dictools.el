@@ -300,9 +300,12 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
 
         (goto-char (point-min))
         (while (not (eobp))
-          (if (looking-at "^[a-z]+ +\\cc+\\|\\cc+ +\\cc+\\|^;+.*coding") ; 删除只包含 code，但没有词条的行
-              (forward-line 1)
-            (pyim-delete-line)))
+          (let* ((line-content (pyim-line-content))
+                 (length (length line-content)))
+            (if (or (> length 1) ;; 删除只包含 code，但没有词条的行
+                    (string-match-p " *^;+" (car line-content)))
+                (forward-line 1)
+              (pyim-delete-line))))
 
         (goto-char (point-min))
         (while (not (eobp))
@@ -313,6 +316,7 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
                 (delete-region (1- (point)) (+ (point) (length currw))))
             (setq lastw currw)
             (forward-line 1)))
+
         (goto-char (point-min))
         (while (not (eobp))
           (pyim-remove-duplicates-word sort-by-freq)
