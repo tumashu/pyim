@@ -208,6 +208,16 @@ Chinese-pyim 内建的功能有：
    1. buffer 词库文件导入时创建的 buffer (用户不可见)。
    2. file   词库文件的路径。")
 
+(defvar pyim-buffer-cache-list nil
+  "一个列表，用来缓存 `pyim-buffer-list' 中的普通词库 buffer，以加快访问速度。
+
+1. 每个元素都是一个 alist。
+2. 每一个 alist 都包含两个部份：
+   1. buffer 词库文件导入时创建的 buffer (用户不可见)。
+   2. buffer-cache 从词库 buffer 中构建的一个 hashtable。
+
+注意： *不缓存* 个人词库文件 buffer 和 guessdict 词库文件 buffer。")
+
 (defvar pyim-shen-mu
   '("b" "p" "m" "f" "d" "t" "n" "l" "g" "k" "h"
     "j" "q" "x" "z" "c" "s" "zh" "ch" "sh" "r" "y" "w"))
@@ -672,7 +682,9 @@ If you don't like this funciton, set the variable to nil")
 ;; BUG: 这个函数需要进一步优化，使其判断更准确。
 
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-get (code &optional search-from-guessdict ignore-personal-buffer)
+(defun pyim-get (code &optional search-from-guessdict
+                      ignore-personal-buffer
+                      search-from-buffer-cache)
   (let ((all-buffer-list
          (if ignore-personal-buffer
              ;; 设置 `ignore-personal-buffer' 为 t 时，用于多音字校正。
@@ -684,28 +696,73 @@ If you don't like this funciton, set the variable to nil")
            pyim-buffer-list))
         words buffer-list)
     (when (and (stringp code) (string< "" code))
-      (dolist (buf all-buffer-list)
-        (let ((dict-type (cdr (assoc "dict-type" buf))))
-          ;; Search from dict
-          (when (and (not search-from-guessdict)
-                     (or (null dict-type)
-                         (eq dict-type 'pinyin-dict)))
-            (push buf buffer-list))
-          ;; Search from guessdict
-          (when (and search-from-guessdict
-                     (eq dict-type 'guess-dict))
-            (push buf buffer-list))))
-      (setq buffer-list (reverse buffer-list))
-      (dolist (buf buffer-list)
-        (with-current-buffer (cdr (assoc "buffer" buf))
-          (if (pyim-dict-buffer-valid-p)
-              (setq words (append words
-                                  (cdr
-                                   (pyim-bisearch-word code
-                                                       (point-min)
-                                                       (point-max)))))
-            (message "%s 可能不是一个有效的词库 buffer，忽略。" (buffer-name)))))
+      (if (and search-from-buffer-cache
+               pyim-buffer-cache-list)
+          ;; 从 buffer cache 中查询词条，速度比较快。
+          (dolist (buf-cache pyim-buffer-cache-list)
+            (setq words
+                  (append words
+                          (gethash (intern code)
+                                   (cadr (assoc "buffer-cache" buf-cache))))))
+
+        (dolist (buf all-buffer-list)
+          (let ((dict-type (cdr (assoc "dict-type" buf))))
+            ;; Search from dict
+            (when (and (not search-from-guessdict)
+                       (or (null dict-type)
+                           (eq dict-type 'pinyin-dict)))
+              (push buf buffer-list))
+            ;; Search from guessdict
+            (when (and search-from-guessdict
+                       (eq dict-type 'guess-dict))
+              (push buf buffer-list))))
+        (setq buffer-list (reverse buffer-list))
+        (dolist (buf buffer-list)
+          (with-current-buffer (cdr (assoc "buffer" buf))
+            (if (pyim-dict-buffer-valid-p)
+                (setq words (append words
+                                    (cdr
+                                     (pyim-bisearch-word code
+                                                         (point-min)
+                                                         (point-max)))))
+              (message "%s 可能不是一个有效的词库 buffer，忽略。" (buffer-name))))))
       (delete-dups words))))
+
+(defun pyim-cache-dict-buffer (&optional max-word-length min-word-length)
+  "构建普通词库文件的缓存，用于加快查询速度，主要用于对访问速度要求高的中文字
+符串分词功能。`max-word-length' 和 `min-word-length' 用于设定进入缓存的词条的
+最大长度和最小长度。"
+  (let ((all-buffer-list (cdr pyim-buffer-list))
+        result)
+    (dolist (buf all-buffer-list)
+      ;; 这里仅仅 cache 普通词库 buffer，忽略 cache 个人词库文件 buffer 和
+      ;; guessdict 词库 buffer。其主要原因是：
+      ;; 1. 个人词库频繁变动，cache 很快会过期
+      ;; 2. guessdict 词库的查询速度基本可以满足输入法的要求，
+      ;;    不需要 cache。
+      ;; 3. 当对中文字符串分词时，要求极其快速的查询个人词库,
+      ;;    使用缓存可以极大的提高分词速度。
+      (let ((dict-type (cdr (assoc "dict-type" buf)))
+            (buffer (cdr (assoc "buffer" buf))))
+        (when (or (null dict-type)
+                  (eq dict-type 'pinyin-dict))
+          (with-current-buffer buffer
+            (let ((index-table (make-hash-table :size 10000)))
+              (when (pyim-dict-buffer-valid-p)
+                (goto-char (point-min))
+                (while (not (eobp))
+                  (let* ((code (pyim-code-at-point))
+                         (code-length (length (split-string code "-")))
+                         (words (cdr (pyim-line-content))))
+                    (when (and (>= code-length (or min-word-length 1))
+                               (<= code-length (or max-word-length 6)))
+                      (puthash (intern code)
+                               words index-table)))
+                  (forward-line))
+                (push `(("buffer" . ,(buffer-name buffer))
+                        ("buffer-cache" ,index-table))
+                      result)))))))
+    result))
 
 (defun pyim-predict (code &optional search-from-guessdict)
   "得到 `code' 对应的联想词。"
