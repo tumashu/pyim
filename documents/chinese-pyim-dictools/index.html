@@ -202,7 +202,7 @@ OUTPUT:
 
       <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#36890;&#36807;&#25490;&#21015;&#32452;&#21512;&#30340;&#26041;&#24335;, &#37325;&#25490; pinyins-list&#12290;</span>
       <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#27604;&#22914;&#65306;(("Hello") ("yin") ("hang" "xing")) -&gt; (("Hello" "yin" "hang") ("Hello" "yin" "xing"))</span>
-      (<span style="color: #FBDE2D;">setq</span> pinyins-list-permutated (pyim-permutate-list pinyins-list))
+      (<span style="color: #FBDE2D;">setq</span> pinyins-list-permutated (pyim-permutate-list2 pinyins-list))
 
       <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20351;&#29992; Chinese-pyim &#30340;&#23433;&#35013;&#30340;&#35789;&#24211;&#26469;&#26657;&#27491;&#22810;&#38899;&#23383;&#12290;</span>
       (<span style="color: #FBDE2D;">when</span> adjuct-duo-yin-zi
@@ -241,7 +241,7 @@ OUTPUT:
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-permutate-list</span> (list)
   <span style="color: #61CE3C;">"&#20351;&#29992;&#25490;&#21015;&#32452;&#21512;&#30340;&#26041;&#24335;&#37325;&#26032;&#25490;&#21015; `</span><span style="color: #61CE3C;">list</span><span style="color: #61CE3C;">'&#65292;&#36825;&#20010;&#20989;&#25968;&#30001; &#8216;&#20108;&#20013;&#8217; &#25552;&#20379;&#12290;</span>
-<span style="color: #61CE3C;">`</span><span style="color: #61CE3C;">pyim-hanzi2pinyin</span><span style="color: #61CE3C;">' &#40664;&#35748;&#20351;&#29992;&#36825;&#20010;&#20989;&#25968;&#12290;"</span>
+<span style="color: #61CE3C;">&#27880;&#65306;`</span><span style="color: #61CE3C;">pyim-hanzi2pinyin</span><span style="color: #61CE3C;">' &#27809;&#26377;&#20351;&#29992;&#36825;&#20010;&#20989;&#25968;(&#36895;&#24230;&#31245;&#24494;&#26377;&#28857;&#24930;)&#12290;"</span>
   (<span style="color: #FBDE2D;">let</span> ((list-head (car list))
         (list-tail (cdr list)))
     (<span style="color: #FBDE2D;">cond</span> ((null list-tail)
@@ -253,29 +253,22 @@ OUTPUT:
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-permutate-list2</span> (list)
   <span style="color: #61CE3C;">"&#20351;&#29992;&#25490;&#21015;&#32452;&#21512;&#30340;&#26041;&#24335;&#37325;&#26032;&#25490;&#21015; `</span><span style="color: #61CE3C;">list</span><span style="color: #61CE3C;">'&#65292;&#36825;&#20010;&#20989;&#25968;&#30001; &#8217;&#32704;/ty&#8216; &#25552;&#20379;&#12290;</span>
-
-<span style="color: #61CE3C;">&#27880;&#24847;&#65306;`</span><span style="color: #61CE3C;">pyim-hanzi2pinyin</span><span style="color: #61CE3C;">' &#27809;&#26377;&#20351;&#29992;&#36825;&#20010;&#20989;&#25968;&#65292;&#20027;&#35201;&#21407;&#22240;&#26159;&#20860;&#23481;&#38382;&#39064;&#65306;</span>
-<span style="color: #61CE3C;">`</span><span style="color: #61CE3C;">pyim-hanzi2pinyin</span><span style="color: #61CE3C;">' &#20351;&#29992;&#36825;&#20010;&#20989;&#25968;&#26102;&#65292;&#24471;&#21040;&#30340;&#32467;&#26524;&#19982;&#32769;&#29256;&#26412;&#19981;&#19968;&#33268;,</span>
-<span style="color: #61CE3C;">&#25490;&#21015;&#39034;&#24207;&#26377;&#24046;&#24322;&#12290;</span>
-
-<span style="color: #61CE3C;">BUG: &#24403; list &#21482;&#26377;&#19968;&#20010;&#20803;&#32032;&#26102;&#65292;&#34892;&#20026;&#21644;&#39044;&#26399;&#30340;&#19981;&#19968;&#33268;&#12290;"</span>
-  (pyim-permutate-list2-internal (car list) (cdr list)))
+<span style="color: #61CE3C;">`</span><span style="color: #61CE3C;">pyim-hanzi2pinyin</span><span style="color: #61CE3C;">' &#40664;&#35748;&#20351;&#29992;&#36825;&#20010;&#20989;&#25968;&#12290;"</span>
+  (<span style="color: #FBDE2D;">if</span> (= (length list) 1)
+      (mapcar #'list (car list))
+    (pyim-permutate-list2-internal (car list) (cdr list))))
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-permutate-list2-internal</span> (one two)
   <span style="color: #61CE3C;">"`</span><span style="color: #61CE3C;">pyim-permutate-list2</span><span style="color: #61CE3C;">' &#30340;&#20869;&#37096;&#20989;&#25968;&#12290;"</span>
   (<span style="color: #FBDE2D;">let</span> (<span style="color: #FBDE2D;">return</span>)
     (<span style="color: #FBDE2D;">if</span> (null (car two))
         one
-      (mapc #'(lambda (item1)
-                (mapc #'(lambda (item2)
-                          (<span style="color: #FBDE2D;">setq</span> return
-                                (cons
-                                 (<span style="color: #FBDE2D;">if</span> (listp item1)
-                                     (append item1 (list item2))
-                                   (list item1 item2))
-                                 return)))
-                      (car two)))
-            one)
+      (<span style="color: #FBDE2D;">dolist</span> (x1 one)
+        (<span style="color: #FBDE2D;">dolist</span> (x2 (car two))
+          (<span style="color: #FBDE2D;">push</span> (<span style="color: #FBDE2D;">if</span> (listp x1)
+                    (append x1 (list x2))
+                  (list x1 x2))
+                return)))
       (<span style="color: #FBDE2D;">setq</span> one return)
       (pyim-permutate-list2-internal one (cdr two)))))
 
@@ -358,9 +351,12 @@ OUTPUT:
 
         (goto-char (point-min))
         (<span style="color: #FBDE2D;">while</span> (not (eobp))
-          (<span style="color: #FBDE2D;">if</span> (looking-at <span style="color: #61CE3C;">"^[a-z]+ +\\cc+</span><span style="color: #61CE3C;">\\</span><span style="color: #61CE3C;">|</span><span style="color: #61CE3C;">\\cc+ +\\cc+</span><span style="color: #61CE3C;">\\</span><span style="color: #61CE3C;">|</span><span style="color: #61CE3C;">^;+.*coding"</span>) <span style="color: #8B8989; font-style: italic;">; </span><span style="color: #8B8989; font-style: italic;">&#21024;&#38500;&#21482;&#21253;&#21547; code&#65292;&#20294;&#27809;&#26377;&#35789;&#26465;&#30340;&#34892;</span>
-              (forward-line 1)
-            (pyim-delete-line)))
+          (<span style="color: #FBDE2D;">let*</span> ((line-content (pyim-line-content))
+                 (length (length line-content)))
+            (<span style="color: #FBDE2D;">if</span> (<span style="color: #FBDE2D;">or</span> (&gt; length 1) <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#21024;&#38500;&#21482;&#21253;&#21547; code&#65292;&#20294;&#27809;&#26377;&#35789;&#26465;&#30340;&#34892;</span>
+                    (string-match-p <span style="color: #61CE3C;">" *^;+"</span> (car line-content)))
+                (forward-line 1)
+              (pyim-delete-line))))
 
         (goto-char (point-min))
         (<span style="color: #FBDE2D;">while</span> (not (eobp))
@@ -371,6 +367,7 @@ OUTPUT:
                 (delete-region (1- (point)) (+ (point) (length currw))))
             (<span style="color: #FBDE2D;">setq</span> lastw currw)
             (forward-line 1)))
+
         (goto-char (point-min))
         (<span style="color: #FBDE2D;">while</span> (not (eobp))
           (pyim-remove-duplicates-word sort-by-freq)
@@ -959,8 +956,8 @@ Chinese-pyim 打算使用 emacs package 来分发词库包。
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2015-07-03</span>
-        <span title="last modification date" class="post-info">2015-07-03</span>
+        <span title="post date" class="post-info">2015-07-04</span>
+        <span title="last modification date" class="post-info">2015-07-04</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>

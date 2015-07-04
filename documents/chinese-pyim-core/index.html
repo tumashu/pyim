@@ -284,6 +284,16 @@ Chinese pyim 输入法的核心文件，包含了输入法的基本功能函数�
 <span style="color: #61CE3C;">   1. buffer &#35789;&#24211;&#25991;&#20214;&#23548;&#20837;&#26102;&#21019;&#24314;&#30340; buffer (&#29992;&#25143;&#19981;&#21487;&#35265;)&#12290;</span>
 <span style="color: #61CE3C;">   2. file   &#35789;&#24211;&#25991;&#20214;&#30340;&#36335;&#24452;&#12290;"</span>)
 
+(<span style="color: #FBDE2D;">defvar</span> <span style="color: #D8FA3C;">pyim-buffer-cache-list</span> nil
+  <span style="color: #61CE3C;">"&#19968;&#20010;&#21015;&#34920;&#65292;&#29992;&#26469;&#32531;&#23384; `</span><span style="color: #61CE3C;">pyim-buffer-list</span><span style="color: #61CE3C;">' &#20013;&#30340;&#26222;&#36890;&#35789;&#24211; buffer&#65292;&#20197;&#21152;&#24555;&#35775;&#38382;&#36895;&#24230;&#12290;</span>
+
+<span style="color: #61CE3C;">1. &#27599;&#20010;&#20803;&#32032;&#37117;&#26159;&#19968;&#20010; alist&#12290;</span>
+<span style="color: #61CE3C;">2. &#27599;&#19968;&#20010; alist &#37117;&#21253;&#21547;&#20004;&#20010;&#37096;&#20221;&#65306;</span>
+<span style="color: #61CE3C;">   1. buffer &#35789;&#24211;&#25991;&#20214;&#23548;&#20837;&#26102;&#21019;&#24314;&#30340; buffer (&#29992;&#25143;&#19981;&#21487;&#35265;)&#12290;</span>
+<span style="color: #61CE3C;">   2. buffer-cache &#20174;&#35789;&#24211; buffer &#20013;&#26500;&#24314;&#30340;&#19968;&#20010; hashtable&#12290;</span>
+
+<span style="color: #61CE3C;">&#27880;&#24847;&#65306; *&#19981;&#32531;&#23384;* &#20010;&#20154;&#35789;&#24211;&#25991;&#20214; buffer &#21644; guessdict &#35789;&#24211;&#25991;&#20214; buffer&#12290;"</span>)
+
 (<span style="color: #FBDE2D;">defvar</span> <span style="color: #D8FA3C;">pyim-shen-mu</span>
   '(<span style="color: #61CE3C;">"b"</span> <span style="color: #61CE3C;">"p"</span> <span style="color: #61CE3C;">"m"</span> <span style="color: #61CE3C;">"f"</span> <span style="color: #61CE3C;">"d"</span> <span style="color: #61CE3C;">"t"</span> <span style="color: #61CE3C;">"n"</span> <span style="color: #61CE3C;">"l"</span> <span style="color: #61CE3C;">"g"</span> <span style="color: #61CE3C;">"k"</span> <span style="color: #61CE3C;">"h"</span>
     <span style="color: #61CE3C;">"j"</span> <span style="color: #61CE3C;">"q"</span> <span style="color: #61CE3C;">"x"</span> <span style="color: #61CE3C;">"z"</span> <span style="color: #61CE3C;">"c"</span> <span style="color: #61CE3C;">"s"</span> <span style="color: #61CE3C;">"zh"</span> <span style="color: #61CE3C;">"ch"</span> <span style="color: #61CE3C;">"sh"</span> <span style="color: #61CE3C;">"r"</span> <span style="color: #61CE3C;">"y"</span> <span style="color: #61CE3C;">"w"</span>))
@@ -834,30 +844,106 @@ BUG: 这个函数需要进一步优化，使其判断更准确。
              <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#26426;&#21046;&#20915;&#23450;&#30340;&#12290;</span>
              (cdr pyim-buffer-list)
            pyim-buffer-list))
-        words buffer-list)
+        words nearby-codes-positions buffer-list)
     (<span style="color: #FBDE2D;">when</span> (<span style="color: #FBDE2D;">and</span> (stringp code) (string&lt; <span style="color: #61CE3C;">""</span> code))
-      (<span style="color: #FBDE2D;">dolist</span> (buf all-buffer-list)
-        (<span style="color: #FBDE2D;">let</span> ((dict-type (cdr (assoc <span style="color: #61CE3C;">"dict-type"</span> buf))))
-          <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">Search from dict</span>
-          (<span style="color: #FBDE2D;">when</span> (<span style="color: #FBDE2D;">and</span> (not search-from-guessdict)
-                     (<span style="color: #FBDE2D;">or</span> (null dict-type)
-                         (eq dict-type 'pinyin-dict)))
-            (<span style="color: #FBDE2D;">push</span> buf buffer-list))
-          <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">Search from guessdict</span>
-          (<span style="color: #FBDE2D;">when</span> (<span style="color: #FBDE2D;">and</span> search-from-guessdict
-                     (eq dict-type 'guess-dict))
-            (<span style="color: #FBDE2D;">push</span> buf buffer-list))))
-      (<span style="color: #FBDE2D;">setq</span> buffer-list (reverse buffer-list))
-      (<span style="color: #FBDE2D;">dolist</span> (buf buffer-list)
-        (<span style="color: #FBDE2D;">with-current-buffer</span> (cdr (assoc <span style="color: #61CE3C;">"buffer"</span> buf))
-          (<span style="color: #FBDE2D;">if</span> (pyim-dict-buffer-valid-p)
-              (<span style="color: #FBDE2D;">setq</span> words (append words
-                                  (cdr
-                                   (pyim-bisearch-word code
-                                                       (point-min)
-                                                       (point-max)))))
-            (message <span style="color: #61CE3C;">"%s &#21487;&#33021;&#19981;&#26159;&#19968;&#20010;&#26377;&#25928;&#30340;&#35789;&#24211; buffer&#65292;&#24573;&#30053;&#12290;"</span> (buffer-name)))))
+      (<span style="color: #FBDE2D;">when</span> pyim-buffer-cache-list
+        <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#30452;&#25509;&#20174; buffer cache &#20013;&#26597;&#35810;&#35789;&#26465;&#65292;&#36895;&#24230;&#24456;&#24555;&#12290;</span>
+        (<span style="color: #FBDE2D;">dolist</span> (buf-cache pyim-buffer-cache-list)
+          (<span style="color: #FBDE2D;">setq</span> words
+                (append words
+                        (car (gethash (intern code)
+                                      (cadr (assoc <span style="color: #61CE3C;">"buffer-cache"</span> buf-cache)))))))
+        <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#22914;&#26524;&#20174;&#32531;&#23384;&#20013;&#25214;&#19981;&#21040; code &#23545;&#24212;&#30340;&#35789;&#26465;&#65292;&#21017;&#33719;&#21462; code &#25152;&#22312;&#30340;&#33539;&#22260;&#65292;</span>
+        <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#27604;&#22914;&#65306; &#22914;&#26524;&#25628;&#32034; ni-hao, &#37027;&#20040;&#65292;&#25628;&#32034; n &#21644; o &#20004;&#20010; code &#22312; buffer</span>
+        <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20013;&#30340;&#20301;&#32622;&#65292;&#36825;&#20004;&#20010; code &#30340;&#20301;&#32622;&#21487;&#20197;&#20943;&#23569;&#21518;&#38754;&#25628;&#32034;&#35789;&#24211; buffer &#33457;&#36153;&#30340;&#26102;&#38388;&#12290;</span>
+        (<span style="color: #FBDE2D;">dolist</span> (buf-cache pyim-buffer-cache-list)
+          (<span style="color: #FBDE2D;">unless</span> words
+            (<span style="color: #FBDE2D;">let*</span> ((begin (string-to-char (substring code 0 1)))
+                   (end (1+ begin))
+                   (words-ht  (cadr (assoc <span style="color: #61CE3C;">"buffer-cache"</span> buf-cache))))
+              (<span style="color: #FBDE2D;">push</span> `(,(cdr (assoc <span style="color: #61CE3C;">"buffer"</span> buf-cache))
+                      ,(cadr (gethash (intern (string begin)) words-ht))
+                      ,(cadr (gethash (intern (string end)) words-ht)))
+                    nearby-codes-positions)))))
+      <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#30452;&#25509;&#29992;&#20108;&#20998;&#27861;&#25628;&#32034;&#35789;&#24211; buffer&#65288;&#36895;&#24230;&#27604;&#36739;&#24930;&#65289;&#12290;</span>
+      (<span style="color: #FBDE2D;">unless</span> words
+        (<span style="color: #FBDE2D;">dolist</span> (buf all-buffer-list)
+          (<span style="color: #FBDE2D;">let</span> ((dict-type (cdr (assoc <span style="color: #61CE3C;">"dict-type"</span> buf))))
+            <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">Search from dict</span>
+            (<span style="color: #FBDE2D;">when</span> (<span style="color: #FBDE2D;">and</span> (not search-from-guessdict)
+                       (<span style="color: #FBDE2D;">or</span> (null dict-type)
+                           (eq dict-type 'pinyin-dict)))
+              (<span style="color: #FBDE2D;">push</span> buf buffer-list))
+            <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">Search from guessdict</span>
+            (<span style="color: #FBDE2D;">when</span> (<span style="color: #FBDE2D;">and</span> search-from-guessdict
+                       (eq dict-type 'guess-dict))
+              (<span style="color: #FBDE2D;">push</span> buf buffer-list))))
+        (<span style="color: #FBDE2D;">setq</span> buffer-list (reverse buffer-list))
+        (<span style="color: #FBDE2D;">dolist</span> (buf buffer-list)
+          (<span style="color: #FBDE2D;">let*</span> ((buffer (cdr (assoc <span style="color: #61CE3C;">"buffer"</span> buf)))
+                 (positions (cdr (assoc buffer nearby-codes-positions)))
+                 (point1 (car positions)) <span style="color: #8B8989; font-style: italic;">;</span><span style="color: #8B8989; font-style: italic;">&#20174;&#32531;&#23384;&#20013;&#33719;&#21462;&#30340;&#19978;&#30028;&#38480;</span>
+                 (point2 (cadr positions))) <span style="color: #8B8989; font-style: italic;">;</span><span style="color: #8B8989; font-style: italic;">&#20174;&#32531;&#23384;&#20013;&#33719;&#21462;&#30340;&#19979;&#30028;&#38480;</span>
+            (<span style="color: #FBDE2D;">with-current-buffer</span> buffer
+              (<span style="color: #FBDE2D;">if</span> (pyim-dict-buffer-valid-p)
+                  (<span style="color: #FBDE2D;">setq</span> words (append words
+                                      (cdr
+                                       (pyim-bisearch-word code
+                                                           (<span style="color: #FBDE2D;">or</span> point1 (point-min))
+                                                           (<span style="color: #FBDE2D;">or</span> point2 (point-max))))))
+                (message <span style="color: #61CE3C;">"%s &#21487;&#33021;&#19981;&#26159;&#19968;&#20010;&#26377;&#25928;&#30340;&#35789;&#24211; buffer&#65292;&#24573;&#30053;&#12290;"</span> (buffer-name)))))))
       (delete-dups words))))
+
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-get-codes-in-personal-buffer</span> ()
+  (<span style="color: #FBDE2D;">let</span> ((buffer (cdr (assoc <span style="color: #61CE3C;">"buffer"</span> (car pyim-buffer-list))))
+        result)
+    (<span style="color: #FBDE2D;">with-current-buffer</span> buffer
+      (goto-char (point-min))
+      (<span style="color: #FBDE2D;">while</span> (not (eobp))
+        (<span style="color: #FBDE2D;">push</span> (pyim-code-at-point) result)
+        (forward-line 1)))
+    <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#21152;&#20837;26&#20010;&#23383;&#27597;code&#65292;&#29992;&#20110;&#32553;&#23567;&#25628;&#32034;&#33539;&#22260;&#12290;</span>
+    (<span style="color: #FBDE2D;">setq</span> result
+          (append (mapcar
+                   #'(lambda (x)
+                       (string x))
+                   <span style="color: #61CE3C;">"abcdefghjklmnopqrstwxyz"</span>)
+                  result))
+    (cl-delete-duplicates (nreverse result)
+                          <span style="color: #FF6400;">:test</span> #'string= <span style="color: #FF6400;">:from-end</span> t)))
+
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-cache-dict-buffer</span> ()
+  <span style="color: #61CE3C;">"&#26681;&#25454;&#20010;&#20154;&#35789;&#24211;&#25991;&#20214;&#20013;&#30340; codes&#65292;&#26469;&#26500;&#24314;&#26222;&#36890;&#35789;&#24211;&#25991;&#20214;&#30340;&#32531;&#23384;&#65292;&#29992;&#20110;&#21152;&#24555;&#26597;&#35810;&#36895;&#24230;&#65292;</span>
+<span style="color: #61CE3C;">&#20027;&#35201;&#29992;&#20110;&#23545;&#35775;&#38382;&#36895;&#24230;&#35201;&#27714;&#39640;&#30340;&#20013;&#25991;&#23383;&#31526;&#20018;&#20998;&#35789;&#21151;&#33021;&#12290;"</span>
+  (<span style="color: #FBDE2D;">interactive</span>)
+  (<span style="color: #FBDE2D;">let</span> ((all-buffer-list (cdr pyim-buffer-list))
+        (codes-used-freq (pyim-get-codes-in-personal-buffer))
+        result)
+    (<span style="color: #FBDE2D;">dolist</span> (buf all-buffer-list)
+      <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#36825;&#37324;&#20165;&#20165; cache &#26222;&#36890;&#35789;&#24211; buffer&#65292;&#24573;&#30053; cache &#20010;&#20154;&#35789;&#24211;&#25991;&#20214; buffer &#21644;</span>
+      <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">guessdict &#35789;&#24211; buffer&#12290;&#20854;&#20027;&#35201;&#21407;&#22240;&#26159;&#65306;</span>
+      <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">1. &#20010;&#20154;&#35789;&#24211;&#39057;&#32321;&#21464;&#21160;&#65292;cache &#24456;&#24555;&#20250;&#36807;&#26399;</span>
+      <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">2. guessdict &#35789;&#24211;&#30340;&#26597;&#35810;&#36895;&#24230;&#22522;&#26412;&#21487;&#20197;&#28385;&#36275;&#36755;&#20837;&#27861;&#30340;&#35201;&#27714;&#65292;</span>
+      <span style="color: #8B8989; font-style: italic;">;;    </span><span style="color: #8B8989; font-style: italic;">&#19981;&#38656;&#35201; cache&#12290;</span>
+      <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">3. &#24403;&#23545;&#20013;&#25991;&#23383;&#31526;&#20018;&#20998;&#35789;&#26102;&#65292;&#35201;&#27714;&#26497;&#20854;&#24555;&#36895;&#30340;&#26597;&#35810;&#20010;&#20154;&#35789;&#24211;,</span>
+      <span style="color: #8B8989; font-style: italic;">;;    </span><span style="color: #8B8989; font-style: italic;">&#20351;&#29992;&#32531;&#23384;&#21487;&#20197;&#26497;&#22823;&#30340;&#25552;&#39640;&#20998;&#35789;&#36895;&#24230;&#12290;</span>
+      (<span style="color: #FBDE2D;">let</span> ((dict-type (cdr (assoc <span style="color: #61CE3C;">"dict-type"</span> buf)))
+            (buffer (cdr (assoc <span style="color: #61CE3C;">"buffer"</span> buf))))
+        (<span style="color: #FBDE2D;">when</span> (<span style="color: #FBDE2D;">or</span> (null dict-type)
+                  (eq dict-type 'pinyin-dict))
+          (<span style="color: #FBDE2D;">with-current-buffer</span> buffer
+            (<span style="color: #FBDE2D;">let</span> ((index-table (make-hash-table <span style="color: #FF6400;">:size</span> 5000)))
+              (<span style="color: #FBDE2D;">when</span> (pyim-dict-buffer-valid-p)
+                (<span style="color: #FBDE2D;">dolist</span> (code codes-used-freq)
+                  (puthash (intern code)
+                           (list (cdr (pyim-bisearch-word code
+                                                          (point-min)
+                                                          (point-max)))
+                                 (point))
+                           index-table))
+                (<span style="color: #FBDE2D;">push</span> `((<span style="color: #61CE3C;">"buffer"</span> . ,buffer)
+                        (<span style="color: #61CE3C;">"buffer-cache"</span> ,index-table))
+                      pyim-buffer-cache-list)))))))))
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-predict</span> (code <span style="color: #D8FA3C;">&amp;optional</span> search-from-guessdict)
   <span style="color: #61CE3C;">"&#24471;&#21040; `</span><span style="color: #61CE3C;">code</span><span style="color: #61CE3C;">' &#23545;&#24212;&#30340;&#32852;&#24819;&#35789;&#12290;"</span>
@@ -2992,8 +3078,8 @@ Chinese-pyim 在特定的时候需要读取一个汉字的拼音，这个工作�
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2015-07-03</span>
-        <span title="last modification date" class="post-info">2015-07-03</span>
+        <span title="post date" class="post-info">2015-07-04</span>
+        <span title="last modification date" class="post-info">2015-07-04</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>
