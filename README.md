@@ -363,6 +363,10 @@ Chinese-pyim 包含了一个简单的分词函数：\`pyim-split-chinese-string'
 
 另外一个分词相关的函数是 \`pyim-split-chinese-string2string', 这个函数仅仅将一个中文字符串分词，在分词的位置用空格或者用户自定义的分隔符隔开，然后返回新的字符串。
 
+用户可以通过运行命令 \`pyim-cache-dict-buffer' 来缓存 Chinese-pyim 的词库 buffer，使用缓存可以提高分词的速度。
+
+注：仅仅对一般词库有效，个人文件和 guessdict 词库无效。
+
 ### 获取光标处的中文词条<a id="orgheadline29"></a>
 
 Chinese-pyim 包含了一个简单的命令：\`pyim-get-words-list-at-point', 这个命令可以得到光标处的 **英文** 或者 **中文** 词条的 \*列表\*，这个命令依赖分词函数：
