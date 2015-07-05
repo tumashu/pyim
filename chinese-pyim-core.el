@@ -744,9 +744,8 @@ If you don't like this funciton, set the variable to nil")
                                                            (or point2 (point-max))))))
                 (message "%s 可能不是一个有效的词库 buffer，忽略。" (buffer-name)))))))
 
-      (when (and search-dicts-buffer-p
-                 (not (or search-from-guessdict
-                          ignore-personal-buffer)))
+      (when (not (or search-from-guessdict
+                     ignore-personal-buffer))
         ;; 设置 `ignore-personal-buffer' 为 t 时，用于多音字校正。
         ;; pyim-buffer-list 中第一个 buffer 对应的是个人词库文件
         ;; 个人词库文件中的词条极有可能存在 *多音字污染*。
