@@ -209,12 +209,30 @@
 较长的词条优先使用，如果 `prefer-short-word' 设置为 t，则优先使用较短的词条。
 最长词条默认不超过6个字符，用户可以通 `max-word-length' 来自定义词条的最大长度，
 但值得注意的是，这个值设置越大，分词速度越慢。"
-  (let ((str-length (length string))
+  (let ((string-list
+         (if (string-match-p "\\CC" string)
+             (split-string
+              (replace-regexp-in-string
+               "\\(\\CC+\\)" "@@@@\\1@@@@" string) "@@@@")
+           (list string))))
+    (mapconcat
+     #'(lambda (str)
+         (when (> (length str) 0)
+           (if (not (string-match-p "\\CC" str))
+               (pyim-split-chinese-string2string-internal
+                str prefer-short-word separator max-word-length)
+             (concat " " str " "))))
+     string-list "")))
+
+(defun pyim-split-chinese-string2string-internal (chinese-string &optional prefer-short-word
+                                                                 separator max-word-length)
+  "`pyim-split-chinese-string2string' 内部函数。"
+  (let ((str-length (length chinese-string))
         (word-list (cl-delete-duplicates
                     ;;  判断两个词条在字符串中的位置
                     ;;  是否冲突，如果冲突，仅保留一个，
                     ;;  删除其它。
-                    (pyim-split-chinese-string string max-word-length)
+                    (pyim-split-chinese-string chinese-string max-word-length)
                     :test #'(lambda (x1 x2)
                               (let ((begin1 (nth 1 x1))
                                     (begin2 (nth 1 x2))
@@ -238,7 +256,7 @@
     (dotimes (i str-length)
       (when (member (1+ i) position-list)
         (push (or separator " ") result))
-      (push (substring string i (1+ i))  result))
+      (push (substring chinese-string i (1+ i))  result))
     (setq result (nreverse result))
     (mapconcat #'identity result "")))
 
