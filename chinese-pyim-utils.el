@@ -260,6 +260,19 @@
     (setq result (nreverse result))
     (mapconcat #'identity result "")))
 
+(defun pyim-split-chinese-buffer ()
+  "将一个 buffer 中的中文文章，进行分词操作。"
+  (interactive)
+  (goto-char (point-min))
+  (while (not (eobp))
+    (let ((string (buffer-substring-no-properties
+                   (line-beginning-position)
+                   (line-end-position))))
+      (pyim-delete-line)
+      (insert (pyim-split-chinese-string2string string))
+      (insert "\n")))
+  (goto-char (point-max)))
+
 ;; #+END_SRC
 
 ;;; Footer:
