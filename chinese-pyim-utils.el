@@ -274,7 +274,7 @@
       (pyim-delete-line)
       (insert (pyim-split-chinese-string2string string))
       (insert "\n")))
-  (goto-char (point-max))
+  (goto-char (point-min))
   (message "分词完成！"))
 
 ;; #+END_SRC
