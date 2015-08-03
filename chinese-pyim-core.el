@@ -753,11 +753,11 @@ If you don't like this funciton, set the variable to nil")
         ;; 机制决定的。
         (with-current-buffer (cdr (assoc "buffer" persional-file-buffer))
           (if (pyim-dict-buffer-valid-p)
-              (setq words (append words
-                                  (cdr
+              (setq words (append (cdr
                                    (pyim-bisearch-word code
                                                        (point-min)
-                                                       (point-max)))))
+                                                       (point-max)))
+                                  words))
             (message "个人词库文件 buffer 存在问题，忽略加载！"))))
       (delete-dups words))))
 
