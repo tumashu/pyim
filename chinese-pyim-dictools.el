@@ -200,11 +200,11 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
   (let ((list-head (car list))
         (list-tail (cdr list)))
     (cond ((null list-tail)
-           (loop for element0 in list-head
-                 append (cons (cons element0 nil) nil)))
-          (t (loop for element in list-head
-                   append (mapcar (lambda (l) (cons element l))
-                                  (pyim-permutate-list list-tail)))))))
+           (cl-loop for element0 in list-head
+                    append (cons (cons element0 nil) nil)))
+          (t (cl-loop for element in list-head
+                      append (mapcar (lambda (l) (cons element l))
+                                     (pyim-permutate-list list-tail)))))))
 
 (defun pyim-permutate-list2 (list)
   "使用排列组合的方式重新排列 `list'，这个函数由 ’翀/ty‘ 提供。
