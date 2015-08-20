@@ -35,13 +35,12 @@
 ;; #+BEGIN_SRC emacs-lisp
 (require 'chinese-pyim)
 (require 'org-webpage)
+(require 'owp-web-server)
 (require 'lentic)
 (require 'lentic-org)
 (require 'lentic-doc)
 (require 'ox-gfm)
 (require 'ox-org)
-(require 'owp-web-server)
-(require 'eh-website)
 ;; #+END_SRC
 
 ;; ** 定义一个 org 导出过滤器，处理中文文档中的多余空格
@@ -105,19 +104,17 @@
 (setq pyim-website-org-webpage-config
       `("chinese-pyim"
         :repository-directory ,(pyim-path)
+        :remote (git "https://github.com/tumashu/org-webpage.git" "gh-pages")
         :site-domain "http://tumashu.github.com/chinese-pyim"
         :site-main-title "Chinese-pyim"
         :site-sub-title "(一个 emacs 环境下的中文拼音输入法)"
-        :repository-org-branch "master"
-        :repository-html-branch "gh-pages"
+        :remote (git "https://github.com/tumashu/chinese-pyim.git" "gh-pages")
         :default-category "documents"
         :theme (worg killjs)
         :force-absolute-url t
         :source-browse-url ("GitHub" "https://github.com/tumashu/chinese-pyim")
         :personal-avatar "/media/img/horse.jpg"
         :personal-duoshuo-shortname "tumashu-website"
-        :preparation-function pyim-preparation-org-files
-        :addition-files-function owp/git-ignored-files
         :org-export-function pyim-org-export-function
         :web-server-docroot "~/.emacs.d/org-webpage-server/chinese-pyim"
         :web-server-port 9876
