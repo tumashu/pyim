@@ -116,7 +116,6 @@
         :personal-avatar "/media/img/horse.jpg"
         :personal-duoshuo-shortname "tumashu-website"
         :org-export-function pyim-org-export-function
-        :web-server-docroot "~/.emacs.d/org-webpage-server/chinese-pyim"
         :web-server-port 9876
         ))
 
