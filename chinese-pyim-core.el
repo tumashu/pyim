@@ -199,6 +199,13 @@ Chinese-pyim 内建的功能有：
 增大或者减小这个变量来改变 tooltip 选词框的宽度，取值大概在 0.5 ~ 2.0 范围之内。"
   :group 'chinese-pyim)
 
+(defcustom pyim-line-content-limit
+  (if (eq system-type 'windows-nt)
+      3000
+    10000)
+  "限制词库文件中的行长度。如果行太长，在windows平台下会出现严重的性能问题。"
+  :group 'chinese-pyim)
+
 (defvar pyim-title "灵拼" "Chinese-pyim 在 mode-line 中显示的名称。")
 (defvar pyim-buffer-name " *Chinese-pyim*")
 (defvar pyim-buffer-list nil
@@ -961,10 +968,14 @@ beginning of line"
 
 (defun pyim-line-content (&optional seperaters omit-nulls)
   "用 SEPERATERS 分解当前行，所有参数传递给 split-string 函数"
-  (let ((items   (split-string
-                  (buffer-substring-no-properties
-                   (line-beginning-position)
-                   (line-end-position)) seperaters)))
+  (let* ((begin (line-beginning-position))
+         (end (line-end-position))
+         (end (if (> (- end begin) pyim-line-content-limit)
+                  (+ begin pyim-line-content-limit)
+                end))
+         (items (split-string
+                 (buffer-substring-no-properties begin end)
+                 seperaters)))
     (if omit-nulls
         (cl-delete-if 'pyim-string-emptyp items)
       items)))
