@@ -1,31 +1,31 @@
-- [Chinese-pyim 使用说明](#chinese-pyim-使用说明)
-  - [截图](#截图)
-  - [简介](#简介)
-  - [背景](#背景)
-  - [目标](#目标)
-  - [特点](#特点)
-  - [安装](#安装)
-  - [配置](#配置)
-    - [添加词库文件](#添加词库文件)
-    - [激活 Chinese-pyim](#激活-chinese-pyim)
-  - [使用](#使用)
-    - [常用快捷键](#常用快捷键)
-    - [让选词框跟随光标](#让选词框跟随光标)
-    - [设置模糊音](#设置模糊音)
-    - [词语联想](#词语联想)
-    - [切换全角标点与半角标点](#切换全角标点与半角标点)
-    - [手动加词和删词](#手动加词和删词)
-    - [快速切换词库](#快速切换词库)
-    - [使用 Company 框架来补全联想词（实验特性）](#使用-company-框架来补全联想词（实验特性）)
-  - [Tips](#tips)
-    - [选词框弹出位置不合理或者选词框内容显示不全](#选词框弹出位置不合理或者选词框内容显示不全)
-    - [如何查看 Chinese-pyim 文档。](#如何查看-chinese-pyim-文档。)
-    - [如何添加自定义拼音词库](#如何添加自定义拼音词库)
-    - [如何手动安装和管理词库](#如何手动安装和管理词库)
-    - [将汉字字符串转换为拼音字符串](#将汉字字符串转换为拼音字符串)
-    - [中文分词](#中文分词)
-    - [获取光标处的中文词条](#获取光标处的中文词条)
-    - [让 \`forward-word' 和 \`back-backward’ 在中文环境下正常工作](#让-\`forward-word'-和-\`back-backward’-在中文环境下正常工作)
+- [Chinese-pyim 使用说明](#sec-1)
+  - [截图](#sec-1-1)
+  - [简介](#sec-1-2)
+  - [背景](#sec-1-3)
+  - [目标](#sec-1-4)
+  - [特点](#sec-1-5)
+  - [安装](#sec-1-6)
+  - [配置](#sec-1-7)
+    - [添加词库文件](#sec-1-7-1)
+    - [激活 Chinese-pyim](#sec-1-7-2)
+  - [使用](#sec-1-8)
+    - [常用快捷键](#sec-1-8-1)
+    - [让选词框跟随光标](#sec-1-8-2)
+    - [设置模糊音](#sec-1-8-3)
+    - [词语联想](#sec-1-8-4)
+    - [切换全角标点与半角标点](#sec-1-8-5)
+    - [手动加词和删词](#sec-1-8-6)
+    - [快速切换词库](#sec-1-8-7)
+    - [使用 Company 框架来补全联想词（实验特性）](#sec-1-8-8)
+  - [Tips](#sec-1-9)
+    - [选词框弹出位置不合理或者选词框内容显示不全](#sec-1-9-1)
+    - [如何查看 Chinese-pyim 文档。](#sec-1-9-2)
+    - [如何添加自定义拼音词库](#sec-1-9-3)
+    - [如何手动安装和管理词库](#sec-1-9-4)
+    - [将汉字字符串转换为拼音字符串](#sec-1-9-5)
+    - [中文分词](#sec-1-9-6)
+    - [获取光标处的中文词条](#sec-1-9-7)
+    - [让 \`forward-word' 和 \`back-backward’ 在中文环境下正常工作](#sec-1-9-8)
 
 # Chinese-pyim 使用说明<a id="orgheadline32"></a>
 
@@ -99,63 +99,63 @@ Chinese-pyim 的目标是： **尽最大的努力成为一个好用的 emacs 备
 
 
 <colgroup>
-<col  class="left" />
+<col  class="org-left" />
 
-<col  class="left" />
+<col  class="org-left" />
 </colgroup>
 <thead>
 <tr>
-<th scope="col" class="left">输入法快捷键</th>
-<th scope="col" class="left">功能</th>
+<th scope="col" class="org-left">输入法快捷键</th>
+<th scope="col" class="org-left">功能</th>
 </tr>
 </thead>
 
 <tbody>
 <tr>
-<td class="left">C-n 或 M-n 或 +</td>
-<td class="left">向下翻页</td>
+<td class="org-left">C-n 或 M-n 或 +</td>
+<td class="org-left">向下翻页</td>
 </tr>
 
 
 <tr>
-<td class="left">C-p 或 M-p 或 -</td>
-<td class="left">向上翻页</td>
+<td class="org-left">C-p 或 M-p 或 -</td>
+<td class="org-left">向上翻页</td>
 </tr>
 
 
 <tr>
-<td class="left">C-f</td>
-<td class="left">选择下一个备选词</td>
+<td class="org-left">C-f</td>
+<td class="org-left">选择下一个备选词</td>
 </tr>
 
 
 <tr>
-<td class="left">C-b</td>
-<td class="left">选择上一个备选词</td>
+<td class="org-left">C-b</td>
+<td class="org-left">选择上一个备选词</td>
 </tr>
 
 
 <tr>
-<td class="left">SPC</td>
-<td class="left">确定输入</td>
+<td class="org-left">SPC</td>
+<td class="org-left">确定输入</td>
 </tr>
 
 
 <tr>
-<td class="left">RET 或 C-m</td>
-<td class="left">字母上屏</td>
+<td class="org-left">RET 或 C-m</td>
+<td class="org-left">字母上屏</td>
 </tr>
 
 
 <tr>
-<td class="left">C-c 或 C-g</td>
-<td class="left">取消输入</td>
+<td class="org-left">C-c 或 C-g</td>
+<td class="org-left">取消输入</td>
 </tr>
 
 
 <tr>
-<td class="left">TAB</td>
-<td class="left">模糊音调整</td>
+<td class="org-left">TAB</td>
+<td class="org-left">模糊音调整</td>
 </tr>
 </tbody>
 </table>
@@ -183,7 +183,8 @@ Chinese-pyim **内置** 了4种词语联想方式：
 
     注意：这个方法需要用户安装 guessdict 词库，guessdict 词库文件可以用 \`pyim-article2dict-guessdict' 命令生成，不想折腾的用户也可以从下面的地址下载样例词库：(注意：请使用另存为，不要直接点击链接)。
 
-    <http://tumashu.github.io/chinese-pyim-guessdict/pyim-guessdict.gpyim>
+    1.  <http://tumashu.github.io/chinese-pyim-guessdict/pyim-guessdict-a.gpyim>
+    2.  <http://tumashu.github.io/chinese-pyim-guessdict/pyim-guessdict-b.gpyim>
 
 Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的代码来调整设置，比如：
 
