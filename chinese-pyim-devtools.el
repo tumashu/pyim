@@ -97,30 +97,30 @@
 ;; 2. 生成 Chinese-pyim 代码的说明文档（html文档），帮助开发者理解代码。
 
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-path (&optional filename)
-  (concat (file-name-directory
-           (locate-library "chinese-pyim")) (or filename "")))
+(defvar pyim-website-repository-directory
+  "~/project/emacs-packages/emacs-helper/")
 
-(setq pyim-website-org-webpage-config
-      `("chinese-pyim"
-        :repository-directory ,(pyim-path)
-        :remote (git "https://github.com/tumashu/chinese-pyim.git" "gh-pages")
-        :site-domain "http://tumashu.github.com/chinese-pyim"
-        :site-main-title "Chinese-pyim"
-        :site-sub-title "(一个 emacs 环境下的中文拼音输入法)"
-        :default-category "documents"
-        :theme (worg killjs)
-        :force-absolute-url t
-        :source-browse-url ("GitHub" "https://github.com/tumashu/chinese-pyim")
-        :personal-avatar "/media/img/horse.jpg"
-        :personal-duoshuo-shortname "tumashu-website"
-        :preparation-function pyim-preparation-org-files
-        :org-export-function pyim-org-export-function
-        :web-server-port 9876
-        ))
+(defun pyim-website-update-owp-config ()
+  (interactive)
+  (add-to-list
+   'owp/project-config-alist
+   `("chinese-pyim"
+     :repository-directory ,pyim-website-repository-directory
+     :remote (git "https://github.com/tumashu/chinese-pyim.git" "gh-pages")
+     :site-domain "http://tumashu.github.com/chinese-pyim"
+     :site-main-title "Chinese-pyim"
+     :site-sub-title "(一个 emacs 环境下的中文拼音输入法)"
+     :default-category "documents"
+     :theme (worg killjs)
+     :force-absolute-url t
+     :source-browse-url ("GitHub" "https://github.com/tumashu/chinese-pyim")
+     :personal-avatar "/media/img/horse.jpg"
+     :personal-duoshuo-shortname "tumashu-website"
+     :preparation-function pyim-preparation-org-files
+     :org-export-function pyim-org-export-function
+     :web-server-port 9876)))
 
-(add-to-list 'owp/project-config-alist
-             pyim-website-org-webpage-config)
+(pyim-website-update-owp-config)
 
 (defun pyim-devtools-generate-readme-and-index ()
   (interactive)
