@@ -124,7 +124,8 @@
 
 (defun pyim-devtools-generate-readme-and-index ()
   (interactive)
-  (let* ((el-file (concat (f-parent (locate-library (symbol-name 'chinese-pyim)))
+  (let* ((el-file (concat (file-name-as-directory
+                           pyim-website-repository-directory)
                           "/chinese-pyim.el"))
          (org-file (concat (file-name-sans-extension el-file) ".org"))
          (el-file-buffer (get-file-buffer el-file))
@@ -158,16 +159,17 @@
 (defun pyim-preparation-org-files ()
   "Generate org files by lentic."
   (message "Generating org files by lentic ...")
-  (mapc #'(lambda (el-file)
-            (let* ((org-file (concat (file-name-sans-extension el-file) ".org"))
-                   (el-buffer (get-file-buffer el-file))
-                   (org-buffer (get-file-buffer org-file)))
-              (when el-buffer
-                (kill-buffer el-buffer))
-              (when org-buffer
-                (kill-buffer org-buffer))))
-        (lentic-doc-all-files-of-package (symbol-name 'chinese-pyim)))
-  (lentic-doc-orgify-package 'chinese-pyim)
+  (let ((el-files (directory-files pyim-website-repository-directory t "\\.el$")))
+    (mapc #'(lambda (el-file)
+              (let* ((org-file (concat (file-name-sans-extension el-file) ".org"))
+                     (el-buffer (get-file-buffer el-file))
+                     (org-buffer (get-file-buffer org-file)))
+                (when el-buffer
+                  (kill-buffer el-buffer))
+                (when org-buffer
+                  (kill-buffer org-buffer)))
+              (lentic-doc-orgify-if-necessary el-file))
+          el-files))
   (pyim-devtools-generate-readme-and-index))
 ;; #+END_SRC
 
