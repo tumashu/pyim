@@ -98,7 +98,7 @@
 
 ;; #+BEGIN_SRC emacs-lisp
 (defvar pyim-website-repository-directory
-  "~/project/emacs-packages/emacs-helper/")
+  "~/project/emacs-packages/chinese-pyim/")
 
 (defun pyim-website-update-owp-config ()
   (interactive)
