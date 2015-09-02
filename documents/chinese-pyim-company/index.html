@@ -78,8 +78,8 @@
     (company-dabbrev-downcase nil)
     (company-dabbrev-ignore-case nil)
     (company-require-match nil))
-  <span style="color: #61CE3C;">"`</span><span style="color: #61CE3C;">company-mode</span><span style="color: #61CE3C;">' &#19982; `</span><span style="color: #61CE3C;">Chinese-pyim</span><span style="color: #61CE3C;">' &#37197;&#21512;&#26102;&#38656;&#35201;&#29305;&#21035;&#35774;&#32622;&#65292;</span>
-<span style="color: #61CE3C;">&#36825;&#20010; list &#21253;&#21547;&#20102;&#38656;&#35201;&#35774;&#32622;&#30340; `</span><span style="color: #61CE3C;">company-mode</span><span style="color: #61CE3C;">' &#21464;&#37327;&#12290;"</span>
+  <span style="color: #61CE3C;">"`</span><span style="color: #4c83ff;">company-mode</span><span style="color: #61CE3C;">' &#19982; `</span><span style="color: #4c83ff;">Chinese-pyim</span><span style="color: #61CE3C;">' &#37197;&#21512;&#26102;&#38656;&#35201;&#29305;&#21035;&#35774;&#32622;&#65292;</span>
+<span style="color: #61CE3C;">&#36825;&#20010; list &#21253;&#21547;&#20102;&#38656;&#35201;&#35774;&#32622;&#30340; `</span><span style="color: #4c83ff;">company-mode</span><span style="color: #61CE3C;">' &#21464;&#37327;&#12290;"</span>
   <span style="color: #FF6400;">:group</span> 'chinese-pyim)
 </pre>
 </div>
@@ -87,14 +87,14 @@
 <div class="org-src-container">
 
 <pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-company-backup-variable</span> (variable)
-  <span style="color: #61CE3C;">"&#21019;&#24314;&#21464;&#37327; `</span><span style="color: #61CE3C;">pyim-&lt;variale&gt;-backup</span><span style="color: #61CE3C;">' &#65292;&#29992;&#26469;&#20445;&#23384;&#21464;&#37327; `</span><span style="color: #61CE3C;">variable</span><span style="color: #61CE3C;">' &#21407;&#26469;&#30340;&#35774;&#23450;"</span>
+  <span style="color: #61CE3C;">"&#21019;&#24314;&#21464;&#37327; `</span><span style="color: #4c83ff;">pyim-&lt;variale&gt;-backup</span><span style="color: #61CE3C;">' &#65292;&#29992;&#26469;&#20445;&#23384;&#21464;&#37327; `</span><span style="color: #4c83ff;">variable</span><span style="color: #61CE3C;">' &#21407;&#26469;&#30340;&#35774;&#23450;"</span>
   (<span style="color: #FBDE2D;">if</span> (boundp variable)
       (set (intern (concat <span style="color: #61CE3C;">"pyim-"</span> (symbol-name variable) <span style="color: #61CE3C;">"-backup"</span>))
            (symbol-value variable))
     (<span style="color: #ff69b4;">error</span> <span style="color: #61CE3C;">"Company-mode &#40664;&#35748;&#21464;&#37327;&#22791;&#20221;&#22833;&#36133;&#65281;&#35831;&#30830;&#20445; Company-mode &#20248;&#20808;&#21152;&#36733;&#12290;"</span>)))
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-company-revert-variable</span> (variable)
-  <span style="color: #61CE3C;">"&#23558;&#21464;&#37327; `</span><span style="color: #61CE3C;">variable</span><span style="color: #61CE3C;">' &#35774;&#32622;&#20026; `</span><span style="color: #61CE3C;">pyim-&lt;variale&gt;-backup</span><span style="color: #61CE3C;">' &#30340;&#20540;&#12290;"</span>
+  <span style="color: #61CE3C;">"&#23558;&#21464;&#37327; `</span><span style="color: #4c83ff;">variable</span><span style="color: #61CE3C;">' &#35774;&#32622;&#20026; `</span><span style="color: #4c83ff;">pyim-&lt;variale&gt;-backup</span><span style="color: #61CE3C;">' &#30340;&#20540;&#12290;"</span>
   (<span style="color: #FBDE2D;">when</span> (boundp variable)
     (<span style="color: #FBDE2D;">let</span> ((variable-backup (intern (concat <span style="color: #61CE3C;">"pyim-"</span> (symbol-name variable) <span style="color: #61CE3C;">"-backup"</span>))))
       (<span style="color: #FBDE2D;">if</span> (boundp variable-backup)
@@ -106,7 +106,7 @@
 <div class="org-src-container">
 
 <pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-company-revert-to-default-settings</span> (x)
-  <span style="color: #61CE3C;">"`</span><span style="color: #61CE3C;">company-mode</span><span style="color: #61CE3C;">' &#34917;&#20840;&#23436;&#25104;&#25110;&#32773;&#21462;&#28040;&#21518;&#65292;&#24674;&#22797; `</span><span style="color: #61CE3C;">company-mode</span><span style="color: #61CE3C;">' &#21407;&#26469;&#30340;&#35774;&#32622;&#12290;"</span>
+  <span style="color: #61CE3C;">"`</span><span style="color: #4c83ff;">company-mode</span><span style="color: #61CE3C;">' &#34917;&#20840;&#23436;&#25104;&#25110;&#32773;&#21462;&#28040;&#21518;&#65292;&#24674;&#22797; `</span><span style="color: #4c83ff;">company-mode</span><span style="color: #61CE3C;">' &#21407;&#26469;&#30340;&#35774;&#32622;&#12290;"</span>
   (mapc 'pyim-company-revert-variable
         (mapcar 'car pyim-company-variables))
   (remove-hook 'company-completion-cancelled-hook
@@ -118,18 +118,18 @@
 
 <div class="org-src-container">
 
-<pre class="src src-emacs-lisp"><span style="color: #8B8989; font-style: italic;">;;;</span><span style="color: #8B8989; font-style: italic;">###</span><span style="color: #8B8989; font-style: italic;">autoload</span>
+<pre class="src src-emacs-lisp"><span style="color: #8B8989; font-style: italic;">;;;</span><span style="color: #8B8989; font-style: italic;">###</span><span style="color: #ff69b4; font-style: italic;">autoload</span>
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-company-complete</span> ()
-  <span style="color: #61CE3C;">"`</span><span style="color: #61CE3C;">company-mode</span><span style="color: #61CE3C;">' &#34917;&#20840;&#21629;&#20196;&#30340;&#21253;&#35013;&#20989;&#25968;&#65292;&#19987;&#38376;&#29992;&#25143; `</span><span style="color: #61CE3C;">chinese-pyim</span><span style="color: #61CE3C;">'"</span>
+  <span style="color: #61CE3C;">"`</span><span style="color: #4c83ff;">company-mode</span><span style="color: #61CE3C;">' &#34917;&#20840;&#21629;&#20196;&#30340;&#21253;&#35013;&#20989;&#25968;&#65292;&#19987;&#38376;&#29992;&#25143; `</span><span style="color: #4c83ff;">chinese-pyim</span><span style="color: #61CE3C;">'"</span>
   (<span style="color: #FBDE2D;">interactive</span>)
   (<span style="color: #FBDE2D;">unless</span> company-mode (company-mode))
-  <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20445;&#23384; `</span><span style="color: #8B8989; font-style: italic;">company-mode</span><span style="color: #8B8989; font-style: italic;">' &#21464;&#37327;&#21407;&#26469;&#30340;&#35774;&#23450;&#12290;</span>
+  <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20445;&#23384; `</span><span style="color: #4c83ff; font-style: italic;">company-mode</span><span style="color: #8B8989; font-style: italic;">' &#21464;&#37327;&#21407;&#26469;&#30340;&#35774;&#23450;&#12290;</span>
   (mapc 'pyim-company-backup-variable
         (mapcar 'car pyim-company-variables))
-  <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#35774;&#32622; `</span><span style="color: #8B8989; font-style: italic;">company-mode</span><span style="color: #8B8989; font-style: italic;">' &#21464;&#37327;</span>
+  <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#35774;&#32622; `</span><span style="color: #4c83ff; font-style: italic;">company-mode</span><span style="color: #8B8989; font-style: italic;">' &#21464;&#37327;</span>
   (<span style="color: #FBDE2D;">dolist</span> (list pyim-company-variables)
     (set (car list) (car (cdr list))))
-  <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#24403; `</span><span style="color: #8B8989; font-style: italic;">company-mode</span><span style="color: #8B8989; font-style: italic;">' &#34917;&#20840;&#23436;&#25104;&#25110;&#32773;&#21462;&#28040;&#26102;&#65292;&#24674;&#22797;&#21407;&#26469;&#35774;&#32622;&#12290;</span>
+  <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#24403; `</span><span style="color: #4c83ff; font-style: italic;">company-mode</span><span style="color: #8B8989; font-style: italic;">' &#34917;&#20840;&#23436;&#25104;&#25110;&#32773;&#21462;&#28040;&#26102;&#65292;&#24674;&#22797;&#21407;&#26469;&#35774;&#32622;&#12290;</span>
   (add-hook 'company-completion-cancelled-hook
             'pyim-company-revert-to-default-settings t)
   (add-hook 'company-completion-finished-hook
@@ -140,7 +140,7 @@
 
 <div class="org-src-container">
 
-<pre class="src src-emacs-lisp"><span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">`</span><span style="color: #8B8989; font-style: italic;">Chinese-pyim</span><span style="color: #8B8989; font-style: italic;">' &#36873;&#35789;&#32467;&#26463;&#21518;&#65292;&#35843;&#29992; `</span><span style="color: #8B8989; font-style: italic;">pyim-company-complete</span><span style="color: #8B8989; font-style: italic;">'.</span>
+<pre class="src src-emacs-lisp"><span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">`</span><span style="color: #4c83ff; font-style: italic;">Chinese-pyim</span><span style="color: #8B8989; font-style: italic;">' &#36873;&#35789;&#32467;&#26463;&#21518;&#65292;&#35843;&#29992; `</span><span style="color: #4c83ff; font-style: italic;">pyim-company-complete</span><span style="color: #8B8989; font-style: italic;">'.</span>
 (add-hook 'pyim-select-word-finish-hook 'pyim-company-complete)
 </pre>
 </div>
@@ -148,10 +148,10 @@
 <div class="org-src-container">
 
 <pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-company-dabbrev</span> (command <span style="color: #D8FA3C;">&amp;optional</span> arg <span style="color: #D8FA3C;">&amp;rest</span> ignored)
-  <span style="color: #61CE3C;">"`</span><span style="color: #61CE3C;">company-mode</span><span style="color: #61CE3C;">' dabbrev &#34917;&#20840;&#21518;&#31471;&#65292;&#26159; `</span><span style="color: #61CE3C;">company-dabbrev</span><span style="color: #61CE3C;">'</span>
+  <span style="color: #61CE3C;">"`</span><span style="color: #4c83ff;">company-mode</span><span style="color: #61CE3C;">' dabbrev &#34917;&#20840;&#21518;&#31471;&#65292;&#26159; `</span><span style="color: #4c83ff;">company-dabbrev</span><span style="color: #61CE3C;">'</span>
 <span style="color: #61CE3C;">&#30340;&#20013;&#25991;&#20248;&#21270;&#29256;&#65292;&#36890;&#36807;&#19982; Chinese-pyim &#37197;&#21512;&#26469;&#34917;&#20840;&#20013;&#25991;&#12290;</span>
 
-<span style="color: #61CE3C;">`</span><span style="color: #61CE3C;">pyim-company-dabbrev</span><span style="color: #61CE3C;">' &#21487;&#20197;&#21644; `</span><span style="color: #61CE3C;">company-dabbrev</span><span style="color: #61CE3C;">' &#37197;&#21512;&#20351;&#29992;&#12290;&#20855;&#20307;&#32454;&#33410;&#35831;</span>
+<span style="color: #61CE3C;">`</span><span style="color: #4c83ff;">pyim-company-dabbrev</span><span style="color: #61CE3C;">' &#21487;&#20197;&#21644; `</span><span style="color: #4c83ff;">company-dabbrev</span><span style="color: #61CE3C;">' &#37197;&#21512;&#20351;&#29992;&#12290;&#20855;&#20307;&#32454;&#33410;&#35831;</span>
 <span style="color: #61CE3C;">&#21442;&#32771; Company-mode group backends &#30456;&#20851;&#25991;&#26723;&#12290;"</span>
   (<span style="color: #FBDE2D;">interactive</span> (list 'interactive))
   (<span style="color: #FBDE2D;">cl-case</span> command
@@ -186,14 +186,14 @@
 <div class="org-src-container">
 
 <pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-get-predict-words</span> (pinyin word)
-  <span style="color: #61CE3C;">"&#33719;&#21462;&#25152;&#26377;&#35789;&#24211;&#20013;&#20197; `</span><span style="color: #61CE3C;">word</span><span style="color: #61CE3C;">' &#24320;&#22836;&#30340;&#20013;&#25991;&#35789;&#26465;&#65292;&#29992;&#20110;&#25340;&#38899;&#32852;&#24819;&#36755;&#20837;&#12290;</span>
-<span style="color: #61CE3C;">`</span><span style="color: #61CE3C;">pinyin</span><span style="color: #61CE3C;">' &#36873;&#39033;&#26159;&#20026;&#20102;&#22312;&#35789;&#24211;&#20013;&#24555;&#36895;&#23450;&#20301;&#65292;&#20943;&#23569;&#25628;&#32034;&#26102;&#38388;&#12290;"</span>
+  <span style="color: #61CE3C;">"&#33719;&#21462;&#25152;&#26377;&#35789;&#24211;&#20013;&#20197; `</span><span style="color: #4c83ff;">word</span><span style="color: #61CE3C;">' &#24320;&#22836;&#30340;&#20013;&#25991;&#35789;&#26465;&#65292;&#29992;&#20110;&#25340;&#38899;&#32852;&#24819;&#36755;&#20837;&#12290;</span>
+<span style="color: #61CE3C;">`</span><span style="color: #4c83ff;">pinyin</span><span style="color: #61CE3C;">' &#36873;&#39033;&#26159;&#20026;&#20102;&#22312;&#35789;&#24211;&#20013;&#24555;&#36895;&#23450;&#20301;&#65292;&#20943;&#23569;&#25628;&#32034;&#26102;&#38388;&#12290;"</span>
   (<span style="color: #FBDE2D;">when</span> (<span style="color: #FBDE2D;">and</span> pyim-company-predict-words-number
              (&gt; pyim-company-predict-words-number 0)
              (&gt; (length pinyin) 0)
              (&gt; (length word) 0))
     (<span style="color: #FBDE2D;">let*</span> ((limit pyim-company-predict-words-number)
-           (regexp (concat <span style="color: #61CE3C;">" +</span><span style="color: #61CE3C;">\\</span><span style="color: #61CE3C;">(</span><span style="color: #61CE3C;">"</span> (regexp-quote word) <span style="color: #61CE3C;">"\\cc+</span><span style="color: #61CE3C;">\\</span><span style="color: #61CE3C;">)</span><span style="color: #61CE3C;">"</span>))
+           (regexp (concat <span style="color: #61CE3C;">" +</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">(</span><span style="color: #61CE3C;">"</span> (regexp-quote word) <span style="color: #61CE3C;">"\\cc+</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">)</span><span style="color: #61CE3C;">"</span>))
            (count 0)
            predict-words)
       (<span style="color: #FBDE2D;">dolist</span> (buf pyim-buffer-list)
@@ -215,7 +215,7 @@
 <div class="org-src-container">
 
 <pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-company-predict-words</span> (command <span style="color: #D8FA3C;">&amp;optional</span> arg <span style="color: #D8FA3C;">&amp;rest</span> ignore)
-  <span style="color: #61CE3C;">"`</span><span style="color: #61CE3C;">company-mode</span><span style="color: #61CE3C;">' &#34917;&#20840;&#21518;&#31471;&#65292;&#21482;&#29992;&#20110; Chinese-pyim &#32852;&#24819;&#35789;&#34917;&#20840;&#65292;&#26080;&#20854;&#20182;</span>
+  <span style="color: #61CE3C;">"`</span><span style="color: #4c83ff;">company-mode</span><span style="color: #61CE3C;">' &#34917;&#20840;&#21518;&#31471;&#65292;&#21482;&#29992;&#20110; Chinese-pyim &#32852;&#24819;&#35789;&#34917;&#20840;&#65292;&#26080;&#20854;&#20182;</span>
 <span style="color: #61CE3C;">&#20316;&#29992;&#12290;"</span>
   (<span style="color: #FBDE2D;">interactive</span> (list 'interactive))
   (<span style="color: #FBDE2D;">cl-case</span> command
@@ -239,7 +239,7 @@
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2015-08-23</span>
+        <span title="post date" class="post-info">2015-09-02</span>
         <span title="last modification date" class="post-info">2015-07-31</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>

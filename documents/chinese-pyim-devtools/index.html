@@ -99,22 +99,22 @@
       <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">org&#40664;&#35748;&#23558;&#19968;&#20010;&#25442;&#34892;&#31526;&#36716;&#25442;&#20026;&#31354;&#26684;&#65292;&#20294;&#20013;&#25991;&#19981;&#38656;&#35201;&#36825;&#20010;&#31354;&#26684;&#65292;&#21024;&#38500;&#12290;</span>
       (<span style="color: #FBDE2D;">setq</span> string
             (replace-regexp-in-string
-             (format <span style="color: #61CE3C;">"</span><span style="color: #61CE3C;">\\</span><span style="color: #61CE3C;">(</span><span style="color: #61CE3C;">%s</span><span style="color: #61CE3C;">\\</span><span style="color: #61CE3C;">)</span><span style="color: #61CE3C;"> *\n *</span><span style="color: #61CE3C;">\\</span><span style="color: #61CE3C;">(</span><span style="color: #61CE3C;">%s</span><span style="color: #61CE3C;">\\</span><span style="color: #61CE3C;">)</span><span style="color: #61CE3C;">"</span> regexp regexp)
+             (format <span style="color: #61CE3C;">"</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">(</span><span style="color: #61CE3C;">%s</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">)</span><span style="color: #61CE3C;"> *\n *</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">(</span><span style="color: #61CE3C;">%s</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">)</span><span style="color: #61CE3C;">"</span> regexp regexp)
              <span style="color: #61CE3C;">"\\1\\2"</span> string))
       <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#21024;&#38500;&#31895;&#20307;&#20043;&#21069;&#30340;&#31354;&#26684;</span>
       (<span style="color: #FBDE2D;">setq</span> string
             (replace-regexp-in-string
-             (format <span style="color: #61CE3C;">"</span><span style="color: #61CE3C;">\\</span><span style="color: #61CE3C;">(</span><span style="color: #61CE3C;">%s</span><span style="color: #61CE3C;">\\</span><span style="color: #61CE3C;">)</span><span style="color: #61CE3C;"> +</span><span style="color: #61CE3C;">\\</span><span style="color: #61CE3C;">(</span><span style="color: #61CE3C;">&lt;</span><span style="color: #61CE3C;">\\</span><span style="color: #61CE3C;">)</span><span style="color: #61CE3C;">"</span> regexp)
+             (format <span style="color: #61CE3C;">"</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">(</span><span style="color: #61CE3C;">%s</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">)</span><span style="color: #61CE3C;"> +</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">(</span><span style="color: #61CE3C;">&lt;</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">)</span><span style="color: #61CE3C;">"</span> regexp)
              <span style="color: #61CE3C;">"\\1\\2"</span> string))
       <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#21024;&#38500;&#31895;&#20307;&#20043;&#21518;&#30340;&#31354;&#26684;</span>
       (<span style="color: #FBDE2D;">setq</span> string
             (replace-regexp-in-string
-             (format <span style="color: #61CE3C;">"</span><span style="color: #61CE3C;">\\</span><span style="color: #61CE3C;">(</span><span style="color: #61CE3C;">&gt;</span><span style="color: #61CE3C;">\\</span><span style="color: #61CE3C;">)</span><span style="color: #61CE3C;"> +</span><span style="color: #61CE3C;">\\</span><span style="color: #61CE3C;">(</span><span style="color: #61CE3C;">%s</span><span style="color: #61CE3C;">\\</span><span style="color: #61CE3C;">)</span><span style="color: #61CE3C;">"</span> regexp)
+             (format <span style="color: #61CE3C;">"</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">(</span><span style="color: #61CE3C;">&gt;</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">)</span><span style="color: #61CE3C;"> +</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">(</span><span style="color: #61CE3C;">%s</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">)</span><span style="color: #61CE3C;">"</span> regexp)
              <span style="color: #61CE3C;">"\\1\\2"</span> string))
       string)))
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-devtools-replace-org-head</span> (regexp replace-string)
-  <span style="color: #61CE3C;">"replace org head matched `</span><span style="color: #61CE3C;">regexp</span><span style="color: #61CE3C;">' to string `</span><span style="color: #61CE3C;">replace-string</span><span style="color: #61CE3C;">'"</span>
+  <span style="color: #61CE3C;">"replace org head matched `</span><span style="color: #4c83ff;">regexp</span><span style="color: #61CE3C;">' to string `</span><span style="color: #4c83ff;">replace-string</span><span style="color: #61CE3C;">'"</span>
   (org-map-entries
    (<span style="color: #FBDE2D;">lambda</span> ()
      (<span style="color: #FBDE2D;">let</span> ((head (org-get-heading t t)))
@@ -125,7 +125,7 @@
          (insert (concat <span style="color: #61CE3C;">" "</span> replace-string)))))))
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-devtools-org-preprocess</span> (backend)
-  <span style="color: #61CE3C;">"This function replace some org head, used by `</span><span style="color: #61CE3C;">org-export-before-processing-hook</span><span style="color: #61CE3C;">'"</span>
+  <span style="color: #61CE3C;">"This function replace some org head, used by `</span><span style="color: #4c83ff;">org-export-before-processing-hook</span><span style="color: #61CE3C;">'"</span>
   (<span style="color: #FBDE2D;">save-excursion</span>
     (<span style="color: #FBDE2D;">when</span> (eq backend 'html)
       (pyim-devtools-replace-org-head <span style="color: #61CE3C;">"Header"</span> <span style="color: #61CE3C;">"Header :noexport:"</span>)
@@ -147,34 +147,35 @@
 
 <div class="org-src-container">
 
-<pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-path</span> (<span style="color: #D8FA3C;">&amp;optional</span> filename)
-  (concat (file-name-directory
-           (locate-library <span style="color: #61CE3C;">"chinese-pyim"</span>)) (<span style="color: #FBDE2D;">or</span> filename <span style="color: #61CE3C;">""</span>)))
+<pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">defvar</span> <span style="color: #D8FA3C;">pyim-website-repository-directory</span>
+  <span style="color: #61CE3C;">"~/project/emacs-packages/chinese-pyim/"</span>)
 
-(<span style="color: #FBDE2D;">setq</span> pyim-website-org-webpage-config
-      `(<span style="color: #61CE3C;">"chinese-pyim"</span>
-        <span style="color: #FF6400;">:repository-directory</span> ,(pyim-path)
-        <span style="color: #FF6400;">:remote</span> (git <span style="color: #61CE3C;">"https://github.com/tumashu/chinese-pyim.git"</span> <span style="color: #61CE3C;">"gh-pages"</span>)
-        <span style="color: #FF6400;">:site-domain</span> <span style="color: #61CE3C;">"http://tumashu.github.com/chinese-pyim"</span>
-        <span style="color: #FF6400;">:site-main-title</span> <span style="color: #61CE3C;">"Chinese-pyim"</span>
-        <span style="color: #FF6400;">:site-sub-title</span> <span style="color: #61CE3C;">"(&#19968;&#20010; emacs &#29615;&#22659;&#19979;&#30340;&#20013;&#25991;&#25340;&#38899;&#36755;&#20837;&#27861;)"</span>
-        <span style="color: #FF6400;">:default-category</span> <span style="color: #61CE3C;">"documents"</span>
-        <span style="color: #FF6400;">:theme</span> (worg killjs)
-        <span style="color: #FF6400;">:force-absolute-url</span> t
-        <span style="color: #FF6400;">:source-browse-url</span> (<span style="color: #61CE3C;">"GitHub"</span> <span style="color: #61CE3C;">"https://github.com/tumashu/chinese-pyim"</span>)
-        <span style="color: #FF6400;">:personal-avatar</span> <span style="color: #61CE3C;">"/media/img/horse.jpg"</span>
-        <span style="color: #FF6400;">:personal-duoshuo-shortname</span> <span style="color: #61CE3C;">"tumashu-website"</span>
-        <span style="color: #FF6400;">:preparation-function</span> pyim-preparation-org-files
-        <span style="color: #FF6400;">:org-export-function</span> pyim-org-export-function
-        <span style="color: #FF6400;">:web-server-port</span> 9876
-        ))
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-website-update-owp-config</span> ()
+  (<span style="color: #FBDE2D;">interactive</span>)
+  (add-to-list
+   'owp/project-config-alist
+   `(<span style="color: #61CE3C;">"chinese-pyim"</span>
+     <span style="color: #FF6400;">:repository-directory</span> ,pyim-website-repository-directory
+     <span style="color: #FF6400;">:remote</span> (git <span style="color: #61CE3C;">"https://github.com/tumashu/chinese-pyim.git"</span> <span style="color: #61CE3C;">"gh-pages"</span>)
+     <span style="color: #FF6400;">:site-domain</span> <span style="color: #61CE3C;">"http://tumashu.github.com/chinese-pyim"</span>
+     <span style="color: #FF6400;">:site-main-title</span> <span style="color: #61CE3C;">"Chinese-pyim"</span>
+     <span style="color: #FF6400;">:site-sub-title</span> <span style="color: #61CE3C;">"(&#19968;&#20010; emacs &#29615;&#22659;&#19979;&#30340;&#20013;&#25991;&#25340;&#38899;&#36755;&#20837;&#27861;)"</span>
+     <span style="color: #FF6400;">:default-category</span> <span style="color: #61CE3C;">"documents"</span>
+     <span style="color: #FF6400;">:theme</span> (worg killjs)
+     <span style="color: #FF6400;">:force-absolute-url</span> t
+     <span style="color: #FF6400;">:source-browse-url</span> (<span style="color: #61CE3C;">"GitHub"</span> <span style="color: #61CE3C;">"https://github.com/tumashu/chinese-pyim"</span>)
+     <span style="color: #FF6400;">:personal-avatar</span> <span style="color: #61CE3C;">"/media/img/horse.jpg"</span>
+     <span style="color: #FF6400;">:personal-duoshuo-shortname</span> <span style="color: #61CE3C;">"tumashu-website"</span>
+     <span style="color: #FF6400;">:preparation-function</span> pyim-preparation-org-files
+     <span style="color: #FF6400;">:org-export-function</span> pyim-org-export-function
+     <span style="color: #FF6400;">:web-server-port</span> 9876)))
 
-(add-to-list 'owp/project-config-alist
-             pyim-website-org-webpage-config)
+(pyim-website-update-owp-config)
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-devtools-generate-readme-and-index</span> ()
   (<span style="color: #FBDE2D;">interactive</span>)
-  (<span style="color: #FBDE2D;">let*</span> ((el-file (concat (f-parent (locate-library (symbol-name 'chinese-pyim)))
+  (<span style="color: #FBDE2D;">let*</span> ((el-file (concat (file-name-as-directory
+                           pyim-website-repository-directory)
                           <span style="color: #61CE3C;">"/chinese-pyim.el"</span>))
          (org-file (concat (file-name-sans-extension el-file) <span style="color: #61CE3C;">".org"</span>))
          (el-file-buffer (get-file-buffer el-file))
@@ -208,16 +209,17 @@
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-preparation-org-files</span> ()
   <span style="color: #61CE3C;">"Generate org files by lentic."</span>
   (message <span style="color: #61CE3C;">"Generating org files by lentic ..."</span>)
-  (mapc #'(lambda (el-file)
-            (<span style="color: #FBDE2D;">let*</span> ((org-file (concat (file-name-sans-extension el-file) <span style="color: #61CE3C;">".org"</span>))
-                   (el-buffer (get-file-buffer el-file))
-                   (org-buffer (get-file-buffer org-file)))
-              (<span style="color: #FBDE2D;">when</span> el-buffer
-                (kill-buffer el-buffer))
-              (<span style="color: #FBDE2D;">when</span> org-buffer
-                (kill-buffer org-buffer))))
-        (lentic-doc-all-files-of-package (symbol-name 'chinese-pyim)))
-  (lentic-doc-orgify-package 'chinese-pyim)
+  (<span style="color: #FBDE2D;">let</span> ((el-files (directory-files pyim-website-repository-directory t <span style="color: #61CE3C;">"\\.el$"</span>)))
+    (mapc #'(lambda (el-file)
+              (<span style="color: #FBDE2D;">let*</span> ((org-file (concat (file-name-sans-extension el-file) <span style="color: #61CE3C;">".org"</span>))
+                     (el-buffer (get-file-buffer el-file))
+                     (org-buffer (get-file-buffer org-file)))
+                (<span style="color: #FBDE2D;">when</span> el-buffer
+                  (kill-buffer el-buffer))
+                (<span style="color: #FBDE2D;">when</span> org-buffer
+                  (kill-buffer org-buffer)))
+              (lentic-doc-orgify-if-necessary el-file))
+          el-files))
   (pyim-devtools-generate-readme-and-index))
 </pre>
 </div>
@@ -229,8 +231,8 @@
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2015-08-23</span>
-        <span title="last modification date" class="post-info">2015-08-23</span>
+        <span title="post date" class="post-info">2015-09-02</span>
+        <span title="last modification date" class="post-info">2015-09-02</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>
