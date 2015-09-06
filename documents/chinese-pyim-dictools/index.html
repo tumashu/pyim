@@ -169,7 +169,7 @@ OUTPUT:
 
       <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#23558;&#27721;&#23383;&#23383;&#31526;&#20018;&#36716;&#25442;&#20026;&#23383;&#31526;list&#65292;&#33521;&#25991;&#21407;&#26679;&#36755;&#20986;&#12290;</span>
       <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#27604;&#22914;&#65306; &#8220;Hello&#38134;&#34892;&#8221; -&gt; ("Hello" "&#38134;" "&#34892;")</span>
-      (<span style="color: #FBDE2D;">setq</span> string-list
+      (setq string-list
             (<span style="color: #FBDE2D;">if</span> (string-match-p <span style="color: #61CE3C;">"\\CC"</span> string)
                 <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#22788;&#29702;&#20013;&#33521;&#25991;&#28151;&#21512;&#30340;&#24773;&#20917;</span>
                 (split-string
@@ -183,31 +183,31 @@ OUTPUT:
       <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#23558;&#19978;&#36848;&#27721;&#23383;&#23383;&#31526;&#20018;&#37324;&#38754;&#30340;&#25152;&#26377;&#27721;&#23383;&#36716;&#25442;&#20026;&#19982;&#20043;&#23545;&#24212;&#30340;&#25340;&#38899;list&#12290;</span>
       <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#27604;&#22914;&#65306; ("Hello" "&#38134;" "&#34892;") -&gt; (("Hello") ("yin") ("hang" "xing"))</span>
       (mapc
-       #'(lambda (str)
+       #'(<span style="color: #FBDE2D;">lambda</span> (str)
            <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">`</span><span style="color: #4c83ff; font-style: italic;">string-to-vector</span><span style="color: #8B8989; font-style: italic;">' &#24471;&#21040;&#30340;&#26159; char vector, &#38656;&#35201;&#23558;&#20854;&#36716;&#25442;&#20026; string&#12290;</span>
            (<span style="color: #FBDE2D;">when</span> (numberp str)
-             (<span style="color: #FBDE2D;">setq</span> str (char-to-string str)))
+             (setq str (char-to-string str)))
            (<span style="color: #FBDE2D;">cond</span>
             ((&gt; (length str) 1)
-             (<span style="color: #FBDE2D;">push</span> (list str) pinyins-list))
-            ((<span style="color: #FBDE2D;">and</span> (&gt; (length str) 0)
+             (push (list str) pinyins-list))
+            ((and (&gt; (length str) 0)
                   (string-match-p <span style="color: #61CE3C;">"\\cc"</span> str))
-             (<span style="color: #FBDE2D;">push</span> (<span style="color: #FBDE2D;">or</span> (pyim-get-char-code (string-to-char str))
+             (push (or (pyim-get-char-code (string-to-char str))
                        (list str))
                    pinyins-list))
             ((&gt; (length str) 0)
-             (<span style="color: #FBDE2D;">push</span> (list str) pinyins-list))))
+             (push (list str) pinyins-list))))
        string-list)
-      (<span style="color: #FBDE2D;">setq</span> pinyins-list (nreverse pinyins-list))
+      (setq pinyins-list (nreverse pinyins-list))
 
       <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#36890;&#36807;&#25490;&#21015;&#32452;&#21512;&#30340;&#26041;&#24335;, &#37325;&#25490; pinyins-list&#12290;</span>
       <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#27604;&#22914;&#65306;(("Hello") ("yin") ("hang" "xing")) -&gt; (("Hello" "yin" "hang") ("Hello" "yin" "xing"))</span>
-      (<span style="color: #FBDE2D;">setq</span> pinyins-list-permutated (pyim-permutate-list2 pinyins-list))
+      (setq pinyins-list-permutated (pyim-permutate-list2 pinyins-list))
 
       <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20351;&#29992; Chinese-pyim &#30340;&#23433;&#35013;&#30340;&#35789;&#24211;&#26469;&#26657;&#27491;&#22810;&#38899;&#23383;&#12290;</span>
       (<span style="color: #FBDE2D;">when</span> adjuct-duo-yin-zi
         (<span style="color: #FBDE2D;">unless</span> pyim-buffer-list <span style="color: #8B8989; font-style: italic;">;</span><span style="color: #8B8989; font-style: italic;">&#30830;&#20445; pyim-get &#21487;&#20197;&#27491;&#24120;&#36816;&#34892;</span>
-          (<span style="color: #FBDE2D;">setq</span> pyim-buffer-list (pyim-load-file)))
+          (setq pyim-buffer-list (pyim-load-file)))
         (<span style="color: #FBDE2D;">dolist</span> (pinyin-list pinyins-list-permutated)
           (<span style="color: #FBDE2D;">let*</span> ((py-str (mapconcat #'identity pinyin-list <span style="color: #61CE3C;">"-"</span>))
                  (words-from-dicts
@@ -216,18 +216,18 @@ OUTPUT:
                   <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#36825;&#26159;&#30001; Chinese-pyim &#20445;&#23384;&#35789;&#26465;&#30340;&#26426;&#21046;&#20915;&#23450;&#30340;&#12290;</span>
                   (pyim-get py-str nil t)))
             (<span style="color: #FBDE2D;">when</span> (member string words-from-dicts)
-              (<span style="color: #FBDE2D;">push</span> pinyin-list pinyins-list-adjusted))))
-        (<span style="color: #FBDE2D;">setq</span> pinyins-list-adjusted
+              (push pinyin-list pinyins-list-adjusted))))
+        (setq pinyins-list-adjusted
               (nreverse pinyins-list-adjusted)))
 
       <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#36820;&#22238;&#25340;&#38899;&#23383;&#31526;&#20018;&#25110;&#32773;&#25340;&#38899;&#21015;&#34920;</span>
       (<span style="color: #FBDE2D;">let*</span> ((pinyins-list
-              (<span style="color: #FBDE2D;">or</span> pinyins-list-adjusted
+              (or pinyins-list-adjusted
                   pinyins-list-permutated))
              (list (mapcar
-                    #'(lambda (x)
+                    #'(<span style="color: #FBDE2D;">lambda</span> (x)
                         (mapconcat
-                         #'(lambda (str)
+                         #'(<span style="color: #FBDE2D;">lambda</span> (str)
                              (<span style="color: #FBDE2D;">if</span> shou-zi-mu
                                  (substring str 0 1)
                                str))
@@ -260,16 +260,16 @@ OUTPUT:
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-permutate-list2-internal</span> (one two)
   <span style="color: #61CE3C;">"`</span><span style="color: #4c83ff;">pyim-permutate-list2</span><span style="color: #61CE3C;">' &#30340;&#20869;&#37096;&#20989;&#25968;&#12290;"</span>
-  (<span style="color: #FBDE2D;">let</span> (<span style="color: #FBDE2D;">return</span>)
+  (<span style="color: #FBDE2D;">let</span> (return)
     (<span style="color: #FBDE2D;">if</span> (null (car two))
         one
       (<span style="color: #FBDE2D;">dolist</span> (x1 one)
         (<span style="color: #FBDE2D;">dolist</span> (x2 (car two))
-          (<span style="color: #FBDE2D;">push</span> (<span style="color: #FBDE2D;">if</span> (listp x1)
+          (push (<span style="color: #FBDE2D;">if</span> (listp x1)
                     (append x1 (list x2))
                   (list x1 x2))
                 return)))
-      (<span style="color: #FBDE2D;">setq</span> one return)
+      (setq one return)
       (pyim-permutate-list2-internal one (cdr two)))))
 
 <span style="color: #8B8989; font-style: italic;">;;;</span><span style="color: #8B8989; font-style: italic;">###</span><span style="color: #ff69b4; font-style: italic;">autoload</span>
@@ -301,7 +301,7 @@ OUTPUT:
   <span style="color: #61CE3C;">"&#21046;&#20316;&#25340;&#38899;&#35789;&#24211;&#26102;&#65292;&#21024;&#38500;&#24403;&#21069;&#34892;&#37325;&#22797;&#20986;&#29616;&#30340;&#35789;&#26465;&#65292;</span>
 <span style="color: #61CE3C;">&#24403; `</span><span style="color: #4c83ff;">sort-by-freq</span><span style="color: #61CE3C;">' &#20026; t &#26102;&#65292;&#39318;&#20808;&#25353;&#29031;&#24403;&#21069;&#34892;&#35789;&#26465;&#20986;&#29616;&#39057;&#29575;&#23545;&#35789;&#26465;&#25490;&#24207;&#65292;</span>
 <span style="color: #61CE3C;">&#28982;&#21518;&#20877;&#21024;&#38500;&#37325;&#22797;&#35789;&#26465;&#65292;&#29992;&#20110;&#65306;&#20174;&#20013;&#25991;&#25991;&#31456;&#26500;&#24314;&#35789;&#24211;&#12290;"</span>
-  (<span style="color: #FBDE2D;">interactive</span>)
+  (interactive)
   (<span style="color: #FBDE2D;">let*</span> ((line-content (pyim-line-content <span style="color: #61CE3C;">" "</span>))
          (code (car line-content)) <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#32534;&#30721;&#21644;&#35789;&#26465;&#20998;&#24320;&#25805;&#20316;&#65292;&#22240;&#20026;&#22312;guessdict&#35789;&#24211;&#20013;&#65292;&#32534;&#30721;&#26159;&#20013;&#25991;&#12290;</span>
          (words-list (cdr line-content))
@@ -309,11 +309,11 @@ OUTPUT:
     <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20174;&#25991;&#31456;&#20013;&#26500;&#24314;&#35789;&#24211;&#26102;&#65292;&#39318;&#20808;&#20250;&#23558;&#35789;&#26465;&#25353;&#29031;&#20986;&#29616;&#39057;&#29575;</span>
     <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#25490;&#24207;&#65292;&#36825;&#26679;&#39057;&#29575;&#39640;&#30340;&#35789;&#26465;&#23601;&#20250;&#25490;&#22312;&#21069;&#38754;&#12290;</span>
     (<span style="color: #FBDE2D;">when</span> sort-by-freq
-      (<span style="color: #FBDE2D;">setq</span> words-list
+      (setq words-list
             (pyim-sort-words-by-freq words-list)))
 
     <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#21024;&#38500;&#37325;&#22797;&#35789;&#26465;&#30340;&#26102;&#20505;&#65292;&#35201;&#27880;&#24847;&#21024;&#38500;&#39034;&#24207;&#12290;</span>
-    (<span style="color: #FBDE2D;">setq</span> words-list
+    (setq words-list
           (cl-delete-duplicates
            words-list
            <span style="color: #FF6400;">:test</span> #'equal <span style="color: #FF6400;">:from-end</span> t))
@@ -338,8 +338,8 @@ OUTPUT:
 <span style="color: #61CE3C;">&#24403; `</span><span style="color: #4c83ff;">sort-by-freq</span><span style="color: #61CE3C;">' &#35774;&#32622;&#20301; t &#26102;&#65292;&#21024;&#38500;&#27599;&#19968;&#34892;&#30340;&#37325;&#22797;&#35789;&#26465;&#20043;&#21069;&#65292;&#39318;&#20808;&#23558;&#35789;&#26465;&#25353;&#29031;</span>
 <span style="color: #61CE3C;">&#35789;&#26465;&#20986;&#29616;&#30340;&#39057;&#29575;&#22823;&#23567;&#25490;&#24207;&#65292;&#36825;&#20010;&#36873;&#39033;&#36866;&#29992;&#20110;&#65306;&#20174;&#25991;&#31456;&#26500;&#24314;&#35789;&#24211;&#65292;&#25991;&#31456;&#20013;&#35789;&#26465;&#20986;&#29616;</span>
 <span style="color: #61CE3C;">&#39057;&#29575;&#21487;&#20197;&#20195;&#34920;&#27492;&#35789;&#26465;&#30340;&#20351;&#29992;&#39057;&#29575;&#12290;"</span>
-  (<span style="color: #FBDE2D;">interactive</span>)
-  (<span style="color: #FBDE2D;">when</span> (<span style="color: #FBDE2D;">or</span> force
+  (interactive)
+  (<span style="color: #FBDE2D;">when</span> (or force
             (yes-or-no-p <span style="color: #61CE3C;">"&#27880;&#24847;&#65306;&#24403;&#21069; buffer *&#24517;&#39035;* &#20026;&#35789;&#24211;&#25991;&#20214; buffer&#65292;&#26159;&#21542;&#32487;&#32493;&#65311;"</span>))
     (<span style="color: #FBDE2D;">save-restriction</span>
       (<span style="color: #FBDE2D;">let</span> ((lastw <span style="color: #61CE3C;">""</span>)
@@ -353,7 +353,7 @@ OUTPUT:
         (<span style="color: #FBDE2D;">while</span> (not (eobp))
           (<span style="color: #FBDE2D;">let*</span> ((line-content (pyim-line-content))
                  (length (length line-content)))
-            (<span style="color: #FBDE2D;">if</span> (<span style="color: #FBDE2D;">or</span> (&gt; length 1) <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#21024;&#38500;&#21482;&#21253;&#21547; code&#65292;&#20294;&#27809;&#26377;&#35789;&#26465;&#30340;&#34892;</span>
+            (<span style="color: #FBDE2D;">if</span> (or (&gt; length 1) <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#21024;&#38500;&#21482;&#21253;&#21547; code&#65292;&#20294;&#27809;&#26377;&#35789;&#26465;&#30340;&#34892;</span>
                     (string-match-p <span style="color: #61CE3C;">" *^;+"</span> (car line-content)))
                 (forward-line 1)
               (pyim-delete-line))))
@@ -362,10 +362,10 @@ OUTPUT:
         (<span style="color: #FBDE2D;">while</span> (not (eobp))
           (<span style="color: #FBDE2D;">if</span> (looking-at <span style="color: #61CE3C;">"^[ \t]*$"</span>)     <span style="color: #8B8989; font-style: italic;">; </span><span style="color: #8B8989; font-style: italic;">&#22914;&#26524;&#26377;&#31354;&#34892;&#65292;&#21024;&#38500;</span>
               (pyim-delete-line)
-            (<span style="color: #FBDE2D;">setq</span> currw (pyim-code-at-point))
+            (setq currw (pyim-code-at-point))
             (<span style="color: #FBDE2D;">if</span> (string= currw lastw)
                 (delete-region (1- (point)) (+ (point) (length currw))))
-            (<span style="color: #FBDE2D;">setq</span> lastw currw)
+            (setq lastw currw)
             (forward-line 1)))
 
         (goto-char (point-min))
@@ -379,7 +379,7 @@ OUTPUT:
   <span style="color: #61CE3C;">"&#23558;&#35789;&#24211; buffer &#20013; `</span><span style="color: #4c83ff;">start</span><span style="color: #61CE3C;">' &#21644; `</span><span style="color: #4c83ff;">end</span><span style="color: #61CE3C;">' &#33539;&#22260;&#20869;&#30340;&#35789;&#26465;&#20449;&#24687;&#25353;&#29031;&#25340;&#38899;code&#25490;&#24207;</span>
 <span style="color: #61CE3C;">&#24403; unix &#24037;&#20855; sort &#23384;&#22312;&#26102;&#65292;&#20248;&#20808;&#20351;&#29992;&#36825;&#20010;&#24037;&#20855;&#65292;&#21542;&#21017;&#20351;&#29992;emacs&#33258;&#24102;&#20989;&#25968;</span>
 <span style="color: #61CE3C;">`</span><span style="color: #4c83ff;">sort-regexp-fields</span><span style="color: #61CE3C;">'&#12290;"</span>
-  (<span style="color: #FBDE2D;">if</span> (<span style="color: #FBDE2D;">and</span> (executable-find <span style="color: #61CE3C;">"sort"</span>)
+  (<span style="color: #FBDE2D;">if</span> (and (executable-find <span style="color: #61CE3C;">"sort"</span>)
            (executable-find <span style="color: #61CE3C;">"env"</span>))
       (call-process-region start end
                            <span style="color: #61CE3C;">"env"</span> t t nil <span style="color: #61CE3C;">"LC_ALL=C"</span>
@@ -388,19 +388,19 @@ OUTPUT:
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-convert-current-line-to-dict-format</span> ()
   <span style="color: #61CE3C;">"&#23558;&#24403;&#21069;&#34892;&#23545;&#24212;&#30340;&#27721;&#35821;&#35789;&#26465;&#36716;&#25442;&#20026; Chinese-pyim &#21487;&#20197;&#35782;&#21035;&#30340;&#35789;&#24211;&#26684;&#24335;&#65288;ni-hao &#20320;&#22909;&#65289;&#12290;"</span>
-  (<span style="color: #FBDE2D;">interactive</span>)
+  (interactive)
   (<span style="color: #FBDE2D;">let</span> (line-content pinyin-list insert-string)
-    (<span style="color: #FBDE2D;">setq</span> line-content (buffer-substring-no-properties
+    (setq line-content (buffer-substring-no-properties
                         (line-beginning-position) (line-end-position)))
-    (<span style="color: #FBDE2D;">setq</span> line-content (replace-regexp-in-string <span style="color: #61CE3C;">"^ +</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">|</span><span style="color: #61CE3C;"> +$"</span> <span style="color: #61CE3C;">""</span> line-content))
-    (<span style="color: #FBDE2D;">setq</span> pinyin-list (pyim-hanzi2pinyin line-content nil <span style="color: #61CE3C;">"-"</span> t))
+    (setq line-content (replace-regexp-in-string <span style="color: #61CE3C;">"^ +</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">|</span><span style="color: #61CE3C;"> +$"</span> <span style="color: #61CE3C;">""</span> line-content))
+    (setq pinyin-list (pyim-hanzi2pinyin line-content nil <span style="color: #61CE3C;">"-"</span> t))
     (delete-region (line-beginning-position) (line-end-position))
-    (<span style="color: #FBDE2D;">setq</span> insert-string
+    (setq insert-string
           (mapconcat
            (<span style="color: #FBDE2D;">lambda</span> (x)
              <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#25340;&#38899;&#20013;&#19981;&#33021;&#26377;&#20013;&#25991;&#23383;&#31526;&#12290;</span>
              <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20013;&#25991;&#35789;&#26465;&#20013;&#24517;&#39035;&#26377;&#20013;&#25991;&#23383;&#31526;&#65292;&#24182;&#19988;&#19981;&#33021;&#26377;ascii&#23383;&#31526;&#12290;</span>
-             (<span style="color: #FBDE2D;">unless</span> (<span style="color: #FBDE2D;">or</span> (string-match-p <span style="color: #61CE3C;">"[</span><span style="color: #61CE3C;">^</span><span style="color: #61CE3C;">a-z-]"</span> x)
+             (<span style="color: #FBDE2D;">unless</span> (or (string-match-p <span style="color: #61CE3C;">"[</span><span style="color: #61CE3C;">^</span><span style="color: #61CE3C;">a-z-]"</span> x)
                          (string-match-p <span style="color: #61CE3C;">"[:ascii:]"</span> line-content)
                          (not (string-match-p <span style="color: #61CE3C;">"\\cc"</span> line-content)))
                (format <span style="color: #61CE3C;">"%s  %s"</span> x line-content))) pinyin-list <span style="color: #61CE3C;">"\n"</span>))
@@ -423,9 +423,9 @@ OUTPUT:
 <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">"&#20320;&#22909; &#22825;&#31354; &#22823;&#22320;" -&gt;  &#22825;&#31354; &#22823;&#22320;</span>
 <span style="color: #8B8989; font-style: italic;">;;                      </span><span style="color: #8B8989; font-style: italic;">&#22823;&#22320;</span>
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-convert-current-line-to-guessdict-format</span> ()
-  (<span style="color: #FBDE2D;">interactive</span>)
+  (interactive)
   (<span style="color: #FBDE2D;">let*</span> ((string (mapconcat
-                  #'(lambda (x)
+                  #'(<span style="color: #FBDE2D;">lambda</span> (x)
                       (mapconcat #'identity x <span style="color: #61CE3C;">" "</span>))
                   (pyim-guessdict-list-convert (pyim-line-content nil t))
                   <span style="color: #61CE3C;">"\n"</span>)))
@@ -438,7 +438,7 @@ OUTPUT:
 <span style="color: #61CE3C;">&#36825;&#20010;&#21629;&#20196;&#21482;&#23558;&#25991;&#31456;&#20013; *&#38750;&#35789;&#35821;* &#20013;&#25991;&#23383;&#31526;&#36716;&#21270;&#20026;&#35789;&#24211;&#12290;</span>
 
 <span style="color: #61CE3C;">&#36825;&#20010;&#21629;&#20196;&#21487;&#20197;&#24471;&#21040;&#19968;&#31687;&#25991;&#31456;&#20013;&#24120;&#29992;&#21333;&#23383;&#35789;&#35821;&#30340;&#35789;&#39057;&#20449;&#24687;&#12290;"</span>
-  (<span style="color: #FBDE2D;">interactive</span>)
+  (interactive)
   (pyim-article2dict 'chars))
 
 <span style="color: #8B8989; font-style: italic;">;;;</span><span style="color: #8B8989; font-style: italic;">###</span><span style="color: #ff69b4; font-style: italic;">autoload</span>
@@ -451,7 +451,7 @@ OUTPUT:
 <span style="color: #61CE3C;">2. &#25991;&#31456;&#24456;&#22823;&#26102;&#65292;&#36825;&#20010;&#21629;&#20196;&#36816;&#34892;&#36895;&#24230;&#22826;&#24930;&#12290;</span>
 
 <span style="color: #61CE3C;">&#36825;&#20010;&#21629;&#20196;&#26368;&#22823;&#30340;&#29992;&#36884;&#23601;&#26159;&#20026;&#27809;&#26377;&#25340;&#38899;&#30340;&#20013;&#25991;&#35789;&#24211;&#28155;&#21152;&#25340;&#38899;code&#12290;"</span>
-  (<span style="color: #FBDE2D;">interactive</span>)
+  (interactive)
   (pyim-article2dict 'words))
 
 <span style="color: #8B8989; font-style: italic;">;;;</span><span style="color: #8B8989; font-style: italic;">###</span><span style="color: #ff69b4; font-style: italic;">autoload</span>
@@ -469,7 +469,7 @@ OUTPUT:
 <span style="color: #61CE3C;">&#26377;&#19968;&#21477;&#35805;&#35828;&#65306;&#8220;&#23545;&#30340;&#37117;&#19968;&#26679;&#65292;&#38169;&#30340;&#19975;&#19975;&#21315;&#8221;&#65292;&#23545;&#29992;&#25143;&#26469;&#35828;&#65292;&#36825;&#20010;&#21629;&#20196;&#21487;&#33021;</span>
 <span style="color: #61CE3C;">&#26368;&#26377;&#29992;&#22788;&#65292;&#23427;&#21487;&#20197;&#22686;&#21152;&#35768;&#22810;&#26032;&#35789;&#65292;&#20063;&#35768;&#36825;&#20123;&#26032;&#35789;&#27627;&#26080;&#24847;&#20041;&#65292;&#20294;&#20854;&#20195;&#34920;&#20102;&#19968;&#31181;</span>
 <span style="color: #61CE3C;">&#36755;&#20837;&#20064;&#24815;&#65292;&#21487;&#20197;&#25552;&#39640;&#36755;&#20837;&#20307;&#39564;&#12290;"</span>
-  (<span style="color: #FBDE2D;">interactive</span>)
+  (interactive)
   (pyim-article2dict 'misspell-words))
 
 <span style="color: #8B8989; font-style: italic;">;;;</span><span style="color: #8B8989; font-style: italic;">###</span><span style="color: #ff69b4; font-style: italic;">autoload</span>
@@ -485,7 +485,7 @@ OUTPUT:
 <span style="color: #61CE3C;">Guessdict &#29992;&#26469;&#20445;&#23384;&#65292;&#19968;&#20010;&#20013;&#25991;&#35789;&#26465;&#65288;code&#65289;&#21518;&#38754;&#32463;&#24120;&#36319;&#38543;&#20986;&#29616;&#30340;&#35789;&#26465;&#12290;&#24403;&#29992;&#25143;&#36755;&#20837;</span>
 <span style="color: #61CE3C;">&#21069;&#19968;&#27425;&#36755;&#20837;&#65306;&#25105;&#29233;&#65292;&#20877;&#36755;&#20837;&#25340;&#38899; lv &#26102;&#65292;Chinese-pyim &#20250;&#21305;&#37197;&#35789;&#26465;&#65306; &#26053;&#28216;&#12290;&#36825;&#26679;&#23601;</span>
 <span style="color: #61CE3C;">&#21487;&#20197;&#38477;&#20302;&#29992;&#25143;&#32763;&#39029;&#30340;&#39057;&#29575;&#19981;&#21516;&#12290;"</span>
-  (<span style="color: #FBDE2D;">interactive</span>)
+  (interactive)
   (pyim-article2dict 'guessdict))
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-article2dict</span> (object)
@@ -593,8 +593,8 @@ OUTPUT:
 <span style="color: #61CE3C;">&#29992;&#20110; `</span><span style="color: #4c83ff;">pyim-article2dict</span><span style="color: #61CE3C;">' &#20998;&#38454;&#27573;&#20445;&#23384;&#20869;&#23481;&#12290;"</span>
   (<span style="color: #FBDE2D;">let</span> ((file (expand-file-name file))
         stage-file)
-    (<span style="color: #FBDE2D;">when</span> (<span style="color: #FBDE2D;">and</span> file stage force)
-      (<span style="color: #FBDE2D;">setq</span> stage-file
+    (<span style="color: #FBDE2D;">when</span> (and file stage force)
+      (setq stage-file
             (concat (file-name-directory file)
                     (make-temp-name stage) <span style="color: #61CE3C;">"-"</span>
                     (file-name-nondirectory file)))
@@ -626,7 +626,7 @@ OUTPUT:
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-dicts-manager-refresh</span> ()
   <span style="color: #61CE3C;">"Refresh the contents of the *pyim-dict-manager* buffer."</span>
-  (<span style="color: #FBDE2D;">interactive</span>)
+  (interactive)
   (<span style="color: #FBDE2D;">with-current-buffer</span> pyim-dicts-manager-buffer-name
     (<span style="color: #FBDE2D;">let</span> ((inhibit-read-only t)
           (dicts-list pyim-dicts)
@@ -668,7 +668,7 @@ OUTPUT:
                                         (<span style="color: #FBDE2D;">if</span> disable <span style="color: #61CE3C;">"no"</span> <span style="color: #61CE3C;">"yes"</span>)
                                         coding name file dict-type)
                                 'id i 'disable disable 'name name 'file file 'coding coding dict-type 'dict-type)))
-          (<span style="color: #FBDE2D;">setq</span> i (1+ i))))
+          (setq i (1+ i))))
       (insert (propertize <span style="color: #61CE3C;">"</span>
 <span style="color: #61CE3C;">&#25805;&#20316;&#21629;&#20196;&#65306;[A] &#28155;&#21152;&#35789;&#24211;  [D] &#21024;&#38500;&#35789;&#24211;   [P] &#21521;&#19978;&#31227;&#21160;   [N] &#21521;&#19979;&#31227;&#21160;  [g] &#21047;&#26032;&#39029;&#38754;</span>
 <span style="color: #61CE3C;">          [s] &#20445;&#23384;&#37197;&#32622;  [R] &#37325;&#21551;&#36755;&#20837;&#27861; [C-c C-c] &#31105;&#29992;/&#21551;&#29992;&#24403;&#21069;&#35789;&#24211;</span>
@@ -681,14 +681,14 @@ OUTPUT:
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-dicts-manager-toggle-enable-dict</span> (<span style="color: #D8FA3C;">&amp;optional</span> enable)
   <span style="color: #61CE3C;">"&#21551;&#29992;&#24403;&#21069;&#34892;&#23545;&#24212;&#30340;&#35789;&#24211;&#12290;"</span>
-  (<span style="color: #FBDE2D;">interactive</span>)
+  (interactive)
   (<span style="color: #FBDE2D;">when</span> (string= (buffer-name) pyim-dicts-manager-buffer-name)
     (<span style="color: #FBDE2D;">let*</span> ((id (get-text-property (point) 'id))
            (disable (get-text-property (point) 'disable))
            (dict (cl-copy-list (nth (1- id) pyim-dicts)))
            (disable (plist-get dict <span style="color: #FF6400;">:disable</span>))
            (line (line-number-at-pos)))
-      (<span style="color: #FBDE2D;">setf</span> (nth (1- id) pyim-dicts) (plist-put dict <span style="color: #FF6400;">:disable</span> (not disable)))
+      (setf (nth (1- id) pyim-dicts) (plist-put dict <span style="color: #FF6400;">:disable</span> (not disable)))
       (<span style="color: #FBDE2D;">if</span> (not disable)
           (message <span style="color: #61CE3C;">"&#31105;&#29992;&#24403;&#21069;&#35789;&#24211;"</span>)
         (message <span style="color: #61CE3C;">"&#21551;&#29992;&#24403;&#21069;&#35789;&#24211;"</span>))
@@ -698,14 +698,14 @@ OUTPUT:
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-dicts-manager-delete-dict</span> ()
   <span style="color: #61CE3C;">"&#20174; `</span><span style="color: #4c83ff;">pyim-dicts</span><span style="color: #61CE3C;">' &#20013;&#21024;&#38500;&#24403;&#21069;&#34892;&#23545;&#24212;&#30340;&#35789;&#24211;&#20449;&#24687;&#12290;"</span>
-  (<span style="color: #FBDE2D;">interactive</span>)
+  (interactive)
   (<span style="color: #FBDE2D;">when</span> (string= (buffer-name) pyim-dicts-manager-buffer-name)
     (<span style="color: #FBDE2D;">let</span> ((id (get-text-property (point) 'id))
           (file (get-text-property (point) 'file))
           (line (line-number-at-pos)))
       (<span style="color: #FBDE2D;">when</span> (yes-or-no-p <span style="color: #61CE3C;">"&#30830;&#23450;&#35201;&#21024;&#38500;&#36825;&#26465;&#35789;&#24211;&#20449;&#24687;&#21527;? "</span>)
-        (<span style="color: #FBDE2D;">setq</span> pyim-dicts (delq (nth (1- id) pyim-dicts) pyim-dicts))
-        (<span style="color: #FBDE2D;">when</span> (<span style="color: #FBDE2D;">and</span> (file-exists-p file)
+        (setq pyim-dicts (delq (nth (1- id) pyim-dicts) pyim-dicts))
+        (<span style="color: #FBDE2D;">when</span> (and (file-exists-p file)
                    (yes-or-no-p <span style="color: #61CE3C;">"&#30830;&#23450;&#35201;&#21024;&#38500;&#23545;&#24212;&#30340;&#35789;&#24211;&#25991;&#20214;&#21527;&#65311;"</span>))
           (delete-file file))
         (pyim-dicts-manager-refresh)
@@ -714,7 +714,7 @@ OUTPUT:
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-dicts-manager-dict-position-up</span> ()
   <span style="color: #61CE3C;">"&#21521;&#19978;&#31227;&#21160;&#35789;&#24211;&#12290;"</span>
-  (<span style="color: #FBDE2D;">interactive</span>)
+  (interactive)
   (<span style="color: #FBDE2D;">when</span> (string= (buffer-name) pyim-dicts-manager-buffer-name)
     (<span style="color: #FBDE2D;">let*</span> ((id (get-text-property (point) 'id))
            (dict1 (nth (- id 1) pyim-dicts))
@@ -722,15 +722,15 @@ OUTPUT:
            (length (length pyim-dicts))
            (line (line-number-at-pos)))
       (<span style="color: #FBDE2D;">when</span> (&gt; id 1)
-        (<span style="color: #FBDE2D;">setf</span> (nth (- id 1) pyim-dicts) dict2)
-        (<span style="color: #FBDE2D;">setf</span> (nth (- id 2) pyim-dicts) dict1)
+        (setf (nth (- id 1) pyim-dicts) dict2)
+        (setf (nth (- id 2) pyim-dicts) dict1)
         (pyim-dicts-manager-refresh)
         (goto-char (point-min))
         (forward-line (- line 2))))))
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-dicts-manager-dict-position-down</span> ()
   <span style="color: #61CE3C;">"&#21521;&#19979;&#31227;&#21160;&#35789;&#24211;&#12290;"</span>
-  (<span style="color: #FBDE2D;">interactive</span>)
+  (interactive)
   (<span style="color: #FBDE2D;">when</span> (string= (buffer-name) pyim-dicts-manager-buffer-name)
     (<span style="color: #FBDE2D;">let*</span> ((id (get-text-property (point) 'id))
            (dict1 (nth (- id 1) pyim-dicts))
@@ -738,22 +738,22 @@ OUTPUT:
            (length (length pyim-dicts))
            (line (line-number-at-pos)))
       (<span style="color: #FBDE2D;">when</span> (&lt; id length)
-        (<span style="color: #FBDE2D;">setf</span> (nth (1- id) pyim-dicts) dict2)
-        (<span style="color: #FBDE2D;">setf</span> (nth id pyim-dicts) dict1)
+        (setf (nth (1- id) pyim-dicts) dict2)
+        (setf (nth id pyim-dicts) dict1)
         (pyim-dicts-manager-refresh)
         (goto-char (point-min))
         (forward-line line)))))
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-dicts-manager-save-dict-info</span> ()
   <span style="color: #61CE3C;">"&#20351;&#29992; `</span><span style="color: #4c83ff;">customize-save-variable</span><span style="color: #61CE3C;">' &#20989;&#25968;&#23558; `</span><span style="color: #4c83ff;">pyim-dicts</span><span style="color: #61CE3C;">' &#20445;&#23384;&#21040; ~/.emacs &#25991;&#20214;&#20013;&#12290;"</span>
-  (<span style="color: #FBDE2D;">interactive</span>)
+  (interactive)
   <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#23558;`</span><span style="color: #4c83ff; font-style: italic;">pyim-dict</span><span style="color: #8B8989; font-style: italic;">'&#30340;&#35774;&#32622;&#20445;&#23384;&#21040;emacs&#37197;&#32622;&#25991;&#20214;&#20013;&#12290;</span>
   (customize-save-variable 'pyim-dicts pyim-dicts)
   (message <span style="color: #61CE3C;">"&#23558; Chinese-pyim &#35789;&#24211;&#37197;&#32622;&#20449;&#24687;&#20445;&#23384;&#21040; ~/.emacs &#25991;&#20214;&#12290;"</span>))
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-dicts-manager-import-sogou-dict-directory</span> ()
   <span style="color: #61CE3C;">"&#23548;&#20837;&#26576;&#20010;&#30446;&#24405;&#20013;&#25152;&#26377;&#25628;&#29399;&#32454;&#32990;&#35789;&#24211;&#30340;&#21629;&#20196;&#12290;"</span>
-  (<span style="color: #FBDE2D;">interactive</span>)
+  (interactive)
   (<span style="color: #FBDE2D;">when</span> (string= (buffer-name) pyim-dicts-manager-buffer-name)
     (<span style="color: #FBDE2D;">let*</span> ((line (line-number-at-pos))
            (dir (read-directory-name <span style="color: #61CE3C;">"&#35831;&#36873;&#25321;&#25628;&#29399;&#32454;&#32990;&#35789;&#24211;&#25152;&#22312;&#30340;&#30446;&#24405;&#65306; "</span> <span style="color: #61CE3C;">"~/"</span>))
@@ -766,7 +766,7 @@ OUTPUT:
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-dicts-manager-import-sogou-dict-file</span> ()
   <span style="color: #61CE3C;">"&#23548;&#20837;&#25628;&#29399;&#32454;&#32990;&#35789;&#24211;&#25991;&#20214;&#30340;&#21629;&#20196;"</span>
-  (<span style="color: #FBDE2D;">interactive</span>)
+  (interactive)
   (<span style="color: #FBDE2D;">when</span> (string= (buffer-name) pyim-dicts-manager-buffer-name)
     (<span style="color: #FBDE2D;">let</span> ((line (line-number-at-pos))
           (file (read-file-name <span style="color: #61CE3C;">"&#35831;&#36873;&#25321;&#38656;&#35201;&#23548;&#20837;&#30340;&#25628;&#29399;&#32454;&#32990;&#35789;&#24211;&#25991;&#20214;&#65306; "</span> <span style="color: #61CE3C;">"~/"</span>)))
@@ -783,7 +783,7 @@ OUTPUT:
                                 pyim-dicts-directory)
                                input-filename <span style="color: #61CE3C;">".pyim"</span>))))
     (<span style="color: #FBDE2D;">if</span> (not (pyim-dict-file-available-p output-file))
-        (<span style="color: #FBDE2D;">if</span> (<span style="color: #FBDE2D;">and</span> (call-process pyim-dicts-manager-scel2pyim-command
+        (<span style="color: #FBDE2D;">if</span> (and (call-process pyim-dicts-manager-scel2pyim-command
                                nil <span style="color: #61CE3C;">"*pyim-dicts-import*"</span> nil input-file output-file)
                  (file-exists-p output-file))
             (add-to-list 'pyim-dicts
@@ -793,20 +793,20 @@ OUTPUT:
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-dicts-manager-add-dict</span> ()
   <span style="color: #61CE3C;">"&#20026; `</span><span style="color: #4c83ff;">pyim-dicts</span><span style="color: #61CE3C;">' &#28155;&#21152;&#35789;&#24211;&#20449;&#24687;&#12290;"</span>
-  (<span style="color: #FBDE2D;">interactive</span>)
+  (interactive)
   (<span style="color: #FBDE2D;">when</span> (string= (buffer-name) pyim-dicts-manager-buffer-name)
     (<span style="color: #FBDE2D;">let</span> ((line (line-number-at-pos))
           dict name file coding first-used dict-type)
-      (<span style="color: #FBDE2D;">setq</span> name (read-from-minibuffer <span style="color: #61CE3C;">"&#35831;&#36755;&#20837;&#35789;&#24211;&#21517;&#31216;&#65306; "</span>))
-      (<span style="color: #FBDE2D;">setq</span> file (read-file-name <span style="color: #61CE3C;">"&#35831;&#36873;&#25321;&#35789;&#24211;&#25991;&#20214;&#65306; "</span> <span style="color: #61CE3C;">"~/"</span>))
-      (<span style="color: #FBDE2D;">setq</span> coding (completing-read <span style="color: #61CE3C;">"&#35789;&#24211;&#25991;&#20214;&#32534;&#30721;: "</span>
+      (setq name (read-from-minibuffer <span style="color: #61CE3C;">"&#35831;&#36755;&#20837;&#35789;&#24211;&#21517;&#31216;&#65306; "</span>))
+      (setq file (read-file-name <span style="color: #61CE3C;">"&#35831;&#36873;&#25321;&#35789;&#24211;&#25991;&#20214;&#65306; "</span> <span style="color: #61CE3C;">"~/"</span>))
+      (setq coding (completing-read <span style="color: #61CE3C;">"&#35789;&#24211;&#25991;&#20214;&#32534;&#30721;: "</span>
                                     '(<span style="color: #61CE3C;">"utf-8-unix"</span> <span style="color: #61CE3C;">"cjk-dos"</span> <span style="color: #61CE3C;">"gb18030-dos"</span>)
                                     nil t nil nil <span style="color: #61CE3C;">"utf-8-unix"</span>))
-      (<span style="color: #FBDE2D;">setq</span> dict-type (completing-read <span style="color: #61CE3C;">"&#35789;&#24211;&#31867;&#22411;: "</span>
+      (setq dict-type (completing-read <span style="color: #61CE3C;">"&#35789;&#24211;&#31867;&#22411;: "</span>
                                        '(<span style="color: #61CE3C;">"pinyin-dict"</span> <span style="color: #61CE3C;">"guess-dict"</span>)
                                        nil t nil nil <span style="color: #61CE3C;">"pinyin-dict"</span>))
-      (<span style="color: #FBDE2D;">setq</span> first-used  (yes-or-no-p <span style="color: #61CE3C;">"&#26159;&#21542;&#35753; Chinese-pyim &#20248;&#20808;&#20351;&#29992;&#35789;&#24211;&#65311; "</span>))
-      (<span style="color: #FBDE2D;">setq</span> dict `(<span style="color: #FF6400;">:name</span> ,name
+      (setq first-used  (yes-or-no-p <span style="color: #61CE3C;">"&#26159;&#21542;&#35753; Chinese-pyim &#20248;&#20808;&#20351;&#29992;&#35789;&#24211;&#65311; "</span>))
+      (setq dict `(<span style="color: #FF6400;">:name</span> ,name
                          <span style="color: #FF6400;">:file</span> ,file
                          <span style="color: #FF6400;">:coding</span> ,(intern coding)
                          <span style="color: #FF6400;">:dict-type</span> ,(intern dict-type)))
@@ -819,7 +819,7 @@ OUTPUT:
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-dicts-manager-add-example-dict</span> ()
   <span style="color: #61CE3C;">"&#19979;&#36733;&#24182;&#23433;&#35013;&#29992;&#20110;&#27979;&#35797;&#30446;&#30340;&#30340;&#26679;&#20363;&#35789;&#24211;&#12290;"</span>
-  (<span style="color: #FBDE2D;">interactive</span>)
+  (interactive)
   (<span style="color: #FBDE2D;">when</span> (string= (buffer-name) pyim-dicts-manager-buffer-name)
     (<span style="color: #FBDE2D;">let</span> ((dict-name <span style="color: #61CE3C;">"BigDict-01"</span>)
           (dict-url <span style="color: #61CE3C;">"http://tumashu.github.io/chinese-pyim-bigdict/pyim-bigdict.pyim"</span>)
@@ -830,19 +830,19 @@ OUTPUT:
       (<span style="color: #FBDE2D;">when</span> (yes-or-no-p (format <span style="color: #61CE3C;">"&#20174;&#32593;&#22336; (%s) &#19979;&#36733;&#23433;&#35013;&#26679;&#20363;&#35789;&#24211;&#65311; "</span> dict-url))
         (<span style="color: #FBDE2D;">unless</span> (file-exists-p dict-file)
           (url-copy-file dict-url dict-file))
-        (<span style="color: #FBDE2D;">when</span> (<span style="color: #FBDE2D;">and</span> (file-exists-p dict-file)
+        (<span style="color: #FBDE2D;">when</span> (and (file-exists-p dict-file)
                    (not (pyim-dict-file-available-p dict-file)))
           (add-to-list 'pyim-dicts
                        `(<span style="color: #FF6400;">:name</span> ,dict-name
                                <span style="color: #FF6400;">:file</span> ,dict-file
                                <span style="color: #FF6400;">:coding</span> utf-8-unix
-                               <span style="color: #FF6400;">:dict-type</span> dict) <span style="color: #ff69b4;">t))</span>
+                               <span style="color: #FF6400;">:dict-type</span> dict) t))
         (pyim-dicts-manager-refresh)))))
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-dicts-manager-merge-all</span> ()
   <span style="color: #61CE3C;">"&#23558;&#35789;&#24211;&#31649;&#29702;&#22120;&#20013;&#25152;&#26377;&#35789;&#24211;&#21512;&#24182;&#65292;&#24182;&#28155;&#21152;&#29983;&#25104;&#30340;&#35789;&#24211;&#25991;&#20214;&#12290;</span>
 <span style="color: #61CE3C;">&#35789;&#24211;&#21512;&#24182;&#21487;&#20197;&#20248;&#21270; Chinese-pyim &#30340;&#36895;&#24230;&#12290;"</span>
-  (<span style="color: #FBDE2D;">interactive</span>)
+  (interactive)
   (<span style="color: #FBDE2D;">let</span> ((dicts-list pyim-dicts)
         (dict-name <span style="color: #61CE3C;">"Dicts-Merged"</span>)
         (buffer (get-buffer-create <span style="color: #61CE3C;">"*pyim-merged-dict*"</span>))
@@ -851,13 +851,13 @@ OUTPUT:
                              pyim-dicts-directory)
                             <span style="color: #61CE3C;">"pyim-dicts-merged.pyim"</span>)))
         file coding disable dict-type)
-    (<span style="color: #FBDE2D;">when</span> (<span style="color: #FBDE2D;">and</span> dicts-list (yes-or-no-p <span style="color: #61CE3C;">"&#30830;&#23450;&#23558;&#25152;&#26377;&#35789;&#24211;&#21512;&#24182;&#20026;&#19968;&#20010;&#35789;&#24211;&#21527;? "</span>))
+    (<span style="color: #FBDE2D;">when</span> (and dicts-list (yes-or-no-p <span style="color: #61CE3C;">"&#30830;&#23450;&#23558;&#25152;&#26377;&#35789;&#24211;&#21512;&#24182;&#20026;&#19968;&#20010;&#35789;&#24211;&#21527;? "</span>))
       (<span style="color: #FBDE2D;">dolist</span> (dict dicts-list)
-        (<span style="color: #FBDE2D;">setq</span> file (expand-file-name (plist-get dict <span style="color: #FF6400;">:file</span>)))
-        (<span style="color: #FBDE2D;">setq</span> coding (plist-get dict <span style="color: #FF6400;">:coding</span>))
-        (<span style="color: #FBDE2D;">setq</span> disable (plist-get dict <span style="color: #FF6400;">:disable</span>))
-        (<span style="color: #FBDE2D;">setq</span> dict-type (plist-get dict <span style="color: #FF6400;">:dict-type</span>))
-        (<span style="color: #FBDE2D;">if</span> (<span style="color: #FBDE2D;">and</span> (not disable)
+        (setq file (expand-file-name (plist-get dict <span style="color: #FF6400;">:file</span>)))
+        (setq coding (plist-get dict <span style="color: #FF6400;">:coding</span>))
+        (setq disable (plist-get dict <span style="color: #FF6400;">:disable</span>))
+        (setq dict-type (plist-get dict <span style="color: #FF6400;">:dict-type</span>))
+        (<span style="color: #FBDE2D;">if</span> (and (not disable)
                  (eq dict-type 'dict)
                  (file-exists-p file))
             (<span style="color: #FBDE2D;">with-current-buffer</span> buffer
@@ -881,7 +881,7 @@ OUTPUT:
         (write-file dict-file)
         (kill-buffer))
 
-      (<span style="color: #FBDE2D;">setq</span> pyim-dicts
+      (setq pyim-dicts
             `((<span style="color: #FF6400;">:name</span> ,dict-name
                      <span style="color: #FF6400;">:file</span> ,dict-file
                      <span style="color: #FF6400;">:coding</span> utf-8-unix
@@ -907,14 +907,14 @@ OUTPUT:
 <span style="color: #8B8989; font-style: italic;">;;;</span><span style="color: #8B8989; font-style: italic;">###</span><span style="color: #ff69b4; font-style: italic;">autoload</span>
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-dicts-manager</span> ()
   <span style="color: #61CE3C;">"Chinese-pyim &#35789;&#24211;&#31649;&#29702;&#22120;&#12290;"</span>
-  (<span style="color: #FBDE2D;">interactive</span>)
+  (interactive)
   (<span style="color: #FBDE2D;">unless</span> (file-exists-p pyim-dicts-directory)
     (make-directory pyim-dicts-directory t))
   (<span style="color: #FBDE2D;">let</span> ((buffer (get-buffer-create pyim-dicts-manager-buffer-name)))
     (pyim-dicts-manager-refresh)
     (switch-to-buffer buffer)
     (pyim-dicts-manager-mode)
-    (<span style="color: #FBDE2D;">setq</span> truncate-lines t)))
+    (setq truncate-lines t)))
 </pre>
 </div>
 </div>
@@ -956,8 +956,8 @@ Chinese-pyim 打算使用 emacs package 来分发词库包。
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2015-09-02</span>
-        <span title="last modification date" class="post-info">2015-08-23</span>
+        <span title="post date" class="post-info">2015-09-06</span>
+        <span title="last modification date" class="post-info">2015-09-01</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>
@@ -977,7 +977,7 @@ Chinese-pyim 打算使用 emacs package 来分发词库包。
         </script>
       </section>
       <div class="footer">
-        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.x(<a href="http://orgmode.org">Org mode</a> 8.x)</p>
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.x(<a href="http://orgmode.org">Org mode</a> 8.x)</p>
         <p>
           Copyright &copy; <span id="footerYear"></span> <a href="mailto:tumashu &lt;at&gt; 163 &lt;dot&gt; com">Feng Shu</a>
           &nbsp;&nbsp;-&nbsp;&nbsp;

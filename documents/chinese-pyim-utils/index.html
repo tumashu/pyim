@@ -64,30 +64,30 @@
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-forward-word</span> (<span style="color: #D8FA3C;">&amp;optional</span> arg)
   <span style="color: #61CE3C;">"&#21521;&#21069;&#31227;&#21160; `</span><span style="color: #4c83ff;">arg</span><span style="color: #61CE3C;">' &#33521;&#25991;&#25110;&#32773;&#20013;&#25991;&#35789;&#65292;&#21521;&#21069;&#31227;&#21160;&#26102;&#22522;&#20110; *&#26368;&#38271;* &#30340;&#35789;&#31227;&#21160;&#12290;"</span>
-  (<span style="color: #FBDE2D;">interactive</span> <span style="color: #61CE3C;">"P"</span>)
-  (<span style="color: #FBDE2D;">or</span> arg (<span style="color: #FBDE2D;">setq</span> arg 1))
+  (interactive <span style="color: #61CE3C;">"P"</span>)
+  (or arg (setq arg 1))
   (<span style="color: #FBDE2D;">dotimes</span> (i arg)
     (<span style="color: #FBDE2D;">let*</span> ((words (pyim-get-words-list-at-point t))
            (max-length
             (cl-reduce #'max
-                       (cons 0 (mapcar #'(lambda (word)
+                       (cons 0 (mapcar #'(<span style="color: #FBDE2D;">lambda</span> (word)
                                            (nth 2 word))
                                        words))))
-           (max-length (max (<span style="color: #FBDE2D;">or</span> max-length 1) 1)))
+           (max-length (max (or max-length 1) 1)))
       (forward-char max-length))))
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-backward-word</span> (<span style="color: #D8FA3C;">&amp;optional</span> arg)
   <span style="color: #61CE3C;">"&#21521;&#21518;&#31227;&#21160; `</span><span style="color: #4c83ff;">arg</span><span style="color: #61CE3C;">' &#20010;&#33521;&#25991;&#25110;&#32773;&#20013;&#25991;&#35789;&#65292;&#21521;&#21518;&#31227;&#21160;&#26102;&#22522;&#20110; *&#26368;&#38271;* &#30340;&#35789;&#31227;&#21160;&#12290;"</span>
-  (<span style="color: #FBDE2D;">interactive</span> <span style="color: #61CE3C;">"P"</span>)
-  (<span style="color: #FBDE2D;">or</span> arg (<span style="color: #FBDE2D;">setq</span> arg 1))
+  (interactive <span style="color: #61CE3C;">"P"</span>)
+  (or arg (setq arg 1))
   (<span style="color: #FBDE2D;">dotimes</span> (i arg)
     (<span style="color: #FBDE2D;">let*</span> ((words (pyim-get-words-list-at-point))
            (max-length
             (cl-reduce #'max
-                       (cons 0 (mapcar #'(lambda (word)
+                       (cons 0 (mapcar #'(<span style="color: #FBDE2D;">lambda</span> (word)
                                            (nth 1 word))
                                        words))))
-           (max-length (max (<span style="color: #FBDE2D;">or</span> max-length 1) 1)))
+           (max-length (max (or max-length 1) 1)))
       (backward-char max-length))))
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-get-words-list-at-point</span> (<span style="color: #D8FA3C;">&amp;optional</span> end-of-point)
@@ -123,7 +123,7 @@
          (str-end-pos (<span style="color: #FBDE2D;">when</span> str-boundary
                         (cdr str-boundary)))
          (str-offset
-          (<span style="color: #FBDE2D;">when</span> (<span style="color: #FBDE2D;">and</span> str-beginning-pos str-end-pos)
+          (<span style="color: #FBDE2D;">when</span> (and str-beginning-pos str-end-pos)
             (<span style="color: #FBDE2D;">if</span> (= current-pos str-end-pos)
                 (1+ (- str-end-pos str-beginning-pos))
               (1+ (- current-pos str-beginning-pos)))))
@@ -131,32 +131,32 @@
 
     <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#24403;&#23383;&#31526;&#20018;&#38271;&#24230;&#22826;&#38271;&#26102;&#65292; `</span><span style="color: #4c83ff; font-style: italic;">pyim-split-chinese-string</span><span style="color: #8B8989; font-style: italic;">'</span>
     <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#30340;&#36895;&#24230;&#27604;&#36739;&#24930;&#65292;&#36825;&#37324;&#30830;&#20445;&#24453;&#20998;&#35789;&#30340;&#23383;&#31526;&#20018;&#38271;&#24230;&#19981;&#36229;&#36807;10.</span>
-    (<span style="color: #FBDE2D;">when</span> (<span style="color: #FBDE2D;">and</span> str (not (string-match-p <span style="color: #61CE3C;">"\\CC"</span> str)))
+    (<span style="color: #FBDE2D;">when</span> (and str (not (string-match-p <span style="color: #61CE3C;">"\\CC"</span> str)))
       (<span style="color: #FBDE2D;">if</span> (&gt; str-offset 5)
-          (<span style="color: #FBDE2D;">progn</span> (<span style="color: #FBDE2D;">setq</span> str-offset-adjusted 5)
-                 (<span style="color: #FBDE2D;">setq</span> str (substring str
+          (<span style="color: #FBDE2D;">progn</span> (setq str-offset-adjusted 5)
+                 (setq str (substring str
                                       (- str-offset 5)
                                       (min (+ str-offset 5) str-length))))
-        (<span style="color: #FBDE2D;">setq</span> str-offset-adjusted str-offset)
-        (<span style="color: #FBDE2D;">setq</span> str (substring str 0 (min 9 str-length)))))
+        (setq str-offset-adjusted str-offset)
+        (setq str (substring str 0 (min 9 str-length)))))
 
     (<span style="color: #FBDE2D;">cond</span>
-     ((<span style="color: #FBDE2D;">and</span> str (not (string-match-p <span style="color: #61CE3C;">"\\CC"</span> str)))
-      (<span style="color: #FBDE2D;">setq</span> words-alist
+     ((and str (not (string-match-p <span style="color: #61CE3C;">"\\CC"</span> str)))
+      (setq words-alist
             (pyim-split-chinese-string str))
       (<span style="color: #FBDE2D;">dolist</span> (word-list words-alist)
         (<span style="color: #FBDE2D;">let</span> ((word-begin (nth 1 word-list))
               (word-end (nth 2 word-list)))
           (<span style="color: #FBDE2D;">if</span> (<span style="color: #FBDE2D;">if</span> end-of-point
-                  (<span style="color: #FBDE2D;">and</span> (&lt; str-offset-adjusted word-end)
+                  (and (&lt; str-offset-adjusted word-end)
                        (&gt;= str-offset-adjusted word-begin))
-                (<span style="color: #FBDE2D;">and</span> (&lt;= str-offset-adjusted word-end)
+                (and (&lt;= str-offset-adjusted word-end)
                      (&gt; str-offset-adjusted word-begin)))
-              (<span style="color: #FBDE2D;">push</span> (list (car word-list)
+              (push (list (car word-list)
                           (- str-offset-adjusted word-begin) <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20363;&#22914;&#65306; ("&#20320;&#22909;" 1 1)</span>
                           (- word-end str-offset-adjusted))
                     results))))
-      (<span style="color: #FBDE2D;">or</span> results
+      (or results
           (list (<span style="color: #FBDE2D;">if</span> end-of-point
                     (list current-char 0 1)
                   (list current-char 1 0)))))
@@ -192,7 +192,7 @@
          (t (append
              (<span style="color: #FBDE2D;">let*</span> ((str (mapconcat #'identity my-list <span style="color: #61CE3C;">""</span>))
                     (length (length str)))
-               (<span style="color: #FBDE2D;">when</span> (&lt;= length (<span style="color: #FBDE2D;">or</span> max-word-length 6))
+               (<span style="color: #FBDE2D;">when</span> (&lt;= length (or max-word-length 6))
                  (list (list str number (+ number length)))))
              (get-possible-words-internal
               (reverse (cdr (reverse my-list))) number)))))
@@ -208,12 +208,12 @@
     <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#22914;&#26524; Chinese-pyim &#35789;&#24211;&#27809;&#26377;&#21152;&#36733;&#65292;&#21152;&#36733; Chinese-pyim &#35789;&#24211;&#65292;</span>
     <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#30830;&#20445; pyim-get &#21487;&#20197;&#27491;&#24120;&#36816;&#34892;&#12290;</span>
     (<span style="color: #FBDE2D;">unless</span> pyim-buffer-list
-      (<span style="color: #FBDE2D;">setq</span> pyim-buffer-list (pyim-load-file)))
+      (setq pyim-buffer-list (pyim-load-file)))
 
     (<span style="color: #FBDE2D;">let</span> ((string-alist
            (get-possible-words
             (mapcar #'char-to-string
-                    (string-to-vector chinese-string)) <span style="color: #ff69b4;">1))</span>
+                    (string-to-vector chinese-string)) 1))
           words-list result)
       (<span style="color: #FBDE2D;">dolist</span> (string-list string-alist)
         (<span style="color: #FBDE2D;">let</span> ((pinyin-list (pyim-hanzi2pinyin (car string-list) nil <span style="color: #61CE3C;">"-"</span> t)))
@@ -221,7 +221,7 @@
             (<span style="color: #FBDE2D;">let</span> ((words (pyim-get pinyin nil t))) <span style="color: #8B8989; font-style: italic;">; </span><span style="color: #8B8989; font-style: italic;">&#24573;&#30053;&#20010;&#20154;&#35789;&#24211; buffer &#21487;&#20197;&#25552;&#39640;&#36895;&#24230;</span>
               (<span style="color: #FBDE2D;">dolist</span> (word words)
                 (<span style="color: #FBDE2D;">when</span> (string= word (car string-list))
-                  (<span style="color: #FBDE2D;">push</span> string-list result)))))))
+                  (push string-list result)))))))
       result)))
 
 <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">(let ((str "&#21307;&#29983;&#38543;&#26102;&#37117;&#26377;&#21487;&#33021;&#34987;&#24739;&#32773;&#21450;&#20854;&#23478;&#23646;&#21453;&#21676;&#19968;&#21475;"))</span>
@@ -243,7 +243,7 @@
                <span style="color: #61CE3C;">"</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">(</span><span style="color: #61CE3C;">\\CC+</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">)</span><span style="color: #61CE3C;">"</span> <span style="color: #61CE3C;">"@@@@\\1@@@@"</span> string) <span style="color: #61CE3C;">"@@@@"</span>)
            (list string))))
     (mapconcat
-     #'(lambda (str)
+     #'(<span style="color: #FBDE2D;">lambda</span> (str)
          (<span style="color: #FBDE2D;">when</span> (&gt; (length str) 0)
            (<span style="color: #FBDE2D;">if</span> (not (string-match-p <span style="color: #61CE3C;">"\\CC"</span> str))
                (pyim-split-chinese-string2string-internal
@@ -260,36 +260,36 @@
                     <span style="color: #8B8989; font-style: italic;">;;  </span><span style="color: #8B8989; font-style: italic;">&#26159;&#21542;&#20914;&#31361;&#65292;&#22914;&#26524;&#20914;&#31361;&#65292;&#20165;&#20445;&#30041;&#19968;&#20010;&#65292;</span>
                     <span style="color: #8B8989; font-style: italic;">;;  </span><span style="color: #8B8989; font-style: italic;">&#21024;&#38500;&#20854;&#23427;&#12290;</span>
                     (pyim-split-chinese-string chinese-string max-word-length)
-                    <span style="color: #FF6400;">:test</span> #'(lambda (x1 x2)
+                    <span style="color: #FF6400;">:test</span> #'(<span style="color: #FBDE2D;">lambda</span> (x1 x2)
                               (<span style="color: #FBDE2D;">let</span> ((begin1 (nth 1 x1))
                                     (begin2 (nth 1 x2))
                                     (end1 (nth 2 x1))
                                     (end2 (nth 2 x2)))
-                                (not (<span style="color: #FBDE2D;">or</span> (&lt;= end1 begin2)
+                                (not (or (&lt;= end1 begin2)
                                          (&lt;= end2 begin1)))))
                     <span style="color: #FF6400;">:from-end</span> prefer-short-word))
         position-list result)
 
     <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#25552;&#21462;&#35789;&#26465;&#30456;&#23545;&#20110;&#23383;&#31526;&#20018;&#30340;&#20301;&#32622;&#20449;&#24687;&#12290;</span>
     (<span style="color: #FBDE2D;">dolist</span> (word word-list)
-      (<span style="color: #FBDE2D;">push</span> (nth 1 word) position-list)
-      (<span style="color: #FBDE2D;">push</span> (nth 2 word) position-list))
+      (push (nth 1 word) position-list)
+      (push (nth 2 word) position-list))
 
     <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#23558;&#20301;&#32622;&#20449;&#24687;&#30001;&#23567;&#21040;&#22823;&#25490;&#24207;&#12290;</span>
-    (<span style="color: #FBDE2D;">setq</span> position-list
+    (setq position-list
           (cl-delete-duplicates (sort position-list #'&lt;)))
 
     <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#22312;&#20998;&#35789;&#30340;&#20301;&#32622;&#25554;&#20837;&#31354;&#26684;&#25110;&#32773;&#29992;&#25143;&#25351;&#23450;&#30340;&#20998;&#38548;&#31526;&#12290;</span>
     (<span style="color: #FBDE2D;">dotimes</span> (i str-length)
       (<span style="color: #FBDE2D;">when</span> (member (1+ i) position-list)
-        (<span style="color: #FBDE2D;">push</span> (<span style="color: #FBDE2D;">or</span> separator <span style="color: #61CE3C;">" "</span>) result))
-      (<span style="color: #FBDE2D;">push</span> (substring chinese-string i (1+ i))  result))
-    (<span style="color: #FBDE2D;">setq</span> result (nreverse result))
+        (push (or separator <span style="color: #61CE3C;">" "</span>) result))
+      (push (substring chinese-string i (1+ i))  result))
+    (setq result (nreverse result))
     (mapconcat #'identity result <span style="color: #61CE3C;">""</span>)))
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-split-chinese-buffer</span> ()
   <span style="color: #61CE3C;">"&#23558;&#19968;&#20010; buffer &#20013;&#30340;&#20013;&#25991;&#25991;&#31456;&#65292;&#36827;&#34892;&#20998;&#35789;&#25805;&#20316;&#12290;"</span>
-  (<span style="color: #FBDE2D;">interactive</span>)
+  (interactive)
   (message <span style="color: #61CE3C;">"&#20998;&#35789;&#24320;&#22987;&#65281;"</span>)
   (<span style="color: #FBDE2D;">unless</span> pyim-buffer-cache-list
     (message <span style="color: #61CE3C;">"NOTE&#65306;&#20998;&#35789;&#21069;&#36816;&#34892;&#21629;&#20196; `</span><span style="color: #4c83ff;">pyim-cache-dict-buffer</span><span style="color: #61CE3C;">' &#21487;&#20197;&#26174;&#33879;&#30340;&#25552;&#39640;&#20998;&#35789;&#36895;&#24230;&#12290;&#12290;&#12290;"</span>))
@@ -312,8 +312,8 @@
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2015-09-02</span>
-        <span title="last modification date" class="post-info">2015-08-23</span>
+        <span title="post date" class="post-info">2015-09-06</span>
+        <span title="last modification date" class="post-info">2015-09-01</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>
@@ -333,7 +333,7 @@
         </script>
       </section>
       <div class="footer">
-        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.x(<a href="http://orgmode.org">Org mode</a> 8.x)</p>
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.x(<a href="http://orgmode.org">Org mode</a> 8.x)</p>
         <p>
           Copyright &copy; <span id="footerYear"></span> <a href="mailto:tumashu &lt;at&gt; 163 &lt;dot&gt; com">Feng Shu</a>
           &nbsp;&nbsp;-&nbsp;&nbsp;

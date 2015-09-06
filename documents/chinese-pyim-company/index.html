@@ -121,7 +121,7 @@
 <pre class="src src-emacs-lisp"><span style="color: #8B8989; font-style: italic;">;;;</span><span style="color: #8B8989; font-style: italic;">###</span><span style="color: #ff69b4; font-style: italic;">autoload</span>
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-company-complete</span> ()
   <span style="color: #61CE3C;">"`</span><span style="color: #4c83ff;">company-mode</span><span style="color: #61CE3C;">' &#34917;&#20840;&#21629;&#20196;&#30340;&#21253;&#35013;&#20989;&#25968;&#65292;&#19987;&#38376;&#29992;&#25143; `</span><span style="color: #4c83ff;">chinese-pyim</span><span style="color: #61CE3C;">'"</span>
-  (<span style="color: #FBDE2D;">interactive</span>)
+  (interactive)
   (<span style="color: #FBDE2D;">unless</span> company-mode (company-mode))
   <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20445;&#23384; `</span><span style="color: #4c83ff; font-style: italic;">company-mode</span><span style="color: #8B8989; font-style: italic;">' &#21464;&#37327;&#21407;&#26469;&#30340;&#35774;&#23450;&#12290;</span>
   (mapc 'pyim-company-backup-variable
@@ -153,11 +153,11 @@
 
 <span style="color: #61CE3C;">`</span><span style="color: #4c83ff;">pyim-company-dabbrev</span><span style="color: #61CE3C;">' &#21487;&#20197;&#21644; `</span><span style="color: #4c83ff;">company-dabbrev</span><span style="color: #61CE3C;">' &#37197;&#21512;&#20351;&#29992;&#12290;&#20855;&#20307;&#32454;&#33410;&#35831;</span>
 <span style="color: #61CE3C;">&#21442;&#32771; Company-mode group backends &#30456;&#20851;&#25991;&#26723;&#12290;"</span>
-  (<span style="color: #FBDE2D;">interactive</span> (list 'interactive))
+  (interactive (list 'interactive))
   (<span style="color: #FBDE2D;">cl-case</span> command
-    (<span style="color: #FBDE2D;">interactive</span> (company-begin-backend 'pyim-company-dabbrev))
+    (interactive (company-begin-backend 'pyim-company-dabbrev))
     (prefix
-     (<span style="color: #FBDE2D;">and</span> (<span style="color: #FBDE2D;">featurep</span> '<span style="color: #4c83ff;">chinese-pyim</span>)
+     (and (<span style="color: #FBDE2D;">featurep</span> '<span style="color: #4c83ff;">chinese-pyim</span>)
           <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20809;&#26631;&#21069;&#23383;&#31526;&#26159;&#21542;&#26102;&#27721;&#23383;&#65311;</span>
           (string-match-p <span style="color: #61CE3C;">"\\cc"</span> (char-to-string (char-before)))
           (string-match-p <span style="color: #61CE3C;">"\\cc"</span> pyim-current-str)
@@ -188,7 +188,7 @@
 <pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-get-predict-words</span> (pinyin word)
   <span style="color: #61CE3C;">"&#33719;&#21462;&#25152;&#26377;&#35789;&#24211;&#20013;&#20197; `</span><span style="color: #4c83ff;">word</span><span style="color: #61CE3C;">' &#24320;&#22836;&#30340;&#20013;&#25991;&#35789;&#26465;&#65292;&#29992;&#20110;&#25340;&#38899;&#32852;&#24819;&#36755;&#20837;&#12290;</span>
 <span style="color: #61CE3C;">`</span><span style="color: #4c83ff;">pinyin</span><span style="color: #61CE3C;">' &#36873;&#39033;&#26159;&#20026;&#20102;&#22312;&#35789;&#24211;&#20013;&#24555;&#36895;&#23450;&#20301;&#65292;&#20943;&#23569;&#25628;&#32034;&#26102;&#38388;&#12290;"</span>
-  (<span style="color: #FBDE2D;">when</span> (<span style="color: #FBDE2D;">and</span> pyim-company-predict-words-number
+  (<span style="color: #FBDE2D;">when</span> (and pyim-company-predict-words-number
              (&gt; pyim-company-predict-words-number 0)
              (&gt; (length pinyin) 0)
              (&gt; (length word) 0))
@@ -201,13 +201,13 @@
           (pyim-bisearch-word pinyin (point-min) (point-max))
           (<span style="color: #FBDE2D;">save-excursion</span>
             (forward-line (- 0 limit))
-            (<span style="color: #FBDE2D;">while</span> (<span style="color: #FBDE2D;">and</span> (re-search-forward regexp nil t)
+            (<span style="color: #FBDE2D;">while</span> (and (re-search-forward regexp nil t)
                         (&lt; count (* 2 limit)))
-              (<span style="color: #FBDE2D;">setq</span> predict-words (delete-dups
+              (setq predict-words (delete-dups
                                    (append predict-words
                                            (list (match-string 1)))))
               (goto-char (match-end 0))
-              (<span style="color: #FBDE2D;">setq</span> count (1+ count))))))
+              (setq count (1+ count))))))
       predict-words)))
 </pre>
 </div>
@@ -217,11 +217,11 @@
 <pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-company-predict-words</span> (command <span style="color: #D8FA3C;">&amp;optional</span> arg <span style="color: #D8FA3C;">&amp;rest</span> ignore)
   <span style="color: #61CE3C;">"`</span><span style="color: #4c83ff;">company-mode</span><span style="color: #61CE3C;">' &#34917;&#20840;&#21518;&#31471;&#65292;&#21482;&#29992;&#20110; Chinese-pyim &#32852;&#24819;&#35789;&#34917;&#20840;&#65292;&#26080;&#20854;&#20182;</span>
 <span style="color: #61CE3C;">&#20316;&#29992;&#12290;"</span>
-  (<span style="color: #FBDE2D;">interactive</span> (list 'interactive))
+  (interactive (list 'interactive))
   (<span style="color: #FBDE2D;">cl-case</span> command
-    (<span style="color: #FBDE2D;">interactive</span> (company-begin-backend 'pyim-company-backend))
+    (interactive (company-begin-backend 'pyim-company-backend))
     (prefix
-     (<span style="color: #FBDE2D;">and</span> (<span style="color: #FBDE2D;">featurep</span> '<span style="color: #4c83ff;">chinese-pyim</span>)
+     (and (<span style="color: #FBDE2D;">featurep</span> '<span style="color: #4c83ff;">chinese-pyim</span>)
           <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20809;&#26631;&#21069;&#23383;&#31526;&#26159;&#21542;&#26102;&#27721;&#23383;&#65311;</span>
           (string-match-p <span style="color: #61CE3C;">"\\cc"</span> (char-to-string (char-before)))
           (string-match-p <span style="color: #61CE3C;">"\\cc"</span> pyim-current-str)
@@ -239,8 +239,8 @@
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2015-09-02</span>
-        <span title="last modification date" class="post-info">2015-07-31</span>
+        <span title="post date" class="post-info">2015-09-06</span>
+        <span title="last modification date" class="post-info">2015-09-01</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>
@@ -260,7 +260,7 @@
         </script>
       </section>
       <div class="footer">
-        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.x(<a href="http://orgmode.org">Org mode</a> 8.x)</p>
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.x(<a href="http://orgmode.org">Org mode</a> 8.x)</p>
         <p>
           Copyright &copy; <span id="footerYear"></span> <a href="mailto:tumashu &lt;at&gt; 163 &lt;dot&gt; com">Feng Shu</a>
           &nbsp;&nbsp;-&nbsp;&nbsp;

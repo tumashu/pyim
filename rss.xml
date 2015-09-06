@@ -4,64 +4,64 @@
     <title>Chinese-pyim</title>
     <link>http://tumashu.github.com/chinese-pyim</link>
     <description>(一个 emacs 环境下的中文拼音输入法)</description>
-    <pubDate>Wed, 02 Sep 2015 19:46:34 CST</pubDate>
-    <lastBuildDate>Wed, 02 Sep 2015 19:46:34 CST</lastBuildDate>
+    <pubDate>星期日, 06 九月 2015 11:04:29 中国标准时间</pubDate>
+    <lastBuildDate>星期日, 06 九月 2015 11:04:29 中国标准时间</lastBuildDate>
     <docs>http://www.rssboard.org/rss-specification</docs>
     <generator>org-webpage static site generator (https://github.com/tumashu/org-webpage)</generator>
-<item>
-<title>chinese-pyim</title>
-<link>http://tumashu.github.com/chinese-pyim/documents/chinese-pyim/</link>
-<description>No Description</description>
-<pubDate>2015-09-02</pubDate>
-<guid>http://tumashu.github.com/chinese-pyim/documents/chinese-pyim/</guid>
-</item>
 <item>
 <title>chinese-pyim-devtools</title>
 <link>http://tumashu.github.com/chinese-pyim/documents/chinese-pyim-devtools/</link>
 <description>No Description</description>
-<pubDate>2015-09-02</pubDate>
+<pubDate>2015-09-06</pubDate>
 <guid>http://tumashu.github.com/chinese-pyim/documents/chinese-pyim-devtools/</guid>
 </item>
 <item>
-<title>chinese-pyim-core</title>
-<link>http://tumashu.github.com/chinese-pyim/documents/chinese-pyim-core/</link>
+<title>chinese-pyim</title>
+<link>http://tumashu.github.com/chinese-pyim/documents/chinese-pyim/</link>
 <description>No Description</description>
-<pubDate>2015-09-02</pubDate>
-<guid>http://tumashu.github.com/chinese-pyim/documents/chinese-pyim-core/</guid>
+<pubDate>2015-09-01</pubDate>
+<guid>http://tumashu.github.com/chinese-pyim/documents/chinese-pyim/</guid>
 </item>
 <item>
 <title>chinese-pyim-utils</title>
 <link>http://tumashu.github.com/chinese-pyim/documents/chinese-pyim-utils/</link>
 <description>No Description</description>
-<pubDate>2015-08-23</pubDate>
+<pubDate>2015-09-01</pubDate>
 <guid>http://tumashu.github.com/chinese-pyim/documents/chinese-pyim-utils/</guid>
 </item>
 <item>
 <title>chinese-pyim-pymap</title>
 <link>http://tumashu.github.com/chinese-pyim/documents/chinese-pyim-pymap/</link>
 <description>No Description</description>
-<pubDate>2015-08-23</pubDate>
+<pubDate>2015-09-01</pubDate>
 <guid>http://tumashu.github.com/chinese-pyim/documents/chinese-pyim-pymap/</guid>
 </item>
 <item>
 <title>chinese-pyim-dictools</title>
 <link>http://tumashu.github.com/chinese-pyim/documents/chinese-pyim-dictools/</link>
 <description>No Description</description>
-<pubDate>2015-08-23</pubDate>
+<pubDate>2015-09-01</pubDate>
 <guid>http://tumashu.github.com/chinese-pyim/documents/chinese-pyim-dictools/</guid>
+</item>
+<item>
+<title>chinese-pyim-core</title>
+<link>http://tumashu.github.com/chinese-pyim/documents/chinese-pyim-core/</link>
+<description>No Description</description>
+<pubDate>2015-09-01</pubDate>
+<guid>http://tumashu.github.com/chinese-pyim/documents/chinese-pyim-core/</guid>
 </item>
 <item>
 <title>chinese-pyim-company</title>
 <link>http://tumashu.github.com/chinese-pyim/documents/chinese-pyim-company/</link>
 <description>No Description</description>
-<pubDate>2015-07-31</pubDate>
+<pubDate>2015-09-01</pubDate>
 <guid>http://tumashu.github.com/chinese-pyim/documents/chinese-pyim-company/</guid>
 </item>
 <item>
 <title>Chinese-pyim 截图展示</title>
 <link>http://tumashu.github.com/chinese-pyim/snapshots/截图展示/</link>
 <description>No Description</description>
-<pubDate>2015-07-04</pubDate>
+<pubDate>2015-08-27</pubDate>
 <guid>http://tumashu.github.com/chinese-pyim/snapshots/截图展示/</guid>
 </item>
 </channel>
