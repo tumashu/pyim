@@ -192,6 +192,12 @@ content: "*** "
         padding: 0px 0.2em;
     }
 
+    span.tags-links {
+        display:block;
+        float:right;
+        text-align:right;
+    }
+
     img {
         border: none;
     }
