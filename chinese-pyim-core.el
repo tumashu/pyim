@@ -2172,7 +2172,8 @@ Counting starts at 1."
            (= punc-posit-before-1 0)
            (= char pyim-translate-trigger-char))
       (setq pyim-last-input-word nil)
-      (pyim-punctuation-translate-last-n-punctuations t))
+      (pyim-punctuation-translate-last-n-punctuations 'quanjiao)
+      "")
 
      ;; 当光标前面为中文标点时， 按 `pyim-translate-trigger-char'
      ;; 对应的字符后， 自动将其转换为对应的英文标点。
@@ -2180,7 +2181,8 @@ Counting starts at 1."
            (> punc-posit-before-1 0)
            (= char pyim-translate-trigger-char))
       (setq pyim-last-input-word nil)
-      (pyim-punctuation-translate-last-n-punctuations nil))
+      (pyim-punctuation-translate-last-n-punctuations 'banjiao)
+      "")
 
      ;; 正常输入标点符号。
      (punc-list
@@ -2249,11 +2251,15 @@ Counting starts at 1."
           (insert (pyim-return-proper-punctuation punc-list t))
         (insert (car punc-list))))))
 
-(defun pyim-punctuation-translate-last-n-punctuations (&optional to-quanjiao)
-  "将光标前面连续的n个标点符号进行全角/半角转换，当 `to-quanjiao' 设置为t时，
-所有的标点符号转换为全角符号，反之，转换为半角符号。"
+(defun pyim-punctuation-translate-last-n-punctuations (&optional punct-style)
+  "将光标前面连续的n个标点符号进行全角/半角转换，当 `punct-style' 设置为 `quanjiao' 时，
+所有的标点符号转换为全角符号，设置为 `banjiao' 时，转换为半角符号。"
   (interactive)
   (let ((punc-list (pyim-flatten-list pyim-punctuation-dict))
+        (punct-style
+         (or punct-style
+             (intern (completing-read
+                      "将光标前的标点转换为" '("quanjiao" "banjiao")))))
         (count 0)
         number last-puncts result)
     (while count
@@ -2270,14 +2276,16 @@ Counting starts at 1."
       (dolist (puncts pyim-punctuation-dict)
         (let ((position (cl-position punct puncts :test #'equal)))
           (when position
-            (if to-quanjiao
-                (if (= position 0)
-                    (push (pyim-return-proper-punctuation puncts) result)
-                  (push punct result))
+            (cond
+             ((eq punct-style 'quanjiao)
+              (if (= position 0)
+                  (push (pyim-return-proper-punctuation puncts) result)
+                (push punct result)))
+             ((eq punct-style 'banjiao)
               (if (= position 0)
                   (push punct result)
-                (push (car puncts) result)))))))
-    (mapconcat #'identity (reverse result) "")))
+                (push (car puncts) result))))))))
+    (insert (mapconcat #'identity (reverse result) ""))))
 ;; #+END_SRC
 
 ;; 使用上述命令切换光标前标点符号的样式时，我们使用函数 `pyim-return-proper-punctuation'
