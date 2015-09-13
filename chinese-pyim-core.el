@@ -1305,6 +1305,47 @@ Return the input string."
          (member last-command-event
                  (mapcar 'identity "vmpfwckzyjqdltxuognbhsrei'-a")))))
 
+(defun pyim-dynamic-english-input-function ()
+  "中英文输入动态切换函数，其基本规则是：
+
+1. 当前字符为英文字符时，输入下一个字符时默认开启英文输入
+2. 当前字符为中文字符时，输入下一个字符时默认开启中文输入
+3. 当前字符为中文字符时，输入1个空格后，仍然输入中文
+4. 当前字符为英文字符时，输入1个空格后，仍然输入英文
+5. 当前字符为中文字符时，输入2个空格后，切换到英文输入
+6. 当前字符为英文字符时，输入2个空格后，切换到中文输入
+
+这个函数的使用方法请参考 `pyim-english-input-switch-function'
+的相关帮助。"
+  (let ((str-before-1 (pyim-char-before-to-string 0))
+        (str-before-2 (pyim-char-before-to-string 1))
+        (str-before-3 (pyim-char-before-to-string 2))
+        (str-before-4 (pyim-char-before-to-string 3))
+        (regexp-chinese "\\cc")
+        (regexp-alpha "[a-zA-Z]")
+        ;; ascii puncts: !\"#$%&'()*+,-./:;<=>?@\^_`{|}~
+        (regexp-punct "[@`+=_~.-]"))
+    (cond ((and str-before-1 str-before-2 str-before-3
+                (string= str-before-1 " ")
+                (string= str-before-2 " ")
+                (string-match-p regexp-chinese str-before-3)) t)
+          ((and str-before-1 str-before-2 str-before-3
+                (string= str-before-1 " ")
+                (string= str-before-2 " ")
+                (string-match-p regexp-alpha str-before-3)) nil)
+          ((and str-before-1 str-before-2
+                (string= str-before-1 " ")
+                (string-match-p regexp-chinese str-before-2)) nil)
+          ((and str-before-1 str-before-2
+                (string= str-before-1 " ")
+                (string-match-p regexp-alpha str-before-2)) t)
+          ((and str-before-1
+                (or (string-match-p regexp-alpha str-before-1)
+                    (string-match-p regexp-punct str-before-1))
+                (= (length pyim-guidance-str) 0)) t)
+          ((and str-before-1
+                (string-match-p regexp-chinese str-before-1)) nil))))
+
 (defun pyim-self-insert-command ()
   "如果在 pyim-first-char 列表中，则查找相应的词条，否则停止转换，插入对应的字符"
   (interactive "*")
