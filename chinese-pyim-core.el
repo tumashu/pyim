@@ -2213,7 +2213,7 @@ Counting starts at 1."
            (= punc-posit-before-1 0)
            (= char pyim-translate-trigger-char))
       (setq pyim-last-input-word nil)
-      (pyim-punctuation-translate-last-n-punctuations 'quanjiao)
+      (pyim-punctuation-translate-last-n-punctuations 'full-width)
       "")
 
      ;; 当光标前面为中文标点时， 按 `pyim-translate-trigger-char'
@@ -2222,7 +2222,7 @@ Counting starts at 1."
            (> punc-posit-before-1 0)
            (= char pyim-translate-trigger-char))
       (setq pyim-last-input-word nil)
-      (pyim-punctuation-translate-last-n-punctuations 'banjiao)
+      (pyim-punctuation-translate-last-n-punctuations 'half-width)
       "")
 
      ;; 正常输入标点符号。
@@ -2293,14 +2293,14 @@ Counting starts at 1."
         (insert (car punc-list))))))
 
 (defun pyim-punctuation-translate-last-n-punctuations (&optional punct-style)
-  "将光标前面连续的n个标点符号进行全角/半角转换，当 `punct-style' 设置为 `quanjiao' 时，
-所有的标点符号转换为全角符号，设置为 `banjiao' 时，转换为半角符号。"
+  "将光标前面连续的n个标点符号进行全角/半角转换，当 `punct-style' 设置为 `full-width' 时，
+所有的标点符号转换为全角符号，设置为 `half-width' 时，转换为半角符号。"
   (interactive)
   (let ((punc-list (pyim-flatten-list pyim-punctuation-dict))
         (punct-style
          (or punct-style
              (intern (completing-read
-                      "将光标前的标点转换为" '("quanjiao" "banjiao")))))
+                      "将光标前的标点转换为" '("full-width" "half-width")))))
         (count 0)
         number last-puncts result)
     (while count
@@ -2318,11 +2318,11 @@ Counting starts at 1."
         (let ((position (cl-position punct puncts :test #'equal)))
           (when position
             (cond
-             ((eq punct-style 'quanjiao)
+             ((eq punct-style 'full-width)
               (if (= position 0)
                   (push (pyim-return-proper-punctuation puncts) result)
                 (push punct result)))
-             ((eq punct-style 'banjiao)
+             ((eq punct-style 'half-width)
               (if (= position 0)
                   (push punct result)
                 (push (car puncts) result))))))))
