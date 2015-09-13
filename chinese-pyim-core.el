@@ -1328,23 +1328,35 @@ Return the input string."
     (cond ((and str-before-1 str-before-2 str-before-3
                 (string= str-before-1 " ")
                 (string= str-before-2 " ")
-                (string-match-p regexp-chinese str-before-3)) t)
+                (string-match-p regexp-chinese str-before-3))
+           (pyim-toggle-full-width-punctuation -1) ;; 使用半角标点
+           t)
           ((and str-before-1 str-before-2 str-before-3
                 (string= str-before-1 " ")
                 (string= str-before-2 " ")
-                (string-match-p regexp-alpha str-before-3)) nil)
+                (string-match-p regexp-alpha str-before-3))
+           (pyim-toggle-full-width-punctuation 1) ;; 使用全角标点
+           nil)
           ((and str-before-1 str-before-2
                 (string= str-before-1 " ")
-                (string-match-p regexp-chinese str-before-2)) nil)
+                (string-match-p regexp-chinese str-before-2))
+           (pyim-toggle-full-width-punctuation 1) ;; 使用全角标点
+           nil)
           ((and str-before-1 str-before-2
                 (string= str-before-1 " ")
-                (string-match-p regexp-alpha str-before-2)) t)
+                (string-match-p regexp-alpha str-before-2))
+           (pyim-toggle-full-width-punctuation -1) ;; 使用半角标点
+           t)
           ((and str-before-1
                 (or (string-match-p regexp-alpha str-before-1)
                     (string-match-p regexp-punct str-before-1))
-                (= (length pyim-guidance-str) 0)) t)
+                (= (length pyim-guidance-str) 0))
+           (pyim-toggle-full-width-punctuation -1) ;; 使用半角标点
+           t)
           ((and str-before-1
-                (string-match-p regexp-chinese str-before-1)) nil))))
+                (string-match-p regexp-chinese str-before-1))
+           (pyim-toggle-full-width-punctuation 1)  ;; 使用全角标点
+           nil))))
 
 (defun pyim-self-insert-command ()
   "如果在 pyim-first-char 列表中，则查找相应的词条，否则停止转换，插入对应的字符"
