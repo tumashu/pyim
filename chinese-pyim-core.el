@@ -1324,7 +1324,7 @@ Return the input string."
         (regexp-chinese "\\cc")
         (regexp-alpha "[a-zA-Z]")
         ;; ascii puncts: !\"#$%&'()*+,-./:;<=>?@\^_`{|}~
-        (regexp-punct "[@`+=_~.-]"))
+        (regexp-punct "[@`+=_~.-&]"))
     (cond ((and str-before-1 str-before-2 str-before-3
                 (string= str-before-1 " ")
                 (string= str-before-2 " ")
