@@ -2198,6 +2198,7 @@ Counting starts at 1."
      ;; 比如：在一个中文字符串后输入 2v，可以将光标前两个中文字符
      ;; 组成的字符串，保存到个人词库。
      ((and (member (char-before) (number-sequence ?2 ?9))
+           (stringp str-before-2)
            (string-match-p "\\cc" str-before-2)
            (= char pyim-translate-trigger-char))
       (delete-char -1)
@@ -2207,6 +2208,7 @@ Counting starts at 1."
 
      ;; 光标前面的字符为中文字符时，按 v 清洗当前行的内容。
      ((and (not (numberp punc-posit-before-1))
+           (stringp str-before-1)
            (string-match-p "\\cc" str-before-1)
            (= char pyim-translate-trigger-char))
       (pyim-wash-current-line)
