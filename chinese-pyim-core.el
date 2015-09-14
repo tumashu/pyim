@@ -2204,6 +2204,12 @@ Counting starts at 1."
        (string-to-number str-before-1))
       "")
 
+     ;; 光标前面的字符为中文字符时，按 v 清洗当前行的内容。
+     ((and (string-match-p "\\cc" str-before-1)
+           (= char pyim-translate-trigger-char))
+      (pyim-wash-current-line)
+      "")
+
      ;; 关闭标点转换功能时，只插入英文标点。
      ((not pyim-punctuation-translate-p)
       ;; `pyim-last-input-word' 保存的词条用于词语联想，
@@ -2252,6 +2258,23 @@ Counting starts at 1."
     (when (and (> point-before 0)
                (char-before point-before))
       (char-to-string (char-before point-before)))))
+
+(defun pyim-wash-current-line ()
+  "清理当前行的内容，比如：删除不必要的空格，等。"
+  (interactive)
+  (let* ((begin (line-beginning-position))
+         (end (point))
+         (string (buffer-substring-no-properties begin end))
+         new-string)
+    (when (> (length string) 0)
+      (delete-region begin end)
+      (setq new-string
+            (replace-regexp-in-string
+             "\\(\\cc\\) +\\([[:ascii:]]\\)" "\\1 \\2"
+             (replace-regexp-in-string
+              "\\([[:ascii:]]\\) +\\(\\cc\\)" "\\1 \\2" string)))
+      (insert new-string))))
+
 ;; #+END_SRC
 
 ;; 当用户使用 org-mode 以及 markdown 等轻量级标记语言撰写文档时，常常需要输入数字列表，比如：
