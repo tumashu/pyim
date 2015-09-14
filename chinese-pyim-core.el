@@ -1329,33 +1329,33 @@ Return the input string."
                 (string= str-before-1 " ")
                 (string= str-before-2 " ")
                 (string-match-p regexp-chinese str-before-3))
-           (pyim-toggle-full-width-punctuation -1) ;; 使用半角标点
+           (pyim-toggle-full-width-punctuation -1 t) ;; 使用半角标点
            t)
           ((and str-before-1 str-before-2 str-before-3
                 (string= str-before-1 " ")
                 (string= str-before-2 " ")
                 (string-match-p regexp-alpha str-before-3))
-           (pyim-toggle-full-width-punctuation 1) ;; 使用全角标点
+           (pyim-toggle-full-width-punctuation 1 t) ;; 使用全角标点
            nil)
           ((and str-before-1 str-before-2
                 (string= str-before-1 " ")
                 (string-match-p regexp-chinese str-before-2))
-           (pyim-toggle-full-width-punctuation 1) ;; 使用全角标点
+           (pyim-toggle-full-width-punctuation 1 t) ;; 使用全角标点
            nil)
           ((and str-before-1 str-before-2
                 (string= str-before-1 " ")
                 (string-match-p regexp-alpha str-before-2))
-           (pyim-toggle-full-width-punctuation -1) ;; 使用半角标点
+           (pyim-toggle-full-width-punctuation -1 t) ;; 使用半角标点
            t)
           ((and str-before-1
                 (or (string-match-p regexp-alpha str-before-1)
                     (string-match-p regexp-punct str-before-1))
                 (= (length pyim-guidance-str) 0))
-           (pyim-toggle-full-width-punctuation -1) ;; 使用半角标点
+           (pyim-toggle-full-width-punctuation -1 t) ;; 使用半角标点
            t)
           ((and str-before-1
                 (string-match-p regexp-chinese str-before-1))
-           (pyim-toggle-full-width-punctuation 1)  ;; 使用全角标点
+           (pyim-toggle-full-width-punctuation 1 t)  ;; 使用全角标点
            nil))))
 
 (defun pyim-self-insert-command ()
@@ -2294,15 +2294,16 @@ Counting starts at 1."
 
 ;; #+BEGIN_SRC emacs-lisp
 ;;; 切换中英文标点符号
-(defun pyim-toggle-full-width-punctuation (arg)
+(defun pyim-toggle-full-width-punctuation (arg &optional silent)
   (interactive "P")
   (setq pyim-punctuation-translate-p
         (if (null arg)
             (not pyim-punctuation-translate-p)
           (> (prefix-numeric-value arg) 0)))
-  (if pyim-punctuation-translate-p
-      (message "开启标点转换功能（使用全角标点）")
-    (message "关闭标点转换功能（使用半角标点）")))
+  (unless silent
+    (if pyim-punctuation-translate-p
+        (message "开启标点转换功能（使用全角标点）")
+      (message "关闭标点转换功能（使用半角标点）"))))
 ;; #+END_SRC
 
 ;; 每次运行这个命令，都会反转变量 `pyim-punctuation-translate-p' 的取值，`pyim-translate' 会检测
