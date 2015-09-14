@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en-us">
   <head>
-    <title>chinese-pyim-core - Chinese-pyim</title>
+    <title>Chinese-Pyim-Core - Chinese-pyim</title>
     <meta charset="utf-8" />
     <meta name="author" content="Feng Shu" />
     <link rel="stylesheet" href="http://tumashu.github.com/chinese-pyim/media/css/main.css" type="text/css">
@@ -29,7 +29,7 @@
 <div class="content-and-footer">
 <div>
 <div class="post">
-<h1 class="post-title">chinese-pyim-core</h1>
+<h1 class="post-title">Chinese-Pyim-Core</h1>
 <div id="table-of-contents">
 <h2>&#30446;&#24405;</h2>
 <div id="text-table-of-contents">
@@ -1524,6 +1524,60 @@ event list。
          (member last-command-event
                  (mapcar 'identity <span style="color: #61CE3C;">"vmpfwckzyjqdltxuognbhsrei'-a"</span>)))))
 
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-dynamic-english-input-function</span> ()
+  <span style="color: #61CE3C;">"&#20013;&#33521;&#25991;&#36755;&#20837;&#21160;&#24577;&#20999;&#25442;&#20989;&#25968;&#65292;&#20854;&#22522;&#26412;&#35268;&#21017;&#26159;&#65306;</span>
+
+<span style="color: #61CE3C;">1. &#24403;&#21069;&#23383;&#31526;&#20026;&#33521;&#25991;&#23383;&#31526;&#26102;&#65292;&#36755;&#20837;&#19979;&#19968;&#20010;&#23383;&#31526;&#26102;&#40664;&#35748;&#24320;&#21551;&#33521;&#25991;&#36755;&#20837;</span>
+<span style="color: #61CE3C;">2. &#24403;&#21069;&#23383;&#31526;&#20026;&#20013;&#25991;&#23383;&#31526;&#26102;&#65292;&#36755;&#20837;&#19979;&#19968;&#20010;&#23383;&#31526;&#26102;&#40664;&#35748;&#24320;&#21551;&#20013;&#25991;&#36755;&#20837;</span>
+<span style="color: #61CE3C;">3. &#24403;&#21069;&#23383;&#31526;&#20026;&#20013;&#25991;&#23383;&#31526;&#26102;&#65292;&#36755;&#20837;1&#20010;&#31354;&#26684;&#21518;&#65292;&#20173;&#28982;&#36755;&#20837;&#20013;&#25991;</span>
+<span style="color: #61CE3C;">4. &#24403;&#21069;&#23383;&#31526;&#20026;&#33521;&#25991;&#23383;&#31526;&#26102;&#65292;&#36755;&#20837;1&#20010;&#31354;&#26684;&#21518;&#65292;&#20173;&#28982;&#36755;&#20837;&#33521;&#25991;</span>
+<span style="color: #61CE3C;">5. &#24403;&#21069;&#23383;&#31526;&#20026;&#20013;&#25991;&#23383;&#31526;&#26102;&#65292;&#36755;&#20837;2&#20010;&#31354;&#26684;&#21518;&#65292;&#20999;&#25442;&#21040;&#33521;&#25991;&#36755;&#20837;</span>
+<span style="color: #61CE3C;">6. &#24403;&#21069;&#23383;&#31526;&#20026;&#33521;&#25991;&#23383;&#31526;&#26102;&#65292;&#36755;&#20837;2&#20010;&#31354;&#26684;&#21518;&#65292;&#20999;&#25442;&#21040;&#20013;&#25991;&#36755;&#20837;</span>
+
+<span style="color: #61CE3C;">&#36825;&#20010;&#20989;&#25968;&#30340;&#20351;&#29992;&#26041;&#27861;&#35831;&#21442;&#32771; `</span><span style="color: #4c83ff;">pyim-english-input-switch-function</span><span style="color: #61CE3C;">'</span>
+<span style="color: #61CE3C;">&#30340;&#30456;&#20851;&#24110;&#21161;&#12290;"</span>
+  (<span style="color: #FBDE2D;">let</span> ((str-before-1 (pyim-char-before-to-string 0))
+        (str-before-2 (pyim-char-before-to-string 1))
+        (str-before-3 (pyim-char-before-to-string 2))
+        (str-before-4 (pyim-char-before-to-string 3))
+        (regexp-chinese <span style="color: #61CE3C;">"\\cc"</span>)
+        (regexp-alpha <span style="color: #61CE3C;">"[a-zA-Z]"</span>)
+        <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">ascii puncts: !\"#$%&amp;'()*+,-./:;&lt;=&gt;?@\^_`{|}~</span>
+        <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">NOTE: "-" must put the end of [].</span>
+        (regexp-punct <span style="color: #61CE3C;">"[@`+=_~.&amp;-]"</span>))
+    (<span style="color: #FBDE2D;">cond</span> ((and str-before-1 str-before-2 str-before-3
+                (string= str-before-1 <span style="color: #61CE3C;">" "</span>)
+                (string= str-before-2 <span style="color: #61CE3C;">" "</span>)
+                (string-match-p regexp-chinese str-before-3))
+           (pyim-toggle-full-width-punctuation -1 t) <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20351;&#29992;&#21322;&#35282;&#26631;&#28857;</span>
+           t)
+          ((and str-before-1 str-before-2 str-before-3
+                (string= str-before-1 <span style="color: #61CE3C;">" "</span>)
+                (string= str-before-2 <span style="color: #61CE3C;">" "</span>)
+                (string-match-p regexp-alpha str-before-3))
+           (pyim-toggle-full-width-punctuation 1 t) <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20351;&#29992;&#20840;&#35282;&#26631;&#28857;</span>
+           nil)
+          ((and str-before-1 str-before-2
+                (string= str-before-1 <span style="color: #61CE3C;">" "</span>)
+                (string-match-p regexp-chinese str-before-2))
+           (pyim-toggle-full-width-punctuation 1 t) <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20351;&#29992;&#20840;&#35282;&#26631;&#28857;</span>
+           nil)
+          ((and str-before-1 str-before-2
+                (string= str-before-1 <span style="color: #61CE3C;">" "</span>)
+                (string-match-p regexp-alpha str-before-2))
+           (pyim-toggle-full-width-punctuation -1 t) <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20351;&#29992;&#21322;&#35282;&#26631;&#28857;</span>
+           t)
+          ((and str-before-1
+                (or (string-match-p regexp-alpha str-before-1)
+                    (string-match-p regexp-punct str-before-1))
+                (= (length pyim-guidance-str) 0))
+           (pyim-toggle-full-width-punctuation -1 t) <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20351;&#29992;&#21322;&#35282;&#26631;&#28857;</span>
+           t)
+          ((and str-before-1
+                (string-match-p regexp-chinese str-before-1))
+           (pyim-toggle-full-width-punctuation 1 t)  <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20351;&#29992;&#20840;&#35282;&#26631;&#28857;</span>
+           nil))))
+
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-self-insert-command</span> ()
   <span style="color: #61CE3C;">"&#22914;&#26524;&#22312; pyim-first-char &#21015;&#34920;&#20013;&#65292;&#21017;&#26597;&#25214;&#30456;&#24212;&#30340;&#35789;&#26465;&#65292;&#21542;&#21017;&#20572;&#27490;&#36716;&#25442;&#65292;&#25554;&#20837;&#23545;&#24212;&#30340;&#23383;&#31526;"</span>
   (interactive <span style="color: #61CE3C;">"*"</span>)
@@ -2619,6 +2673,13 @@ Chinese-pyim 在运行过程中调用函数 `pyim-translate' 进行标点符号�
        (string-to-number str-before-1))
       <span style="color: #61CE3C;">""</span>)
 
+     <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20809;&#26631;&#21069;&#38754;&#30340;&#23383;&#31526;&#20026;&#20013;&#25991;&#23383;&#31526;&#26102;&#65292;&#25353; v &#28165;&#27927;&#24403;&#21069;&#34892;&#30340;&#20869;&#23481;&#12290;</span>
+     ((and (not (numberp punc-posit-before-1))
+           (string-match-p <span style="color: #61CE3C;">"\\cc"</span> str-before-1)
+           (= char pyim-translate-trigger-char))
+      (pyim-wash-current-line)
+      <span style="color: #61CE3C;">""</span>)
+
      <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20851;&#38381;&#26631;&#28857;&#36716;&#25442;&#21151;&#33021;&#26102;&#65292;&#21482;&#25554;&#20837;&#33521;&#25991;&#26631;&#28857;&#12290;</span>
      ((not pyim-punctuation-translate-p)
       <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">`</span><span style="color: #4c83ff; font-style: italic;">pyim-last-input-word</span><span style="color: #8B8989; font-style: italic;">' &#20445;&#23384;&#30340;&#35789;&#26465;&#29992;&#20110;&#35789;&#35821;&#32852;&#24819;&#65292;</span>
@@ -2640,8 +2701,8 @@ Chinese-pyim 在运行过程中调用函数 `pyim-translate' 进行标点符号�
            (= punc-posit-before-1 0)
            (= char pyim-translate-trigger-char))
       (setq pyim-last-input-word nil)
-      (delete-char -1)
-      (pyim-return-proper-punctuation punc-list-before-1 t))
+      (pyim-punctuation-translate-last-n-punctuations 'full-width)
+      <span style="color: #61CE3C;">""</span>)
 
      <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#24403;&#20809;&#26631;&#21069;&#38754;&#20026;&#20013;&#25991;&#26631;&#28857;&#26102;&#65292; &#25353; `</span><span style="color: #4c83ff; font-style: italic;">pyim-translate-trigger-char</span><span style="color: #8B8989; font-style: italic;">'</span>
      <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#23545;&#24212;&#30340;&#23383;&#31526;&#21518;&#65292; &#33258;&#21160;&#23558;&#20854;&#36716;&#25442;&#20026;&#23545;&#24212;&#30340;&#33521;&#25991;&#26631;&#28857;&#12290;</span>
@@ -2649,8 +2710,8 @@ Chinese-pyim 在运行过程中调用函数 `pyim-translate' 进行标点符号�
            (&gt; punc-posit-before-1 0)
            (= char pyim-translate-trigger-char))
       (setq pyim-last-input-word nil)
-      (delete-char -1)
-      (car punc-list-before-1))
+      (pyim-punctuation-translate-last-n-punctuations 'half-width)
+      <span style="color: #61CE3C;">""</span>)
 
      <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#27491;&#24120;&#36755;&#20837;&#26631;&#28857;&#31526;&#21495;&#12290;</span>
      (punc-list
@@ -2667,6 +2728,22 @@ Chinese-pyim 在运行过程中调用函数 `pyim-translate' 进行标点符号�
     (<span style="color: #FBDE2D;">when</span> (and (&gt; point-before 0)
                (char-before point-before))
       (char-to-string (char-before point-before)))))
+
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-wash-current-line</span> ()
+  <span style="color: #61CE3C;">"&#28165;&#29702;&#24403;&#21069;&#34892;&#30340;&#20869;&#23481;&#65292;&#27604;&#22914;&#65306;&#21024;&#38500;&#19981;&#24517;&#35201;&#30340;&#31354;&#26684;&#65292;&#31561;&#12290;"</span>
+  (interactive)
+  (<span style="color: #FBDE2D;">let*</span> ((begin (line-beginning-position))
+         (end (point))
+         (string (buffer-substring-no-properties begin end))
+         new-string)
+    (<span style="color: #FBDE2D;">when</span> (&gt; (length string) 0)
+      (delete-region begin end)
+      (setq new-string
+            (replace-regexp-in-string
+             <span style="color: #61CE3C;">"</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">(</span><span style="color: #61CE3C;">\\cc</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">)</span><span style="color: #61CE3C;"> +</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">(</span><span style="color: #61CE3C;">[[:ascii:]]</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">)</span><span style="color: #61CE3C;">"</span> <span style="color: #61CE3C;">"\\1 \\2"</span>
+             (replace-regexp-in-string
+              <span style="color: #61CE3C;">"</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">(</span><span style="color: #61CE3C;">[[:ascii:]]</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">)</span><span style="color: #61CE3C;"> +</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">(</span><span style="color: #61CE3C;">\\cc</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">)</span><span style="color: #61CE3C;">"</span> <span style="color: #61CE3C;">"\\1 \\2"</span> string)))
+      (insert new-string))))
 </pre>
 </div>
 
@@ -2692,15 +2769,16 @@ Chinese-pyim 在运行过程中调用函数 `pyim-translate' 进行标点符号�
 <div class="org-src-container">
 
 <pre class="src src-emacs-lisp"><span style="color: #8B8989; font-style: italic;">;;; </span><span style="color: #8B8989; font-style: italic;">&#20999;&#25442;&#20013;&#33521;&#25991;&#26631;&#28857;&#31526;&#21495;</span>
-(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-toggle-full-width-punctuation</span> (arg)
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-toggle-full-width-punctuation</span> (arg <span style="color: #D8FA3C;">&amp;optional</span> silent)
   (interactive <span style="color: #61CE3C;">"P"</span>)
   (setq pyim-punctuation-translate-p
         (<span style="color: #FBDE2D;">if</span> (null arg)
             (not pyim-punctuation-translate-p)
           (&gt; (prefix-numeric-value arg) 0)))
-  (<span style="color: #FBDE2D;">if</span> pyim-punctuation-translate-p
-      (message <span style="color: #61CE3C;">"&#24320;&#21551;&#26631;&#28857;&#36716;&#25442;&#21151;&#33021;&#65288;&#20351;&#29992;&#20840;&#35282;&#26631;&#28857;&#65289;"</span>)
-    (message <span style="color: #61CE3C;">"&#20851;&#38381;&#26631;&#28857;&#36716;&#25442;&#21151;&#33021;&#65288;&#20351;&#29992;&#21322;&#35282;&#26631;&#28857;&#65289;"</span>)))
+  (<span style="color: #FBDE2D;">unless</span> silent
+    (<span style="color: #FBDE2D;">if</span> pyim-punctuation-translate-p
+        (message <span style="color: #61CE3C;">"&#24320;&#21551;&#26631;&#28857;&#36716;&#25442;&#21151;&#33021;&#65288;&#20351;&#29992;&#20840;&#35282;&#26631;&#28857;&#65289;"</span>)
+      (message <span style="color: #61CE3C;">"&#20851;&#38381;&#26631;&#28857;&#36716;&#25442;&#21151;&#33021;&#65288;&#20351;&#29992;&#21322;&#35282;&#26631;&#28857;&#65289;"</span>))))
 </pre>
 </div>
 
@@ -2729,6 +2807,42 @@ Chinese-pyim 在运行过程中调用函数 `pyim-translate' 进行标点符号�
       (<span style="color: #FBDE2D;">if</span> (string= current-char (car punc-list))
           (insert (pyim-return-proper-punctuation punc-list t))
         (insert (car punc-list))))))
+
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-punctuation-translate-last-n-punctuations</span> (<span style="color: #D8FA3C;">&amp;optional</span> punct-style)
+  <span style="color: #61CE3C;">"&#23558;&#20809;&#26631;&#21069;&#38754;&#36830;&#32493;&#30340;n&#20010;&#26631;&#28857;&#31526;&#21495;&#36827;&#34892;&#20840;&#35282;/&#21322;&#35282;&#36716;&#25442;&#65292;&#24403; `</span><span style="color: #4c83ff;">punct-style</span><span style="color: #61CE3C;">' &#35774;&#32622;&#20026; `</span><span style="color: #4c83ff;">full-width</span><span style="color: #61CE3C;">' &#26102;&#65292;</span>
+<span style="color: #61CE3C;">&#25152;&#26377;&#30340;&#26631;&#28857;&#31526;&#21495;&#36716;&#25442;&#20026;&#20840;&#35282;&#31526;&#21495;&#65292;&#35774;&#32622;&#20026; `</span><span style="color: #4c83ff;">half-width</span><span style="color: #61CE3C;">' &#26102;&#65292;&#36716;&#25442;&#20026;&#21322;&#35282;&#31526;&#21495;&#12290;"</span>
+  (interactive)
+  (<span style="color: #FBDE2D;">let</span> ((punc-list (pyim-flatten-list pyim-punctuation-dict))
+        (punct-style
+         (or punct-style
+             (intern (completing-read
+                      <span style="color: #61CE3C;">"&#23558;&#20809;&#26631;&#21069;&#30340;&#26631;&#28857;&#36716;&#25442;&#20026;"</span> '(<span style="color: #61CE3C;">"full-width"</span> <span style="color: #61CE3C;">"half-width"</span>)))))
+        (count 0)
+        number last-puncts result)
+    (<span style="color: #FBDE2D;">while</span> count
+      (<span style="color: #FBDE2D;">let</span> ((str (pyim-char-before-to-string count)))
+        (<span style="color: #FBDE2D;">if</span> (member str punc-list)
+            (<span style="color: #FBDE2D;">progn</span>
+              (push str last-puncts)
+              (setq count (+ count 1)))
+          (setq number count)
+          (setq count nil))))
+    <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#21024;&#38500;&#26087;&#30340;&#26631;&#28857;&#31526;&#21495;</span>
+    (delete-char (- 0 number))
+    (<span style="color: #FBDE2D;">dolist</span> (punct last-puncts)
+      (<span style="color: #FBDE2D;">dolist</span> (puncts pyim-punctuation-dict)
+        (<span style="color: #FBDE2D;">let</span> ((position (cl-position punct puncts <span style="color: #FF6400;">:test</span> #'equal)))
+          (<span style="color: #FBDE2D;">when</span> position
+            (<span style="color: #FBDE2D;">cond</span>
+             ((eq punct-style 'full-width)
+              (<span style="color: #FBDE2D;">if</span> (= position 0)
+                  (push (pyim-return-proper-punctuation puncts) result)
+                (push punct result)))
+             ((eq punct-style 'half-width)
+              (<span style="color: #FBDE2D;">if</span> (= position 0)
+                  (push punct result)
+                (push (car puncts) result))))))))
+    (insert (mapconcat #'identity (reverse result) <span style="color: #61CE3C;">""</span>))))
 </pre>
 </div>
 
@@ -3141,8 +3255,8 @@ Chinese-pyim 在特定的时候需要读取一个汉字的拼音，这个工作�
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2015-09-07</span>
-        <span title="last modification date" class="post-info">2015-09-01</span>
+        <span title="post date" class="post-info">2015-09-14</span>
+        <span title="last modification date" class="post-info">2015-09-14</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>
