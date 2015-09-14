@@ -184,6 +184,13 @@ Chinese-pyim 内建的功能有：
   :group 'chinese-pyim
   :type 'hook)
 
+(defcustom pyim-wash-function 'pyim-wash-current-line-function
+  "这个函数与『单字快捷键配合使用』，当光标前面的字符为汉字字符时，
+按 `pyim-translate-trigger-char' 对应字符，可以调用这个函数来清洗
+光标前面的文字内容。"
+  :group 'chinese-pyim
+  :type 'function)
+
 (defcustom pyim-use-tooltip  t
   "如何显示 Chinese-pyim 选词框，当取值为 t 并且 *tooltip 功能可以正常使用*
 时，使用 tooltip 显示选词框，当取值为 nil 时，使用 minibuffer 显示选词框。
@@ -2211,7 +2218,7 @@ Counting starts at 1."
            (stringp str-before-1)
            (string-match-p "\\cc" str-before-1)
            (= char pyim-translate-trigger-char))
-      (pyim-wash-current-line)
+      (funcall pyim-wash-function)
       "")
 
      ;; 关闭标点转换功能时，只插入英文标点。
@@ -2263,7 +2270,7 @@ Counting starts at 1."
                (char-before point-before))
       (char-to-string (char-before point-before)))))
 
-(defun pyim-wash-current-line ()
+(defun pyim-wash-current-line-function ()
   "清理当前行的内容，比如：删除不必要的空格，等。"
   (interactive)
   (let* ((begin (line-beginning-position))
