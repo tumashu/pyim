@@ -2205,7 +2205,8 @@ Counting starts at 1."
       "")
 
      ;; 光标前面的字符为中文字符时，按 v 清洗当前行的内容。
-     ((and (string-match-p "\\cc" str-before-1)
+     ((and (not (numberp punc-posit-before-1))
+           (string-match-p "\\cc" str-before-1)
            (= char pyim-translate-trigger-char))
       (pyim-wash-current-line)
       "")
