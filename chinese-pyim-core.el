@@ -1325,7 +1325,7 @@ Return the input string."
         (regexp-alpha "[a-zA-Z]")
         ;; ascii puncts: !\"#$%&'()*+,-./:;<=>?@\^_`{|}~
         ;; NOTE: "-" must put the end of [].
-        (regexp-punct "[@`+=_~.&-]"))
+        (regexp-punct "[@`+=_~&-]"))
     (cond ((and str-before-1 str-before-2 str-before-3
                 (string= str-before-1 " ")
                 (string= str-before-2 " ")
@@ -2272,9 +2272,9 @@ Counting starts at 1."
       (delete-region begin end)
       (setq new-string
             (replace-regexp-in-string
-             "\\(\\cc\\) +\\([[:ascii:]]\\)" "\\1 \\2"
+             "\\(\\cc\\)  +\\([[:ascii:]]\\)" "\\1 \\2"
              (replace-regexp-in-string
-              "\\([[:ascii:]]\\) +\\(\\cc\\)" "\\1 \\2" string)))
+              "\\([[:ascii:]]\\)  +\\(\\cc\\)" "\\1 \\2" string)))
       (insert new-string))))
 
 ;; #+END_SRC
