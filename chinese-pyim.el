@@ -125,6 +125,24 @@
 ;; C-h v pyim-fuzzy-pinyin-adjust-function
 ;; #+END_EXAMPLE
 
+;; *** 动态中英文切换
+;; Chinese-pyim  可以根据输入内容动态的切换中英文输入，
+;; 基本规则是：
+
+;; 1. 当前字符为英文字符时，输入下一个字符时默认开启英文输入
+;; 2. 当前字符为中文字符时，输入下一个字符时默认开启中文输入
+;; 3. 当前字符为中文字符时，输入1个空格后，仍然输入中文
+;; 4. 当前字符为英文字符时，输入1个空格后，仍然输入英文
+;; 5. 当前字符为中文字符时，输入2个空格后，切换到英文输入
+;; 6. 当前字符为英文字符时，输入2个空格后，切换到中文输入
+
+;; 激活方法：
+
+;; #+BEGIN_EXAMPLE
+;; (setq-default pyim-english-input-switch-function
+;;               'pyim-dynamic-english-input-function)
+;; #+END_EXAMPLE
+
 ;; *** 词语联想
 ;; Chinese-pyim *内置* 了4种词语联想方式：
 
