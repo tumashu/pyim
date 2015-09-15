@@ -2293,6 +2293,12 @@ Counting starts at 1."
             (with-temp-buffer
               (insert string)
               (goto-char (point-min))
+              (while (re-search-forward "\\([，。；？！；、）】]\\)  +\\([[:ascii:]]\\)" nil t)
+                (replace-match (concat (match-string 1) (match-string 2))  nil t))
+              (goto-char (point-min))
+              (while (re-search-forward "\\([[:ascii:]]\\)  +\\([（【]\\)" nil t)
+                (replace-match (concat (match-string 1) (match-string 2))  nil t))
+              (goto-char (point-min))
               (while (re-search-forward "\\([[:ascii:]]\\)  +\\(\\cc\\)" nil t)
                 (replace-match (concat (match-string 1) " " (match-string 2))  nil t))
               (goto-char (point-min))
