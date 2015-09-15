@@ -893,7 +893,8 @@ If you don't like this funciton, set the variable to nil")
                       (append words-list
                               (pyim-multiline-content begin end))))))))
       (dolist (line-words words-list)
-        (when (string-match-p regexp (car line-words))
+        (when (and (stringp (car line-words))
+                   (string-match-p regexp (car line-words)))
           (let ((line-words (cdr line-words)))
             (dolist (word line-words)
               (when (and (stringp word)
@@ -1106,7 +1107,8 @@ buffer中，当前词条追加到已有词条之后。`pyim-create-or-rearrange-
 BUG：无法有效的处理多音字。"
   (let ((pinyins (pyim-hanzi2pinyin word nil "-" t nil t))) ;使用了多音字校正
     (mapc #'(lambda (py)
-              (unless (string-match-p "[^ a-z-]" py)
+              (unless (and (stringp py)
+                           (string-match-p "[^ a-z-]" py))
                 ;; 添加词库： ”拼音“ - ”中文词条“
                 (pyim-intern-word word py (not rearrange-word))
                 ;; 添加词库： ”拼音首字母“ - ”中文词条“
@@ -1129,7 +1131,7 @@ BUG：无法有效的处理多音字。"
                     (point-min)))
            (string (buffer-substring-no-properties
                     point begin)))
-      (when (and string
+      (when (and (stringp string)
                  (= (length string) number)
                  (not (string-match-p "\\CC" string)))
         string))))
@@ -1167,7 +1169,8 @@ BUG：无法有效的处理多音字。"
 (defun pyim-delete-word (word)
   "将中文词条 `word' 从 personal-file 对应的 buffer 中删除"
   (mapc (lambda (py)
-          (unless (string-match-p "[^ a-z-]" py)
+          (unless (and (stringp py)
+                       (string-match-p "[^ a-z-]" py))
             (pyim-intern-word word py nil t)))
         (pyim-hanzi2pinyin word nil "-" t)))
 
@@ -1333,35 +1336,41 @@ Return the input string."
         ;; ascii puncts: !\"#$%&'()*+,-./:;<=>?@\^_`{|}~
         ;; NOTE: "-" must put the end of [].
         (regexp-punct "[@`+=_~&-]"))
-    (cond ((and str-before-1 str-before-2 str-before-3
+    (cond ((and (stringp str-before-1)
+                (stringp str-before-2)
+                (stringp str-before-3)
                 (string= str-before-1 " ")
                 (string= str-before-2 " ")
                 (string-match-p regexp-chinese str-before-3))
            (pyim-toggle-full-width-punctuation -1 t) ;; 使用半角标点
            t)
-          ((and str-before-1 str-before-2 str-before-3
+          ((and (stringp str-before-1)
+                (stringp str-before-2)
+                (stringp str-before-3)
                 (string= str-before-1 " ")
                 (string= str-before-2 " ")
                 (string-match-p regexp-alpha str-before-3))
            (pyim-toggle-full-width-punctuation 1 t) ;; 使用全角标点
            nil)
-          ((and str-before-1 str-before-2
+          ((and (stringp str-before-1)
+                (stringp str-before-2)
                 (string= str-before-1 " ")
                 (string-match-p regexp-chinese str-before-2))
            (pyim-toggle-full-width-punctuation 1 t) ;; 使用全角标点
            nil)
-          ((and str-before-1 str-before-2
+          ((and (stringp str-before-1)
+                (stringp str-before-2)
                 (string= str-before-1 " ")
                 (string-match-p regexp-alpha str-before-2))
            (pyim-toggle-full-width-punctuation -1 t) ;; 使用半角标点
            t)
-          ((and str-before-1
+          ((and (stringp str-before-1)
                 (or (string-match-p regexp-alpha str-before-1)
                     (string-match-p regexp-punct str-before-1))
                 (= (length pyim-guidance-str) 0))
            (pyim-toggle-full-width-punctuation -1 t) ;; 使用半角标点
            t)
-          ((and str-before-1
+          ((and (stringp str-before-1)
                 (string-match-p regexp-chinese str-before-1))
            (pyim-toggle-full-width-punctuation 1 t)  ;; 使用全角标点
            nil))))
@@ -1643,12 +1652,14 @@ Return the input string."
           (let ((pinyins (pyim-hanzi2pinyin word nil "-" t)))
             (when (cl-some
                    #'(lambda (x)
-                       (string-match-p (pyim-predict-build-regexp py-str) x))
+                       (and (stringp x)
+                            (string-match-p (pyim-predict-build-regexp py-str) x)))
                    pinyins)
               (push word guess-words-similar))
             (when (cl-some
                    #'(lambda (x)
-                       (string= py-str x))
+                       (and (stringp x)
+                            (string= py-str x)))
                    pinyins)
               (push word guess-words-accurate)))
           ;; 当 `words' 包含的元素太多时，后面处理会极其缓慢，
@@ -2632,28 +2643,29 @@ in package `chinese-pyim-pymap'"
 
 (defun pyim-fuzzy-pinyin-adjust-1 ()
   (interactive)
-  (cond
-   ((string-match-p "eng" pyim-current-key)
-    (setq pyim-current-key
-          (replace-regexp-in-string "eng" "en" pyim-current-key)))
-   ((string-match-p "en[^g]*" pyim-current-key)
-    (setq pyim-current-key
-          (replace-regexp-in-string "en" "eng" pyim-current-key))))
-  (cond
-   ((string-match-p "ing" pyim-current-key)
-    (setq pyim-current-key
-          (replace-regexp-in-string "ing" "in" pyim-current-key)))
-   ((string-match-p "in[^g]*" pyim-current-key)
-    (setq pyim-current-key
-          (replace-regexp-in-string "in" "ing" pyim-current-key))))
-  (cond
-   ((string-match-p "un" pyim-current-key)
-    (setq pyim-current-key
-          (replace-regexp-in-string "un" "ong" pyim-current-key)))
-   ((string-match-p "ong" pyim-current-key)
-    (setq pyim-current-key
-          (replace-regexp-in-string "ong" "un" pyim-current-key))))
-  (pyim-handle-string))
+  (when (stringp pyim-current-key)
+    (cond
+     ((string-match-p "eng" pyim-current-key)
+      (setq pyim-current-key
+            (replace-regexp-in-string "eng" "en" pyim-current-key)))
+     ((string-match-p "en[^g]*" pyim-current-key)
+      (setq pyim-current-key
+            (replace-regexp-in-string "en" "eng" pyim-current-key))))
+    (cond
+     ((string-match-p "ing" pyim-current-key)
+      (setq pyim-current-key
+            (replace-regexp-in-string "ing" "in" pyim-current-key)))
+     ((string-match-p "in[^g]*" pyim-current-key)
+      (setq pyim-current-key
+            (replace-regexp-in-string "in" "ing" pyim-current-key))))
+    (cond
+     ((string-match-p "un" pyim-current-key)
+      (setq pyim-current-key
+            (replace-regexp-in-string "un" "ong" pyim-current-key)))
+     ((string-match-p "ong" pyim-current-key)
+      (setq pyim-current-key
+            (replace-regexp-in-string "ong" "un" pyim-current-key))))
+    (pyim-handle-string)))
 ;; #+END_SRC
 
 ;; *** Chinese-pyim 取消激活
