@@ -312,7 +312,7 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
           (if (looking-at "^[ \t]*$")     ; 如果有空行，删除
               (pyim-delete-line)
             (setq currw (pyim-code-at-point))
-            (if (string= currw lastw)
+            (if (equal currw lastw)
                 (delete-region (1- (point)) (+ (point) (length currw))))
             (setq lastw currw)
             (forward-line 1)))
@@ -621,7 +621,7 @@ Guessdict 用来保存，一个中文词条（code）后面经常跟随出现的
 (defun pyim-dicts-manager-toggle-enable-dict (&optional enable)
   "启用当前行对应的词库。"
   (interactive)
-  (when (string= (buffer-name) pyim-dicts-manager-buffer-name)
+  (when (equal (buffer-name) pyim-dicts-manager-buffer-name)
     (let* ((id (get-text-property (point) 'id))
            (disable (get-text-property (point) 'disable))
            (dict (cl-copy-list (nth (1- id) pyim-dicts)))
@@ -638,7 +638,7 @@ Guessdict 用来保存，一个中文词条（code）后面经常跟随出现的
 (defun pyim-dicts-manager-delete-dict ()
   "从 `pyim-dicts' 中删除当前行对应的词库信息。"
   (interactive)
-  (when (string= (buffer-name) pyim-dicts-manager-buffer-name)
+  (when (equal (buffer-name) pyim-dicts-manager-buffer-name)
     (let ((id (get-text-property (point) 'id))
           (file (get-text-property (point) 'file))
           (line (line-number-at-pos)))
@@ -654,7 +654,7 @@ Guessdict 用来保存，一个中文词条（code）后面经常跟随出现的
 (defun pyim-dicts-manager-dict-position-up ()
   "向上移动词库。"
   (interactive)
-  (when (string= (buffer-name) pyim-dicts-manager-buffer-name)
+  (when (equal (buffer-name) pyim-dicts-manager-buffer-name)
     (let* ((id (get-text-property (point) 'id))
            (dict1 (nth (- id 1) pyim-dicts))
            (dict2 (nth (- id 2) pyim-dicts))
@@ -670,7 +670,7 @@ Guessdict 用来保存，一个中文词条（code）后面经常跟随出现的
 (defun pyim-dicts-manager-dict-position-down ()
   "向下移动词库。"
   (interactive)
-  (when (string= (buffer-name) pyim-dicts-manager-buffer-name)
+  (when (equal (buffer-name) pyim-dicts-manager-buffer-name)
     (let* ((id (get-text-property (point) 'id))
            (dict1 (nth (- id 1) pyim-dicts))
            (dict2 (nth id pyim-dicts))
@@ -693,7 +693,7 @@ Guessdict 用来保存，一个中文词条（code）后面经常跟随出现的
 (defun pyim-dicts-manager-import-sogou-dict-directory ()
   "导入某个目录中所有搜狗细胞词库的命令。"
   (interactive)
-  (when (string= (buffer-name) pyim-dicts-manager-buffer-name)
+  (when (equal (buffer-name) pyim-dicts-manager-buffer-name)
     (let* ((line (line-number-at-pos))
            (dir (read-directory-name "请选择搜狗细胞词库所在的目录： " "~/"))
            (files (directory-files dir t ".*\\.scel")))
@@ -706,7 +706,7 @@ Guessdict 用来保存，一个中文词条（code）后面经常跟随出现的
 (defun pyim-dicts-manager-import-sogou-dict-file ()
   "导入搜狗细胞词库文件的命令"
   (interactive)
-  (when (string= (buffer-name) pyim-dicts-manager-buffer-name)
+  (when (equal (buffer-name) pyim-dicts-manager-buffer-name)
     (let ((line (line-number-at-pos))
           (file (read-file-name "请选择需要导入的搜狗细胞词库文件： " "~/")))
       (pyim-dicts-manager-import-sogou-dict-file-1 file)
@@ -733,7 +733,7 @@ Guessdict 用来保存，一个中文词条（code）后面经常跟随出现的
 (defun pyim-dicts-manager-add-dict ()
   "为 `pyim-dicts' 添加词库信息。"
   (interactive)
-  (when (string= (buffer-name) pyim-dicts-manager-buffer-name)
+  (when (equal (buffer-name) pyim-dicts-manager-buffer-name)
     (let ((line (line-number-at-pos))
           dict name file coding first-used dict-type)
       (setq name (read-from-minibuffer "请输入词库名称： "))
@@ -759,7 +759,7 @@ Guessdict 用来保存，一个中文词条（code）后面经常跟随出现的
 (defun pyim-dicts-manager-add-example-dict ()
   "下载并安装用于测试目的的样例词库。"
   (interactive)
-  (when (string= (buffer-name) pyim-dicts-manager-buffer-name)
+  (when (equal (buffer-name) pyim-dicts-manager-buffer-name)
     (let ((dict-name "BigDict-01")
           (dict-url "http://tumashu.github.io/chinese-pyim-bigdict/pyim-bigdict.pyim")
           (dict-file (expand-file-name
@@ -866,7 +866,7 @@ Guessdict 用来保存，一个中文词条（code）后面经常跟随出现的
   这个函数主要用于词库 package。"
   (cl-some (lambda (x)
              (let ((name (plist-get x :name)))
-               (string= name dict-name)))
+               (equal name dict-name)))
            pyim-dicts))
 
 (defun pyim-dict-file-available-p (dict-file)
@@ -874,8 +874,8 @@ Guessdict 用来保存，一个中文词条（code）后面经常跟随出现的
   这个函数主要用于词库 package。"
   (cl-some (lambda (x)
              (let ((file (plist-get x :file)))
-               (string= (expand-file-name file)
-                        (expand-file-name dict-file))))
+               (equal (expand-file-name file)
+                      (expand-file-name dict-file))))
            pyim-dicts))
 ;; #+END_SRC
 

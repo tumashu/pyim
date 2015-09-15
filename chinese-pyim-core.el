@@ -791,7 +791,7 @@ If you don't like this funciton, set the variable to nil")
                    "abcdefghjklmnopqrstwxyz")
                   result))
     (cl-delete-duplicates (nreverse result)
-                          :test #'string= :from-end t)))
+                          :test #'equal :from-end t)))
 
 (defun pyim-cache-dict-buffer ()
   "根据个人词库文件中的 codes，来构建普通词库文件的缓存，用于加快查询速度，
@@ -959,7 +959,7 @@ BUG: 这个函数需要进一步优化，使其判断更准确。"
     (beginning-of-line)
     (setq ccode (pyim-code-at-point))
     ;;    (message "%d, %d, %d: %s" start mid end ccode)
-    (if (string= ccode code)
+    (if (equal ccode code)
         (pyim-line-content)
       (if (> mid start)
           (if (string< ccode code)
@@ -1080,7 +1080,7 @@ beginning of line"
        words)
     (with-current-buffer buf
       (pyim-bisearch-word py (point-min) (point-max))
-      (if (string= (pyim-code-at-point) py)
+      (if (equal (pyim-code-at-point) py)
           (progn
             (setq words (pyim-line-content))
             (if delete
@@ -1339,28 +1339,28 @@ Return the input string."
     (cond ((and (stringp str-before-1)
                 (stringp str-before-2)
                 (stringp str-before-3)
-                (string= str-before-1 " ")
-                (string= str-before-2 " ")
+                (equal str-before-1 " ")
+                (equal str-before-2 " ")
                 (string-match-p regexp-chinese str-before-3))
            (pyim-toggle-full-width-punctuation -1 t) ;; 使用半角标点
            t)
           ((and (stringp str-before-1)
                 (stringp str-before-2)
                 (stringp str-before-3)
-                (string= str-before-1 " ")
-                (string= str-before-2 " ")
+                (equal str-before-1 " ")
+                (equal str-before-2 " ")
                 (string-match-p regexp-alpha str-before-3))
            (pyim-toggle-full-width-punctuation 1 t) ;; 使用全角标点
            nil)
           ((and (stringp str-before-1)
                 (stringp str-before-2)
-                (string= str-before-1 " ")
+                (equal str-before-1 " ")
                 (string-match-p regexp-chinese str-before-2))
            (pyim-toggle-full-width-punctuation 1 t) ;; 使用全角标点
            nil)
           ((and (stringp str-before-1)
                 (stringp str-before-2)
-                (string= str-before-1 " ")
+                (equal str-before-1 " ")
                 (string-match-p regexp-alpha str-before-2))
            (pyim-toggle-full-width-punctuation -1 t) ;; 使用半角标点
            t)
@@ -1658,8 +1658,7 @@ Return the input string."
               (push word guess-words-similar))
             (when (cl-some
                    #'(lambda (x)
-                       (and (stringp x)
-                            (string= py-str x)))
+                       (equal py-str x))
                    pinyins)
               (push word guess-words-accurate)))
           ;; 当 `words' 包含的元素太多时，后面处理会极其缓慢，
@@ -2207,7 +2206,7 @@ Counting starts at 1."
          ;; `str-before-1' 在其对应的标点列表中的位置。
          (punc-posit-before-1
           (cl-position str-before-1 punc-list-before-1
-                       :test #'string=)))
+                       :test #'equal)))
     (cond
      ;; 空格之前的字符什么也不输入。
      ((< char ? ) "")
@@ -2351,7 +2350,7 @@ Counting starts at 1."
                    pyim-punctuation-dict)))
     (when punc-list
       (delete-char -1)
-      (if (string= current-char (car punc-list))
+      (if (equal current-char (car punc-list))
           (insert (pyim-return-proper-punctuation punc-list t))
         (insert (car punc-list))))))
 
