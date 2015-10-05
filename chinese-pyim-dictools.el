@@ -775,7 +775,7 @@ Guessdict 用来保存，一个中文词条（code）后面经常跟随出现的
                        `(:name ,dict-name
                                :file ,dict-file
                                :coding utf-8-unix
-                               :dict-type dict) t))
+                               :dict-type pinyin-dict) t))
         (pyim-dicts-manager-refresh)))))
 
 (defun pyim-dicts-manager-merge-all ()
