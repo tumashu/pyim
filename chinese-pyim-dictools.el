@@ -726,7 +726,7 @@ Guessdict 用来保存，一个中文词条（code）后面经常跟随出现的
                                nil "*pyim-dicts-import*" nil input-file output-file)
                  (file-exists-p output-file))
             (add-to-list 'pyim-dicts
-                         `(:name ,input-filename :file ,output-file :coding utf-8 :dict-type 'dict) t)
+                         `(:name ,input-filename :file ,output-file :coding utf-8 :dict-type pinyin-dict) t)
           (message "搜狗词库文件：%s 转换失败。" input-file))
       (message "这个词库文件似乎已经导入。"))))
 
