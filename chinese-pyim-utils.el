@@ -1,5 +1,6 @@
 ;;; chinese-pyim-utils.el --- Useful tools which are based chinese-pyim
-;;; Header:
+
+;; * Header
 ;; Copyright  2015 Feng Shu
 
 ;; Author: Feng Shu <tumashu@163.com>
@@ -22,6 +23,7 @@
 ;; Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 ;;; Commentary:
+;; * 说明文档                                                              :doc:
 ;; 这个文件包含一些有用工具，这些工具都依赖 Chinese-pyim 的内部特性。
 
 ;; #+BEGIN_EXAMPLE
@@ -29,6 +31,7 @@
 ;; #+END_EXAMPLE
 
 ;;; Code:
+;; * 代码                                                                 :code:
 ;; #+BEGIN_SRC emacs-lisp
 (require 'cl-lib)
 (require 'chinese-pyim-pymap)
@@ -279,7 +282,7 @@
 
 ;; #+END_SRC
 
-;;; Footer:
+;; * Footer
 ;; #+BEGIN_SRC emacs-lisp
 (provide 'chinese-pyim-utils)
 
@@ -287,7 +290,7 @@
 ;; coding: utf-8-unix
 ;; tab-width: 4
 ;; indent-tabs-mode: nil
-;; lentic-init: lentic-orgel-org-init
+;; lentic-init: lentic-el2org-init
 ;; End:
 
 ;;; chinese-pyim-utils.el ends here

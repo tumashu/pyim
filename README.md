@@ -28,7 +28,7 @@
     - [获取光标处的中文词条](#sec-1-9-7)
     - [让 \`forward-word' 和 \`back-backward’ 在中文环境下正常工作](#sec-1-9-8)
 
-# Chinese-pyim 使用说明<a id="orgheadline33"></a>
+# Chinese-pyim 使用说明     :doc:<a id="orgheadline33"></a>
 
 ## 截图<a id="orgheadline1"></a>
 
@@ -77,24 +77,24 @@ Chinese-pyim 的目标是： **尽最大的努力成为一个好用的 emacs 备
 
     (require 'chinese-pyim)
 
-## 配置<a id="orgheadline9"></a>
+## 配置<a id="orgheadline10"></a>
 
-### 添加词库文件<a id="orgheadline7"></a>
+### 添加词库文件<a id="orgheadline8"></a>
 
-用户可以使用三种方法为 Chinese-pyim 添加拼音词库，具体方式请参考 1.9.3 小结。
+用户可以使用三种方法为 Chinese-pyim 添加拼音词库，具体方式请参考 [1.9.3](#orgheadline7) 小结。
 
 注意：每一个词库文件必须按行排序（准确的说，是按每一行的拼音code排序），因为\`Chinese-pyim' 寻找词条时，使用二分法来优化速度，而二分法工作的前提就是对文件按行排序。具体细节请参考：\`pyim-bisearch-word' 。所以，当词库排序不正确时（比如：用户手动调整词库文件后），记得运行函数
 \`pyim-update-dict-file' 重新对文件排序。
 
-### 激活 Chinese-pyim<a id="orgheadline8"></a>
+### 激活 Chinese-pyim<a id="orgheadline9"></a>
 
     (setq default-input-method "chinese-pyim")
     (global-set-key (kbd "C-<SPC>") 'toggle-input-method)
     (global-set-key (kbd "C-;") 'pyim-toggle-full-width-punctuation)
 
-## 使用<a id="orgheadline19"></a>
+## 使用<a id="orgheadline20"></a>
 
-### 常用快捷键<a id="orgheadline10"></a>
+### 常用快捷键<a id="orgheadline11"></a>
 
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -161,19 +161,19 @@ Chinese-pyim 的目标是： **尽最大的努力成为一个好用的 emacs 备
 </tbody>
 </table>
 
-### 让选词框跟随光标<a id="orgheadline11"></a>
+### 让选词框跟随光标<a id="orgheadline12"></a>
 
 Chinese-pyim 可以使用 emacs tooltip 功能在 **光标处** 显示一个选词框，用户可以通过下面的设置来开启这个功能。
 
     (setq pyim-use-tooltip t)
 
-### 设置模糊音<a id="orgheadline12"></a>
+### 设置模糊音<a id="orgheadline13"></a>
 
 Chinese-pyim 使用一个比较 **粗糙** 的方法处理 **模糊音** ，要了解具体细节，请运行：
 
     C-h v pyim-fuzzy-pinyin-adjust-function
 
-### 动态中英文切换<a id="orgheadline13"></a>
+### 动态中英文切换<a id="orgheadline14"></a>
 
 Chinese-pyim  可以根据输入内容动态的切换中英文输入，基本规则是：
 
@@ -189,7 +189,7 @@ Chinese-pyim  可以根据输入内容动态的切换中英文输入，基本规
     (setq-default pyim-english-input-switch-function
                   'pyim-dynamic-english-input-function)
 
-### 词语联想<a id="orgheadline14"></a>
+### 词语联想<a id="orgheadline16"></a>
 
 Chinese-pyim **内置** 了4种词语联想方式：
 
@@ -211,15 +211,15 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
 
     (setq pyim-enable-words-predict nil)
 
-另外，Chinese-pyim 也可以通过 Company 框架来实现词语联想，具体请参考： 1.8.9
+另外，Chinese-pyim 也可以通过 Company 框架来实现词语联想，具体请参考： [1.8.9](#orgheadline15)
 
-### 切换全角标点与半角标点<a id="orgheadline15"></a>
+### 切换全角标点与半角标点<a id="orgheadline17"></a>
 
 1.  第一种方法：使用命令 \`pyim-toggle-full-width-punctuation'，全局切换。
 2.  第二种方法：使用命令 \`pyim-punctuation-translate-at-point' 只切换光标处标点的样式。
 3.  第三种方法：设置变量 \`pyim-translate-trigger-char'。输入变量设定的字符会切换光标处标点的样式。
 
-### 手动加词和删词<a id="orgheadline16"></a>
+### 手动加词和删词<a id="orgheadline18"></a>
 
 1.  \`pyim-create-word-without-pinyin' 直接将一个中文词条加入个人词库的函数，用于编程环境。
 2.  \`pyim-create-word-at-point:<N>char' 这是一组命令，从光标前提取N个汉字字符组成字符串，并将其加入个人词库。
@@ -227,7 +227,7 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
 4.  \`pyim-delete-word-from-personal-buffer' 从个人词频文件对应的 buffer
     中删除当前高亮选择的词条。
 
-### 快速切换词库<a id="orgheadline17"></a>
+### 快速切换词库<a id="orgheadline19"></a>
 
 用户可以自定义类似的命令来实现快速切换拼音词库。
 
@@ -239,7 +239,7 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
                      :coding utf-8-unix)))
       (pyim-restart-1 t))
 
-### 使用 Company 框架来补全联想词（实验特性）<a id="orgheadline18"></a>
+### 使用 Company 框架来补全联想词（实验特性）<a id="orgheadline15"></a>
 
 \`Chinese-pyim' 增加了两个 \`company-mode' 后端来实现 **联想词** 输入功能：
 
@@ -259,20 +259,20 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
 
 ## Tips<a id="orgheadline32"></a>
 
-### 选词框弹出位置不合理或者选词框内容显示不全<a id="orgheadline20"></a>
+### 选词框弹出位置不合理或者选词框内容显示不全<a id="orgheadline21"></a>
 
 可以通过设置 \`pyim-tooltip-width-adjustment' 变量来手动校正。
 
 1.  选词框内容显示不全：增大变量值
 2.  选词框弹出位置不合理：减小变量值
 
-### 如何查看 Chinese-pyim 文档。<a id="orgheadline21"></a>
+### 如何查看 Chinese-pyim 文档。<a id="orgheadline22"></a>
 
 Chinese－-pyim 开发使用 lentic 文学编程模式，代码文档隐藏在comment中，如果用户喜欢阅读 html 格式的文档，可以查看在线文档；
 
 <http://tumashu.github.io/chinese-pyim/>
 
-### 如何添加自定义拼音词库<a id="orgheadline26"></a>
+### 如何添加自定义拼音词库<a id="orgheadline7"></a>
 
 Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面三种方式，获取质量较好的拼音词库：
 

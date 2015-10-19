@@ -1,6 +1,6 @@
 ;;; chinese-pyim.el --- Chinese pinyin input method
 
-;;; Header:
+;; * Header
 ;; Copyright 2015 Feng Shu
 
 ;; Author: Feng Shu <tumashu@163.com>
@@ -24,16 +24,17 @@
 ;; Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 ;;; Commentary:
-;; * Chinese-pyim 使用说明
-;; ** 截图                                                              :README:
+
+;; * Chinese-pyim 使用说明                                          :README:doc:
+;; ** 截图
 ;; [[./snapshots/pyim-linux-x-with-toolkit.png]]
 
-;; ** 简介                                                              :README:
+;; ** 简介
 ;; Chinese-pyim (Chinese Pinyin Input Method) 是 emacs 环境下的一个中文拼
 ;; 音输入法。
 
 
-;; ** 背景                                                              :README:
+;; ** 背景
 ;; Chinese-pyim 的代码源自 emacs-eim。
 
 ;; emacs-eim 是一个 emacs 中文输入法框架，本身包含了多种中文输入法，比如：
@@ -52,7 +53,7 @@
 ;; 所以，本人认为 emacs-eim 非常适合作为 *备用* 中文输入法，于是我 fork
 ;; emacs-eim 的代码, 更改名称为：chinese-pyim。
 
-;; ** 目标                                                              :README:
+;; ** 目标
 ;; Chinese-pyim 的目标是： *尽最大的努力成为一个好用的 emacs 备用中文拼音
 ;; 输入法* 。具体可表现为三个方面：
 
@@ -63,13 +64,13 @@
 ;; 3. Exchange:     尽最大可能简化 Chinese-pyim 使用其他优秀输入法的词库
 ;;    的难度和复杂度。
 
-;; ** 特点                                                              :README:
+;; ** 特点
 ;; 1. Chinese-pyim 只是一个拼音输入法，安装配置方便快捷，默认只通过添加词
 ;;    库的方式优化输入法。
 ;; 2. Chinese-pyim 只使用最简单的文本词库格式，可以快速方便的利用其他输入
 ;;    法的词库。
 
-;; ** 安装                                                              :README:
+;; ** 安装
 ;; 1. 配置melpa源，参考：http://melpa.org/#/getting-started
 ;; 2. M-x package-install RET chinese-pyim RET
 ;; 3. 在emacs配置文件中（比如: ~/.emacs）添加如下代码：
@@ -78,7 +79,7 @@
 ;; (require 'chinese-pyim)
 ;; #+END_EXAMPLE
 
-;; ** 配置                                                              :README:
+;; ** 配置
 ;; *** 添加词库文件
 ;; 用户可以使用三种方法为 Chinese-pyim 添加拼音词库，具体方式请参考 [[如何添加自定义拼音词库]] 小结。
 
@@ -96,7 +97,7 @@
 ;; (global-set-key (kbd "C-;") 'pyim-toggle-full-width-punctuation)
 ;; #+END_EXAMPLE
 
-;; ** 使用                                                              :README:
+;; ** 使用
 ;; *** 常用快捷键
 ;; | 输入法快捷键    | 功能             |
 ;; |-----------------+------------------|
@@ -232,7 +233,7 @@
 ;; (setq pyim-company-predict-words-number 10)
 ;; #+END_EXAMPLE
 
-;; ** Tips                                                              :README:
+;; ** Tips
 
 ;; *** 选词框弹出位置不合理或者选词框内容显示不全
 ;; 可以通过设置 `pyim-tooltip-width-adjustment' 变量来手动校正。
@@ -400,6 +401,7 @@
 
 
 ;;; Code:
+;; * 代码                                                                 :code:
 ;; #+BEGIN_SRC emacs-lisp
 (require 'chinese-pyim-pymap)
 (require 'chinese-pyim-core)
@@ -407,7 +409,7 @@
 (require 'chinese-pyim-utils)
 ;; #+END_SRC
 
-;;; Footer:
+;; * Footer
 ;; #+BEGIN_SRC emacs-lisp
 (provide 'chinese-pyim)
 
@@ -415,7 +417,7 @@
 ;; coding: utf-8-unix
 ;; tab-width: 4
 ;; indent-tabs-mode: nil
-;; lentic-init: lentic-orgel-org-init
+;; lentic-init: lentic-el2org-init
 ;; End:
 
 ;;; chinese-pyim.el ends here

@@ -1,6 +1,6 @@
 ;;; chinese-pyim-dictools.el --- Tools for Chinese-pyim pinyin dict
 
-;;; Header:
+;; * Header
 ;; Copyright 2015 Feng Shu
 
 ;; Author: Feng Shu <tumashu@163.com>
@@ -24,6 +24,7 @@
 
 ;;; Commentary:
 
+;; * 说明文档                                                              :doc:
 ;; 这个文件主要包含与词库文件管理相关的一些命令和函数，比如：
 ;; 1. 词库管理器
 ;; 2. 词库文件制作
@@ -33,8 +34,9 @@
 
 
 ;;; Code:
-;; ** Require
 
+;; * 代码                                                                 :code:
+;; ** Require
 ;; #+BEGIN_SRC emacs-lisp
 (require 'cl-lib)
 (require 'chinese-pyim-pymap)
@@ -879,7 +881,7 @@ Guessdict 用来保存，一个中文词条（code）后面经常跟随出现的
            pyim-dicts))
 ;; #+END_SRC
 
-;; ** Footer
+;; * Footer
 ;; #+BEGIN_SRC emacs-lisp
 (provide 'chinese-pyim-dictools)
 
@@ -887,7 +889,7 @@ Guessdict 用来保存，一个中文词条（code）后面经常跟随出现的
 ;; coding: utf-8-unix
 ;; tab-width: 4
 ;; indent-tabs-mode: nil
-;; lentic-init: lentic-orgel-org-init
+;; lentic-init: lentic-el2org-init
 ;; End:
 
 ;;; chinese-pyim-dictools.el ends here

@@ -1,6 +1,6 @@
 ;;; chinese-pyim-core.el --- The core of Chinese pinyin input method
 
-;;; Header:
+;; * Header
 ;; Copyright 2006 Ye Wenbin
 ;;           2014-2015 Feng Shu
 
@@ -25,6 +25,8 @@
 ;; Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 ;;; Commentary:
+
+;; * 说明文档                                                           :doc:
 ;; Chinese pyim 输入法的核心文件，包含了输入法的基本功能函数，比如：
 ;; 1. 加载和搜索词库
 ;; 2. 处理拼音字符串
@@ -33,6 +35,8 @@
 ;; 5. 其它
 
 ;;; Code:
+
+;; * 核心代码                                                           :code:
 ;; ** require + defcustom + defvar
 ;; #+BEGIN_SRC emacs-lisp
 (require 'cl-lib)
@@ -2695,7 +2699,8 @@ in package `chinese-pyim-pymap'"
       (setq current-input-method-title (concat pyim-title "-英文"))
     (setq current-input-method-title pyim-title)))
 ;; #+END_SRC
-;;; Footer:
+
+;; * Footer
 ;; #+BEGIN_SRC emacs-lisp
 (provide 'chinese-pyim-core)
 
@@ -2703,7 +2708,7 @@ in package `chinese-pyim-pymap'"
 ;; coding: utf-8-unix
 ;; tab-width: 4
 ;; indent-tabs-mode: nil
-;; lentic-init: lentic-orgel-org-init
+;; lentic-init: lentic-el2org-init
 ;; End:
 
 ;;; chinese-pyim-core.el ends here

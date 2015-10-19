@@ -1,6 +1,6 @@
 ;;; chinese-pyim-devtools.el --- Tools for Chinese-pyim developers
 
-;;; Header:
+;; * Header
 ;; Copyright 2015 Feng Shu
 
 ;; Author: Feng Shu <tumashu@163.com>
@@ -23,6 +23,8 @@
 ;; Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 ;;; Commentary:
+
+;; * 说明文档                                                              :doc:
 ;; 这个文件包含了 Chinese-pyim 开发相关的命令，比如：
 ;; 1. 生成 GitHub README
 ;; 2. 生成代码 html 文档
@@ -31,6 +33,7 @@
 
 ;;; Code:
 
+;; * 代码                                                                 :code:
 ;; ** 加载必要的库文件
 ;; #+BEGIN_SRC emacs-lisp
 (require 'chinese-pyim)
@@ -71,25 +74,15 @@
              "\\1\\2" string))
       string)))
 
-(defun pyim-devtools-replace-org-head (regexp replace-string)
-  "replace org head matched `regexp' to string `replace-string'"
-  (org-map-entries
-   (lambda ()
-     (let ((head (org-get-heading t t)))
-       (when (string-match-p regexp head)
-         (delete-region (+ (line-beginning-position) 2)
-                        (line-end-position))
-         (goto-char (line-end-position))
-         (insert (concat " " replace-string)))))))
-
 (defun pyim-devtools-org-preprocess (backend)
-  "This function replace some org head, used by `org-export-before-processing-hook'"
+  "This function delete useless string."
   (save-excursion
-    (when (eq backend 'html)
-      (pyim-devtools-replace-org-head "Header" "Header :noexport:")
-      (pyim-devtools-replace-org-head "Footer" "Footer :noexport:")
-      (pyim-devtools-replace-org-head "Commentary" "简要介绍")
-      (pyim-devtools-replace-org-head "Code" "代码说明"))))
+    (goto-char (point-min))
+    (while (re-search-forward "^;;; +Commentary:.*" nil t)
+      (replace-match "" nil t))
+    (goto-char (point-min))
+    (while (re-search-forward "^;;; +Code:.*" nil t)
+      (replace-match "" nil t))))
 ;; #+END_SRC
 
 ;; ** 用于生成 chinese-pyim 相关文档的命令
@@ -138,6 +131,7 @@
     (if (file-exists-p org-file)
         (with-current-buffer (find-file-noselect org-file)
           (let ((org-export-filter-paragraph-functions '(pyim-devtools-org-clean-space))
+                (org-export-before-processing-hook '(pyim-devtools-org-preprocess))
                 (org-export-select-tags '("README"))
                 (indent-tabs-mode nil)
                 (tab-width 4))
@@ -151,10 +145,24 @@
          '(pyim-devtools-org-preprocess))
         (org-export-filter-paragraph-functions
          '(pyim-devtools-org-clean-space))
-        (org-export-select-tags '("README" "devel"))
+        (org-export-select-tags '("README" "devel" "doc" "code"))
         (indent-tabs-mode nil)
         (tab-width 4))
     (org-export-as 'html nil nil t nil)))
+
+(defun pyim-orgify-if-necessary (file)
+  (let* ((target (concat
+                  (file-name-sans-extension file)
+                  ".org"))
+         (locked (or (file-locked-p file)
+                     (file-locked-p target)))
+         (open (or (get-file-buffer file)
+                   (get-file-buffer target))))
+    (unless (or locked open)
+      (when (file-newer-than-file-p file target)
+        (let ((lentic-kill-retain t))
+          (lentic-batch-clone-and-save-with-config
+           file 'lentic-el2org-init))))))
 
 (defun pyim-preparation-org-files ()
   "Generate org files by lentic."
@@ -168,12 +176,13 @@
                   (kill-buffer el-buffer))
                 (when org-buffer
                   (kill-buffer org-buffer)))
-              (lentic-doc-orgify-if-necessary el-file))
+              (pyim-orgify-if-necessary el-file))
           el-files))
   (pyim-devtools-generate-readme-and-index))
 ;; #+END_SRC
 
-;;; Footer:
+;; * Footer
+
 ;; #+BEGIN_SRC emacs-lisp
 (provide 'chinese-pyim-devtools)
 
@@ -182,7 +191,7 @@
 ;; coding: utf-8-unix
 ;; tab-width: 4
 ;; indent-tabs-mode: nil
-;; lentic-init: lentic-orgel-org-init
+;; lentic-init: lentic-el2org-init
 ;; End:
 
 ;;; chinese-pyim-devtools.el ends here
