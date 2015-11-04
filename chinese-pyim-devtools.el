@@ -120,14 +120,8 @@
   (let* ((el-file (concat (file-name-as-directory
                            pyim-website-repository-directory)
                           "/chinese-pyim.el"))
-         (org-file (concat (file-name-sans-extension el-file) ".org"))
-         (el-file-buffer (get-file-buffer el-file))
-         (org-file-buffer (get-file-buffer org-file)))
-    (when el-file-buffer
-      (kill-buffer el-file-buffer))
-    (when org-file-buffer
-      (kill-buffer org-file-buffer))
-    (lentic-doc-orgify-if-necessary el-file)
+         (org-file (concat (file-name-sans-extension el-file) ".org")))
+    (pyim-orgify-if-necessary el-file)
     (if (file-exists-p org-file)
         (with-current-buffer (find-file-noselect org-file)
           (let ((org-export-filter-paragraph-functions '(pyim-devtools-org-clean-space))
@@ -150,34 +144,27 @@
         (tab-width 4))
     (org-export-as 'html nil nil t nil)))
 
-(defun pyim-orgify-if-necessary (file)
-  (let* ((target (concat
-                  (file-name-sans-extension file)
-                  ".org"))
-         (locked (or (file-locked-p file)
-                     (file-locked-p target)))
-         (open (or (get-file-buffer file)
-                   (get-file-buffer target))))
-    (unless (or locked open)
-      (when (file-newer-than-file-p file target)
+(defun pyim-orgify-if-necessary (el-file)
+  (let* ((el-buffer (get-file-buffer el-file))
+         (org-file (concat (file-name-sans-extension el-file) ".org"))
+         (org-buffer (get-file-buffer org-file))
+         (locked (or (file-locked-p el-file)
+                     (file-locked-p org-file))))
+    (when el-buffer
+      (kill-buffer el-buffer))
+    (when org-buffer
+      (kill-buffer org-buffer))
+    (unless locked
+      (when (file-newer-than-file-p el-file org-file)
         (let ((lentic-kill-retain t))
           (lentic-batch-clone-and-save-with-config
-           file 'lentic-el2org-init))))))
+           el-file 'lentic-el2org-init))))))
 
 (defun pyim-preparation-org-files ()
   "Generate org files by lentic."
   (message "Generating org files by lentic ...")
   (let ((el-files (directory-files pyim-website-repository-directory t "\\.el$")))
-    (mapc #'(lambda (el-file)
-              (let* ((org-file (concat (file-name-sans-extension el-file) ".org"))
-                     (el-buffer (get-file-buffer el-file))
-                     (org-buffer (get-file-buffer org-file)))
-                (when el-buffer
-                  (kill-buffer el-buffer))
-                (when org-buffer
-                  (kill-buffer org-buffer)))
-              (pyim-orgify-if-necessary el-file))
-          el-files))
+    (mapc #'pyim-orgify-if-necessary el-files))
   (pyim-devtools-generate-readme-and-index))
 ;; #+END_SRC
 
