@@ -286,12 +286,5 @@
 ;; #+BEGIN_SRC emacs-lisp
 (provide 'chinese-pyim-utils)
 
-;; Local Variables:
-;; coding: utf-8-unix
-;; tab-width: 4
-;; indent-tabs-mode: nil
-;; lentic-init: lentic-el2org-init
-;; End:
-
 ;;; chinese-pyim-utils.el ends here
 ;; #+END_SRC

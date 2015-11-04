@@ -885,12 +885,5 @@ Guessdict 用来保存，一个中文词条（code）后面经常跟随出现的
 ;; #+BEGIN_SRC emacs-lisp
 (provide 'chinese-pyim-dictools)
 
-;; Local Variables:
-;; coding: utf-8-unix
-;; tab-width: 4
-;; indent-tabs-mode: nil
-;; lentic-init: lentic-el2org-init
-;; End:
-
 ;;; chinese-pyim-dictools.el ends here
 ;; #+END_SRC
