@@ -163,7 +163,7 @@
 (defun pyim-preparation-org-files ()
   "Generate org files by lentic."
   (message "Generating org files by lentic ...")
-  (let ((el-files (directory-files pyim-website-repository-directory t "\\.el$")))
+  (let ((el-files (directory-files pyim-website-repository-directory t "^chinese-pyim-.*\\.el$")))
     (mapc #'pyim-orgify-if-necessary el-files))
   (pyim-devtools-generate-readme-and-index))
 ;; #+END_SRC
