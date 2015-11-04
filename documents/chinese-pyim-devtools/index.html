@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en-us">
   <head>
-    <title>Chinese-Pyim-Devtools - Chinese-pyim</title>
+    <title>chinese-pyim-devtools - Chinese-pyim</title>
     <meta charset="utf-8" />
     <meta name="author" content="Feng Shu" />
     <link rel="stylesheet" href="http://tumashu.github.com/chinese-pyim/media/css/main.css" type="text/css">
@@ -29,7 +29,7 @@
 <div class="content-and-footer">
 <div>
 <div class="post">
-<h1 class="post-title">Chinese-Pyim-Devtools</h1>
+<h1 class="post-title">chinese-pyim-devtools</h1>
 <div id="table-of-contents">
 <h2>&#30446;&#24405;</h2>
 <div id="text-table-of-contents">
@@ -212,7 +212,7 @@
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-preparation-org-files</span> ()
   <span style="color: #61CE3C;">"Generate org files by lentic."</span>
   (message <span style="color: #61CE3C;">"Generating org files by lentic ..."</span>)
-  (<span style="color: #FBDE2D;">let</span> ((el-files (directory-files pyim-website-repository-directory t <span style="color: #61CE3C;">"\\.el$"</span>)))
+  (<span style="color: #FBDE2D;">let</span> ((el-files (directory-files pyim-website-repository-directory t <span style="color: #61CE3C;">"^chinese-pyim-.*\\.el$"</span>)))
     (mapc #'pyim-orgify-if-necessary el-files))
   (pyim-devtools-generate-readme-and-index))
 </pre>
