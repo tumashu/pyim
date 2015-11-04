@@ -34,8 +34,8 @@
 <h2>&#30446;&#24405;</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgheadline1">1. 简要介绍</a></li>
-<li><a href="#orgheadline7">2. 代码说明</a>
+<li><a href="#orgheadline1">1. 说明文档</a></li>
+<li><a href="#orgheadline7">2. 代码</a>
 <ul>
 <li><a href="#orgheadline2">2.1. Require</a></li>
 <li><a href="#orgheadline3">2.2. 汉字到拼音的转换工具</a></li>
@@ -48,7 +48,7 @@
 </div>
 </div>
 <div id="outline-container-orgheadline1" class="outline-2">
-<h2 id="orgheadline1"><span class="section-number-2">1</span> 简要介绍</h2>
+<h2 id="orgheadline1"><span class="section-number-2">1</span> 说明文档</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 这个文件主要包含与词库文件管理相关的一些命令和函数，比如：
@@ -64,8 +64,10 @@
 </div>
 
 
+
+
 <div id="outline-container-orgheadline7" class="outline-2">
-<h2 id="orgheadline7"><span class="section-number-2">2</span> 代码说明</h2>
+<h2 id="orgheadline7"><span class="section-number-2">2</span> 代码</h2>
 <div class="outline-text-2" id="text-2">
 </div><div id="outline-container-orgheadline2" class="outline-3">
 <h3 id="orgheadline2"><span class="section-number-3">2.1</span> Require</h3>
@@ -363,7 +365,7 @@ OUTPUT:
           (<span style="color: #FBDE2D;">if</span> (looking-at <span style="color: #61CE3C;">"^[ \t]*$"</span>)     <span style="color: #8B8989; font-style: italic;">; </span><span style="color: #8B8989; font-style: italic;">&#22914;&#26524;&#26377;&#31354;&#34892;&#65292;&#21024;&#38500;</span>
               (pyim-delete-line)
             (setq currw (pyim-code-at-point))
-            (<span style="color: #FBDE2D;">if</span> (string= currw lastw)
+            (<span style="color: #FBDE2D;">if</span> (equal currw lastw)
                 (delete-region (1- (point)) (+ (point) (length currw))))
             (setq lastw currw)
             (forward-line 1)))
@@ -682,7 +684,7 @@ OUTPUT:
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-dicts-manager-toggle-enable-dict</span> (<span style="color: #D8FA3C;">&amp;optional</span> enable)
   <span style="color: #61CE3C;">"&#21551;&#29992;&#24403;&#21069;&#34892;&#23545;&#24212;&#30340;&#35789;&#24211;&#12290;"</span>
   (interactive)
-  (<span style="color: #FBDE2D;">when</span> (string= (buffer-name) pyim-dicts-manager-buffer-name)
+  (<span style="color: #FBDE2D;">when</span> (equal (buffer-name) pyim-dicts-manager-buffer-name)
     (<span style="color: #FBDE2D;">let*</span> ((id (get-text-property (point) 'id))
            (disable (get-text-property (point) 'disable))
            (dict (cl-copy-list (nth (1- id) pyim-dicts)))
@@ -699,7 +701,7 @@ OUTPUT:
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-dicts-manager-delete-dict</span> ()
   <span style="color: #61CE3C;">"&#20174; `</span><span style="color: #4c83ff;">pyim-dicts</span><span style="color: #61CE3C;">' &#20013;&#21024;&#38500;&#24403;&#21069;&#34892;&#23545;&#24212;&#30340;&#35789;&#24211;&#20449;&#24687;&#12290;"</span>
   (interactive)
-  (<span style="color: #FBDE2D;">when</span> (string= (buffer-name) pyim-dicts-manager-buffer-name)
+  (<span style="color: #FBDE2D;">when</span> (equal (buffer-name) pyim-dicts-manager-buffer-name)
     (<span style="color: #FBDE2D;">let</span> ((id (get-text-property (point) 'id))
           (file (get-text-property (point) 'file))
           (line (line-number-at-pos)))
@@ -715,7 +717,7 @@ OUTPUT:
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-dicts-manager-dict-position-up</span> ()
   <span style="color: #61CE3C;">"&#21521;&#19978;&#31227;&#21160;&#35789;&#24211;&#12290;"</span>
   (interactive)
-  (<span style="color: #FBDE2D;">when</span> (string= (buffer-name) pyim-dicts-manager-buffer-name)
+  (<span style="color: #FBDE2D;">when</span> (equal (buffer-name) pyim-dicts-manager-buffer-name)
     (<span style="color: #FBDE2D;">let*</span> ((id (get-text-property (point) 'id))
            (dict1 (nth (- id 1) pyim-dicts))
            (dict2 (nth (- id 2) pyim-dicts))
@@ -731,7 +733,7 @@ OUTPUT:
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-dicts-manager-dict-position-down</span> ()
   <span style="color: #61CE3C;">"&#21521;&#19979;&#31227;&#21160;&#35789;&#24211;&#12290;"</span>
   (interactive)
-  (<span style="color: #FBDE2D;">when</span> (string= (buffer-name) pyim-dicts-manager-buffer-name)
+  (<span style="color: #FBDE2D;">when</span> (equal (buffer-name) pyim-dicts-manager-buffer-name)
     (<span style="color: #FBDE2D;">let*</span> ((id (get-text-property (point) 'id))
            (dict1 (nth (- id 1) pyim-dicts))
            (dict2 (nth id pyim-dicts))
@@ -754,7 +756,7 @@ OUTPUT:
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-dicts-manager-import-sogou-dict-directory</span> ()
   <span style="color: #61CE3C;">"&#23548;&#20837;&#26576;&#20010;&#30446;&#24405;&#20013;&#25152;&#26377;&#25628;&#29399;&#32454;&#32990;&#35789;&#24211;&#30340;&#21629;&#20196;&#12290;"</span>
   (interactive)
-  (<span style="color: #FBDE2D;">when</span> (string= (buffer-name) pyim-dicts-manager-buffer-name)
+  (<span style="color: #FBDE2D;">when</span> (equal (buffer-name) pyim-dicts-manager-buffer-name)
     (<span style="color: #FBDE2D;">let*</span> ((line (line-number-at-pos))
            (dir (read-directory-name <span style="color: #61CE3C;">"&#35831;&#36873;&#25321;&#25628;&#29399;&#32454;&#32990;&#35789;&#24211;&#25152;&#22312;&#30340;&#30446;&#24405;&#65306; "</span> <span style="color: #61CE3C;">"~/"</span>))
            (files (directory-files dir t <span style="color: #61CE3C;">".*\\.scel"</span>)))
@@ -767,7 +769,7 @@ OUTPUT:
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-dicts-manager-import-sogou-dict-file</span> ()
   <span style="color: #61CE3C;">"&#23548;&#20837;&#25628;&#29399;&#32454;&#32990;&#35789;&#24211;&#25991;&#20214;&#30340;&#21629;&#20196;"</span>
   (interactive)
-  (<span style="color: #FBDE2D;">when</span> (string= (buffer-name) pyim-dicts-manager-buffer-name)
+  (<span style="color: #FBDE2D;">when</span> (equal (buffer-name) pyim-dicts-manager-buffer-name)
     (<span style="color: #FBDE2D;">let</span> ((line (line-number-at-pos))
           (file (read-file-name <span style="color: #61CE3C;">"&#35831;&#36873;&#25321;&#38656;&#35201;&#23548;&#20837;&#30340;&#25628;&#29399;&#32454;&#32990;&#35789;&#24211;&#25991;&#20214;&#65306; "</span> <span style="color: #61CE3C;">"~/"</span>)))
       (pyim-dicts-manager-import-sogou-dict-file-1 file)
@@ -787,14 +789,14 @@ OUTPUT:
                                nil <span style="color: #61CE3C;">"*pyim-dicts-import*"</span> nil input-file output-file)
                  (file-exists-p output-file))
             (add-to-list 'pyim-dicts
-                         `(<span style="color: #FF6400;">:name</span> ,input-filename <span style="color: #FF6400;">:file</span> ,output-file <span style="color: #FF6400;">:coding</span> utf-8 <span style="color: #FF6400;">:dict-type</span> 'dict) t)
+                         `(<span style="color: #FF6400;">:name</span> ,input-filename <span style="color: #FF6400;">:file</span> ,output-file <span style="color: #FF6400;">:coding</span> utf-8 <span style="color: #FF6400;">:dict-type</span> pinyin-dict) t)
           (message <span style="color: #61CE3C;">"&#25628;&#29399;&#35789;&#24211;&#25991;&#20214;&#65306;%s &#36716;&#25442;&#22833;&#36133;&#12290;"</span> input-file))
       (message <span style="color: #61CE3C;">"&#36825;&#20010;&#35789;&#24211;&#25991;&#20214;&#20284;&#20046;&#24050;&#32463;&#23548;&#20837;&#12290;"</span>))))
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-dicts-manager-add-dict</span> ()
   <span style="color: #61CE3C;">"&#20026; `</span><span style="color: #4c83ff;">pyim-dicts</span><span style="color: #61CE3C;">' &#28155;&#21152;&#35789;&#24211;&#20449;&#24687;&#12290;"</span>
   (interactive)
-  (<span style="color: #FBDE2D;">when</span> (string= (buffer-name) pyim-dicts-manager-buffer-name)
+  (<span style="color: #FBDE2D;">when</span> (equal (buffer-name) pyim-dicts-manager-buffer-name)
     (<span style="color: #FBDE2D;">let</span> ((line (line-number-at-pos))
           dict name file coding first-used dict-type)
       (setq name (read-from-minibuffer <span style="color: #61CE3C;">"&#35831;&#36755;&#20837;&#35789;&#24211;&#21517;&#31216;&#65306; "</span>))
@@ -820,7 +822,7 @@ OUTPUT:
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-dicts-manager-add-example-dict</span> ()
   <span style="color: #61CE3C;">"&#19979;&#36733;&#24182;&#23433;&#35013;&#29992;&#20110;&#27979;&#35797;&#30446;&#30340;&#30340;&#26679;&#20363;&#35789;&#24211;&#12290;"</span>
   (interactive)
-  (<span style="color: #FBDE2D;">when</span> (string= (buffer-name) pyim-dicts-manager-buffer-name)
+  (<span style="color: #FBDE2D;">when</span> (equal (buffer-name) pyim-dicts-manager-buffer-name)
     (<span style="color: #FBDE2D;">let</span> ((dict-name <span style="color: #61CE3C;">"BigDict-01"</span>)
           (dict-url <span style="color: #61CE3C;">"http://tumashu.github.io/chinese-pyim-bigdict/pyim-bigdict.pyim"</span>)
           (dict-file (expand-file-name
@@ -836,7 +838,7 @@ OUTPUT:
                        `(<span style="color: #FF6400;">:name</span> ,dict-name
                                <span style="color: #FF6400;">:file</span> ,dict-file
                                <span style="color: #FF6400;">:coding</span> utf-8-unix
-                               <span style="color: #FF6400;">:dict-type</span> dict) t))
+                               <span style="color: #FF6400;">:dict-type</span> pinyin-dict) t))
         (pyim-dicts-manager-refresh)))))
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-dicts-manager-merge-all</span> ()
@@ -935,7 +937,7 @@ Chinese-pyim 打算使用 emacs package 来分发词库包。
 <span style="color: #61CE3C;">  &#36825;&#20010;&#20989;&#25968;&#20027;&#35201;&#29992;&#20110;&#35789;&#24211; package&#12290;"</span>
   (cl-some (<span style="color: #FBDE2D;">lambda</span> (x)
              (<span style="color: #FBDE2D;">let</span> ((name (plist-get x <span style="color: #FF6400;">:name</span>)))
-               (string= name dict-name)))
+               (equal name dict-name)))
            pyim-dicts))
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-dict-file-available-p</span> (dict-file)
@@ -943,8 +945,8 @@ Chinese-pyim 打算使用 emacs package 来分发词库包。
 <span style="color: #61CE3C;">  &#36825;&#20010;&#20989;&#25968;&#20027;&#35201;&#29992;&#20110;&#35789;&#24211; package&#12290;"</span>
   (cl-some (<span style="color: #FBDE2D;">lambda</span> (x)
              (<span style="color: #FBDE2D;">let</span> ((file (plist-get x <span style="color: #FF6400;">:file</span>)))
-               (string= (expand-file-name file)
-                        (expand-file-name dict-file))))
+               (equal (expand-file-name file)
+                      (expand-file-name dict-file))))
            pyim-dicts))
 </pre>
 </div>
@@ -956,8 +958,8 @@ Chinese-pyim 打算使用 emacs package 来分发词库包。
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2015-09-14</span>
-        <span title="last modification date" class="post-info">2015-09-01</span>
+        <span title="post date" class="post-info">2015-11-04</span>
+        <span title="last modification date" class="post-info">2015-11-04</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>

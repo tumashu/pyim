@@ -272,7 +272,7 @@ content: "*** "
         border: 1px solid #aaa;
         background: white;
         color: black !important;
-        list-style: "disc";
+        list-style-type: disc;
         position: absolute;
         right: 1%;
         top: 20%;

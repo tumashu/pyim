@@ -34,8 +34,8 @@
 <h2>&#30446;&#24405;</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgheadline1">1. 简要介绍</a></li>
-<li><a href="#orgheadline5">2. 代码说明</a>
+<li><a href="#orgheadline1">1. 说明文档</a></li>
+<li><a href="#orgheadline5">2. 代码</a>
 <ul>
 <li><a href="#orgheadline2">2.1. 加载必要的库文件</a></li>
 <li><a href="#orgheadline3">2.2. 定义一个 org 导出过滤器，处理中文文档中的多余空格</a></li>
@@ -46,7 +46,7 @@
 </div>
 </div>
 <div id="outline-container-orgheadline1" class="outline-2">
-<h2 id="orgheadline1"><span class="section-number-2">1</span> 简要介绍</h2>
+<h2 id="orgheadline1"><span class="section-number-2">1</span> 说明文档</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 这个文件包含了 Chinese-pyim 开发相关的命令，比如：
@@ -60,8 +60,10 @@
 </div>
 
 
+
+
 <div id="outline-container-orgheadline5" class="outline-2">
-<h2 id="orgheadline5"><span class="section-number-2">2</span> 代码说明</h2>
+<h2 id="orgheadline5"><span class="section-number-2">2</span> 代码</h2>
 <div class="outline-text-2" id="text-2">
 </div><div id="outline-container-orgheadline2" class="outline-3">
 <h3 id="orgheadline2"><span class="section-number-3">2.1</span> 加载必要的库文件</h3>
@@ -113,25 +115,15 @@
              <span style="color: #61CE3C;">"\\1\\2"</span> string))
       string)))
 
-(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-devtools-replace-org-head</span> (regexp replace-string)
-  <span style="color: #61CE3C;">"replace org head matched `</span><span style="color: #4c83ff;">regexp</span><span style="color: #61CE3C;">' to string `</span><span style="color: #4c83ff;">replace-string</span><span style="color: #61CE3C;">'"</span>
-  (org-map-entries
-   (<span style="color: #FBDE2D;">lambda</span> ()
-     (<span style="color: #FBDE2D;">let</span> ((head (org-get-heading t t)))
-       (<span style="color: #FBDE2D;">when</span> (string-match-p regexp head)
-         (delete-region (+ (line-beginning-position) 2)
-                        (line-end-position))
-         (goto-char (line-end-position))
-         (insert (concat <span style="color: #61CE3C;">" "</span> replace-string)))))))
-
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-devtools-org-preprocess</span> (backend)
-  <span style="color: #61CE3C;">"This function replace some org head, used by `</span><span style="color: #4c83ff;">org-export-before-processing-hook</span><span style="color: #61CE3C;">'"</span>
+  <span style="color: #61CE3C;">"This function delete useless string."</span>
   (<span style="color: #FBDE2D;">save-excursion</span>
-    (<span style="color: #FBDE2D;">when</span> (eq backend 'html)
-      (pyim-devtools-replace-org-head <span style="color: #61CE3C;">"Header"</span> <span style="color: #61CE3C;">"Header :noexport:"</span>)
-      (pyim-devtools-replace-org-head <span style="color: #61CE3C;">"Footer"</span> <span style="color: #61CE3C;">"Footer :noexport:"</span>)
-      (pyim-devtools-replace-org-head <span style="color: #61CE3C;">"Commentary"</span> <span style="color: #61CE3C;">"&#31616;&#35201;&#20171;&#32461;"</span>)
-      (pyim-devtools-replace-org-head <span style="color: #61CE3C;">"Code"</span> <span style="color: #61CE3C;">"&#20195;&#30721;&#35828;&#26126;"</span>))))
+    (goto-char (point-min))
+    (<span style="color: #FBDE2D;">while</span> (re-search-forward <span style="color: #61CE3C;">"^;;; +Commentary:.*"</span> nil t)
+      (replace-match <span style="color: #61CE3C;">""</span> nil t))
+    (goto-char (point-min))
+    (<span style="color: #FBDE2D;">while</span> (re-search-forward <span style="color: #61CE3C;">"^;;; +Code:.*"</span> nil t)
+      (replace-match <span style="color: #61CE3C;">""</span> nil t))))
 </pre>
 </div>
 </div>
@@ -177,17 +169,12 @@
   (<span style="color: #FBDE2D;">let*</span> ((el-file (concat (file-name-as-directory
                            pyim-website-repository-directory)
                           <span style="color: #61CE3C;">"/chinese-pyim.el"</span>))
-         (org-file (concat (file-name-sans-extension el-file) <span style="color: #61CE3C;">".org"</span>))
-         (el-file-buffer (get-file-buffer el-file))
-         (org-file-buffer (get-file-buffer org-file)))
-    (<span style="color: #FBDE2D;">when</span> el-file-buffer
-      (kill-buffer el-file-buffer))
-    (<span style="color: #FBDE2D;">when</span> org-file-buffer
-      (kill-buffer org-file-buffer))
-    (lentic-doc-orgify-if-necessary el-file)
+         (org-file (concat (file-name-sans-extension el-file) <span style="color: #61CE3C;">".org"</span>)))
+    (pyim-orgify-if-necessary el-file)
     (<span style="color: #FBDE2D;">if</span> (file-exists-p org-file)
         (<span style="color: #FBDE2D;">with-current-buffer</span> (find-file-noselect org-file)
           (<span style="color: #FBDE2D;">let</span> ((org-export-filter-paragraph-functions '(pyim-devtools-org-clean-space))
+                (org-export-before-processing-hook '(pyim-devtools-org-preprocess))
                 (org-export-select-tags '(<span style="color: #61CE3C;">"README"</span>))
                 (indent-tabs-mode nil)
                 (tab-width 4))
@@ -201,25 +188,32 @@
          '(pyim-devtools-org-preprocess))
         (org-export-filter-paragraph-functions
          '(pyim-devtools-org-clean-space))
-        (org-export-select-tags '(<span style="color: #61CE3C;">"README"</span> <span style="color: #61CE3C;">"devel"</span>))
+        (org-export-select-tags '(<span style="color: #61CE3C;">"README"</span> <span style="color: #61CE3C;">"devel"</span> <span style="color: #61CE3C;">"doc"</span> <span style="color: #61CE3C;">"code"</span>))
         (indent-tabs-mode nil)
         (tab-width 4))
     (org-export-as 'html nil nil t nil)))
+
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-orgify-if-necessary</span> (el-file)
+  (<span style="color: #FBDE2D;">let*</span> ((el-buffer (get-file-buffer el-file))
+         (org-file (concat (file-name-sans-extension el-file) <span style="color: #61CE3C;">".org"</span>))
+         (org-buffer (get-file-buffer org-file))
+         (locked (or (file-locked-p el-file)
+                     (file-locked-p org-file))))
+    (<span style="color: #FBDE2D;">when</span> el-buffer
+      (kill-buffer el-buffer))
+    (<span style="color: #FBDE2D;">when</span> org-buffer
+      (kill-buffer org-buffer))
+    (<span style="color: #FBDE2D;">unless</span> locked
+      (<span style="color: #FBDE2D;">when</span> (file-newer-than-file-p el-file org-file)
+        (<span style="color: #FBDE2D;">let</span> ((lentic-kill-retain t))
+          (lentic-batch-clone-and-save-with-config
+           el-file 'lentic-el2org-init))))))
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-preparation-org-files</span> ()
   <span style="color: #61CE3C;">"Generate org files by lentic."</span>
   (message <span style="color: #61CE3C;">"Generating org files by lentic ..."</span>)
   (<span style="color: #FBDE2D;">let</span> ((el-files (directory-files pyim-website-repository-directory t <span style="color: #61CE3C;">"\\.el$"</span>)))
-    (mapc #'(<span style="color: #FBDE2D;">lambda</span> (el-file)
-              (<span style="color: #FBDE2D;">let*</span> ((org-file (concat (file-name-sans-extension el-file) <span style="color: #61CE3C;">".org"</span>))
-                     (el-buffer (get-file-buffer el-file))
-                     (org-buffer (get-file-buffer org-file)))
-                (<span style="color: #FBDE2D;">when</span> el-buffer
-                  (kill-buffer el-buffer))
-                (<span style="color: #FBDE2D;">when</span> org-buffer
-                  (kill-buffer org-buffer)))
-              (lentic-doc-orgify-if-necessary el-file))
-          el-files))
+    (mapc #'pyim-orgify-if-necessary el-files))
   (pyim-devtools-generate-readme-and-index))
 </pre>
 </div>
@@ -231,8 +225,8 @@
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2015-09-14</span>
-        <span title="last modification date" class="post-info">2015-09-06</span>
+        <span title="post date" class="post-info">2015-11-04</span>
+        <span title="last modification date" class="post-info">2015-11-04</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>

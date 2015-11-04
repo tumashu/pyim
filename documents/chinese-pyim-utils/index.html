@@ -34,13 +34,13 @@
 <h2>&#30446;&#24405;</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgheadline1">1. 简要介绍</a></li>
-<li><a href="#orgheadline2">2. 代码说明</a></li>
+<li><a href="#orgheadline1">1. 说明文档</a></li>
+<li><a href="#orgheadline2">2. 代码</a></li>
 </ul>
 </div>
 </div>
 <div id="outline-container-orgheadline1" class="outline-2">
-<h2 id="orgheadline1"><span class="section-number-2">1</span> 简要介绍</h2>
+<h2 id="orgheadline1"><span class="section-number-2">1</span> 说明文档</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 这个文件包含一些有用工具，这些工具都依赖 Chinese-pyim 的内部特性。
@@ -52,8 +52,9 @@
 </div>
 </div>
 
+
 <div id="outline-container-orgheadline2" class="outline-2">
-<h2 id="orgheadline2"><span class="section-number-2">2</span> 代码说明</h2>
+<h2 id="orgheadline2"><span class="section-number-2">2</span> 代码</h2>
 <div class="outline-text-2" id="text-2">
 <div class="org-src-container">
 
@@ -220,7 +221,7 @@
           (<span style="color: #FBDE2D;">dolist</span> (pinyin pinyin-list)
             (<span style="color: #FBDE2D;">let</span> ((words (pyim-get pinyin nil t))) <span style="color: #8B8989; font-style: italic;">; </span><span style="color: #8B8989; font-style: italic;">&#24573;&#30053;&#20010;&#20154;&#35789;&#24211; buffer &#21487;&#20197;&#25552;&#39640;&#36895;&#24230;</span>
               (<span style="color: #FBDE2D;">dolist</span> (word words)
-                (<span style="color: #FBDE2D;">when</span> (string= word (car string-list))
+                (<span style="color: #FBDE2D;">when</span> (equal word (car string-list))
                   (push string-list result)))))))
       result)))
 
@@ -312,8 +313,8 @@
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2015-09-14</span>
-        <span title="last modification date" class="post-info">2015-09-01</span>
+        <span title="post date" class="post-info">2015-11-04</span>
+        <span title="last modification date" class="post-info">2015-11-04</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>
