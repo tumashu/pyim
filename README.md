@@ -28,7 +28,7 @@
     - [获取光标处的中文词条](#sec-1-9-7)
     - [让 \`forward-word' 和 \`back-backward’ 在中文环境下正常工作](#sec-1-9-8)
 
-# Chinese-pyim 使用说明     :doc:<a id="orgheadline33"></a>
+# Chinese-pyim 使用说明<a id="orgheadline33"></a>
 
 ## 截图<a id="orgheadline1"></a>
 

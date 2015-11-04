@@ -127,6 +127,7 @@
           (let ((org-export-filter-paragraph-functions '(pyim-devtools-org-clean-space))
                 (org-export-before-processing-hook '(pyim-devtools-org-preprocess))
                 (org-export-select-tags '("README"))
+                (org-export-with-tags nil)
                 (indent-tabs-mode nil)
                 (tab-width 4))
             (org-export-to-file 'gfm "README.md")
