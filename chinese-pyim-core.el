@@ -1049,19 +1049,19 @@ beginning of line"
 ;;    `pyim-select-current' 会调用这个函数来自动造词。其工作流程是：
 ;;     1. 使用 `chinese-hanzi2pinyin' 获取中文词条的拼音。
 ;;     2. 然后调用 `pyim-intern-word' 保存词条，多音字重复操作，比如：
-;;
+
 ;;        #+BEGIN_EXAMPLE
 ;;        yin-hang 银行
 ;;        yin-xing 银行
 ;;        #+END_EXAMPLE
-;;
+
 ;;     另外，这个函数也用于 *词频调整*  。
-;;
+
 ;;     BUG：这种处理方式最大的问题是 *无法正确处理* 多音字，从而导致
 ;;     chinese-pyim 个人文件 *不纯洁*  :-)，但不影响使用。Emacs-eim
 ;;     使用的方式不存在这种问题，但其增加了代码的复杂度，并且灵活性太差
 ;;     增加高级功能，比如 “词语联想”，时存在问题。
-;;
+
 ;; 2. `pyim-create-word-at-point' 这个命令会提取光标前 `number' 个中文字
 ;;     符，将其组成字符串后，调用 `pyim-create-word' 将其加入个人词频文件。
 ;; 3. `pyim-create-word-at-point:<NUM>char' 这组命令是
