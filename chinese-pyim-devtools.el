@@ -141,6 +141,7 @@
         (org-export-filter-paragraph-functions
          '(pyim-devtools-org-clean-space))
         (org-export-select-tags '("README" "devel" "doc" "code"))
+        (org-export-headline-levels 7)
         (indent-tabs-mode nil)
         (tab-width 4))
     (org-export-as 'html nil nil t nil)))
