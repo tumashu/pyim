@@ -65,7 +65,14 @@
 <ul>
 <li><a href="#orgheadline21">1.9.1. 选词框弹出位置不合理或者选词框内容显示不全</a></li>
 <li><a href="#orgheadline22">1.9.2. 如何查看 Chinese-pyim 文档。</a></li>
-<li><a href="#orgheadline7">1.9.3. 如何添加自定义拼音词库</a></li>
+<li><a href="#orgheadline7">1.9.3. 如何添加自定义拼音词库</a>
+<ul>
+<li><a href="#orgheadline23">1.9.3.1. 第一种方式 (懒人推荐使用)</a></li>
+<li><a href="#orgheadline24">1.9.3.2. 第二种方式 (Windows 用户推荐使用)</a></li>
+<li><a href="#orgheadline25">1.9.3.3. 第三种方式 (Linux &amp; Unix 用户推荐使用)</a></li>
+<li><a href="#orgheadline26">1.9.3.4. 第四种方式 (喜欢折腾的人推荐使用)</a></li>
+</ul>
+</li>
 <li><a href="#orgheadline27">1.9.4. 如何手动安装和管理词库</a></li>
 <li><a href="#orgheadline28">1.9.5. 将汉字字符串转换为拼音字符串</a></li>
 <li><a href="#orgheadline29">1.9.6. 中文分词</a></li>
@@ -485,7 +492,9 @@ Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面三�
 </p>
 </div>
 
-<ol class="org-ol"><li><a id="orgheadline23"></a>第一种方式 (懒人推荐使用)<br  /><div class="outline-text-5" id="text-1-9-3-1">
+<div id="outline-container-orgheadline23" class="outline-5">
+<h5 id="orgheadline23"><span class="section-number-5">1.9.3.1</span> 第一种方式 (懒人推荐使用)</h5>
+<div class="outline-text-5" id="text-1-9-3-1">
 <p>
 获取其他 Chinese-pyim 用户的拼音词库，比如，某个同学测试 Chinese-pyim
 时创建了一个中文拼音词库，词条数量大约60万，文件大约20M，(注意：请使用另存为，不要直接点击链接)。
@@ -499,9 +508,12 @@ Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面三�
 下载上述词库后，运行 `pyim-dicts-manager' ，按照命令提示，将下载得到的词库文件信息添加到 `pyim-dicts' 中，最后运行命令 `pyim-restart' 或者重启
 emacs，这个词库使用 `utf-8-unix' 编码。
 </p>
-</div></li>
+</div>
+</div>
 
-<li><a id="orgheadline24"></a>第二种方式 (Windows 用户推荐使用)<br  /><div class="outline-text-5" id="text-1-9-3-2">
+<div id="outline-container-orgheadline24" class="outline-5">
+<h5 id="orgheadline24"><span class="section-number-5">1.9.3.2</span> 第二种方式 (Windows 用户推荐使用)</h5>
+<div class="outline-text-5" id="text-1-9-3-2">
 <p>
 使用词库转换工具将其他输入法的词库转化为Chinese-pyim使用的词库：这里只介绍windows平台下的一个词库转换软件：
 </p>
@@ -532,9 +544,12 @@ shen-lan-ci-ku 深蓝词库
 <p>
 最后，运行 `pyim-dicts-manager' ，按照命令提示，将转换得到的词库文件的信息添加到 `pyim-dicts' 中，完成后运行命令 `pyim-restart' 或者重启emacs。
 </p>
-</div></li>
+</div>
+</div>
 
-<li><a id="orgheadline25"></a>第三种方式 (Linux &amp; Unix 用户推荐使用)<br  /><div class="outline-text-5" id="text-1-9-3-3">
+<div id="outline-container-orgheadline25" class="outline-5">
+<h5 id="orgheadline25"><span class="section-number-5">1.9.3.3</span> 第三种方式 (Linux &amp; Unix 用户推荐使用)</h5>
+<div class="outline-text-5" id="text-1-9-3-3">
 <p>
 E-Neo 同学编写了一个简单的词库转换工具: <a href="https://github.com/E-Neo/scel2pyim">scel2pyim</a> ,
 这个小工具可以直接将搜狗输入法的细胞词库转换为 Chinese-pyim 使用的文本词库，
@@ -554,9 +569,12 @@ pyim-dicts-manager 中 “导入搜狗输入法细胞词库” 功能就是依�
 <pre class="example">
 (setq pyim-dicts-manager-scel2pyim-command "/path/to/scel2pyim")
 </pre>
-</div></li>
+</div>
+</div>
 
-<li><a id="orgheadline26"></a>第四种方式 (喜欢折腾的人推荐使用)<br  /><div class="outline-text-5" id="text-1-9-3-4">
+<div id="outline-container-orgheadline26" class="outline-5">
+<h5 id="orgheadline26"><span class="section-number-5">1.9.3.4</span> 第四种方式 (喜欢折腾的人推荐使用)</h5>
+<div class="outline-text-5" id="text-1-9-3-4">
 <p>
 获取中文词条，然后使用命令为词条添加拼音code。中文词条的获取途径很多，比如：
 </p>
@@ -587,7 +605,8 @@ pyim-dicts-manager 中 “导入搜狗输入法细胞词库” 功能就是依�
 <p>
 最后将生成的词库按上述方法添加到 Chinese-pyim 中就可以了。
 </p>
-</div></li></ol>
+</div>
+</div>
 </div>
 
 <div id="outline-container-orgheadline27" class="outline-4">
@@ -731,8 +750,8 @@ Chinese-pyim 包含了一个简单的命令：`pyim-get-words-list-at-point', �
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2015-11-04</span>
-        <span title="last modification date" class="post-info">2015-11-04</span>
+        <span title="post date" class="post-info">2015-11-19</span>
+        <span title="last modification date" class="post-info">2015-11-16</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>
