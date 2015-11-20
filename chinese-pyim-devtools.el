@@ -56,9 +56,9 @@
    :personal-duoshuo-shortname "tumashu-website"
    :preparation-function owp/lentic-preparation-function
    :org-export-function owp/lentic-org-export-function
-   :lentic-doc-source "^chinese-pyim-.*\\.el$"
-   :lentic-readme-source "chinese-pyim.el"
-   :lentic-index-source "chinese-pyim.el"
+   :lentic-doc-sources ("chinese-pyim-.*\\.el$")
+   :lentic-readme-sources ("chinese-pyim.el")
+   :lentic-index-sources ("chinese-pyim.el")
    :web-server-port 9876))
 ;; #+END_SRC
 
