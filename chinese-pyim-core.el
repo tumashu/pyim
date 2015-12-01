@@ -213,7 +213,7 @@ Chinese-pyim 内建的功能有：
 (defcustom pyim-line-content-limit
   (if (eq system-type 'windows-nt)
       3000
-    10000)
+    5000)
   "限制词库文件中的行长度。如果行太长，在windows平台下会出现严重的性能问题。"
   :group 'chinese-pyim)
 
