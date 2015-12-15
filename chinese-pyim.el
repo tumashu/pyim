@@ -203,7 +203,8 @@
 ;;   (setq pyim-dicts
 ;;         '((:name "BigDict"
 ;;                  :file "/path/to/pyim-bigdict.txt"
-;;                  :coding utf-8-unix)))
+;;                  :coding utf-8-unix
+;;                  :dict-type pinyin-dict)))
 ;;   (pyim-restart-1 t))
 ;; #+END_EXAMPLE
 
@@ -245,7 +246,7 @@
 ;;   http://tumashu.github.io/chinese-pyim/
 
 ;; *** 如何添加自定义拼音词库
-;; Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面三种方式，获取
+;; Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面四种方式，获取
 ;; 质量较好的拼音词库：
 
 ;; **** 第一种方式 (懒人推荐使用)
@@ -333,8 +334,8 @@
 
 ;; #+BEGIN_EXAMPLE
 ;; (setq pyim-dicts
-;;       '((:name "dict1" :file "/path/to/pyim-dict1.txt" :coding gbk-dos)
-;;         (:name "dict2" :file "/path/to/pyim-dict2.txt" :coding gbk-dos)))
+;;       '((:name "dict1" :file "/path/to/pyim-dict1.txt" :coding gbk-dos :dict-type pinyin-dict)
+;;         (:name "dict2" :file "/path/to/pyim-dict2.txt" :coding gbk-dos :dict-type pinyin-dict)))
 ;; #+END_EXAMPLE
 
 ;; 注意事项:

@@ -233,7 +233,8 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
       (setq pyim-dicts
             '((:name "BigDict"
                      :file "/path/to/pyim-bigdict.txt"
-                     :coding utf-8-unix)))
+                     :coding utf-8-unix
+                     :dict-type pinyin-dict)))
       (pyim-restart-1 t))
 
 ### 使用 Company 框架来补全联想词（实验特性）<a id="orgheadline15"></a>
@@ -271,7 +272,7 @@ Chinese－-pyim 开发使用 lentic 文学编程模式，代码文档隐藏在co
 
 ### 如何添加自定义拼音词库<a id="orgheadline7"></a>
 
-Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面三种方式，获取质量较好的拼音词库：
+Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面四种方式，获取质量较好的拼音词库：
 
 1.  第一种方式 (懒人推荐使用)
 
@@ -347,8 +348,8 @@ Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面三�
 在~/.emacs文件中添加如下一行配置。
 
     (setq pyim-dicts
-          '((:name "dict1" :file "/path/to/pyim-dict1.txt" :coding gbk-dos)
-            (:name "dict2" :file "/path/to/pyim-dict2.txt" :coding gbk-dos)))
+          '((:name "dict1" :file "/path/to/pyim-dict1.txt" :coding gbk-dos :dict-type pinyin-dict)
+            (:name "dict2" :file "/path/to/pyim-dict2.txt" :coding gbk-dos :dict-type pinyin-dict)))
 
 注意事项:
 
