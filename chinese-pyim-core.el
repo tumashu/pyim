@@ -1324,17 +1324,12 @@ Return the input string."
 
 1. 当前字符为英文字符时，输入下一个字符时默认开启英文输入
 2. 当前字符为中文字符时，输入下一个字符时默认开启中文输入
-3. 当前字符为中文字符时，输入1个空格后，仍然输入中文
-4. 当前字符为英文字符时，输入1个空格后，仍然输入英文
-5. 当前字符为中文字符时，输入2个空格后，切换到英文输入
-6. 当前字符为英文字符时，输入2个空格后，切换到中文输入
+3. 无论当前是什么输入模式，当输入1个空格后，自动切换到中文输入模式
 
 这个函数的使用方法请参考 `pyim-english-input-switch-function'
 的相关帮助。"
   (let ((str-before-1 (pyim-char-before-to-string 0))
         (str-before-2 (pyim-char-before-to-string 1))
-        (str-before-3 (pyim-char-before-to-string 2))
-        (str-before-4 (pyim-char-before-to-string 3))
         (regexp-chinese "\\cc")
         (regexp-alpha "[a-zA-Z]")
         ;; ascii puncts: !\"#$%&'()*+,-./:;<=>?@\^_`{|}~
@@ -1342,32 +1337,9 @@ Return the input string."
         (regexp-punct "[@`+=_~&-]"))
     (cond ((and (stringp str-before-1)
                 (stringp str-before-2)
-                (stringp str-before-3)
-                (equal str-before-1 " ")
-                (equal str-before-2 " ")
-                (string-match-p regexp-chinese str-before-3))
-           (pyim-toggle-full-width-punctuation -1 t) ;; 使用半角标点
-           t)
-          ((and (stringp str-before-1)
-                (stringp str-before-2)
-                (stringp str-before-3)
-                (equal str-before-1 " ")
-                (equal str-before-2 " ")
-                (string-match-p regexp-alpha str-before-3))
+                (equal str-before-1 " "))
            (pyim-toggle-full-width-punctuation 1 t) ;; 使用全角标点
            nil)
-          ((and (stringp str-before-1)
-                (stringp str-before-2)
-                (equal str-before-1 " ")
-                (string-match-p regexp-chinese str-before-2))
-           (pyim-toggle-full-width-punctuation 1 t) ;; 使用全角标点
-           nil)
-          ((and (stringp str-before-1)
-                (stringp str-before-2)
-                (equal str-before-1 " ")
-                (string-match-p regexp-alpha str-before-2))
-           (pyim-toggle-full-width-punctuation -1 t) ;; 使用半角标点
-           t)
           ((and (stringp str-before-1)
                 (or (string-match-p regexp-alpha str-before-1)
                     (string-match-p regexp-punct str-before-1))
