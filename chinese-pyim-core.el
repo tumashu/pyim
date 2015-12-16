@@ -179,9 +179,10 @@ Chinese-pyim 内建的功能有：
   :group 'chinese-pyim)
 
 (defcustom pyim-english-input-switch-function nil
-  "一个函数，其运行结果为 t 时，Chinese-pyim 开启英文输入功能。"
-  :group 'chinese-pyim
-  :type 'function)
+  "当这个变量的取值为一个函数且这个函数的运行结果为 t 时，Chinese-pyim 开启英文输入功能。
+当这个变量的取值为一个函数列表且这个函数列表中的任意一个函数的运行结果为 t 时，
+Chinese-pyim 也开启英文输入功能。"
+  :group 'chinese-pyim)
 
 (defcustom pyim-select-word-finish-hook nil
   "Chinese-pyim 选词完成时运行的hook，"
@@ -1310,14 +1311,23 @@ Return the input string."
 
 (defun pyim-input-chinese-p ()
   "确定 Chinese-pyim 是否启动中文输入模式"
-  (and (not pyim-input-ascii)
-       (if (functionp pyim-english-input-switch-function)
-           (not (funcall pyim-english-input-switch-function)) t)
-       (if (pyim-string-emptyp pyim-current-key)
+  (let* ((func-or-list pyim-english-input-switch-function)
+         (auto-switch-english-input-p
+          ;; Deal with `pyim-english-input-switch-function'
+          (cl-some #'(lambda (x)
+                       (if (functionp x)
+                           (funcall x)
+                         nil))
+                   (cond ((functionp func-or-list) (list func-or-list))
+                         ((listp func-or-list) func-or-list)
+                         (t nil)))))
+    (and (not pyim-input-ascii)
+         (not auto-switch-english-input-p)
+         (if (pyim-string-emptyp pyim-current-key)
+             (member last-command-event
+                     (mapcar 'identity "abcdefghjklmnopqrstwxyz"))
            (member last-command-event
-                   (mapcar 'identity "abcdefghjklmnopqrstwxyz"))
-         (member last-command-event
-                 (mapcar 'identity "vmpfwckzyjqdltxuognbhsrei'-a")))))
+                   (mapcar 'identity "vmpfwckzyjqdltxuognbhsrei'-a"))))))
 
 (defun pyim-dynamic-english-input-function ()
   "中英文输入动态切换函数，其基本规则是：

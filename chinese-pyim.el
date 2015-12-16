@@ -141,6 +141,14 @@
 ;;               'pyim-dynamic-english-input-function)
 ;; #+END_EXAMPLE
 
+;; 注：如果用户希望设置多个切换函数，也可以将上述变量设置为一个 *函数列表* ，
+;; 函数列表中的任意一个函数返回值为 `t' 时，Chinese-pyim 就会切换到
+;; 英文输入模式。
+;; #+BEGIN_EXAMPLE
+;; (setq-default pyim-english-input-switch-function
+;;               '(function1 function2 function3))
+;; #+END_EXAMPLE
+
 ;; *** 词语联想
 ;; Chinese-pyim *内置* 了4种词语联想方式：
 

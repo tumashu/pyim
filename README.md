@@ -186,6 +186,11 @@ Chinese-pyim  可以根据输入内容动态的切换中英文输入，基本规
     (setq-default pyim-english-input-switch-function
                   'pyim-dynamic-english-input-function)
 
+注：如果用户希望设置多个切换函数，也可以将上述变量设置为一个 **函数列表** ，函数列表中的任意一个函数返回值为 \`t' 时，Chinese-pyim 就会切换到英文输入模式。
+
+    (setq-default pyim-english-input-switch-function
+                  '(function1 function2 function3))
+
 ### 词语联想<a id="orgheadline16"></a>
 
 Chinese-pyim **内置** 了4种词语联想方式：
