@@ -1631,7 +1631,7 @@ Return the input string."
     ;; 如果上一次输入词条 "你好" ，那么以 “你好” 为 code，从 guessdict 词库中搜索词条
     ;; 将搜索得到的词条的拼音与 *当前输入的拼音* 进行比较，类似或者精确匹配的词条作为联想词。
     (when (member 'guess-words pyim-enable-words-predict)
-      (let ((words (pyim-get pyim-last-input-word t))
+      (let ((words (pyim-get (pyim-grab-chinese-word) t))
             (count 0))
         (while words
           (setq word (pop words))
@@ -1683,6 +1683,39 @@ Return the input string."
                    ;; 汉字字符
                    ,@chars))
     (delete-dups (delq nil choice))))
+
+(defun pyim-grab-chinese-word ()
+  "获取光标处一个 *有效的* 中文词语，较长的词语优先。
+如果提取不到合适的中文词语，就返回 `pyim-last-input-word' 的值。"
+  (unless (featurep 'chinese-pyim-utils)
+    (require 'chinese-pyim-utils))
+  (let* ((length-current-str (length pyim-current-str))
+         (string (replace-regexp-in-string
+                  ".*\\CC" ""
+                  (buffer-substring
+                   (save-excursion
+                     ;; 在输入中文的时候，`pyim-current-str' 也会
+                     ;; 插入到光标处，跳过。。。
+                     (backward-char length-current-str)
+                     (point))
+                   (save-excursion
+                     (backward-char length-current-str)
+                     (skip-syntax-backward "w")
+                     (point)))))
+         (string
+          ;; 我们先提取一个中文字符串，然后将这个字符串分词，得到所需词语。
+          ;; 因为长字符串分词消耗的时间较长，影响输入法响应速度，所以这里限制
+          ;; 字符串长度为6，经验数值。
+          (if (> (length string) 6)
+              (substring string -6)
+            string))
+         (length (+ (length string) 1)))
+    (or (cl-some
+         #'(lambda (x)
+             (if (= (nth 2 x) length)
+                 (car x)))
+         (nreverse (pyim-split-chinese-string string)))
+        pyim-last-input-word)))
 
 (defun pyim-sublist (list start end)
   "Return a section of LIST, from START to END.
