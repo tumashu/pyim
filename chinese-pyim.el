@@ -180,9 +180,6 @@
 ;; (setq pyim-enable-words-predict nil)
 ;; #+END_EXAMPLE
 
-;; 另外，Chinese-pyim 也可以通过 Company 框架来实现词语联想，
-;; 具体请参考： [[使用 Company 框架来补全联想词（实验特性）]]
-
 ;; *** 切换全角标点与半角标点
 
 ;; 1. 第一种方法：使用命令 `pyim-toggle-full-width-punctuation'，全局切换。
@@ -216,12 +213,11 @@
 ;;   (pyim-restart-1 t))
 ;; #+END_EXAMPLE
 
-;; *** 使用 Company 框架来补全联想词（实验特性）
+;; *** 使用 Chinese-pyim 改善 company-mode 中文补全的体验
 
-;; `Chinese-pyim' 增加了两个 `company-mode' 后端来实现 *联想词* 输入功能：
-
-;; 1. `pyim-company-dabbrev' 是 `company-dabbrev' 的中文优化版，适用于补全其它 buffer 中的中文词语。
-;; 2. `pyim-company-predict-words' 可以从 Chinese-pyim 词库中搜索与当前中文词条相近的词条。
+;; 中文词语之间没有分割字符，所以 Company-mode 在中文环境下， *补全词条* 变成了 *补全句子* ，
+;; 可用性很差，chinese-pyim-company 通过 Chinese-pyim 自带的分词函数来分割中文字符串，
+;; 改善了中文补全的体验 。
 
 ;; 安装和使用方式：
 
@@ -230,14 +226,17 @@
 
 ;; #+BEGIN_EXAMPLE
 ;; (require 'chinese-pyim-company)
+;; (setq company-idle-delay  0.1)
+;; (setq company-minimum-prefix-length 2)
+;; (setq company-selection-wrap-around t)
+;; (setq company-show-numbers t)
+;; (setq company-dabbrev-downcase nil)
+;; (setq company-dabbrev-ignore-case nil)
+;; (setq company-require-match nil)
 ;; #+END_EXAMPLE
 
-;; 可以通过 pyim-company-predict-words-number 来设置联想词的数量，
-;; 比如：从词库中搜索10个联想词可以设置为：
-
-;; #+BEGIN_EXAMPLE
-;; (setq pyim-company-predict-words-number 10)
-;; #+END_EXAMPLE
+;; 注：如果加载 `chinese-pyim-company' 后，company 补全菜单显示出现卡顿，
+;; 可以通过运行 `pyim-cache-dict-buffer' 命令来得到改善。
 
 ;; ** Tips
 
