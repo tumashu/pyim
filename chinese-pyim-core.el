@@ -1631,7 +1631,7 @@ Return the input string."
     ;; 如果上一次输入词条 "你好" ，那么以 “你好” 为 code，从 guessdict 词库中搜索词条
     ;; 将搜索得到的词条的拼音与 *当前输入的拼音* 进行比较，类似或者精确匹配的词条作为联想词。
     (when (member 'guess-words pyim-enable-words-predict)
-      (let ((words (pyim-get (pyim-grab-chinese-word) t))
+      (let ((words (pyim-get (pyim-grab-chinese-word (length pyim-current-str)) t))
             (count 0))
         (while words
           (setq word (pop words))
@@ -1684,22 +1684,22 @@ Return the input string."
                    ,@chars))
     (delete-dups (delq nil choice))))
 
-(defun pyim-grab-chinese-word ()
+(defun pyim-grab-chinese-word (&optional backward-char-number)
   "获取光标处一个 *有效的* 中文词语，较长的词语优先。
 如果提取不到合适的中文词语，就返回 `pyim-last-input-word' 的值。"
   (unless (featurep 'chinese-pyim-utils)
     (require 'chinese-pyim-utils))
-  (let* ((length-current-str (length pyim-current-str))
+  (let* ((backward-char-number (or backward-char-number 0))
          (string (replace-regexp-in-string
                   ".*\\CC" ""
                   (buffer-substring
                    (save-excursion
                      ;; 在输入中文的时候，`pyim-current-str' 也会
                      ;; 插入到光标处，跳过。。。
-                     (backward-char length-current-str)
+                     (backward-char backward-char-number)
                      (point))
                    (save-excursion
-                     (backward-char length-current-str)
+                     (backward-char backward-char-number)
                      (skip-syntax-backward "w")
                      (point)))))
          (string
