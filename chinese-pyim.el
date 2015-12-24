@@ -150,7 +150,7 @@
 ;; #+END_EXAMPLE
 
 ;; *** 词语联想
-;; Chinese-pyim *内置* 了4种词语联想方式：
+;; Chinese-pyim *内置* 了5种词语联想方式：
 
 ;; 1. `pinyin-similar' 搜索拼音类似的词条做为联想词，
 ;;     如果输入 "ni-hao" ，那么搜索拼音与 "ni-hao" 类似的词条
@@ -168,10 +168,12 @@
 ;;    1. http://tumashu.github.io/chinese-pyim-guessdict/pyim-guessdict-a.gpyim
 ;;    2. http://tumashu.github.io/chinese-pyim-guessdict/pyim-guessdict-b.gpyim
 
-;; 5. `company'  使用 `company-mode' 补全框架来联想词条，
-;;    1. 配置 chinese-pyim-company'，参考：[[使用 Chinese-pyim 改善 company-mode 中文补全的体验]]
-;;    2. 目前只搜索 current buffer
-;;    3. 注意：这个方法 *可能会* 降低输入法的响应速度。
+;; 5. `dabbrev'  搜索当前 buffer, 或者其他 buffer 中已经存在的中文文本，得到匹配的
+;;    候选词，通过这些候选词来提高输入法的识别精度。
+
+;;    值得注意的是：
+;;    1. 这个方法依赖 `company-dabbrev', 需要用户自己安装配置 `company-dabbrev'.
+;;    2. 如果 emacs 打开的 buffer 太多或者打开的 buffer 太大, 输入法的响应速度可能降低。
 
 ;; Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的代码来调整设置，比如：
 

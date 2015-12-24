@@ -136,7 +136,7 @@ Chinese-pyim 内建的功能有：
   :type 'function)
 
 (defcustom pyim-enable-words-predict
-  '(pinyin-similar guess-words pinyin-znabc company)
+  '(pinyin-similar guess-words pinyin-znabc dabbrev)
   "一个 list，用于设置词语联想方式，当前支持：
 
 1. `pinyin-similar' 搜索拼音类似的词条做为联想词。
@@ -148,13 +148,25 @@ Chinese-pyim 内建的功能有：
                  注意：这个方法需要用户安装 guessdict 词库，
                        guessdict 词库文件可以用 `pyim-article2dict-guessdict'
                        命令生成。
-5. `company'  使用 `company-mode' 补全框架来联想词条，
+5. `dabbrev'  搜索当前 buffer, 或者其他 buffer 中已经存在的中文文本，得到匹配的
+              候选词，通过这些候选词来提高输入法的识别精度。
 
-              注意：这个方法需要用户 *正确配置* `chinese-pyim-company' .
+              注意：这个方法需要用户安装配置 `company-dabbrev' ,
                     并且 *可能* 会降低输入法的响应速度。
 
 当这个变量设置为 nil 时，关闭词语联想功能。"
   :group 'chinese-pyim)
+
+(defcustom pyim-dabbrev-other-buffers nil
+  "设置 dabbrev 词语联想需要搜索的 buffer，如果设置为 `all', 搜索所有的 buffer,
+如果设置为 t, 搜索所有和当前 buffer 模式相同的 buffer, 如果设置为 nil, 则只搜索
+当前 buffer.
+
+这个变量源自 `company-dabbrev-other-buffers' "
+  :group 'chinese-pyim
+  :type '(choice (const :tag "Off" nil)
+                 (const :tag "Same major mode" t)
+                 (const :tag "All" all)))
 
 (defcustom pyim-page-length 5
   "每页显示的词条数目"
@@ -1620,7 +1632,7 @@ Return the input string."
         (py-str-shouzimu (pyim-pylist-to-string pylist t))
         (length-pylist (length pylist))
         choice words word guess-words-accurate guess-words-similar
-        company-words-accurate words-predicted chars wordspy)
+        dabbrev-words-accurate words-predicted chars wordspy)
 
     ;; 搜索严格匹配输入拼音的词条。
     (setq words (pyim-get py-str))
@@ -1668,38 +1680,37 @@ Return the input string."
       ;; 来决定哪一类联想词优先显示。
       (push `(guess-words ,@(reverse guess-words-similar)) words-predicted))
 
-    ;; 使用 company 补全框架来补全词条。
-    ;; 注：当前只使用了 `company-dabbrev' 后端的相关函数。
-    (when (and (featurep 'chinese-pyim-company)
-               (member 'company pyim-enable-words-predict))
+    ;; 在当前 buffer 或者其他 buffer 中，搜索光标处的中文词语，得到
+    ;; 所有 *可能* 的候选词语，依靠这些候选词语，来提高输入法的识别精度。
+    (when (and (require 'company-dabbrev)
+               (member 'dabbrev pyim-enable-words-predict))
       (let* ((prefix (pyim-grab-chinese-word (length pyim-current-str) pyim-last-input-word))
              (prefix-length (length prefix))
              (words (when (> prefix-length 0)
                       (delete-duplicates
-                       (company-dabbrev--search ; `company-dabbrev' 使用的函数
-                        (company-dabbrev--make-regexp prefix)
+                       ;; `company-dabbrev' 内置函数
+                       (company-dabbrev--search
+                        (format "%s[^[:punct:][:blank:]\n]\\{1,10\\}" prefix)
                         company-dabbrev-time-limit
-                        ;; (pcase company-dabbrev-other-buffers
-                        ;;   (`t (list major-mode))
-                        ;;   (`all `all))
-                        nil ; 让 `company-dabbrev' 只搜索 current buffer.
-                        ))))
+                        (pcase pyim-dabbrev-other-buffers
+                          (`t (list major-mode))
+                          (`all `all))))))
              (count 0))
         (while words
-          ;; Company-dabbrev 备选词条都包含 prefix, 需要剔除。
+          ;; 搜索得到的候选词条都包含 prefix, 需要剔除。
           (setq word (substring (pop words) prefix-length))
           (unless (string-match-p "\\CC" word)
             (let ((pinyins (pyim-hanzi2pinyin word nil "-" t)))
               ;; 请参考 guess-words 处的 comment
               (when (cl-some
                      #'(lambda (x)
-                         (string-match-p (concat "^" py-str) x))
+                         (string-match-p (pyim-predict-build-regexp py-str) x))
                      pinyins)
-                (push (substring word 0 length-pylist) company-words-accurate))))
+                (push (substring word 0 length-pylist) dabbrev-words-accurate))))
           (setq count (1+ count))
           (when (> count 1000)
             (setq words nil))))
-      (setq company-words-accurate (reverse company-words-accurate)))
+      (setq dabbrev-words-accurate (reverse dabbrev-words-accurate)))
 
     ;; 将输入的拼音按照声母和韵母打散，得到尽可能多的拼音组合，
     ;; 查询这些拼音组合，得到的词条做为联想词。
@@ -1711,7 +1722,7 @@ Return the input string."
     (setq chars (pyim-get (concat (caar pylist) (cdar pylist))))
 
     ;; 将上述搜索得到的词条合并。
-    (setq choice `(,@company-words-accurate
+    (setq choice `(,@dabbrev-words-accurate
                    ,@guess-words-accurate
                    ,@words
                    ;; 没有严格匹配的词条时，设置第一个被选词为字符，
