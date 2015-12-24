@@ -1614,6 +1614,7 @@ Return the input string."
  => (\"拼音\" \"贫铀\" \"聘用\" \"拼\" \"品\" \"贫\" \"苹\" \"聘\" \"频\" \"拚\" \"颦\" \"牝\" \"嫔\" \"姘\" \"嚬\")"
   (let ((py-str (pyim-pylist-to-string pylist))
         (py-str-shouzimu (pyim-pylist-to-string pylist t))
+        (length-pylist (length pylist))
         choice words word guess-words-accurate guess-words-similar
         words-predicted chars wordspy)
 
@@ -1643,11 +1644,15 @@ Return the input string."
                             (string-match-p (pyim-predict-build-regexp py-str) x)))
                    pinyins)
               (push word guess-words-similar))
+            ;; 搜索拼音与 py-list "^" 匹配的词条，比如:
+            ;; 拼音 "ni-hao" 就匹配 "你好我的家乡"，然后根据拼音的长度，
+            ;; 提取一个子字符串作为词条，比如：字符串 "你好我的家乡" 的子字符串
+            ;; "你好" 会被提取出来。
             (when (cl-some
                    #'(lambda (x)
-                       (equal py-str x))
+                       (string-match-p (concat "^" py-str) x))
                    pinyins)
-              (push word guess-words-accurate)))
+              (push (substring word 0 length-pylist) guess-words-accurate)))
           ;; 当 `words' 包含的元素太多时，后面处理会极其缓慢，
           ;; 这里通过限制循环次数来提高输入法的响应。
           (setq count (1+ count))
