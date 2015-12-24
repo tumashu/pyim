@@ -25,58 +25,106 @@
 ;;; Commentary:
 
 ;; * 说明文档                                                           :doc:
-;; 这个文件包含了两个 company 补全后端，与 Chinese-pyim 配合使用
-;; 可以比较方便的补全中文词条。
+;; 通过 Chinese-pyim 让 Company-dabbrev 更好的处理中文。
 
-
-;; #+BEGIN_EXAMPLE
-;; (require 'chinese-pyim-company)
-
-;; (setq company-idle-delay  0.1)
-;; (setq company-minimum-prefix-length 2)
-;; (setq company-selection-wrap-around t)
-;; (setq company-show-numbers t)
-;; (setq company-dabbrev-downcase nil)
-;; (setq company-dabbrev-ignore-case nil)
-;; (setq company-require-match nil)
-
-;; #+END_EXAMPLE
+;; 1. 配置 company-mode, 具体可以参考：[[https://github.com/tumashu/emacs-helper/blob/master/eh-complete.el][emacs-helper's company configure]]
+;; 2. 配置 chinese-pyim-company
+;;    #+BEGIN_EXAMPLE
+;;    (require 'chinese-pyim-company)
+;;    (setq pyim-company-max-length 6)
+;;    #+END_EXAMPLE
 
 ;;; Code:
 
 ;; * 代码                                                               :code:
-;; ** require
+;; ** Require + defcustom
 ;; #+BEGIN_SRC emacs-lisp
 (require 'chinese-pyim)
 (require 'company)
 (require 'company-dabbrev)
 
+(defcustom pyim-company-max-length 6
+  "这个用来设置 Company 补全中文时，候选中文词条的最大长度。"
+  :group 'chinese-pyim)
+;; #+END_SRC
+
+;; 判断 Company-mode 是否在补全中文，如果光标前的一个字符为中文字符
+;; 则返回 `t', 反之，返回 nil.
+;; #+BEGIN_SRC emacs-lisp
 (defun pyim-company-chinese-complete-p ()
   (let ((string (pyim-char-before-to-string 0)))
     (string-match-p "\\cc" string)))
+;; #+END_SRC
 
+;; `company-dabbrev' 补全命令的简单流程是：
+;; 1. 提取光标前的一个字符串，作为搜索的 `prefix',
+;;    具体细节见： `company-grab-word'
+;; 2. 对 `prefix' 进行进一步处理，生成一个搜索用的 `regexp'.
+;;    具体细节见： `company-dabbrev--make-regexp'
+;; 3. 使用生成的 `regexp' 搜索特定的 buffer.
+;; 4. 将搜索得到的结果进行处理，生成一个候选词条的 `list'.
+;;    具体细节见： `company-dabbrev--search'
+;; 5. 使用菜单显示
+
+;; 中文和英文的书写习惯有很大的不同，对 company-mode 影响最大的一条是：
+
+;; #+BEGIN_EXAMPLE
+;; 中文的词语与词语之间没有 *强制* 的用空格隔开，
+;; #+END_EXAMPLE
+
+;; 这个书写习惯影响上面三个函数的 *正常* 运行。
+
+;; ** 让 company-grab-word 正确的处理中文
+
+;; `company-grab-word' 可以获取光标处的一个英文词语，但只能获取
+;; 光标处的一个 *中文句子* ，使用一个句子来搜索，得到的备选词条往往很少，
+;; 并且用处不大（很少人在一篇文章中重复的写一个句子）。
+
+;; 这里为 `company-grab-word' 添加了一个 advice: 当 company-dabbrev 补全中文时，
+;; 用 `pyim-grab-chinese-word' 函数获取光标前的一个 *中文词条* ，如果获取失败，
+;; 则返回光标前的 *中文字符* 。
+
+;; #+BEGIN_SRC emacs-lisp
 (defun pyim-company-grab-word (orig-fun)
   (if (pyim-company-chinese-complete-p)
       (pyim-grab-chinese-word
        0 (pyim-char-before-to-string 0))
     (funcall orig-fun)))
+;; #+END_SRC
 
+;; ** 让 pyim-company-dabbrev--make-regexp 生成合适中文搜索的 regexp
+
+;; 用 `pyim-company-dabbrev--make-regexp' 得到的 regexp, 搜索中文时，会搜索到一个
+;; *中文句子* ， 不太实用，这里添加了一个 advice:
+
+;; 当 company-dabbrev 补全中文时，将搜索得到的结果截取前 `pyim-company-max-length' 个字符，
+;; 默认为6个，这对中文而言应该够用了。
+
+;; #+BEGIN_SRC emacs-lisp
 (defun pyim-company-dabbrev--make-regexp (orig-fun prefix)
   (if (pyim-company-chinese-complete-p)
-      (format "%s[^[:punct:][:blank:]\n]\\{1,6\\}" prefix)
+      (format "%s[^[:punct:][:blank:]\n]\\{1,%s\\}" prefix pyim-company-max-length)
     (funcall orig-fun prefix)))
+;; #+END_SRC
 
+;; ** TODO 让 pyim-company-dabbrev--search 更好的处理中文
+
+;; 本来打算在这个地方对 *候选词条列表* 做一些筛选，比如，用 Chinese-pyim 自带
+;; 的分词函数对候选词条进行分词，然后只提取第一个 *有效* 的中文词语，但由于
+;; 分词函数速度太慢，导致补全时卡顿明显，所以暂时没有这么处理。
+
+
+;; #+BEGIN_SRC emacs-lisp
 (defun pyim-company-dabbrev--search (orig-fun regexp &optional limit other-buffer-modes
                                               ignore-comments)
   (let ((words (funcall orig-fun regexp limit other-buffer-modes ignore-comments)))
     (if (pyim-company-chinese-complete-p)
-        (mapcar
-         #'(lambda (x)
-             (concat (company-grab-word)
-                     (car (split-string (pyim-split-chinese-string2string
-                                         (substring x 2)))))) words)
+        words
       words)))
+;; #+END_SRC
 
+
+;; #+BEGIN_SRC emacs-lisp
 (advice-add 'company-grab-word :around #'pyim-company-grab-word)
 (advice-add 'company-dabbrev--make-regexp :around #'pyim-company-dabbrev--make-regexp)
 (advice-add 'company-dabbrev--search :around #'pyim-company-dabbrev--search)

@@ -246,19 +246,11 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
 
 安装和使用方式：
 
-1.  安装 \`company-mode' 扩展包。
+1.  安装配置 \`company-mode' 扩展包，具体可以参考：[emacs-helper's company configure](https://github.com/tumashu/emacs-helper/blob/master/eh-complete.el)
 2.  在 emacs 配置中添加如下几行代码：
 
-    (require 'chinese-pyim-company)
-    (setq company-idle-delay  0.1)
-    (setq company-minimum-prefix-length 2)
-    (setq company-selection-wrap-around t)
-    (setq company-show-numbers t)
-    (setq company-dabbrev-downcase nil)
-    (setq company-dabbrev-ignore-case nil)
-    (setq company-require-match nil)
-
-注：如果加载 \`chinese-pyim-company' 后，company 补全菜单显示出现卡顿，可以通过运行 \`pyim-cache-dict-buffer' 命令来得到改善。
+        (require 'chinese-pyim-company)
+        (setq pyim-company-max-length 6)
 
 ## Tips<a id="orgheadline32"></a>
 
