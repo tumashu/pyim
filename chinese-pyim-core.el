@@ -926,15 +926,16 @@ If you don't like this funciton, set the variable to nil")
                 (push word predicted-words))))))
       (delete-dups (reverse predicted-words)))))
 
-(defun pyim-predict-build-regexp (code)
+(defun pyim-predict-build-regexp (code &optional all)
   "从`code' 构建一个 regexp，用于搜索联想词，
-比如：ni-hao-si-j --> ^ni-hao[a-z]*-si[a-z]*-j[a-z]*"
+比如：ni-hao-si-j --> ^ni-hao[a-z]*-si[a-z]*-j[a-z]* , when `all' set to `nil'
+      ni-hao-a  --> ^ni[a-z]*-hao[a-z]*-a[a-z]* , when `all' set to `t'"
   (let ((count 0))
     (concat "^"
             (mapconcat
              #'(lambda (x)
                  (setq count (+ count 1))
-                 (if (> count 1)
+                 (if (or all (> count 1))
                      (concat x "[a-z]*")
                    x))
              (split-string code "-") "-"))))
@@ -1703,7 +1704,7 @@ Return the input string."
               ;; 请参考 guess-words 处的 comment
               (when (cl-some
                      #'(lambda (x)
-                         (pyim-string-match-p (pyim-predict-build-regexp py-str) x))
+                         (pyim-string-match-p (pyim-predict-build-regexp py-str t) x))
                      pinyins)
                 (push (substring word 0 length-pylist) dabbrev-words-accurate))))
           (setq count (1+ count))
