@@ -165,8 +165,13 @@
 ;;     用 `pyim-article2dict-guessdict' 命令生成，不想折腾的用户也可以从
 ;;     下面的地址下载样例词库：(注意：请使用另存为，不要直接点击链接)。
 
-;;     1. http://tumashu.github.io/chinese-pyim-guessdict/pyim-guessdict-a.gpyim
-;;     2. http://tumashu.github.io/chinese-pyim-guessdict/pyim-guessdict-b.gpyim
+;;    1. http://tumashu.github.io/chinese-pyim-guessdict/pyim-guessdict-a.gpyim
+;;    2. http://tumashu.github.io/chinese-pyim-guessdict/pyim-guessdict-b.gpyim
+
+;; 5. `company'  使用 `company-mode' 补全框架来联想词条，
+;;    1. 配置 chinese-pyim-company'，参考：[[使用 Chinese-pyim 改善 company-mode 中文补全的体验]]
+;;    2. 目前只搜索 current buffer
+;;    3. 注意：这个方法 *可能会* 降低输入法的响应速度。
 
 ;; Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的代码来调整设置，比如：
 

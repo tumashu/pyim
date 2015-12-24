@@ -191,7 +191,7 @@ Chinese-pyim  可以根据输入内容动态的切换中英文输入，基本规
     (setq-default pyim-english-input-switch-function
                   '(function1 function2 function3))
 
-### 词语联想<a id="orgheadline15"></a>
+### 词语联想<a id="orgheadline16"></a>
 
 Chinese-pyim **内置** 了4种词语联想方式：
 
@@ -205,6 +205,11 @@ Chinese-pyim **内置** 了4种词语联想方式：
     1.  <http://tumashu.github.io/chinese-pyim-guessdict/pyim-guessdict-a.gpyim>
     2.  <http://tumashu.github.io/chinese-pyim-guessdict/pyim-guessdict-b.gpyim>
 
+5.  \`company'  使用 \`company-mode' 补全框架来联想词条，
+    1.  配置 chinese-pyim-company'，参考：[1.8.9](#orgheadline15)
+    2.  目前只搜索 current buffer
+    3.  注意：这个方法 **可能会** 降低输入法的响应速度。
+
 Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的代码来调整设置，比如：
 
     (setq pyim-enable-words-predict '(pinyin-similar pinyin-shouzimu guess-words))
@@ -213,13 +218,13 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
 
     (setq pyim-enable-words-predict nil)
 
-### 切换全角标点与半角标点<a id="orgheadline16"></a>
+### 切换全角标点与半角标点<a id="orgheadline17"></a>
 
 1.  第一种方法：使用命令 \`pyim-toggle-full-width-punctuation'，全局切换。
 2.  第二种方法：使用命令 \`pyim-punctuation-translate-at-point' 只切换光标处标点的样式。
 3.  第三种方法：设置变量 \`pyim-translate-trigger-char'。输入变量设定的字符会切换光标处标点的样式。
 
-### 手动加词和删词<a id="orgheadline17"></a>
+### 手动加词和删词<a id="orgheadline18"></a>
 
 1.  \`pyim-create-word-without-pinyin' 直接将一个中文词条加入个人词库的函数，用于编程环境。
 2.  \`pyim-create-word-at-point:<N>char' 这是一组命令，从光标前提取N个汉字字符组成字符串，并将其加入个人词库。
@@ -227,7 +232,7 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
 4.  \`pyim-delete-word-from-personal-buffer' 从个人词频文件对应的 buffer
     中删除当前高亮选择的词条。
 
-### 快速切换词库<a id="orgheadline18"></a>
+### 快速切换词库<a id="orgheadline19"></a>
 
 用户可以自定义类似的命令来实现快速切换拼音词库。
 
@@ -240,7 +245,7 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
                      :dict-type pinyin-dict)))
       (pyim-restart-1 t))
 
-### 使用 Chinese-pyim 改善 company-mode 中文补全的体验<a id="orgheadline19"></a>
+### 使用 Chinese-pyim 改善 company-mode 中文补全的体验<a id="orgheadline15"></a>
 
 中文词语之间没有分割字符，所以 Company-mode 在中文环境下， **补全词条** 变成了 **补全句子** ，可用性很差，chinese-pyim-company 通过 Chinese-pyim 自带的分词函数来分割中文字符串，改善了中文补全的体验 。
 
