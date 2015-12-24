@@ -880,6 +880,10 @@ If you don't like this funciton, set the variable to nil")
                         ("buffer-cache-mode" . ,buffer-cache-mode))
                       pyim-buffer-cache-list)))))))))
 
+(defun pyim-string-match-p (regexp string &optional start)
+  (and (stringp string)
+       (string-match-p regexp string start)))
+
 (defun pyim-predict (code &optional search-from-guessdict)
   "得到 `code' 对应的联想词。"
   (let ((regexp (pyim-predict-build-regexp code))
@@ -896,7 +900,7 @@ If you don't like this funciton, set the variable to nil")
     (setq buffer-list (reverse buffer-list))
     (when (and (stringp code)
                (string< "" code)
-               (string-match-p "[a-z]+-[a-z]+" code))
+               (pyim-string-match-p "[a-z]+-[a-z]+" code))
       (dolist (buf buffer-list)
         (with-current-buffer (cdr (assoc "buffer" buf))
           (when (pyim-dict-buffer-valid-p)
@@ -914,8 +918,7 @@ If you don't like this funciton, set the variable to nil")
                       (append words-list
                               (pyim-multiline-content begin end))))))))
       (dolist (line-words words-list)
-        (when (and (stringp (car line-words))
-                   (string-match-p regexp (car line-words)))
+        (when (pyim-string-match-p regexp (car line-words))
           (let ((line-words (cdr line-words)))
             (dolist (word line-words)
               (when (and (stringp word)
@@ -1128,8 +1131,7 @@ buffer中，当前词条追加到已有词条之后。`pyim-create-or-rearrange-
 BUG：无法有效的处理多音字。"
   (let ((pinyins (pyim-hanzi2pinyin word nil "-" t nil t))) ;使用了多音字校正
     (mapc #'(lambda (py)
-              (unless (and (stringp py)
-                           (string-match-p "[^ a-z-]" py))
+              (unless (pyim-string-match-p "[^ a-z-]" py)
                 ;; 添加词库： ”拼音“ - ”中文词条“
                 (pyim-intern-word word py (not rearrange-word))
                 ;; 添加词库： ”拼音首字母“ - ”中文词条“
@@ -1154,7 +1156,7 @@ BUG：无法有效的处理多音字。"
                     point begin)))
       (when (and (stringp string)
                  (= (length string) number)
-                 (not (string-match-p "\\CC" string)))
+                 (not (pyim-string-match-p "\\CC" string)))
         string))))
 
 (defun pyim-create-word-at-point (&optional number silent)
@@ -1190,8 +1192,7 @@ BUG：无法有效的处理多音字。"
 (defun pyim-delete-word (word)
   "将中文词条 `word' 从 personal-file 对应的 buffer 中删除"
   (mapc (lambda (py)
-          (unless (and (stringp py)
-                       (string-match-p "[^ a-z-]" py))
+          (unless (pyim-string-match-p "[^ a-z-]" py)
             (pyim-intern-word word py nil t)))
         (pyim-hanzi2pinyin word nil "-" t)))
 
@@ -1367,13 +1368,12 @@ Return the input string."
            (pyim-toggle-full-width-punctuation 1 t) ;; 使用全角标点
            nil)
           ((and (stringp str-before-1)
-                (or (string-match-p regexp-alpha str-before-1)
-                    (string-match-p regexp-punct str-before-1))
+                (or (pyim-string-match-p regexp-alpha str-before-1)
+                    (pyim-string-match-p regexp-punct str-before-1))
                 (= (length pyim-guidance-str) 0))
            (pyim-toggle-full-width-punctuation -1 t) ;; 使用半角标点
            t)
-          ((and (stringp str-before-1)
-                (string-match-p regexp-chinese str-before-1))
+          ((pyim-string-match-p regexp-chinese str-before-1)
            (pyim-toggle-full-width-punctuation 1 t)  ;; 使用全角标点
            nil))))
 
@@ -1656,8 +1656,7 @@ Return the input string."
           (let ((pinyins (pyim-hanzi2pinyin word nil "-" t)))
             (when (cl-some
                    #'(lambda (x)
-                       (and (stringp x)
-                            (string-match-p (pyim-predict-build-regexp py-str) x)))
+                       (pyim-string-match-p (pyim-predict-build-regexp py-str) x))
                    pinyins)
               (push word guess-words-similar))
             ;; 搜索拼音与 py-list "^" 匹配的词条，比如:
@@ -1666,7 +1665,7 @@ Return the input string."
             ;; "你好" 会被提取出来。
             (when (cl-some
                    #'(lambda (x)
-                       (string-match-p (concat "^" py-str) x))
+                       (pyim-string-match-p (concat "^" py-str) x))
                    pinyins)
               (push (substring word 0 length-pylist) guess-words-accurate)))
           ;; 当 `words' 包含的元素太多时，后面处理会极其缓慢，
@@ -1699,12 +1698,12 @@ Return the input string."
         (while words
           ;; 搜索得到的候选词条都包含 prefix, 需要剔除。
           (setq word (substring (pop words) prefix-length))
-          (unless (string-match-p "\\CC" word)
+          (unless (pyim-string-match-p "\\CC" word)
             (let ((pinyins (pyim-hanzi2pinyin word nil "-" t)))
               ;; 请参考 guess-words 处的 comment
               (when (cl-some
                      #'(lambda (x)
-                         (string-match-p (pyim-predict-build-regexp py-str) x))
+                         (pyim-string-match-p (pyim-predict-build-regexp py-str) x))
                      pinyins)
                 (push (substring word 0 length-pylist) dabbrev-words-accurate))))
           (setq count (1+ count))
@@ -2289,8 +2288,7 @@ Counting starts at 1."
      ;; 比如：在一个中文字符串后输入 2v，可以将光标前两个中文字符
      ;; 组成的字符串，保存到个人词库。
      ((and (member (char-before) (number-sequence ?2 ?9))
-           (stringp str-before-2)
-           (string-match-p "\\cc" str-before-2)
+           (pyim-string-match-p "\\cc" str-before-2)
            (= char pyim-translate-trigger-char))
       (delete-char -1)
       (pyim-create-word-at-point
@@ -2299,8 +2297,7 @@ Counting starts at 1."
 
      ;; 光标前面的字符为中文字符时，按 v 清洗当前行的内容。
      ((and (not (numberp punc-posit-before-1))
-           (stringp str-before-1)
-           (string-match-p "\\cc" str-before-1)
+           (pyim-string-match-p "\\cc" str-before-1)
            (= char pyim-translate-trigger-char))
       (funcall pyim-wash-function)
       "")
@@ -2724,24 +2721,24 @@ in package `chinese-pyim-pymap'"
   (interactive)
   (when (stringp pyim-current-key)
     (cond
-     ((string-match-p "eng" pyim-current-key)
+     ((pyim-string-match-p "eng" pyim-current-key)
       (setq pyim-current-key
             (replace-regexp-in-string "eng" "en" pyim-current-key)))
-     ((string-match-p "en[^g]*" pyim-current-key)
+     ((pyim-string-match-p "en[^g]*" pyim-current-key)
       (setq pyim-current-key
             (replace-regexp-in-string "en" "eng" pyim-current-key))))
     (cond
-     ((string-match-p "ing" pyim-current-key)
+     ((pyim-string-match-p "ing" pyim-current-key)
       (setq pyim-current-key
             (replace-regexp-in-string "ing" "in" pyim-current-key)))
-     ((string-match-p "in[^g]*" pyim-current-key)
+     ((pyim-string-match-p "in[^g]*" pyim-current-key)
       (setq pyim-current-key
             (replace-regexp-in-string "in" "ing" pyim-current-key))))
     (cond
-     ((string-match-p "un" pyim-current-key)
+     ((pyim-string-match-p "un" pyim-current-key)
       (setq pyim-current-key
             (replace-regexp-in-string "un" "ong" pyim-current-key)))
-     ((string-match-p "ong" pyim-current-key)
+     ((pyim-string-match-p "ong" pyim-current-key)
       (setq pyim-current-key
             (replace-regexp-in-string "ong" "un" pyim-current-key))))
     (pyim-handle-string)))
