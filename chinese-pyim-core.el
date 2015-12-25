@@ -1015,6 +1015,32 @@ If you don't like this funciton, set the variable to nil")
                    x))
              pylist "-"))))
 
+(defun pyim-pinyin-match (pinyin1 pinyin2 &optional match-beginning first-equal all-equal)
+  "判断拼音 `pinyin1' 是否和拼音 `pinyin2' 相匹配，如果匹配，
+则返回匹配的起点与终点，通过起点和终点，可以方便的从 `pinyin2'
+对应的汉字字符串中提取拼音为 `pinyin1' 的子字符串。比如：
+
+shi-shui 与  ni-shi-shui-ya 匹配，这个函数的返回值为 (1 . 3),
+我们可以使用下面这一个语句：
+
+       (substring \"你是谁啊\" 1 3)
+
+得到拼音 shi-shui 对应的子字符串: “是谁”。"
+  (when (and (> (length pinyin1) 0) (> (length pinyin2) 0))
+    (let* ((regexp (pyim-predict-build-regexp pinyin1 match-beginning first-equal all-equal))
+           (match (pyim-string-match-p regexp pinyin2))
+           (substring (when match
+                        (substring pinyin2 0 match)))
+           (begin (when substring
+                    (length (replace-regexp-in-string
+                             "[a-z]" "" substring))))
+           (length
+            (when pinyin1
+              (+ 1 (length (replace-regexp-in-string
+                            "[a-z]" "" pinyin1))))))
+      (when (and begin length)
+        (cons begin (+ begin length))))))
+
 (defun pyim-dict-buffer-valid-p ()
   "粗略地确定当前 buffer 是否是一个有效的词库产生的 buffer。
 确定标准：
@@ -1731,10 +1757,11 @@ Return the input string."
             (count 0))
         (while words
           (setq word (pop words))
-          (let ((pinyins (pyim-hanzi2pinyin word nil "-" t)))
+          (let ((pinyins (pyim-hanzi2pinyin word nil "-" t))
+                boundary)
             (when (cl-some
                    #'(lambda (x)
-                       (pyim-string-match-p (pyim-predict-build-regexp py-str t t) x))
+                       (setq boundary (pyim-pinyin-match py-str x t t)))
                    pinyins)
               (push word guess-words-similar))
             ;; 搜索拼音与 py-list "^" 匹配的词条，比如:
@@ -1743,9 +1770,10 @@ Return the input string."
             ;; "你好" 会被提取出来。
             (when (cl-some
                    #'(lambda (x)
-                       (pyim-string-match-p (pyim-predict-build-regexp py-str t t t) x))
+                       (setq boundary (pyim-pinyin-match py-str x t t t)))
                    pinyins)
-              (push (substring word 0 length-pylist) guess-words-accurate)))
+              (push (substring word (car boundary) (cdr boundary))
+                    guess-words-accurate)))
           ;; 当 `words' 包含的元素太多时，后面处理会极其缓慢，
           ;; 这里通过限制循环次数来提高输入法的响应。
           (setq count (1+ count))
@@ -1775,21 +1803,36 @@ Return the input string."
           ;; 搜索得到的候选词条都包含 prefix, 需要剔除。
           (setq word (substring (pop words) prefix-length))
           (unless (pyim-string-match-p "\\CC" word)
-            (let ((pinyins (pyim-hanzi2pinyin word nil "-" t)))
+            (let ((pinyins (pyim-hanzi2pinyin word nil "-" t))
+                  boundary)
               ;; 请参考 guess-words 处的 comment
               (when (cl-some
                      #'(lambda (x)
-                         (pyim-string-match-p (pyim-predict-build-regexp py-str) x))
+                         (setq boundary (pyim-pinyin-match py-str x)))
                      pinyins)
-                (push word dabbrev-words-similar))
+                (push (substring word (car boundary) (cdr boundary))
+                      dabbrev-words-accurate)
+                (push (substring word 0 (cdr boundary))
+                      dabbrev-words-similar))
               (when (cl-some
                      #'(lambda (x)
-                         (pyim-string-match-p (pyim-predict-build-regexp py-str t) x))
+                         (setq boundary (pyim-pinyin-match py-str x t)))
                      pinyins)
-                (push (substring word 0 length-pylist) dabbrev-words-accurate))))
+                (push (substring word (car boundary) (cdr boundary))
+                      dabbrev-words-accurate))))
           (setq count (1+ count))
           (when (> count 1000)
             (setq words nil))))
+      ;; Debug
+      ;; (princ "guess-words-accurate: ")
+      ;; (princ guess-words-accurate)
+      ;; (princ "\nguess-words-similar: ")
+      ;; (princ guess-words-similar)
+      ;; (princ "\ndabbrev-words-accurate: ")
+      ;; (princ dabbrev-words-accurate)
+      ;; (princ "\ndabbrev-words-similar: ")
+      ;; (princ dabbrev-words-similar)
+
       (setq dabbrev-words-accurate (reverse dabbrev-words-accurate))
       (push `(dabbrev ,@(reverse dabbrev-words-similar)) words-predicted))
 
