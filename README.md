@@ -207,10 +207,7 @@ Chinese-pyim **内置** 了5种词语联想方式：
 
 5.  \`dabbrev'  搜索当前 buffer, 或者其他 buffer 中已经存在的中文文本，得到匹配的候选词，通过这些候选词来提高输入法的识别精度。
 
-    值得注意的是：
-
-    1.  这个方法依赖 \`company-dabbrev', 需要用户自己安装配置 \`company-dabbrev'.
-    2.  如果 emacs 打开的 buffer 太多或者打开的 buffer 太大, 输入法的响应速度可能降低。
+    注意: 如果 emacs 打开的 buffer 太多或者太大, 输入法 **可能** 出现卡顿。
 
 Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的代码来调整设置，比如：
 

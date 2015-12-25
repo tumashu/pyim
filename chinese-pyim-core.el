@@ -151,22 +151,20 @@ Chinese-pyim 内建的功能有：
 5. `dabbrev'  搜索当前 buffer, 或者其他 buffer 中已经存在的中文文本，得到匹配的
               候选词，通过这些候选词来提高输入法的识别精度。
 
-              注意：这个方法需要用户安装配置 `company-dabbrev' ,
-                    并且 *可能* 会降低输入法的响应速度。
+              注意：如果用户打开的 buffer 太多或者太大，输入法 *可能* 会出现 *卡顿* 。
 
 当这个变量设置为 nil 时，关闭词语联想功能。"
   :group 'chinese-pyim)
 
-(defcustom pyim-dabbrev-other-buffers nil
+(defcustom pyim-dabbrev-other-buffers 'all
   "设置 dabbrev 词语联想需要搜索的 buffer，如果设置为 `all', 搜索所有的 buffer,
 如果设置为 t, 搜索所有和当前 buffer 模式相同的 buffer, 如果设置为 nil, 则只搜索
-当前 buffer.
+当前 buffer."
+  :group 'chinese-pyim)
 
-这个变量源自 `company-dabbrev-other-buffers' "
-  :group 'chinese-pyim
-  :type '(choice (const :tag "Off" nil)
-                 (const :tag "Same major mode" t)
-                 (const :tag "All" all)))
+(defcustom pyim-dabbrev-ignore-buffers '("\\`[ *]" "\\.pyim" "\\.gpyim")
+  "Regexp list, matching the names of buffers to ignore."
+  :type 'list)
 
 (defcustom pyim-page-length 5
   "每页显示的词条数目"
@@ -306,6 +304,9 @@ Chinese-pyim 也开启英文输入功能。"
 (defvar pyim-punctuation-escape-list (number-sequence ?0 ?9)
   "Punctuation will not insert after this characters.
 If you don't like this funciton, set the variable to nil")
+
+(defvar pyim-dabbrev-time-limit .1
+  "Determines how many seconds should look for dabbrev matches.")
 
 (defvar pyim-mode-map
   (let ((map (make-sparse-keymap))
@@ -813,6 +814,77 @@ If you don't like this funciton, set the variable to nil")
                   result))
     (cl-delete-duplicates (nreverse result)
                           :test #'equal :from-end t)))
+
+;; Shameless steal from company-dabbrev.el in `company' package
+(defmacro pyim-get-dabbrev-time-limit-while (test start limit &rest body)
+  (declare (indent 3) (debug t))
+  `(let ((pyim-time-limit-while-counter 0))
+     (catch 'done
+       (while ,test
+         ,@body
+         (and ,limit
+              (eq (cl-incf pyim-time-limit-while-counter) 25)
+              (setq pyim-time-limit-while-counter 0)
+              (> (float-time (time-since ,start)) ,limit)
+              (throw 'done 'pyim-time-out))))))
+
+;; Shameless steal from company-dabbrev.el in `company' package
+(defun pyim-get-dabbrev-search-buffer (regexp pos symbols start
+                                              limit ignore-comments)
+  (save-excursion
+    (cl-labels ((maybe-collect-match
+                 ()
+                 (let ((match (match-string-no-properties 0)))
+                   (when (>= (length match) 2)
+                     (push match symbols)))))
+      (goto-char (if pos (1- pos) (point-min)))
+      ;; Search before pos.
+      (let ((tmp-end (point)))
+        (pyim-get-dabbrev-time-limit-while
+            (not (bobp)) start limit
+          (ignore-errors
+            (forward-char -10000))
+          (forward-line 0)
+          (save-excursion
+            ;; Before, we used backward search, but it matches non-greedily, and
+            ;; that forced us to use the "beginning/end of word" anchors in
+            ;; search regexp.
+            (while (re-search-forward regexp tmp-end t)
+              (if (and ignore-comments (save-match-data (company-in-string-or-comment)))
+                  (re-search-forward "\\s>\\|\\s!\\|\\s\"" tmp-end t)
+                (maybe-collect-match))))
+          (setq tmp-end (point))))
+      (goto-char (or pos (point-min)))
+      ;; Search after pos.
+      (pyim-get-dabbrev-time-limit-while
+          (re-search-forward regexp nil t) start limit
+        (if (and ignore-comments (save-match-data (company-in-string-or-comment)))
+            (re-search-forward "\\s>\\|\\s!\\|\\s\"" nil t)
+          (maybe-collect-match)))
+      symbols)))
+
+;; Shameless steal from company-dabbrev.el in `company' package
+(defun pyim-get-dabbrev (regexp &optional limit other-buffer-modes
+                                ignore-comments)
+  (let* ((start (current-time))
+         (symbols (pyim-get-dabbrev-search-buffer
+                   regexp (point) nil start limit ignore-comments)))
+    (when other-buffer-modes
+      (cl-dolist (buffer (delq (current-buffer) (buffer-list)))
+        (with-current-buffer buffer
+          (when (if (eq other-buffer-modes 'all)
+                    (not (cl-some
+                          #'(lambda (regexp)
+                              (pyim-string-match-p regexp (buffer-name)))
+                          pyim-dabbrev-ignore-buffers))
+                  (apply #'derived-mode-p other-buffer-modes))
+            (setq symbols
+                  (pyim-get-dabbrev-search-buffer
+                   regexp nil symbols start limit ignore-comments))))
+        (and limit
+             (> (float-time (time-since start)) limit)
+             (cl-return))))
+    symbols))
 
 (defun pyim-cache-dict-buffer ()
   "根据个人词库文件中的 codes，来构建普通词库文件的缓存，用于加快查询速度，
@@ -1682,16 +1754,14 @@ Return the input string."
 
     ;; 在当前 buffer 或者其他 buffer 中，搜索光标处的中文词语，得到
     ;; 所有 *可能* 的候选词语，依靠这些候选词语，来提高输入法的识别精度。
-    (when (and (require 'company-dabbrev)
-               (member 'dabbrev pyim-enable-words-predict))
+    (when (member 'dabbrev pyim-enable-words-predict)
       (let* ((prefix (pyim-grab-chinese-word (length pyim-current-str) pyim-last-input-word))
              (prefix-length (length prefix))
              (words (when (> prefix-length 0)
                       (delete-duplicates
-                       ;; `company-dabbrev' 内置函数
-                       (company-dabbrev--search
+                       (pyim-get-dabbrev
                         (format "%s[^[:punct:][:blank:]\n]\\{1,10\\}" prefix)
-                        company-dabbrev-time-limit
+                        pyim-dabbrev-time-limit
                         (pcase pyim-dabbrev-other-buffers
                           (`t (list major-mode))
                           (`all `all))))))
