@@ -136,7 +136,7 @@ Chinese-pyim 内建的功能有：
   :type 'function)
 
 (defcustom pyim-enable-words-predict
-  '(pinyin-similar guess-words pinyin-znabc dabbrev)
+  '(dabbrev pinyin-similar guess-words pinyin-znabc)
   "一个 list，用于设置词语联想方式，当前支持：
 
 1. `pinyin-similar' 搜索拼音类似的词条做为联想词。
@@ -998,19 +998,22 @@ If you don't like this funciton, set the variable to nil")
                 (push word predicted-words))))))
       (delete-dups (reverse predicted-words)))))
 
-(defun pyim-predict-build-regexp (code &optional match-beginning first-equal)
+(defun pyim-predict-build-regexp (code &optional match-beginning first-equal all-equal)
   "从`code' 构建一个 regexp，用于搜索联想词，
 比如：ni-hao-si-j --> ^ni-hao[a-z]*-si[a-z]*-j[a-z]* , when `first-equal' set to `t'
                   --> ^ni[a-z]*-hao[a-z]*-si[a-z]*-j[a-z]* , when `first-equal' set to `nil'"
-  (let ((count 0))
+  (let ((pylist (split-string code "-"))
+        (count 0))
     (concat (if match-beginning "^" "")
             (mapconcat
              #'(lambda (x)
                  (setq count (+ count 1))
                  (if (or (not first-equal) (> count 1))
-                     (concat x "[a-z]*")
+                     (if all-equal
+                         x
+                       (concat x "[a-z]*"))
                    x))
-             (split-string code "-") "-"))))
+             pylist "-"))))
 
 (defun pyim-dict-buffer-valid-p ()
   "粗略地确定当前 buffer 是否是一个有效的词库产生的 buffer。
@@ -1704,8 +1707,10 @@ Return the input string."
   (let ((py-str (pyim-pylist-to-string pylist))
         (py-str-shouzimu (pyim-pylist-to-string pylist t))
         (length-pylist (length pylist))
-        choice words word guess-words-accurate guess-words-similar
-        dabbrev-words-accurate words-predicted chars wordspy)
+        choice words word
+        guess-words-accurate guess-words-similar
+        dabbrev-words-accurate dabbrev-words-similar
+        words-predicted chars wordspy)
 
     ;; 搜索严格匹配输入拼音的词条。
     (setq words (pyim-get py-str))
@@ -1738,7 +1743,7 @@ Return the input string."
             ;; "你好" 会被提取出来。
             (when (cl-some
                    #'(lambda (x)
-                       (pyim-string-match-p (concat "^" py-str) x))
+                       (pyim-string-match-p (pyim-predict-build-regexp py-str t t t) x))
                    pinyins)
               (push (substring word 0 length-pylist) guess-words-accurate)))
           ;; 当 `words' 包含的元素太多时，后面处理会极其缓慢，
@@ -1774,13 +1779,19 @@ Return the input string."
               ;; 请参考 guess-words 处的 comment
               (when (cl-some
                      #'(lambda (x)
+                         (pyim-string-match-p (pyim-predict-build-regexp py-str) x))
+                     pinyins)
+                (push word dabbrev-words-similar))
+              (when (cl-some
+                     #'(lambda (x)
                          (pyim-string-match-p (pyim-predict-build-regexp py-str t) x))
                      pinyins)
                 (push (substring word 0 length-pylist) dabbrev-words-accurate))))
           (setq count (1+ count))
           (when (> count 1000)
             (setq words nil))))
-      (setq dabbrev-words-accurate (reverse dabbrev-words-accurate)))
+      (setq dabbrev-words-accurate (reverse dabbrev-words-accurate))
+      (push `(dabbrev ,@(reverse dabbrev-words-similar)) words-predicted))
 
     ;; 将输入的拼音按照声母和韵母打散，得到尽可能多的拼音组合，
     ;; 查询这些拼音组合，得到的词条做为联想词。
