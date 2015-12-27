@@ -43,6 +43,10 @@
 (require 'company)
 (require 'company-dabbrev)
 
+(defcustom pyim-company-complete-chinese-enable t
+  "设置 Company 是否补全中文"
+  :group 'chinese-pyim)
+
 (defcustom pyim-company-max-length 6
   "这个用来设置 Company 补全中文时，候选中文词条的最大长度。"
   :group 'chinese-pyim)
@@ -87,8 +91,10 @@
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-company-grab-word (orig-fun)
   (if (pyim-company-chinese-complete-p)
-      (pyim-grab-chinese-word
-       0 (pyim-char-before-to-string 0))
+      (if pyim-company-complete-chinese-enable
+          (pyim-grab-chinese-word
+           0 (pyim-char-before-to-string 0))
+        nil)
     (funcall orig-fun)))
 ;; #+END_SRC
 
