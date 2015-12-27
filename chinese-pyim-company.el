@@ -91,10 +91,9 @@
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-company-grab-word (orig-fun)
   (if (pyim-company-chinese-complete-p)
-      (if pyim-company-complete-chinese-enable
-          (pyim-grab-chinese-word
-           0 (pyim-char-before-to-string 0))
-        nil)
+      (when pyim-company-complete-chinese-enable
+        (pyim-grab-chinese-word
+         0 (pyim-char-before-to-string 0)))
     (funcall orig-fun)))
 ;; #+END_SRC
 
@@ -125,7 +124,8 @@
                                               ignore-comments)
   (let ((words (funcall orig-fun regexp limit other-buffer-modes ignore-comments)))
     (if (pyim-company-chinese-complete-p)
-        words
+        (when pyim-company-complete-chinese-enable
+          words)
       words)))
 ;; #+END_SRC
 
