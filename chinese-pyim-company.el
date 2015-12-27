@@ -122,11 +122,10 @@
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-company-dabbrev--search (orig-fun regexp &optional limit other-buffer-modes
                                               ignore-comments)
-  (let ((words (funcall orig-fun regexp limit other-buffer-modes ignore-comments)))
-    (if (pyim-company-chinese-complete-p)
-        (when pyim-company-complete-chinese-enable
-          words)
-      words)))
+  (if (pyim-company-chinese-complete-p)
+      (when pyim-company-complete-chinese-enable
+        (funcall orig-fun regexp limit other-buffer-modes ignore-comments))
+    (funcall orig-fun regexp limit other-buffer-modes ignore-comments)))
 ;; #+END_SRC
 
 
