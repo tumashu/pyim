@@ -2981,31 +2981,20 @@ in package `chinese-pyim-pymap'"
                     (buffer-local-value 'isearch-mode buf))
                 (buffer-list))))
 
-(defun pyim-isearch-search-fun-default (orig-fun)
-  "这个 advice 为 isearch 添加中文拼音搜索功能。"
-  (when pyim-isearch-enable-pinyin-search
-    (let ((func (funcall orig-fun)))
-      (cond
-       ((member func '(re-search-forward
-                       search-forward
-                       re-search-forward-lax-whitespace
-                       search-forward-lax-whitespace))
-        `(lambda (string bound noerror)
-           (funcall 're-search-forward
-                    (pyim-isearch-build-search-regexp string)
-                    bound noerror)))
-       ((member func '(re-search-backward
-                       search-backward
-                       re-search-backward-lax-whitespace
-                       search-backward-lax-whitespace))
-        `(lambda (string bound noerror)
-           (funcall 're-search-backward
-                    (pyim-isearch-build-search-regexp string)
-                    bound noerror)))
-       (t func)))))
+(defun pyim-isearch-pinyin-search-function ()
+  "这个函数为 isearch 相关命令添加中文拼音搜索功能，
+用于 `isearch-search-fun-function' 。"
+  (if pyim-isearch-enable-pinyin-search
+      ;; Return the function to use for pinyin search
+      `(lambda (string &optional bound noerror count)
+         (funcall (if ,isearch-forward
+                      're-search-forward
+                    're-search-backward)
+                  (pyim-isearch-build-search-regexp string) bound noerror count))
+    ;; Return default function
+    (isearch-search-fun-default)))
 
-(advice-add 'isearch-search-fun-default
-            :around #'pyim-isearch-search-fun-default)
+(setq isearch-search-fun-function 'pyim-isearch-pinyin-search-function)
 ;; #+END_SRC
 
 
