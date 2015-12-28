@@ -1448,25 +1448,27 @@ Return the input string."
     ;; But translate KEY if necessary.
     (char-to-string key)))
 
+(defun pyim-auto-switch-english-input-p ()
+  "判断是否 *根据环境自动切换* 为英文输入模式，这个函数处理变量：
+`pyim-english-input-switch-function'"
+  (let* ((func-or-list pyim-english-input-switch-function))
+    (cl-some #'(lambda (x)
+                 (if (functionp x)
+                     (funcall x)
+                   nil))
+             (cond ((functionp func-or-list) (list func-or-list))
+                   ((listp func-or-list) func-or-list)
+                   (t nil)))))
+
 (defun pyim-input-chinese-p ()
   "确定 Chinese-pyim 是否启动中文输入模式"
-  (let* ((func-or-list pyim-english-input-switch-function)
-         (auto-switch-english-input-p
-          ;; Deal with `pyim-english-input-switch-function'
-          (cl-some #'(lambda (x)
-                       (if (functionp x)
-                           (funcall x)
-                         nil))
-                   (cond ((functionp func-or-list) (list func-or-list))
-                         ((listp func-or-list) func-or-list)
-                         (t nil)))))
-    (and (not pyim-input-ascii)
-         (not auto-switch-english-input-p)
-         (if (pyim-string-emptyp pyim-current-key)
-             (member last-command-event
-                     (mapcar 'identity "abcdefghjklmnopqrstwxyz"))
+  (and (not pyim-input-ascii)
+       (not (pyim-auto-switch-english-input-p))
+       (if (pyim-string-emptyp pyim-current-key)
            (member last-command-event
-                   (mapcar 'identity "vmpfwckzyjqdltxuognbhsrei'-a"))))))
+                   (mapcar 'identity "abcdefghjklmnopqrstwxyz"))
+         (member last-command-event
+                 (mapcar 'identity "vmpfwckzyjqdltxuognbhsrei'-a")))))
 
 (defun pyim-dynamic-english-input-function ()
   "中英文输入动态切换函数，其基本规则是：
@@ -2448,7 +2450,7 @@ Counting starts at 1."
       "")
 
      ;; 关闭标点转换功能时，只插入英文标点。
-     ((not pyim-punctuation-translate-p)
+     ((not (pyim-punctuation-full-width-p))
       ;; `pyim-last-input-word' 保存的词条用于词语联想，
       ;; 逻辑上，当输入标点符号后，保存的词条已经失效，
       ;; 应该将其清空。
@@ -2537,11 +2539,26 @@ Counting starts at 1."
 ;; 会检测光标前面的字符，如果这个字符属于 `pyim-punctuation-escape-list' ，Chinese-pyim 将输入
 ;; 半角标点，具体细节见：`pyim-translate'
 
-;; 用户可以使用 `pyim-toggle-full-width-punctuation' 全局的控制输入的标点符号是半角标点还是全角标点。
+;; 输入标点的样式的改变（全角或者半角）受三个方面影响：
 
+;; 1. 用户是否手动切换了标点样式？
+;; 2  用户是否手动切换到英文输入模式？
+;; 3. Chinese-pyim 是否根据环境自动切换到英文输入模式？
+
+;; 三方面的综合结果为： 只要当前的输入模式是英文输入模式，那么输入的标点符号 *必定* 是半角标点，
+;; 如果当前输入模式是中文输入模式，那么，输入标点的样式用户可以使用 `pyim-toggle-full-width-punctuation'
+;; 手动控制，具体请参考 `pyim-punctuation-full-width-p'。
 
 ;; #+BEGIN_SRC emacs-lisp
 ;;; 切换中英文标点符号
+(defun pyim-punctuation-full-width-p ()
+  "判断是否需要切换到全角标点输入模式"
+  (and pyim-punctuation-translate-p
+       ;; 如果用户手动或者根据环境自动切换为英文输入模式，
+       ;; 那么标点符号也要切换为半角模式。
+       (not pyim-input-ascii)
+       (not (pyim-auto-switch-english-input-p))))
+
 (defun pyim-toggle-full-width-punctuation (arg &optional silent)
   (interactive "P")
   (setq pyim-punctuation-translate-p
@@ -2554,9 +2571,10 @@ Counting starts at 1."
       (message "关闭标点转换功能（使用半角标点）"))))
 ;; #+END_SRC
 
-;; 每次运行这个命令，都会反转变量 `pyim-punctuation-translate-p' 的取值，`pyim-translate' 会检测
-;; `pyim-punctuation-translate-p' 的取值，当取值为 t 时，`pyim-translate' 转换标点符号，从而
-;; 输入全角标点，反之，`pyim-translate' 忽略转换，从而输入半角标点。
+;; 每次运行 `pyim-toggle-full-width-punctuation' 命令，都会反转变量 `pyim-punctuation-translate-p'
+;; 的取值，`pyim-translate' 会检测 `pyim-punctuation-full-width-p' 函数的返回值，当返回值为 t 时，
+;; `pyim-translate' 转换标点符号，从而输入全角标点，反之，`pyim-translate' 忽略转换，
+;; 从而输入半角标点。
 
 ;; 用户也可以使用命令 `pyim-punctuation-translate-at-point' 来切换 *光标前* 标点符号的样式。
 
@@ -2751,7 +2769,7 @@ Counting starts at 1."
 ;;    (("ni" "你尼呢腻"))
 ;;    #+END_EXAMPLE
 ;; 3. 使用 `pyim-make-char-table-1' 处理得到的列表。
-;;
+
 ;; 函数 `pyim-make-char-table' 也是函数 `pyim-make-char-table-1' 的包装，
 ;; 其过程简单来说就是使用 `pyim-make-char-table-1' 函数处理变量
 ;; `pyim-pinyin-pymap' 中保存的拼音汉字对应信息。
@@ -2901,15 +2919,8 @@ in package `chinese-pyim-pymap'"
 (defun pyim-toggle-input-ascii ()
   "Chinese-pyim 切换中英文输入模式。同时调整标点符号样式。"
   (interactive)
-  (setq pyim-punctuation-translate-p
-        (not pyim-input-ascii))
   (setq pyim-input-ascii
-        (not pyim-input-ascii))
-  (setq pyim-punctuation-translate-p
-        (not pyim-punctuation-translate-p))
-  (if pyim-input-ascii
-      (setq current-input-method-title (concat pyim-title "-英文"))
-    (setq current-input-method-title pyim-title)))
+        (not pyim-input-ascii)))
 ;; #+END_SRC
 
 ;; *** 为 isearch 添加拼音搜索功能
