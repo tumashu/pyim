@@ -166,6 +166,11 @@ Chinese-pyim 内建的功能有：
   "Regexp list, matching the names of buffers to ignore."
   :type 'list)
 
+(defcustom pyim-isearch-enable-pinyin-search t
+  "设置是否开启 isearch 中文拼音搜索功能。"
+  :group 'chinese-pyim
+  :type 'boolean)
+
 (defcustom pyim-page-length 5
   "每页显示的词条数目"
   :group 'chinese-pyim
@@ -2906,6 +2911,83 @@ in package `chinese-pyim-pymap'"
       (setq current-input-method-title (concat pyim-title "-英文"))
     (setq current-input-method-title pyim-title)))
 ;; #+END_SRC
+
+;; *** 为 isearch 添加拼音搜索功能
+;; #+BEGIN_SRC emacs-lisp
+(defun pyim-isearch-build-search-regexp (str)
+  "这个函数用于 isearch 中文 *拼音* 搜索，
+根据 str 构建一个 regexp, 比如：
+
+\"nihao\" -> \"[你呢...][好号...] \\| nihao\""
+  (if (pyim-string-match-p "[^a-z']+" str)
+      str
+    (let* ((pylist (mapcar
+                    #'(lambda (x)
+                        (concat (car x) (cdr x)))
+                    (pyim-split-string str)))
+           (cchar-list
+            (mapcar
+             #'(lambda (py)
+                 (mapconcat #'identity
+                            (mapcar
+                             #'(lambda (x)
+                                 (when (pyim-string-match-p
+                                        (concat "^" py)
+                                        (car x))
+                                   (car (cdr x))))
+                             pyim-pinyin-pymap)
+                            "")) pylist))
+           (regexp
+            (if (and (= (length cchar-list) 1)
+                     (equal (car cchar-list) ""))
+                str
+              (concat str "\\|"
+                      (mapconcat
+                       #'(lambda (x)
+                           (when (pyim-string-match-p "\\cc" x)
+                             (format "[%s]" x)))
+                       cchar-list
+                       "")))))
+      regexp)))
+
+(defun pyim-isearch-force-english-input ()
+  "isearch 搜索时强制英文输入，
+用于：`pyim-english-input-switch-function'"
+  (and pyim-isearch-enable-pinyin-search
+       ;; isearch 启动的时候，会设置一个 buffer variable: `isearch-mode'
+       ;; 检测所有 buffer 中 `isearch-mode' 的取值，如果任何一个
+       ;; 取值为 t, 就说明 isearch 已经启动。
+       (cl-some #'(lambda (buf)
+                    (buffer-local-value 'isearch-mode buf))
+                (buffer-list))))
+
+(defun pyim-isearch-search-fun-default (orig-fun)
+  "这个 advice 为 isearch 添加中文拼音搜索功能。"
+  (when pyim-isearch-enable-pinyin-search
+    (let ((func (funcall orig-fun)))
+      (cond
+       ((member func '(re-search-forward
+                       search-forward
+                       re-search-forward-lax-whitespace
+                       search-forward-lax-whitespace))
+        `(lambda (string bound noerror)
+           (funcall 're-search-forward
+                    (pyim-isearch-build-search-regexp string)
+                    bound noerror)))
+       ((member func '(re-search-backward
+                       search-backward
+                       re-search-backward-lax-whitespace
+                       search-backward-lax-whitespace))
+        `(lambda (string bound noerror)
+           (funcall 're-search-backward
+                    (pyim-isearch-build-search-regexp string)
+                    bound noerror)))
+       (t func)))))
+
+(advice-add 'isearch-search-fun-default
+            :around #'pyim-isearch-search-fun-default)
+;; #+END_SRC
+
 
 ;; * Footer
 ;; #+BEGIN_SRC emacs-lisp

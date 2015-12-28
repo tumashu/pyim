@@ -27,8 +27,9 @@
     - [中文分词](#中文分词)
     - [获取光标处的中文词条](#获取光标处的中文词条)
     - [让 \`forward-word' 和 \`back-backward’ 在中文环境下正常工作](#让-\`forward-word'-和-\`back-backward’-在中文环境下正常工作)
+    - [为 isearch 相关命令添加拼音搜索支持](#为-isearch-相关命令添加拼音搜索支持)
 
-# Chinese-pyim 使用说明<a id="orgheadline33"></a>
+# Chinese-pyim 使用说明<a id="orgheadline34"></a>
 
 ## 截图<a id="orgheadline1"></a>
 
@@ -256,7 +257,7 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
         (require 'chinese-pyim-company)
         (setq pyim-company-max-length 6)
 
-## Tips<a id="orgheadline32"></a>
+## Tips<a id="orgheadline33"></a>
 
 ### 选词框弹出位置不合理或者选词框内容显示不全<a id="orgheadline21"></a>
 
@@ -402,3 +403,16 @@ Chinese-pyim 包含了一个简单的命令：\`pyim-get-words-list-at-point', �
 
     (global-set-key (kbd "M-f") 'pyim-forward-word)
     (global-set-key (kbd "M-b") 'pyim-backward-word)
+
+### 为 isearch 相关命令添加拼音搜索支持<a id="orgheadline32"></a>
+
+chinese-pyim 安装后，拼音搜索功能就会开启，如果用户想关闭这个功能，可以设置：
+
+    (setq pyim-isearch-enable-pinyin-search nil)
+
+值得注意的是：这个功能有一些限制：搜索字符串中只能出现 “a-z” 和 “’”，如果有其他字符（比如 regexp 操作符），则自动关闭拼音搜索功能。
+
+如果用户开启了拼音搜索功能，可以使用下面的方式 **禁用** isearch 搜索框中文搜索，（即使在 Chinese-pyim 激活的时候）。
+
+    (setq-default pyim-english-input-switch-function
+                  '(pyim-isearch-force-english-input))

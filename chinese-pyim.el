@@ -399,6 +399,24 @@
 ;; (global-set-key (kbd "M-b") 'pyim-backward-word)
 ;; #+END_EXAMPLE
 
+;; *** 为 isearch 相关命令添加拼音搜索支持
+;; chinese-pyim 安装后，拼音搜索功能就会开启，如果用户想关闭这个功能，可以设置：
+
+;; #+BEGIN_EXAMPLE
+;; (setq pyim-isearch-enable-pinyin-search nil)
+;; #+END_EXAMPLE
+
+;; 值得注意的是：这个功能有一些限制：搜索字符串中只能出现 “a-z” 和 “’”，如果有
+;; 其他字符（比如 regexp 操作符），则自动关闭拼音搜索功能。
+
+;; 如果用户开启了拼音搜索功能，可以使用下面的方式 *禁用* isearch 搜索框中文搜索，
+;; （即使在 Chinese-pyim 激活的时候）。
+
+;; #+BEGIN_EXAMPLE
+;; (setq-default pyim-english-input-switch-function
+;;               '(pyim-isearch-force-english-input))
+;; #+END_EXAMPLE
+
 
 ;;; Code:
 ;; * 代码                                                                 :code:
