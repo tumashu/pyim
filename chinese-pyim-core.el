@@ -2921,6 +2921,9 @@ in package `chinese-pyim-pymap'"
 \"nihao\" -> \"[你呢...][好号...] \\| nihao\""
   (if (pyim-string-match-p "[^a-z']+" str)
       str
+    ;; 确保 pyim 词库已经加载
+    (unless pyim-buffer-list
+      (setq pyim-buffer-list (pyim-load-file)))
     (let* ((pylist (mapcar
                     #'(lambda (x)
                         (concat (car x) (cdr x)))
