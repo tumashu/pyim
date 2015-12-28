@@ -1452,13 +1452,18 @@ Return the input string."
   "判断是否 *根据环境自动切换* 为英文输入模式，这个函数处理变量：
 `pyim-english-input-switch-function'"
   (let* ((func-or-list pyim-english-input-switch-function))
-    (cl-some #'(lambda (x)
-                 (if (functionp x)
-                     (funcall x)
-                   nil))
-             (cond ((functionp func-or-list) (list func-or-list))
-                   ((listp func-or-list) func-or-list)
-                   (t nil)))))
+    (and (cl-some #'(lambda (x)
+                      (if (functionp x)
+                          (funcall x)
+                        nil))
+                  (cond ((functionp func-or-list) (list func-or-list))
+                        ((listp func-or-list) func-or-list)
+                        (t nil)))
+         (setq current-input-method-title
+               (concat pyim-title
+                       (if pyim-input-ascii
+                           "-英文"
+                         "-AU英"))))))
 
 (defun pyim-input-chinese-p ()
   "确定 Chinese-pyim 是否启动中文输入模式"
@@ -1468,7 +1473,8 @@ Return the input string."
            (member last-command-event
                    (mapcar 'identity "abcdefghjklmnopqrstwxyz"))
          (member last-command-event
-                 (mapcar 'identity "vmpfwckzyjqdltxuognbhsrei'-a")))))
+                 (mapcar 'identity "vmpfwckzyjqdltxuognbhsrei'-a")))
+       (setq current-input-method-title pyim-title)))
 
 (defun pyim-dynamic-english-input-function ()
   "中英文输入动态切换函数，其基本规则是：
