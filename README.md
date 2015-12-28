@@ -412,7 +412,7 @@ chinese-pyim 安装后，拼音搜索功能就会开启，如果用户想关闭�
 
 值得注意的是：这个功能有一些限制：搜索字符串中只能出现 “a-z” 和 “’”，如果有其他字符（比如 regexp 操作符），则自动关闭拼音搜索功能。
 
-如果用户开启了拼音搜索功能，可以使用下面的方式 **强制关闭** isearch 搜索框中文输入，（即使在 Chinese-pyim 激活的时候）。
+如果用户开启了拼音搜索功能，可以使用下面的方式 **强制关闭** isearch 搜索框中文输入（即使在 Chinese-pyim 激活的时候）。
 
     (setq-default pyim-english-input-switch-function
                   '(pyim-isearch-force-english-input))
