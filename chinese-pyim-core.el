@@ -2944,19 +2944,15 @@ in package `chinese-pyim-pymap'"
     (let* ((pylist (mapcar
                     #'(lambda (x)
                         (concat (car x) (cdr x)))
+                    ;; Slowly operating, need to improve.
                     (pyim-split-string str)))
            (cchar-list
             (mapcar
              #'(lambda (py)
-                 (mapconcat #'identity
-                            (mapcar
-                             #'(lambda (x)
-                                 (when (pyim-string-match-p
-                                        (concat "^" py)
-                                        (car x))
-                                   (car (cdr x))))
-                             pyim-pinyin-pymap)
-                            "")) pylist))
+                 (mapconcat
+                  #'identity
+                  (pyim-pinyin-pymap-get-pinyin-matched-char py)
+                  "")) pylist))
            (regexp
             (if (and (= (length cchar-list) 1)
                      (equal (car cchar-list) ""))
