@@ -1031,7 +1031,10 @@ shi-shui 与  ni-shi-shui-ya 匹配，这个函数的返回值为 (1 . 3),
        (substring \"你是谁啊\" 1 3)
 
 得到拼音 shi-shui 对应的子字符串: “是谁”。"
-  (when (and (> (length pinyin1) 0) (> (length pinyin2) 0))
+  (when (and (stringp pinyin1)
+             (stringp pinyin2)
+             (> (length pinyin1) 0)
+             (> (length pinyin2) 0))
     (let* ((long-pinyin (pyim-string-match-p "-" pinyin1))
            (regexp (pyim-predict-build-regexp
                     pinyin1
