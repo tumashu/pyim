@@ -1433,9 +1433,10 @@ Return the input string."
                         last-command this-command
                         this-command cmd)
                   (setq key t)
-                  (condition-case err
+                  (condition-case-unless-debug err
                       (call-interactively cmd)
-                    (error (message "%s" (cdr err)) (beep))))
+                    (error (message "Chinese-pyim 出现错误: %s , 开启 debug-on-error 后可以了解详细情况。"
+                                    (cdr err)) (beep))))
               ;; KEYSEQ is not defined in the translation keymap.
               ;; Let's return the event(s) to the caller.
               (setq unread-command-events

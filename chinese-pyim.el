@@ -235,6 +235,12 @@
 
 ;; ** Tips
 
+;; *** Chinese-pyim 出现错误时，如何开启 debug 模式
+
+;; #+BEGIN_EXAMPLE
+;; (setq debug-on-error t)
+;; #+END_EXAMPLE
+
 ;; *** 选词框弹出位置不合理或者选词框内容显示不全
 ;; 可以通过设置 `pyim-tooltip-width-adjustment' 变量来手动校正。
 
