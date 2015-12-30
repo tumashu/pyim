@@ -958,7 +958,8 @@ If you don't like this funciton, set the variable to nil")
                       pyim-buffer-cache-list)))))))))
 
 (defun pyim-string-match-p (regexp string &optional start)
-  (and (stringp string)
+  (and (stringp regexp)
+       (stringp string)
        (string-match-p regexp string start)))
 
 (defun pyim-predict (code &optional search-from-guessdict)
@@ -1063,6 +1064,55 @@ shi-shui 与  ni-shi-shui-ya 匹配，这个函数的返回值为 (1 . 3),
                             "[a-z]" "" pinyin1))))))
       (when (and begin length)
         (cons begin (+ begin length))))))
+
+(defun pyim-build-chinese-regexp-for-pylist (pylist &optional match-beginning
+                                                    first-equal all-equal)
+  "这个函数生成一个 regexp ，用这个 regexp 可以搜索到
+拼音匹配 `pylist' 的中文字符串。"
+  (let* ((pylist (mapcar
+                  #'(lambda (x)
+                      (concat (car x) (cdr x)))
+                  pylist))
+         (cchar-list
+          (let ((n 0) results)
+            (dolist (py pylist)
+              (push
+               (mapconcat #'identity
+                          (pyim-pinyin-pymap-get-pinyin-matched-char
+                           py
+                           (or all-equal
+                               (and first-equal
+                                    (= n 0)))) "")
+               results)
+              (setq n (+ 1 n)))
+            (nreverse results)))
+         (regexp
+          (mapconcat
+           #'(lambda (x)
+               (when (pyim-string-match-p "\\cc" x)
+                 (format "[%s]" x)))
+           cchar-list
+           "")))
+    (unless (equal regexp "")
+      (concat (if match-beginning "^" "")
+              regexp))))
+
+(defun pyim-match-chinese-with-pylist (pylist chinese-string &optional match-beginning
+                                              first-equal all-equal)
+  "从中文字符串 `chinese-string' 中搜索一个拼音与 `pylist' 匹配的子字符串，
+然后返回匹配的起点与终点组成的 cons，通过起点和终点，可以方便的提取匹配的子字符串
+或者其他相关的子字符串。"
+  (when (and (listp pylist)
+             (stringp chinese-string))
+    (let* ((length-pylist (length pylist))
+           (length-str (length chinese-string))
+           (regexp (pyim-build-chinese-regexp-for-pylist
+                    pylist match-beginning first-equal all-equal))
+           (begin (pyim-string-match-p regexp chinese-string)))
+      (when begin
+        (cons begin
+              (min length-str
+                   (+ begin length-pylist)))))))
 
 (defun pyim-dict-buffer-valid-p ()
   "粗略地确定当前 buffer 是否是一个有效的词库产生的 buffer。
@@ -2935,39 +2985,25 @@ in package `chinese-pyim-pymap'"
 
 ;; *** 为 isearch 添加拼音搜索功能
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-isearch-build-search-regexp (str)
+(defun pyim-isearch-build-search-regexp (pystr)
   "这个函数用于 isearch 中文 *拼音* 搜索，
 根据 str 构建一个 regexp, 比如：
 
 \"nihao\" -> \"[你呢...][好号...] \\| nihao\""
-  (if (pyim-string-match-p "[^a-z']+" str)
-      str
+  (if (pyim-string-match-p "[^a-z']+" pystr)
+      pystr
     ;; 确保 pyim 词库已经加载
     (unless pyim-buffer-list
       (setq pyim-buffer-list (pyim-load-file)))
-    (let* ((pylist (mapcar
-                    #'(lambda (x)
-                        (concat (car x) (cdr x)))
-                    ;; Slowly operating, need to improve.
-                    (pyim-split-string str)))
-           (cchar-list
-            (mapcar
-             #'(lambda (py)
-                 (mapconcat
-                  #'identity
-                  (pyim-pinyin-pymap-get-pinyin-matched-char py)
-                  "")) pylist))
+    (let* ((pylist
+            ;; Slowly operating, need to improve.
+            (pyim-split-string pystr))
            (regexp
-            (if (and (= (length cchar-list) 1)
-                     (equal (car cchar-list) ""))
-                str
-              (concat str "\\|"
-                      (mapconcat
-                       #'(lambda (x)
-                           (when (pyim-string-match-p "\\cc" x)
-                             (format "[%s]" x)))
-                       cchar-list
-                       "")))))
+            (pyim-build-chinese-regexp-for-pylist pylist))
+           (regexp
+            (if regexp
+                (concat pystr "\\|" regexp)
+              pystr)))
       regexp)))
 
 (defun pyim-isearch-force-english-input ()

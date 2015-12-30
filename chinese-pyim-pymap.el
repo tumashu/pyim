@@ -471,7 +471,7 @@
       (setq pyim-pinyin-pymap-index
             (reverse results)))))
 
-(defun pyim-pinyin-pymap-get-pinyin-matched-char (pinyin &optional sort)
+(defun pyim-pinyin-pymap-get-pinyin-matched-char (pinyin &optional equal-match sort)
   "获取拼音与 `pinyin' 想匹配的所有汉字，比如：
 
 “man” -> (\"忙茫盲芒氓莽蟒邙漭硭" "满慢漫曼蛮馒瞒蔓颟谩墁幔螨鞔鳗缦熳镘\")
@@ -488,8 +488,10 @@
         results)
    (while n
      (let ((element (nth n pymap)))
-       (when (pyim-string-match-p
-              (concat "^" pinyin) (car element))
+       (when (if equal-match
+                 (equal pinyin (car element))
+               (pyim-string-match-p
+                (concat "^" pinyin) (car element)))
          (push (car (cdr element)) results)))
      (setq n (+ 1 n))
      (when (> n (or end-index (- length 1)))
