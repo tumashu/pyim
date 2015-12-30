@@ -1834,33 +1834,44 @@ Return the input string."
     ;; 如果上一次输入词条 "你好" ，那么以 “你好” 为 code，从 guessdict 词库中搜索词条
     ;; 将搜索得到的词条的拼音与 *当前输入的拼音* 进行比较，类似或者精确匹配的词条作为联想词。
     (when (member 'guess-words pyim-enable-words-predict)
-      (let ((words (pyim-get (pyim-grab-chinese-word (length pyim-current-str)
-                                                     pyim-last-input-word) t))
-            (count 0))
-        (while words
-          (setq word (pop words))
-          (let ((pinyins (pyim-hanzi2pinyin word nil "-" t))
-                boundary)
-            (when (cl-some
-                   #'(lambda (x)
-                       (setq boundary (pyim-pinyin-match py-str x t t)))
-                   pinyins)
-              (push word guess-words-similar))
-            ;; 搜索拼音与 py-list "^" 匹配的词条，比如:
-            ;; 拼音 "ni-hao" 就匹配 "你好我的家乡"，然后根据拼音的长度，
-            ;; 提取一个子字符串作为词条，比如：字符串 "你好我的家乡" 的子字符串
-            ;; "你好" 会被提取出来。
-            (when (cl-some
-                   #'(lambda (x)
-                       (setq boundary (pyim-pinyin-match py-str x t t t)))
-                   pinyins)
-              (push (substring word (car boundary) (cdr boundary))
-                    guess-words-accurate)))
-          ;; 当 `words' 包含的元素太多时，后面处理会极其缓慢，
-          ;; 这里通过限制循环次数来提高输入法的响应。
-          (setq count (1+ count))
-          (when (> count 1000)
-            (setq words nil))))
+      (let* ((prefix (pyim-grab-chinese-word
+                      (length pyim-current-str) pyim-last-input-word))
+             (length-prefix (length prefix))
+             (words (pyim-get prefix t))
+             (count 0))
+        ;; 光标前获取的 prefix 字符串长度大于1并且小于5时，
+        ;; 才进行 guess-words 词语联想，prefix 长度太小时，搜索
+        ;; 得到的词条太多，处理起来容易卡顿，prefix 长度太大时，
+        ;; 词库中大多数没有，搜索是浪费时间。
+        (when (and (> length-prefix 1)
+                   (< length-prefix 5))
+          (while words
+            (setq word (pop words))
+            ;; 下面功能使用函数 `pyim-match-chinese-with-pylist' 实现比较直接，
+            ;; `pyim-match-chinese-with-pylist' 这个函数 benchmark 显示速度比较快，
+            ;; 但用到这个地方后，chinese-pyim 卡顿明显，暂时找不到原因。
+            (let ((pinyins (pyim-hanzi2pinyin word nil "-" t))
+                  boundary)
+              (when (cl-some
+                     #'(lambda (x)
+                         (setq boundary (pyim-pinyin-match py-str x t t)))
+                     pinyins)
+                (push word guess-words-similar))
+              ;; 搜索拼音与 py-list "^" 匹配的词条，比如:
+              ;; 拼音 "ni-hao" 就匹配 "你好我的家乡"，然后根据拼音的长度，
+              ;; 提取一个子字符串作为词条，比如：字符串 "你好我的家乡" 的子字符串
+              ;; "你好" 会被提取出来。
+              (when (cl-some
+                     #'(lambda (x)
+                         (setq boundary (pyim-pinyin-match py-str x t t t)))
+                     pinyins)
+                (push (substring word (car boundary) (cdr boundary))
+                      guess-words-accurate)))
+            (setq count (1+ count))
+            ;; 当 `words' 包含的元素太多时，后面处理会极其缓慢，
+            ;; 这里通过限制循环次数来提高输入法的响应，经验数值。
+            (when (> count 200)
+              (setq words nil)))))
 
       (setq guess-words-accurate (reverse guess-words-accurate))
       ;; 合并到联想词一起处理，这样用户就可以通过 `pyim-enable-words-predict'
@@ -1873,7 +1884,11 @@ Return the input string."
       (let* ((prefix (pyim-grab-chinese-word (length pyim-current-str) pyim-last-input-word))
              (prefix-length (length prefix))
              (words (when (> prefix-length 0)
-                      (delete-duplicates
+                      ;; prefix 为光标前的一个中文字符串：我们根据 prefix 构建一个 regexp,
+                      ;; 在指定的 buffer 中搜索词条，得到的结果保存到 words 变量中, 假如 prefix 为 “你好”，
+                      ;; 则搜索 “你好<1-10个字符>” ，后面的代码会从这 “1-10个字符” 中提取符合
+                      ;; 要求的字符串作为联想词。
+                      (delete-dups
                        (pyim-get-dabbrev
                         (format "%s[^[:punct:][:blank:]\n]\\{1,10\\}" prefix)
                         pyim-dabbrev-time-limit
@@ -1903,7 +1918,7 @@ Return the input string."
                 (push (substring word (car boundary) (cdr boundary))
                       dabbrev-words-accurate))))
           (setq count (1+ count))
-          (when (> count 1000)
+          (when (> count 500)
             (setq words nil))))
       ;; Debug
       ;; (princ "guess-words-accurate: ")
