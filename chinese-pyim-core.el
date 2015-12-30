@@ -1817,7 +1817,7 @@ Return the input string."
         (length-pylist (length pylist))
         choice words word
         guess-words-accurate guess-words-similar
-        dabbrev-words-accurate dabbrev-words-similar
+        dabbrev-words-accurate-1 dabbrev-words-accurate-2 dabbrev-words-similar
         words-predicted chars wordspy)
 
     ;; 搜索严格匹配输入拼音的词条。
@@ -1908,7 +1908,7 @@ Return the input string."
                          (setq boundary (pyim-pinyin-match py-str x)))
                      pinyins)
                 (push (substring word (car boundary) (cdr boundary))
-                      dabbrev-words-accurate)
+                      dabbrev-words-accurate-1)
                 (push (substring word 0 (cdr boundary))
                       dabbrev-words-similar))
               (when (cl-some
@@ -1916,21 +1916,35 @@ Return the input string."
                          (setq boundary (pyim-pinyin-match py-str x t)))
                      pinyins)
                 (push (substring word (car boundary) (cdr boundary))
-                      dabbrev-words-accurate))))
+                      dabbrev-words-accurate-1))))
           (setq count (1+ count))
           (when (> count 500)
-            (setq words nil))))
+            (setq words nil)))
+        ;; 在所有指定的 buffer 中，搜索拼音匹配 `pylist' 中文词条，
+        ;; 搜索得到的结果作为联想词。
+        (setq dabbrev-words-accurate-2
+              (when (> length-pylist 1)
+                (delete-dups
+                 (pyim-get-dabbrev
+                  (pyim-build-chinese-regexp-for-pylist pylist nil nil t)
+                  pyim-dabbrev-time-limit
+                  (pcase pyim-dabbrev-other-buffers
+                    (`t (list major-mode))
+                    (`all `all)))))))
       ;; Debug
       ;; (princ "guess-words-accurate: ")
       ;; (princ guess-words-accurate)
       ;; (princ "\nguess-words-similar: ")
       ;; (princ guess-words-similar)
-      ;; (princ "\ndabbrev-words-accurate: ")
-      ;; (princ dabbrev-words-accurate)
+      ;; (princ "\ndabbrev-words-accurate-1: ")
+      ;; (princ dabbrev-words-accurate-1)
+      ;; (princ "\nguess-words-accurate-2: ")
+      ;; (princ dabbrev-words-accurate-2)
       ;; (princ "\ndabbrev-words-similar: ")
       ;; (princ dabbrev-words-similar)
 
-      (setq dabbrev-words-accurate (reverse dabbrev-words-accurate))
+      (setq dabbrev-words-accurate-1 (reverse dabbrev-words-accurate-1))
+      (setq dabbrev-words-accurate-2 (reverse dabbrev-words-accurate-2))
       (push `(dabbrev ,@(reverse dabbrev-words-similar)) words-predicted))
 
     ;; 将输入的拼音按照声母和韵母打散，得到尽可能多的拼音组合，
@@ -1943,8 +1957,9 @@ Return the input string."
     (setq chars (pyim-get (concat (caar pylist) (cdar pylist))))
 
     ;; 将上述搜索得到的词条合并。
-    (setq choice `(,@dabbrev-words-accurate
+    (setq choice `(,@dabbrev-words-accurate-1
                    ,@guess-words-accurate
+                   ,@dabbrev-words-accurate-2
                    ,@words
                    ;; 没有严格匹配的词条时，设置第一个被选词为字符，
                    ;; 这样可以减少不可预期的联想词带来的视觉压力。
