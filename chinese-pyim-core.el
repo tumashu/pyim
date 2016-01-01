@@ -1942,13 +1942,20 @@ Return the input string."
   ;; 可能包含多个 pylist, 从而得到多个子候选词列表，如何将多个 *子候选词列表* 合理的合并，
   ;; 是一个麻烦的事情。
 
-  ;; 当前的合并模式是：选择候选词最多的一个子候选词列表做为最终候选词列表，其他子列表抛弃。
-  ;; TODO: 这个地方需要进一步得改进。
-  (car (sort (mapcar
-              #'pyim-get-choices-internal
-              list-of-pylist)
-             #'(lambda (x y)
-                 (> (length x) (length y))))))
+  ;; 当前的合并模式是：将子候选词列表按照 length 排序，length 最大的放到最前面，然后将所有的
+  ;; 子列表连接起来形成最终得候选词列表。
+
+  ;; 注：这个地方需要进一步得改进。
+  (let ((candidates-list
+         (sort (mapcar
+                #'pyim-get-choices-internal
+                list-of-pylist)
+               #'(lambda (x y)
+                   (> (length x) (length y)))))
+        results)
+    (dolist (candidate candidates-list)
+      (setq results (append results candidate)))
+    results))
 
 (defun pyim-get-choices-internal (pylist)
   "得到可能的词组和汉字。例如：
