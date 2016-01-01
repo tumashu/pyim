@@ -1571,9 +1571,15 @@ Return the input string."
        (not (pyim-auto-switch-english-input-p))
        (if (pyim-string-emptyp pyim-current-key)
            (member last-command-event
-                   (mapcar 'identity "abcdefghjklmnopqrstwxyz"))
+                   (mapcar 'identity
+                           (if pyim-use-shuangpin
+                               "abcdefghijklmnopqrstuvwxyz"
+                             "abcdefghjklmnopqrstwxyz")))
          (member last-command-event
-                 (mapcar 'identity "vmpfwckzyjqdltxuognbhsrei'-a")))
+                 (mapcar 'identity
+                         (if pyim-use-shuangpin
+                             "abcdefghijklmnopqrstuvwxyz"
+                           "vmpfwckzyjqdltxuognbhsrei'-a"))))
        (setq current-input-method-title pyim-title)))
 
 (defun pyim-dynamic-english-input-function ()
