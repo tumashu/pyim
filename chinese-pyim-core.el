@@ -1777,11 +1777,11 @@ Return the input string."
         (cons (cons (car sm) (car ym)) (cdr ym))))))
 
 ;;; 处理输入的拼音
-(defun pyim-split-string (str &optional shuangpin-scheme-name)
-  "如果 `shuangpin-scheme-name' 设置一个可用的双拼方案，则把 `str' 按照这个双拼
+(defun pyim-split-string (str &optional shuangpin-scheme)
+  "如果双拼方案 `shuangpin-scheme' 可用，则把 `str' 按照这个双拼
 方案分解，如果设置为 nil, 则按照全拼分解。"
-  (if shuangpin-scheme-name
-      (pyim-split-string:shuangpin str shuangpin-scheme-name)
+  (if shuangpin-scheme
+      (pyim-split-string:shuangpin str shuangpin-scheme)
     (pyim-split-string:pinyin str)))
 
 (defun pyim-split-string:pinyin (py)
@@ -1800,11 +1800,9 @@ Return the input string."
                    (split-string py "'")))))
 
 ;; "nihc" -> ((\"n\" . \"i\") (\"h\" . \"ao\"))
-(defun pyim-split-string:shuangpin (str &optional shuangpin-scheme-name)
+(defun pyim-split-string:shuangpin (str &optional shuangpin-scheme)
   "把一个双拼字符串分解成一个 pylist 组成的列表，每一个 pylist 都类似："
-  (let ((shuangpin-scheme
-         (pyim-get-current-shuangpin-scheme shuangpin-scheme-name))
-        (list (string-to-list
+  (let ((list (string-to-list
                (replace-regexp-in-string "-" ""str)))
         results)
     (while list
@@ -1822,11 +1820,9 @@ Return the input string."
                (or ym (list ""))) results)))
     (car (pyim-permutate-list (nreverse results)))))
 
-(defun pyim-get-current-shuangpin-scheme (&optional shuangpin-scheme-name)
-  "获取名称为 shuangpin-scheme-name 的双拼方案，如果 shuangpin-scheme-name 设置为 nil,
-则返回 `pyim-use-shuangpin' 对应的双拼方案。 "
-  (cdr (assoc (or shuangpin-scheme-name pyim-use-shuangpin)
-              pyim-shuangpin-schemes)))
+(defun pyim-return-shuangpin-scheme (shuangpin-scheme-name)
+  "返回名称为 shuangpin-scheme-name 的双拼方案。"
+  (cdr (assoc shuangpin-scheme-name pyim-shuangpin-schemes)))
 
 (defun pyim-validp (pylist)
   "检查得到的拼音是否含有声母为空，而韵母又不正确的拼音"
@@ -1865,12 +1861,12 @@ Return the input string."
     (if cur (setq py (concat py "'")))  ; the last char is `''
     py))
 
-(defun pyim-pylist-to-string (pylist &optional shou-zi-mu shuangpin-scheme-name)
-  "把分解的拼音列表合并为一个全拼字符串或者双拼字符串, 如果 `shuangpin-scheme-name'
-设置为一个双拼方案名称，则按照这个双拼方案把 pylist 合并为双拼字符串，如果设置为 nil,
-则将其合并为全拼字符串。"
-  (if shuangpin-scheme-name
-      (pyim-pylist-to-string:shuangpin pylist shou-zi-mu shuangpin-scheme-name)
+(defun pyim-pylist-to-string (pylist &optional shou-zi-mu shuangpin-scheme)
+  "把分解的拼音列表合并为一个全拼字符串或者双拼字符串, 如果双拼方案 `shuangpin-scheme'
+可用，则按照这个双拼方案把 pylist 合并为一个双拼字符串，如果其设置为 nil,
+则将 pylist 合并为全拼字符串。"
+  (if shuangpin-scheme
+      (pyim-pylist-to-string:shuangpin pylist shou-zi-mu shuangpin-scheme)
     (pyim-pylist-to-string:pinyin pylist shou-zi-mu)))
 
 (defun pyim-pylist-to-string:pinyin (pylist &optional shou-zi-mu)
@@ -1886,34 +1882,32 @@ Return the input string."
               pylist)
              "-"))
 
-(defun pyim-pylist-to-string:shuangpin (pylist &optional shou-zi-mu shuangpin-scheme-name)
-  "根据 `shuangpin-scheme-name' 对应的双拼方案，把分解的拼音合并为一个双拼字符串，
+(defun pyim-pylist-to-string:shuangpin (pylist &optional shou-zi-mu shuangpin-scheme)
+  "根据双拼方案 `shuangpin-scheme' ，把分解的拼音合并为一个双拼字符串，
 当 `shou-zi-mu' 设置为 t 时，生成双拼字母字符串，比如 p-y。"
-  (let ((shuangpin-scheme
-         (pyim-get-current-shuangpin-scheme shuangpin-scheme-name)))
-    (when shuangpin-scheme
-      (mapconcat 'identity
-                 (mapcar
-                  #'(lambda (w)
-                      (let ((special
-                             (car (rassoc (list w)
-                                          (car (cdr shuangpin-scheme)))))
-                            (sm (car w))
-                            (ym (cdr w)))
-                        (if special
-                            (concat (car special) (cdr special))
-                          (concat (cl-some
+  (when shuangpin-scheme
+    (mapconcat 'identity
+               (mapcar
+                #'(lambda (w)
+                    (let ((special
+                           (car (rassoc (list w)
+                                        (car (cdr shuangpin-scheme)))))
+                          (sm (car w))
+                          (ym (cdr w)))
+                      (if special
+                          (concat (car special) (cdr special))
+                        (concat (cl-some
+                                 #'(lambda (x)
+                                     (when (equal sm (nth 1 x))
+                                       (car x))) (car shuangpin-scheme))
+                                (unless shou-zi-mu
+                                  (cl-some
                                    #'(lambda (x)
-                                       (when (equal sm (nth 1 x))
-                                         (car x))) (car shuangpin-scheme))
-                                  (unless shou-zi-mu
-                                    (cl-some
-                                     #'(lambda (x)
-                                         (when (or (equal ym (nth 2 x))
-                                                   (equal ym (nth 3 x)))
-                                           (car x))) (car shuangpin-scheme)))))))
-                  pylist)
-                 "-"))))
+                                       (when (or (equal ym (nth 2 x))
+                                                 (equal ym (nth 3 x)))
+                                         (car x))) (car shuangpin-scheme)))))))
+                pylist)
+               "-")))
 ;; #+END_SRC
 
 ;; **** 获得词语拼音并进一步查询得到备选词列表
@@ -2196,15 +2190,17 @@ Counting starts at 1."
 
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-handle-string ()
-  (let ((str pyim-current-key)
+  (let ((shuangpin-scheme
+         (pyim-return-shuangpin-scheme pyim-use-shuangpin))
+        (str pyim-current-key)
         userpos wordspy)
-    (setq pyim-pinyin-list (pyim-split-string str pyim-use-shuangpin)
+    (setq pyim-pinyin-list (pyim-split-string str shuangpin-scheme)
           pyim-pinyin-position 0)
     (unless (and (pyim-validp pyim-pinyin-list)
                  (progn
                    (setq userpos (pyim-user-divide-pos str)
                          pyim-current-key (pyim-restore-user-divide
-                                           (pyim-pylist-to-string pyim-pinyin-list nil pyim-use-shuangpin)
+                                           (pyim-pylist-to-string pyim-pinyin-list nil shuangpin-scheme)
                                            userpos))
                    (setq pyim-current-choices (list (delete-dups (pyim-get-choices pyim-pinyin-list))))
                    (when  (car pyim-current-choices)
