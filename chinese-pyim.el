@@ -110,6 +110,18 @@
 ;; | C-c 或 C-g      | 取消输入         |
 ;; | TAB             | 模糊音调整       |
 
+;; *** 使用双拼模式
+;; Chinese-pyim 支持双拼模式，用户可以通过变量 `pyim-use-shuangpin' 来设定当前使用的
+;; 双拼方案，比如：
+
+;; #+BEGIN_EXAMPLE
+;; (setq pyim-use-shuangpin 'xiaohe)
+;; #+END_EXAMPLE
+
+;; 如果这个变量设置为 nil, 则禁用双拼模式。
+
+;; 注：用户可以通过变量 `pyim-shuangpin-schemes' 添加自定义双拼方案。
+
 ;; *** 让选词框跟随光标
 ;; Chinese-pyim 可以使用 emacs tooltip 功能在 *光标处* 显示一个选词框，
 ;; 用户可以通过下面的设置来开启这个功能。

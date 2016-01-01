@@ -332,7 +332,9 @@ Chinese-pyim 也开启英文输入功能。"
 (defvar pyim-overlay nil "显示当前选择词条的 overlay")
 
 (defvar pyim-pinyin-position nil)
-(defvar pyim-pinyin-list nil)
+(defvar pyim-pylist-list nil
+  "Chinese-pyim 会将一个拼音字符串分解为一个或者多个 pylist （常见于双拼模式）,
+这个变量用于保存分解得到的结果。")
 
 (defvar pyim-guidance-str "" "显示可选词条的字符串")
 (defvar pyim-current-pos nil "当前选择的词条在 pyim-current-choices 中的位置")
@@ -414,7 +416,7 @@ If you don't like this funciton, set the variable to nil")
     pyim-pair-punctuation-status
     pyim-punctuation-escape-list
 
-    pyim-pinyin-list
+    pyim-pylist-list
     pyim-pinyin-position)
   "A list of buffer local variable")
 
@@ -912,25 +914,28 @@ If you don't like this funciton, set the variable to nil")
 ;; Shameless steal from company-dabbrev.el in `company' package
 (defun pyim-get-dabbrev (regexp &optional limit other-buffer-modes
                                 ignore-comments)
-  (let* ((start (current-time))
-         (symbols (pyim-get-dabbrev-search-buffer
-                   regexp (point) nil start limit ignore-comments)))
-    (when other-buffer-modes
-      (cl-dolist (buffer (delq (current-buffer) (buffer-list)))
-        (with-current-buffer buffer
-          (when (if (eq other-buffer-modes 'all)
-                    (not (cl-some
-                          #'(lambda (regexp)
-                              (pyim-string-match-p regexp (buffer-name)))
-                          pyim-dabbrev-ignore-buffers))
-                  (apply #'derived-mode-p other-buffer-modes))
-            (setq symbols
-                  (pyim-get-dabbrev-search-buffer
-                   regexp nil symbols start limit ignore-comments))))
-        (and limit
-             (> (float-time (time-since start)) limit)
-             (cl-return))))
-    symbols))
+  (when (and regexp
+             (stringp regexp)
+             (not (equal regexp "")))
+    (let* ((start (current-time))
+           (symbols (pyim-get-dabbrev-search-buffer
+                     regexp (point) nil start limit ignore-comments)))
+      (when other-buffer-modes
+        (cl-dolist (buffer (delq (current-buffer) (buffer-list)))
+          (with-current-buffer buffer
+            (when (if (eq other-buffer-modes 'all)
+                      (not (cl-some
+                            #'(lambda (regexp)
+                                (pyim-string-match-p regexp (buffer-name)))
+                            pyim-dabbrev-ignore-buffers))
+                    (apply #'derived-mode-p other-buffer-modes))
+              (setq symbols
+                    (pyim-get-dabbrev-search-buffer
+                     regexp nil symbols start limit ignore-comments))))
+          (and limit
+               (> (float-time (time-since start)) limit)
+               (cl-return))))
+      symbols)))
 
 (defun pyim-cache-dict-buffer ()
   "根据个人词库文件中的 codes，来构建普通词库文件的缓存，用于加快查询速度，
@@ -1656,7 +1661,7 @@ Return the input string."
 ;; #+END_EXAMPLE
 
 ;; 结果为:
-;; : (("w" . "o") ("" . "ai") ("m" . "ei") ("n" . "v"))
+;; : ((("w" . "o") ("" . "ai") ("m" . "ei") ("n" . "v")))
 
 ;; 这个过程通过递归的调用 `pyim-get-charpy' 来实现，整个过程类似用菜刀切黄瓜片，将一个拼音字符串逐渐切开。比如：
 
@@ -1701,14 +1706,14 @@ Return the input string."
 ;; #+END_EXAMPLE
 
 ;; 结果为:
-;; : (("" . "ua"))
+;; : ((("" . "ua")))
 
 ;; 这种错误可以使用函数 `pyim-validp' 来检测。
 ;; #+BEGIN_EXAMPLE
-;; (list (pyim-validp (pyim-split-string "ua"))
-;;       (pyim-validp (pyim-split-string "a"))
-;;       (pyim-validp (pyim-split-string "wa"))
-;;       (pyim-validp (pyim-split-string "wua")))
+;; (list (pyim-validp (car (pyim-split-string "ua")))
+;;       (pyim-validp (car (pyim-split-string "a")))
+;;       (pyim-validp (car (pyim-split-string "wa")))
+;;       (pyim-validp (car (pyim-split-string "wua"))))
 ;; #+END_EXAMPLE
 
 ;; 结果为:
@@ -1778,8 +1783,12 @@ Return the input string."
 
 ;;; 处理输入的拼音
 (defun pyim-split-string (str &optional shuangpin-scheme)
-  "如果双拼方案 `shuangpin-scheme' 可用，则把 `str' 按照这个双拼
-方案分解，如果设置为 nil, 则按照全拼分解。"
+  "把一个全拼或者双拼字符串分解为 *一个或者多个* pylist, 返回所有 pylist 的组成的
+一个 *列表*  。如果双拼方案 `shuangpin-scheme' 可用，则把 `str' 按照这个双拼方案分解，
+如果不可用,则按照全拼分解。
+
+注：1, 每一个 pylist 都有类似的结构: ((\"n\" . \"i\")(\"h\" . \"ao\"))
+    2. 使用这么复杂的list的原因是为了支持双拼，因为一个双拼字符串有可能转换为多个有效的全拼。"
   (if shuangpin-scheme
       (pyim-split-string:shuangpin str shuangpin-scheme)
     (pyim-split-string:pinyin str)))
@@ -1788,18 +1797,18 @@ Return the input string."
   "把一个拼音字符串分解。如果含有 '，优先在这个位置中断，否则，自动分
 解成声母和韵母的组合"
   (when (and py (string< "" py))
-    (apply 'append
-           (mapcar (lambda (p)
-                     (let (chpy pylist)
-                       (setq p (replace-regexp-in-string "[ -]" "" p))
-                       (while (when (string< "" p)
-                                (setq chpy (pyim-get-charpy p))
-                                (setq pylist (append pylist (list (car chpy))))
-                                (setq p (cdr chpy))))
-                       pylist))
-                   (split-string py "'")))))
+    (list (apply 'append
+                 (mapcar (lambda (p)
+                           (let (chpy pylist)
+                             (setq p (replace-regexp-in-string "[ -]" "" p))
+                             (while (when (string< "" p)
+                                      (setq chpy (pyim-get-charpy p))
+                                      (setq pylist (append pylist (list (car chpy))))
+                                      (setq p (cdr chpy))))
+                             pylist))
+                         (split-string py "'"))))))
 
-;; "nihc" -> ((\"n\" . \"i\") (\"h\" . \"ao\"))
+;; "nihc" -> (((\"n\" . \"i\") (\"h\" . \"ao\")))
 (defun pyim-split-string:shuangpin (str &optional shuangpin-scheme)
   "把一个双拼字符串分解成一个 pylist 组成的列表，每一个 pylist 都类似："
   (let ((list (string-to-list
@@ -1818,7 +1827,7 @@ Return the input string."
                           (z (car (cdr (assoc y (car (cdr shuangpin-scheme)))))))
                      (or z (cons sm x))))
                (or ym (list ""))) results)))
-    (car (pyim-permutate-list (nreverse results)))))
+    (pyim-permutate-list (nreverse results))))
 
 (defun pyim-return-shuangpin-scheme (shuangpin-scheme-name)
   "返回名称为 shuangpin-scheme-name 的双拼方案。"
@@ -1912,13 +1921,28 @@ Return the input string."
 
 ;; **** 获得词语拼音并进一步查询得到备选词列表
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-get-choices (pylist)
+(defun pyim-get-choices (list-of-pylist)
+  "得到可能的词组和汉字。"
+  ;; 全拼输入模式下，list-of-pylist 一般只包含一个 pylist, 所以没有 *子候选词列表* 合并问题，
+  ;; 但在双拼输入模式下，由于一个双拼字符串可能分解为多个有效的全拼，所以 list-of-pylist
+  ;; 可能包含多个 pylist, 从而得到多个子候选词列表，如何将多个 *子候选词列表* 合理的合并，
+  ;; 是一个麻烦的事情。
+
+  ;; 当前的合并模式是：选择候选词最多的一个子候选词列表做为最终候选词列表，其他子列表抛弃。
+  ;; TODO: 这个地方需要进一步得改进。
+  (car (sort (mapcar
+              #'pyim-get-choices-internal
+              list-of-pylist)
+             #'(lambda (x y)
+                 (> (length x) (length y))))))
+
+(defun pyim-get-choices-internal (pylist)
   "得到可能的词组和汉字。例如：
 
- (pyim-get-choices  (pyim-split-string \"pin-yin\"))
+ (pyim-get-choices-internal  (car (pyim-split-string \"pin-yin\")))
   => (\"拼音\" \"拼\" \"品\" \"贫\" \"苹\" \"聘\" \"频\" \"拚\" \"颦\" \"牝\" \"嫔\" \"姘\" \"嚬\")
 
- (pyim-get-choices  (pyim-split-string \"pin-yin\"))
+ (pyim-get-choices-internal  (car (pyim-split-string \"pin-yin\")))
  => (\"拼音\" \"贫铀\" \"聘用\" \"拼\" \"品\" \"贫\" \"苹\" \"聘\" \"频\" \"拚\" \"颦\" \"牝\" \"嫔\" \"姘\" \"嚬\")"
   (let ((py-str (pyim-pylist-to-string pylist))
         (py-str-shouzimu (pyim-pylist-to-string pylist t))
@@ -2050,7 +2074,7 @@ Return the input string."
               (push word dabbrev-words-accurate-2)
             (push word dabbrev-words-similar-2))
           (setq count (1+ count))
-          (when (> count 1000)
+          (when (> count 500)
             (setq words-searched nil)))
 
         (setq dabbrev-words-accurate-1 (reverse dabbrev-words-accurate-1))
@@ -2215,15 +2239,15 @@ Counting starts at 1."
          (pyim-return-shuangpin-scheme pyim-use-shuangpin))
         (str pyim-current-key)
         userpos wordspy)
-    (setq pyim-pinyin-list (pyim-split-string str shuangpin-scheme)
+    (setq pyim-pylist-list (pyim-split-string str shuangpin-scheme)
           pyim-pinyin-position 0)
-    (unless (and (pyim-validp pyim-pinyin-list)
+    (unless (and (pyim-validp (car pyim-pylist-list))
                  (progn
                    (setq userpos (pyim-user-divide-pos str)
                          pyim-current-key (pyim-restore-user-divide
-                                           (pyim-pylist-to-string pyim-pinyin-list nil shuangpin-scheme)
+                                           (pyim-pylist-to-string (car pyim-pylist-list) nil shuangpin-scheme)
                                            userpos))
-                   (setq pyim-current-choices (list (delete-dups (pyim-get-choices pyim-pinyin-list))))
+                   (setq pyim-current-choices (list (delete-dups (pyim-get-choices pyim-pylist-list))))
                    (when  (car pyim-current-choices)
                      (setq pyim-current-pos 1)
                      (pyim-update-current-str)
@@ -2275,7 +2299,7 @@ Counting starts at 1."
                                    (pyim-choice (nth pos choices)))
           rest (mapconcat (lambda (py)
                             (concat (car py) (cdr py)))
-                          (nthcdr (length pyim-current-str) pyim-pinyin-list)
+                          (nthcdr (length pyim-current-str) (car pyim-pylist-list))
                           "'"))
     (if (string< "" rest)
         (setq pyim-current-str (concat pyim-current-str rest)))))
@@ -2586,7 +2610,7 @@ Counting starts at 1."
           pylist)
       (pyim-create-or-rearrange-word str t)
       (setq pyim-pinyin-position (+ pyim-pinyin-position (length str)))
-      (if (>= pyim-pinyin-position (length pyim-pinyin-list))
+      (if (>= pyim-pinyin-position (length (car pyim-pylist-list)))
                                         ; 如果是最后一个，检查
                                         ; 是不是在文件中，没有的话，创
                                         ; 建这个词
@@ -2597,8 +2621,8 @@ Counting starts at 1."
             (pyim-terminate-translation)
             ;; Chinese-pyim 使用这个 hook 来处理联想词。
             (run-hooks 'pyim-select-word-finish-hook))
-        (setq pylist (nthcdr pyim-pinyin-position pyim-pinyin-list))
-        (setq pyim-current-choices (list (pyim-get-choices pylist))
+        (setq pylist (nthcdr pyim-pinyin-position (car pyim-pylist-list)))
+        (setq pyim-current-choices (list (pyim-get-choices (list pylist)))
               pyim-current-pos 1)
         (pyim-update-current-str)
         (pyim-format-page)
@@ -3156,14 +3180,22 @@ in package `chinese-pyim-pymap'"
     ;; 确保 pyim 词库已经加载
     (unless pyim-buffer-list
       (setq pyim-buffer-list (pyim-load-file)))
-    (let* ((pylist
+    (let* ((shuangpin-scheme
+            (pyim-return-shuangpin-scheme pyim-use-shuangpin))
+           (pylist-list
             ;; Slowly operating, need to improve.
-            (pyim-split-string pystr))
+            (pyim-split-string pystr shuangpin-scheme))
+           (regexp-list
+            (mapcar
+             #'(lambda (pylist)
+                 (pyim-build-chinese-regexp-for-pylist pylist))
+             pylist-list))
            (regexp
-            (pyim-build-chinese-regexp-for-pylist pylist))
-           (regexp
-            (if regexp
-                (concat pystr "\\|" regexp)
+            (if regexp-list
+                (concat pystr "\\|"
+                        (mapconcat #'identity
+                                   (delq nil regexp-list)
+                                   "\\|"))
               pystr)))
       regexp)))
 
