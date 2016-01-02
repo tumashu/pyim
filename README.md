@@ -172,7 +172,10 @@ Chinese-pyim 支持双拼模式，用户可以通过变量 \`pyim-use-shuangpin'
 
 如果这个变量设置为 nil, 则禁用双拼模式。
 
-注：用户可以通过变量 \`pyim-shuangpin-schemes' 添加自定义双拼方案。
+注意：
+
+1.  用户可以通过变量 \`pyim-shuangpin-schemes' 添加自定义双拼方案。
+2.  用户可能需要重新设置 \`pyim-translate-trigger-char'。
 
 ### 让选词框跟随光标<a id="orgheadline13"></a>
 

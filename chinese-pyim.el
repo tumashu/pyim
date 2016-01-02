@@ -120,7 +120,9 @@
 
 ;; 如果这个变量设置为 nil, 则禁用双拼模式。
 
-;; 注：用户可以通过变量 `pyim-shuangpin-schemes' 添加自定义双拼方案。
+;; 注意：
+;; 1. 用户可以通过变量 `pyim-shuangpin-schemes' 添加自定义双拼方案。
+;; 2. 用户可能需要重新设置 `pyim-translate-trigger-char'。
 
 ;; *** 让选词框跟随光标
 ;; Chinese-pyim 可以使用 emacs tooltip 功能在 *光标处* 显示一个选词框，
