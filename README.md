@@ -168,13 +168,13 @@ Chinese-pyim 的目标是： **尽最大的努力成为一个好用的 emacs 备
 
 Chinese-pyim 支持双拼模式，用户可以通过变量 \`pyim-use-shuangpin' 来设定当前使用的双拼方案，比如：
 
-    (setq pyim-use-shuangpin 'xiaohe)
+    (setq pyim-default-pinyin-scheme 'xiaohe)
 
 如果这个变量设置为 nil, 则禁用双拼模式。
 
 注意：
 
-1.  用户可以通过变量 \`pyim-shuangpin-schemes' 添加自定义双拼方案。
+1.  用户可以使用变量 \`pyim-pinyin-schemes' 添加自定义双拼方案。
 2.  用户可能需要重新设置 \`pyim-translate-trigger-char'。
 
 ### 让选词框跟随光标<a id="orgheadline13"></a>

@@ -115,13 +115,13 @@
 ;; 双拼方案，比如：
 
 ;; #+BEGIN_EXAMPLE
-;; (setq pyim-use-shuangpin 'xiaohe)
+;; (setq pyim-default-pinyin-scheme 'xiaohe)
 ;; #+END_EXAMPLE
 
 ;; 如果这个变量设置为 nil, 则禁用双拼模式。
 
 ;; 注意：
-;; 1. 用户可以通过变量 `pyim-shuangpin-schemes' 添加自定义双拼方案。
+;; 1. 用户可以使用变量 `pyim-pinyin-schemes' 添加自定义双拼方案。
 ;; 2. 用户可能需要重新设置 `pyim-translate-trigger-char'。
 
 ;; *** 让选词框跟随光标

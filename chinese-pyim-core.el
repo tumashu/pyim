@@ -119,52 +119,61 @@ plist 来表示，比如：
   :group 'chinese-pyim
   :type 'list)
 
-(defcustom pyim-use-shuangpin nil
-  "设置 Chinese-pyim 使用哪一种双拼方案，如果设置为 nil, 则默认使用全拼输入。"
+(defcustom pyim-default-pinyin-scheme 'default
+  "设置 Chinese-pyim 使用哪一种拼音方案，默认使用全拼输入。"
   :group 'chinese-pyim)
 
-(defcustom pyim-shuangpin-schemes
-  '((xiaohe
-     (("a" "a" "a")
-      ("b" "b" "in")
-      ("c" "c" "ao")
-      ("d" "d" "ai")
-      ("e" "e" "e")
-      ("f" "f" "en")
-      ("g" "g" "eng")
-      ("h" "h" "ang")
-      ("i" "ch" "i")
-      ("j" "j" "an")
-      ("k" "k" "ing" "uai")
-      ("l" "l" "iang" "uang")
-      ("m" "m" "ian")
-      ("n" "n" "iao")
-      ("o" "o" "uo" "o")
-      ("p" "p" "ie")
-      ("q" "q" "iu")
-      ("r" "r" "uan")
-      ("s" "s" "iong" "ong")
-      ("t" "t" "ue" "ve")
-      ("u" "sh" "u")
-      ("v" "zh" "v" "ui")
-      ("w" "w" "ei")
-      ("x" "x" "ia" "ua")
-      ("y" "y" "un")
-      ("z" "z" "zou"))
-     ((("a" . "a") ("" . "a"))
-      (("a" . "j") ("" . "an"))
-      (("a" . "d") ("" . "ai"))
-      (("a" . "c") ("" . "ao"))
-      (("a" . "h") ("" . "ang"))
-      (("e" . "e") ("" . "e"))
-      (("e" . "w") ("" . "ei"))
-      (("e" . "f") ("" . "en"))
-      (("e" . "r") ("" . "er"))
-      (("e" . "g") ("" . "eng"))
-      (("o" . "g") ("" . "ng"))
-      (("o" . "o") ("" . "o"))
-      (("o" . "u") ("" . "ou")))))
-  "为 Chinese-pyim 添加双拼方案。")
+(defcustom pyim-pinyin-schemes
+  '((default
+      :class quanpin
+      :first-chars "abcdefghjklmnopqrstwxyz"
+      :rest-chars "vmpfwckzyjqdltxuognbhsrei'-a"
+      :trigger-chars "v")
+    (xiaohe
+     :class shuangpin
+     :first-chars "abcdefghijklmnopqrstuvwxyz"
+     :rest-chars "abcdefghijklmnopqrstuvwxyz"
+     :trigger-chars nil
+     :keymaps-general (("a" "a" "a")
+                       ("b" "b" "in")
+                       ("c" "c" "ao")
+                       ("d" "d" "ai")
+                       ("e" "e" "e")
+                       ("f" "f" "en")
+                       ("g" "g" "eng")
+                       ("h" "h" "ang")
+                       ("i" "ch" "i")
+                       ("j" "j" "an")
+                       ("k" "k" "ing" "uai")
+                       ("l" "l" "iang" "uang")
+                       ("m" "m" "ian")
+                       ("n" "n" "iao")
+                       ("o" "o" "uo" "o")
+                       ("p" "p" "ie")
+                       ("q" "q" "iu")
+                       ("r" "r" "uan")
+                       ("s" "s" "iong" "ong")
+                       ("t" "t" "ue" "ve")
+                       ("u" "sh" "u")
+                       ("v" "zh" "v" "ui")
+                       ("w" "w" "ei")
+                       ("x" "x" "ia" "ua")
+                       ("y" "y" "un")
+                       ("z" "z" "zou"))
+     :keymaps-special ((("a" . "a") ("" . "a"))
+                       (("a" . "j") ("" . "an"))
+                       (("a" . "d") ("" . "ai"))
+                       (("a" . "c") ("" . "ao"))
+                       (("a" . "h") ("" . "ang"))
+                       (("e" . "e") ("" . "e"))
+                       (("e" . "w") ("" . "ei"))
+                       (("e" . "f") ("" . "en"))
+                       (("e" . "r") ("" . "er"))
+                       (("e" . "g") ("" . "eng"))
+                       (("o" . "g") ("" . "ng"))
+                       (("o" . "o") ("" . "o"))
+                       (("o" . "u") ("" . "ou")))))
+  "Chinese-pyim 支持的所有拼音方案。")
 
 (defcustom pyim-translate-trigger-char ?v
   "用于触发特殊操作的字符，相当与单字快捷键。
@@ -1062,18 +1071,19 @@ If you don't like this funciton, set the variable to nil")
   "从`code' 构建一个 regexp，用于搜索联想词，
 比如：ni-hao-si-j --> ^ni-hao[a-z]*-si[a-z]*-j[a-z]* , when `first-equal' set to `t'
                   --> ^ni[a-z]*-hao[a-z]*-si[a-z]*-j[a-z]* , when `first-equal' set to `nil'"
-  (let ((pylist (split-string code "-"))
-        (count 0))
-    (concat (if match-beginning "^" "")
-            (mapconcat
-             #'(lambda (x)
-                 (setq count (+ count 1))
-                 (if (or (not first-equal) (> count 1))
-                     (if all-equal
-                         x
-                       (concat x "[a-z]*"))
-                   x))
-             pylist "-"))))
+  (when (and code (stringp code))
+    (let ((pylist (split-string code "-"))
+          (count 0))
+      (concat (if match-beginning "^" "")
+              (mapconcat
+               #'(lambda (x)
+                   (setq count (+ count 1))
+                   (if (or (not first-equal) (> count 1))
+                       (if all-equal
+                           x
+                         (concat x "[a-z]*"))
+                     x))
+               pylist "-")))))
 
 (defun pyim-pinyin-match (pinyin1 pinyin2 &optional match-beginning first-equal all-equal)
   "判断拼音 `pinyin1' 是否和拼音 `pinyin2' 相匹配，如果匹配，
@@ -1575,20 +1585,17 @@ Return the input string."
 
 (defun pyim-input-chinese-p ()
   "确定 Chinese-pyim 是否启动中文输入模式"
-  (and (not pyim-input-ascii)
-       (not (pyim-auto-switch-english-input-p))
-       (if (pyim-string-emptyp pyim-current-key)
+  (let* ((pinyin-scheme-name pyim-default-pinyin-scheme)
+         (first-chars (pyim-get-pinyin-scheme-option pinyin-scheme-name :first-chars))
+         (rest-chars (pyim-get-pinyin-scheme-option pinyin-scheme-name :rest-chars)))
+    (and (not pyim-input-ascii)
+         (not (pyim-auto-switch-english-input-p))
+         (if (pyim-string-emptyp pyim-current-key)
+             (member last-command-event
+                     (mapcar 'identity first-chars))
            (member last-command-event
-                   (mapcar 'identity
-                           (if pyim-use-shuangpin
-                               "abcdefghijklmnopqrstuvwxyz"
-                             "abcdefghjklmnopqrstwxyz")))
-         (member last-command-event
-                 (mapcar 'identity
-                         (if pyim-use-shuangpin
-                             "abcdefghijklmnopqrstuvwxyz"
-                           "vmpfwckzyjqdltxuognbhsrei'-a"))))
-       (setq current-input-method-title pyim-title)))
+                   (mapcar 'identity rest-chars)))
+         (setq current-input-method-title pyim-title))))
 
 (defun pyim-dynamic-english-input-function ()
   "中英文输入动态切换函数，其基本规则是：
@@ -1671,7 +1678,7 @@ Return the input string."
 ;; Chinese-pyim 使用函数 `pyim-split-string' 将拼音字符串分解为一个由声母和韵母组成的拼音列表，比如：
 
 ;; #+BEGIN_EXAMPLE
-;; (pyim-split-string "woaimeinv")
+;; (pyim-split-string "woaimeinv" 'default)
 ;; #+END_EXAMPLE
 
 ;; 结果为:
@@ -1716,7 +1723,7 @@ Return the input string."
 ;; 当用户输入一个错误的拼音时，`pyim-split-string' 会产生一个声母为空而韵母又不正确的拼音列表 ，比如：
 
 ;; #+BEGIN_EXAMPLE
-;; (pyim-split-string "ua")
+;; (pyim-split-string "ua" 'default)
 ;; #+END_EXAMPLE
 
 ;; 结果为:
@@ -1724,10 +1731,10 @@ Return the input string."
 
 ;; 这种错误可以使用函数 `pyim-validp' 来检测。
 ;; #+BEGIN_EXAMPLE
-;; (list (pyim-validp (car (pyim-split-string "ua")))
-;;       (pyim-validp (car (pyim-split-string "a")))
-;;       (pyim-validp (car (pyim-split-string "wa")))
-;;       (pyim-validp (car (pyim-split-string "wua"))))
+;; (list (pyim-validp (car (pyim-split-string "ua" 'default)))
+;;       (pyim-validp (car (pyim-split-string "a" 'default)))
+;;       (pyim-validp (car (pyim-split-string "wa" 'default)))
+;;       (pyim-validp (car (pyim-split-string "wua" 'default))))
 ;; #+END_EXAMPLE
 
 ;; 结果为:
@@ -1738,7 +1745,7 @@ Return the input string."
 ;; 字符串用于搜索词条。
 
 ;; #+BEGIN_EXAMPLE
-;; (pyim-pylist-to-string '(("w" . "o") ("" . "ai") ("m" . "ei") ("n" . "v")))
+;; (pyim-pylist-to-string '(("w" . "o") ("" . "ai") ("m" . "ei") ("n" . "v")) nil 'default)
 ;; #+END_EXAMPLE
 
 ;; 结果为:
@@ -1796,20 +1803,33 @@ Return the input string."
         (cons (cons (car sm) (car ym)) (cdr ym))))))
 
 ;;; 处理输入的拼音
-(defun pyim-split-string (str &optional shuangpin-scheme)
-  "把一个全拼或者双拼字符串分解为 *一个或者多个* pylist, 返回所有 pylist 的组成的
-一个 *列表*  。如果双拼方案 `shuangpin-scheme' 可用，则把 `str' 按照这个双拼方案分解，
-如果不可用,则按照全拼分解。
+(defun pyim-get-pinyin-scheme (pinyin-scheme-name)
+  "获取名称为 `pinyin-scheme-name' 的拼音方案。"
+  (assoc pinyin-scheme-name pyim-pinyin-schemes))
+
+(defun pyim-get-pinyin-scheme-option (pinyin-scheme-name option)
+  "获取名称为 `pinyin-scheme-name' 的拼音方案，并提取其属性 `option' 。"
+  (let ((pinyin-scheme (pyim-get-pinyin-scheme pinyin-scheme-name)))
+    (when pinyin-scheme
+      (plist-get (cdr pinyin-scheme) option))))
+
+(defun pyim-split-string (str &optional pinyin-scheme-name)
+  "按照 `pinyin-scheme-name' 对应的拼音方案，把一个全拼或者双拼字符串分解为 *一个或者多个* pylist,
+返回所有 pylist 的组成的一个 *列表* 。
 
 注：1, 每一个 pylist 都有类似的结构: ((\"n\" . \"i\")(\"h\" . \"ao\"))
-    2. 使用这么复杂的list的原因是为了支持双拼，因为一个双拼字符串有可能转换为多个有效的全拼。"
-  (if shuangpin-scheme
-      (pyim-split-string:shuangpin str shuangpin-scheme)
-    (pyim-split-string:pinyin str)))
+    2. 使用这么复杂的list的原因是为了支持双拼，因为一个双拼字符串有可能转换为多个有效的全拼。
+    3. 变量 `pyim-pinyin-schemes' 保存所有可用的 pinyin-scheme 。"
+  (let ((pinyin-class (pyim-get-pinyin-scheme-option pinyin-scheme-name :class)))
+    (when pinyin-class
+      (funcall (intern (concat "pyim-split-string:"
+                               (symbol-name pinyin-class)))
+               str pinyin-scheme-name))))
 
-(defun pyim-split-string:pinyin (py)
+(defun pyim-split-string:quanpin (py &optional pinyin-scheme-name)
   "把一个拼音字符串分解。如果含有 '，优先在这个位置中断，否则，自动分
-解成声母和韵母的组合"
+解成声母和韵母的组合，可选参数 `pinyin-scheme' 只是一个虚参数，暂时没有
+用处。"
   (when (and py (string< "" py))
     (list (apply 'append
                  (mapcar (lambda (p)
@@ -1823,9 +1843,11 @@ Return the input string."
                          (split-string py "'"))))))
 
 ;; "nihc" -> (((\"n\" . \"i\") (\"h\" . \"ao\")))
-(defun pyim-split-string:shuangpin (str &optional shuangpin-scheme)
-  "把一个双拼字符串分解成一个 pylist 组成的列表，每一个 pylist 都类似："
-  (let ((list (string-to-list
+(defun pyim-split-string:shuangpin (str &optional pinyin-scheme-name)
+  "按照 `pyim-scheme-name' 对应的拼音方案，把一个双拼字符串分解成一个 pylist 组成的列表。"
+  (let ((keymaps-general (pyim-get-pinyin-scheme-option pinyin-scheme-name :keymaps-general))
+        (keymaps-special (pyim-get-pinyin-scheme-option pinyin-scheme-name :keymaps-special))
+        (list (string-to-list
                (replace-regexp-in-string "-" ""str)))
         results)
     (while list
@@ -1833,19 +1855,15 @@ Return the input string."
              (sp-ym (pop list))
              (sp-sm (when sp-sm (char-to-string sp-sm)))
              (sp-ym (when sp-ym (char-to-string sp-ym)))
-             (sm (nth 1 (assoc sp-sm (car shuangpin-scheme))))
-             (ym (cdr (cdr (assoc sp-ym (car shuangpin-scheme))))))
+             (sm (nth 1 (assoc sp-sm keymaps-general)))
+             (ym (cdr (cdr (assoc sp-ym keymaps-general)))))
         (push (mapcar
                #'(lambda (x)
                    (let* ((y (cons sp-sm sp-ym))
-                          (z (car (cdr (assoc y (car (cdr shuangpin-scheme)))))))
+                          (z (car (cdr (assoc y keymaps-special)))))
                      (or z (cons sm x))))
                (or ym (list ""))) results)))
     (pyim-permutate-list (nreverse results))))
-
-(defun pyim-return-shuangpin-scheme (shuangpin-scheme-name)
-  "返回名称为 shuangpin-scheme-name 的双拼方案。"
-  (cdr (assoc shuangpin-scheme-name pyim-shuangpin-schemes)))
 
 (defun pyim-validp (pylist)
   "检查得到的拼音是否含有声母为空，而韵母又不正确的拼音"
@@ -1884,16 +1902,17 @@ Return the input string."
     (if cur (setq py (concat py "'")))  ; the last char is `''
     py))
 
-(defun pyim-pylist-to-string (pylist &optional shou-zi-mu shuangpin-scheme)
-  "把分解的拼音列表合并为一个全拼字符串或者双拼字符串, 如果双拼方案 `shuangpin-scheme'
-可用，则按照这个双拼方案把 pylist 合并为一个双拼字符串，如果其设置为 nil,
-则将 pylist 合并为全拼字符串。"
-  (if shuangpin-scheme
-      (pyim-pylist-to-string:shuangpin pylist shou-zi-mu shuangpin-scheme)
-    (pyim-pylist-to-string:pinyin pylist shou-zi-mu)))
+(defun pyim-pylist-to-string (pylist &optional shou-zi-mu pinyin-scheme-name)
+  "按照 `pinyin-scheme' 对应的拼音方案，把一个拼音列表合并为一个全拼字符串
+或者双拼字符串，常常用于搜索。"
+  (let ((pinyin-class (pyim-get-pinyin-scheme-option pinyin-scheme-name :class)))
+    (when pinyin-class
+      (funcall (intern (concat "pyim-pylist-to-string:"
+                               (symbol-name pinyin-class)))
+               pylist shou-zi-mu pinyin-scheme-name))))
 
-(defun pyim-pylist-to-string:pinyin (pylist &optional shou-zi-mu)
-  "把分解的拼音合并为一个全拼字符串，以便进行查找, 当 `shou-zi-mu' 设置为 t
+(defun pyim-pylist-to-string:quanpin (pylist &optional shou-zi-mu pinyin-scheme-name)
+  "把一个拼音列表合并为一个全拼字符串，当 `shou-zi-mu' 设置为 t
 时，生成拼音首字母字符串，比如 p-y。"
   (mapconcat 'identity
              (mapcar
@@ -1905,32 +1924,34 @@ Return the input string."
               pylist)
              "-"))
 
-(defun pyim-pylist-to-string:shuangpin (pylist &optional shou-zi-mu shuangpin-scheme)
-  "根据双拼方案 `shuangpin-scheme' ，把分解的拼音合并为一个双拼字符串，
-当 `shou-zi-mu' 设置为 t 时，生成双拼字母字符串，比如 p-y。"
-  (when shuangpin-scheme
-    (mapconcat 'identity
-               (mapcar
-                #'(lambda (w)
-                    (let ((special
-                           (car (rassoc (list w)
-                                        (car (cdr shuangpin-scheme)))))
-                          (sm (car w))
-                          (ym (cdr w)))
-                      (if special
-                          (concat (car special) (cdr special))
-                        (concat (cl-some
-                                 #'(lambda (x)
-                                     (when (equal sm (nth 1 x))
-                                       (car x))) (car shuangpin-scheme))
-                                (unless shou-zi-mu
-                                  (cl-some
+(defun pyim-pylist-to-string:shuangpin (pylist &optional shou-zi-mu pinyin-scheme-name)
+  "把一个拼音列表合并为一个双拼字符串，当 `shou-zi-mu' 设置为 t 时，
+生成双拼首字母字符串，比如 p-y。"
+  (when pinyin-scheme-name
+    (let* ((keymaps-general (pyim-get-pinyin-scheme-option pinyin-scheme-name :keymaps-general))
+           (keymaps-special (pyim-get-pinyin-scheme-option pinyin-scheme-name :keymaps-special)))
+      (mapconcat 'identity
+                 (mapcar
+                  #'(lambda (w)
+                      (let ((special
+                             (car (rassoc (list w)
+                                          keymaps-special)))
+                            (sm (car w))
+                            (ym (cdr w)))
+                        (if special
+                            (concat (car special) (cdr special))
+                          (concat (cl-some
                                    #'(lambda (x)
-                                       (when (or (equal ym (nth 2 x))
-                                                 (equal ym (nth 3 x)))
-                                         (car x))) (car shuangpin-scheme)))))))
-                pylist)
-               "-")))
+                                       (when (equal sm (nth 1 x))
+                                         (car x))) keymaps-general)
+                                  (unless shou-zi-mu
+                                    (cl-some
+                                     #'(lambda (x)
+                                         (when (or (equal ym (nth 2 x))
+                                                   (equal ym (nth 3 x)))
+                                           (car x))) keymaps-general))))))
+                  pylist)
+                 "-"))))
 ;; #+END_SRC
 
 ;; **** 获得词语拼音并进一步查询得到备选词列表
@@ -1960,13 +1981,13 @@ Return the input string."
 (defun pyim-get-choices-internal (pylist)
   "得到可能的词组和汉字。例如：
 
- (pyim-get-choices-internal  (car (pyim-split-string \"pin-yin\")))
+ (pyim-get-choices-internal  (car (pyim-split-string \"pin-yin\" 'default)))
   => (\"拼音\" \"拼\" \"品\" \"贫\" \"苹\" \"聘\" \"频\" \"拚\" \"颦\" \"牝\" \"嫔\" \"姘\" \"嚬\")
 
- (pyim-get-choices-internal  (car (pyim-split-string \"pin-yin\")))
+ (pyim-get-choices-internal  (car (pyim-split-string \"pin-yin\" 'default)))
  => (\"拼音\" \"贫铀\" \"聘用\" \"拼\" \"品\" \"贫\" \"苹\" \"聘\" \"频\" \"拚\" \"颦\" \"牝\" \"嫔\" \"姘\" \"嚬\")"
-  (let ((py-str (pyim-pylist-to-string pylist))
-        (py-str-shouzimu (pyim-pylist-to-string pylist t))
+  (let ((py-str (pyim-pylist-to-string pylist nil 'default))
+        (py-str-shouzimu (pyim-pylist-to-string pylist t 'default))
         (length-pylist (length pylist))
         choice words word
         guess-words-accurate guess-words-similar
@@ -2216,7 +2237,7 @@ Counting starts at 1."
 完整拼音，则给出完整的拼音，如果是给出声母，则为一个 CONS CELL，CAR 是
 拼音，CDR 是拼音列表。例如：
 
- (setq foo-pylist (pyim-split-string \"pin-yin-sh-r\"))
+ (setq foo-pylist (pyim-split-string \"pin-yin-sh-r\" 'default))
   => ((\"p\" . \"in\") (\"y\" . \"in\") (\"sh\" . \"\") (\"r\" . \"\"))
 
  (pyim-possible-words-py foo-pylist)
@@ -2256,17 +2277,16 @@ Counting starts at 1."
 
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-handle-string ()
-  (let ((shuangpin-scheme
-         (pyim-return-shuangpin-scheme pyim-use-shuangpin))
+  (let ((pinyin-scheme-name pyim-default-pinyin-scheme)
         (str pyim-current-key)
         userpos wordspy)
-    (setq pyim-pylist-list (pyim-split-string str shuangpin-scheme)
+    (setq pyim-pylist-list (pyim-split-string str pinyin-scheme-name)
           pyim-pinyin-position 0)
     (unless (and (pyim-validp (car pyim-pylist-list))
                  (progn
                    (setq userpos (pyim-user-divide-pos str)
                          pyim-current-key (pyim-restore-user-divide
-                                           (pyim-pylist-to-string (car pyim-pylist-list) nil shuangpin-scheme)
+                                           (pyim-pylist-to-string (car pyim-pylist-list) nil pinyin-scheme-name)
                                            userpos))
                    (setq pyim-current-choices (list (delete-dups (pyim-get-choices pyim-pylist-list))))
                    (when  (car pyim-current-choices)
@@ -3201,11 +3221,9 @@ in package `chinese-pyim-pymap'"
     ;; 确保 pyim 词库已经加载
     (unless pyim-buffer-list
       (setq pyim-buffer-list (pyim-load-file)))
-    (let* ((shuangpin-scheme
-            (pyim-return-shuangpin-scheme pyim-use-shuangpin))
-           (pylist-list
+    (let* ((pylist-list
             ;; Slowly operating, need to improve.
-            (pyim-split-string pystr shuangpin-scheme))
+            (pyim-split-string pystr pyim-default-pinyin-scheme))
            (regexp-list
             (mapcar
              #'(lambda (pylist)
