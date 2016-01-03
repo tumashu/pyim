@@ -2762,7 +2762,7 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
                                 :prefer-trigger-chars)))
     (if (pyim-string-match-p user-trigger-char first-char)
         (progn
-          (message "注意：pyim-translate-trigger-char 设置和当前输入法冲突，使用推荐设置：%s"
+          (message "注意：pyim-translate-trigger-char 设置和当前输入法冲突，使用推荐设置：\"%s\""
                    prefer-trigger-chars)
           prefer-trigger-chars)
       user-trigger-char)))
