@@ -115,7 +115,7 @@
 ;; 双拼方案，比如：
 
 ;; #+BEGIN_EXAMPLE
-;; (setq pyim-default-pinyin-scheme 'xiaohe)
+;; (setq pyim-default-pinyin-scheme 'pyim-shuangpin)
 ;; #+END_EXAMPLE
 
 ;; 如果这个变量设置为 nil, 则禁用双拼模式。

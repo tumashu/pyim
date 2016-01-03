@@ -168,7 +168,7 @@ Chinese-pyim 的目标是： **尽最大的努力成为一个好用的 emacs 备
 
 Chinese-pyim 支持双拼模式，用户可以通过变量 \`pyim-use-shuangpin' 来设定当前使用的双拼方案，比如：
 
-    (setq pyim-default-pinyin-scheme 'xiaohe)
+    (setq pyim-default-pinyin-scheme 'pyim-shuangpin)
 
 如果这个变量设置为 nil, 则禁用双拼模式。
 
