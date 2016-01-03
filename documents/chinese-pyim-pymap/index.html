@@ -467,6 +467,55 @@
     (<span style="color: #61CE3C;">"zui"</span> <span style="color: #61CE3C;">"&#26368;&#32618;&#22068;&#37257;&#21632;&#35292;&#34142;"</span>)
     (<span style="color: #61CE3C;">"zun"</span> <span style="color: #61CE3C;">"&#23562;&#36981;&#27197;&#40159;&#25753;"</span>)
     (<span style="color: #61CE3C;">"zuo"</span> <span style="color: #61CE3C;">"&#20316;&#20570;&#22352;&#24231;&#24038;&#26152;&#29730;&#20304;&#20991;&#25774;&#26590;&#22060;&#24589;&#32985;&#21777;&#31534;&#38460;&#31066;&#37218;"</span>)))
+
+(<span style="color: #FBDE2D;">defvar</span> <span style="color: #D8FA3C;">pyim-pinyin-pymap-index</span> nil
+  <span style="color: #61CE3C;">"&#36825;&#20010;&#21464;&#37327;&#20445;&#23384; `</span><span style="color: #4c83ff;">pyim-pinyin-pymap</span><span style="color: #61CE3C;">' &#30340;&#32034;&#24341;&#65292;&#29992;&#20110;&#21152;&#24555;&#25628;&#32034;&#36895;&#24230;&#12290;"</span>)
+
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-pinyin-pymap-index-charpy</span> (<span style="color: #D8FA3C;">&amp;optional</span> force)
+  <span style="color: #61CE3C;">"&#26500;&#24314; pymap &#30340;&#32034;&#24341;&#65292;&#29992;&#20110;&#21152;&#24555;&#25628;&#32034;&#36895;&#24230;&#65292;&#36825;&#20010;&#20989;&#25968;</span>
+<span style="color: #61CE3C;">&#23558;&#32034;&#24341;&#20445;&#23384;&#21040; `</span><span style="color: #4c83ff;">pyim-pinyin-pymap-index</span><span style="color: #61CE3C;">' &#21464;&#37327;&#20013;&#65292;</span>
+<span style="color: #61CE3C;">&#22914;&#26524; force &#35774;&#32622;&#20026; t, &#24378;&#21046;&#26356;&#26032;&#32034;&#24341;&#12290;"</span>
+  (<span style="color: #FBDE2D;">when</span> (or force (not pyim-pinyin-pymap-index))
+    (<span style="color: #FBDE2D;">let</span> ((index '(<span style="color: #61CE3C;">"a"</span> <span style="color: #61CE3C;">"ba"</span> <span style="color: #61CE3C;">"ca"</span> <span style="color: #61CE3C;">"da"</span> <span style="color: #61CE3C;">"e"</span> <span style="color: #61CE3C;">"fa"</span> <span style="color: #61CE3C;">"ga"</span>
+                   <span style="color: #61CE3C;">"ha"</span> <span style="color: #61CE3C;">"ji"</span> <span style="color: #61CE3C;">"ka"</span> <span style="color: #61CE3C;">"la"</span> <span style="color: #61CE3C;">"m"</span> <span style="color: #61CE3C;">"n"</span>
+                   <span style="color: #61CE3C;">"o"</span> <span style="color: #61CE3C;">"pa"</span> <span style="color: #61CE3C;">"qi"</span> <span style="color: #61CE3C;">"ran"</span> <span style="color: #61CE3C;">"sa"</span> <span style="color: #61CE3C;">"ta"</span>
+                   <span style="color: #61CE3C;">"wa"</span> <span style="color: #61CE3C;">"xi"</span> <span style="color: #61CE3C;">"ya"</span> <span style="color: #61CE3C;">"za"</span>))
+          (n 0) results)
+      (<span style="color: #FBDE2D;">dolist</span> (py pyim-pinyin-pymap)
+        (<span style="color: #FBDE2D;">when</span> (member (car py) index)
+          (push (cons (substring (car py) 0 1) n) results))
+        (setq n (+ n 1)))
+      (setq pyim-pinyin-pymap-index
+            (reverse results)))))
+
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-pinyin-pymap-get-pinyin-matched-char</span> (pinyin <span style="color: #D8FA3C;">&amp;optional</span> equal-match sort)
+  <span style="color: #61CE3C;">"&#33719;&#21462;&#25340;&#38899;&#19982; `</span><span style="color: #4c83ff;">pinyin</span><span style="color: #61CE3C;">' &#24819;&#21305;&#37197;&#30340;&#25152;&#26377;&#27721;&#23383;&#65292;&#27604;&#22914;&#65306;</span>
+
+<span style="color: #61CE3C;">&#8220;man&#8221; -&gt; (\"&#24537;&#33579;&#30450;&#33426;&#27667;&#33725;&#34770;&#37017;&#28461;&#30829;"</span> <span style="color: #61CE3C;">"&#28385;&#24930;&#28459;&#26364;&#34542;&#39314;&#30610;&#34067;&#39071;&#35881;&#22657;&#24148;&#34728;&#38804;&#40151;&#32550;&#29107;&#38232;\")</span>
+
+<span style="color: #61CE3C;">&#22914;&#26524; `</span><span style="color: #4c83ff;">sort</span><span style="color: #61CE3C;">' &#35774;&#32622;&#20026; t, &#21017;&#23545;&#32467;&#26524;&#25353;&#29031;&#23383;&#27597;&#39034;&#24207;&#25490;&#24207;&#12290;"</span>
+ (pyim-pinyin-pymap-index-charpy)
+ (<span style="color: #FBDE2D;">let*</span> ((pymap pyim-pinyin-pymap)
+        (length (length pymap))
+        (beg (substring pinyin 0 1))
+        (end (char-to-string (+ 1 (string-to-char beg))))
+        (beg-index (cdr (assoc beg pyim-pinyin-pymap-index)))
+        (end-index (cdr (assoc end pyim-pinyin-pymap-index)))
+        (n beg-index)
+        results)
+   (<span style="color: #FBDE2D;">while</span> n
+     (<span style="color: #FBDE2D;">let</span> ((element (nth n pymap)))
+       (<span style="color: #FBDE2D;">when</span> (<span style="color: #FBDE2D;">if</span> equal-match
+                 (equal pinyin (car element))
+               (pyim-string-match-p
+                (concat <span style="color: #61CE3C;">"^"</span> pinyin) (car element)))
+         (push (car (cdr element)) results)))
+     (setq n (+ 1 n))
+     (<span style="color: #FBDE2D;">when</span> (&gt; n (or end-index (- length 1)))
+       (setq n nil)))
+   (<span style="color: #FBDE2D;">if</span> sort
+       (nreverse results)
+     results)))
 </pre>
 </div>
 </div>
@@ -476,8 +525,8 @@
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2015-11-19</span>
-        <span title="last modification date" class="post-info">2015-11-16</span>
+        <span title="post date" class="post-info">2016-01-03</span>
+        <span title="last modification date" class="post-info">2016-01-03</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>

@@ -35,9 +35,12 @@
 <div id="text-table-of-contents">
 <ul>
 <li><a href="#orgheadline1">1. 说明文档</a></li>
-<li><a href="#orgheadline3">2. 代码</a>
+<li><a href="#orgheadline6">2. 代码</a>
 <ul>
-<li><a href="#orgheadline2">2.1. require</a></li>
+<li><a href="#orgheadline2">2.1. Require + defcustom</a></li>
+<li><a href="#orgheadline3">2.2. 让 company-grab-word 正确的处理中文</a></li>
+<li><a href="#orgheadline4">2.3. 让 pyim-company-dabbrev&#x2013;make-regexp 生成合适中文搜索的 regexp</a></li>
+<li><a href="#orgheadline5">2.4. <span class="todo nilTODO">TODO</span> 让 pyim-company-dabbrev&#x2013;search 更好的处理中文</a></li>
 </ul>
 </li>
 </ul>
@@ -47,23 +50,29 @@
 <h2 id="orgheadline1"><span class="section-number-2">1</span> 说明文档</h2>
 <div class="outline-text-2" id="text-1">
 <p>
-这个文件包含了两个 company 补全后端，与 Chinese-pyim 配合使用可以比较方便的补全中文词条。
+通过 Chinese-pyim 让 Company-dabbrev 更好的处理中文。
 </p>
 
-
+<ol class="org-ol">
+<li>配置 company-mode, 具体可以参考：<a href="https://github.com/tumashu/emacs-helper/blob/master/eh-complete.el">emacs-helper's company configure</a></li>
+<li><p>
+配置 chinese-pyim-company
+</p>
 <pre class="example">
 (require 'chinese-pyim-company)
-</pre>
+(setq pyim-company-max-length 6)
+</pre></li>
+</ol>
 </div>
 </div>
 
 
 
-<div id="outline-container-orgheadline3" class="outline-2">
-<h2 id="orgheadline3"><span class="section-number-2">2</span> 代码</h2>
+<div id="outline-container-orgheadline6" class="outline-2">
+<h2 id="orgheadline6"><span class="section-number-2">2</span> 代码</h2>
 <div class="outline-text-2" id="text-2">
 </div><div id="outline-container-orgheadline2" class="outline-3">
-<h3 id="orgheadline2"><span class="section-number-3">2.1</span> require</h3>
+<h3 id="orgheadline2"><span class="section-number-3">2.1</span> Require + defcustom</h3>
 <div class="outline-text-3" id="text-2-1">
 <div class="org-src-container">
 
@@ -71,174 +80,127 @@
 (<span style="color: #FBDE2D;">require</span> '<span style="color: #4c83ff;">company</span>)
 (<span style="color: #FBDE2D;">require</span> '<span style="color: #4c83ff;">company-dabbrev</span>)
 
-(<span style="color: #FBDE2D;">defcustom</span> <span style="color: #D8FA3C;">pyim-company-predict-words-number</span> 10
-  <span style="color: #61CE3C;">"&#35774;&#32622;&#26368;&#22810;&#21487;&#20197;&#25628;&#32034;&#22810;&#23569;&#20010;&#32852;&#24819;&#35789;&#26465;&#65292;&#22914;&#26524;&#35774;&#32622;&#20026; nil</span>
-<span style="color: #61CE3C;">&#25110;&#32773; 0 &#26102;&#65292;&#20851;&#38381;&#32852;&#24819;&#21151;&#33021;&#12290;"</span>
-  <span style="color: #FF6400;">:group</span> 'chinese-pyim
-  <span style="color: #FF6400;">:type</span> 'number)
+(<span style="color: #FBDE2D;">defcustom</span> <span style="color: #D8FA3C;">pyim-company-complete-chinese-enable</span> t
+  <span style="color: #61CE3C;">"&#35774;&#32622; Company &#26159;&#21542;&#34917;&#20840;&#20013;&#25991;"</span>
+  <span style="color: #FF6400;">:group</span> 'chinese-pyim)
 
-(<span style="color: #FBDE2D;">defcustom</span> <span style="color: #D8FA3C;">pyim-company-variables</span>
-  `((company-backends ,(nconc '((pyim-company-predict-words pyim-company-dabbrev))
-                              company-backends))
-    (company-idle-delay  0.1)
-    (company-minimum-prefix-length  2)
-    (company-selection-wrap-around  t)
-    (company-show-numbers t)
-    (company-dabbrev-downcase nil)
-    (company-dabbrev-ignore-case nil)
-    (company-require-match nil))
-  <span style="color: #61CE3C;">"`</span><span style="color: #4c83ff;">company-mode</span><span style="color: #61CE3C;">' &#19982; `</span><span style="color: #4c83ff;">Chinese-pyim</span><span style="color: #61CE3C;">' &#37197;&#21512;&#26102;&#38656;&#35201;&#29305;&#21035;&#35774;&#32622;&#65292;</span>
-<span style="color: #61CE3C;">&#36825;&#20010; list &#21253;&#21547;&#20102;&#38656;&#35201;&#35774;&#32622;&#30340; `</span><span style="color: #4c83ff;">company-mode</span><span style="color: #61CE3C;">' &#21464;&#37327;&#12290;"</span>
+(<span style="color: #FBDE2D;">defcustom</span> <span style="color: #D8FA3C;">pyim-company-max-length</span> 6
+  <span style="color: #61CE3C;">"&#36825;&#20010;&#29992;&#26469;&#35774;&#32622; Company &#34917;&#20840;&#20013;&#25991;&#26102;&#65292;&#20505;&#36873;&#20013;&#25991;&#35789;&#26465;&#30340;&#26368;&#22823;&#38271;&#24230;&#12290;"</span>
   <span style="color: #FF6400;">:group</span> 'chinese-pyim)
 </pre>
 </div>
 
+<p>
+判断 Company-mode 是否在补全中文，如果光标前的一个字符为中文字符则返回 `t', 反之，返回 nil.
+</p>
 <div class="org-src-container">
 
-<pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-company-backup-variable</span> (variable)
-  <span style="color: #61CE3C;">"&#21019;&#24314;&#21464;&#37327; `</span><span style="color: #4c83ff;">pyim-&lt;variale&gt;-backup</span><span style="color: #61CE3C;">' &#65292;&#29992;&#26469;&#20445;&#23384;&#21464;&#37327; `</span><span style="color: #4c83ff;">variable</span><span style="color: #61CE3C;">' &#21407;&#26469;&#30340;&#35774;&#23450;"</span>
-  (<span style="color: #FBDE2D;">if</span> (boundp variable)
-      (set (intern (concat <span style="color: #61CE3C;">"pyim-"</span> (symbol-name variable) <span style="color: #61CE3C;">"-backup"</span>))
-           (symbol-value variable))
-    (<span style="color: #ff69b4;">error</span> <span style="color: #61CE3C;">"Company-mode &#40664;&#35748;&#21464;&#37327;&#22791;&#20221;&#22833;&#36133;&#65281;&#35831;&#30830;&#20445; Company-mode &#20248;&#20808;&#21152;&#36733;&#12290;"</span>)))
-
-(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-company-revert-variable</span> (variable)
-  <span style="color: #61CE3C;">"&#23558;&#21464;&#37327; `</span><span style="color: #4c83ff;">variable</span><span style="color: #61CE3C;">' &#35774;&#32622;&#20026; `</span><span style="color: #4c83ff;">pyim-&lt;variale&gt;-backup</span><span style="color: #61CE3C;">' &#30340;&#20540;&#12290;"</span>
-  (<span style="color: #FBDE2D;">when</span> (boundp variable)
-    (<span style="color: #FBDE2D;">let</span> ((variable-backup (intern (concat <span style="color: #61CE3C;">"pyim-"</span> (symbol-name variable) <span style="color: #61CE3C;">"-backup"</span>))))
-      (<span style="color: #FBDE2D;">if</span> (boundp variable-backup)
-          (set variable (symbol-value variable-backup))
-        (message <span style="color: #61CE3C;">"&#21464;&#37327;&#36824;&#21407;&#22833;&#36133;,&#27809;&#26377;&#25214;&#21040;&#22791;&#20221;&#21464;&#37327;&#65281;"</span>)))))
+<pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-company-chinese-complete-p</span> ()
+  (<span style="color: #FBDE2D;">let</span> ((string (pyim-char-before-to-string 0)))
+    (string-match-p <span style="color: #61CE3C;">"\\cc"</span> string)))
 </pre>
 </div>
 
+<p>
+`company-dabbrev' 补全命令的简单流程是：
+</p>
+<ol class="org-ol">
+<li>提取光标前的一个字符串，作为搜索的 `prefix',
+具体细节见： `company-grab-word'</li>
+<li>对 `prefix' 进行进一步处理，生成一个搜索用的 `regexp'.
+具体细节见： `company-dabbrev&#x2013;make-regexp'</li>
+<li>使用生成的 `regexp' 搜索特定的 buffer.</li>
+<li>将搜索得到的结果进行处理，生成一个候选词条的 `list'.
+具体细节见： `company-dabbrev&#x2013;search'</li>
+<li>使用菜单显示</li>
+</ol>
+
+<p>
+中文和英文的书写习惯有很大的不同，对 company-mode 影响最大的一条是：
+</p>
+
+<pre class="example">
+中文的词语与词语之间没有 *强制* 的用空格隔开，
+</pre>
+
+<p>
+这个书写习惯影响上面三个函数的<b>正常</b>运行。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline3" class="outline-3">
+<h3 id="orgheadline3"><span class="section-number-3">2.2</span> 让 company-grab-word 正确的处理中文</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+`company-grab-word' 可以获取光标处的一个英文词语，但只能获取光标处的一个<b>中文句子</b>，使用一个句子来搜索，得到的备选词条往往很少，并且用处不大（很少人在一篇文章中重复的写一个句子）。
+</p>
+
+<p>
+这里为 `company-grab-word' 添加了一个 advice: 当 company-dabbrev 补全中文时，用 `pyim-grab-chinese-word' 函数获取光标前的一个<b>中文词条</b>，如果获取失败，则返回光标前的<b>中文字符</b>。
+</p>
+
 <div class="org-src-container">
 
-<pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-company-revert-to-default-settings</span> (x)
-  <span style="color: #61CE3C;">"`</span><span style="color: #4c83ff;">company-mode</span><span style="color: #61CE3C;">' &#34917;&#20840;&#23436;&#25104;&#25110;&#32773;&#21462;&#28040;&#21518;&#65292;&#24674;&#22797; `</span><span style="color: #4c83ff;">company-mode</span><span style="color: #61CE3C;">' &#21407;&#26469;&#30340;&#35774;&#32622;&#12290;"</span>
-  (mapc 'pyim-company-revert-variable
-        (mapcar 'car pyim-company-variables))
-  (remove-hook 'company-completion-cancelled-hook
-               'pyim-company-revert-to-default-setting t)
-  (remove-hook 'company-completion-finished-hook
-               'pyim-company-revert-to-default-setting t))
+<pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-company-grab-word</span> (orig-fun)
+  (<span style="color: #FBDE2D;">if</span> (pyim-company-chinese-complete-p)
+      (<span style="color: #FBDE2D;">when</span> pyim-company-complete-chinese-enable
+        (pyim-grab-chinese-word
+         0 (pyim-char-before-to-string 0)))
+    (funcall orig-fun)))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline4" class="outline-3">
+<h3 id="orgheadline4"><span class="section-number-3">2.3</span> 让 pyim-company-dabbrev&#x2013;make-regexp 生成合适中文搜索的 regexp</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+用 `pyim-company-dabbrev&#x2013;make-regexp' 得到的 regexp, 搜索中文时，会搜索到一个
+<b>中文句子</b>， 不太实用，这里添加了一个 advice:
+</p>
+
+<p>
+当 company-dabbrev 补全中文时，将搜索得到的结果截取前 `pyim-company-max-length' 个字符，默认为6个，这对中文而言应该够用了。
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-company-dabbrev--make-regexp</span> (orig-fun prefix)
+  (<span style="color: #FBDE2D;">if</span> (pyim-company-chinese-complete-p)
+      (format <span style="color: #61CE3C;">"%s[</span><span style="color: #61CE3C;">^</span><span style="color: #61CE3C;">[:punct:][:blank:]\n]\\{1,%s\\}"</span> prefix pyim-company-max-length)
+    (funcall orig-fun prefix)))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline5" class="outline-3">
+<h3 id="orgheadline5"><span class="section-number-3">2.4</span> <span class="todo TODO">TODO</span> 让 pyim-company-dabbrev&#x2013;search 更好的处理中文</h3>
+<div class="outline-text-3" id="text-2-4">
+<p>
+本来打算在这个地方对<b>候选词条列表</b>做一些筛选，比如，用 Chinese-pyim 自带的分词函数对候选词条进行分词，然后只提取第一个<b>有效</b>的中文词语，但由于分词函数速度太慢，导致补全时卡顿明显，所以暂时没有这么处理。
+</p>
+
+
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-company-dabbrev--search</span> (orig-fun regexp <span style="color: #D8FA3C;">&amp;optional</span> limit other-buffer-modes
+                                              ignore-comments)
+  (<span style="color: #FBDE2D;">if</span> (pyim-company-chinese-complete-p)
+      (<span style="color: #FBDE2D;">when</span> pyim-company-complete-chinese-enable
+        (funcall orig-fun regexp limit other-buffer-modes ignore-comments))
+    (funcall orig-fun regexp limit other-buffer-modes ignore-comments)))
 </pre>
 </div>
 
-<div class="org-src-container">
-
-<pre class="src src-emacs-lisp"><span style="color: #8B8989; font-style: italic;">;;;</span><span style="color: #8B8989; font-style: italic;">###</span><span style="color: #ff69b4; font-style: italic;">autoload</span>
-(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-company-complete</span> ()
-  <span style="color: #61CE3C;">"`</span><span style="color: #4c83ff;">company-mode</span><span style="color: #61CE3C;">' &#34917;&#20840;&#21629;&#20196;&#30340;&#21253;&#35013;&#20989;&#25968;&#65292;&#19987;&#38376;&#29992;&#25143; `</span><span style="color: #4c83ff;">chinese-pyim</span><span style="color: #61CE3C;">'"</span>
-  (interactive)
-  (<span style="color: #FBDE2D;">unless</span> company-mode (company-mode))
-  <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20445;&#23384; `</span><span style="color: #4c83ff; font-style: italic;">company-mode</span><span style="color: #8B8989; font-style: italic;">' &#21464;&#37327;&#21407;&#26469;&#30340;&#35774;&#23450;&#12290;</span>
-  (mapc 'pyim-company-backup-variable
-        (mapcar 'car pyim-company-variables))
-  <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#35774;&#32622; `</span><span style="color: #4c83ff; font-style: italic;">company-mode</span><span style="color: #8B8989; font-style: italic;">' &#21464;&#37327;</span>
-  (<span style="color: #FBDE2D;">dolist</span> (list pyim-company-variables)
-    (set (car list) (car (cdr list))))
-  <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#24403; `</span><span style="color: #4c83ff; font-style: italic;">company-mode</span><span style="color: #8B8989; font-style: italic;">' &#34917;&#20840;&#23436;&#25104;&#25110;&#32773;&#21462;&#28040;&#26102;&#65292;&#24674;&#22797;&#21407;&#26469;&#35774;&#32622;&#12290;</span>
-  (add-hook 'company-completion-cancelled-hook
-            'pyim-company-revert-to-default-settings t)
-  (add-hook 'company-completion-finished-hook
-            'pyim-company-revert-to-default-settings t)
-  (company-manual-begin))
-</pre>
-</div>
 
 <div class="org-src-container">
 
-<pre class="src src-emacs-lisp"><span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">`</span><span style="color: #4c83ff; font-style: italic;">Chinese-pyim</span><span style="color: #8B8989; font-style: italic;">' &#36873;&#35789;&#32467;&#26463;&#21518;&#65292;&#35843;&#29992; `</span><span style="color: #4c83ff; font-style: italic;">pyim-company-complete</span><span style="color: #8B8989; font-style: italic;">'.</span>
-(add-hook 'pyim-select-word-finish-hook 'pyim-company-complete)
-</pre>
-</div>
-
-<div class="org-src-container">
-
-<pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-company-dabbrev</span> (command <span style="color: #D8FA3C;">&amp;optional</span> arg <span style="color: #D8FA3C;">&amp;rest</span> ignored)
-  <span style="color: #61CE3C;">"`</span><span style="color: #4c83ff;">company-mode</span><span style="color: #61CE3C;">' dabbrev &#34917;&#20840;&#21518;&#31471;&#65292;&#26159; `</span><span style="color: #4c83ff;">company-dabbrev</span><span style="color: #61CE3C;">'</span>
-<span style="color: #61CE3C;">&#30340;&#20013;&#25991;&#20248;&#21270;&#29256;&#65292;&#36890;&#36807;&#19982; Chinese-pyim &#37197;&#21512;&#26469;&#34917;&#20840;&#20013;&#25991;&#12290;</span>
-
-<span style="color: #61CE3C;">`</span><span style="color: #4c83ff;">pyim-company-dabbrev</span><span style="color: #61CE3C;">' &#21487;&#20197;&#21644; `</span><span style="color: #4c83ff;">company-dabbrev</span><span style="color: #61CE3C;">' &#37197;&#21512;&#20351;&#29992;&#12290;&#20855;&#20307;&#32454;&#33410;&#35831;</span>
-<span style="color: #61CE3C;">&#21442;&#32771; Company-mode group backends &#30456;&#20851;&#25991;&#26723;&#12290;"</span>
-  (interactive (list 'interactive))
-  (<span style="color: #FBDE2D;">cl-case</span> command
-    (interactive (company-begin-backend 'pyim-company-dabbrev))
-    (prefix
-     (and (<span style="color: #FBDE2D;">featurep</span> '<span style="color: #4c83ff;">chinese-pyim</span>)
-          <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20809;&#26631;&#21069;&#23383;&#31526;&#26159;&#21542;&#26102;&#27721;&#23383;&#65311;</span>
-          (string-match-p <span style="color: #61CE3C;">"\\cc"</span> (char-to-string (char-before)))
-          (string-match-p <span style="color: #61CE3C;">"\\cc"</span> pyim-current-str)
-          pyim-current-str))
-    (candidates
-     (<span style="color: #FBDE2D;">let*</span> ((case-fold-search company-dabbrev-ignore-case)
-            (words (company-dabbrev--search
-                    <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#26368;&#22810;&#34917;&#20840;&#20845;&#20010;&#20013;&#25991;&#23383;&#31526;&#65292;&#24471;&#21040;&#22826;&#38271;&#30340;&#20013;&#25991;&#23383;&#31526;&#20018;&#29992;&#22788;&#19981;&#22823;&#12290;</span>
-                    (format <span style="color: #61CE3C;">"%s[</span><span style="color: #61CE3C;">^</span><span style="color: #61CE3C;">[:punct:][:blank:]\n]\\{1,6\\}"</span> arg)
-                    company-dabbrev-time-limit
-                    (<span style="color: #FBDE2D;">pcase</span> company-dabbrev-other-buffers
-                      (`t (list major-mode))
-                      (`all `all))))
-            (downcase-p
-             (<span style="color: #FBDE2D;">if</span> (eq company-dabbrev-downcase 'case-replace)
-                 case-replace
-               company-dabbrev-downcase)))
-       (<span style="color: #FBDE2D;">if</span> downcase-p
-           (mapcar 'downcase words)
-         words)))
-    (ignore-case company-dabbrev-ignore-case)
-    (duplicates t)))
-</pre>
-</div>
-
-<div class="org-src-container">
-
-<pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-get-predict-words</span> (pinyin word)
-  <span style="color: #61CE3C;">"&#33719;&#21462;&#25152;&#26377;&#35789;&#24211;&#20013;&#20197; `</span><span style="color: #4c83ff;">word</span><span style="color: #61CE3C;">' &#24320;&#22836;&#30340;&#20013;&#25991;&#35789;&#26465;&#65292;&#29992;&#20110;&#25340;&#38899;&#32852;&#24819;&#36755;&#20837;&#12290;</span>
-<span style="color: #61CE3C;">`</span><span style="color: #4c83ff;">pinyin</span><span style="color: #61CE3C;">' &#36873;&#39033;&#26159;&#20026;&#20102;&#22312;&#35789;&#24211;&#20013;&#24555;&#36895;&#23450;&#20301;&#65292;&#20943;&#23569;&#25628;&#32034;&#26102;&#38388;&#12290;"</span>
-  (<span style="color: #FBDE2D;">when</span> (and pyim-company-predict-words-number
-             (&gt; pyim-company-predict-words-number 0)
-             (&gt; (length pinyin) 0)
-             (&gt; (length word) 0))
-    (<span style="color: #FBDE2D;">let*</span> ((limit pyim-company-predict-words-number)
-           (regexp (concat <span style="color: #61CE3C;">" +</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">(</span><span style="color: #61CE3C;">"</span> (regexp-quote word) <span style="color: #61CE3C;">"\\cc+</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">)</span><span style="color: #61CE3C;">"</span>))
-           (count 0)
-           predict-words)
-      (<span style="color: #FBDE2D;">dolist</span> (buf pyim-buffer-list)
-        (<span style="color: #FBDE2D;">with-current-buffer</span> (cdr (assoc <span style="color: #61CE3C;">"buffer"</span> buf))
-          (pyim-bisearch-word pinyin (point-min) (point-max))
-          (<span style="color: #FBDE2D;">save-excursion</span>
-            (forward-line (- 0 limit))
-            (<span style="color: #FBDE2D;">while</span> (and (re-search-forward regexp nil t)
-                        (&lt; count (* 2 limit)))
-              (setq predict-words (delete-dups
-                                   (append predict-words
-                                           (list (match-string 1)))))
-              (goto-char (match-end 0))
-              (setq count (1+ count))))))
-      predict-words)))
-</pre>
-</div>
-
-<div class="org-src-container">
-
-<pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-company-predict-words</span> (command <span style="color: #D8FA3C;">&amp;optional</span> arg <span style="color: #D8FA3C;">&amp;rest</span> ignore)
-  <span style="color: #61CE3C;">"`</span><span style="color: #4c83ff;">company-mode</span><span style="color: #61CE3C;">' &#34917;&#20840;&#21518;&#31471;&#65292;&#21482;&#29992;&#20110; Chinese-pyim &#32852;&#24819;&#35789;&#34917;&#20840;&#65292;&#26080;&#20854;&#20182;</span>
-<span style="color: #61CE3C;">&#20316;&#29992;&#12290;"</span>
-  (interactive (list 'interactive))
-  (<span style="color: #FBDE2D;">cl-case</span> command
-    (interactive (company-begin-backend 'pyim-company-backend))
-    (prefix
-     (and (<span style="color: #FBDE2D;">featurep</span> '<span style="color: #4c83ff;">chinese-pyim</span>)
-          <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20809;&#26631;&#21069;&#23383;&#31526;&#26159;&#21542;&#26102;&#27721;&#23383;&#65311;</span>
-          (string-match-p <span style="color: #61CE3C;">"\\cc"</span> (char-to-string (char-before)))
-          (string-match-p <span style="color: #61CE3C;">"\\cc"</span> pyim-current-str)
-          pyim-current-key
-          pyim-current-str))
-    (candidates
-     (pyim-get-predict-words pyim-current-key
-                             pyim-current-str))))
+<pre class="src src-emacs-lisp">(advice-add 'company-grab-word <span style="color: #FF6400;">:around</span> #'pyim-company-grab-word)
+(advice-add 'company-dabbrev--make-regexp <span style="color: #FF6400;">:around</span> #'pyim-company-dabbrev--make-regexp)
+(advice-add 'company-dabbrev--search <span style="color: #FF6400;">:around</span> #'pyim-company-dabbrev--search)
 </pre>
 </div>
 </div>
@@ -249,8 +211,8 @@
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2015-11-19</span>
-        <span title="last modification date" class="post-info">2015-11-16</span>
+        <span title="post date" class="post-info">2016-01-03</span>
+        <span title="last modification date" class="post-info">2016-01-03</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>
