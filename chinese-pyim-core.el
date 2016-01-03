@@ -128,12 +128,12 @@ plist 来表示，比如：
       :class quanpin
       :first-chars "abcdefghjklmnopqrstwxyz"
       :rest-chars "vmpfwckzyjqdltxuognbhsrei'-a"
-      :trigger-chars "v")
+      :prefer-trigger-chars "v")
     (xiaohe
      :class shuangpin
      :first-chars "abcdefghijklmnopqrstuvwxyz"
      :rest-chars "abcdefghijklmnopqrstuvwxyz"
-     :trigger-chars nil
+     :prefer-trigger-chars nil
      :keymaps-general (("a" "a" "a")
                        ("b" "b" "in")
                        ("c" "c" "ao")
@@ -175,7 +175,7 @@ plist 来表示，比如：
                        (("o" . "u") ("" . "ou")))))
   "Chinese-pyim 支持的所有拼音方案。")
 
-(defcustom pyim-translate-trigger-char ?v
+(defcustom pyim-translate-trigger-char "v"
   "用于触发特殊操作的字符，相当与单字快捷键。
 
 Chinese-pyim 内建的功能有：
@@ -2695,6 +2695,31 @@ Counting starts at 1."
 ;; Chinese-pyim 在运行过程中调用函数 `pyim-translate' 进行标点符号格式的转换。
 
 ;; #+BEGIN_SRC emacs-lisp
+(defun pyim-get-translate-trigger-char ()
+  "检查 `pyim-translate-trigger-char' 是否为一个合理的 trigger char 。
+
+Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
+自定义设置与输入法冲突，这里需要检查一下这个键位设置的是否合理，
+如果不合理，就返回输入法默认设定。"
+  (let* ((user-trigger-char pyim-translate-trigger-char)
+         (user-trigger-char
+          (if (characterp user-trigger-char)
+              (char-to-string user-trigger-char)
+            (when (= (length user-trigger-char) 1)
+              user-trigger-char)))
+         (first-char (pyim-get-pinyin-scheme-option
+                      pyim-default-pinyin-scheme
+                      :first-chars))
+         (prefer-trigger-chars (pyim-get-pinyin-scheme-option
+                                pyim-default-pinyin-scheme
+                                :prefer-trigger-chars)))
+    (if (pyim-string-match-p user-trigger-char first-char)
+        (progn
+          (message "注意：pyim-translate-trigger-char 设置和当前输入法冲突，使用推荐设置：%s"
+                   prefer-trigger-chars)
+          prefer-trigger-chars)
+      user-trigger-char)))
+
 (defun pyim-translate (char)
   (let* ((str (char-to-string char))
          ;; 注意：`str' 是 *待输入* 的字符对应的字符串。
@@ -2712,7 +2737,8 @@ Counting starts at 1."
          ;; `str-before-1' 在其对应的标点列表中的位置。
          (punc-posit-before-1
           (cl-position str-before-1 punc-list-before-1
-                       :test #'equal)))
+                       :test #'equal))
+         (trigger-str (pyim-get-translate-trigger-char)))
     (cond
      ;; 空格之前的字符什么也不输入。
      ((< char ? ) "")
@@ -2722,7 +2748,7 @@ Counting starts at 1."
      ;; 组成的字符串，保存到个人词库。
      ((and (member (char-before) (number-sequence ?2 ?9))
            (pyim-string-match-p "\\cc" str-before-2)
-           (= char pyim-translate-trigger-char))
+           (equal str trigger-str))
       (delete-char -1)
       (pyim-create-word-at-point
        (string-to-number str-before-1))
@@ -2731,7 +2757,7 @@ Counting starts at 1."
      ;; 光标前面的字符为中文字符时，按 v 清洗当前行的内容。
      ((and (not (numberp punc-posit-before-1))
            (pyim-string-match-p "\\cc" str-before-1)
-           (= char pyim-translate-trigger-char))
+           (equal str trigger-str))
       (funcall pyim-wash-function)
       "")
 
@@ -2754,7 +2780,7 @@ Counting starts at 1."
      ;; 对应的字符后， 自动将其转换为对应的中文标点。
      ((and (numberp punc-posit-before-1)
            (= punc-posit-before-1 0)
-           (= char pyim-translate-trigger-char))
+           (equal str trigger-str))
       (setq pyim-last-input-word nil)
       (pyim-punctuation-translate-last-n-punctuations 'full-width)
       "")
@@ -2763,7 +2789,7 @@ Counting starts at 1."
      ;; 对应的字符后， 自动将其转换为对应的英文标点。
      ((and (numberp punc-posit-before-1)
            (> punc-posit-before-1 0)
-           (= char pyim-translate-trigger-char))
+           (equal str trigger-str))
       (setq pyim-last-input-word nil)
       (pyim-punctuation-translate-last-n-punctuations 'half-width)
       "")
