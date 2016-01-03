@@ -420,10 +420,10 @@
 ;; #+END_EXAMPLE
 
 ;; *** 为 isearch 相关命令添加拼音搜索支持
-;; chinese-pyim 安装后，拼音搜索功能就会开启，如果用户想关闭这个功能，可以设置：
+;; chinese-pyim 安装后，可以通过下面的设置开启拼音搜索功能：
 
 ;; #+BEGIN_EXAMPLE
-;; (setq pyim-isearch-enable-pinyin-search nil)
+;; (setq pyim-isearch-enable-pinyin-search t)
 ;; #+END_EXAMPLE
 
 ;; 值得注意的是：这个功能有一些限制：搜索字符串中只能出现 “a-z” 和 “’”，如果有

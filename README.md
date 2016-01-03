@@ -425,9 +425,9 @@ Chinese-pyim 包含了一个简单的命令：\`pyim-get-words-list-at-point', �
 
 ### 为 isearch 相关命令添加拼音搜索支持<a id="orgheadline34"></a>
 
-chinese-pyim 安装后，拼音搜索功能就会开启，如果用户想关闭这个功能，可以设置：
+chinese-pyim 安装后，可以通过下面的设置开启拼音搜索功能：
 
-    (setq pyim-isearch-enable-pinyin-search nil)
+    (setq pyim-isearch-enable-pinyin-search t)
 
 值得注意的是：这个功能有一些限制：搜索字符串中只能出现 “a-z” 和 “’”，如果有其他字符（比如 regexp 操作符），则自动关闭拼音搜索功能。
 

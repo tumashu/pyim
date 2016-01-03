@@ -277,7 +277,7 @@ Chinese-pyim 内建的功能有：
   "Regexp list, matching the names of buffers to ignore."
   :type 'list)
 
-(defcustom pyim-isearch-enable-pinyin-search t
+(defcustom pyim-isearch-enable-pinyin-search nil
   "设置是否开启 isearch 中文拼音搜索功能。"
   :group 'chinese-pyim
   :type 'boolean)
