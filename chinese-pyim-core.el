@@ -125,11 +125,58 @@ plist 来表示，比如：
 
 (defcustom pyim-pinyin-schemes
   '((default
+      :document "全拼输入法方案（不可删除）。"
       :class quanpin
       :first-chars "abcdefghjklmnopqrstwxyz"
       :rest-chars "vmpfwckzyjqdltxuognbhsrei'-a"
       :prefer-trigger-chars "v")
-    (xiaohe
+    (pyim-shuangpin
+     :document "与 Chinese-pyim 配合良好的双拼输入法方案，源自小鹤双拼方案。"
+     :class shuangpin
+     :first-chars "abcdefghijklmnpqrstuvwxyz"
+     :rest-chars "abcdefghijklmnopqrstuvwxyz"
+     :prefer-trigger-chars "o"
+     :keymaps-general (("a" "a" "a")
+                       ("b" "b" "in")
+                       ("c" "c" "ao")
+                       ("d" "d" "ai")
+                       ("e" "e" "e")
+                       ("f" "f" "en")
+                       ("g" "g" "eng")
+                       ("h" "h" "ang")
+                       ("i" "ch" "i")
+                       ("j" "j" "an")
+                       ("k" "k" "ing" "uai")
+                       ("l" "l" "iang" "uang")
+                       ("m" "m" "ian")
+                       ("n" "n" "iao")
+                       ("o" "o" "uo" "o")
+                       ("p" "p" "ie")
+                       ("q" "q" "iu")
+                       ("r" "r" "uan")
+                       ("s" "s" "iong" "ong")
+                       ("t" "t" "ue" "ve")
+                       ("u" "sh" "u")
+                       ("v" "zh" "v" "ui")
+                       ("w" "w" "ei")
+                       ("x" "x" "ia" "ua")
+                       ("y" "y" "un")
+                       ("z" "z" "zou"))
+     :keymaps-special ((("a" . "a") ("" . "a"))
+                       (("a" . "j") ("" . "an"))
+                       (("a" . "d") ("" . "ai"))
+                       (("a" . "c") ("" . "ao"))
+                       (("a" . "h") ("" . "ang"))
+                       (("e" . "e") ("" . "e"))
+                       (("e" . "w") ("" . "ei"))
+                       (("e" . "f") ("" . "en"))
+                       (("e" . "r") ("" . "er"))
+                       (("e" . "g") ("" . "eng"))
+                       (("a" . "g") ("" . "ng"))
+                       (("a" . "o") ("" . "o"))
+                       (("a" . "u") ("" . "ou"))))
+    (xiaohe-shuangpin
+     :document "小鹤双拼输入法方案。"
      :class shuangpin
      :first-chars "abcdefghijklmnopqrstuvwxyz"
      :rest-chars "abcdefghijklmnopqrstuvwxyz"
