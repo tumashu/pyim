@@ -3309,11 +3309,13 @@ in package `chinese-pyim-pymap'"
                  (pyim-build-chinese-regexp-for-pylist pylist))
              pylist-list))
            (regexp
-            (if regexp-list
-                (concat pystr "\\|"
-                        (mapconcat #'identity
-                                   (delq nil regexp-list)
-                                   "\\|"))
+            (when regexp-list
+              (mapconcat #'identity
+                         (delq nil regexp-list)
+                         "\\|")))
+           (regexp
+            (if (> (length regexp) 0)
+                (concat pystr "\\|" regexp)
               pystr)))
       regexp)))
 
