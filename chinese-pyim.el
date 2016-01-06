@@ -145,7 +145,7 @@
 
 ;; #+BEGIN_EXAMPLE
 ;; (setq-default pyim-english-input-switch-function
-;;               'pyim-dynamic-english-input-function)
+;;               '(pyim-probe-dynamic-english))
 ;; #+END_EXAMPLE
 
 ;; 注：如果用户希望设置多个切换函数，也可以将上述变量设置为一个 *函数列表* ，
@@ -434,7 +434,7 @@
 
 ;; #+BEGIN_EXAMPLE
 ;; (setq-default pyim-english-input-switch-function
-;;               '(pyim-isearch-force-english-input))
+;;               '(pyim-probe-isearch-mode))
 ;; #+END_EXAMPLE
 
 

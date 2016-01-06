@@ -1650,37 +1650,6 @@ Return the input string."
                    (mapcar 'identity rest-chars)))
          (setq current-input-method-title pyim-title))))
 
-(defun pyim-dynamic-english-input-function ()
-  "中英文输入动态切换函数，其基本规则是：
-
-1. 当前字符为英文字符时，输入下一个字符时默认开启英文输入
-2. 当前字符为中文字符时，输入下一个字符时默认开启中文输入
-3. 无论当前是什么输入模式，当输入1个空格后，自动切换到中文输入模式
-
-这个函数的使用方法请参考 `pyim-english-input-switch-function'
-的相关帮助。"
-  (let ((str-before-1 (pyim-char-before-to-string 0))
-        (str-before-2 (pyim-char-before-to-string 1))
-        (regexp-chinese "\\cc")
-        (regexp-alpha "[a-zA-Z]")
-        ;; ascii puncts: !\"#$%&'()*+,-./:;<=>?@\^_`{|}~
-        ;; NOTE: "-" must put the end of [].
-        (regexp-punct "[@`+=_~&-]"))
-    (cond ((and (stringp str-before-1)
-                (stringp str-before-2)
-                (equal str-before-1 " "))
-           (pyim-toggle-full-width-punctuation 1 t) ;; 使用全角标点
-           nil)
-          ((and (stringp str-before-1)
-                (or (pyim-string-match-p regexp-alpha str-before-1)
-                    (pyim-string-match-p regexp-punct str-before-1))
-                (= (length pyim-guidance-str) 0))
-           (pyim-toggle-full-width-punctuation -1 t) ;; 使用半角标点
-           t)
-          ((pyim-string-match-p regexp-chinese str-before-1)
-           (pyim-toggle-full-width-punctuation 1 t)  ;; 使用全角标点
-           nil))))
-
 (defun pyim-self-insert-command ()
   "如果在 pyim-first-char 列表中，则查找相应的词条，否则停止转换，插入对应的字符"
   (interactive "*")

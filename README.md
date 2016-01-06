@@ -195,7 +195,7 @@ Chinese-pyim  可以根据输入内容动态的切换中英文输入，基本规
 激活方法：
 
     (setq-default pyim-english-input-switch-function
-                  'pyim-dynamic-english-input-function)
+                  '(pyim-probe-dynamic-english))
 
 注：如果用户希望设置多个切换函数，也可以将上述变量设置为一个 **函数列表** ，函数列表中的任意一个函数返回值为 \`t' 时，Chinese-pyim 就会切换到英文输入模式。
 
@@ -433,4 +433,4 @@ chinese-pyim 安装后，可以通过下面的设置开启拼音搜索功能：
 如果用户开启了拼音搜索功能，可以使用下面的方式 **强制关闭** isearch 搜索框中文输入（即使在 Chinese-pyim 激活的时候）。
 
     (setq-default pyim-english-input-switch-function
-                  '(pyim-isearch-force-english-input))
+                  '(pyim-probe-isearch-mode))
