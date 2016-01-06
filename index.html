@@ -120,24 +120,21 @@ Chinese-pyim 的代码源自 emacs-eim。
 </p>
 
 <p>
-emacs-eim 是一个 emacs 中文输入法框架，本身包含了多种中文输入法，比如：五笔输入法，仓颉输入法以及二笔输入法等等。但遗憾的是，emacs-eim 并没有发展起来，2008 年之后几乎停止了开发。一个主要的原因是外部中文输入法的高速发展，比如：Window平台下的搜狗输入法，baidu输入法以及QQ输入法，
-linux平台下的fcitx，ibus等等。
+emacs-eim 是 emacs 环境下的一个中文输入法框架， 支持拼音，五笔，仓颉以及二笔等多种输入法，但遗憾的是，2008 年之后它就停止了开发，我认为主要原因是外部中文输入法快速发展。
 </p>
 
 <p>
-但外部输入法与 emacs 配合不够默契，极大的损害了 emacs 那种<b>行云流水</b>
-的体验。而本人在使用（或者叫折腾） emacs-eim 的过程中发现：
+虽然外部输入法功能强大，但不能和 emacs 默契的配合，这一点极大的损害了 emacs 那种<b>行云流水</b>
+的感觉。而本人在使用（或者叫折腾） emacs-eim 的过程中发现：
 </p>
 
 <ol class="org-ol">
-<li><b>当 emacs-eim 拼音词库词条超过100万时，选词频率大大降低。</b></li>
-<li><b>当 emacs-eim 拼音词库词条超过100万时，中文输入体验可以达到搜狗输入法的80%。</b></li>
+<li><b>当 emacs-eim 拼音词库词条超过100万时，选词频率大大降低，中文体验增强。</b></li>
 <li><b>随着使用时间的延长，emacs-eim会越来越好用（个人词库的积累）。</b></li>
 </ol>
 
 <p>
-所以，本人认为 emacs-eim 非常适合作为<b>备用</b>中文输入法，于是我 fork
-emacs-eim 的代码, 更改名称为：chinese-pyim。
+于是我 fork 了 emacs-eim 拼音输入法相关的代码, 创建了一个项目：chinese-pyim。
 </p>
 </div>
 </div>
@@ -146,7 +143,7 @@ emacs-eim 的代码, 更改名称为：chinese-pyim。
 <h3 id="orgheadline4"><span class="section-number-3">1.4</span> 目标</h3>
 <div class="outline-text-3" id="text-1-4">
 <p>
-Chinese-pyim 的目标是：<b>尽最大的努力成为一个好用的 emacs 备用中文拼音输入法</b>。具体可表现为三个方面：
+Chinese-pyim 的目标是：<b>尽最大的努力成为一个好用的 emacs 中文拼音输入法</b>，具体可表现为三个方面：
 </p>
 
 <ol class="org-ol">
@@ -162,7 +159,7 @@ Chinese-pyim 的目标是：<b>尽最大的努力成为一个好用的 emacs 备
 <h3 id="orgheadline5"><span class="section-number-3">1.5</span> 特点</h3>
 <div class="outline-text-3" id="text-1-5">
 <ol class="org-ol">
-<li>Chinese-pyim 只是一个拼音输入法，安装配置方便快捷，默认只通过添加词库的方式优化输入法。</li>
+<li>Chinese-pyim 只是一个拼音输入法，安装配置方便快捷，一般只能通过添加词库的方式优化输入法。</li>
 <li>Chinese-pyim 只使用最简单的文本词库格式，可以快速方便的利用其他输入法的词库。</li>
 </ol>
 </div>
@@ -194,7 +191,7 @@ Chinese-pyim 的目标是：<b>尽最大的努力成为一个好用的 emacs 备
 </p>
 
 <p>
-注意：每一个词库文件必须按行排序（准确的说，是按每一行的拼音code排序），因为`Chinese-pyim' 寻找词条时，使用二分法来优化速度，而二分法工作的前提就是对文件按行排序。具体细节请参考：`pyim-bisearch-word' 。所以，当词库排序不正确时（比如：用户手动调整词库文件后），记得运行函数
+注意：每一个词库文件必须按行排序（准确的说，是按每一行的拼音code排序），因为`Chinese-pyim' 寻找词条时，使用二分法来优化速度，而二分法工作的前提就是对文件按行排序。具体细节请参考：`pyim-bisearch-word' 。当发现词库排序不正确时（比如：用户手动调整词库文件后），记得运行函数
 `pyim-update-dict-file' 重新对文件排序。
 </p>
 </div>
@@ -205,7 +202,7 @@ Chinese-pyim 的目标是：<b>尽最大的努力成为一个好用的 emacs 备
 <div class="outline-text-4" id="text-1-7-2">
 <pre class="example">
 (setq default-input-method "chinese-pyim")
-(global-set-key (kbd "C-&lt;SPC&gt;") 'toggle-input-method)
+(global-set-key (kbd "C-\") 'toggle-input-method)
 (global-set-key (kbd "C-;") 'pyim-toggle-full-width-punctuation)
 </pre>
 </div>
@@ -281,16 +278,12 @@ Chinese-pyim 的目标是：<b>尽最大的努力成为一个好用的 emacs 备
 <h4 id="orgheadline12"><span class="section-number-4">1.8.2</span> 使用双拼模式</h4>
 <div class="outline-text-4" id="text-1-8-2">
 <p>
-Chinese-pyim 支持双拼模式，用户可以通过变量 `pyim-use-shuangpin' 来设定当前使用的双拼方案，比如：
+Chinese-pyim 支持双拼模式，用户可以通过变量 `pyim-default-pinyin-scheme' 来设定当前使用的双拼方案，比如：
 </p>
 
 <pre class="example">
 (setq pyim-default-pinyin-scheme 'pyim-shuangpin)
 </pre>
-
-<p>
-如果这个变量设置为 nil, 则禁用双拼模式。
-</p>
 
 <p>
 注意：
@@ -347,12 +340,13 @@ Chinese-pyim  可以根据输入内容动态的切换中英文输入，基本规
 
 <pre class="example">
 (setq-default pyim-english-input-switch-function
-              'pyim-dynamic-english-input-function)
+              '(pyim-probe-dynamic-english))
 </pre>
 
 <p>
 注：如果用户希望设置多个切换函数，也可以将上述变量设置为一个<b>函数列表</b>，函数列表中的任意一个函数返回值为 `t' 时，Chinese-pyim 就会切换到英文输入模式。
 </p>
+
 <pre class="example">
 (setq-default pyim-english-input-switch-function
               '(function1 function2 function3))
@@ -398,7 +392,7 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
 </p>
 
 <pre class="example">
-(setq pyim-enable-words-predict '(pinyin-similar pinyin-shouzimu guess-words))
+(setq pyim-enable-words-predict '(dabbrev pinyin-similar pinyin-shouzimu guess-words))
 </pre>
 
 <p>
@@ -417,7 +411,7 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
 <ol class="org-ol">
 <li>第一种方法：使用命令 `pyim-toggle-full-width-punctuation'，全局切换。</li>
 <li>第二种方法：使用命令 `pyim-punctuation-translate-at-point' 只切换光标处标点的样式。</li>
-<li>第三种方法：设置变量 `pyim-translate-trigger-char'。输入变量设定的字符会切换光标处标点的样式。</li>
+<li>第三种方法：设置变量 `pyim-translate-trigger-char' ，输入变量设定的字符会切换光标处标点的样式。</li>
 </ol>
 </div>
 </div>
@@ -427,7 +421,7 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
 <div class="outline-text-4" id="text-1-8-8">
 <ol class="org-ol">
 <li>`pyim-create-word-without-pinyin' 直接将一个中文词条加入个人词库的函数，用于编程环境。</li>
-<li>`pyim-create-word-at-point:&lt;N&gt;char' 这是一组命令，从光标前提取N个汉字字符组成字符串，并将其加入个人词库。</li>
+<li>`pyim-create-word-at-point:"N"char' 这是一组命令，从光标前提取N个汉字字符组成字符串，并将其加入个人词库。</li>
 <li>`pyim-translate-trigger-char' 以默认设置为例：在“我爱吃红烧肉”后输入“5v” 可以将“爱吃红烧肉”这个词条保存到用户个人词频文件。</li>
 <li>`pyim-delete-word-from-personal-buffer' 从个人词频文件对应的 buffer
 中删除当前高亮选择的词条。</li>
@@ -476,6 +470,14 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
 (setq pyim-company-max-length 6)
 </pre></li>
 </ol>
+
+<p>
+用户也可以通过下面的方式<b>禁用</b> company 中文补全
+</p>
+
+<pre class="example">
+(setq pyim-company-complete-chinese-enable nil)
+</pre>
 </div>
 </div>
 </div>
@@ -557,7 +559,7 @@ emacs，这个词库使用 `utf-8-unix' 编码。
 <li>软件名称： imewlconverter</li>
 <li>中文名称： 深蓝词库转换</li>
 <li>下载地址：<a href="https://github.com/studyzy/imewlconverter">https://github.com/studyzy/imewlconverter</a></li>
-<li>依赖平台： Microsoft .NET Framework 2.0</li>
+<li>依赖平台： Microsoft .NET Framework (&gt;= 2.0)</li>
 </ol>
 
 <p>
@@ -695,7 +697,7 @@ pyim-dicts-manager 中 “导入搜狗输入法细胞词库” 功能就是依�
 <h4 id="orgheadline31"><span class="section-number-4">1.9.7</span> 中文分词</h4>
 <div class="outline-text-4" id="text-1-9-7">
 <p>
-Chinese-pyim 包含了一个简单的分词函数：`pyim-split-chinese-string'. 这个函数使用暴力匹配模式来分词，所以，*不能检测出* Chinese-pyim 词库中不存在的中文词条。另外，这个函数的分词速度比较慢，仅仅适用于中文短句的分词，不适用于文章分词。根据评估，20个汉字组成的字符串需要大约0.3s， 40个汉字消耗1s，随着字符串长度的增大消耗的时间呈几何倍数增加。
+Chinese-pyim 包含了一个简单的分词函数：`pyim-split-chinese-string'. 这个函数使用暴力匹配模式来分词，所以，<b>不能检测出</b> Chinese-pyim 词库中不存在的中文词条。另外，这个函数的分词速度比较慢，仅仅适用于中文短句的分词，不适用于文章分词。根据评估，20个汉字组成的字符串需要大约0.3s， 40个汉字消耗1s，随着字符串长度的增大消耗的时间呈几何倍数增加。
 </p>
 
 <p>
@@ -784,7 +786,7 @@ chinese-pyim 安装后，可以通过下面的设置开启拼音搜索功能：
 
 <pre class="example">
 (setq-default pyim-english-input-switch-function
-              '(pyim-isearch-force-english-input))
+              '(pyim-probe-isearch-mode))
 </pre>
 </div>
 </div>

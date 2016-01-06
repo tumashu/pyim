@@ -1900,37 +1900,6 @@ event list。
                    (mapcar 'identity rest-chars)))
          (setq current-input-method-title pyim-title))))
 
-(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-dynamic-english-input-function</span> ()
-  <span style="color: #61CE3C;">"&#20013;&#33521;&#25991;&#36755;&#20837;&#21160;&#24577;&#20999;&#25442;&#20989;&#25968;&#65292;&#20854;&#22522;&#26412;&#35268;&#21017;&#26159;&#65306;</span>
-
-<span style="color: #61CE3C;">1. &#24403;&#21069;&#23383;&#31526;&#20026;&#33521;&#25991;&#23383;&#31526;&#26102;&#65292;&#36755;&#20837;&#19979;&#19968;&#20010;&#23383;&#31526;&#26102;&#40664;&#35748;&#24320;&#21551;&#33521;&#25991;&#36755;&#20837;</span>
-<span style="color: #61CE3C;">2. &#24403;&#21069;&#23383;&#31526;&#20026;&#20013;&#25991;&#23383;&#31526;&#26102;&#65292;&#36755;&#20837;&#19979;&#19968;&#20010;&#23383;&#31526;&#26102;&#40664;&#35748;&#24320;&#21551;&#20013;&#25991;&#36755;&#20837;</span>
-<span style="color: #61CE3C;">3. &#26080;&#35770;&#24403;&#21069;&#26159;&#20160;&#20040;&#36755;&#20837;&#27169;&#24335;&#65292;&#24403;&#36755;&#20837;1&#20010;&#31354;&#26684;&#21518;&#65292;&#33258;&#21160;&#20999;&#25442;&#21040;&#20013;&#25991;&#36755;&#20837;&#27169;&#24335;</span>
-
-<span style="color: #61CE3C;">&#36825;&#20010;&#20989;&#25968;&#30340;&#20351;&#29992;&#26041;&#27861;&#35831;&#21442;&#32771; `</span><span style="color: #4c83ff;">pyim-english-input-switch-function</span><span style="color: #61CE3C;">'</span>
-<span style="color: #61CE3C;">&#30340;&#30456;&#20851;&#24110;&#21161;&#12290;"</span>
-  (<span style="color: #FBDE2D;">let</span> ((str-before-1 (pyim-char-before-to-string 0))
-        (str-before-2 (pyim-char-before-to-string 1))
-        (regexp-chinese <span style="color: #61CE3C;">"\\cc"</span>)
-        (regexp-alpha <span style="color: #61CE3C;">"[a-zA-Z]"</span>)
-        <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">ascii puncts: !\"#$%&amp;'()*+,-./:;&lt;=&gt;?@\^_`{|}~</span>
-        <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">NOTE: "-" must put the end of [].</span>
-        (regexp-punct <span style="color: #61CE3C;">"[@`+=_~&amp;-]"</span>))
-    (<span style="color: #FBDE2D;">cond</span> ((and (stringp str-before-1)
-                (stringp str-before-2)
-                (equal str-before-1 <span style="color: #61CE3C;">" "</span>))
-           (pyim-toggle-full-width-punctuation 1 t) <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20351;&#29992;&#20840;&#35282;&#26631;&#28857;</span>
-           nil)
-          ((and (stringp str-before-1)
-                (or (pyim-string-match-p regexp-alpha str-before-1)
-                    (pyim-string-match-p regexp-punct str-before-1))
-                (= (length pyim-guidance-str) 0))
-           (pyim-toggle-full-width-punctuation -1 t) <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20351;&#29992;&#21322;&#35282;&#26631;&#28857;</span>
-           t)
-          ((pyim-string-match-p regexp-chinese str-before-1)
-           (pyim-toggle-full-width-punctuation 1 t)  <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20351;&#29992;&#20840;&#35282;&#26631;&#28857;</span>
-           nil))))
-
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-self-insert-command</span> ()
   <span style="color: #61CE3C;">"&#22914;&#26524;&#22312; pyim-first-char &#21015;&#34920;&#20013;&#65292;&#21017;&#26597;&#25214;&#30456;&#24212;&#30340;&#35789;&#26465;&#65292;&#21542;&#21017;&#20572;&#27490;&#36716;&#25442;&#65292;&#25554;&#20837;&#23545;&#24212;&#30340;&#23383;&#31526;"</span>
   (interactive <span style="color: #61CE3C;">"*"</span>)
@@ -3940,24 +3909,15 @@ Chinese-pyim 在特定的时候需要读取一个汉字的拼音，这个工作�
                  (pyim-build-chinese-regexp-for-pylist pylist))
              pylist-list))
            (regexp
-            (<span style="color: #FBDE2D;">if</span> regexp-list
-                (concat pystr <span style="color: #61CE3C;">"</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">|</span><span style="color: #61CE3C;">"</span>
-                        (mapconcat #'identity
-                                   (delq nil regexp-list)
-                                   <span style="color: #61CE3C;">"</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">|</span><span style="color: #61CE3C;">"</span>))
+            (<span style="color: #FBDE2D;">when</span> regexp-list
+              (mapconcat #'identity
+                         (delq nil regexp-list)
+                         <span style="color: #61CE3C;">"</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">|</span><span style="color: #61CE3C;">"</span>)))
+           (regexp
+            (<span style="color: #FBDE2D;">if</span> (&gt; (length regexp) 0)
+                (concat pystr <span style="color: #61CE3C;">"</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">|</span><span style="color: #61CE3C;">"</span> regexp)
               pystr)))
       regexp)))
-
-(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-isearch-force-english-input</span> ()
-  <span style="color: #61CE3C;">"isearch &#25628;&#32034;&#26102;&#24378;&#21046;&#33521;&#25991;&#36755;&#20837;&#65292;</span>
-<span style="color: #61CE3C;">&#29992;&#20110;&#65306;`</span><span style="color: #4c83ff;">pyim-english-input-switch-function</span><span style="color: #61CE3C;">'"</span>
-  (and pyim-isearch-enable-pinyin-search
-       <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">isearch &#21551;&#21160;&#30340;&#26102;&#20505;&#65292;&#20250;&#35774;&#32622;&#19968;&#20010; buffer variable: `</span><span style="color: #4c83ff; font-style: italic;">isearch-mode</span><span style="color: #8B8989; font-style: italic;">'</span>
-       <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#26816;&#27979;&#25152;&#26377; buffer &#20013; `</span><span style="color: #4c83ff; font-style: italic;">isearch-mode</span><span style="color: #8B8989; font-style: italic;">' &#30340;&#21462;&#20540;&#65292;&#22914;&#26524;&#20219;&#20309;&#19968;&#20010;</span>
-       <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#21462;&#20540;&#20026; t, &#23601;&#35828;&#26126; isearch &#24050;&#32463;&#21551;&#21160;&#12290;</span>
-       (cl-some #'(<span style="color: #FBDE2D;">lambda</span> (buf)
-                    (buffer-local-value 'isearch-mode buf))
-                (buffer-list))))
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-isearch-pinyin-search-function</span> ()
   <span style="color: #61CE3C;">"&#36825;&#20010;&#20989;&#25968;&#20026; isearch &#30456;&#20851;&#21629;&#20196;&#28155;&#21152;&#20013;&#25991;&#25340;&#38899;&#25628;&#32034;&#21151;&#33021;&#65292;</span>
@@ -3984,8 +3944,8 @@ Chinese-pyim 在特定的时候需要读取一个汉字的拼音，这个工作�
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2016-01-03</span>
-        <span title="last modification date" class="post-info">2016-01-03</span>
+        <span title="post date" class="post-info">2016-01-06</span>
+        <span title="last modification date" class="post-info">2016-01-06</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>

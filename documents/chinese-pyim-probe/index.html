@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <title>chinese-pyim-probe - Chinese-pyim</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Feng Shu" />
+    <link rel="stylesheet" href="http://tumashu.github.com/chinese-pyim/media/css/main.css" type="text/css">
+  </head>
+<body class="container">
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="http://tumashu.github.com/chinese-pyim/">Chinese-pyim</a> <span class="subtitle">(一个 emacs 环境下的中文拼音输入法)</span></h1>
+        <ul>
+          <li><a href="http://tumashu.github.com/chinese-pyim/documents/">Documents</a></li>
+          <li><a href="http://tumashu.github.com/chinese-pyim/snapshots/">Snapshots</a></li>
+          <li><a href="http://tumashu.github.com/chinese-pyim/tags/">Tags</a></li>
+          <li><a href="http://tumashu.github.com/chinese-pyim/about/">About</a></li>
+          <li><a href="https://github.com/tumashu/chinese-pyim">GitHub</a></li>
+          <li><a href="http://tumashu.github.com/chinese-pyim/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="tumashu.github.com/chinese-pyim">
+        </form>
+        <img class="avatar" src="http://tumashu.github.com/chinese-pyim/media/img/horse.jpg" />
+      </header>
+    </div>
+
+<div class="content-and-footer">
+<div>
+<div class="post">
+<h1 class="post-title">chinese-pyim-probe</h1>
+<div id="table-of-contents">
+<h2>&#30446;&#24405;</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgheadline1">1. 代码</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgheadline1" class="outline-2">
+<h2 id="orgheadline1"><span class="section-number-2">1</span> 代码</h2>
+<div class="outline-text-2" id="text-1">
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-probe-program-mode</span> ()
+  <span style="color: #61CE3C;">"&#28608;&#27963;&#36825;&#20010; Chinese-pyim &#25506;&#38024;&#20989;&#25968;&#21518;&#65292;&#21482;&#33021;&#22312;&#23383;&#31526;&#20018;&#21644; comment &#20013;&#36755;&#20837;&#20013;&#25991;&#12290;</span>
+<span style="color: #61CE3C;">&#27880;&#65306;&#20165;&#20165;&#24433;&#21709; `</span><span style="color: #4c83ff;">prog-mode</span><span style="color: #61CE3C;">' &#34893;&#29983;&#30340; mode &#12290;"</span>
+  (interactive)
+  (<span style="color: #FBDE2D;">when</span> (derived-mode-p 'prog-mode)
+    (<span style="color: #FBDE2D;">let*</span> ((pos (point))
+           (ppss (syntax-ppss pos)))
+      (not
+       (or (car (setq ppss (nthcdr 3 ppss)))
+           (car (setq ppss (cdr ppss)))
+           (nth 3 ppss))))))
+
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-probe-org-speed-commands</span> ()
+  <span style="color: #61CE3C;">"&#28608;&#27963;&#36825;&#20010; Chinese-pyim &#25506;&#38024;&#20989;&#25968;&#21518;&#65292;&#21487;&#20197;&#35299;&#20915; org-speed-commands &#19982; Chinese-pyim &#20914;&#31361;&#38382;&#39064;&#12290;"</span>
+  (and (string= major-mode <span style="color: #61CE3C;">"org-mode"</span>)
+       (bolp)
+       (looking-at org-heading-regexp)
+       org-use-speed-commands))
+
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-probe-isearch-mode</span> ()
+  <span style="color: #61CE3C;">"&#28608;&#27963;&#36825;&#20010; Chinese-pyim &#25506;&#38024;&#20989;&#25968;&#21518;&#65292;&#20351;&#29992; isearch &#25628;&#32034;&#26102;&#65292;&#31105;&#29992;&#20013;&#25991;&#36755;&#20837;&#65292;&#24378;&#21046;&#33521;&#25991;&#36755;&#20837;&#12290;"</span>
+  (and pyim-isearch-enable-pinyin-search
+       <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">isearch &#21551;&#21160;&#30340;&#26102;&#20505;&#65292;&#20250;&#35774;&#32622;&#19968;&#20010; buffer variable: `</span><span style="color: #4c83ff; font-style: italic;">isearch-mode</span><span style="color: #8B8989; font-style: italic;">'</span>
+       <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#26816;&#27979;&#25152;&#26377; buffer &#20013; `</span><span style="color: #4c83ff; font-style: italic;">isearch-mode</span><span style="color: #8B8989; font-style: italic;">' &#30340;&#21462;&#20540;&#65292;&#22914;&#26524;&#20219;&#20309;&#19968;&#20010;</span>
+       <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#21462;&#20540;&#20026; t, &#23601;&#35828;&#26126; isearch &#24050;&#32463;&#21551;&#21160;&#12290;</span>
+       (cl-some #'(<span style="color: #FBDE2D;">lambda</span> (buf)
+                    (buffer-local-value 'isearch-mode buf))
+                (buffer-list))))
+
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-probe-dynamic-english</span> ()
+  <span style="color: #61CE3C;">"&#28608;&#27963;&#36825;&#20010; Chinese-pyim &#25506;&#38024;&#20989;&#25968;&#21518;&#65292;&#20351;&#29992;&#19979;&#38754;&#30340;&#35268;&#21017;&#21160;&#24577;&#20999;&#25442;&#20013;&#33521;&#25991;&#36755;&#20837;&#65306;</span>
+
+<span style="color: #61CE3C;">1. &#24403;&#21069;&#23383;&#31526;&#20026;&#33521;&#25991;&#23383;&#31526;&#26102;&#65292;&#36755;&#20837;&#19979;&#19968;&#20010;&#23383;&#31526;&#26102;&#40664;&#35748;&#24320;&#21551;&#33521;&#25991;&#36755;&#20837;</span>
+<span style="color: #61CE3C;">2. &#24403;&#21069;&#23383;&#31526;&#20026;&#20013;&#25991;&#23383;&#31526;&#26102;&#65292;&#36755;&#20837;&#19979;&#19968;&#20010;&#23383;&#31526;&#26102;&#40664;&#35748;&#24320;&#21551;&#20013;&#25991;&#36755;&#20837;</span>
+<span style="color: #61CE3C;">3. &#26080;&#35770;&#24403;&#21069;&#26159;&#20160;&#20040;&#36755;&#20837;&#27169;&#24335;&#65292;&#24403;&#36755;&#20837;1&#20010;&#31354;&#26684;&#21518;&#65292;&#33258;&#21160;&#20999;&#25442;&#21040;&#20013;&#25991;&#36755;&#20837;&#27169;&#24335;"</span>
+  (<span style="color: #FBDE2D;">let</span> ((str-before-1 (pyim-char-before-to-string 0))
+        (str-before-2 (pyim-char-before-to-string 1))
+        (regexp-chinese <span style="color: #61CE3C;">"\\cc"</span>)
+        (regexp-alpha <span style="color: #61CE3C;">"[a-zA-Z]"</span>)
+        <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">ascii puncts: !\"#$%&amp;'()*+,-./:;&lt;=&gt;?@\^_`{|}~</span>
+        <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">NOTE: "-" must put the end of [].</span>
+        (regexp-punct <span style="color: #61CE3C;">"[@`+=_~&amp;-]"</span>))
+    (<span style="color: #FBDE2D;">cond</span> ((and (stringp str-before-1)
+                (stringp str-before-2)
+                (equal str-before-1 <span style="color: #61CE3C;">" "</span>))
+           (pyim-toggle-full-width-punctuation 1 t) <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20351;&#29992;&#20840;&#35282;&#26631;&#28857;</span>
+           nil)
+          ((and (stringp str-before-1)
+                (or (pyim-string-match-p regexp-alpha str-before-1)
+                    (pyim-string-match-p regexp-punct str-before-1))
+                (= (length pyim-guidance-str) 0))
+           (pyim-toggle-full-width-punctuation -1 t) <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20351;&#29992;&#21322;&#35282;&#26631;&#28857;</span>
+           t)
+          ((pyim-string-match-p regexp-chinese str-before-1)
+           (pyim-toggle-full-width-punctuation 1 t)  <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20351;&#29992;&#20840;&#35282;&#26631;&#28857;</span>
+           nil))))
+</pre>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2016-01-06</span>
+        <span title="last modification date" class="post-info">2016-01-06</span>
+        <span title="tags" class="post-info">N/A</span>
+        <span title="author" class="post-info">Feng Shu</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'tumashu-website'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.x(<a href="http://orgmode.org">Org mode</a> 8.x)</p>
+        <p>
+          Copyright &copy; <span id="footerYear"></span> <a href="mailto:tumashu &lt;at&gt; 163 &lt;dot&gt; com">Feng Shu</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/tumashu/org-webpage" target="_blank">org-webpage</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+</div>
+</body>
+</html>
