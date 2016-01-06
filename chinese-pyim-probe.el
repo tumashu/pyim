@@ -41,6 +41,12 @@
            (car (setq ppss (cdr ppss)))
            (nth 3 ppss))))))
 
+(defun pyim-probe-org-speed-commands-active-p ()
+  "激活这个探针后，解决 org-speed-commands 与 Chinese-pyim 冲突。"
+  (and (string= major-mode "org-mode")
+       (bolp)
+       (looking-at org-heading-regexp)
+       org-use-speed-commands))
 ;; #+END_SRC
 
 ;; * Footer
