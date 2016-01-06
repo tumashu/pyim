@@ -445,6 +445,7 @@
 (require 'chinese-pyim-core)
 (require 'chinese-pyim-dictools)
 (require 'chinese-pyim-utils)
+(require 'chinese-pyim-probe)
 ;; #+END_SRC
 
 ;; * Footer
