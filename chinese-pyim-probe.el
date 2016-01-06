@@ -31,7 +31,8 @@
 ;; #+BEGIN_SRC emacs-lisp
 
 (defun pyim-probe-outside-string-or-comment-p ()
-  "如果当前 POS 不在字符串或者 comment 中时，返回 t, 否则，返回 nil 。"
+  "如果当前 POS 不在字符串或者 comment 中时，返回 t, 否则，返回 nil 。
+激活这个探针后，只能在字符串和 comment 中输入中文。"
   (interactive)
   (when (derived-mode-p 'prog-mode)
     (let* ((pos (point))
@@ -42,7 +43,7 @@
            (nth 3 ppss))))))
 
 (defun pyim-probe-org-speed-commands-active-p ()
-  "激活这个探针后，解决 org-speed-commands 与 Chinese-pyim 冲突。"
+  "激活这个探针后，可以解决 org-speed-commands 与 Chinese-pyim 冲突问题。"
   (and (string= major-mode "org-mode")
        (bolp)
        (looking-at org-heading-regexp)
