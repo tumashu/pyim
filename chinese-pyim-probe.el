@@ -48,6 +48,16 @@
        (bolp)
        (looking-at org-heading-regexp)
        org-use-speed-commands))
+
+(defun pyim-probe-isearch-force-english-input ()
+  "激活这个探针后，使用 isearch 搜索时，禁用中文输入，强制英文输入。"
+  (and pyim-isearch-enable-pinyin-search
+       ;; isearch 启动的时候，会设置一个 buffer variable: `isearch-mode'
+       ;; 检测所有 buffer 中 `isearch-mode' 的取值，如果任何一个
+       ;; 取值为 t, 就说明 isearch 已经启动。
+       (cl-some #'(lambda (buf)
+                    (buffer-local-value 'isearch-mode buf))
+                (buffer-list))))
 ;; #+END_SRC
 
 ;; * Footer
