@@ -314,6 +314,12 @@ Chinese-pyim 内建的功能有：
 Chinese-pyim 也开启英文输入功能。"
   :group 'chinese-pyim)
 
+(defcustom pyim-punctuation-half-width-functions nil
+  "取值为一个函数列表，这个函数列表中的任意一个函数的运行结果为 t 时，
+Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数：char ，表示
+最后输入的一个字符，具体见: `pyim-translate' 。"
+  :group 'chinese-pyim)
+
 (defcustom pyim-select-word-finish-hook nil
   "Chinese-pyim 选词完成时运行的hook，"
   :group 'chinese-pyim
@@ -471,6 +477,7 @@ If you don't like this funciton, set the variable to nil")
     pyim-current-pos
     pyim-input-ascii
     pyim-english-input-switch-function
+    pyim-punctuation-half-width-functions
     pyim-guidance-str
     pyim-translating
     pyim-overlay
@@ -2795,6 +2802,16 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
      ;; 插入英文标点。
      ((member (char-before)
               pyim-punctuation-escape-list)
+      (setq pyim-last-input-word nil)
+      str)
+
+     ;; 当 `pyim-punctuation-half-width-functions' 中
+     ;; 任意一个函数返回值为 t 时，插入英文标点。
+     ((cl-some #'(lambda (x)
+                   (if (functionp x)
+                       (funcall x char)
+                     nil))
+               pyim-punctuation-half-width-functions)
       (setq pyim-last-input-word nil)
       str)
 
