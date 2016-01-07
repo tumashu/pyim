@@ -4,15 +4,22 @@
     <title>Chinese-pyim</title>
     <link>http://tumashu.github.com/chinese-pyim</link>
     <description>(一个 emacs 环境下的中文拼音输入法)</description>
-    <pubDate>星期三, 06 一月 2016 16:19:36 中国标准时间</pubDate>
-    <lastBuildDate>星期三, 06 一月 2016 16:19:36 中国标准时间</lastBuildDate>
+    <pubDate>星期五, 08 一月 2016 07:57:47 中国标准时间</pubDate>
+    <lastBuildDate>星期五, 08 一月 2016 07:57:47 中国标准时间</lastBuildDate>
     <docs>http://www.rssboard.org/rss-specification</docs>
     <generator>org-webpage static site generator (https://github.com/tumashu/org-webpage)</generator>
+<item>
+<title>chinese-pyim-core</title>
+<link>http://tumashu.github.com/chinese-pyim/documents/chinese-pyim-core/</link>
+<description>No Description</description>
+<pubDate>2016-01-08</pubDate>
+<guid>http://tumashu.github.com/chinese-pyim/documents/chinese-pyim-core/</guid>
+</item>
 <item>
 <title>chinese-pyim-probe</title>
 <link>http://tumashu.github.com/chinese-pyim/documents/chinese-pyim-probe/</link>
 <description>No Description</description>
-<pubDate>2016-01-06</pubDate>
+<pubDate>2016-01-08</pubDate>
 <guid>http://tumashu.github.com/chinese-pyim/documents/chinese-pyim-probe/</guid>
 </item>
 <item>
@@ -21,13 +28,6 @@
 <description>No Description</description>
 <pubDate>2016-01-06</pubDate>
 <guid>http://tumashu.github.com/chinese-pyim/documents/chinese-pyim/</guid>
-</item>
-<item>
-<title>chinese-pyim-core</title>
-<link>http://tumashu.github.com/chinese-pyim/documents/chinese-pyim-core/</link>
-<description>No Description</description>
-<pubDate>2016-01-06</pubDate>
-<guid>http://tumashu.github.com/chinese-pyim/documents/chinese-pyim-core/</guid>
 </item>
 <item>
 <title>chinese-pyim-company</title>

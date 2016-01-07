@@ -405,6 +405,12 @@ Chinese pyim 输入法的核心文件，包含了输入法的基本功能函数�
 <span style="color: #61CE3C;">Chinese-pyim &#20063;&#24320;&#21551;&#33521;&#25991;&#36755;&#20837;&#21151;&#33021;&#12290;"</span>
   <span style="color: #FF6400;">:group</span> 'chinese-pyim)
 
+(<span style="color: #FBDE2D;">defcustom</span> <span style="color: #D8FA3C;">pyim-punctuation-half-width-functions</span> nil
+  <span style="color: #61CE3C;">"&#21462;&#20540;&#20026;&#19968;&#20010;&#20989;&#25968;&#21015;&#34920;&#65292;&#36825;&#20010;&#20989;&#25968;&#21015;&#34920;&#20013;&#30340;&#20219;&#24847;&#19968;&#20010;&#20989;&#25968;&#30340;&#36816;&#34892;&#32467;&#26524;&#20026; t &#26102;&#65292;</span>
+<span style="color: #61CE3C;">Chinese-pyim &#36755;&#20837;&#21322;&#35282;&#26631;&#28857;&#65292;&#20989;&#25968;&#21015;&#34920;&#20013;&#27599;&#20010;&#20989;&#25968;&#37117;&#26377;&#19968;&#20010;&#21442;&#25968;&#65306;char &#65292;&#34920;&#31034;</span>
+<span style="color: #61CE3C;">&#26368;&#21518;&#36755;&#20837;&#30340;&#19968;&#20010;&#23383;&#31526;&#65292;&#20855;&#20307;&#35265;: `</span><span style="color: #4c83ff;">pyim-translate</span><span style="color: #61CE3C;">' &#12290;"</span>
+  <span style="color: #FF6400;">:group</span> 'chinese-pyim)
+
 (<span style="color: #FBDE2D;">defcustom</span> <span style="color: #D8FA3C;">pyim-select-word-finish-hook</span> nil
   <span style="color: #61CE3C;">"Chinese-pyim &#36873;&#35789;&#23436;&#25104;&#26102;&#36816;&#34892;&#30340;hook&#65292;"</span>
   <span style="color: #FF6400;">:group</span> 'chinese-pyim
@@ -568,6 +574,7 @@ Chinese pyim 输入法的核心文件，包含了输入法的基本功能函数�
     pyim-current-pos
     pyim-input-ascii
     pyim-english-input-switch-function
+    pyim-punctuation-half-width-functions
     pyim-guidance-str
     pyim-translating
     pyim-overlay
@@ -3303,6 +3310,16 @@ Chinese-pyim 在运行过程中调用函数 `pyim-translate' 进行标点符号�
       (setq pyim-last-input-word nil)
       str)
 
+     <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#24403; `</span><span style="color: #4c83ff; font-style: italic;">pyim-punctuation-half-width-functions</span><span style="color: #8B8989; font-style: italic;">' &#20013;</span>
+     <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20219;&#24847;&#19968;&#20010;&#20989;&#25968;&#36820;&#22238;&#20540;&#20026; t &#26102;&#65292;&#25554;&#20837;&#33521;&#25991;&#26631;&#28857;&#12290;</span>
+     ((cl-some #'(<span style="color: #FBDE2D;">lambda</span> (x)
+                   (<span style="color: #FBDE2D;">if</span> (functionp x)
+                       (funcall x char)
+                     nil))
+               pyim-punctuation-half-width-functions)
+      (setq pyim-last-input-word nil)
+      str)
+
      <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#24403;&#20809;&#26631;&#21069;&#38754;&#20026;&#33521;&#25991;&#26631;&#28857;&#26102;&#65292; &#25353; `</span><span style="color: #4c83ff; font-style: italic;">pyim-translate-trigger-char</span><span style="color: #8B8989; font-style: italic;">'</span>
      <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#23545;&#24212;&#30340;&#23383;&#31526;&#21518;&#65292; &#33258;&#21160;&#23558;&#20854;&#36716;&#25442;&#20026;&#23545;&#24212;&#30340;&#20013;&#25991;&#26631;&#28857;&#12290;</span>
      ((and (numberp punc-posit-before-1)
@@ -3944,8 +3961,8 @@ Chinese-pyim 在特定的时候需要读取一个汉字的拼音，这个工作�
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2016-01-06</span>
-        <span title="last modification date" class="post-info">2016-01-06</span>
+        <span title="post date" class="post-info">2016-01-08</span>
+        <span title="last modification date" class="post-info">2016-01-08</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>
