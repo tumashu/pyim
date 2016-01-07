@@ -106,24 +106,22 @@
 用于：`pyim-english-input-switch-function' 。"
   (let ((str-before-1 (pyim-char-before-to-string 0))
         (str-before-2 (pyim-char-before-to-string 1))
+        (str-before-2 (pyim-char-before-to-string 2))
         (regexp-chinese "\\cc")
         (regexp-alpha "[a-zA-Z]")
         ;; ascii puncts: !\"#$%&'()*+,-./:;<=>?@\^_`{|}~
-        ;; NOTE: "-" must put the end of [].
-        (regexp-punct "[@`+=_~&-]"))
+        (puncts "#$%&*+,.:;=?@^_`|~!-"))
     (cond ((and (stringp str-before-1)
                 (stringp str-before-2)
                 (equal str-before-1 " "))
-           (pyim-toggle-full-width-punctuation 1 t) ;; 使用全角标点
            nil)
           ((and (stringp str-before-1)
                 (or (pyim-string-match-p regexp-alpha str-before-1)
-                    (pyim-string-match-p regexp-punct str-before-1))
+                    (member str-before-1
+                            (mapcar #'char-to-string puncts)))
                 (= (length pyim-guidance-str) 0))
-           (pyim-toggle-full-width-punctuation -1 t) ;; 使用半角标点
            t)
           ((pyim-string-match-p regexp-chinese str-before-1)
-           (pyim-toggle-full-width-punctuation 1 t)  ;; 使用全角标点
            nil))))
 ;; #+END_SRC
 
