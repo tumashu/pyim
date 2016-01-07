@@ -73,6 +73,13 @@
                     (buffer-local-value 'isearch-mode buf))
                 (buffer-list))))
 
+(defun pyim-probe-org-structure-template ()
+  "激活这个 Chinese-pyim 探针函数后，输入 org-structure-template 时，不会开启中文输入。"
+  (when (string= major-mode "org-mode")
+    (let ((line-string (buffer-substring (point-at-bol) (point))))
+      (and (looking-at "[ \t]*$")
+           (string-match "^[ \t]*<\\([a-zA-Z]*\\)$" line-string)))))
+
 (defun pyim-probe-dynamic-english ()
   "激活这个 Chinese-pyim 探针函数后，使用下面的规则动态切换中英文输入：
 
