@@ -133,30 +133,6 @@
 ;; C-h v pyim-fuzzy-pinyin-adjust-function
 ;; #+END_EXAMPLE
 
-;; *** 动态中英文切换
-;; Chinese-pyim  可以根据输入内容动态的切换中英文输入，
-;; 基本规则是：
-
-;; 1. 当前字符为英文字符时，输入下一个字符时默认开启英文输入
-;; 2. 当前字符为中文字符时，输入下一个字符时默认开启中文输入
-;; 3. 无论当前是什么输入模式，当输入1个空格后，自动切换到中文输入模式
-
-;; 激活方法：
-
-;; #+BEGIN_EXAMPLE
-;; (setq-default pyim-english-input-switch-function
-;;               '(pyim-probe-dynamic-english))
-;; #+END_EXAMPLE
-
-;; 注：如果用户希望设置多个切换函数，也可以将上述变量设置为一个 *函数列表* ，
-;; 函数列表中的任意一个函数返回值为 `t' 时，Chinese-pyim 就会切换到
-;; 英文输入模式。
-
-;; #+BEGIN_EXAMPLE
-;; (setq-default pyim-english-input-switch-function
-;;               '(function1 function2 function3))
-;; #+END_EXAMPLE
-
 ;; *** 词语联想
 ;; Chinese-pyim *内置* 了5种词语联想方式：
 
@@ -212,40 +188,43 @@
 ;; 4. `pyim-delete-word-from-personal-buffer' 从个人词频文件对应的 buffer
 ;;    中删除当前高亮选择的词条。
 
-;; *** 快速切换词库
-;; 用户可以自定义类似的命令来实现快速切换拼音词库。
+;; *** Chinese-pyim 高级功能
+;; **** 根据环境自动切换到英文输入模式
+
+;; | 探针函数                            | 功能说明                                                            |
+;; |-------------------------------------+---------------------------------------------------------------------|
+;; | `pyim-probe-program-mode'           | `prog-mode' 衍生 mode 下，仅仅在字符串和 comment 中开启中文输入模式 |
+;; | `pyim-probe-org-speed-commands'     | 解决 org-speed-commands 与 Chinese-pyim 冲突问题                    |
+;; | `pyim-probe-isearch-mode'           | 使用 isearch 搜索时，强制开启英文输入模式                           |
+;; | `pyim-probe-org-structure-template' | 使用 org-structure-template 时，关闭中文输入模式                    |
+;; |                                     | 1. 当前字符为英文字符时，输入下一个字符时默认开启英文输入           |
+;; | `pyim-probe-dynamic-english'        | 2. 当前字符为中文字符时，输入下一个字符时默认开启中文输入           |
+;; |                                     | 3. 无论当前是什么输入模式，当输入1个空格后，自动切换到中文输入模式  |
+
+;; 激活方式：
 
 ;; #+BEGIN_EXAMPLE
-;; (defun pyim-use-dict:bigdict ()
-;;   (interactive)
-;;   (setq pyim-dicts
-;;         '((:name "BigDict"
-;;                  :file "/path/to/pyim-bigdict.txt"
-;;                  :coding utf-8-unix
-;;                  :dict-type pinyin-dict)))
-;;   (pyim-restart-1 t))
+;; (setq-default pyim-english-input-switch-function
+;;               '(probe-function1 probe-function2 probe-function3))
 ;; #+END_EXAMPLE
 
-;; *** 使用 Chinese-pyim 改善 company-mode 中文补全的体验
+;; 注：上述函数列表中，任意一个函数的返回值为 t 时，Chinese-pyim 切换到英文输入模式。
 
-;; 中文词语之间没有分割字符，所以 Company-mode 在中文环境下， *补全词条* 变成了 *补全句子* ，
-;; 可用性很差，chinese-pyim-company 通过 Chinese-pyim 自带的分词函数来分割中文字符串，
-;; 改善了中文补全的体验 。
+;; **** 根据环境自动切换到半角标点输入模式
 
-;; 安装和使用方式：
+;; | 探针函数                                   | 功能说明                   |
+;; |--------------------------------------------+----------------------------|
+;; | `pyim-probe-punctuation-line-beginning'    | 行首强制输入半角标点       |
+;; | `pyim-probe-punctuation-after-punctuation' | 半角标点后强制输入半角标点 |
 
-;; 1. 安装配置 `company-mode' 扩展包，具体可以参考：[[https://github.com/tumashu/emacs-helper/blob/master/eh-complete.el][emacs-helper's company configure]]
-;; 2. 在 emacs 配置中添加如下几行代码：
-;;    #+BEGIN_EXAMPLE
-;;    (require 'chinese-pyim-company)
-;;    (setq pyim-company-max-length 6)
-;;    #+END_EXAMPLE
-
-;; 用户也可以通过下面的方式 *禁用* company 中文补全
+;; 激活方式：
 
 ;; #+BEGIN_EXAMPLE
-;; (setq pyim-company-complete-chinese-enable nil)
+;; (setq-default pyim-punctuation-half-width-functions
+;;               '(probe-function4 probe-function5 probe-function6))
 ;; #+END_EXAMPLE
+
+;; 注：上述函数列表中，任意一个函数的返回值为 t 时，Chinese-pyim 切换到半角标点输入模式。
 
 ;; ** Tips
 
@@ -364,6 +343,20 @@
 ;; 1. 必须使用词库文件的绝对路径。
 ;; 2. 正确设置coding，否则会出现乱码。
 
+;; *** 如何快速切换词库
+;; 用户可以自定义类似的命令来实现快速切换拼音词库。
+
+;; #+BEGIN_EXAMPLE
+;; (defun pyim-use-dict:bigdict ()
+;;   (interactive)
+;;   (setq pyim-dicts
+;;         '((:name "BigDict"
+;;                  :file "/path/to/pyim-bigdict.txt"
+;;                  :coding utf-8-unix
+;;                  :dict-type pinyin-dict)))
+;;   (pyim-restart-1 t))
+;; #+END_EXAMPLE
+
 ;; *** 将汉字字符串转换为拼音字符串
 ;; 下面两个函数可以将中文字符串转换的拼音字符串或者列表，用于 emacs-lisp
 ;; 编程。
@@ -397,7 +390,6 @@
 ;; 使用缓存可以提高分词的速度。
 
 ;; 注：仅仅对一般词库有效，个人文件和 guessdict 词库无效。
-
 
 ;; *** 获取光标处的中文词条
 ;; Chinese-pyim 包含了一个简单的命令：`pyim-get-words-list-at-point', 这个命令
@@ -439,6 +431,29 @@
 
 
 ;;; Code:
+;; *** 使用 Chinese-pyim 改善 company-mode 中文补全的体验
+
+;; 中文词语之间没有分割字符，所以 Company-mode 在中文环境下， *补全词条* 变成了 *补全句子* ，
+;; 可用性很差，chinese-pyim-company 通过 Chinese-pyim 自带的分词函数来分割中文字符串，
+;; 改善了中文补全的体验 。
+
+;; 安装和使用方式：
+
+;; 1. 安装配置 `company-mode' 扩展包，具体可以参考：[[https://github.com/tumashu/emacs-helper/blob/master/eh-complete.el][emacs-helper's company configure]]
+;; 2. 在 emacs 配置中添加如下几行代码：
+;;    #+BEGIN_EXAMPLE
+;;    (require 'chinese-pyim-company)
+;;    (setq pyim-company-max-length 6)
+;;    #+END_EXAMPLE
+
+;; 用户也可以通过下面的方式 *禁用* company 中文补全
+
+;; #+BEGIN_EXAMPLE
+;; (setq pyim-company-complete-chinese-enable nil)
+;; #+END_EXAMPLE
+
+
+
 ;; * 代码                                                                 :code:
 ;; #+BEGIN_SRC emacs-lisp
 (require 'chinese-pyim-pymap)
