@@ -347,7 +347,7 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
 
 ### 如何查看 Chinese-pyim 文档。<a id="orgheadline24"></a>
 
-Chinese－-pyim 开发使用 lentic 文学编程模式，代码文档隐藏在comment中，如果用户喜欢阅读 html 格式的文档，可以查看在线文档；
+Chinese-pyim 开发使用 lentic 文学编程模式，代码文档隐藏在comment中，如果用户喜欢阅读 html 格式的文档，可以查看在线文档；
 
 <http://tumashu.github.io/chinese-pyim/>
 
