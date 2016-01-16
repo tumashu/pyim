@@ -125,6 +125,14 @@
 ;; (setq pyim-use-tooltip t)
 ;; #+END_EXAMPLE
 
+;; 注：Linux 平台下，emacs 可以使用 GTK 来绘制选词框：
+
+;; #+BEGIN_EXAMPLE
+;; (setq x-gtk-use-system-tooltips t)
+;; #+END_EXAMPLE
+
+;; GTK 选词框的字体设置可以参考：[[https://www.gnu.org/software/emacs/manual/html_node/emacs/GTK-resources.html#GTK-resources][GTK resources]] 。
+
 ;; *** 设置模糊音
 ;; Chinese-pyim 使用一个比较 *粗糙* 的方法处理 *模糊音* ，要了解具体细节，
 ;; 请运行：

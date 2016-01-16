@@ -178,6 +178,12 @@ Chinese-pyim 可以使用 emacs tooltip 功能在 **光标处** 显示一个选�
 
     (setq pyim-use-tooltip t)
 
+注：Linux 平台下，emacs 可以使用 GTK 来绘制选词框：
+
+    (setq x-gtk-use-system-tooltips t)
+
+GTK 选词框的字体设置可以参考：[GTK resources](https://www.gnu.org/software/emacs/manual/html_node/emacs/GTK-resources.html#GTK-resources) 。
+
 ### 设置模糊音<a id="orgheadline14"></a>
 
 Chinese-pyim 使用一个比较 **粗糙** 的方法处理 **模糊音** ，要了解具体细节，请运行：
