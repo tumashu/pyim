@@ -2632,7 +2632,7 @@ Counting starts at 1."
                (eq tooltip 'popup)
                (and (eq tooltip 'pos-tip)
                     (not pos-tip-usable-p)))
-           (popup-tip string :point position :margin 2))
+           (popup-tip string :point position :margin 1))
           ((and pos-tip-usable-p
                 (eq tooltip 'pos-tip))
            (pos-tip-show-no-propertize pyim-guidance-str
