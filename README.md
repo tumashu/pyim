@@ -174,12 +174,12 @@ Chinese-pyim 支持双拼模式，用户可以通过变量 \`pyim-default-pinyin
 
 ### 让选词框跟随光标<a id="orgheadline13"></a>
 
-Chinese-pyim 可以使用 emacs tooltip 功能在 **光标处** 显示一个选词框，用户可以通过下面的设置来开启这个功能。
+用户可以通过下面的设置让 Chinese-pyim 在 **光标处** 显示一个选词框：
 
-1.  使用 popup 包来绘制选词框 （使用 emacs overlay 机制）
+1.  使用 popup 包来绘制选词框 （emacs overlay 机制）
 
         (setq pyim-use-tooltip 'popup)
-2.  使用 pos-tip 包来绘制选词框（使用 emacs tooltip 机制）
+2.  使用 pos-tip 包来绘制选词框（emacs tooltip 机制）
 
         (setq pyim-use-tooltip 'pos-tip)
 
