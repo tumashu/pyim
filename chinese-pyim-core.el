@@ -7,7 +7,7 @@
 ;; Author: Ye Wenbin <wenbinye@163.com>, Feng Shu <tumashu@163.com>
 ;; URL: https://github.com/tumashu/chinese-pyim
 ;; Version: 0.0.1
-;; Package-Requires: ((cl-lib "0.5")(pos-tip "0.4"))
+;; Package-Requires: ((cl-lib "0.5") (pos-tip "0.4") (popup "0.1"))
 ;; Keywords: convenience, Chinese, pinyin, input-method
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -42,6 +42,7 @@
 (require 'cl-lib)
 (require 'help-mode)
 (require 'pos-tip)
+(require 'popup)
 (require 'chinese-pyim-pymap)
 
 (defgroup chinese-pyim nil
@@ -292,21 +293,8 @@ Chinese-pyim 内建的功能有：
   :group 'chinese-pyim)
 
 (defface pyim-minibuffer-string-face '((t (:background "gray40")))
-  "Face to current string show in minibuffer"
-  :group 'chinese-pyim)
-
-(defcustom pyim-tooltip-color nil
-  "设置 tooltip 选词框的颜色，设置格式为：
-
-    (FOREGROUND-COLOR . BACKGROUND-COLOR)
-
-例如：
-
-   (\"white\" . \"black\")
-
-如果这个变量设置为 nil，默认将使用变量 `pos-tip-foreground-color' 来指定
-前景颜色，使用变量 `pos-tip-background-color' 来指定背景颜色。"
-  :group 'chinese-pyim)
+         "Face to current string show in minibuffer"
+         :group 'chinese-pyim)
 
 (defcustom pyim-english-input-switch-function nil
   "当这个变量的取值为一个函数且这个函数的运行结果为 t 时，Chinese-pyim 开启英文输入功能。
@@ -332,19 +320,22 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
   :group 'chinese-pyim
   :type 'function)
 
-(defcustom pyim-use-tooltip  t
-  "如何显示 Chinese-pyim 选词框，当取值为 t 并且 *tooltip 功能可以正常使用*
-时，使用 tooltip 显示选词框，当取值为 nil 时，使用 minibuffer 显示选词框。
+(defcustom pyim-use-tooltip 'popup
+  "如何绘制 Chinese-pyim 选词框。
 
-具体细节请参考函数 `pyim-use-tooltip-p' ."
+1. 当这个变量取值为 t 或者 'popup 时，使用 popup-el 包来绘制选词框；
+2. 当取值为 pos-tip 时，使用 pos-tip 包来绘制选词框；
+3. 当取值为 nil 时，将 minibuffer 做为选词框；"
   :group 'chinese-pyim)
 
 (defcustom pyim-tooltip-width-adjustment 1.2
   "校正 tooltip 选词框宽度的数值，表示校正后的宽度是未校正前宽度的倍数。
 
-由于字体设置等原因，tooltip 选词框实际宽度会比 *预期宽度* 偏大或者偏小，
+由于字体设置等原因，pos-tip 选词框实际宽度会比 *预期宽度* 偏大或者偏小，
 这时，有可能会出现选词框词条显示不全或者选词框弹出位置不合理等问题。用户可以通过
-增大或者减小这个变量来改变 tooltip 选词框的宽度，取值大概在 0.5 ~ 2.0 范围之内。"
+增大或者减小这个变量来改变 tooltip 选词框的宽度，取值大概在 0.5 ~ 2.0 范围之内。
+
+注：这个选项只适用于 `pyim-use-tooltip' 取值为 'pos-tip 的时候。"
   :group 'chinese-pyim)
 
 (defcustom pyim-line-content-limit
@@ -1674,7 +1665,7 @@ Return the input string."
   (pyim-delete-region)
   (setq pyim-current-choices nil)
   (setq pyim-guidance-str "")
-  (when (pyim-use-tooltip-p)
+  (when (pyim-tooltip-pos-tip-available-p)
     (pos-tip-hide)))
 ;; #+END_SRC
 
@@ -2593,7 +2584,7 @@ Counting starts at 1."
 
 ;; *** 显示选词框
 ;; 当`pyim-guidance-str' 构建完成后，Chinese-pyim 使用函数 `pyim-show' 重
-;; 新显示选词框，`pyim-show' 会根据函数 `pyim-use-tooltip-p' 的返回值来决定使用
+;; 新显示选词框，`pyim-show' 会根据 `pyim-use-tooltip' 的取值来决定使用
 ;; 哪种方式来显示选词框（minibuffer 或者 tooltip ）。
 
 ;; #+BEGIN_SRC emacs-lisp
@@ -2617,14 +2608,14 @@ Counting starts at 1."
                  current-input-method-title pyim-guidance-str))
       ;; Show the guidance in echo area without logging.
       (let ((message-log-max nil))
-        (if (pyim-use-tooltip-p)
+        (if pyim-use-tooltip
             (let ((pos (string-match ": " pyim-guidance-str)))
               (if pos
                   (setq pyim-guidance-str
                         (format "=> %s\n%s"
                                 (substring pyim-guidance-str 0 pos)
                                 (substring pyim-guidance-str (+ pos 2)))))
-              (pyim-pos-tip-show pyim-guidance-str (overlay-start pyim-overlay)))
+              (pyim-tooltip-show pyim-guidance-str (overlay-start pyim-overlay)))
           (message "%s" pyim-guidance-str))))))
 
 (defun pyim-delete-region ()
@@ -2633,17 +2624,22 @@ Counting starts at 1."
       (delete-region (overlay-start pyim-overlay)
                      (overlay-end pyim-overlay))))
 
-(defun pyim-pos-tip-show (string position)
-  "在 `position' 位置，使用 pos-tip 显示字符串 `string' 。"
+(defun pyim-tooltip-show (string position)
+  "在 `position' 位置，使用 pos-tip 或者 popup 显示字符串 `string' 。"
   (let ((frame (window-frame (selected-window)))
         (length (* pyim-page-length 10)))
-    (pos-tip-show-no-propertize pyim-guidance-str
-                                pyim-tooltip-color
-                                position nil 15
-                                (round (* (pos-tip-tooltip-width length (frame-char-width frame))
-                                          pyim-tooltip-width-adjustment))
-                                (pos-tip-tooltip-height 2 (frame-char-height frame) frame)
-                                nil nil 35)))
+    (cond ((or (eq pyim-use-tooltip t)
+               (eq pyim-use-tooltip 'popup))
+           (popup-tip string :point position :margin 2))
+          ((eq pyim-use-tooltip 'pos-tip)
+           (pos-tip-show-no-propertize pyim-guidance-str
+                                       nil
+                                       position nil 15
+                                       (round (* (pos-tip-tooltip-width length (frame-char-width frame))
+                                                 pyim-tooltip-width-adjustment))
+                                       (pos-tip-tooltip-height 2 (frame-char-height frame) frame)
+                                       nil nil 35))
+          (t (error "`pyim-use-tooltip' 设置不对，请重新设置。")))))
 
 (defun pyim-minibuffer-message (string)
   (message nil)
@@ -2658,14 +2654,12 @@ Counting starts at 1."
       (setq quit-flag nil
             unread-command-events '(7)))))
 
-(defun pyim-use-tooltip-p ()
-  "当这个函数返回值为 t 时，Chinese-pyim 使用 tooltip 显示选词框，
-返回值为 nil 时，使用 minibuffer 显示选词框。"
-  (and pyim-use-tooltip
-       (not (or noninteractive
-                emacs-basic-display
-                (not (display-graphic-p))
-                (not (fboundp 'x-show-tip))))))
+(defun pyim-tooltip-pos-tip-available-p ()
+  "测试当前环境下 pos-tip 是否可用。"
+  (not (or noninteractive
+           emacs-basic-display
+           (not (display-graphic-p))
+           (not (fboundp 'x-show-tip)))))
 ;; #+END_SRC
 
 ;; *** 选择备选词

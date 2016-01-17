@@ -121,13 +121,19 @@
 ;; Chinese-pyim 可以使用 emacs tooltip 功能在 *光标处* 显示一个选词框，
 ;; 用户可以通过下面的设置来开启这个功能。
 
-;; #+BEGIN_EXAMPLE
-;; (setq pyim-use-tooltip t)
-;; #+END_EXAMPLE
+;; 1. 使用 popup 包来绘制选词框 （使用 emacs overlay 机制）
+;;    #+BEGIN_EXAMPLE
+;;    (setq pyim-use-tooltip 'popup)
+;;    #+END_EXAMPLE
+;; 2. 使用 pos-tip 包来绘制选词框（使用 emacs tooltip 机制）
+;;    #+BEGIN_EXAMPLE
+;;    (setq pyim-use-tooltip 'pos-tip)
+;;    #+END_EXAMPLE
 
 ;; 注：Linux 平台下，emacs 可以使用 GTK 来绘制选词框：
 
 ;; #+BEGIN_EXAMPLE
+;; (setq pyim-use-tooltip 'pos-tip)
 ;; (setq x-gtk-use-system-tooltips t)
 ;; #+END_EXAMPLE
 
