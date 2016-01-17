@@ -1664,9 +1664,7 @@ Return the input string."
   (setq pyim-translating nil)
   (pyim-delete-region)
   (setq pyim-current-choices nil)
-  (setq pyim-guidance-str "")
-  (when (pyim-tooltip-pos-tip-available-p)
-    (pos-tip-hide)))
+  (setq pyim-guidance-str ""))
 ;; #+END_SRC
 
 ;; ** 处理拼音字符串 `pyim-current-key'
@@ -2627,11 +2625,16 @@ Counting starts at 1."
 (defun pyim-tooltip-show (string position)
   "在 `position' 位置，使用 pos-tip 或者 popup 显示字符串 `string' 。"
   (let ((frame (window-frame (selected-window)))
-        (length (* pyim-page-length 10)))
-    (cond ((or (eq pyim-use-tooltip t)
-               (eq pyim-use-tooltip 'popup))
+        (length (* pyim-page-length 10))
+        (tooltip pyim-use-tooltip)
+        (pos-tip-usable-p (pyim-tooltip-pos-tip-usable-p)))
+    (cond ((or (eq tooltip t)
+               (eq tooltip 'popup)
+               (and (eq tooltip 'pos-tip)
+                    (not pos-tip-usable-p)))
            (popup-tip string :point position :margin 2))
-          ((eq pyim-use-tooltip 'pos-tip)
+          ((and pos-tip-usable-p
+                (eq tooltip 'pos-tip))
            (pos-tip-show-no-propertize pyim-guidance-str
                                        nil
                                        position nil 15
@@ -2654,7 +2657,7 @@ Counting starts at 1."
       (setq quit-flag nil
             unread-command-events '(7)))))
 
-(defun pyim-tooltip-pos-tip-available-p ()
+(defun pyim-tooltip-pos-tip-usable-p ()
   "测试当前环境下 pos-tip 是否可用。"
   (not (or noninteractive
            emacs-basic-display
