@@ -2402,7 +2402,7 @@ Counting starts at 1."
 ;; Chinese-pyim 内建两种方式显示选词框：
 
 ;; 1. 使用 `pyim-minibuffer-message' 函数在 minibuffer 中显示选词框。
-;; 2. 使用 `pyim-pos-tip-show' 函数在光标处创建一个 tooltip 来显示选词框。
+;; 2. 使用 `pyim-tooltip-show' 函数在光标处创建一个 tooltip 来显示选词框。
 
 ;; 两种方式的基本原理相同：通过 *待选词列表* 构建为一个字符串，然后显示这个字符串。
 ;; 用户可以根据这个字符串的提示，来执行相应的动作，比如按空格确认当前选择的词条或
