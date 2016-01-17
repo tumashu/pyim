@@ -2539,12 +2539,10 @@ Counting starts at 1."
                                   ;; 高亮当前选择的词条，用于 `pyim-next-word'
                                   (if (and hightlight-current
                                            (= i pos))
-                                      (format "%d.%s" i
-                                              (propertize
-                                               (concat "[" str "]")
-                                               'face 'pyim-minibuffer-string-face))
-                                    (format "%d. %s " i str))))
-                              choice) " ")))))
+                                      (format "%d[%s]" i
+                                              (propertize str 'face 'pyim-minibuffer-string-face))
+                                    (format "%d.%s " i str))))
+                              choice) "")))))
 
 (defun pyim-next-page (arg)
   (interactive "p")
