@@ -330,7 +330,8 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
   "将词库 buffer 中 `start' 和 `end' 范围内的词条信息按照拼音code排序
 当 unix 工具 sort 存在时，优先使用这个工具，否则使用emacs自带函数
 `sort-regexp-fields'。"
-  (if (and (executable-find "sort")
+  (if (and (eq system-type 'gnu/linux)
+           (executable-find "sort")
            (executable-find "env"))
       (call-process-region start end
                            "env" t t nil "LC_ALL=C"
