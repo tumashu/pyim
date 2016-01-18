@@ -57,7 +57,7 @@
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-company-chinese-complete-p ()
   (let ((string (pyim-char-before-to-string 0)))
-    (string-match-p "\\cc" string)))
+    (pyim-string-match-p "\\cc" string)))
 ;; #+END_SRC
 
 ;; `company-dabbrev' 补全命令的简单流程是：
