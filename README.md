@@ -384,17 +384,17 @@ Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面四�
     1.  软件名称： imewlconverter
     2.  中文名称： 深蓝词库转换
     3.  下载地址：<https://github.com/studyzy/imewlconverter>
-    4.  依赖平台： Microsoft .NET Framework (>= 2.0)
+    4.  依赖平台： Microsoft .NET Framework (>= 3.5)
 
-    首先从其他拼音输入法网站上获取所需词库，使用下述自定义输出格式转换词库文件，然后将转换得到的内容保存到文件中。
+    使用方式：
 
-        shen,lan,ci,ku 深蓝词库
+    ![img](snapshots/imewlconverter-basic.gif)
 
-    将文件中所有","替换为"-"，得到的文件每一行都类似：
+    如果生成的词库词频不合理，可以按照下面的方式处理（非常有用的功能）：
 
-        shen-lan-ci-ku 深蓝词库
+    ![img](snapshots/imewlconverter-wordfreq.gif)
 
-    最后，运行 \`pyim-dicts-manager' ，按照命令提示，将转换得到的词库文件的信息添加到 \`pyim-dicts' 中，完成后运行命令 \`pyim-restart' 或者重启emacs。
+    生成词库后，运行 \`pyim-dicts-manager' ，按照命令提示，将转换得到的词库文件的信息添加到 \`pyim-dicts' 中，完成后运行命令 \`pyim-restart' 或者重启emacs。
 
 3.  第三种方式 (Linux & Unix 用户推荐使用)
 
