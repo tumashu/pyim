@@ -17,7 +17,7 @@
     - [切换全角标点与半角标点](#切换全角标点与半角标点)
     - [手动加词和删词](#手动加词和删词)
     - [Chinese-pyim 高级功能](#chinese-pyim-高级功能)
-    - [捐赠](#捐赠)
+  - [捐赠](#捐赠)
   - [Tips](#tips)
     - [Chinese-pyim 出现错误时，如何开启 debug 模式](#chinese-pyim-出现错误时，如何开启-debug-模式)
     - [选词框弹出位置不合理或者选词框内容显示不全](#选词框弹出位置不合理或者选词框内容显示不全)
@@ -82,7 +82,7 @@ Chinese-pyim 的目标是： **尽最大的努力成为一个好用的 emacs 中
 
 ### 添加词库文件<a id="orgheadline8"></a>
 
-用户可以使用三种方法为 Chinese-pyim 添加拼音词库，具体方式请参考 [1.9.4](#orgheadline7) 小结。
+用户可以使用三种方法为 Chinese-pyim 添加拼音词库，具体方式请参考 [1.10.4](#orgheadline7) 小结。
 
 注意：每一个词库文件必须按行排序（准确的说，是按每一行的拼音code排序），因为\`Chinese-pyim' 寻找词条时，使用二分法来优化速度，而二分法工作的前提就是对文件按行排序。具体细节请参考：\`pyim-bisearch-word' 。当发现词库排序不正确时（比如：用户手动调整词库文件后），记得运行函数
 \`pyim-update-dict-file' 重新对文件排序。
@@ -93,7 +93,7 @@ Chinese-pyim 的目标是： **尽最大的努力成为一个好用的 emacs 中
     (global-set-key (kbd "C-\") 'toggle-input-method)
     (global-set-key (kbd "C-;") 'pyim-toggle-full-width-punctuation)
 
-## 使用<a id="orgheadline22"></a>
+## 使用<a id="orgheadline21"></a>
 
 ### 常用快捷键<a id="orgheadline11"></a>
 
@@ -345,12 +345,13 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
 
     注：上述函数列表中，任意一个函数的返回值为 t 时，Chinese-pyim 切换到半角标点输入模式。
 
-### 捐赠<a id="orgheadline21"></a>
+## 捐赠<a id="orgheadline22"></a>
 
 您可以通过小额捐赠的方式支持 Chinese-pyim 的开发工作，具体方式：
 
 1.  通过支付宝收款账户：tumashu@163.com
 2.  通过支付宝钱包扫描：
+
     ![img](snapshots/QR-code-for-author.jpg)
 
 ## Tips<a id="orgheadline38"></a>
