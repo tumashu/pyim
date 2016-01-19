@@ -133,6 +133,7 @@ Chinese pyim 输入法的核心文件，包含了输入法的基本功能函数�
 <pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">require</span> '<span style="color: #4c83ff;">cl-lib</span>)
 (<span style="color: #FBDE2D;">require</span> '<span style="color: #4c83ff;">help-mode</span>)
 (<span style="color: #FBDE2D;">require</span> '<span style="color: #4c83ff;">pos-tip</span>)
+(<span style="color: #FBDE2D;">require</span> '<span style="color: #4c83ff;">popup</span>)
 (<span style="color: #FBDE2D;">require</span> '<span style="color: #4c83ff;">chinese-pyim-pymap</span>)
 
 (<span style="color: #FBDE2D;">defgroup</span> <span style="color: #D8FA3C;">chinese-pyim</span> nil
@@ -383,21 +384,8 @@ Chinese pyim 输入法的核心文件，包含了输入法的基本功能函数�
   <span style="color: #FF6400;">:group</span> 'chinese-pyim)
 
 (<span style="color: #FBDE2D;">defface</span> <span style="color: #D8FA3C;">pyim-minibuffer-string-face</span> '((t (<span style="color: #FF6400;">:background</span> <span style="color: #61CE3C;">"gray40"</span>)))
-  <span style="color: #61CE3C;">"Face to current string show in minibuffer"</span>
-  <span style="color: #FF6400;">:group</span> 'chinese-pyim)
-
-(<span style="color: #FBDE2D;">defcustom</span> <span style="color: #D8FA3C;">pyim-tooltip-color</span> nil
-  <span style="color: #61CE3C;">"&#35774;&#32622; tooltip &#36873;&#35789;&#26694;&#30340;&#39068;&#33394;&#65292;&#35774;&#32622;&#26684;&#24335;&#20026;&#65306;</span>
-
-<span style="color: #61CE3C;">    (FOREGROUND-COLOR . BACKGROUND-COLOR)</span>
-
-<span style="color: #61CE3C;">&#20363;&#22914;&#65306;</span>
-
-<span style="color: #61CE3C;">   (\"white\" . \"black\")</span>
-
-<span style="color: #61CE3C;">&#22914;&#26524;&#36825;&#20010;&#21464;&#37327;&#35774;&#32622;&#20026; nil&#65292;&#40664;&#35748;&#23558;&#20351;&#29992;&#21464;&#37327; `</span><span style="color: #4c83ff;">pos-tip-foreground-color</span><span style="color: #61CE3C;">' &#26469;&#25351;&#23450;</span>
-<span style="color: #61CE3C;">&#21069;&#26223;&#39068;&#33394;&#65292;&#20351;&#29992;&#21464;&#37327; `</span><span style="color: #4c83ff;">pos-tip-background-color</span><span style="color: #61CE3C;">' &#26469;&#25351;&#23450;&#32972;&#26223;&#39068;&#33394;&#12290;"</span>
-  <span style="color: #FF6400;">:group</span> 'chinese-pyim)
+         <span style="color: #61CE3C;">"Face to current string show in minibuffer"</span>
+         <span style="color: #FF6400;">:group</span> 'chinese-pyim)
 
 (<span style="color: #FBDE2D;">defcustom</span> <span style="color: #D8FA3C;">pyim-english-input-switch-function</span> nil
   <span style="color: #61CE3C;">"&#24403;&#36825;&#20010;&#21464;&#37327;&#30340;&#21462;&#20540;&#20026;&#19968;&#20010;&#20989;&#25968;&#19988;&#36825;&#20010;&#20989;&#25968;&#30340;&#36816;&#34892;&#32467;&#26524;&#20026; t &#26102;&#65292;Chinese-pyim &#24320;&#21551;&#33521;&#25991;&#36755;&#20837;&#21151;&#33021;&#12290;</span>
@@ -423,25 +411,25 @@ Chinese pyim 输入法的核心文件，包含了输入法的基本功能函数�
   <span style="color: #FF6400;">:group</span> 'chinese-pyim
   <span style="color: #FF6400;">:type</span> 'function)
 
-(<span style="color: #FBDE2D;">defcustom</span> <span style="color: #D8FA3C;">pyim-use-tooltip</span>  t
-  <span style="color: #61CE3C;">"&#22914;&#20309;&#26174;&#31034; Chinese-pyim &#36873;&#35789;&#26694;&#65292;&#24403;&#21462;&#20540;&#20026; t &#24182;&#19988; *tooltip &#21151;&#33021;&#21487;&#20197;&#27491;&#24120;&#20351;&#29992;*</span>
-<span style="color: #61CE3C;">&#26102;&#65292;&#20351;&#29992; tooltip &#26174;&#31034;&#36873;&#35789;&#26694;&#65292;&#24403;&#21462;&#20540;&#20026; nil &#26102;&#65292;&#20351;&#29992; minibuffer &#26174;&#31034;&#36873;&#35789;&#26694;&#12290;</span>
+(<span style="color: #FBDE2D;">defcustom</span> <span style="color: #D8FA3C;">pyim-use-tooltip</span> 'popup
+  <span style="color: #61CE3C;">"&#22914;&#20309;&#32472;&#21046; Chinese-pyim &#36873;&#35789;&#26694;&#12290;</span>
 
-<span style="color: #61CE3C;">&#20855;&#20307;&#32454;&#33410;&#35831;&#21442;&#32771;&#20989;&#25968; `</span><span style="color: #4c83ff;">pyim-use-tooltip-p</span><span style="color: #61CE3C;">' ."</span>
+<span style="color: #61CE3C;">1. &#24403;&#36825;&#20010;&#21464;&#37327;&#21462;&#20540;&#20026; t &#25110;&#32773; 'popup &#26102;&#65292;&#20351;&#29992; popup-el &#21253;&#26469;&#32472;&#21046;&#36873;&#35789;&#26694;&#65307;</span>
+<span style="color: #61CE3C;">2. &#24403;&#21462;&#20540;&#20026; pos-tip &#26102;&#65292;&#20351;&#29992; pos-tip &#21253;&#26469;&#32472;&#21046;&#36873;&#35789;&#26694;&#65307;</span>
+<span style="color: #61CE3C;">3. &#24403;&#21462;&#20540;&#20026; nil &#26102;&#65292;&#23558; minibuffer &#20570;&#20026;&#36873;&#35789;&#26694;&#65307;"</span>
   <span style="color: #FF6400;">:group</span> 'chinese-pyim)
 
 (<span style="color: #FBDE2D;">defcustom</span> <span style="color: #D8FA3C;">pyim-tooltip-width-adjustment</span> 1.2
   <span style="color: #61CE3C;">"&#26657;&#27491; tooltip &#36873;&#35789;&#26694;&#23485;&#24230;&#30340;&#25968;&#20540;&#65292;&#34920;&#31034;&#26657;&#27491;&#21518;&#30340;&#23485;&#24230;&#26159;&#26410;&#26657;&#27491;&#21069;&#23485;&#24230;&#30340;&#20493;&#25968;&#12290;</span>
 
-<span style="color: #61CE3C;">&#30001;&#20110;&#23383;&#20307;&#35774;&#32622;&#31561;&#21407;&#22240;&#65292;tooltip &#36873;&#35789;&#26694;&#23454;&#38469;&#23485;&#24230;&#20250;&#27604; *&#39044;&#26399;&#23485;&#24230;* &#20559;&#22823;&#25110;&#32773;&#20559;&#23567;&#65292;</span>
+<span style="color: #61CE3C;">&#30001;&#20110;&#23383;&#20307;&#35774;&#32622;&#31561;&#21407;&#22240;&#65292;pos-tip &#36873;&#35789;&#26694;&#23454;&#38469;&#23485;&#24230;&#20250;&#27604; *&#39044;&#26399;&#23485;&#24230;* &#20559;&#22823;&#25110;&#32773;&#20559;&#23567;&#65292;</span>
 <span style="color: #61CE3C;">&#36825;&#26102;&#65292;&#26377;&#21487;&#33021;&#20250;&#20986;&#29616;&#36873;&#35789;&#26694;&#35789;&#26465;&#26174;&#31034;&#19981;&#20840;&#25110;&#32773;&#36873;&#35789;&#26694;&#24377;&#20986;&#20301;&#32622;&#19981;&#21512;&#29702;&#31561;&#38382;&#39064;&#12290;&#29992;&#25143;&#21487;&#20197;&#36890;&#36807;</span>
-<span style="color: #61CE3C;">&#22686;&#22823;&#25110;&#32773;&#20943;&#23567;&#36825;&#20010;&#21464;&#37327;&#26469;&#25913;&#21464; tooltip &#36873;&#35789;&#26694;&#30340;&#23485;&#24230;&#65292;&#21462;&#20540;&#22823;&#27010;&#22312; 0.5 ~ 2.0 &#33539;&#22260;&#20043;&#20869;&#12290;"</span>
+<span style="color: #61CE3C;">&#22686;&#22823;&#25110;&#32773;&#20943;&#23567;&#36825;&#20010;&#21464;&#37327;&#26469;&#25913;&#21464; tooltip &#36873;&#35789;&#26694;&#30340;&#23485;&#24230;&#65292;&#21462;&#20540;&#22823;&#27010;&#22312; 0.5 ~ 2.0 &#33539;&#22260;&#20043;&#20869;&#12290;</span>
+
+<span style="color: #61CE3C;">&#27880;&#65306;&#36825;&#20010;&#36873;&#39033;&#21482;&#36866;&#29992;&#20110; `</span><span style="color: #4c83ff;">pyim-use-tooltip</span><span style="color: #61CE3C;">' &#21462;&#20540;&#20026; 'pos-tip &#30340;&#26102;&#20505;&#12290;"</span>
   <span style="color: #FF6400;">:group</span> 'chinese-pyim)
 
-(<span style="color: #FBDE2D;">defcustom</span> <span style="color: #D8FA3C;">pyim-line-content-limit</span>
-  (<span style="color: #FBDE2D;">if</span> (eq system-type 'windows-nt)
-      3000
-    5000)
+(<span style="color: #FBDE2D;">defcustom</span> <span style="color: #D8FA3C;">pyim-line-content-limit</span> 1000
   <span style="color: #61CE3C;">"&#38480;&#21046;&#35789;&#24211;&#25991;&#20214;&#20013;&#30340;&#34892;&#38271;&#24230;&#12290;&#22914;&#26524;&#34892;&#22826;&#38271;&#65292;&#22312;windows&#24179;&#21488;&#19979;&#20250;&#20986;&#29616;&#20005;&#37325;&#30340;&#24615;&#33021;&#38382;&#39064;&#12290;"</span>
   <span style="color: #FF6400;">:group</span> 'chinese-pyim)
 
@@ -1923,9 +1911,7 @@ event list。
   (setq pyim-translating nil)
   (pyim-delete-region)
   (setq pyim-current-choices nil)
-  (setq pyim-guidance-str <span style="color: #61CE3C;">""</span>)
-  (<span style="color: #FBDE2D;">when</span> (pyim-use-tooltip-p)
-    (pos-tip-hide)))
+  (setq pyim-guidance-str <span style="color: #61CE3C;">""</span>))
 </pre>
 </div>
 </div>
@@ -2781,7 +2767,7 @@ Chinese-pyim 内建两种方式显示选词框：
 
 <ol class="org-ol">
 <li>使用 `pyim-minibuffer-message' 函数在 minibuffer 中显示选词框。</li>
-<li>使用 `pyim-pos-tip-show' 函数在光标处创建一个 tooltip 来显示选词框。</li>
+<li>使用 `pyim-tooltip-show' 函数在光标处创建一个 tooltip 来显示选词框。</li>
 </ol>
 
 <p>
@@ -3032,12 +3018,10 @@ sublist:
                                   <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#39640;&#20142;&#24403;&#21069;&#36873;&#25321;&#30340;&#35789;&#26465;&#65292;&#29992;&#20110; `</span><span style="color: #4c83ff; font-style: italic;">pyim-next-word</span><span style="color: #8B8989; font-style: italic;">'</span>
                                   (<span style="color: #FBDE2D;">if</span> (and hightlight-current
                                            (= i pos))
-                                      (format <span style="color: #61CE3C;">"%d.%s"</span> i
-                                              (propertize
-                                               (concat <span style="color: #61CE3C;">"["</span> str <span style="color: #61CE3C;">"]"</span>)
-                                               'face 'pyim-minibuffer-string-face))
-                                    (format <span style="color: #61CE3C;">"%d. %s "</span> i str))))
-                              choice) <span style="color: #61CE3C;">" "</span>)))))
+                                      (format <span style="color: #61CE3C;">"%d[%s]"</span> i
+                                              (propertize str 'face 'pyim-minibuffer-string-face))
+                                    (format <span style="color: #61CE3C;">"%d.%s "</span> i str))))
+                              choice) <span style="color: #61CE3C;">""</span>)))))
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-next-page</span> (arg)
   (interactive <span style="color: #61CE3C;">"p"</span>)
@@ -3080,7 +3064,7 @@ sublist:
 <h4 id="orgheadline25"><span class="section-number-4">2.8.2</span> 显示选词框</h4>
 <div class="outline-text-4" id="text-2-8-2">
 <p>
-当`pyim-guidance-str' 构建完成后，Chinese-pyim 使用函数 `pyim-show' 重新显示选词框，`pyim-show' 会根据函数 `pyim-use-tooltip-p' 的返回值来决定使用哪种方式来显示选词框（minibuffer 或者 tooltip ）。
+当`pyim-guidance-str' 构建完成后，Chinese-pyim 使用函数 `pyim-show' 重新显示选词框，`pyim-show' 会根据 `pyim-use-tooltip' 的取值来决定使用哪种方式来显示选词框（minibuffer 或者 tooltip ）。
 </p>
 
 <div class="org-src-container">
@@ -3105,14 +3089,14 @@ sublist:
                  current-input-method-title pyim-guidance-str))
       <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">Show the guidance in echo area without logging.</span>
       (<span style="color: #FBDE2D;">let</span> ((message-log-max nil))
-        (<span style="color: #FBDE2D;">if</span> (pyim-use-tooltip-p)
+        (<span style="color: #FBDE2D;">if</span> pyim-use-tooltip
             (<span style="color: #FBDE2D;">let</span> ((pos (string-match <span style="color: #61CE3C;">": "</span> pyim-guidance-str)))
               (<span style="color: #FBDE2D;">if</span> pos
                   (setq pyim-guidance-str
                         (format <span style="color: #61CE3C;">"=&gt; %s\n%s"</span>
                                 (substring pyim-guidance-str 0 pos)
                                 (substring pyim-guidance-str (+ pos 2)))))
-              (pyim-pos-tip-show pyim-guidance-str (overlay-start pyim-overlay)))
+              (pyim-tooltip-show pyim-guidance-str (overlay-start pyim-overlay)))
           (message <span style="color: #61CE3C;">"%s"</span> pyim-guidance-str))))))
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-delete-region</span> ()
@@ -3121,17 +3105,27 @@ sublist:
       (delete-region (overlay-start pyim-overlay)
                      (overlay-end pyim-overlay))))
 
-(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-pos-tip-show</span> (string position)
-  <span style="color: #61CE3C;">"&#22312; `</span><span style="color: #4c83ff;">position</span><span style="color: #61CE3C;">' &#20301;&#32622;&#65292;&#20351;&#29992; pos-tip &#26174;&#31034;&#23383;&#31526;&#20018; `</span><span style="color: #4c83ff;">string</span><span style="color: #61CE3C;">' &#12290;"</span>
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-tooltip-show</span> (string position)
+  <span style="color: #61CE3C;">"&#22312; `</span><span style="color: #4c83ff;">position</span><span style="color: #61CE3C;">' &#20301;&#32622;&#65292;&#20351;&#29992; pos-tip &#25110;&#32773; popup &#26174;&#31034;&#23383;&#31526;&#20018; `</span><span style="color: #4c83ff;">string</span><span style="color: #61CE3C;">' &#12290;"</span>
   (<span style="color: #FBDE2D;">let</span> ((frame (window-frame (selected-window)))
-        (length (* pyim-page-length 10)))
-    (pos-tip-show-no-propertize pyim-guidance-str
-                                pyim-tooltip-color
-                                position nil 15
-                                (round (* (pos-tip-tooltip-width length (frame-char-width frame))
-                                          pyim-tooltip-width-adjustment))
-                                (pos-tip-tooltip-height 2 (frame-char-height frame) frame)
-                                nil nil 35)))
+        (length (* pyim-page-length 10))
+        (tooltip pyim-use-tooltip)
+        (pos-tip-usable-p (pyim-tooltip-pos-tip-usable-p)))
+    (<span style="color: #FBDE2D;">cond</span> ((or (eq tooltip t)
+               (eq tooltip 'popup)
+               (and (eq tooltip 'pos-tip)
+                    (not pos-tip-usable-p)))
+           (popup-tip string <span style="color: #FF6400;">:point</span> position <span style="color: #FF6400;">:margin</span> 1))
+          ((and pos-tip-usable-p
+                (eq tooltip 'pos-tip))
+           (pos-tip-show-no-propertize pyim-guidance-str
+                                       nil
+                                       position nil 15
+                                       (round (* (pos-tip-tooltip-width length (frame-char-width frame))
+                                                 pyim-tooltip-width-adjustment))
+                                       (pos-tip-tooltip-height 2 (frame-char-height frame) frame)
+                                       nil nil 35))
+          (t (<span style="color: #ff69b4;">error</span> <span style="color: #61CE3C;">"`</span><span style="color: #4c83ff;">pyim-use-tooltip</span><span style="color: #61CE3C;">' &#35774;&#32622;&#19981;&#23545;&#65292;&#35831;&#37325;&#26032;&#35774;&#32622;&#12290;"</span>)))))
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-minibuffer-message</span> (string)
   (message nil)
@@ -3146,14 +3140,12 @@ sublist:
       (setq quit-flag nil
             unread-command-events '(7)))))
 
-(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-use-tooltip-p</span> ()
-  <span style="color: #61CE3C;">"&#24403;&#36825;&#20010;&#20989;&#25968;&#36820;&#22238;&#20540;&#20026; t &#26102;&#65292;Chinese-pyim &#20351;&#29992; tooltip &#26174;&#31034;&#36873;&#35789;&#26694;&#65292;</span>
-<span style="color: #61CE3C;">&#36820;&#22238;&#20540;&#20026; nil &#26102;&#65292;&#20351;&#29992; minibuffer &#26174;&#31034;&#36873;&#35789;&#26694;&#12290;"</span>
-  (and pyim-use-tooltip
-       (not (or noninteractive
-                emacs-basic-display
-                (not (display-graphic-p))
-                (not (fboundp 'x-show-tip))))))
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-tooltip-pos-tip-usable-p</span> ()
+  <span style="color: #61CE3C;">"&#27979;&#35797;&#24403;&#21069;&#29615;&#22659;&#19979; pos-tip &#26159;&#21542;&#21487;&#29992;&#12290;"</span>
+  (not (or noninteractive
+           emacs-basic-display
+           (not (display-graphic-p))
+           (not (fboundp 'x-show-tip)))))
 </pre>
 </div>
 </div>
@@ -3961,8 +3953,8 @@ Chinese-pyim 在特定的时候需要读取一个汉字的拼音，这个工作�
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2016-01-09</span>
-        <span title="last modification date" class="post-info">2016-01-08</span>
+        <span title="post date" class="post-info">2016-01-19</span>
+        <span title="last modification date" class="post-info">2016-01-19</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>

@@ -161,7 +161,7 @@ OUTPUT:
 
 <span style="color: #61CE3C;">BUG: &#24403; `</span><span style="color: #4c83ff;">string</span><span style="color: #61CE3C;">' &#20013;&#21253;&#21547;&#20854;&#23427;&#26631;&#28857;&#31526;&#21495;&#65292;&#24182;&#19988;&#35774;&#32622; `</span><span style="color: #4c83ff;">separator</span><span style="color: #61CE3C;">' &#26102;&#65292;&#32467;&#26524;&#20250;&#21253;&#21547;&#22810;&#20313;&#30340;&#36830;&#25509;&#31526;&#65306;</span>
 <span style="color: #61CE3C;">&#27604;&#22914;&#65306; '&#20320;=&#22909;' --&gt; 'ni-=-hao'"</span>
-  (<span style="color: #FBDE2D;">if</span> (not (string-match-p <span style="color: #61CE3C;">"\\cc"</span> string))
+  (<span style="color: #FBDE2D;">if</span> (not (pyim-string-match-p <span style="color: #61CE3C;">"\\cc"</span> string))
       string
     (<span style="color: #FBDE2D;">let</span> (string-list pinyins-list pinyins-list-permutated pinyins-list-adjusted)
 
@@ -172,7 +172,7 @@ OUTPUT:
       <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#23558;&#27721;&#23383;&#23383;&#31526;&#20018;&#36716;&#25442;&#20026;&#23383;&#31526;list&#65292;&#33521;&#25991;&#21407;&#26679;&#36755;&#20986;&#12290;</span>
       <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#27604;&#22914;&#65306; &#8220;Hello&#38134;&#34892;&#8221; -&gt; ("Hello" "&#38134;" "&#34892;")</span>
       (setq string-list
-            (<span style="color: #FBDE2D;">if</span> (string-match-p <span style="color: #61CE3C;">"\\CC"</span> string)
+            (<span style="color: #FBDE2D;">if</span> (pyim-string-match-p <span style="color: #61CE3C;">"\\CC"</span> string)
                 <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#22788;&#29702;&#20013;&#33521;&#25991;&#28151;&#21512;&#30340;&#24773;&#20917;</span>
                 (split-string
                  (replace-regexp-in-string
@@ -193,7 +193,7 @@ OUTPUT:
             ((&gt; (length str) 1)
              (push (list str) pinyins-list))
             ((and (&gt; (length str) 0)
-                  (string-match-p <span style="color: #61CE3C;">"\\cc"</span> str))
+                  (pyim-string-match-p <span style="color: #61CE3C;">"\\cc"</span> str))
              (push (or (pyim-get-char-code (string-to-char str))
                        (list str))
                    pinyins-list))
@@ -356,7 +356,7 @@ OUTPUT:
           (<span style="color: #FBDE2D;">let*</span> ((line-content (pyim-line-content))
                  (length (length line-content)))
             (<span style="color: #FBDE2D;">if</span> (or (&gt; length 1) <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#21024;&#38500;&#21482;&#21253;&#21547; code&#65292;&#20294;&#27809;&#26377;&#35789;&#26465;&#30340;&#34892;</span>
-                    (string-match-p <span style="color: #61CE3C;">" *^;+"</span> (car line-content)))
+                    (pyim-string-match-p <span style="color: #61CE3C;">" *^;+"</span> (car line-content)))
                 (forward-line 1)
               (pyim-delete-line))))
 
@@ -381,7 +381,8 @@ OUTPUT:
   <span style="color: #61CE3C;">"&#23558;&#35789;&#24211; buffer &#20013; `</span><span style="color: #4c83ff;">start</span><span style="color: #61CE3C;">' &#21644; `</span><span style="color: #4c83ff;">end</span><span style="color: #61CE3C;">' &#33539;&#22260;&#20869;&#30340;&#35789;&#26465;&#20449;&#24687;&#25353;&#29031;&#25340;&#38899;code&#25490;&#24207;</span>
 <span style="color: #61CE3C;">&#24403; unix &#24037;&#20855; sort &#23384;&#22312;&#26102;&#65292;&#20248;&#20808;&#20351;&#29992;&#36825;&#20010;&#24037;&#20855;&#65292;&#21542;&#21017;&#20351;&#29992;emacs&#33258;&#24102;&#20989;&#25968;</span>
 <span style="color: #61CE3C;">`</span><span style="color: #4c83ff;">sort-regexp-fields</span><span style="color: #61CE3C;">'&#12290;"</span>
-  (<span style="color: #FBDE2D;">if</span> (and (executable-find <span style="color: #61CE3C;">"sort"</span>)
+  (<span style="color: #FBDE2D;">if</span> (and (eq system-type 'gnu/linux)
+           (executable-find <span style="color: #61CE3C;">"sort"</span>)
            (executable-find <span style="color: #61CE3C;">"env"</span>))
       (call-process-region start end
                            <span style="color: #61CE3C;">"env"</span> t t nil <span style="color: #61CE3C;">"LC_ALL=C"</span>
@@ -399,13 +400,14 @@ OUTPUT:
     (delete-region (line-beginning-position) (line-end-position))
     (setq insert-string
           (mapconcat
-           (<span style="color: #FBDE2D;">lambda</span> (x)
-             <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#25340;&#38899;&#20013;&#19981;&#33021;&#26377;&#20013;&#25991;&#23383;&#31526;&#12290;</span>
-             <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20013;&#25991;&#35789;&#26465;&#20013;&#24517;&#39035;&#26377;&#20013;&#25991;&#23383;&#31526;&#65292;&#24182;&#19988;&#19981;&#33021;&#26377;ascii&#23383;&#31526;&#12290;</span>
-             (<span style="color: #FBDE2D;">unless</span> (or (string-match-p <span style="color: #61CE3C;">"[</span><span style="color: #61CE3C;">^</span><span style="color: #61CE3C;">a-z-]"</span> x)
-                         (string-match-p <span style="color: #61CE3C;">"[:ascii:]"</span> line-content)
-                         (not (string-match-p <span style="color: #61CE3C;">"\\cc"</span> line-content)))
-               (format <span style="color: #61CE3C;">"%s  %s"</span> x line-content))) pinyin-list <span style="color: #61CE3C;">"\n"</span>))
+           #'(<span style="color: #FBDE2D;">lambda</span> (x)
+               <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#25340;&#38899;&#20013;&#19981;&#33021;&#26377;&#20013;&#25991;&#23383;&#31526;&#12290;</span>
+               <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20013;&#25991;&#35789;&#26465;&#20013;&#24517;&#39035;&#26377;&#20013;&#25991;&#23383;&#31526;&#65292;&#24182;&#19988;&#19981;&#33021;&#26377;ascii&#23383;&#31526;&#12290;</span>
+               (<span style="color: #FBDE2D;">unless</span> (or (pyim-string-match-p <span style="color: #61CE3C;">"[</span><span style="color: #61CE3C;">^</span><span style="color: #61CE3C;">a-z-]"</span> x)
+                           (pyim-string-match-p <span style="color: #61CE3C;">"[:ascii:]"</span> line-content)
+                           (not (pyim-string-match-p <span style="color: #61CE3C;">"\\cc"</span> line-content)))
+                 (format <span style="color: #61CE3C;">"%s  %s"</span> x line-content)))
+           pinyin-list <span style="color: #61CE3C;">"\n"</span>))
     (<span style="color: #FBDE2D;">when</span> (&gt; (length insert-string) 1)
       (insert insert-string))))
 
@@ -958,8 +960,8 @@ Chinese-pyim 打算使用 emacs package 来分发词库包。
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2016-01-09</span>
-        <span title="last modification date" class="post-info">2016-01-03</span>
+        <span title="post date" class="post-info">2016-01-19</span>
+        <span title="last modification date" class="post-info">2016-01-19</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>

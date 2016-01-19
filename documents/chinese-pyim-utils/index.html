@@ -132,7 +132,7 @@
 
     <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#24403;&#23383;&#31526;&#20018;&#38271;&#24230;&#22826;&#38271;&#26102;&#65292; `</span><span style="color: #4c83ff; font-style: italic;">pyim-split-chinese-string</span><span style="color: #8B8989; font-style: italic;">'</span>
     <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#30340;&#36895;&#24230;&#27604;&#36739;&#24930;&#65292;&#36825;&#37324;&#30830;&#20445;&#24453;&#20998;&#35789;&#30340;&#23383;&#31526;&#20018;&#38271;&#24230;&#19981;&#36229;&#36807;10.</span>
-    (<span style="color: #FBDE2D;">when</span> (and str (not (string-match-p <span style="color: #61CE3C;">"\\CC"</span> str)))
+    (<span style="color: #FBDE2D;">when</span> (and str (not (pyim-string-match-p <span style="color: #61CE3C;">"\\CC"</span> str)))
       (<span style="color: #FBDE2D;">if</span> (&gt; str-offset 5)
           (<span style="color: #FBDE2D;">progn</span> (setq str-offset-adjusted 5)
                  (setq str (substring str
@@ -142,7 +142,7 @@
         (setq str (substring str 0 (min 9 str-length)))))
 
     (<span style="color: #FBDE2D;">cond</span>
-     ((and str (not (string-match-p <span style="color: #61CE3C;">"\\CC"</span> str)))
+     ((and str (not (pyim-string-match-p <span style="color: #61CE3C;">"\\CC"</span> str)))
       (setq words-alist
             (pyim-split-chinese-string str))
       (<span style="color: #FBDE2D;">dolist</span> (word-list words-alist)
@@ -238,7 +238,7 @@
 <span style="color: #61CE3C;">&#26368;&#38271;&#35789;&#26465;&#40664;&#35748;&#19981;&#36229;&#36807;6&#20010;&#23383;&#31526;&#65292;&#29992;&#25143;&#21487;&#20197;&#36890; `</span><span style="color: #4c83ff;">max-word-length</span><span style="color: #61CE3C;">' &#26469;&#33258;&#23450;&#20041;&#35789;&#26465;&#30340;&#26368;&#22823;&#38271;&#24230;&#65292;</span>
 <span style="color: #61CE3C;">&#20294;&#20540;&#24471;&#27880;&#24847;&#30340;&#26159;&#65292;&#36825;&#20010;&#20540;&#35774;&#32622;&#36234;&#22823;&#65292;&#20998;&#35789;&#36895;&#24230;&#36234;&#24930;&#12290;"</span>
   (<span style="color: #FBDE2D;">let</span> ((string-list
-         (<span style="color: #FBDE2D;">if</span> (string-match-p <span style="color: #61CE3C;">"\\CC"</span> string)
+         (<span style="color: #FBDE2D;">if</span> (pyim-string-match-p <span style="color: #61CE3C;">"\\CC"</span> string)
              (split-string
               (replace-regexp-in-string
                <span style="color: #61CE3C;">"</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">(</span><span style="color: #61CE3C;">\\CC+</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">)</span><span style="color: #61CE3C;">"</span> <span style="color: #61CE3C;">"@@@@\\1@@@@"</span> string) <span style="color: #61CE3C;">"@@@@"</span>)
@@ -246,7 +246,7 @@
     (mapconcat
      #'(<span style="color: #FBDE2D;">lambda</span> (str)
          (<span style="color: #FBDE2D;">when</span> (&gt; (length str) 0)
-           (<span style="color: #FBDE2D;">if</span> (not (string-match-p <span style="color: #61CE3C;">"\\CC"</span> str))
+           (<span style="color: #FBDE2D;">if</span> (not (pyim-string-match-p <span style="color: #61CE3C;">"\\CC"</span> str))
                (pyim-split-chinese-string2string-internal
                 str prefer-short-word separator max-word-length)
              (concat <span style="color: #61CE3C;">" "</span> str <span style="color: #61CE3C;">" "</span>))))
@@ -313,8 +313,8 @@
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2016-01-09</span>
-        <span title="last modification date" class="post-info">2015-11-20</span>
+        <span title="post date" class="post-info">2016-01-19</span>
+        <span title="last modification date" class="post-info">2016-01-19</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>
