@@ -17,6 +17,7 @@
     - [切换全角标点与半角标点](#切换全角标点与半角标点)
     - [手动加词和删词](#手动加词和删词)
     - [Chinese-pyim 高级功能](#chinese-pyim-高级功能)
+    - [捐赠](#捐赠)
   - [Tips](#tips)
     - [Chinese-pyim 出现错误时，如何开启 debug 模式](#chinese-pyim-出现错误时，如何开启-debug-模式)
     - [选词框弹出位置不合理或者选词框内容显示不全](#选词框弹出位置不合理或者选词框内容显示不全)
@@ -31,7 +32,7 @@
     - [为 isearch 相关命令添加拼音搜索支持](#为-isearch-相关命令添加拼音搜索支持)
     - [使用 Chinese-pyim 改善 company-mode 中文补全的体验](#使用-chinese-pyim-改善-company-mode-中文补全的体验)
 
-# Chinese-pyim 使用说明<a id="orgheadline38"></a>
+# Chinese-pyim 使用说明<a id="orgheadline39"></a>
 
 ## 截图<a id="orgheadline1"></a>
 
@@ -92,7 +93,7 @@ Chinese-pyim 的目标是： **尽最大的努力成为一个好用的 emacs 中
     (global-set-key (kbd "C-\") 'toggle-input-method)
     (global-set-key (kbd "C-;") 'pyim-toggle-full-width-punctuation)
 
-## 使用<a id="orgheadline21"></a>
+## 使用<a id="orgheadline22"></a>
 
 ### 常用快捷键<a id="orgheadline11"></a>
 
@@ -344,20 +345,28 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
 
     注：上述函数列表中，任意一个函数的返回值为 t 时，Chinese-pyim 切换到半角标点输入模式。
 
-## Tips<a id="orgheadline37"></a>
+### 捐赠<a id="orgheadline21"></a>
 
-### Chinese-pyim 出现错误时，如何开启 debug 模式<a id="orgheadline22"></a>
+您可以通过小额捐赠的方式支持 Chinese-pyim 的开发工作，具体方式：
+
+1.  通过支付宝收款账户：tumashu@163.com
+2.  通过支付宝钱包扫描：
+    ![img](snapshots/QR-code-for-author.jpg)
+
+## Tips<a id="orgheadline38"></a>
+
+### Chinese-pyim 出现错误时，如何开启 debug 模式<a id="orgheadline23"></a>
 
     (setq debug-on-error t)
 
-### 选词框弹出位置不合理或者选词框内容显示不全<a id="orgheadline23"></a>
+### 选词框弹出位置不合理或者选词框内容显示不全<a id="orgheadline24"></a>
 
 可以通过设置 \`pyim-tooltip-width-adjustment' 变量来手动校正。
 
 1.  选词框内容显示不全：增大变量值
 2.  选词框弹出位置不合理：减小变量值
 
-### 如何查看 Chinese-pyim 文档。<a id="orgheadline24"></a>
+### 如何查看 Chinese-pyim 文档。<a id="orgheadline25"></a>
 
 Chinese-pyim 开发使用 lentic 文学编程模式，代码文档隐藏在comment中，如果用户喜欢阅读 html 格式的文档，可以查看在线文档；
 
@@ -431,7 +440,7 @@ Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面四�
 
     最后将生成的词库按上述方法添加到 Chinese-pyim 中就可以了。
 
-### 如何手动安装和管理词库<a id="orgheadline29"></a>
+### 如何手动安装和管理词库<a id="orgheadline30"></a>
 
 这里假设有两个词库文件：
 
@@ -449,7 +458,7 @@ Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面四�
 1.  必须使用词库文件的绝对路径。
 2.  正确设置coding，否则会出现乱码。
 
-### 如何快速切换词库<a id="orgheadline30"></a>
+### 如何快速切换词库<a id="orgheadline31"></a>
 
 用户可以自定义类似的命令来实现快速切换拼音词库。
 
@@ -462,7 +471,7 @@ Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面四�
                      :dict-type pinyin-dict)))
       (pyim-restart-1 t))
 
-### 将汉字字符串转换为拼音字符串<a id="orgheadline31"></a>
+### 将汉字字符串转换为拼音字符串<a id="orgheadline32"></a>
 
 下面两个函数可以将中文字符串转换的拼音字符串或者列表，用于 emacs-lisp
 编程。
@@ -470,7 +479,7 @@ Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面四�
 1.  \`pyim-hanzi2pinyin' （考虑多音字）
 2.  \`pyim-hanzi2pinyin-simple'  （不考虑多音字）
 
-### 中文分词<a id="orgheadline32"></a>
+### 中文分词<a id="orgheadline33"></a>
 
 Chinese-pyim 包含了一个简单的分词函数：\`pyim-split-chinese-string'. 这个函数使用暴力匹配模式来分词，所以， **不能检测出** Chinese-pyim 词库中不存在的中文词条。另外，这个函数的分词速度比较慢，仅仅适用于中文短句的分词，不适用于文章分词。根据评估，20个汉字组成的字符串需要大约0.3s， 40个汉字消耗1s，随着字符串长度的增大消耗的时间呈几何倍数增加。
 
@@ -489,12 +498,12 @@ Chinese-pyim 包含了一个简单的分词函数：\`pyim-split-chinese-string'
 
 注：仅仅对一般词库有效，个人文件和 guessdict 词库无效。
 
-### 获取光标处的中文词条<a id="orgheadline33"></a>
+### 获取光标处的中文词条<a id="orgheadline34"></a>
 
 Chinese-pyim 包含了一个简单的命令：\`pyim-get-words-list-at-point', 这个命令可以得到光标处的 **英文** 或者 **中文** 词条的 \*列表\*，这个命令依赖分词函数：
 \`pyim-split-chinese-string'。
 
-### 让 \`forward-word' 和 \`back-backward’ 在中文环境下正常工作<a id="orgheadline34"></a>
+### 让 \`forward-word' 和 \`back-backward’ 在中文环境下正常工作<a id="orgheadline35"></a>
 
 中文词语没有强制用空格分词，所以 emacs 内置的命令 \`forward-word' 和 \`backward-word'
 在中文环境不能按用户预期的样子执行，而是 forward/backward “句子” ，Chinese-pyim
@@ -508,7 +517,7 @@ Chinese-pyim 包含了一个简单的命令：\`pyim-get-words-list-at-point', �
     (global-set-key (kbd "M-f") 'pyim-forward-word)
     (global-set-key (kbd "M-b") 'pyim-backward-word)
 
-### 为 isearch 相关命令添加拼音搜索支持<a id="orgheadline35"></a>
+### 为 isearch 相关命令添加拼音搜索支持<a id="orgheadline36"></a>
 
 chinese-pyim 安装后，可以通过下面的设置开启拼音搜索功能：
 
@@ -521,7 +530,7 @@ chinese-pyim 安装后，可以通过下面的设置开启拼音搜索功能：
     (setq-default pyim-english-input-switch-function
                   '(pyim-probe-isearch-mode))
 
-### 使用 Chinese-pyim 改善 company-mode 中文补全的体验<a id="orgheadline36"></a>
+### 使用 Chinese-pyim 改善 company-mode 中文补全的体验<a id="orgheadline37"></a>
 
 中文词语之间没有分割字符，所以 Company-mode 在中文环境下， **补全词条** 变成了 **补全句子** ，可用性很差，chinese-pyim-company 通过 Chinese-pyim 自带的分词函数来分割中文字符串，改善了中文补全的体验 。
 

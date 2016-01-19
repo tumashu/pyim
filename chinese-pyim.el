@@ -239,6 +239,15 @@
 
 ;; 注：上述函数列表中，任意一个函数的返回值为 t 时，Chinese-pyim 切换到半角标点输入模式。
 
+;; ** 捐赠
+;; 您可以通过小额捐赠的方式支持 Chinese-pyim 的开发工作，具体方式：
+
+;; 1. 通过支付宝收款账户：tumashu@163.com
+;; 2. 通过支付宝钱包扫描：
+
+;;    [[file:snapshots/QR-code-for-author.jpg]]
+
+
 ;; ** Tips
 
 ;; *** Chinese-pyim 出现错误时，如何开启 debug 模式
