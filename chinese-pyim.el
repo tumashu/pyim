@@ -202,17 +202,23 @@
 ;;    中删除当前高亮选择的词条。
 
 ;; *** Chinese-pyim 高级功能
+;; 1. 根据环境自动切换到英文输入模式，使用 pyim-english-input-switch-functions 配置。
+;; 2. 根据环境自动切换到半角标点输入模式，使用 pyim-punctuation-half-width-functions 配置。
+
+;; 注意：上述两个功能使用不同的变量设置， *千万不要搞错* 。
+
 ;; **** 根据环境自动切换到英文输入模式
 
-;; | 探针函数                            | 功能说明                                                            |
-;; |-------------------------------------+---------------------------------------------------------------------|
-;; | `pyim-probe-program-mode'           | `prog-mode' 衍生 mode 下，仅仅在字符串和 comment 中开启中文输入模式 |
-;; | `pyim-probe-org-speed-commands'     | 解决 org-speed-commands 与 Chinese-pyim 冲突问题                    |
-;; | `pyim-probe-isearch-mode'           | 使用 isearch 搜索时，强制开启英文输入模式                           |
-;; | `pyim-probe-org-structure-template' | 使用 org-structure-template 时，关闭中文输入模式                    |
-;; |                                     | 1. 当前字符为英文字符时，输入下一个字符时默认开启英文输入           |
-;; | `pyim-probe-dynamic-english'        | 2. 当前字符为中文字符时，输入下一个字符时默认开启中文输入           |
-;; |                                     | 3. 无论当前是什么输入模式，当输入1个空格后，自动切换到中文输入模式  |
+;; | 探针函数                          | 功能说明                                                               |
+;; |-----------------------------------+------------------------------------------------------------------------|
+;; | pyim-probe-program-mode           | `prog-mode' 衍生 mode 下，仅仅在字符串和 comment 中开启中文输入模式    |
+;; | pyim-probe-org-speed-commands     | 解决 org-speed-commands 与 Chinese-pyim 冲突问题                       |
+;; | pyim-probe-isearch-mode           | 使用 isearch 搜索时，强制开启英文输入模式                              |
+;; |                                   | 注意：想要使用这个功能，pyim-isearch-enable-pinyin-search 必须设置为 t |
+;; | pyim-probe-org-structure-template | 使用 org-structure-template 时，关闭中文输入模式                       |
+;; |                                   | 1. 当前字符为英文字符时，输入下一个字符时默认开启英文输入              |
+;; | pyim-probe-dynamic-english        | 2. 当前字符为中文字符时，输入下一个字符时默认开启中文输入              |
+;; |                                   | 3. 无论当前是什么输入模式，当输入1个空格后，自动切换到中文输入模式     |
 
 ;; 激活方式：
 
@@ -225,10 +231,10 @@
 
 ;; **** 根据环境自动切换到半角标点输入模式
 
-;; | 探针函数                                   | 功能说明                   |
-;; |--------------------------------------------+----------------------------|
-;; | `pyim-probe-punctuation-line-beginning'    | 行首强制输入半角标点       |
-;; | `pyim-probe-punctuation-after-punctuation' | 半角标点后强制输入半角标点 |
+;; | 探针函数                                 | 功能说明                   |
+;; |------------------------------------------+----------------------------|
+;; | pyim-probe-punctuation-line-beginning    | 行首强制输入半角标点       |
+;; | pyim-probe-punctuation-after-punctuation | 半角标点后强制输入半角标点 |
 
 ;; 激活方式：
 

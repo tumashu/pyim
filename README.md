@@ -239,6 +239,11 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
 
 ### Chinese-pyim 高级功能<a id="orgheadline20"></a>
 
+1.  根据环境自动切换到英文输入模式，使用 pyim-english-input-switch-functions 配置。
+2.  根据环境自动切换到半角标点输入模式，使用 pyim-punctuation-half-width-functions 配置。
+
+注意：上述两个功能使用不同的变量设置， **千万不要搞错** 。
+
 1.  根据环境自动切换到英文输入模式
 
     <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
@@ -258,25 +263,31 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
 
     <tbody>
     <tr>
-    <td class="org-left">\`pyim-probe-program-mode'</td>
+    <td class="org-left">pyim-probe-program-mode</td>
     <td class="org-left">\`prog-mode' 衍生 mode 下，仅仅在字符串和 comment 中开启中文输入模式</td>
     </tr>
 
 
     <tr>
-    <td class="org-left">\`pyim-probe-org-speed-commands'</td>
+    <td class="org-left">pyim-probe-org-speed-commands</td>
     <td class="org-left">解决 org-speed-commands 与 Chinese-pyim 冲突问题</td>
     </tr>
 
 
     <tr>
-    <td class="org-left">\`pyim-probe-isearch-mode'</td>
+    <td class="org-left">pyim-probe-isearch-mode</td>
     <td class="org-left">使用 isearch 搜索时，强制开启英文输入模式</td>
     </tr>
 
 
     <tr>
-    <td class="org-left">\`pyim-probe-org-structure-template'</td>
+    <td class="org-left">&#xa0;</td>
+    <td class="org-left">注意：想要使用这个功能，pyim-isearch-enable-pinyin-search 必须设置为 t</td>
+    </tr>
+
+
+    <tr>
+    <td class="org-left">pyim-probe-org-structure-template</td>
     <td class="org-left">使用 org-structure-template 时，关闭中文输入模式</td>
     </tr>
 
@@ -288,7 +299,7 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
 
 
     <tr>
-    <td class="org-left">\`pyim-probe-dynamic-english'</td>
+    <td class="org-left">pyim-probe-dynamic-english</td>
     <td class="org-left">2. 当前字符为中文字符时，输入下一个字符时默认开启中文输入</td>
     </tr>
 
@@ -326,13 +337,13 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
 
     <tbody>
     <tr>
-    <td class="org-left">\`pyim-probe-punctuation-line-beginning'</td>
+    <td class="org-left">pyim-probe-punctuation-line-beginning</td>
     <td class="org-left">行首强制输入半角标点</td>
     </tr>
 
 
     <tr>
-    <td class="org-left">\`pyim-probe-punctuation-after-punctuation'</td>
+    <td class="org-left">pyim-probe-punctuation-after-punctuation</td>
     <td class="org-left">半角标点后强制输入半角标点</td>
     </tr>
     </tbody>
