@@ -96,7 +96,6 @@ Chinese-pyim 的目标是： **尽最大的努力成为一个好用的 emacs 中
 
     (setq default-input-method "chinese-pyim")
     (global-set-key (kbd "C-\") 'toggle-input-method)
-    (global-set-key (kbd "C-;") 'pyim-toggle-full-width-punctuation)
 
 ## 使用<a id="orgheadline22"></a>
 
