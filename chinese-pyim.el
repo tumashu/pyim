@@ -75,6 +75,11 @@
 ;; #+END_EXAMPLE
 
 ;; ** 配置
+
+;; *** 配置实例
+;; 对 Chinese-pyim 感兴趣的同学，可以看看我的 Chinese-pyim 配置，
+;; 大体了解一下 Chinese-pyim 的用法：[[https://github.com/tumashu/emacs-helper/blob/master/eh-basic.el][Tumashu's emacs configure]] 。
+
 ;; *** 添加词库文件
 ;; 用户可以使用三种方法为 Chinese-pyim 添加拼音词库，具体方式请参考 [[如何添加自定义拼音词库]] 小结。
 
