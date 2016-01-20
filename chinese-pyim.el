@@ -93,7 +93,7 @@
 
 ;; #+BEGIN_EXAMPLE
 ;; (setq default-input-method "chinese-pyim")
-;; (global-set-key (kbd "C-\") 'toggle-input-method)
+;; (global-set-key (kbd "C-\\") 'toggle-input-method)
 ;; #+END_EXAMPLE
 
 ;; ** 使用

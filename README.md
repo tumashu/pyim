@@ -95,7 +95,7 @@ Chinese-pyim 的目标是： **尽最大的努力成为一个好用的 emacs 中
 ### 激活 Chinese-pyim<a id="orgheadline10"></a>
 
     (setq default-input-method "chinese-pyim")
-    (global-set-key (kbd "C-\") 'toggle-input-method)
+    (global-set-key (kbd "C-\\") 'toggle-input-method)
 
 ## 使用<a id="orgheadline22"></a>
 
