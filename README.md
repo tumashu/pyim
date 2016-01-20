@@ -302,7 +302,7 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
 
     激活方式：
 
-        (setq-default pyim-english-input-switch-function
+        (setq-default pyim-english-input-switch-functions
                       '(probe-function1 probe-function2 probe-function3))
 
     注：上述函数列表中，任意一个函数的返回值为 t 时，Chinese-pyim 切换到英文输入模式。
@@ -528,7 +528,7 @@ chinese-pyim 安装后，可以通过下面的设置开启拼音搜索功能：
 
 如果用户开启了拼音搜索功能，可以使用下面的方式 **强制关闭** isearch 搜索框中文输入（即使在 Chinese-pyim 激活的时候）。
 
-    (setq-default pyim-english-input-switch-function
+    (setq-default pyim-english-input-switch-functions
                   '(pyim-probe-isearch-mode))
 
 ### 使用 Chinese-pyim 改善 company-mode 中文补全的体验<a id="orgheadline37"></a>

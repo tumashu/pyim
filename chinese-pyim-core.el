@@ -296,11 +296,14 @@ Chinese-pyim 内建的功能有：
          "Face to current string show in minibuffer"
          :group 'chinese-pyim)
 
-(defcustom pyim-english-input-switch-function nil
-  "当这个变量的取值为一个函数且这个函数的运行结果为 t 时，Chinese-pyim 开启英文输入功能。
-当这个变量的取值为一个函数列表且这个函数列表中的任意一个函数的运行结果为 t 时，
+(defcustom pyim-english-input-switch-functions nil
+  "这个变量的取值为一个函数列表，这个函数列表中的任意一个函数的运行结果为 t 时，
 Chinese-pyim 也开启英文输入功能。"
   :group 'chinese-pyim)
+
+(defalias 'pyim-english-input-switch-function 'pyim-english-input-switch-functions)
+(make-obsolete 'pyim-english-input-switch-function 'pyim-english-input-switch-functions
+               "Chinese-pyim 1.0")
 
 (defcustom pyim-punctuation-half-width-functions nil
   "取值为一个函数列表，这个函数列表中的任意一个函数的运行结果为 t 时，
@@ -464,7 +467,8 @@ If you don't like this funciton, set the variable to nil")
     pyim-current-choices
     pyim-current-pos
     pyim-input-ascii
-    pyim-english-input-switch-function
+    pyim-english-input-switch-function ;; obsolete
+    pyim-english-input-switch-functions
     pyim-punctuation-half-width-functions
     pyim-guidance-str
     pyim-translating
@@ -1616,8 +1620,8 @@ Return the input string."
 
 (defun pyim-auto-switch-english-input-p ()
   "判断是否 *根据环境自动切换* 为英文输入模式，这个函数处理变量：
-`pyim-english-input-switch-function'"
-  (let* ((func-or-list pyim-english-input-switch-function))
+`pyim-english-input-switch-functions'"
+  (let* ((func-or-list pyim-english-input-switch-functions))
     (and (cl-some #'(lambda (x)
                       (if (functionp x)
                           (funcall x)

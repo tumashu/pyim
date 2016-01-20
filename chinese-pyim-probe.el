@@ -31,11 +31,11 @@
 
 ;; ** 设置
 ;; *** 根据环境自动切换到英文输入模式
-;; 用户将探针函数添加到 `pyim-english-input-switch-function' 后, 就可以激活这个
+;; 用户将探针函数添加到 `pyim-english-input-switch-functions' 后, 就可以激活这个
 ;; 探针函数，比如：
 
 ;; #+BEGIN_EXAMPLE
-;; (setq-default pyim-english-input-switch-function
+;; (setq-default pyim-english-input-switch-functions
 ;;               '(pyim-probe-dynamic-english
 ;;                 pyim-probe-isearch-mode
 ;;                 pyim-probe-program-mode))
@@ -56,7 +56,7 @@
   "激活这个 Chinese-pyim 探针函数后，只能在字符串和 comment 中输入中文。
 注：仅仅影响 `prog-mode' 衍生的 mode 。
 
-用于：`pyim-english-input-switch-function' 。"
+用于：`pyim-english-input-switch-functions' 。"
   (interactive)
   (when (derived-mode-p 'prog-mode)
     (let* ((pos (point))
@@ -69,7 +69,7 @@
 (defun pyim-probe-org-speed-commands ()
   "激活这个 Chinese-pyim 探针函数后，可以解决 org-speed-commands 与 Chinese-pyim 冲突问题。
 
-用于：`pyim-english-input-switch-function' 。"
+用于：`pyim-english-input-switch-functions' 。"
   (and (string= major-mode "org-mode")
        (bolp)
        (looking-at org-heading-regexp)
@@ -78,7 +78,7 @@
 (defun pyim-probe-isearch-mode ()
   "激活这个 Chinese-pyim 探针函数后，使用 isearch 搜索时，禁用中文输入，强制英文输入。
 
-用于：`pyim-english-input-switch-function' 。"
+用于：`pyim-english-input-switch-functions' 。"
   (and pyim-isearch-enable-pinyin-search
        ;; isearch 启动的时候，会设置一个 buffer variable: `isearch-mode'
        ;; 检测所有 buffer 中 `isearch-mode' 的取值，如果任何一个
@@ -90,7 +90,7 @@
 (defun pyim-probe-org-structure-template ()
   "激活这个 Chinese-pyim 探针函数后，输入 org-structure-template 时，不会开启中文输入。
 
-用于：`pyim-english-input-switch-function' 。"
+用于：`pyim-english-input-switch-functions' 。"
   (when (string= major-mode "org-mode")
     (let ((line-string (buffer-substring (point-at-bol) (point))))
       (and (looking-at "[ \t]*$")
@@ -103,7 +103,7 @@
 2. 当前字符为中文字符时，输入下一个字符时默认开启中文输入
 3. 无论当前是什么输入模式，当输入1个空格后，自动切换到中文输入模式
 
-用于：`pyim-english-input-switch-function' 。"
+用于：`pyim-english-input-switch-functions' 。"
   (let ((str-before-1 (pyim-char-before-to-string 0))
         (str-before-2 (pyim-char-before-to-string 1))
         (str-before-2 (pyim-char-before-to-string 2))

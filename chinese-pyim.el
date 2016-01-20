@@ -217,7 +217,7 @@
 ;; 激活方式：
 
 ;; #+BEGIN_EXAMPLE
-;; (setq-default pyim-english-input-switch-function
+;; (setq-default pyim-english-input-switch-functions
 ;;               '(probe-function1 probe-function2 probe-function3))
 ;; #+END_EXAMPLE
 
@@ -442,7 +442,7 @@
 ;; （即使在 Chinese-pyim 激活的时候）。
 
 ;; #+BEGIN_EXAMPLE
-;; (setq-default pyim-english-input-switch-function
+;; (setq-default pyim-english-input-switch-functions
 ;;               '(pyim-probe-isearch-mode))
 ;; #+END_EXAMPLE
 
