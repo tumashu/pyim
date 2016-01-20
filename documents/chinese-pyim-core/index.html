@@ -387,11 +387,14 @@ Chinese pyim 输入法的核心文件，包含了输入法的基本功能函数�
          <span style="color: #61CE3C;">"Face to current string show in minibuffer"</span>
          <span style="color: #FF6400;">:group</span> 'chinese-pyim)
 
-(<span style="color: #FBDE2D;">defcustom</span> <span style="color: #D8FA3C;">pyim-english-input-switch-function</span> nil
-  <span style="color: #61CE3C;">"&#24403;&#36825;&#20010;&#21464;&#37327;&#30340;&#21462;&#20540;&#20026;&#19968;&#20010;&#20989;&#25968;&#19988;&#36825;&#20010;&#20989;&#25968;&#30340;&#36816;&#34892;&#32467;&#26524;&#20026; t &#26102;&#65292;Chinese-pyim &#24320;&#21551;&#33521;&#25991;&#36755;&#20837;&#21151;&#33021;&#12290;</span>
-<span style="color: #61CE3C;">&#24403;&#36825;&#20010;&#21464;&#37327;&#30340;&#21462;&#20540;&#20026;&#19968;&#20010;&#20989;&#25968;&#21015;&#34920;&#19988;&#36825;&#20010;&#20989;&#25968;&#21015;&#34920;&#20013;&#30340;&#20219;&#24847;&#19968;&#20010;&#20989;&#25968;&#30340;&#36816;&#34892;&#32467;&#26524;&#20026; t &#26102;&#65292;</span>
+(<span style="color: #FBDE2D;">defcustom</span> <span style="color: #D8FA3C;">pyim-english-input-switch-functions</span> nil
+  <span style="color: #61CE3C;">"&#36825;&#20010;&#21464;&#37327;&#30340;&#21462;&#20540;&#20026;&#19968;&#20010;&#20989;&#25968;&#21015;&#34920;&#65292;&#36825;&#20010;&#20989;&#25968;&#21015;&#34920;&#20013;&#30340;&#20219;&#24847;&#19968;&#20010;&#20989;&#25968;&#30340;&#36816;&#34892;&#32467;&#26524;&#20026; t &#26102;&#65292;</span>
 <span style="color: #61CE3C;">Chinese-pyim &#20063;&#24320;&#21551;&#33521;&#25991;&#36755;&#20837;&#21151;&#33021;&#12290;"</span>
   <span style="color: #FF6400;">:group</span> 'chinese-pyim)
+
+(<span style="color: #FBDE2D;">defalias</span> '<span style="color: #ff1493;">pyim-english-input-switch-function</span> 'pyim-english-input-switch-functions)
+(make-obsolete 'pyim-english-input-switch-function 'pyim-english-input-switch-functions
+               <span style="color: #61CE3C;">"Chinese-pyim 1.0"</span>)
 
 (<span style="color: #FBDE2D;">defcustom</span> <span style="color: #D8FA3C;">pyim-punctuation-half-width-functions</span> nil
   <span style="color: #61CE3C;">"&#21462;&#20540;&#20026;&#19968;&#20010;&#20989;&#25968;&#21015;&#34920;&#65292;&#36825;&#20010;&#20989;&#25968;&#21015;&#34920;&#20013;&#30340;&#20219;&#24847;&#19968;&#20010;&#20989;&#25968;&#30340;&#36816;&#34892;&#32467;&#26524;&#20026; t &#26102;&#65292;</span>
@@ -561,7 +564,8 @@ Chinese pyim 输入法的核心文件，包含了输入法的基本功能函数�
     pyim-current-choices
     pyim-current-pos
     pyim-input-ascii
-    pyim-english-input-switch-function
+    pyim-english-input-switch-function <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">obsolete</span>
+    pyim-english-input-switch-functions
     pyim-punctuation-half-width-functions
     pyim-guidance-str
     pyim-translating
@@ -1866,8 +1870,8 @@ event list。
 
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-auto-switch-english-input-p</span> ()
   <span style="color: #61CE3C;">"&#21028;&#26029;&#26159;&#21542; *&#26681;&#25454;&#29615;&#22659;&#33258;&#21160;&#20999;&#25442;* &#20026;&#33521;&#25991;&#36755;&#20837;&#27169;&#24335;&#65292;&#36825;&#20010;&#20989;&#25968;&#22788;&#29702;&#21464;&#37327;&#65306;</span>
-<span style="color: #61CE3C;">`</span><span style="color: #4c83ff;">pyim-english-input-switch-function</span><span style="color: #61CE3C;">'"</span>
-  (<span style="color: #FBDE2D;">let*</span> ((func-or-list pyim-english-input-switch-function))
+<span style="color: #61CE3C;">`</span><span style="color: #4c83ff;">pyim-english-input-switch-functions</span><span style="color: #61CE3C;">'"</span>
+  (<span style="color: #FBDE2D;">let*</span> ((func-or-list pyim-english-input-switch-functions))
     (and (cl-some #'(<span style="color: #FBDE2D;">lambda</span> (x)
                       (<span style="color: #FBDE2D;">if</span> (functionp x)
                           (funcall x)
@@ -3953,8 +3957,8 @@ Chinese-pyim 在特定的时候需要读取一个汉字的拼音，这个工作�
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2016-01-19</span>
-        <span title="last modification date" class="post-info">2016-01-19</span>
+        <span title="post date" class="post-info">2016-01-20</span>
+        <span title="last modification date" class="post-info">2016-01-20</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>

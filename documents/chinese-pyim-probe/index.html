@@ -78,11 +78,11 @@
 <h4 id="orgheadline2"><span class="section-number-4">1.2.1</span> 根据环境自动切换到英文输入模式</h4>
 <div class="outline-text-4" id="text-1-2-1">
 <p>
-用户将探针函数添加到 `pyim-english-input-switch-function' 后, 就可以激活这个探针函数，比如：
+用户将探针函数添加到 `pyim-english-input-switch-functions' 后, 就可以激活这个探针函数，比如：
 </p>
 
 <pre class="example">
-(setq-default pyim-english-input-switch-function
+(setq-default pyim-english-input-switch-functions
               '(pyim-probe-dynamic-english
                 pyim-probe-isearch-mode
                 pyim-probe-program-mode))
@@ -118,7 +118,7 @@
   <span style="color: #61CE3C;">"&#28608;&#27963;&#36825;&#20010; Chinese-pyim &#25506;&#38024;&#20989;&#25968;&#21518;&#65292;&#21482;&#33021;&#22312;&#23383;&#31526;&#20018;&#21644; comment &#20013;&#36755;&#20837;&#20013;&#25991;&#12290;</span>
 <span style="color: #61CE3C;">&#27880;&#65306;&#20165;&#20165;&#24433;&#21709; `</span><span style="color: #4c83ff;">prog-mode</span><span style="color: #61CE3C;">' &#34893;&#29983;&#30340; mode &#12290;</span>
 
-<span style="color: #61CE3C;">&#29992;&#20110;&#65306;`</span><span style="color: #4c83ff;">pyim-english-input-switch-function</span><span style="color: #61CE3C;">' &#12290;"</span>
+<span style="color: #61CE3C;">&#29992;&#20110;&#65306;`</span><span style="color: #4c83ff;">pyim-english-input-switch-functions</span><span style="color: #61CE3C;">' &#12290;"</span>
   (interactive)
   (<span style="color: #FBDE2D;">when</span> (derived-mode-p 'prog-mode)
     (<span style="color: #FBDE2D;">let*</span> ((pos (point))
@@ -131,7 +131,7 @@
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-probe-org-speed-commands</span> ()
   <span style="color: #61CE3C;">"&#28608;&#27963;&#36825;&#20010; Chinese-pyim &#25506;&#38024;&#20989;&#25968;&#21518;&#65292;&#21487;&#20197;&#35299;&#20915; org-speed-commands &#19982; Chinese-pyim &#20914;&#31361;&#38382;&#39064;&#12290;</span>
 
-<span style="color: #61CE3C;">&#29992;&#20110;&#65306;`</span><span style="color: #4c83ff;">pyim-english-input-switch-function</span><span style="color: #61CE3C;">' &#12290;"</span>
+<span style="color: #61CE3C;">&#29992;&#20110;&#65306;`</span><span style="color: #4c83ff;">pyim-english-input-switch-functions</span><span style="color: #61CE3C;">' &#12290;"</span>
   (and (string= major-mode <span style="color: #61CE3C;">"org-mode"</span>)
        (bolp)
        (looking-at org-heading-regexp)
@@ -140,7 +140,7 @@
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-probe-isearch-mode</span> ()
   <span style="color: #61CE3C;">"&#28608;&#27963;&#36825;&#20010; Chinese-pyim &#25506;&#38024;&#20989;&#25968;&#21518;&#65292;&#20351;&#29992; isearch &#25628;&#32034;&#26102;&#65292;&#31105;&#29992;&#20013;&#25991;&#36755;&#20837;&#65292;&#24378;&#21046;&#33521;&#25991;&#36755;&#20837;&#12290;</span>
 
-<span style="color: #61CE3C;">&#29992;&#20110;&#65306;`</span><span style="color: #4c83ff;">pyim-english-input-switch-function</span><span style="color: #61CE3C;">' &#12290;"</span>
+<span style="color: #61CE3C;">&#29992;&#20110;&#65306;`</span><span style="color: #4c83ff;">pyim-english-input-switch-functions</span><span style="color: #61CE3C;">' &#12290;"</span>
   (and pyim-isearch-enable-pinyin-search
        <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">isearch &#21551;&#21160;&#30340;&#26102;&#20505;&#65292;&#20250;&#35774;&#32622;&#19968;&#20010; buffer variable: `</span><span style="color: #4c83ff; font-style: italic;">isearch-mode</span><span style="color: #8B8989; font-style: italic;">'</span>
        <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#26816;&#27979;&#25152;&#26377; buffer &#20013; `</span><span style="color: #4c83ff; font-style: italic;">isearch-mode</span><span style="color: #8B8989; font-style: italic;">' &#30340;&#21462;&#20540;&#65292;&#22914;&#26524;&#20219;&#20309;&#19968;&#20010;</span>
@@ -152,7 +152,7 @@
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-probe-org-structure-template</span> ()
   <span style="color: #61CE3C;">"&#28608;&#27963;&#36825;&#20010; Chinese-pyim &#25506;&#38024;&#20989;&#25968;&#21518;&#65292;&#36755;&#20837; org-structure-template &#26102;&#65292;&#19981;&#20250;&#24320;&#21551;&#20013;&#25991;&#36755;&#20837;&#12290;</span>
 
-<span style="color: #61CE3C;">&#29992;&#20110;&#65306;`</span><span style="color: #4c83ff;">pyim-english-input-switch-function</span><span style="color: #61CE3C;">' &#12290;"</span>
+<span style="color: #61CE3C;">&#29992;&#20110;&#65306;`</span><span style="color: #4c83ff;">pyim-english-input-switch-functions</span><span style="color: #61CE3C;">' &#12290;"</span>
   (<span style="color: #FBDE2D;">when</span> (string= major-mode <span style="color: #61CE3C;">"org-mode"</span>)
     (<span style="color: #FBDE2D;">let</span> ((line-string (buffer-substring (point-at-bol) (point))))
       (and (looking-at <span style="color: #61CE3C;">"[ \t]*$"</span>)
@@ -165,7 +165,7 @@
 <span style="color: #61CE3C;">2. &#24403;&#21069;&#23383;&#31526;&#20026;&#20013;&#25991;&#23383;&#31526;&#26102;&#65292;&#36755;&#20837;&#19979;&#19968;&#20010;&#23383;&#31526;&#26102;&#40664;&#35748;&#24320;&#21551;&#20013;&#25991;&#36755;&#20837;</span>
 <span style="color: #61CE3C;">3. &#26080;&#35770;&#24403;&#21069;&#26159;&#20160;&#20040;&#36755;&#20837;&#27169;&#24335;&#65292;&#24403;&#36755;&#20837;1&#20010;&#31354;&#26684;&#21518;&#65292;&#33258;&#21160;&#20999;&#25442;&#21040;&#20013;&#25991;&#36755;&#20837;&#27169;&#24335;</span>
 
-<span style="color: #61CE3C;">&#29992;&#20110;&#65306;`</span><span style="color: #4c83ff;">pyim-english-input-switch-function</span><span style="color: #61CE3C;">' &#12290;"</span>
+<span style="color: #61CE3C;">&#29992;&#20110;&#65306;`</span><span style="color: #4c83ff;">pyim-english-input-switch-functions</span><span style="color: #61CE3C;">' &#12290;"</span>
   (<span style="color: #FBDE2D;">let</span> ((str-before-1 (pyim-char-before-to-string 0))
         (str-before-2 (pyim-char-before-to-string 1))
         (str-before-2 (pyim-char-before-to-string 2))
@@ -222,8 +222,8 @@
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2016-01-19</span>
-        <span title="last modification date" class="post-info">2016-01-19</span>
+        <span title="post date" class="post-info">2016-01-20</span>
+        <span title="last modification date" class="post-info">2016-01-20</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>
