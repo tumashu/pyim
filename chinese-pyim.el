@@ -351,15 +351,15 @@
 ;; *** 如何手动安装和管理词库
 ;; 这里假设有两个词库文件：
 
-;; 1. /path/to/pyim-dict1.txt
-;; 2. /path/to/pyim-dict2.txt
+;; 1. /path/to/pyim-dict1.pyim
+;; 2. /path/to/pyim-dict2.pyim
 
 ;; 在~/.emacs文件中添加如下一行配置。
 
 ;; #+BEGIN_EXAMPLE
 ;; (setq pyim-dicts
-;;       '((:name "dict1" :file "/path/to/pyim-dict1.txt" :coding gbk-dos :dict-type pinyin-dict)
-;;         (:name "dict2" :file "/path/to/pyim-dict2.txt" :coding gbk-dos :dict-type pinyin-dict)))
+;;       '((:name "dict1" :file "/path/to/pyim-dict1.pyim" :coding gbk-dos :dict-type pinyin-dict)
+;;         (:name "dict2" :file "/path/to/pyim-dict2.pyim" :coding gbk-dos :dict-type pinyin-dict)))
 ;; #+END_EXAMPLE
 
 ;; 注意事项:
@@ -374,7 +374,7 @@
 ;;   (interactive)
 ;;   (setq pyim-dicts
 ;;         '((:name "BigDict"
-;;                  :file "/path/to/pyim-bigdict.txt"
+;;                  :file "/path/to/pyim-bigdict.pyim"
 ;;                  :coding utf-8-unix
 ;;                  :dict-type pinyin-dict)))
 ;;   (pyim-restart-1 t))

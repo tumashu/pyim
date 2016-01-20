@@ -456,14 +456,14 @@ Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面四�
 
 这里假设有两个词库文件：
 
-1.  /path/to/pyim-dict1.txt
-2.  /path/to/pyim-dict2.txt
+1.  /path/to/pyim-dict1.pyim
+2.  /path/to/pyim-dict2.pyim
 
 在~/.emacs文件中添加如下一行配置。
 
     (setq pyim-dicts
-          '((:name "dict1" :file "/path/to/pyim-dict1.txt" :coding gbk-dos :dict-type pinyin-dict)
-            (:name "dict2" :file "/path/to/pyim-dict2.txt" :coding gbk-dos :dict-type pinyin-dict)))
+          '((:name "dict1" :file "/path/to/pyim-dict1.pyim" :coding gbk-dos :dict-type pinyin-dict)
+            (:name "dict2" :file "/path/to/pyim-dict2.pyim" :coding gbk-dos :dict-type pinyin-dict)))
 
 注意事项:
 
@@ -478,7 +478,7 @@ Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面四�
       (interactive)
       (setq pyim-dicts
             '((:name "BigDict"
-                     :file "/path/to/pyim-bigdict.txt"
+                     :file "/path/to/pyim-bigdict.pyim"
                      :coding utf-8-unix
                      :dict-type pinyin-dict)))
       (pyim-restart-1 t))
