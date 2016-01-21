@@ -919,24 +919,6 @@ If you don't like this funciton, set the variable to nil")
             (message "个人词库文件 buffer 存在问题，忽略加载！"))))
       (delete-dups words))))
 
-(defun pyim-get-codes-in-personal-buffer ()
-  (let ((buffer (cdr (assoc "buffer" (car pyim-buffer-list))))
-        result)
-    (with-current-buffer buffer
-      (goto-char (point-min))
-      (while (not (eobp))
-        (push (pyim-code-at-point) result)
-        (forward-line 1)))
-    ;; 加入26个字母code，用于缩小搜索范围。
-    (setq result
-          (append (mapcar
-                   #'(lambda (x)
-                       (string x))
-                   "abcdefghjklmnopqrstwxyz")
-                  result))
-    (cl-delete-duplicates (nreverse result)
-                          :test #'equal :from-end t)))
-
 ;; Shameless steal from company-dabbrev.el in `company' package
 (defmacro pyim-get-dabbrev-time-limit-while (test start limit &rest body)
   (declare (indent 3) (debug t))
@@ -1011,6 +993,11 @@ If you don't like this funciton, set the variable to nil")
                (cl-return))))
       symbols)))
 
+(defun pyim-string-match-p (regexp string &optional start)
+  (and (stringp regexp)
+       (stringp string)
+       (string-match-p regexp string start)))
+
 (defun pyim-get-pinyin-similar-words (code &optional search-from-guessdict search-personal-buffer-only)
   "得到 `code' 对应的联想词。"
   (let ((regexp (pyim-build-pinyin-regexp code t t))
@@ -1073,99 +1060,6 @@ If you don't like this funciton, set the variable to nil")
                      x))
                pylist "-")))))
 
-(defun pyim-pinyin-match (pinyin1 pinyin2 &optional match-beginning first-equal all-equal)
-  "判断拼音 `pinyin1' 是否和拼音 `pinyin2' 相匹配，如果匹配，
-则返回匹配的起点与终点，通过起点和终点，可以方便的从 `pinyin2'
-对应的汉字字符串中提取拼音为 `pinyin1' 的子字符串。比如：
-
-shi-shui 与  ni-shi-shui-ya 匹配，这个函数的返回值为 (1 . 3),
-我们可以使用下面这一个语句：
-
-       (substring \"你是谁啊\" 1 3)
-
-得到拼音 shi-shui 对应的子字符串: “是谁”。"
-  (when (and (stringp pinyin1)
-             (stringp pinyin2)
-             (> (length pinyin1) 0)
-             (> (length pinyin2) 0))
-    (let* ((long-pinyin (pyim-string-match-p "-" pinyin1))
-           (regexp (pyim-build-pinyin-regexp
-                    pinyin1
-                    match-beginning
-                    ;; 当 `pinyin1' 为一个汉字的拼音时，强制 equal 匹配
-                    (if long-pinyin
-                        first-equal
-                      t)
-                    all-equal))
-           (regexp
-            ;; 当 `pinyin1' 为一个汉字的拼音时，
-            ;; 强制尾端匹配，这样可以清除许多不需要的候选词。
-            ;; 比如：“jia” 匹配到 “将”。
-            (if long-pinyin
-                regexp
-              (format "%s$\\|%s[-]+" regexp regexp)))
-           (match (pyim-string-match-p regexp pinyin2))
-           (substring (when match
-                        (substring pinyin2 0 match)))
-           (begin (when substring
-                    (length (replace-regexp-in-string
-                             "[a-z]" "" substring))))
-           (length
-            (when pinyin1
-              (+ 1 (length (replace-regexp-in-string
-                            "[a-z]" "" pinyin1))))))
-      (when (and begin length)
-        (cons begin (+ begin length))))))
-
-(defun pyim-build-chinese-regexp-for-pylist (pylist &optional match-beginning
-                                                    first-equal all-equal)
-  "这个函数生成一个 regexp ，用这个 regexp 可以搜索到
-拼音匹配 `pylist' 的中文字符串。"
-  (let* ((pylist (mapcar
-                  #'(lambda (x)
-                      (concat (car x) (cdr x)))
-                  pylist))
-         (cchar-list
-          (let ((n 0) results)
-            (dolist (py pylist)
-              (push
-               (mapconcat #'identity
-                          (pyim-pinyin-pymap-get-pinyin-matched-char
-                           py
-                           (or all-equal
-                               (and first-equal
-                                    (= n 0)))) "")
-               results)
-              (setq n (+ 1 n)))
-            (nreverse results)))
-         (regexp
-          (mapconcat
-           #'(lambda (x)
-               (when (pyim-string-match-p "\\cc" x)
-                 (format "[%s]" x)))
-           cchar-list
-           "")))
-    (unless (equal regexp "")
-      (concat (if match-beginning "^" "")
-              regexp))))
-
-(defun pyim-match-chinese-with-pylist (pylist chinese-string &optional match-beginning
-                                              first-equal all-equal)
-  "从中文字符串 `chinese-string' 中搜索一个拼音与 `pylist' 匹配的子字符串，
-然后返回匹配的起点与终点组成的 cons，通过起点和终点，可以方便的提取匹配的子字符串
-或者其他相关的子字符串。"
-  (when (and (listp pylist)
-             (stringp chinese-string))
-    (let* ((length-pylist (length pylist))
-           (length-str (length chinese-string))
-           (regexp (pyim-build-chinese-regexp-for-pylist
-                    pylist match-beginning first-equal all-equal))
-           (begin (pyim-string-match-p regexp chinese-string)))
-      (when begin
-        (cons begin
-              (min length-str
-                   (+ begin length-pylist)))))))
-
 (defun pyim-dict-buffer-valid-p ()
   "粗略地确定当前 buffer 是否是一个有效的词库产生的 buffer。
 确定标准：
@@ -1184,7 +1078,9 @@ BUG: 这个函数需要进一步优化，使其判断更准确。"
         (beginning-of-line)
         (and (re-search-forward "[ \t]" (line-end-position) t)
              (re-search-forward "\\cc" (line-end-position) t))))))
+;; #+END_SRC
 
+;; #+BEGIN_SRC emacs-lisp
 (defun pyim-cache-dict-buffer ()
   "根据个人词库文件中的 codes，来构建普通词库文件的缓存，用于加快查询速度，
 主要用于对访问速度要求高的中文字符串分词功能。"
@@ -1251,10 +1147,23 @@ BUG: 这个函数需要进一步优化，使其判断更准确。"
                         ("buffer-cache-mode" . ,buffer-cache-mode))
                       pyim-buffer-cache-list)))))))))
 
-(defun pyim-string-match-p (regexp string &optional start)
-  (and (stringp regexp)
-       (stringp string)
-       (string-match-p regexp string start)))
+(defun pyim-get-codes-in-personal-buffer ()
+  (let ((buffer (cdr (assoc "buffer" (car pyim-buffer-list))))
+        result)
+    (with-current-buffer buffer
+      (goto-char (point-min))
+      (while (not (eobp))
+        (push (pyim-code-at-point) result)
+        (forward-line 1)))
+    ;; 加入26个字母code，用于缩小搜索范围。
+    (setq result
+          (append (mapcar
+                   #'(lambda (x)
+                       (string x))
+                   "abcdefghjklmnopqrstwxyz")
+                  result))
+    (cl-delete-duplicates (nreverse result)
+                          :test #'equal :from-end t)))
 ;; #+END_SRC
 
 ;; `pyim-buffer-list' 中每一个 buffer 都使用函数：`pyim-bisearch-word' 来
@@ -2232,6 +2141,99 @@ Return the input string."
                  (car x)))
          (nreverse (pyim-split-chinese-string string)))
         (or fallback ""))))
+
+(defun pyim-pinyin-match (pinyin1 pinyin2 &optional match-beginning first-equal all-equal)
+  "判断拼音 `pinyin1' 是否和拼音 `pinyin2' 相匹配，如果匹配，
+则返回匹配的起点与终点，通过起点和终点，可以方便的从 `pinyin2'
+对应的汉字字符串中提取拼音为 `pinyin1' 的子字符串。比如：
+
+shi-shui 与  ni-shi-shui-ya 匹配，这个函数的返回值为 (1 . 3),
+我们可以使用下面这一个语句：
+
+       (substring \"你是谁啊\" 1 3)
+
+得到拼音 shi-shui 对应的子字符串: “是谁”。"
+  (when (and (stringp pinyin1)
+             (stringp pinyin2)
+             (> (length pinyin1) 0)
+             (> (length pinyin2) 0))
+    (let* ((long-pinyin (pyim-string-match-p "-" pinyin1))
+           (regexp (pyim-build-pinyin-regexp
+                    pinyin1
+                    match-beginning
+                    ;; 当 `pinyin1' 为一个汉字的拼音时，强制 equal 匹配
+                    (if long-pinyin
+                        first-equal
+                      t)
+                    all-equal))
+           (regexp
+            ;; 当 `pinyin1' 为一个汉字的拼音时，
+            ;; 强制尾端匹配，这样可以清除许多不需要的候选词。
+            ;; 比如：“jia” 匹配到 “将”。
+            (if long-pinyin
+                regexp
+              (format "%s$\\|%s[-]+" regexp regexp)))
+           (match (pyim-string-match-p regexp pinyin2))
+           (substring (when match
+                        (substring pinyin2 0 match)))
+           (begin (when substring
+                    (length (replace-regexp-in-string
+                             "[a-z]" "" substring))))
+           (length
+            (when pinyin1
+              (+ 1 (length (replace-regexp-in-string
+                            "[a-z]" "" pinyin1))))))
+      (when (and begin length)
+        (cons begin (+ begin length))))))
+
+(defun pyim-build-chinese-regexp-for-pylist (pylist &optional match-beginning
+                                                    first-equal all-equal)
+  "这个函数生成一个 regexp ，用这个 regexp 可以搜索到
+拼音匹配 `pylist' 的中文字符串。"
+  (let* ((pylist (mapcar
+                  #'(lambda (x)
+                      (concat (car x) (cdr x)))
+                  pylist))
+         (cchar-list
+          (let ((n 0) results)
+            (dolist (py pylist)
+              (push
+               (mapconcat #'identity
+                          (pyim-pinyin-pymap-get-pinyin-matched-char
+                           py
+                           (or all-equal
+                               (and first-equal
+                                    (= n 0)))) "")
+               results)
+              (setq n (+ 1 n)))
+            (nreverse results)))
+         (regexp
+          (mapconcat
+           #'(lambda (x)
+               (when (pyim-string-match-p "\\cc" x)
+                 (format "[%s]" x)))
+           cchar-list
+           "")))
+    (unless (equal regexp "")
+      (concat (if match-beginning "^" "")
+              regexp))))
+
+(defun pyim-match-chinese-with-pylist (pylist chinese-string &optional match-beginning
+                                              first-equal all-equal)
+  "从中文字符串 `chinese-string' 中搜索一个拼音与 `pylist' 匹配的子字符串，
+然后返回匹配的起点与终点组成的 cons，通过起点和终点，可以方便的提取匹配的子字符串
+或者其他相关的子字符串。"
+  (when (and (listp pylist)
+             (stringp chinese-string))
+    (let* ((length-pylist (length pylist))
+           (length-str (length chinese-string))
+           (regexp (pyim-build-chinese-regexp-for-pylist
+                    pylist match-beginning first-equal all-equal))
+           (begin (pyim-string-match-p regexp chinese-string)))
+      (when begin
+        (cons begin
+              (min length-str
+                   (+ begin length-pylist)))))))
 
 (defun pyim-sublist (list start end)
   "Return a section of LIST, from START to END.
