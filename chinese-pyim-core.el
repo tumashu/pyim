@@ -836,17 +836,13 @@ If you don't like this funciton, set the variable to nil")
 
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-get (code &optional search-from-guessdict ignore-personal-buffer search-personal-buffer-only)
-  (let* ((persional-file-buffer (car pyim-buffer-list))
-         (buffer-list
-          (cond (search-personal-buffer-only
-                 (list (car pyim-buffer-list)))
-                (ignore-personal-buffer
-                 (cdr pyim-buffer-list))
-                (t pyim-buffer-list)))
-         (search-dicts-buffer-p t) ;用来决定是否需要搜索词库 buffer
-         words nearby-codes-positions buffer-list)
+  (let ((persional-file-buffer (car pyim-buffer-list))
+        (other-buffer-list (cdr pyim-buffer-list))
+        (search-dicts-buffer-p t) ;用来决定是否需要搜索词库 buffer
+        words nearby-codes-positions buffer-list)
     (when (and (stringp code) (string< "" code))
-      (when pyim-buffer-cache-list
+      (when (and pyim-buffer-cache-list
+                 (not search-personal-buffer-only))
         ;; 直接从 buffer cache 中查询词条，速度很快。
         (dolist (buf-cache pyim-buffer-cache-list)
           (setq words
@@ -875,8 +871,10 @@ If you don't like this funciton, set the variable to nil")
                       nearby-codes-positions))))))
 
       ;; 直接用二分法搜索 *普通词库* buffer（速度比较慢）。
-      (when (and (not words) search-dicts-buffer-p)
-        (dolist (buf buffer-list)
+      (when (and (not words)
+                 (not search-personal-buffer-only)
+                 search-dicts-buffer-p)
+        (dolist (buf other-buffer-list)
           (let ((dict-type (cdr (assoc "dict-type" buf))))
             ;; Search from dict
             (when (and (not search-from-guessdict)
@@ -902,8 +900,9 @@ If you don't like this funciton, set the variable to nil")
                                                            (or point2 (point-max))))))
                 (message "%s 可能不是一个有效的词库 buffer，忽略。" (buffer-name)))))))
 
-      (when (not (or search-from-guessdict
-                     ignore-personal-buffer))
+      (when (or search-personal-buffer-only
+                (not (or search-from-guessdict
+                         ignore-personal-buffer)))
         ;; 设置 `ignore-personal-buffer' 为 t 时，用于多音字校正。
         ;; pyim-buffer-list 中第一个 buffer 对应的是个人词库文件
         ;; 个人词库文件中的词条极有可能存在 *多音字污染*。
