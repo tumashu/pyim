@@ -1011,80 +1011,9 @@ If you don't like this funciton, set the variable to nil")
                (cl-return))))
       symbols)))
 
-(defun pyim-cache-dict-buffer ()
-  "根据个人词库文件中的 codes，来构建普通词库文件的缓存，用于加快查询速度，
-主要用于对访问速度要求高的中文字符串分词功能。"
-  (interactive)
-  (let ((cache-all-codes (yes-or-no-p "请选择缓存模式：[Yes] 缓存所有的词条; [No] 缓存常用的词条;  "))
-        (max-word-length (read-number "缓存词条的最大长度为： ")))
-    ;; 如果 Chinese-pyim 词库没有加载，加载 Chinese-pyim 词库，
-    ;; 确保 pyim-get 可以正常运行。
-    (unless pyim-buffer-list
-      (setq pyim-buffer-list (pyim-load-file)))
-    (message "正在缓存词库，请稍等。。。")
-    (pyim-cache-dict-buffer-internal cache-all-codes max-word-length)
-    (message "词库缓存完成！")))
-
-(defun pyim-cache-dict-buffer-internal (&optional cache-all-codes max-word-length)
-  "构建普通词库文件的缓存，用于加快查询速度，主要用于对访问速度要求高的中文字符串分词功能。
-当 `cache-all-codes' 设置为 t 时，缓存普通词库 buffer 中存在的所有词条，如果设置为 nil， 仅仅
-缓存常用的 codes 对应的词条，常用 codes 从个人文件中提取，具体请参考：`pyim-get-codes-in-personal-buffer'
-`max-word-length' 用来设置缓存词条的最大长度。"
-  (interactive)
-  (let ((all-buffer-list pyim-buffer-list)
-        (codes-used-freq (pyim-get-codes-in-personal-buffer))
-        buffer-cache-mode result)
-    ;; 清空原来的缓存。
-    (setq pyim-buffer-cache-list nil)
-    (dolist (buf all-buffer-list)
-      ;; 这里仅仅 cache 普通词库 buffer，忽略 cache 个人词库文件 buffer 和
-      ;; guessdict 词库 buffer。其主要原因是：
-      ;; 1. 个人词库频繁变动，cache 很快会过期
-      ;; 2. guessdict 词库的查询速度基本可以满足输入法的要求，
-      ;;    不需要 cache。
-      ;; 3. 当对中文字符串分词时，要求极其快速的查询个人词库,
-      ;;    使用缓存可以极大的提高分词速度。
-      (let ((dict-type (cdr (assoc "dict-type" buf)))
-            (buffer (cdr (assoc "buffer" buf))))
-        (when (or (null dict-type)
-                  (eq dict-type 'pinyin-dict))
-          (with-current-buffer buffer
-            (goto-char (point-min))
-            (let ((index-table (make-hash-table :size 50000 :test #'equal)))
-              (when (pyim-dict-buffer-valid-p)
-                (if cache-all-codes
-                    (progn
-                      (while (not (eobp))
-                        (let* ((code (pyim-code-at-point))
-                               (code-length (length (split-string code "-")))
-                               (words (cdr (pyim-line-content))))
-                          (when (<= code-length (or max-word-length 6))
-                            (puthash code
-                                     (list words)
-                                     index-table)))
-                        (forward-line 1))
-                      (setq buffer-cache-mode 'full))
-                  (dolist (code codes-used-freq)
-                    (puthash code
-                             (list (cdr (pyim-bisearch-word code
-                                                            (point-min)
-                                                            (point-max)))
-                                   (point))
-                             index-table))
-                  (setq buffer-cache-mode 'partly))
-                (push `(("buffer" . ,buffer)
-                        ("buffer-cache" . ,index-table)
-                        ("buffer-cache-mode" . ,buffer-cache-mode))
-                      pyim-buffer-cache-list)))))))))
-
-(defun pyim-string-match-p (regexp string &optional start)
-  (and (stringp regexp)
-       (stringp string)
-       (string-match-p regexp string start)))
-
-(defun pyim-predict (code &optional search-from-guessdict search-personal-buffer-only)
+(defun pyim-get-pinyin-similar-words (code &optional search-from-guessdict search-personal-buffer-only)
   "得到 `code' 对应的联想词。"
-  (let ((regexp (pyim-predict-build-regexp code t t))
+  (let ((regexp (pyim-build-pinyin-regexp code t t))
         buffer-list words-list predicted-words)
     (when (and (stringp code)
                (string< "" code)
@@ -1126,7 +1055,7 @@ If you don't like this funciton, set the variable to nil")
                 (push word predicted-words))))))
       (delete-dups (reverse predicted-words)))))
 
-(defun pyim-predict-build-regexp (code &optional match-beginning first-equal all-equal)
+(defun pyim-build-pinyin-regexp (code &optional match-beginning first-equal all-equal)
   "从`code' 构建一个 regexp，用于搜索联想词，
 比如：ni-hao-si-j --> ^ni-hao[a-z]*-si[a-z]*-j[a-z]* , when `first-equal' set to `t'
                   --> ^ni[a-z]*-hao[a-z]*-si[a-z]*-j[a-z]* , when `first-equal' set to `nil'"
@@ -1160,7 +1089,7 @@ shi-shui 与  ni-shi-shui-ya 匹配，这个函数的返回值为 (1 . 3),
              (> (length pinyin1) 0)
              (> (length pinyin2) 0))
     (let* ((long-pinyin (pyim-string-match-p "-" pinyin1))
-           (regexp (pyim-predict-build-regexp
+           (regexp (pyim-build-pinyin-regexp
                     pinyin1
                     match-beginning
                     ;; 当 `pinyin1' 为一个汉字的拼音时，强制 equal 匹配
@@ -1255,6 +1184,77 @@ BUG: 这个函数需要进一步优化，使其判断更准确。"
         (beginning-of-line)
         (and (re-search-forward "[ \t]" (line-end-position) t)
              (re-search-forward "\\cc" (line-end-position) t))))))
+
+(defun pyim-cache-dict-buffer ()
+  "根据个人词库文件中的 codes，来构建普通词库文件的缓存，用于加快查询速度，
+主要用于对访问速度要求高的中文字符串分词功能。"
+  (interactive)
+  (let ((cache-all-codes (yes-or-no-p "请选择缓存模式：[Yes] 缓存所有的词条; [No] 缓存常用的词条;  "))
+        (max-word-length (read-number "缓存词条的最大长度为： ")))
+    ;; 如果 Chinese-pyim 词库没有加载，加载 Chinese-pyim 词库，
+    ;; 确保 pyim-get 可以正常运行。
+    (unless pyim-buffer-list
+      (setq pyim-buffer-list (pyim-load-file)))
+    (message "正在缓存词库，请稍等。。。")
+    (pyim-cache-dict-buffer-internal cache-all-codes max-word-length)
+    (message "词库缓存完成！")))
+
+(defun pyim-cache-dict-buffer-internal (&optional cache-all-codes max-word-length)
+  "构建普通词库文件的缓存，用于加快查询速度，主要用于对访问速度要求高的中文字符串分词功能。
+当 `cache-all-codes' 设置为 t 时，缓存普通词库 buffer 中存在的所有词条，如果设置为 nil， 仅仅
+缓存常用的 codes 对应的词条，常用 codes 从个人文件中提取，具体请参考：`pyim-get-codes-in-personal-buffer'
+`max-word-length' 用来设置缓存词条的最大长度。"
+  (interactive)
+  (let ((all-buffer-list pyim-buffer-list)
+        (codes-used-freq (pyim-get-codes-in-personal-buffer))
+        buffer-cache-mode result)
+    ;; 清空原来的缓存。
+    (setq pyim-buffer-cache-list nil)
+    (dolist (buf all-buffer-list)
+      ;; 这里仅仅 cache 普通词库 buffer，忽略 cache 个人词库文件 buffer 和
+      ;; guessdict 词库 buffer。其主要原因是：
+      ;; 1. 个人词库频繁变动，cache 很快会过期
+      ;; 2. guessdict 词库的查询速度基本可以满足输入法的要求，
+      ;;    不需要 cache。
+      ;; 3. 当对中文字符串分词时，要求极其快速的查询个人词库,
+      ;;    使用缓存可以极大的提高分词速度。
+      (let ((dict-type (cdr (assoc "dict-type" buf)))
+            (buffer (cdr (assoc "buffer" buf))))
+        (when (or (null dict-type)
+                  (eq dict-type 'pinyin-dict))
+          (with-current-buffer buffer
+            (goto-char (point-min))
+            (let ((index-table (make-hash-table :size 50000 :test #'equal)))
+              (when (pyim-dict-buffer-valid-p)
+                (if cache-all-codes
+                    (progn
+                      (while (not (eobp))
+                        (let* ((code (pyim-code-at-point))
+                               (code-length (length (split-string code "-")))
+                               (words (cdr (pyim-line-content))))
+                          (when (<= code-length (or max-word-length 6))
+                            (puthash code
+                                     (list words)
+                                     index-table)))
+                        (forward-line 1))
+                      (setq buffer-cache-mode 'full))
+                  (dolist (code codes-used-freq)
+                    (puthash code
+                             (list (cdr (pyim-bisearch-word code
+                                                            (point-min)
+                                                            (point-max)))
+                                   (point))
+                             index-table))
+                  (setq buffer-cache-mode 'partly))
+                (push `(("buffer" . ,buffer)
+                        ("buffer-cache" . ,index-table)
+                        ("buffer-cache-mode" . ,buffer-cache-mode))
+                      pyim-buffer-cache-list)))))))))
+
+(defun pyim-string-match-p (regexp string &optional start)
+  (and (stringp regexp)
+       (stringp string)
+       (string-match-p regexp string start)))
 ;; #+END_SRC
 
 ;; `pyim-buffer-list' 中每一个 buffer 都使用函数：`pyim-bisearch-word' 来
@@ -1312,7 +1312,7 @@ beginning of line"
 
 (defun pyim-multiline-content (begin end &optional seperaters omit-nulls)
   "将当前 buffer 中，`begin' 到 `end' 之间的内容分解，生成一个 list，
-这个函数用于搜索联想词函数 `pyim-predict' 。"
+这个函数用于搜索联想词函数 `pyim-get-pinyin-similar-words' 。"
   ;;  ni-hao 你好 倪浩         (("ni-hao" "你好" "倪浩")
   ;;  ni-hao-a 你好啊    -->    ("ni-hao-a" "你好啊")
   ;;  ni-hao-b 你好吧           ("ni-hao-ba" "你好吧"))
@@ -2027,7 +2027,7 @@ Return the input string."
     ;; 如果输入 "ni-hao" ，搜索拼音与 "ni-hao" 类似的词条作为联想词。
     ;; 搜索相似词得到的联想词太多，这里限制只搜索个人文件。
     (when (member 'pinyin-similar pyim-enable-words-predict)
-      (push `(pinyin-similar ,@(pyim-predict py-str nil t)) words-predicted))
+      (push `(pinyin-similar ,@(pyim-get-pinyin-similar-words py-str nil t)) words-predicted))
 
     ;; 如果输入 "ni-hao" ，搜索 code 为 "n-h" 的词条做为联想词。
     ;; 搜索首字母得到的联想词太多，这里限制联想词要大于三个汉字并且只搜索
