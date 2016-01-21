@@ -345,6 +345,7 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
   "限制词库文件中的行长度。如果行太长，在windows平台下会出现严重的性能问题。"
   :group 'chinese-pyim)
 
+(defvar pyim-debug nil)
 (defvar pyim-title "灵拼" "Chinese-pyim 在 mode-line 中显示的名称。")
 (defvar pyim-buffer-name " *Chinese-pyim*")
 (defvar pyim-buffer-list nil
@@ -2063,18 +2064,17 @@ Return the input string."
         (push `(dabbrev ,@(reverse dabbrev-words-similar-1)) words-predicted)))
 
     ;; debug
-    ;; (princ "guess-words-accurate: ")
-    ;; (princ guess-words-accurate)
-    ;; (princ "\nguess-words-similar: ")
-    ;; (princ guess-words-similar)
-    ;; (princ "\ndabbrev-words-accurate-1: ")
-    ;; (princ dabbrev-words-accurate-1)
-    ;; (princ "\nguess-words-accurate-2: ")
-    ;; (princ dabbrev-words-accurate-2)
-    ;; (princ "\ndabbrev-words-similar-1: ")
-    ;; (princ dabbrev-words-similar-1)
-    ;; (princ "\ndabbrev-words-similar-2: ")
-    ;; (princ dabbrev-words-similar-2)
+    (when pyim-debug
+      (dolist (var '(words
+                     guess-words-accurate
+                     guess-words-similar
+                     dabbrev-words-accurate-1
+                     dabbrev-words-accurate-2
+                     dabbrev-words-similar-1
+                     dabbrev-words-similar-2))
+        (when var
+          (princ (format (concat (symbol-name var) ": %S\n")
+                         (symbol-value var))))))
 
     ;; 将输入的拼音按照声母和韵母打散，得到尽可能多的拼音组合，
     ;; 查询这些拼音组合，得到的词条做为联想词。
