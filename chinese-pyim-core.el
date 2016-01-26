@@ -1581,7 +1581,10 @@ Return the input string."
   (setq pyim-translating nil)
   (pyim-delete-region)
   (setq pyim-current-choices nil)
-  (setq pyim-guidance-str ""))
+  (setq pyim-guidance-str "")
+  (when (and (eq pyim-use-tooltip 'pos-tip)
+             (pyim-tooltip-pos-tip-usable-p))
+    (pos-tip-hide)))
 ;; #+END_SRC
 
 ;; ** 处理拼音字符串 `pyim-current-key'
