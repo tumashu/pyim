@@ -2686,6 +2686,25 @@ guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
           (plist-get guidance-list :current-page)
           (plist-get guidance-list :total-page)))
 
+(defun pyim-guidance-format-function-vertical (guidance-list)
+  "将 guidance-list 格式化为类似下面格式的字符串，这个字符串将在
+tooltip 选词框中显示。
+
+----------------
+| ni hao [1/9] |
+| 1.你好       |
+| 2.你号 ...   |
+----------------
+
+guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
+  (format "=> %s [%s/%s]: \n%s"
+          (plist-get guidance-list :key)
+          (plist-get guidance-list :current-page)
+          (plist-get guidance-list :total-page)
+          (replace-regexp-in-string
+           " " "\n"
+           (plist-get guidance-list :words))))
+
 (defun pyim-guidance-format-function-minibuffer (guidance-list)
   "将 guidance-list 格式化为类似下面格式的字符串，这个字符串
 将在 minibuffer 中显示。
