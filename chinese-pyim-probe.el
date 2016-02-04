@@ -119,7 +119,7 @@
                 (or (pyim-string-match-p regexp-alpha str-before-1)
                     (member str-before-1
                             (mapcar #'char-to-string puncts)))
-                (= (length pyim-guidance-str) 0))
+                (= (length (plist-get pyim-guidance-list :words)) 0))
            t)
           ((pyim-string-match-p regexp-chinese str-before-1)
            nil))))

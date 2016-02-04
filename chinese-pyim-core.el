@@ -331,6 +331,11 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
 3. 当取值为 nil 时，将 minibuffer 做为选词框；"
   :group 'chinese-pyim)
 
+(defcustom pyim-guidance-format-function 'pyim-guidance-format-function-two-lines
+  "这个变量保存的函数用于 format 选词框中的字符串。"
+  :group 'chinese-pyim
+  :type 'function)
+
 (defcustom pyim-tooltip-width-adjustment 1.2
   "校正 tooltip 选词框宽度的数值，表示校正后的宽度是未校正前宽度的倍数。
 
@@ -404,7 +409,11 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
   "Chinese-pyim 会将一个拼音字符串分解为一个或者多个 pylist （常见于双拼模式）,
 这个变量用于保存分解得到的结果。")
 
-(defvar pyim-guidance-str "" "显示可选词条的字符串")
+(defvar pyim-guidance-list nil
+  "这个 list 用于构建选词框中显示的字符串，其结构类似：
+
+(:key \"ni hao\" :current-page 1 :total-page 9 :words \"1.你好 2.你好 ...\")")
+
 (defvar pyim-current-pos nil "当前选择的词条在 pyim-current-choices 中的位置")
 
 (defvar pyim-load-hook nil)
@@ -471,7 +480,7 @@ If you don't like this funciton, set the variable to nil")
     pyim-english-input-switch-function ;; obsolete
     pyim-english-input-switch-functions
     pyim-punctuation-half-width-functions
-    pyim-guidance-str
+    pyim-guidance-list
     pyim-translating
     pyim-overlay
 
@@ -1470,7 +1479,7 @@ BUG：无法有效的处理多音字。"
       (unwind-protect
           (let ((input-string (pyim-start-translation key)))
             ;; (message "input-string: %s" input-string)
-            (setq pyim-guidance-str "")
+            (setq pyim-guidance-list nil)
             (when (and (stringp input-string)
                        (> (length input-string) 0))
               (if input-method-exit-on-first-char
@@ -1504,7 +1513,7 @@ Return the input string."
                              (format "%s%s %s"
                                      (or input-method-previous-message "")
                                      pyim-current-key
-                                     pyim-guidance-str)))
+                                     (plist-get pyim-guidance-list :words))))
                  (keyseq (read-key-sequence prompt nil nil t))
                  (cmd (lookup-key pyim-mode-map keyseq)))
             ;;             (message "key: %s, cmd:%s\nlcmd: %s, lcmdv: %s, tcmd: %s"
@@ -1581,7 +1590,7 @@ Return the input string."
   (setq pyim-translating nil)
   (pyim-delete-region)
   (setq pyim-current-choices nil)
-  (setq pyim-guidance-str "")
+  (setq pyim-guidance-list nil)
   (when (and (eq pyim-use-tooltip 'pos-tip)
              (pyim-tooltip-pos-tip-usable-p))
     (pos-tip-hide)))
@@ -2330,9 +2339,11 @@ Counting starts at 1."
                      (pyim-show)
                      t)))
       (setq pyim-current-str (replace-regexp-in-string "-" "" pyim-current-key))
-      (setq pyim-guidance-str (format "%s"
-                                      (replace-regexp-in-string
-                                       "-" " " pyim-current-key)))
+      (setq pyim-guidance-list
+            (plist-put pyim-guidance-list
+                       :words
+                       (format "%s" (replace-regexp-in-string
+                                     "-" " " pyim-current-key))))
       (pyim-show))))
 
 ;; #+END_SRC
@@ -2412,7 +2423,7 @@ Counting starts at 1."
 ;; #+END_SRC
 
 ;; ** 显示和选择备选词条
-;; *** 构建词条菜单字符串： `pyim-guidance-str' 。
+;; *** 构建词条菜单字符串
 ;; Chinese-pyim 内建两种方式显示选词框：
 
 ;; 1. 使用 `pyim-minibuffer-message' 函数在 minibuffer 中显示选词框。
@@ -2431,13 +2442,17 @@ Counting starts at 1."
 ;; 函数。
 
 ;; #+BEGIN_EXAMPLE
-;; (#("你好" 0 2 (py ("ni-hao"))) #("倪皓" 0 2 (py ("ni-hao"))) "泥" "你" "呢" "拟" "逆" "腻" "妮" "怩" "溺" "尼" "禰" "齯" "麑" "鲵" "蜺" "衵" "薿" "旎" "睨" "铌" "昵" "匿" "倪" "霓" "暱" "柅" "猊" "郳" "輗" "坭" "惄" "堄" "儗" "伲" "祢" "慝")
+;; ("你好" "倪皓" "泥" "你" "呢" "拟" "逆" "腻" "妮" "怩" "溺" "尼" "禰" "齯" "麑" "鲵" "蜺" "衵" "薿" "旎" "睨" "铌" "昵" "匿" "倪" "霓" "暱" "柅" "猊" "郳" "輗" "坭" "惄" "堄" "儗" "伲" "祢" "慝")
 ;; #+END_EXAMPLE
 
-;; 变量 `pyim-guidance-str' 用来保存需要在 minibuffer 选词框中显示的词条
-;;  菜单字符串，而变量 `pyim-current-pos' 纪录当前选择的词条在
-;;  `pyim-current-choices' 中的位置，如果当前选择的词条为“倪皓”，那么其取
-;;  值为2，如果当前选择的词条为“腻”，其取值为8。
+;; minibuffer 或者 tooltip 选词框中显示的字符串通过
+;; `pyim-guidance-format-function' 变量对应的函数生成,
+;; chinese-pyim 当前内置了两个 format 函数：
+
+;; 1. pyim-guidance-format-function-two-lines
+;; 2. pyim-guidance-format-function-one-line
+
+;; 这些函数会根据 `pyim-guidance-list' 中的信息来得到所需要的字符串。
 
 ;;  *待选词列表* 一般都很长，不可能在一行中完全显示，所以 Chinese-pyim 使
 ;;  用了 page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以逻辑的分
@@ -2477,7 +2492,7 @@ Counting starts at 1."
 ;;    #+END_EXAMPLE
 ;;    这个 sublist 的起点为  `pyim-page-start' 的返回值，终点为
 ;;    `pyim-page-end' 的返回值。然后使用这个 sublist 来构建类似下面的字符
-;;    串，并保存到变量 `pyim-guidance-str' 。
+;;    串，并保存到 `pyim-guidance-list'  :words 关键字对应的位置。
 ;;    #+BEGIN_EXAMPLE
 ;;    "1. 薿 2.旎 3.睨 4.铌 5.昵 6.匿 7.倪 8.霓 9.暱"
 ;;    #+END_EXAMPLE
@@ -2488,7 +2503,7 @@ Counting starts at 1."
 ;;    置在下一页。
 ;; 2. 然后将 `pyim-current-pos' 的值设定为 `pyim-page-start' 的返回值，确
 ;;    保 `pyim-current-pos' 的取值为下一页第一个词条的位置。
-;; 3. 最后调用 `pyim-format-page' 来重新设置 `pyim-guidance-str' 。
+;; 3. 最后调用 `pyim-format-page' 来重新设置 `pyim-guidance-list' 。
 
 ;; #+BEGIN_SRC emacs-lisp
 ;;;  page format
@@ -2540,25 +2555,36 @@ Counting starts at 1."
          (choice (pyim-subseq choices start end))
          (pos (- (min pyim-current-pos (length choices)) start))
          (i 0))
-    (setq pyim-guidance-str
-          (format "%s[%d/%d]: %s"
-                  (replace-regexp-in-string "-" " " pyim-current-key)
-                  (pyim-current-page) (pyim-total-page)
-                  (mapconcat 'identity
-                             (mapcar
-                              (lambda (c)
-                                (setq i (1+ i))
-                                (let (str)
-                                  (setq str (if (consp c)
-                                                (concat (car c) (cdr c))
-                                              c))
-                                  ;; 高亮当前选择的词条，用于 `pyim-next-word'
-                                  (if (and hightlight-current
-                                           (= i pos))
-                                      (format "%d[%s]" i
-                                              (propertize str 'face 'pyim-minibuffer-string-face))
-                                    (format "%d.%s " i str))))
-                              choice) "")))))
+    (setq pyim-guidance-list
+          (plist-put pyim-guidance-list
+                     :key
+                     (replace-regexp-in-string "-" " " pyim-current-key)))
+    (setq pyim-guidance-list
+          (plist-put pyim-guidance-list
+                     :current-page
+                     (pyim-current-page)))
+    (setq pyim-guidance-list
+          (plist-put pyim-guidance-list
+                     :total-page
+                     (pyim-total-page)))
+    (setq pyim-guidance-list
+          (plist-put pyim-guidance-list
+                     :words
+                     (mapconcat 'identity
+                                (mapcar
+                                 (lambda (c)
+                                   (setq i (1+ i))
+                                   (let (str)
+                                     (setq str (if (consp c)
+                                                   (concat (car c) (cdr c))
+                                                 c))
+                                     ;; 高亮当前选择的词条，用于 `pyim-next-word'
+                                     (if (and hightlight-current
+                                              (= i pos))
+                                         (format "%d[%s]" i
+                                                 (propertize str 'face 'pyim-minibuffer-string-face))
+                                       (format "%d.%s " i str))))
+                                 choice) "")))))
 
 (defun pyim-next-page (arg)
   (interactive "p")
@@ -2595,7 +2621,7 @@ Counting starts at 1."
 ;; #+END_SRC
 
 ;; *** 显示选词框
-;; 当`pyim-guidance-str' 构建完成后，Chinese-pyim 使用函数 `pyim-show' 重
+;; 当`pyim-guidance-list' 构建完成后，Chinese-pyim 使用函数 `pyim-show' 重
 ;; 新显示选词框，`pyim-show' 会根据 `pyim-use-tooltip' 的取值来决定使用
 ;; 哪种方式来显示选词框（minibuffer 或者 tooltip ）。
 
@@ -2617,18 +2643,63 @@ Counting starts at 1."
         ;; minibuffer.
         (pyim-minibuffer-message
          (format "  [%s]\n%s"
-                 current-input-method-title pyim-guidance-str))
+                 current-input-method-title
+                 (plist-get pyim-guidance-list :words)))
       ;; Show the guidance in echo area without logging.
       (let ((message-log-max nil))
         (if pyim-use-tooltip
-            (let ((pos (string-match ": " pyim-guidance-str)))
-              (if pos
-                  (setq pyim-guidance-str
-                        (format "=> %s\n%s"
-                                (substring pyim-guidance-str 0 pos)
-                                (substring pyim-guidance-str (+ pos 2)))))
-              (pyim-tooltip-show pyim-guidance-str (overlay-start pyim-overlay)))
-          (message "%s" pyim-guidance-str))))))
+            (pyim-tooltip-show
+             (funcall pyim-guidance-format-function pyim-guidance-list)
+             (overlay-start pyim-overlay))
+          (message "%s" (pyim-guidance-format-function-minibuffer pyim-guidance-list)))))))
+
+(defun pyim-guidance-format-function-two-lines (guidance-list)
+  "将 guidance-list 格式化为类似下面格式的字符串，这个字符串将在
+tooltip 选词框中显示。
+
+------------------------------
+| ni hao [1/9]               |
+| 1.你好 2.你号 ...         |
+------------------------------
+
+guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
+  (format "=> %s [%s/%s]: \n%s"
+          (plist-get guidance-list :key)
+          (plist-get guidance-list :current-page)
+          (plist-get guidance-list :total-page)
+          (plist-get guidance-list :words)))
+
+(defun pyim-guidance-format-function-one-line (guidance-list)
+  "将 guidance-list 格式化为类似下面格式的字符串，这个字符串将在
+tooltip 选词框中显示。
+
+--------------------------------------
+| [ni hao]: 1.你好 2.你号 ... (1/9) |
+--------------------------------------
+
+guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
+  (format "[%s]: %s(%s/%s)"
+          (replace-regexp-in-string
+           " " ""
+           (plist-get guidance-list :key))
+          (plist-get guidance-list :words)
+          (plist-get guidance-list :current-page)
+          (plist-get guidance-list :total-page)))
+
+(defun pyim-guidance-format-function-minibuffer (guidance-list)
+  "将 guidance-list 格式化为类似下面格式的字符串，这个字符串
+将在 minibuffer 中显示。
+
+-------------------------------------
+| ni hao [1/9] 1.你好 2.你号 ...   |
+-------------------------------------
+
+guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
+  (format "%s [%s/%s]: %s"
+          (plist-get guidance-list :key)
+          (plist-get guidance-list :current-page)
+          (plist-get guidance-list :total-page)
+          (plist-get guidance-list :words)))
 
 (defun pyim-delete-region ()
   "Delete the text in the current translation region of E+."
@@ -2649,7 +2720,7 @@ Counting starts at 1."
            (popup-tip string :point position :margin 1))
           ((and pos-tip-usable-p
                 (eq tooltip 'pos-tip))
-           (pos-tip-show-no-propertize pyim-guidance-str
+           (pos-tip-show-no-propertize string
                                        nil
                                        position nil 15
                                        (round (* (pos-tip-tooltip-width length (frame-char-width frame))

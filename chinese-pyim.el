@@ -142,6 +142,17 @@
 
 ;; GTK 选词框的字体设置可以参考：[[https://www.gnu.org/software/emacs/manual/html_node/emacs/GTK-resources.html#GTK-resources][GTK resources]] 。
 
+;; *** 调整 tooltip 选词框的显示样式
+;; Chinese-pyim 的 tooltip 选词框默认使用 *双行显示* 的样式，在一些特
+;; 殊的情况下（比如：popup 显示的菜单错位），用户可以使用 *单行显示*
+;; 的样式：
+
+;; #+BEGIN_EXAMPLE
+;; (setq pyim-guidance-format-function 'pyim-guidance-format-function-one-line)
+;; #+END_EXAMPLE
+
+;; 注：用户也可以自定义 guidance 格式化函数。
+
 ;; *** 设置模糊音
 ;; Chinese-pyim 使用一个比较 *粗糙* 的方法处理 *模糊音* ，要了解具体细节，
 ;; 请运行：
