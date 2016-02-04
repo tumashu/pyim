@@ -2680,7 +2680,7 @@ tooltip 选词框中显示。
 guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
   (format "[%s]: %s(%s/%s)"
           (replace-regexp-in-string
-           " " ""
+           " +" ""
            (plist-get guidance-list :key))
           (plist-get guidance-list :words)
           (plist-get guidance-list :current-page)
@@ -2702,7 +2702,7 @@ guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
           (plist-get guidance-list :current-page)
           (plist-get guidance-list :total-page)
           (replace-regexp-in-string
-           " " "\n"
+           " +" "\n"
            (plist-get guidance-list :words))))
 
 (defun pyim-guidance-format-function-minibuffer (guidance-list)
