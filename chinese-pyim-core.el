@@ -1937,6 +1937,7 @@ Return the input string."
         (py-str-shouzimu (pyim-pylist-to-string pylist t 'default))
         (length-pylist (length pylist))
         choice words word
+        pinyin-similar-words shouzimu-words
         guess-words-accurate guess-words-similar
         dabbrev-words-accurate-1 dabbrev-words-similar-1
         dabbrev-words-accurate-2 dabbrev-words-similar-2
@@ -1948,14 +1949,16 @@ Return the input string."
     ;; 如果输入 "ni-hao" ，搜索拼音与 "ni-hao" 类似的词条作为联想词。
     ;; 搜索相似词得到的联想词太多，这里限制只搜索个人文件。
     (when (member 'pinyin-similar pyim-enable-words-predict)
-      (push `(pinyin-similar ,@(pyim-get-pinyin-similar-words py-str nil t)) words-predicted))
+      (setq pinyin-similar-words (pyim-get-pinyin-similar-words py-str nil t))
+      (push `(pinyin-similar ,@pinyin-similar-words) words-predicted))
 
     ;; 如果输入 "ni-hao" ，搜索 code 为 "n-h" 的词条做为联想词。
-    ;; 搜索首字母得到的联想词太多，这里限制联想词要大于三个汉字并且只搜索
+    ;; 搜索首字母得到的联想词太多，这里限制联想词要大于两个汉字并且只搜索
     ;; 个人文件。
     (when (and (member 'pinyin-shouzimu pyim-enable-words-predict)
-               (> length-pylist 2))
-      (push `(pinyin-shouzimu ,@(pyim-get py-str-shouzimu nil nil t)) words-predicted))
+               (> length-pylist 1))
+      (setq shouzimu-words (pyim-get py-str-shouzimu nil nil t))
+      (push `(pinyin-shouzimu ,@shouzimu-words) words-predicted))
 
     ;; 如果上一次输入词条 "你好" ，那么以 “你好” 为 code，从 guessdict 词库中搜索词条
     ;; 将搜索得到的词条的拼音与 *当前输入的拼音* 进行比较，类似或者精确匹配的词条作为联想词。
@@ -2078,6 +2081,8 @@ Return the input string."
     ;; debug
     (when pyim-debug
       (dolist (var '(words
+                     pinyin-similar-words
+                     shouzimu-words
                      guess-words-accurate
                      guess-words-similar
                      dabbrev-words-accurate-1
@@ -2106,6 +2111,8 @@ Return the input string."
                    ;; 非常有用
                    ,@dabbrev-words-similar-2
                    ,@words
+                   ,@(when (and words (not (member (car words) shouzimu-words)))
+                       shouzimu-words)
                    ;; 没有精确匹配的词条时，设置第一个被选词为字符，
                    ;; 这样可以减少不可预期的联想词带来的视觉压力。
                    ,@(unless words
