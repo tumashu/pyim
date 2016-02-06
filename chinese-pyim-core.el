@@ -729,7 +729,7 @@ If you don't like this funciton, set the variable to nil")
         ;; 如果 `pyim-personal-file' 对应的文件不存在，
         ;; 创建一个模版文件。
         (pyim-create-template-dict personal-file))
-      (setq buf (pyim-read-file personal-file bufname))
+      (setq buf (pyim-read-file personal-file bufname nil 'personal-file))
       (setq buflist (append buflist (list buf)))
       (if dicts-list
           (dolist (dict dicts-list)
@@ -845,14 +845,13 @@ If you don't like this funciton, set the variable to nil")
 ;; BUG: 这个函数需要进一步优化，使其判断更准确。
 
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-get (code &optional search-from-guessdict ignore-personal-buffer search-personal-buffer-only)
-  (let ((persional-file-buffer (car pyim-buffer-list))
-        (other-buffer-list (cdr pyim-buffer-list))
+(defun pyim-get (code &optional search-from)
+  (let ((search-from (or search-from '(personal-file pinyin-dict)))
         (search-dicts-buffer-p t) ;用来决定是否需要搜索词库 buffer
         words nearby-codes-positions buffer-list)
     (when (and (stringp code) (string< "" code))
       (when (and pyim-buffer-cache-list
-                 (not search-personal-buffer-only))
+                 (not (equal search-from '(personal-file))))
         ;; 直接从 buffer cache 中查询词条，速度很快。
         (dolist (buf-cache pyim-buffer-cache-list)
           (setq words
@@ -881,19 +880,10 @@ If you don't like this funciton, set the variable to nil")
                       nearby-codes-positions))))))
 
       ;; 直接用二分法搜索 *普通词库* buffer（速度比较慢）。
-      (when (and (not words)
-                 (not search-personal-buffer-only)
-                 search-dicts-buffer-p)
-        (dolist (buf other-buffer-list)
+      (when (and (not words) search-dicts-buffer-p)
+        (dolist (buf pyim-buffer-list)
           (let ((dict-type (cdr (assoc "dict-type" buf))))
-            ;; Search from dict
-            (when (and (not search-from-guessdict)
-                       (or (null dict-type)
-                           (eq dict-type 'pinyin-dict)))
-              (push buf buffer-list))
-            ;; Search from guessdict
-            (when (and search-from-guessdict
-                       (eq dict-type 'guess-dict))
+            (when (member dict-type search-from)
               (push buf buffer-list))))
         (setq buffer-list (reverse buffer-list))
         (dolist (buf buffer-list)
@@ -909,23 +899,6 @@ If you don't like this funciton, set the variable to nil")
                                                            (or point1 (point-min))
                                                            (or point2 (point-max))))))
                 (message "%s 可能不是一个有效的词库 buffer，忽略。" (buffer-name)))))))
-
-      (when (or search-personal-buffer-only
-                (not (or search-from-guessdict
-                         ignore-personal-buffer)))
-        ;; 设置 `ignore-personal-buffer' 为 t 时，用于多音字校正。
-        ;; pyim-buffer-list 中第一个 buffer 对应的是个人词库文件
-        ;; 个人词库文件中的词条极有可能存在 *多音字污染*。
-        ;; 不适合用于多音字校正，这是由 Chinese-pyim 保存词条的
-        ;; 机制决定的。
-        (with-current-buffer (cdr (assoc "buffer" persional-file-buffer))
-          (if (pyim-dict-buffer-valid-p)
-              (setq words (append (cdr
-                                   (pyim-bisearch-word code
-                                                       (point-min)
-                                                       (point-max)))
-                                  words))
-            (message "个人词库文件 buffer 存在问题，忽略加载！"))))
       (delete-dups words))))
 
 ;; Shameless steal from company-dabbrev.el in `company' package
@@ -1007,25 +980,19 @@ If you don't like this funciton, set the variable to nil")
        (stringp string)
        (string-match-p regexp string start)))
 
-(defun pyim-get-pinyin-similar-words (code &optional search-from-guessdict search-personal-buffer-only)
+(defun pyim-get-pinyin-similar-words (code &optional search-from)
   "得到 `code' 对应的联想词。"
-  (let ((regexp (pyim-build-pinyin-regexp code t t))
+  (let ((search-from (or search-from '(personal-file pinyin-dict)))
+        (regexp (pyim-build-pinyin-regexp code t t))
         buffer-list words-list predicted-words)
     (when (and (stringp code)
                (string< "" code)
                (pyim-string-match-p "[a-z]+-[a-z]+" code))
-      (if search-personal-buffer-only
-          (setq buffer-list (list (car pyim-buffer-list)))
-        (dolist (buf pyim-buffer-list)
-          (let ((dict-type (cdr (assoc "dict-type" buf))))
-            (when (and (not search-from-guessdict)
-                       (or (null dict-type)
-                           (eq dict-type 'pinyin-dict)))
-              (push buf buffer-list))
-            (when (and search-from-guessdict
-                       (eq dict-type 'guess-dict))
-              (push buf buffer-list))))
-        (setq buffer-list (reverse buffer-list)))
+      (dolist (buf pyim-buffer-list)
+        (let ((dict-type (cdr (assoc "dict-type" buf))))
+          (when (member dict-type search-from)
+            (push buf buffer-list))))
+      (setq buffer-list (reverse buffer-list))
       (dolist (buf buffer-list)
         (with-current-buffer (cdr (assoc "buffer" buf))
           (when (pyim-dict-buffer-valid-p)
@@ -1949,7 +1916,7 @@ Return the input string."
     ;; 如果输入 "ni-hao" ，搜索拼音与 "ni-hao" 类似的词条作为联想词。
     ;; 搜索相似词得到的联想词太多，这里限制只搜索个人文件。
     (when (member 'pinyin-similar pyim-enable-words-predict)
-      (setq pinyin-similar-words (pyim-get-pinyin-similar-words py-str nil t))
+      (setq pinyin-similar-words (pyim-get-pinyin-similar-words py-str '(personal-file)))
       (push `(pinyin-similar ,@pinyin-similar-words) words-predicted))
 
     ;; 如果输入 "ni-hao" ，搜索 code 为 "n-h" 的词条做为联想词。
@@ -1957,7 +1924,7 @@ Return the input string."
     ;; 个人文件。
     (when (and (member 'pinyin-shouzimu pyim-enable-words-predict)
                (> length-pylist 1))
-      (setq shouzimu-words (pyim-get py-str-shouzimu nil nil t))
+      (setq shouzimu-words (pyim-get py-str-shouzimu '(personal-file)))
       (push `(pinyin-shouzimu ,@shouzimu-words) words-predicted))
 
     ;; 如果上一次输入词条 "你好" ，那么以 “你好” 为 code，从 guessdict 词库中搜索词条
@@ -1966,7 +1933,7 @@ Return the input string."
       (let* ((prefix (pyim-grab-chinese-word
                       (length pyim-current-str) pyim-last-input-word))
              (length-prefix (length prefix))
-             (words (pyim-get prefix t))
+             (words (pyim-get prefix '(guess-dict)))
              (count 0))
         ;; 光标前获取的 prefix 字符串长度大于1并且小于5时，
         ;; 才进行 guess-words 词语联想，prefix 长度太小时，搜索

@@ -194,7 +194,7 @@
       (dolist (string-list string-alist)
         (let ((pinyin-list (pyim-hanzi2pinyin (car string-list) nil "-" t)))
           (dolist (pinyin pinyin-list)
-            (let ((words (pyim-get pinyin nil t))) ; 忽略个人词库 buffer 可以提高速度
+            (let ((words (pyim-get pinyin '(pinyin-dict)))) ; 忽略个人词库 buffer 可以提高速度
               (dolist (word words)
                 (when (equal word (car string-list))
                   (push string-list result)))))))
