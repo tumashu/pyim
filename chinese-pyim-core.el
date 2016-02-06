@@ -60,6 +60,13 @@
   :group 'chinese-pyim
   :type 'file)
 
+(defcustom pyim-property-file
+  (concat (file-name-as-directory pyim-directory)
+          "pyim-words-property.txt")
+  "这个文件用来保存已输入中文词条的其他有用属性。"
+  :group 'chinese-pyim
+  :type 'file)
+
 (defcustom pyim-dicts nil
   "一个列表，用于保存 `Chinese-pyim' 的词库信息，每一个 element 都代表一条词库的信息。
 用户可以使用词库管理命令 `pyim-dicts-manager' 来添加词库信息，每一条词库信息都使用一个
@@ -519,7 +526,7 @@ If you don't like this funciton, set the variable to nil")
 ;; 3. 使用 `pyim-make-char-table' 创建汉字到拼音的 hash table，具体细节请
 ;;    参考：[[#make-char-table]]
 ;; 4. 运行hook： `pyim-load-hook'。
-;; 5. 将 `pyim-save-personal-file' 命令添加到 `kill-emacs-hook' emacs 关
+;; 5. 将 `pyim-save-files' 命令添加到 `kill-emacs-hook' emacs 关
 ;;    闭之前将个人词频 buffer 的内容保存到个人词频文件。具体细节请参考：
 ;;    [[save-personal-file]]。
 ;; 6. 设定变量：
@@ -543,7 +550,7 @@ If you don't like this funciton, set the variable to nil")
   (mapc 'make-local-variable pyim-local-variable-list)
   ;; 重启时，kill 所有已经打开的 buffer。
   (when (and restart save-personal-file)
-    (pyim-save-personal-file))
+    (pyim-save-files))
   (when restart
     (pyim-kill-buffers)
     (setq pyim-buffer-list nil))
@@ -555,8 +562,8 @@ If you don't like this funciton, set the variable to nil")
     (run-hooks 'pyim-load-hook)
     (message nil))
 
-  (unless (member 'pyim-save-personal-file kill-emacs-hook)
-    (add-to-list 'kill-emacs-hook 'pyim-save-personal-file))
+  (unless (member 'pyim-save-files kill-emacs-hook)
+    (add-to-list 'kill-emacs-hook 'pyim-save-files))
 
   (setq input-method-function 'pyim-input-method)
   (setq deactivate-current-input-method-function 'pyim-inactivate)
@@ -623,7 +630,7 @@ If you don't like this funciton, set the variable to nil")
 ;;    需要用户经常备份。
 
 ;; 值得注意的是：不建议用户 *手动编辑* 这个文件，因为：每次 emacs 关闭之
-;; 前，emacs 会运行命令：`pyim-save-personal-file' 来更新这个文件，编辑过
+;; 前，emacs 会运行命令：`pyim-save-files' 来更新这个文件，编辑过
 ;; 的内容将会被覆盖。
 
 ;; BUG：当用户错误的将这个变量设定为其他重要文件时，也存在文件内容破坏的风险。
@@ -721,6 +728,7 @@ If you don't like this funciton, set the variable to nil")
 `pyim-personal-file' 文件最先导入。然后按照先后顺序导入 `pyim-dicts' 中定义的词库
 排在最前面的词库首先被加载，相同的词库文件只加载一次。"
   (let ((personal-file (expand-file-name pyim-personal-file))
+        (property-file (expand-file-name pyim-property-file))
         (dicts-list pyim-dicts)
         (bufname pyim-buffer-name)
         buflist buf file coding disable dict-type)
@@ -729,8 +737,14 @@ If you don't like this funciton, set the variable to nil")
         ;; 如果 `pyim-personal-file' 对应的文件不存在，
         ;; 创建一个模版文件。
         (pyim-create-template-dict personal-file))
+      (unless (file-exists-p property-file)
+        (pyim-create-template-dict property-file))
+
       (setq buf (pyim-read-file personal-file bufname nil 'personal-file))
       (setq buflist (append buflist (list buf)))
+      (setq buf (pyim-read-file property-file bufname nil 'property-file))
+      (setq buflist (append buflist (list buf)))
+
       (if dicts-list
           (dolist (dict dicts-list)
             (setq file (expand-file-name (plist-get dict :file)))
@@ -766,27 +780,39 @@ If you don't like this funciton, set the variable to nil")
 ;; 当使用 `pyim-start' 或者 `pyim-restart' 命令激活  Chinese-pyim 时，上述对应表保存到变量 `pyim-buffer-list'。
 ;; 供 Chinese-pyim 后续使用。
 
-;; `pyim-buffer-list' 包含的第一个buffer，永远对应着个人词频文件，Chinese-pyim 使用 `pyim-save-personal-file'
+;; `pyim-buffer-list' 包含的第一个buffer，永远对应着个人词频文件，Chinese-pyim 使用 `pyim-save-files'
 ;; 将 `pyim-buffer-list' 第一个 buffer 的内容保存到个人词频文件，这个命令用于更新个人词频文件。
 ;; <<save-personal-file>>
 
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-save-personal-file ()
-  "与 `pyim-personal-file' 文件对应的buffer在 `Chinese-pyim' 使用期间不断更新。
-这个函数将更新后的内容保存到`pyim-personal-file' 文件中，
+(defun pyim-save-files ()
+  "将下面几个文件更新后内容保存。
+
+1. `pyim-personal-file'
+2. `pyim-property-file'
 
 这个函数默认作为`kill-emacs-hook'使用。"
   (interactive)
-  (let* ((element (car pyim-buffer-list))
-         (buffer (cdr (assoc "buffer" element)))
-         (file (cdr (assoc "file" element))))
-    (when (buffer-live-p buffer)
-      (with-current-buffer buffer
-        (save-restriction
-          (if (file-exists-p file)
-              (progn (write-region (point-min) (point-max) file)
-                     (message "更新 Chinese-pyim 文件：%s。" file))
-            (message "Chinese-pyim 文件：%s 不存在。" file)))))))
+  (let ((buffers-list (pyim-filter-buffer-list '(personal-file property-file))))
+    (dolist (buffer-list buffers-list)
+      (let* ((buffer (cdr (assoc "buffer" buffer-list)))
+             (file (cdr (assoc "file" buffer-list))))
+        (when (buffer-live-p buffer)
+          (with-current-buffer buffer
+            (save-restriction
+              (if (file-exists-p file)
+                  (progn (write-region (point-min) (point-max) file)
+                         (message "更新 Chinese-pyim 文件：%s。" file))
+                (message "Chinese-pyim 文件：%s 不存在。" file)))))))))
+
+(defun pyim-filter-buffer-list (dict-types)
+  "从 `pyim-buffer-list' 中挑选符合的 buffer."
+  (delq nil
+        (mapcar
+         #'(lambda (buf)
+             (when (member (cdr (assoc "dict-type" buf)) dict-types)
+               buf))
+         pyim-buffer-list)))
 
 ;; #+END_SRC
 
@@ -1043,7 +1069,6 @@ If you don't like this funciton, set the variable to nil")
 
 1. buffer 必须多于5行。
 2. buffer 中间一行必须包含空格或者TAB。
-2. buffer 中间一行必须包含中文字符(\\cc)。
 
 BUG: 这个函数需要进一步优化，使其判断更准确。"
   (when (> (count-lines (point-min)
@@ -1053,8 +1078,7 @@ BUG: 这个函数需要进一步优化，使其判断更准确。"
             ccode)
         (goto-char mid)
         (beginning-of-line)
-        (and (re-search-forward "[ \t]" (line-end-position) t)
-             (re-search-forward "\\cc" (line-end-position) t))))))
+        (re-search-forward "[ \t]" (line-end-position) t)))))
 ;; #+END_SRC
 
 ;; #+BEGIN_SRC emacs-lisp
@@ -1125,7 +1149,7 @@ BUG: 这个函数需要进一步优化，使其判断更准确。"
                       pyim-buffer-cache-list)))))))))
 
 (defun pyim-get-codes-in-personal-buffer ()
-  (let ((buffer (cdr (assoc "buffer" (car pyim-buffer-list))))
+  (let ((buffer (cdr (assoc "buffer" (car (pyim-filter-buffer-list '(personal-file))))))
         result)
     (with-current-buffer buffer
       (goto-char (point-min))
@@ -1228,11 +1252,11 @@ beginning of line"
 ;; *** 保存词条，删除词条以及调整词条位置
 ;; Chinese-pyim 不会更改普通词库文件的内容，只会将运行过程中的词频信息保存到个人词频文件，这个过程
 ;; 分为两步：
-;; 1. 调整个人词频文件对应的 buffer 的内容，这个过程的核心函数是 `pyim-intern-word'。
-;; 2. 将 buffer 的内容保存到个人词频文件，这个使用函数 `pyim-save-personal-file' 完成。
+;; 1. 调整个人词频文件对应的 buffer 的内容，这个过程的核心函数是 `pyim-intern-personal-file'。
+;; 2. 将 buffer 的内容保存到个人词频文件，这个使用函数 `pyim-save-files' 完成。
 
-;; `pyim-intern-word' 的工作原理和 `pyim-get' 类似， 只不过
-;; `pyim-intern-word' 只搜索个人词频文件对应的 buffer ，搜索到结果后做如
+;; `pyim-intern-personal-file' 的工作原理和 `pyim-get' 类似， 只不过
+;; `pyim-intern-personal-file' 只搜索个人词频文件对应的 buffer ，搜索到结果后做如
 ;; 下工作：
 
 ;; 1. 获取当前行的信息，并其格式为一个list
@@ -1243,7 +1267,7 @@ beginning of line"
 ;; 3. 使用 `pyim-delete-line' 删除当前行
 ;; 4. 将合并后的list转换为词库格式后，再写入当前行。
 
-;; 围绕着 `pyim-intern-word'，Chinese-pyim 构建了3类命令：
+;; 围绕着 `pyim-intern-personal-file'，Chinese-pyim 构建了3类命令：
 ;; 1. 将一个中文词条加入个人词频文件（造词功能）
 ;; 2. 将一个中文词条从个人词频文件中删除（删词功能）
 ;; 3. 调整一个中文词条选项的位置（词频调整功能）
@@ -1252,7 +1276,7 @@ beginning of line"
 ;; 1. `pyim-create-or-rearrange-word' 当用户选择了一个词库中不存在的中文词条时，
 ;;    `pyim-select-current' 会调用这个函数来自动造词。其工作流程是：
 ;;     1. 使用 `chinese-hanzi2pinyin' 获取中文词条的拼音。
-;;     2. 然后调用 `pyim-intern-word' 保存词条，多音字重复操作，比如：
+;;     2. 然后调用 `pyim-intern-personal-file' 保存词条，多音字重复操作，比如：
 
 ;;        #+BEGIN_EXAMPLE
 ;;        yin-hang 银行
@@ -1276,7 +1300,21 @@ beginning of line"
   (delete-region (line-beginning-position) (min (+ (line-end-position) 1)
                                                 (point-max))))
 
-(defun pyim-intern-word (word py &optional append delete)
+(defun pyim-intern-property-file (word property)
+  (let ((buf (cdr (assoc "buffer" (car (pyim-filter-buffer-list '(property-file)))))))
+    (when (and (listp property)
+               (> (length property) 0))
+      (with-current-buffer buf
+        (pyim-bisearch-word word (point-min) (point-max))
+        (if (equal (pyim-code-at-point) word)
+            (pyim-delete-line)
+          (forward-line 1))
+        (insert (mapconcat
+                 #'(lambda (x)
+                     (format "%s" x))
+                 (append (list word) property) " ") "\n")))))
+
+(defun pyim-intern-personal-file (word py &optional append delete)
   "这个函数用于保存用户词频，将参数拼音 `py' 对应的中文词条 `word'
 保存到 personal-file 对应的 buffer。
 
@@ -1284,8 +1322,8 @@ beginning of line"
 
 当`delete' 设置为 t 时，从上述 buffer 中删除参数拼音 `py' 对应
 的中文词条 `word'。"
-  (let((buf (cdr (assoc "buffer" (car pyim-buffer-list))))
-       words)
+  (let ((buf (cdr (assoc "buffer" (car (pyim-filter-buffer-list '(personal-file))))))
+        words)
     (with-current-buffer buf
       (pyim-bisearch-word py (point-min) (point-max))
       (if (equal (pyim-code-at-point) py)
@@ -1313,20 +1351,30 @@ buffer中，当前词条追加到已有词条之后。`pyim-create-or-rearrange-
 `pyim-hanzi2pinyin' 来获取中文词条的拼音code。
 
 BUG：无法有效的处理多音字。"
-  (let ((pinyins (pyim-hanzi2pinyin word nil "-" t nil t))) ;使用了多音字校正
-    (mapc #'(lambda (py)
-              (unless (pyim-string-match-p "[^ a-z-]" py)
-                ;; 添加词库： ”拼音“ - ”中文词条“
-                (pyim-intern-word word py (not rearrange-word))
-                ;; 添加词库： ”拼音首字母“ - ”中文词条“
-                (pyim-intern-word word
-                                  (mapconcat
-                                   #'(lambda (x)
-                                       (substring x 0 1))
-                                   (split-string py "-")
-                                   "-")
-                                  (not rearrange-word))))
-          pinyins)))
+  (let* ((pinyins (pyim-hanzi2pinyin word nil "-" t nil t)) ;使用了多音字校正
+         (word-property (pyim-get word '(property-file)))
+         (word-count (+ 1 (string-to-number (or (nth 0 word-property) "1")))))
+
+    ;; 当 word 长度大于1且词频大于1时，在 property-file 对应的 buffer 中
+    ;; 记录 word 的其他属性（比如：精确词频），用于词条联想和排序。
+    (when (and (> (length word) 1)
+               (cl-some #'(lambda (py)
+                            (member word (pyim-get py '(personal-file))))
+                        pinyins))
+      (pyim-intern-property-file word (list word-count)))
+
+    (dolist (py pinyins)
+      (unless (pyim-string-match-p "[^ a-z-]" py)
+        ;; 添加词库： ”拼音“ - ”中文词条“
+        (pyim-intern-personal-file word py (not rearrange-word))
+        ;; 添加词库： ”拼音首字母“ - ”中文词条“
+        (pyim-intern-personal-file
+         word (mapconcat
+               #'(lambda (x)
+                   (substring x 0 1))
+               (split-string py "-")
+               "-")
+         (not rearrange-word))))))
 
 (defun pyim-chinese-string-at-point (&optional number)
   "获取光标一个中文字符串，字符数量为：`number'"
@@ -1377,7 +1425,7 @@ BUG：无法有效的处理多音字。"
   "将中文词条 `word' 从 personal-file 对应的 buffer 中删除"
   (mapc (lambda (py)
           (unless (pyim-string-match-p "[^ a-z-]" py)
-            (pyim-intern-word word py nil t)))
+            (pyim-intern-personal-file word py nil t)))
         (pyim-hanzi2pinyin word nil "-" t)))
 
 (defun pyim-delete-word-from-personal-buffer ()
