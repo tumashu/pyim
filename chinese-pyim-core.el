@@ -851,6 +851,7 @@ If you don't like this funciton, set the variable to nil")
         words nearby-codes-positions buffer-list)
     (when (and (stringp code) (string< "" code))
       (when (and pyim-buffer-cache-list
+                 (not (equal search-from '(guess-dict)))
                  (not (equal search-from '(personal-file))))
         ;; 直接从 buffer cache 中查询词条，速度很快。
         (dolist (buf-cache pyim-buffer-cache-list)
