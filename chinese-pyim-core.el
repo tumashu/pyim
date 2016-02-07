@@ -1949,18 +1949,23 @@ Return the input string."
 
  (pyim-get-choices-internal  (car (pyim-split-string \"pin-yin\" 'default)))
  => (\"拼音\" \"贫铀\" \"聘用\" \"拼\" \"品\" \"贫\" \"苹\" \"聘\" \"频\" \"拚\" \"颦\" \"牝\" \"嫔\" \"姘\" \"嚬\")"
-  (let ((py-str (pyim-pylist-to-string pylist nil 'default))
-        (py-str-shouzimu (pyim-pylist-to-string pylist t 'default))
-        (length-pylist (length pylist))
-        choice words word
-        pinyin-similar-words shouzimu-words
-        guess-words-accurate guess-words-similar
-        dabbrev-words-accurate-1 dabbrev-words-similar-1
-        dabbrev-words-accurate-2 dabbrev-words-similar-2
-        words-predicted chars wordspy)
+  (let* ((py-str (pyim-pylist-to-string pylist nil 'default))
+         (py-str-shouzimu (pyim-pylist-to-string pylist t 'default))
+         (length-pylist (length pylist))
+         (personal-words (pyim-get py-str '(personal-file)))
+         (pinyin-dict-words (pyim-get py-str '(pinyin-dict)))
+         choice words word
+         pinyin-similar-words shouzimu-words
+         guess-words-accurate guess-words-similar
+         dabbrev-words-accurate-1 dabbrev-words-similar-1
+         dabbrev-words-accurate-2 dabbrev-words-similar-2
+         words-predicted chars wordspy)
 
     ;; 搜索严格匹配输入拼音的词条。
-    (setq words (pyim-get py-str))
+    (setq words
+          `(,(car personal-words)
+            ,@(pyim-sort-words-by-property-file personal-words)
+            ,@pinyin-dict-words))
 
     ;; 如果输入 "ni-hao" ，搜索拼音与 "ni-hao" 类似的词条作为联想词。
     ;; 搜索相似词得到的联想词太多，这里限制只搜索个人文件。
@@ -1973,7 +1978,9 @@ Return the input string."
     ;; 个人文件。
     (when (and (member 'pinyin-shouzimu pyim-enable-words-predict)
                (> length-pylist 1))
-      (setq shouzimu-words (pyim-get py-str-shouzimu '(personal-file)))
+      (setq shouzimu-words
+            (pyim-sort-words-by-property-file
+             (pyim-get py-str-shouzimu '(personal-file))))
       (push `(pinyin-shouzimu ,@shouzimu-words) words-predicted))
 
     ;; 如果上一次输入词条 "你好" ，那么以 “你好” 为 code，从 guessdict 词库中搜索词条
@@ -2142,6 +2149,19 @@ Return the input string."
                    ;; 汉字字符
                    ,@chars))
     (delete-dups (delq nil choice))))
+
+(defun pyim-sort-words-by-property-file (words-list)
+  "根据 `pyim-property-file' 提供的信息，对 `words-list' 中的词条进行排序。"
+  (let ((counts (mapcar
+                 #'(lambda (word)
+                     (cons (string-to-number
+                            (or (nth 0 (pyim-get word '(property-file))) "1"))
+                           word))
+                 words-list)))
+    (mapcar #'cdr
+            (sort counts
+                  #'(lambda (a b)
+                      (> (car a) (car b)))))))
 
 (defun pyim-grab-chinese-word (&optional backward-char-number fallback)
   "获取光标处一个 *有效的* 中文词语，较长的词语优先。
