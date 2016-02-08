@@ -478,7 +478,6 @@ If you don't like this funciton, set the variable to nil")
     (define-key map "\C-m" 'pyim-quit-no-clear)
     (define-key map [return] 'pyim-quit-no-clear)
     (define-key map "\C-c" 'pyim-quit-clear)
-    (define-key map "\C-g" 'pyim-quit-clear)
     map)
   "Keymap")
 ;; #+END_SRC
