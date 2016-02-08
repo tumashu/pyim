@@ -67,6 +67,13 @@
   :group 'chinese-pyim
   :type 'file)
 
+(defcustom pyim-property-alist
+  '((count string-to-number 1))
+  "`pyim-property-file' 文件的结构描述，
+
+注意，如果没有特殊原因，不要更改这个变量。"
+  :group 'chinese-pyim)
+
 (defcustom pyim-dicts nil
   "一个列表，用于保存 `Chinese-pyim' 的词库信息，每一个 element 都代表一条词库的信息。
 用户可以使用词库管理命令 `pyim-dicts-manager' 来添加词库信息，每一条词库信息都使用一个
@@ -914,12 +921,14 @@ If you don't like this funciton, set the variable to nil")
               (push buf buffer-list))))
         (setq buffer-list (reverse buffer-list))
         (dolist (buf buffer-list)
-          (let* ((buffer (cdr (assoc "buffer" buf)))
+          (let* ((dict-type (cdr (assoc "dict-type" buf)))
+                 (buffer (cdr (assoc "buffer" buf)))
                  (positions (cdr (assoc buffer nearby-codes-positions)))
                  (point1 (car positions)) ;从缓存中获取的上界限
                  (point2 (cadr positions))) ;从缓存中获取的下界限
             (with-current-buffer buffer
-              (if (pyim-dict-buffer-valid-p)
+              (if (or (pyim-dict-buffer-valid-p)                         ; personal-file 和 property-file
+                      (member dict-type '(personal-file property-file))) ; 对应的 buffer 不检查
                   (setq words (append words
                                       (cdr
                                        (pyim-bisearch-word code
@@ -1192,7 +1201,7 @@ BUG: 这个函数需要进一步优化，使其判断更准确。"
     (setq ccode (pyim-code-at-point))
     ;;    (message "%d, %d, %d: %s" start mid end ccode)
     (if (equal ccode code)
-        (pyim-line-content)
+        (pyim-line-content "[ \f\t\n\r\v]+\\|:")
       (if (> mid start)
           (if (string< ccode code)
               (pyim-bisearch-word code mid end)
@@ -1202,7 +1211,7 @@ BUG: 这个函数需要进一步优化，使其判断更准确。"
   "Before calling this function, be sure that the point is at the
 beginning of line"
   (save-excursion
-    (if (re-search-forward "[ \t]" (line-end-position) t)
+    (if (re-search-forward "[ \t:]" (line-end-position) t)
         (buffer-substring-no-properties (line-beginning-position) (1- (point)))
       (error "文件类型错误！%s 的第 %d 行没有词条！" (buffer-name) (line-number-at-pos)))))
 
@@ -1312,7 +1321,7 @@ beginning of line"
         (insert (mapconcat
                  #'(lambda (x)
                      (format "%s" x))
-                 (append (list word) property) " ") "\n")))))
+                 (append (list word) property) ":") "\n")))))
 
 (defun pyim-intern-personal-file (word py &optional append delete)
   "这个函数用于保存用户词频，将参数拼音 `py' 对应的中文词条 `word'
@@ -1352,16 +1361,26 @@ buffer中，当前词条追加到已有词条之后。`pyim-create-or-rearrange-
 
 BUG：无法有效的处理多音字。"
   (let* ((pinyins (pyim-hanzi2pinyin word nil "-" t nil t)) ;使用了多音字校正
-         (word-property (pyim-get word '(property-file)))
-         (word-count (+ 1 (string-to-number (or (nth 0 word-property) "1")))))
+         (word-property (pyim-get-property-from-property-file word)))
 
+    ;; Update count property
+    (setq word-property
+          (plist-put word-property 'count
+                     (+ (plist-get word-property 'count) 1)))
     ;; 当 word 长度大于1且词频大于1时，在 property-file 对应的 buffer 中
     ;; 记录 word 的其他属性（比如：精确词频），用于词条联想和排序。
     (when (and (> (length word) 1)
                (cl-some #'(lambda (py)
                             (member word (pyim-get py '(personal-file))))
                         pinyins))
-      (pyim-intern-property-file word (list word-count)))
+      (pyim-intern-property-file
+       word
+       (delq nil (let ((n 0))
+                   (mapcar
+                    #'(lambda (x)
+                        (setq n (+ 1 n))
+                        (when (eq (% n 2) 0) x))
+                    word-property)))))
 
     (dolist (py pinyins)
       (unless (pyim-string-match-p "[^ a-z-]" py)
@@ -2150,12 +2169,36 @@ Return the input string."
                    ,@chars))
     (delete-dups (delq nil choice))))
 
+(defun pyim-get-property-from-property-file (word &optional property-list)
+  "从 `pyim-property-file' 文件中获取 `word' 对应的一个或者多个属性。
+这些属性名组成 `property-list' 列表。"
+  (let* ((contents (pyim-get word '(property-file)))
+         (property-alist pyim-property-alist)
+         (property-list (or property-list
+                            (mapcar #'car property-alist)))
+         (position 0)
+         result)
+    (dolist (prop property-list)
+      (let* ((rules (assoc prop property-alist))
+             (func (nth 1 rules))
+             (default-value (nth 2 rules))
+             (value-str (nth position contents)))
+        (setq position (+ 1 position))
+        (when (and rules position)
+          (setq result
+                (plist-put result prop
+                           (if value-str
+                               (funcall (or func 'identity) value-str)
+                             default-value))))))
+    result))
+
 (defun pyim-sort-words-by-property-file (words-list)
   "根据 `pyim-property-file' 提供的信息，对 `words-list' 中的词条进行排序。"
   (let ((counts (mapcar
                  #'(lambda (word)
-                     (cons (string-to-number
-                            (or (nth 0 (pyim-get word '(property-file))) "1"))
+                     (cons (plist-get
+                            (pyim-get-property-from-property-file word '(count))
+                            'count)
                            word))
                  words-list)))
     (mapcar #'cdr
