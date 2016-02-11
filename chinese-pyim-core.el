@@ -2787,8 +2787,10 @@ guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
           (plist-get guidance-list :current-page)
           (plist-get guidance-list :total-page)
           (replace-regexp-in-string
-           " +" "\n"
-           (plist-get guidance-list :words))))
+           "]" "]\n"
+           (replace-regexp-in-string
+            " +" "\n"
+            (plist-get guidance-list :words)))))
 
 (defun pyim-guidance-format-function-minibuffer (guidance-list)
   "将 guidance-list 格式化为类似下面格式的字符串，这个字符串
