@@ -403,8 +403,8 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
 (defvar pyim-current-key "" "已经输入的代码")
 (defvar pyim-current-str "" "当前选择的词条")
 (defvar pyim-last-input-word "" "保存上一次输入过的词条，用于实现某种词语联想功能。")
-(defvar pyim-input-ascii nil
-  "是否开启 Chinese-pyim 英文输入模式。")
+(defvar pyim-input-ascii nil  "是否开启 Chinese-pyim 英文输入模式。")
+(defvar pyim-force-input-chinese nil "是否强制开启中文输入模式。")
 
 (defvar pyim-current-choices nil
   "所有可选的词条，是一个list。
@@ -1502,16 +1502,18 @@ BUG：无法有效的处理多音字。"
 ;; 最后，emacs 低层函数 read-event 将这个 list 插入 *待输入buffer* 。
 
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-input-method (key)
+(defun pyim-input-method (key-or-string)
   (if (or buffer-read-only
           overriding-terminal-local-map
           overriding-local-map)
-      (list key)
-    ;; (message "call with key: %c" key)
+      (if (characterp key-or-string)
+          (list key-or-string)
+        (mapcar 'identity key-or-string))
+    ;; (message "call with key: %S" key-or-string)
     (pyim-setup-overlays)
     (with-silent-modifications
       (unwind-protect
-          (let ((input-string (pyim-start-translation key)))
+          (let ((input-string (pyim-start-translation key-or-string)))
             ;; (message "input-string: %s" input-string)
             (setq pyim-guidance-list nil)
             (when (and (stringp input-string)
@@ -1521,12 +1523,14 @@ BUG：无法有效的处理多音字。"
                 (mapcar 'identity input-string))))
         (pyim-delete-overlays)))))
 
-(defun pyim-start-translation (key)
+(defun pyim-start-translation (key-or-string)
   "Start translation of the typed character KEY by Chinese-pyim.
 Return the input string."
   ;; Check the possibility of translating KEY.
   ;; If KEY is nil, we can anyway start translation.
-  (if (or (integerp key) (null key))
+  (if (or (integerp key-or-string)
+          (stringp key-or-string)
+          (null key-or-string))
       ;; OK, we can start translation.
       (let* ((echo-keystrokes 0)
              (help-char nil)
@@ -1534,13 +1538,21 @@ Return the input string."
              (generated-events nil)
              (input-method-function nil)
              (modified-p (buffer-modified-p))
-             last-command-event last-command this-command)
+             key str last-command-event last-command this-command)
+
+        (if (integerp key-or-string)
+            (setq key key-or-string)
+          (setq key (string-to-char (substring key-or-string -1)))
+          (setq str (substring key-or-string 0 -1)))
+
         (setq pyim-current-str ""
-              pyim-current-key ""
+              pyim-current-key (or str "")
               pyim-translating t)
-        (if key
-            (setq unread-command-events
-                  (cons key unread-command-events)))
+
+        (when key
+          (setq unread-command-events
+                (cons key unread-command-events)))
+
         (while pyim-translating
           (set-buffer-modified-p modified-p)
           (let* ((prompt (if input-method-use-echo-area
@@ -1550,8 +1562,8 @@ Return the input string."
                                      (plist-get pyim-guidance-list :words))))
                  (keyseq (read-key-sequence prompt nil nil t))
                  (cmd (lookup-key pyim-mode-map keyseq)))
-            ;;             (message "key: %s, cmd:%s\nlcmd: %s, lcmdv: %s, tcmd: %s"
-            ;;                      key cmd last-command last-command-event this-command)
+            ;; (message "key: %s, cmd:%s\nlcmd: %s, lcmdv: %s, tcmd: %s"
+            ;;          key cmd last-command last-command-event this-command)
             (if (if key
                     (commandp cmd)
                   (eq cmd 'pyim-self-insert-command))
@@ -1571,11 +1583,11 @@ Return the input string."
                     (string-to-list (this-single-command-raw-keys)))
               ;; (message "unread-command-events: %s" unread-command-events)
               (pyim-terminate-translation))))
-        ;;    (1message "return: %s" pyim-current-str)
+        ;; (message "return: %s" pyim-current-str)
         pyim-current-str)
     ;; Since KEY doesn't start any translation, just return it.
     ;; But translate KEY if necessary.
-    (char-to-string key)))
+    (char-to-string key-or-string)))
 
 (defun pyim-auto-switch-english-input-p ()
   "判断是否 *根据环境自动切换* 为英文输入模式，这个函数处理变量：
@@ -1599,14 +1611,15 @@ Return the input string."
   (let* ((pinyin-scheme-name pyim-default-pinyin-scheme)
          (first-chars (pyim-get-pinyin-scheme-option pinyin-scheme-name :first-chars))
          (rest-chars (pyim-get-pinyin-scheme-option pinyin-scheme-name :rest-chars)))
-    (and (not pyim-input-ascii)
-         (not (pyim-auto-switch-english-input-p))
-         (if (pyim-string-emptyp pyim-current-key)
-             (member last-command-event
-                     (mapcar 'identity first-chars))
-           (member last-command-event
-                   (mapcar 'identity rest-chars)))
-         (setq current-input-method-title pyim-title))))
+    (or pyim-force-input-chinese
+        (and (not pyim-input-ascii)
+             (not (pyim-auto-switch-english-input-p))
+             (if (pyim-string-emptyp pyim-current-key)
+                 (member last-command-event
+                         (mapcar 'identity first-chars))
+               (member last-command-event
+                       (mapcar 'identity rest-chars)))
+             (setq current-input-method-title pyim-title)))))
 
 (defun pyim-self-insert-command ()
   "如果在 pyim-first-char 列表中，则查找相应的词条，否则停止转换，插入对应的字符"
@@ -3386,6 +3399,29 @@ in package `chinese-pyim-pymap'"
   (setq pyim-current-key
         (replace-match "" nil nil pyim-current-key))
   (pyim-handle-string))
+;; #+END_SRC
+
+;; *** 将光标前的拼音字符串转换为中文
+;; #+BEGIN_SRC emacs-lisp
+(defun pyim-convert-pinyin-at-point ()
+  (interactive)
+  (let* ((pyim-force-input-chinese t)
+         (string (if mark-active
+                     (buffer-substring-no-properties
+                      (region-beginning) (region-end))
+                   (buffer-substring
+                    (point)
+                    (save-excursion
+                      (skip-syntax-backward "w")
+                      (point)))))
+         pinyin length)
+    (and (string-match "[a-zA-Z-]+$" string)
+         (setq pinyin (match-string 0 string))
+         (setq length (length pinyin)))
+    (when (and length (> length 0))
+      (delete-backward-char length)
+      (insert (mapconcat #'char-to-string
+                         (pyim-input-method pinyin) "")))))
 ;; #+END_SRC
 
 ;; *** 取消当前输入

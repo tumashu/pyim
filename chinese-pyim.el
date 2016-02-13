@@ -289,6 +289,11 @@
 
 ;;   http://tumashu.github.io/chinese-pyim/
 
+;; *** 将光标处的拼音字符串转换为中文
+;; #+BEGIN_EXAMPLE
+;; (global-set-key (kbd "M-i") 'pyim-convert-pinyin-at-point)
+;; #+END_EXAMPLE
+
 ;; *** 如何添加自定义拼音词库
 ;; Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面四种方式，获取
 ;; 质量较好的拼音词库：

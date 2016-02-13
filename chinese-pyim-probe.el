@@ -99,30 +99,20 @@
 (defun pyim-probe-dynamic-english ()
   "激活这个 Chinese-pyim 探针函数后，使用下面的规则动态切换中英文输入：
 
-1. 当前字符为英文字符时，输入下一个字符时默认开启英文输入
-2. 当前字符为中文字符时，输入下一个字符时默认开启中文输入
-3. 无论当前是什么输入模式，当输入1个空格后，自动切换到中文输入模式
+1. 当前字符为中文字符时，输入下一个字符时默认开启中文输入
+2. 当前字符为其他字符时，输入下一个字符时默认开启英文输入
+3. 使用 `pyim-convert-pinyin-at-point' 可以将光标前的拼音字符串转换为中文，
+   所以用户需要给 `pyim-convert-pinyin-at-point' 绑定一个快捷键，比如：
 
-用于：`pyim-english-input-switch-functions' 。"
-  (let ((str-before-1 (pyim-char-before-to-string 0))
-        (str-before-2 (pyim-char-before-to-string 1))
-        (str-before-2 (pyim-char-before-to-string 2))
-        (regexp-chinese "\\cc")
-        (regexp-alpha "[a-zA-Z]")
-        ;; ascii puncts: !\"#$%&'()*+,-./:;<=>?@\^_`{|}~
-        (puncts "#$%&*+,.:;=?@^_`|~!-"))
-    (cond ((and (stringp str-before-1)
-                (stringp str-before-2)
-                (equal str-before-1 " "))
-           nil)
-          ((and (stringp str-before-1)
-                (or (pyim-string-match-p regexp-alpha str-before-1)
-                    (member str-before-1
-                            (mapcar #'char-to-string puncts)))
-                (= (length (plist-get pyim-guidance-list :words)) 0))
-           t)
-          ((pyim-string-match-p regexp-chinese str-before-1)
-           nil))))
+   #+BEGIN_SRC elisp
+   (global-set-key (kbd \"M-i\") 'pyim-convert-pinyin-at-point)
+   #+END_SRC
+
+这个函数用于：`pyim-english-input-switch-functions' 。"
+   (let ((str-before-1 (pyim-char-before-to-string 0)))
+     (if (pyim-string-match-p "\\cc" str-before-1)
+         nil
+       t)))
 ;; #+END_SRC
 
 ;; ** 根据环境自动切换到半角标点输入模式
