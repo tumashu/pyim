@@ -156,7 +156,7 @@ Chinese-pyim 的目标是： **尽最大的努力成为一个好用的 emacs 中
 
 
 <tr>
-<td class="org-left">C-c 或 C-g</td>
+<td class="org-left">C-c</td>
 <td class="org-left">取消输入</td>
 </tr>
 
