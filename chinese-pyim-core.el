@@ -2149,8 +2149,8 @@ Return the input string."
 
     ;; 将输入的拼音按照声母和韵母打散，得到尽可能多的拼音组合，
     ;; 查询这些拼音组合，得到的词条做为联想词。
-    (setq wordspy (pyim-possible-words-py pylist))
     (when (and wordspy (member 'pinyin-znabc pyim-enable-words-predict))
+      (setq wordspy (pyim-possible-words-py pylist))
       (push `(pinyin-znabc ,@(pyim-possible-words wordspy)) words-predicted))
 
     ;; 依次搜索每个拼音对应的汉字。
