@@ -289,7 +289,7 @@
 
 ;;   http://tumashu.github.io/chinese-pyim/
 
-;; *** 将光标处的拼音字符串转换为中文
+;; *** 将光标处的拼音字符串转换为中文 (与 vimim 的 “点石成金” 功能类似)
 ;; #+BEGIN_EXAMPLE
 ;; (global-set-key (kbd "M-i") 'pyim-convert-pinyin-at-point)
 ;; #+END_EXAMPLE

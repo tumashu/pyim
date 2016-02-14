@@ -3405,23 +3405,22 @@ in package `chinese-pyim-pymap'"
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-convert-pinyin-at-point ()
   (interactive)
-  (let* ((pyim-force-input-chinese t)
-         (string (if mark-active
-                     (buffer-substring-no-properties
-                      (region-beginning) (region-end))
-                   (buffer-substring
-                    (point)
-                    (save-excursion
-                      (skip-syntax-backward "w")
-                      (point)))))
-         pinyin length)
-    (and (string-match "[a-zA-Z-]+$" string)
-         (setq pinyin (match-string 0 string))
-         (setq length (length pinyin)))
-    (when (and length (> length 0))
-      (delete-backward-char length)
-      (insert (mapconcat #'char-to-string
-                         (pyim-input-method pinyin) "")))))
+  (if (equal input-method-function 'pyim-input-method)
+      (let* ((pyim-force-input-chinese t)
+             (string (if mark-active
+                         (buffer-substring-no-properties
+                          (region-beginning) (region-end))
+                       (buffer-substring (point) (line-beginning-position))))
+             pinyin length)
+        (and (string-match "[a-zA-Z'-]+ *$" string)
+             (setq pinyin (match-string 0 string))
+             (setq length (length pinyin))
+             (setq pinyin (replace-regexp-in-string " +" "" pinyin)))
+        (when (and length (> length 0))
+          (delete-backward-char length)
+          (insert (mapconcat #'char-to-string
+                             (pyim-input-method pinyin) ""))))
+    (message "Chinese-pyim 没有激活!")))
 ;; #+END_SRC
 
 ;; *** 取消当前输入
