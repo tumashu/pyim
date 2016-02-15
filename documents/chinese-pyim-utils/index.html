@@ -219,7 +219,7 @@
       (<span style="color: #FBDE2D;">dolist</span> (string-list string-alist)
         (<span style="color: #FBDE2D;">let</span> ((pinyin-list (pyim-hanzi2pinyin (car string-list) nil <span style="color: #61CE3C;">"-"</span> t)))
           (<span style="color: #FBDE2D;">dolist</span> (pinyin pinyin-list)
-            (<span style="color: #FBDE2D;">let</span> ((words (pyim-get pinyin nil t))) <span style="color: #8B8989; font-style: italic;">; </span><span style="color: #8B8989; font-style: italic;">&#24573;&#30053;&#20010;&#20154;&#35789;&#24211; buffer &#21487;&#20197;&#25552;&#39640;&#36895;&#24230;</span>
+            (<span style="color: #FBDE2D;">let</span> ((words (pyim-get pinyin '(pinyin-dict)))) <span style="color: #8B8989; font-style: italic;">; </span><span style="color: #8B8989; font-style: italic;">&#24573;&#30053;&#20010;&#20154;&#35789;&#24211; buffer &#21487;&#20197;&#25552;&#39640;&#36895;&#24230;</span>
               (<span style="color: #FBDE2D;">dolist</span> (word words)
                 (<span style="color: #FBDE2D;">when</span> (equal word (car string-list))
                   (push string-list result)))))))
@@ -313,8 +313,8 @@
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2016-01-20</span>
-        <span title="last modification date" class="post-info">2016-01-19</span>
+        <span title="post date" class="post-info">2016-02-15</span>
+        <span title="last modification date" class="post-info">2016-02-15</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>

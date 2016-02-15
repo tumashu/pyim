@@ -216,7 +216,7 @@ OUTPUT:
                   <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">pyim-buffer-list &#20013;&#31532;&#19968;&#20010; buffer &#23545;&#24212;&#30340;&#26159;&#20010;&#20154;&#35789;&#24211;&#25991;&#20214;</span>
                   <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20010;&#20154;&#35789;&#24211;&#25991;&#20214;&#20013;&#30340;&#35789;&#26465;&#65292;&#26497;&#26377;&#21487;&#33021;&#23384;&#22312; *&#22810;&#38899;&#23383;&#27745;&#26579;*&#12290;</span>
                   <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#36825;&#26159;&#30001; Chinese-pyim &#20445;&#23384;&#35789;&#26465;&#30340;&#26426;&#21046;&#20915;&#23450;&#30340;&#12290;</span>
-                  (pyim-get py-str nil t)))
+                  (pyim-get py-str '(pinyin-dict))))
             (<span style="color: #FBDE2D;">when</span> (member string words-from-dicts)
               (push pinyin-list pinyins-list-adjusted))))
         (setq pinyins-list-adjusted
@@ -960,8 +960,8 @@ Chinese-pyim 打算使用 emacs package 来分发词库包。
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2016-01-20</span>
-        <span title="last modification date" class="post-info">2016-01-19</span>
+        <span title="post date" class="post-info">2016-02-15</span>
+        <span title="last modification date" class="post-info">2016-02-15</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>

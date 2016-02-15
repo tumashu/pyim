@@ -161,32 +161,23 @@
 (<span style="color: #FBDE2D;">defun</span> <span style="color: #ff1493;">pyim-probe-dynamic-english</span> ()
   <span style="color: #61CE3C;">"&#28608;&#27963;&#36825;&#20010; Chinese-pyim &#25506;&#38024;&#20989;&#25968;&#21518;&#65292;&#20351;&#29992;&#19979;&#38754;&#30340;&#35268;&#21017;&#21160;&#24577;&#20999;&#25442;&#20013;&#33521;&#25991;&#36755;&#20837;&#65306;</span>
 
-<span style="color: #61CE3C;">1. &#24403;&#21069;&#23383;&#31526;&#20026;&#33521;&#25991;&#23383;&#31526;&#26102;&#65292;&#36755;&#20837;&#19979;&#19968;&#20010;&#23383;&#31526;&#26102;&#40664;&#35748;&#24320;&#21551;&#33521;&#25991;&#36755;&#20837;</span>
-<span style="color: #61CE3C;">2. &#24403;&#21069;&#23383;&#31526;&#20026;&#20013;&#25991;&#23383;&#31526;&#26102;&#65292;&#36755;&#20837;&#19979;&#19968;&#20010;&#23383;&#31526;&#26102;&#40664;&#35748;&#24320;&#21551;&#20013;&#25991;&#36755;&#20837;</span>
-<span style="color: #61CE3C;">3. &#26080;&#35770;&#24403;&#21069;&#26159;&#20160;&#20040;&#36755;&#20837;&#27169;&#24335;&#65292;&#24403;&#36755;&#20837;1&#20010;&#31354;&#26684;&#21518;&#65292;&#33258;&#21160;&#20999;&#25442;&#21040;&#20013;&#25991;&#36755;&#20837;&#27169;&#24335;</span>
+<span style="color: #61CE3C;">1. &#24403;&#21069;&#23383;&#31526;&#20026;&#20013;&#25991;&#23383;&#31526;&#26102;&#65292;&#36755;&#20837;&#19979;&#19968;&#20010;&#23383;&#31526;&#26102;&#40664;&#35748;&#24320;&#21551;&#20013;&#25991;&#36755;&#20837;</span>
+<span style="color: #61CE3C;">2. &#24403;&#21069;&#23383;&#31526;&#20026;&#20854;&#20182;&#23383;&#31526;&#26102;&#65292;&#36755;&#20837;&#19979;&#19968;&#20010;&#23383;&#31526;&#26102;&#40664;&#35748;&#24320;&#21551;&#33521;&#25991;&#36755;&#20837;</span>
+<span style="color: #61CE3C;">3. &#20351;&#29992; `</span><span style="color: #4c83ff;">pyim-convert-pinyin-at-point</span><span style="color: #61CE3C;">' &#21487;&#20197;&#23558;&#20809;&#26631;&#21069;&#30340;&#25340;&#38899;&#23383;&#31526;&#20018;&#36716;&#25442;&#20026;&#20013;&#25991;&#65292;</span>
+<span style="color: #61CE3C;">   &#25152;&#20197;&#29992;&#25143;&#38656;&#35201;&#32473; `</span><span style="color: #4c83ff;">pyim-convert-pinyin-at-point</span><span style="color: #61CE3C;">' &#32465;&#23450;&#19968;&#20010;&#24555;&#25463;&#38190;&#65292;&#27604;&#22914;&#65306;</span>
 
-<span style="color: #61CE3C;">&#29992;&#20110;&#65306;`</span><span style="color: #4c83ff;">pyim-english-input-switch-functions</span><span style="color: #61CE3C;">' &#12290;"</span>
-  (<span style="color: #FBDE2D;">let</span> ((str-before-1 (pyim-char-before-to-string 0))
-        (str-before-2 (pyim-char-before-to-string 1))
-        (str-before-2 (pyim-char-before-to-string 2))
-        (regexp-chinese <span style="color: #61CE3C;">"\\cc"</span>)
-        (regexp-alpha <span style="color: #61CE3C;">"[a-zA-Z]"</span>)
-        <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">ascii puncts: !\"#$%&amp;'()*+,-./:;&lt;=&gt;?@\^_`{|}~</span>
-        (puncts <span style="color: #61CE3C;">"#$%&amp;*+,.:;=?@^_`|~!-"</span>))
-    (<span style="color: #FBDE2D;">cond</span> ((and (stringp str-before-1)
-                (stringp str-before-2)
-                (equal str-before-1 <span style="color: #61CE3C;">" "</span>))
-           nil)
-          ((and (stringp str-before-1)
-                (or (pyim-string-match-p regexp-alpha str-before-1)
-                    (member str-before-1
-                            (mapcar #'char-to-string puncts)))
-                (= (length pyim-guidance-str) 0))
-           t)
-          ((pyim-string-match-p regexp-chinese str-before-1)
-           nil))))
+<span style="color: #61CE3C;">   #+BEGIN_SRC elisp</span>
+<span style="color: #61CE3C;">   (global-set-key (kbd \"M-i\") 'pyim-convert-pinyin-at-point)</span>
 </pre>
 </div>
+
+<p>
+这个函数用于：`pyim-english-input-switch-functions' 。"
+  (let ((str-before-1 (pyim-char-before-to-string 0)))
+    (not (or (pyim-string-match-p "\\cc" str-before-1)
+             (&gt; (length pyim-current-key) 0)))))
+#+END_SRC
+</p>
 </div>
 </div>
 
@@ -222,8 +213,8 @@
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2016-01-20</span>
-        <span title="last modification date" class="post-info">2016-01-20</span>
+        <span title="post date" class="post-info">2016-02-15</span>
+        <span title="last modification date" class="post-info">2016-02-15</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>
