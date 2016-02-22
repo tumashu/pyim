@@ -110,8 +110,9 @@
 
 这个函数用于：`pyim-english-input-switch-functions' 。"
   (let ((str-before-1 (pyim-char-before-to-string 0)))
-    (not (or (pyim-string-match-p "\\cc" str-before-1)
-             (> (length pyim-current-key) 0)))))
+    (unless (string= (buffer-name) " *temp*") ; Make sure this probe can work with exim of exwm.
+      (not (or (pyim-string-match-p "\\cc" str-before-1)
+               (> (length pyim-current-key) 0))))))
 ;; #+END_SRC
 
 ;; ** 根据环境自动切换到半角标点输入模式
