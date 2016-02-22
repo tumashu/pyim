@@ -91,7 +91,7 @@
   "激活这个 Chinese-pyim 探针函数后，输入 org-structure-template 时，不会开启中文输入。
 
 用于：`pyim-english-input-switch-functions' 。"
-  (when (string= major-mode "org-mode")
+  (when (eq major-mode 'org-mode)
     (let ((line-string (buffer-substring (point-at-bol) (point))))
       (and (looking-at "[ \t]*$")
            (string-match "^[ \t]*<\\([a-zA-Z]*\\)$" line-string)))))
