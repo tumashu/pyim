@@ -122,9 +122,10 @@
 
 用于：`pyim-punctuation-half-width-functions' 。"
   (let ((line-string (buffer-substring (point-at-bol) (point))))
-    (and (member (char-to-string char)
-                 (mapcar 'car pyim-punctuation-dict))
-         (string-match "^[ \t]*$" line-string))))
+    (unless (string= (buffer-name) " *temp*") ; Make sure this probe can work with exim of exwm.
+      (and (member (char-to-string char)
+                   (mapcar 'car pyim-punctuation-dict))
+           (string-match "^[ \t]*$" line-string)))))
 
 (defun pyim-probe-punctuation-after-punctuation (char)
   "激活这个 Chinese-pyim 探针函数后，半角标点后再输入一个标点符号时，强制输入半角标点。
