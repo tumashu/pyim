@@ -1555,11 +1555,11 @@ Return the input string."
 
         (while pyim-translating
           (set-buffer-modified-p modified-p)
-          (let* ((prompt (if input-method-use-echo-area
-                             (format "%s%s %s"
-                                     (or input-method-previous-message "")
-                                     pyim-current-key
-                                     (plist-get pyim-guidance-list :words))))
+          (let* ((prompt (when input-method-use-echo-area
+                           (format "[%s%s]: %s"
+                                   (or input-method-previous-message "")
+                                   (replace-regexp-in-string "-" "" pyim-current-key)
+                                   (plist-get pyim-guidance-list :words))))
                  (keyseq (read-key-sequence prompt nil nil t))
                  (cmd (lookup-key pyim-mode-map keyseq)))
             ;; (message "key: %s, cmd:%s\nlcmd: %s, lcmdv: %s, tcmd: %s"
