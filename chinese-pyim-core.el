@@ -1556,8 +1556,7 @@ Return the input string."
         (while pyim-translating
           (set-buffer-modified-p modified-p)
           (let* ((prompt (when input-method-use-echo-area
-                           (format "[%s%s]: %s"
-                                   (or input-method-previous-message "")
+                           (format "[%s]: %s"
                                    (replace-regexp-in-string "-" "" pyim-current-key)
                                    (plist-get pyim-guidance-list :words))))
                  (keyseq (read-key-sequence prompt nil nil t))
