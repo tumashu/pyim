@@ -1791,7 +1791,9 @@ Return the input string."
            (ym (pyim-get-ym (cdr sm)))
            (chpy (concat (car sm) (car ym))))
       (if (or (null ym)                 ; 如果韵母为空
-              (and (string< "" (car ym)) (not (pyim-get chpy)))) ; 错误的拼音
+              (and (string< "" (car ym))
+                   (not (assoc chpy pyim-pinyin-pymap))
+                   (not (pyim-get chpy)))) ; 错误的拼音
           (cons sm "")
         (cons (cons (car sm) (car ym)) (cdr ym))))))
 
