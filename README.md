@@ -162,6 +162,12 @@ Chinese-pyim 的目标是： **尽最大的努力成为一个好用的 emacs 中
 
 
 <tr>
+<td class="org-left">C-q</td>
+<td class="org-left">取消输入并保留已输入的中文</td>
+</tr>
+
+
+<tr>
 <td class="org-left">TAB</td>
 <td class="org-left">模糊音调整</td>
 </tr>
