@@ -2155,7 +2155,10 @@ Return the input string."
       (push `(pinyin-znabc ,@(pyim-possible-words wordspy)) words-predicted))
 
     ;; 依次搜索每个拼音对应的汉字。
-    (setq chars (pyim-get (concat (caar pylist) (cdar pylist))))
+    (setq chars
+          `(,@(pyim-get (concat (caar pylist) (cdar pylist)))
+            ,@(mapcar #'char-to-string
+                      (cadr (assoc py-str pyim-pinyin-pymap)))))
 
     ;; 将上述搜索得到的词条合并。
     (setq choice `(,@dabbrev-words-accurate-1
