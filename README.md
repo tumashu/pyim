@@ -214,9 +214,7 @@ Chinese-pyim 的 tooltip 选词框默认使用 **双行显示** 的样式，在�
 
 ### 设置模糊音<a id="orgheadline16"></a>
 
-Chinese-pyim 使用一个比较 **粗糙** 的方法处理 **模糊音** ，要了解具体细节，请运行：
-
-    C-h v pyim-fuzzy-pinyin-adjust-function
+可以通过设置 \`pyim-fuzzy-pinyin-alist' 变量来自定义模糊音。
 
 ### 词语联想<a id="orgheadline17"></a>
 

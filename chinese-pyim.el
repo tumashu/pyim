@@ -155,12 +155,7 @@
 ;; 注：用户也可以自定义 guidance 格式化函数。
 
 ;; *** 设置模糊音
-;; Chinese-pyim 使用一个比较 *粗糙* 的方法处理 *模糊音* ，要了解具体细节，
-;; 请运行：
-
-;; #+BEGIN_EXAMPLE
-;; C-h v pyim-fuzzy-pinyin-adjust-function
-;; #+END_EXAMPLE
+;; 可以通过设置 `pyim-fuzzy-pinyin-alist' 变量来自定义模糊音。
 
 ;; *** 词语联想
 ;; Chinese-pyim *内置* 了5种词语联想方式：
