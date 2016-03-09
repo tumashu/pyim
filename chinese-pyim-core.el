@@ -1879,7 +1879,7 @@ Return the input string."
                                (setq list nil)
                                (setq result
                                      (delete-dups
-                                      `(,str ,@(copy-list x))))))
+                                      `(,str ,@(cl-copy-list x))))))
                            (or result (list str)))))
     (let* ((fuzzy-alist pyim-fuzzy-pinyin-alist)
            (sm-list (find-list (car pycons) fuzzy-alist))
@@ -3405,7 +3405,7 @@ in package `chinese-pyim-pymap'"
          (setq length (length pinyin))
          (setq pinyin (replace-regexp-in-string " +" "" pinyin)))
     (when (and length (> length 0))
-      (delete-backward-char length)
+      (delete-char (- 0 length))
       (insert (mapconcat #'char-to-string
                          (pyim-input-method pinyin) "")))))
 ;; #+END_SRC
