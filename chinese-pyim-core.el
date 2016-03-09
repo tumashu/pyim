@@ -2039,7 +2039,7 @@ Return the input string."
            `(,@dabbrev-accurate-words
              ,@guess-accurate-words
              ,@dabbrev-similar-words
-             ,@personal-words
+             ,@(pyim-sort-words:count personal-words)
              ,@pinyin-dict-words
              ,@(when (and pinyin-dict-words
                           (not (member (car pinyin-dict-words) shouzimu-similar-words)))
