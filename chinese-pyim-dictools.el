@@ -237,7 +237,7 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
 
 ;; ** 词库文件生成工具
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-sort-words-by-freq (words-list)
+(defun pyim-sort-by-freq (words-list)
   "按照词条出现频率对词条列表排序，频率高词条的排在最前面。"
   (let ((count-table (make-hash-table :test #'equal)))
     (dolist (x words-list)
@@ -261,7 +261,7 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
     ;; 排序，这样频率高的词条就会排在前面。
     (when sort-by-freq
       (setq words-list
-            (pyim-sort-words-by-freq words-list)))
+            (pyim-sort-by-freq words-list)))
 
     ;; 删除重复词条的时候，要注意删除顺序。
     (setq words-list

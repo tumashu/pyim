@@ -1358,7 +1358,7 @@ buffer中，当前词条追加到已有词条之后。`pyim-create-or-rearrange-
 
 BUG：无法有效的处理多音字。"
   (let* ((pinyins (pyim-hanzi2pinyin word nil "-" t nil t)) ;使用了多音字校正
-         (word-property (pyim-get-property-from-property-file word)))
+         (word-property (pyim-get-word-properties word)))
 
     ;; Update count property
     (setq word-property
@@ -2143,7 +2143,7 @@ Return the input string."
   (let ((py-str-shouzimu (pyim-pylist-to-string pylist t 'default)))
     (when (and (member 'pinyin-shouzimu pyim-enable-words-predict)
                (> (length pylist) 1))
-      (list nil (pyim-sort-words-by-property-file
+      (list nil (pyim-sort-words:count
                  (pyim-get py-str-shouzimu '(personal-file)))))))
 
 (defun pyim-get-choices:pinyin-similar (pylist)
@@ -2168,7 +2168,7 @@ Return the input string."
                       (cadr (assoc py-str pyim-pinyin-pymap))))
           nil)))
 
-(defun pyim-get-property-from-property-file (word &optional property-list)
+(defun pyim-get-word-properties (word &optional property-list)
   "从 `pyim-property-file' 文件中获取 `word' 对应的一个或者多个属性。
 这些属性名组成 `property-list' 列表。"
   (let* ((contents (pyim-get word '(property-file)))
@@ -2191,12 +2191,12 @@ Return the input string."
                              default-value))))))
     result))
 
-(defun pyim-sort-words-by-property-file (words-list)
+(defun pyim-sort-words:count (words-list)
   "根据 `pyim-property-file' 提供的信息，对 `words-list' 中的词条进行排序。"
   (let ((counts (mapcar
                  #'(lambda (word)
                      (cons (plist-get
-                            (pyim-get-property-from-property-file word '(count))
+                            (pyim-get-word-properties word '(count))
                             'count)
                            word))
                  words-list)))
