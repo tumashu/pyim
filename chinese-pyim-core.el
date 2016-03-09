@@ -770,7 +770,7 @@ If you don't like this funciton, set the variable to nil")
         (let ((coding-system-for-read coding))
           (insert-file-contents file))
       (insert-file-contents file))
-    ;; Create index variable
+    ;; Create cache variable
     (setq pyim-buffer-cache
           (make-hash-table :size 50000 :test #'equal))
     `(("buffer" . ,(current-buffer))
@@ -1196,7 +1196,10 @@ beginning of line"
         (pyim-bisearch-word word (point-min) (point-max))
         (if (equal (pyim-code-at-point) word)
             (pyim-delete-line)
-          (forward-line 1))
+          (forward-line 1)
+          ;; 只要添加新行，cache 就失效了，重置。
+          (setq pyim-buffer-cache
+                (make-hash-table :size 50000 :test #'equal)))
         (insert (mapconcat
                  #'(lambda (x)
                      (format "%s" x))
@@ -1231,7 +1234,10 @@ beginning of line"
         (setq words (list py word)))
       ;;    (message "insert: %s" words)
       (when (> (length words) 1)
-        (insert (mapconcat 'identity words " ") "\n")))))
+        (insert (mapconcat 'identity words " ") "\n")
+        ;; 只要添加新行，cache 就失效了，重置。
+        (setq pyim-buffer-cache
+              (make-hash-table :size 50000 :test #'equal))))))
 
 (defun pyim-create-or-rearrange-word (word &optional rearrange-word)
   "将中文词条 `word' 添加拼音后，保存到 personal-file 对应的
