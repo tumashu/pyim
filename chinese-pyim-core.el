@@ -610,11 +610,12 @@ If you don't like this funciton, set the variable to nil")
 ;; 件后，记得运行 `pyim-update-dict-file' 来对文件排序。
 
 ;; **** 个人词频文件
-;; 虽然 Chinese-pyim 只使用一种词库文件格式，但定义了两种词库类型，用于不
+;; 虽然 Chinese-pyim 只使用一种词库文件格式，但定义了多种词库类型，用于不
 ;; 同的目的：
-;; 1. 个人词频文件
-;; 2. 普通词库文件
-;; 3. Guessdict词库文件
+;; 1. 个人词频文件 (personal-file)
+;; 2. 属性文件 (property-file)
+;; 3. 普通词库文件 (pinyin-dict)
+;; 4. Guessdict词库文件 (guess-dict)
 
 ;; 个人词频文件用来保存用户曾经输入过的中文词条以及这些词条输入的先后顺序
 ;; （也就是词频信息）。Chinese-pyim 搜索中文词条时，个人词频文件里的词条
@@ -643,13 +644,8 @@ If you don't like this funciton, set the variable to nil")
 ;;    所以普通词库文件的内容一般不会发生改变。
 ;; 3. 普通词库文件适宜制作词库包，在用户之间共享。
 
-;; Guessdict词库用于词语联想，它与普通词库文件有类似的特征，唯一不同的是：
-;; Guessdict词库的 code 是中文，而不是拼音。
-
-;; #+BEGIN_EXAMPLE
-;; 我爱 北京 美女 旅游
-;; 我们 去哪 去看海
-;; #+END_EXAMPLE
+;; Guessdict 词库用于词语联想，它与普通词库文件有相同的结构，但得词条
+;; 的意义不同。
 
 ;; 我们使用变量 `pyim-dicts' 来设定普通词库文件和 guessdict 词库的信息：
 ;; 1. `:name' 用户给词库设定的名称，暂时没有用处，未来可能用于构建词库包。
@@ -1947,7 +1943,7 @@ Return the input string."
            (prefix (pyim-grab-chinese-word
                     (length pyim-current-str) pyim-last-input-word))
            (length-prefix (length prefix))
-           (words-all (pyim-get prefix '(guess-dict)))
+           (words-all (pyim-get (pyim-hanzi2pinyin prefix nil "-" nil t) '(guess-dict)))
            (count 0)
            words-accurate words-similar)
       ;; 光标前获取的 prefix 字符串长度大于1并且小于5时，

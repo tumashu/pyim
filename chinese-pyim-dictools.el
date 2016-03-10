@@ -342,10 +342,15 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
   "将当前行对应的汉语词条转换为 Chinese-pyim 可以识别的词库格式（ni-hao 你好）。"
   (interactive)
   (let (line-content pinyin-list insert-string)
-    (setq line-content (buffer-substring-no-properties
-                        (line-beginning-position) (line-end-position)))
-    (setq line-content (replace-regexp-in-string "^ +\\| +$" "" line-content))
-    (setq pinyin-list (pyim-hanzi2pinyin line-content nil "-" t))
+    (setq line-content
+          (buffer-substring-no-properties
+           (line-beginning-position) (line-end-position)))
+    (setq line-content
+          (replace-regexp-in-string
+           "^ +\\| +$" "" line-content))
+    (setq pinyin-list
+          (pyim-hanzi2pinyin
+           (car (split-string line-content)) nil "-" t))
     (delete-region (line-beginning-position) (line-end-position))
     (setq insert-string
           (mapconcat
@@ -379,7 +384,12 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
   (interactive)
   (let* ((string (mapconcat
                   #'(lambda (x)
-                      (mapconcat #'identity x " "))
+                      (let ((pinyin-list (pyim-hanzi2pinyin
+                                          (car x) nil "-" t)))
+                        (mapconcat
+                         #'(lambda (pinyin)
+                             (concat pinyin "  " (mapconcat #'identity x " ")))
+                         pinyin-list "\n")))
                   (pyim-guessdict-list-convert (pyim-line-content nil t))
                   "\n")))
     (delete-region (line-beginning-position) (line-end-position))
