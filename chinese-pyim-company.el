@@ -108,7 +108,7 @@
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-company-dabbrev--make-regexp (orig-fun)
   (if (pyim-company-chinese-complete-p)
-      (format "%s[^[:punct:][:blank:]\n]\\{1,%s\\}" pyim-company-max-length)
+      (format "[^[:punct:][:blank:]\n]\\{1,%s\\}" pyim-company-max-length)
     (funcall orig-fun)))
 ;; #+END_SRC
 
