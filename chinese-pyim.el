@@ -173,8 +173,7 @@
 ;;     用 `pyim-article2dict-guessdict' 命令生成，不想折腾的用户也可以从
 ;;     下面的地址下载样例词库：(注意：请使用另存为，不要直接点击链接)。
 
-;;    1. http://tumashu.github.io/chinese-pyim-guessdict/pyim-guessdict-a.gpyim
-;;    2. http://tumashu.github.io/chinese-pyim-guessdict/pyim-guessdict-b.gpyim
+;;     http://tumashu.github.io/chinese-pyim-guessdict/pyim-guessdict.gpyim
 
 ;; 5. `dabbrev'  搜索当前 buffer, 或者其他 buffer 中已经存在的中文文本，得到匹配的
 ;;    候选词，通过这些候选词来提高输入法的识别精度。
