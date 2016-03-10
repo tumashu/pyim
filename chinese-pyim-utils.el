@@ -267,8 +267,6 @@
   "将一个 buffer 中的中文文章，进行分词操作。"
   (interactive)
   (message "分词开始！")
-  (unless pyim-buffer-cache-list
-    (message "NOTE：分词前运行命令 `pyim-cache-dict-buffer' 可以显著的提高分词速度。。。"))
   (goto-char (point-min))
   (while (not (eobp))
     (let ((string (buffer-substring-no-properties
