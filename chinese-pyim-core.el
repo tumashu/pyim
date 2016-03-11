@@ -1061,8 +1061,14 @@ BUG: 这个函数需要进一步优化，使其判断更准确。"
 (defun pyim-bisearch-word (code start end)
   (let ((code-cached (gethash code pyim-buffer-cache)))
     ;; (princ code-cached)
-    (cond ((numberp code-cached) (pyim-bisearch-word-internal
-                                  code code-cached code-cached))
+    (cond ((and code-cached (listp code-cached))
+           ;; Jump to the line of words, which is need by `pyim-intern-personal-file'
+           ;; and `pyim-intern-property-file'
+           (goto-char (car code-cached))
+           (car (cdr code-cached)))
+          ((numberp code-cached)
+           (pyim-bisearch-word-internal
+            code code-cached code-cached))
           (t (pyim-bisearch-word-internal
               code start end)))))
 
@@ -1072,11 +1078,15 @@ BUG: 这个函数需要进一步优化，使其判断更准确。"
     (goto-char mid)
     (beginning-of-line)
     (setq ccode (pyim-code-at-point))
-    ;; Create buffer
+    ;; Create point number cache
     (puthash ccode (point) pyim-buffer-cache)
     ;; (message "%d, %d, %d: %s" start mid end ccode)
     (if (equal ccode code)
-        (pyim-line-content "[ \f\t\n\r\v]+\\|:")
+        (let* ((content (pyim-line-content "[ \f\t\n\r\v]+\\|:"))
+               (cache (list (point) content)))
+          ;; Create point number cache and words list cache
+          (puthash code cache pyim-buffer-cache)
+          content)
       (if (> mid start)
           (if (string< ccode code)
               (pyim-bisearch-word-internal code mid end)
