@@ -1197,9 +1197,8 @@ beginning of line"
         (if (equal (pyim-code-at-point) word)
             (pyim-delete-line)
           (forward-line 1)
-          ;; 只要添加新行，cache 就失效了，重置。
-          (setq pyim-buffer-cache
-                (make-hash-table :size 50000 :test #'equal)))
+          ;; 只要添加新行，cache 就失效了，清空。
+          (clrhash pyim-buffer-cache))
         (insert (mapconcat
                  #'(lambda (x)
                      (format "%s" x))
@@ -1235,9 +1234,8 @@ beginning of line"
       ;;    (message "insert: %s" words)
       (when (> (length words) 1)
         (insert (mapconcat 'identity words " ") "\n")
-        ;; 只要添加新行，cache 就失效了，重置。
-        (setq pyim-buffer-cache
-              (make-hash-table :size 50000 :test #'equal))))))
+        ;; 只要添加新行，cache 就失效了，清空。
+        (clrhash pyim-buffer-cache)))))
 
 (defun pyim-create-or-rearrange-word (word &optional rearrange-word)
   "将中文词条 `word' 添加拼音后，保存到 personal-file 对应的
