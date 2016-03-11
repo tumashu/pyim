@@ -902,8 +902,7 @@ If you don't like this funciton, set the variable to nil")
               (throw 'done 'pyim-time-out))))))
 
 ;; Shameless steal from company-dabbrev.el in `company' package
-(defun pyim-get-dabbrev-search-buffer (regexp pos symbols start
-                                              limit ignore-comments)
+(defun pyim-get-dabbrev-search-buffer (regexp pos symbols start limit)
   (save-excursion
     (cl-labels ((maybe-collect-match
                  ()
@@ -923,28 +922,23 @@ If you don't like this funciton, set the variable to nil")
             ;; that forced us to use the "beginning/end of word" anchors in
             ;; search regexp.
             (while (re-search-forward regexp tmp-end t)
-              (if (and ignore-comments (save-match-data (company-in-string-or-comment)))
-                  (re-search-forward "\\s>\\|\\s!\\|\\s\"" tmp-end t)
-                (maybe-collect-match))))
+              (maybe-collect-match)))
           (setq tmp-end (point))))
       (goto-char (or pos (point-min)))
       ;; Search after pos.
       (pyim-get-dabbrev-time-limit-while
-          (re-search-forward regexp nil t) start limit
-        (if (and ignore-comments (save-match-data (company-in-string-or-comment)))
-            (re-search-forward "\\s>\\|\\s!\\|\\s\"" nil t)
-          (maybe-collect-match)))
+          (re-search-forward regexp nil t)
+          start limit (maybe-collect-match))
       symbols)))
 
 ;; Shameless steal from company-dabbrev.el in `company' package
-(defun pyim-get-dabbrev (regexp &optional limit other-buffer-modes
-                                ignore-comments)
+(defun pyim-get-dabbrev (regexp &optional limit other-buffer-modes)
   (when (and regexp
              (stringp regexp)
              (not (equal regexp "")))
     (let* ((start (current-time))
            (symbols (pyim-get-dabbrev-search-buffer
-                     regexp (point) nil start limit ignore-comments)))
+                     regexp (point) nil start limit)))
       (when other-buffer-modes
         (cl-dolist (buffer (delq (current-buffer) (buffer-list)))
           (with-current-buffer buffer
@@ -956,7 +950,7 @@ If you don't like this funciton, set the variable to nil")
                     (apply #'derived-mode-p other-buffer-modes))
               (setq symbols
                     (pyim-get-dabbrev-search-buffer
-                     regexp nil symbols start limit ignore-comments))))
+                     regexp nil symbols start limit))))
           (and limit
                (> (float-time (time-since start)) limit)
                (cl-return))))
