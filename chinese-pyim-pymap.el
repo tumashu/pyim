@@ -529,12 +529,11 @@
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-cchar2pinyin-get (char-or-str)
   "Get the code of the character CHAR"
-  (let ((char (if (and char-or-str
-                       (stringp char-or-str)
-                       (= (length char-or-str) 1))
-                  (string-to-char char-or-str)
-                char-or-str)))
-    (gethash char pyim-cchar2pinyin-cache)))
+  (let ((key (if (characterp char-or-str)
+                 (char-to-string char-or-str)
+               char-or-str)))
+    (when (= (length key) 1)
+      (gethash key pyim-cchar2pinyin-cache))))
 
 (defun pyim-cchar2pinyin-create-cache (&optional force)
   "Build pinyin cchar to pinyin hashtable from `pyim-pinyin-pymap'
@@ -546,10 +545,11 @@ in package `chinese-pyim-pymap'"
       (let ((py (car x))
             (cchar-list (string-to-list (car (cdr x)))))
         (dolist (cchar cchar-list)
-          (let ((cache (gethash cchar pyim-cchar2pinyin-cache)))
+          (let* ((key (char-to-string cchar))
+                 (cache (gethash key pyim-cchar2pinyin-cache)))
             (if cache
-                (puthash cchar (append (list py) cache) pyim-cchar2pinyin-cache)
-              (puthash cchar (list py) pyim-cchar2pinyin-cache))))))))
+                (puthash key (append (list py) cache) pyim-cchar2pinyin-cache)
+              (puthash key (list py) pyim-cchar2pinyin-cache))))))))
 ;; #+END_SRC
 
 
