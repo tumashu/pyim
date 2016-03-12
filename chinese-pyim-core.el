@@ -389,8 +389,6 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
   '("a" "o" "e" "ai" "ei" "ui" "ao" "ou" "er" "an" "en"
     "ang" "eng"))
 
-(defvar pyim-char-table (make-vector 1511 nil))
-
 (defvar pyim-current-key "" "已经输入的代码")
 (defvar pyim-current-str "" "当前选择的词条")
 (defvar pyim-last-input-word "" "保存上一次输入过的词条，用于实现某种词语联想功能。")
@@ -521,7 +519,7 @@ If you don't like this funciton, set the variable to nil")
 ;; 真正启动 Chinese-pyim 的命令是 `pyim-start' ，这个命令做如下工作：
 ;; 1. 重置 `pyim-local-variable-list' 中所有的 local 变量。
 ;; 2. 使用 `pyim-load-file’加载词库文件，具体细节请参考：[[#load-dicts]]
-;; 3. 使用 `pyim-make-char-table' 创建汉字到拼音的 hash table，具体细节请
+;; 3. 使用 `pyim-cchar2pinyin-create-cache' 创建汉字到拼音的 hash table，具体细节请
 ;;    参考：[[#make-char-table]]
 ;; 4. 运行hook： `pyim-load-hook'。
 ;; 5. 将 `pyim-save-files' 命令添加到 `kill-emacs-hook' emacs 关
@@ -556,7 +554,8 @@ If you don't like this funciton, set the variable to nil")
                (pyim-check-buffers)
                (not restart))
     (setq pyim-buffer-list (pyim-load-file))
-    (pyim-make-char-table)
+    (pyim-cchar2pinyin-create-cache)
+    (pyim-pinyin2cchar-create-cache)
     (run-hooks 'pyim-load-hook)
     (message nil))
 
@@ -1947,7 +1946,7 @@ Return the input string."
            (length-prefix (length prefix))
            (words-all (pyim-get (pyim-hanzi2pinyin prefix nil "-" nil t) '(guess-dict)))
            (count 0)
-           words-accurate words-similar)
+           words words-accurate words-similar)
       ;; 光标前获取的 prefix 字符串长度大于1并且小于5时，
       ;; 才进行 guess-words 词语联想，prefix 长度太小时，搜索
       ;; 得到的词条太多，处理起来容易卡顿，prefix 长度太大时，
@@ -2181,7 +2180,7 @@ shi-shui 与  ni-shi-shui-ya 匹配，这个函数的返回值为 (1 . 3),
             (dolist (py pylist)
               (push
                (mapconcat #'identity
-                          (pyim-pinyin-pymap-get-pinyin-matched-char
+                          (pyim-pinyin2cchar-get
                            py
                            (or all-equal
                                (and first-equal
@@ -3143,113 +3142,6 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
 ;; 当待输入的字符是触发字符时，`pyim-translate' 根据光标前的字符的不同
 ;; 来调用不同的功能，具体见 `pyim-translate' ：
 
-;; ** 查询某个汉字的拼音code
-;;   :PROPERTIES:
-;;   :CUSTOM_ID: make-char-table
-;;   :END:
-;; Chinese-pyim 在特定的时候需要读取一个汉字的拼音，这个工作由下面几个函数完成：
-
-;; 函数 `pyim-get-char-code' 从 `pyim-char-table' 查询得到一个汉字字符的拼音， 例如：
-;; #+BEGIN_EXAMPLE
-;; (pyim-get-char-code ?我)
-;; #+END_EXAMPLE
-
-;; 结果为:
-;; : ("wo")
-
-;; 函数 `pyim-make-char-table-1' 参数 `chars’的形式类似：
-;; #+BEGIN_EXAMPLE
-;; (("ni" "你尼呢腻")
-;;  ("wo" "我握涡卧龌"))
-;; #+END_EXAMPLE
-
-;; 最终得到一个汉字到拼音的 *hash table* ，用 *一个列表* 直观的表示为：
-;; #+BEGIN_EXAMPLE
-;; (('我 '("wo"))
-;;  ('你 '("ni"))
-;;  ('行 '("xing" "hang"))
-;;  ('大 '("da")))
-;; #+END_EXAMPLE
-
-;; 我们用全局变量 `pyim-char-table' 来保存这个 *hash table* 。
-
-;; 函数 `pyim-make-char-table-quail/PY' 是函数 `pyim-make-char-table-1' 的包装，
-;; 这个函数是一个 *历史函数* ，已经没有作用了，仅仅用于学习，其运行过程大体为：
-;; 1. 使用 regexp 解析  "quail/PY.el" 文件中的汉字拼音信息，这个文件的结构类似：
-;;    #+BEGIN_EXAMPLE
-;;    (quail-define-rules
-;;    ("a" "阿啊呵腌嗄锕吖")
-;;    ("ai" "爱哀挨碍埃癌艾唉矮哎皑蔼隘暧霭捱嗳瑷嫒锿嗌砹")
-;;    ("an" "安案按暗岸俺谙黯鞍氨庵桉鹌胺铵揞犴埯")
-;;    ("ang" "昂肮盎")
-;;    ("ao" "奥澳傲熬敖凹袄懊坳嗷拗鏖骜鳌翱岙廒遨獒聱媪螯鏊")
-;;    ("ba" "把八吧巴爸罢拔叭芭霸靶扒疤跋坝笆耙粑灞茇菝魃岜捌钯鲅")
-;;    ("bai" "百白败摆伯拜柏呗掰捭佰稗")
-;;    ("ban" "办半版般班板伴搬扮斑颁瓣拌扳绊阪坂瘢钣舨癍")
-;;    ...
-;;    )
-;;    #+END_EXAMPLE
-;; 2. 将上述汉字拼音信息 *按行处理* ，转换为下述类似的列表结构。
-;;    #+BEGIN_EXAMPLE
-;;    (("ni" "你尼呢腻"))
-;;    #+END_EXAMPLE
-;; 3. 使用 `pyim-make-char-table-1' 处理得到的列表。
-
-;; 函数 `pyim-make-char-table' 也是函数 `pyim-make-char-table-1' 的包装，
-;; 其过程简单来说就是使用 `pyim-make-char-table-1' 函数处理变量
-;; `pyim-pinyin-pymap' 中保存的拼音汉字对应信息。
-
-;; 这个例子中的语句用于调试上述三个函数。
-;; #+BEGIN_EXAMPLE
-;; (setq pyim-char-table nil)
-;; (pyim-make-char-table-1 '(("ni" "你呢泥")))
-;; (pyim-make-char-table)
-;; (pyim-get-char-code ?你)
-;; #+END_EXAMPLE
-
-
-;; #+BEGIN_SRC emacs-lisp
-(defun pyim-get-char-code (char)
-  "Get the code of the character CHAR"
-  (symbol-value (intern-soft (char-to-string char) pyim-char-table)))
-
-(defun pyim-make-char-table-1 (chars)
-  (dolist (char chars)
-    (let ((code (car char)))
-      (mapc (lambda (c)
-              (let* ((str (char-to-string c))
-                     (s (intern-soft str pyim-char-table))
-                     (py (and s (symbol-value s))))
-                (set (intern str pyim-char-table)
-                     (cl-remove-duplicates
-                      (append py (list code)) :test #'equal))))
-            (car (cdr char))))))
-
-(defun pyim-make-char-table ()
-  "Build pinyin char hashtable from `pyim-pinyin-pymap'
-in package `chinese-pyim-pymap'"
-  (pyim-make-char-table-1 pyim-pinyin-pymap))
-
-(defun pyim-make-char-table-from-quail/PY ()
-  "Build pinyin char hashtable from quail/PY.el，
-这个函数暂时没有用处。"
-  (interactive)
-  (let ((file (locate-library "quail/PY.el")))
-    (if file
-        (with-temp-buffer
-          (insert-file-contents file)
-          (goto-char (point-min))
-          (while (re-search-forward
-                  "^[[:space:]]*([[:space:]]*\"\\([a-z]+\\)\"[[:space:]]*\"\\([^\"]+\\)\"[[:space:]]*)[[:space:]]*$" nil t)
-            (let ((pinyin (match-string 1))
-                  (hanzi-string (substring-no-properties (match-string 2))))
-              (pyim-make-char-table-1 `((,pinyin ,hanzi-string))))))
-      (warn "没有找到 Emacs 自带文件: quail/PY.el，用户可能没有安装 emacs<VERSION>-el 软件包。
-此时， Chinese-pyim 可以正常输入词条，但下面几个功能失效：
-1. 词频调整功能
-2. 汉字到拼音转换功能
-3. 词条添加和删除功能"))))
-;; #+END_SRC
 
 ;; ** 与拼音输入相关的用户命令
 ;; *** 删除拼音字符串最后一个字符
