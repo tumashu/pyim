@@ -1324,10 +1324,19 @@ BUG：无法有效的处理多音字。"
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-delete-word (word)
   "将中文词条 `word' 从 personal-file 对应的 buffer 中删除"
-  (mapc (lambda (py)
-          (unless (pyim-string-match-p "[^ a-z-]" py)
-            (pyim-intern-personal-file word py nil t)))
-        (pyim-hanzi2pinyin word nil "-" t)))
+  (let* ((pinyins (pyim-hanzi2pinyin word nil "-" t))
+         (pinyins-szm (mapcar
+                       #'(lambda (pinyin)
+                           (mapconcat #'(lambda (x)
+                                          (substring x 0 1))
+                                      (split-string pinyin "-") "-"))
+                       pinyins)))
+    (dolist (pinyin pinyins)
+      (unless (pyim-string-match-p "[^ a-z-]" pinyin)
+        (pyim-intern-personal-file word pinyin nil t)))
+    (dolist (pinyin pinyins-szm)
+      (unless (pyim-string-match-p "[^ a-z-]" pinyin)
+        (pyim-intern-personal-file word pinyin nil t)))))
 
 (defun pyim-delete-word-from-personal-buffer ()
   "将高亮选择的字符从 personel-file 对应的 buffer 中删除。"
