@@ -1882,8 +1882,8 @@ Return the input string."
   (let* (personal-words
          pinyin-dict-words
          dabbrev-accurate-words dabbrev-similar-words
-         guess-accurate-words guess-similar-words
-         shouzimu-similar-words other-similar-words
+         guess-dict-accurate-words guess-dict-similar-words
+         pinyin-similar-words pinyin-shouzimu-similar-words pinyin-znabc-similar-words
          chars)
 
     (dolist (pylist list-of-pylist)
@@ -1903,46 +1903,45 @@ Return the input string."
 
     ;; Guess-dict words
     (let ((words (pyim-get-choices:guess-words (car list-of-pylist))))
-      (setq guess-accurate-words (car words))
-      (setq guess-similar-words (car (cdr words))))
+      (setq guess-dict-accurate-words (car words))
+      (setq guess-dict-similar-words (car (cdr words))))
 
-    ;; Shouzimu words
+    ;; Pinyin shouzimu similar words
     (let ((words (pyim-get-choices:pinyin-shouzimu (car list-of-pylist))))
-      (setq shouzimu-similar-words (car (cdr words))))
+      (setq pinyin-shouzimu-similar-words (car (cdr words))))
 
-    ;; Other words
-    (dolist (func '(pyim-get-choices:pinyin-shouzimu
-                    pyim-get-choices:pinyin-similar
-                    pyim-get-choices:pinyin-znabc))
-      (setq other-similar-words
-            (append other-similar-words
-                    (car (cdr (funcall func (car list-of-pylist)))))))
+    ;; Pinyin znabc-style similar words
+    (let ((words (pyim-get-choices:pinyin-znabc (car list-of-pylist))))
+      (setq pinyin-znabc-similar-words (car (cdr words))))
+
+    ;; Pinyin similar words
+    (let ((words (pyim-get-choices:pinyin-similar (car list-of-pylist))))
+      (setq pinyin-similar-words (car (cdr words))))
+
     ;; Debug
     (when pyim-debug
       (princ (list :dabbrev-accurate-words dabbrev-accurate-words
-                   :guess-accurate-words guess-accurate-words
+                   :guess-dict-accurate-words guess-dict-accurate-words
                    :personal-words personal-words
                    :pinyin-dict-words pinyin-dict-words
-                   :shouzimu-dict-words shouzimu-similar-words
+                   :pinyin-shouzimu-words pinyin-shouzimu-similar-words
                    :dabbrev-similar-words dabbrev-similar-words
-                   :other-similar-words other-similar-words
+                   :pinyin-similar-words pinyin-similar-words
+                   :pinyin-znabc-similar-words pinyin-znabc-similar-words
                    :chars chars)))
 
     (delete-dups
      (delq nil
            `(,@dabbrev-accurate-words
-             ,@guess-accurate-words
+             ,@guess-dict-accurate-words
              ,@dabbrev-similar-words
              ,@(pyim-sort-words:count personal-words)
              ,@pinyin-dict-words
              ,@(when (and pinyin-dict-words
-                          (not (member (car pinyin-dict-words) shouzimu-similar-words)))
-                 shouzimu-similar-words)
-             ;; 没有精确匹配的词条时，设置第一个被选词为字符，
-             ;; 这样可以减少不可预期的联想词带来的视觉压力。
-             ,@(unless pinyin-dict-words
-                 (list (car chars)))
-             ,@other-similar-words
+                          (not (member (car pinyin-dict-words) pinyin-shouzimu-similar-words)))
+                 pinyin-shouzimu-similar-words)
+             ,@pinyin-similar-words
+             ,@pinyin-znabc-similar-words
              ,@chars)))))
 
 (defun pyim-get-choices:guess-words (pylist)
