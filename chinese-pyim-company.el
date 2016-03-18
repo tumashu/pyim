@@ -92,8 +92,8 @@
 (defun pyim-company-grab-word (orig-fun)
   (if (pyim-company-chinese-complete-p)
       (when pyim-company-complete-chinese-enable
-        (pyim-grab-chinese-word
-         0 (pyim-char-before-to-string 0)))
+        (or (pyim-grab-chinese-word)
+            (pyim-char-before-to-string 0)))
     (funcall orig-fun)))
 ;; #+END_SRC
 

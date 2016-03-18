@@ -1952,9 +1952,8 @@ Return the input string."
   ;; 将搜索得到的词条的拼音与 *当前输入的拼音* 进行比较，类似或者精确匹配的词条作为联想词。
   (when (member 'guess-words pyim-enable-words-predict)
     (let ((py-str (pyim-pylist-to-string pylist nil 'default))
-          (prefixs (delete-dups
-                    (pyim-grab-chinese-word
-                     (length pyim-current-str) pyim-last-input-word t)))
+          (prefixs (pyim-grab-chinese-word
+                    (length pyim-current-str) t))
           words words-accurate words-similar)
       (dolist (prefix prefixs)
         (let ((length-prefix (length prefix))
@@ -2102,7 +2101,7 @@ Return the input string."
                   #'(lambda (a b)
                       (> (car a) (car b)))))))
 
-(defun pyim-grab-chinese-word (&optional backward-char-number fallback return-list)
+(defun pyim-grab-chinese-word (&optional backward-char-number return-possible-words)
   "获取光标处一个 *有效的* 中文词语，较长的词语优先。"
   (unless (featurep 'chinese-pyim-utils)
     (require 'chinese-pyim-utils))
@@ -2126,22 +2125,17 @@ Return the input string."
           (if (> (length string) 6)
               (substring string -6)
             string))
-         (length (length string))
-         output)
-    (setq output
-          `(,(or (cl-some #'(lambda (x)
-                              (if (= (nth 2 x) (+ 1 length))
-                                  (car x)))
-                          (nreverse (pyim-split-chinese-string string)))
-                 (or fallback ""))
-            ,@(when (stringp string)
-                (let (results)
-                  (dotimes (i length)
-                    (push (substring string i) results))
-                  results))))
-    (if return-list
-        output
-      (car output))))
+         (length (length string)))
+    (if return-possible-words
+        (when (stringp string)
+          (let (results)
+            (dotimes (i length)
+              (push (substring string i) results))
+            results))
+      (cl-some #'(lambda (x)
+                   (if (= (nth 2 x) (+ 1 length))
+                       (car x)))
+               (nreverse (pyim-split-chinese-string string))))))
 
 (defun pyim-pinyin-match (pinyin1 pinyin2 &optional match-beginning first-equal all-equal)
   "判断拼音 `pinyin1' 是否和拼音 `pinyin2' 相匹配，如果匹配，
