@@ -387,6 +387,22 @@
 ;; 1. 必须使用词库文件的绝对路径。
 ;; 2. 正确设置coding，否则会出现乱码。
 
+
+;; *** 如何合并两个词库文件
+;; 假设有两个词库文件：
+
+;; 1. file-a.pyim
+;; 2. file-b.pyim
+
+;; 合并方法：
+
+;; 1. 将两个词库文件的内容合并到一起，比如：
+;;    #+BEGIN_EXAMPLE
+;;    cat file-a.pyim file-b.pyim > output.pyim
+;;    #+END_EXAMPLE
+;; 2. 使用 emacs 打开合并后的文件：output.pyim
+;; 3. 运行 pyim-update-dict-file 命令对 output.pyim 的内容进行排序，然后保存。
+
 ;; *** 如何快速切换词库
 ;; 用户可以自定义类似的命令来实现快速切换拼音词库。
 

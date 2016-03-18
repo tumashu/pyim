@@ -27,6 +27,7 @@
     - [将光标处的拼音字符串转换为中文 (与 vimim 的 “点石成金” 功能类似)](#将光标处的拼音字符串转换为中文-(与-vimim-的-“点石成金”-功能类似))
     - [如何添加自定义拼音词库](#如何添加自定义拼音词库)
     - [如何手动安装和管理词库](#如何手动安装和管理词库)
+    - [如何合并两个词库文件](#如何合并两个词库文件)
     - [如何快速切换词库](#如何快速切换词库)
     - [将汉字字符串转换为拼音字符串](#将汉字字符串转换为拼音字符串)
     - [中文分词](#中文分词)
@@ -35,7 +36,7 @@
     - [为 isearch 相关命令添加拼音搜索支持](#为-isearch-相关命令添加拼音搜索支持)
     - [使用 Chinese-pyim 改善 company-mode 中文补全的体验](#使用-chinese-pyim-改善-company-mode-中文补全的体验)
 
-# Chinese-pyim 使用说明<a id="orgheadline42"></a>
+# Chinese-pyim 使用说明<a id="orgheadline43"></a>
 
 ## 截图<a id="orgheadline1"></a>
 
@@ -282,10 +283,11 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
     <tbody>
     <tr>
     <td class="org-left">pyim-probe-program-mode</td>
-    <td class="org-left">\`prog-mode' 衍生 mode 下，仅仅在字符串和 comment 中开启中文输入模式</td>
+    <td class="org-left">如果当前的 mode 衍生自 prog-mode，那么仅仅在字符串和 comment 中开启中文输入模式</td>
     </tr>
+    </tbody>
 
-
+    <tbody>
     <tr>
     <td class="org-left">pyim-probe-org-speed-commands</td>
     <td class="org-left">解决 org-speed-commands 与 Chinese-pyim 冲突问题</td>
@@ -302,29 +304,31 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
     <td class="org-left">&#xa0;</td>
     <td class="org-left">注意：想要使用这个功能，pyim-isearch-enable-pinyin-search 必须设置为 t</td>
     </tr>
+    </tbody>
 
-
+    <tbody>
     <tr>
     <td class="org-left">pyim-probe-org-structure-template</td>
     <td class="org-left">使用 org-structure-template 时，关闭中文输入模式</td>
     </tr>
+    </tbody>
 
-
+    <tbody>
     <tr>
     <td class="org-left">&#xa0;</td>
-    <td class="org-left">1. 当前字符为英文字符时，输入下一个字符时默认开启英文输入</td>
+    <td class="org-left">1. 当前字符为中文字符时，输入下一个字符时默认开启中文输入</td>
     </tr>
 
 
     <tr>
     <td class="org-left">pyim-probe-dynamic-english</td>
-    <td class="org-left">2. 当前字符为中文字符时，输入下一个字符时默认开启中文输入</td>
+    <td class="org-left">2. 当前字符为其他字符时，输入下一个字符时默认开启英文输入</td>
     </tr>
 
 
     <tr>
     <td class="org-left">&#xa0;</td>
-    <td class="org-left">3. 无论当前是什么输入模式，当输入1个空格后，自动切换到中文输入模式</td>
+    <td class="org-left">3. 使用命令 pyim-convert-pinyin-at-point 可以将光标前的拼音字符串强制转换为中文。</td>
     </tr>
     </tbody>
     </table>
@@ -358,8 +362,9 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
     <td class="org-left">pyim-probe-punctuation-line-beginning</td>
     <td class="org-left">行首强制输入半角标点</td>
     </tr>
+    </tbody>
 
-
+    <tbody>
     <tr>
     <td class="org-left">pyim-probe-punctuation-after-punctuation</td>
     <td class="org-left">半角标点后强制输入半角标点</td>
@@ -383,7 +388,7 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
 
     ![img](snapshots/QR-code-for-author.jpg)
 
-## Tips<a id="orgheadline41"></a>
+## Tips<a id="orgheadline42"></a>
 
 ### Chinese-pyim 出现错误时，如何开启 debug 模式<a id="orgheadline25"></a>
 
@@ -492,7 +497,22 @@ Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面四�
 1.  必须使用词库文件的绝对路径。
 2.  正确设置coding，否则会出现乱码。
 
-### 如何快速切换词库<a id="orgheadline34"></a>
+### 如何合并两个词库文件<a id="orgheadline34"></a>
+
+假设有两个词库文件：
+
+1.  file-a.pyim
+2.  file-b.pyim
+
+合并方法：
+
+1.  将两个词库文件的内容合并到一起，比如：
+
+        cat file-a.pyim file-b.pyim > output.pyim
+2.  使用 emacs 打开合并后的文件：output.pyim
+3.  运行 pyim-update-dict-file 命令对 output.pyim 的内容进行排序，然后保存。
+
+### 如何快速切换词库<a id="orgheadline35"></a>
 
 用户可以自定义类似的命令来实现快速切换拼音词库。
 
@@ -505,7 +525,7 @@ Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面四�
                      :dict-type pinyin-dict)))
       (pyim-restart-1 t))
 
-### 将汉字字符串转换为拼音字符串<a id="orgheadline35"></a>
+### 将汉字字符串转换为拼音字符串<a id="orgheadline36"></a>
 
 下面两个函数可以将中文字符串转换的拼音字符串或者列表，用于 emacs-lisp
 编程。
@@ -513,7 +533,7 @@ Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面四�
 1.  \`pyim-hanzi2pinyin' （考虑多音字）
 2.  \`pyim-hanzi2pinyin-simple'  （不考虑多音字）
 
-### 中文分词<a id="orgheadline36"></a>
+### 中文分词<a id="orgheadline37"></a>
 
 Chinese-pyim 包含了一个简单的分词函数：\`pyim-split-chinese-string'. 这个函数使用暴力匹配模式来分词，所以， **不能检测出** Chinese-pyim 词库中不存在的中文词条。另外，这个函数的分词速度比较慢，仅仅适用于中文短句的分词，不适用于文章分词。根据评估，20个汉字组成的字符串需要大约0.3s， 40个汉字消耗1s，随着字符串长度的增大消耗的时间呈几何倍数增加。
 
@@ -528,12 +548,12 @@ Chinese-pyim 包含了一个简单的分词函数：\`pyim-split-chinese-string'
 
 另外一个分词相关的函数是 \`pyim-split-chinese-string2string', 这个函数仅仅将一个中文字符串分词，在分词的位置用空格或者用户自定义的分隔符隔开，然后返回新的字符串。
 
-### 获取光标处的中文词条<a id="orgheadline37"></a>
+### 获取光标处的中文词条<a id="orgheadline38"></a>
 
 Chinese-pyim 包含了一个简单的命令：\`pyim-get-words-list-at-point', 这个命令可以得到光标处的 **英文** 或者 **中文** 词条的 \*列表\*，这个命令依赖分词函数：
 \`pyim-split-chinese-string'。
 
-### 让 \`forward-word' 和 \`back-backward’ 在中文环境下正常工作<a id="orgheadline38"></a>
+### 让 \`forward-word' 和 \`back-backward’ 在中文环境下正常工作<a id="orgheadline39"></a>
 
 中文词语没有强制用空格分词，所以 emacs 内置的命令 \`forward-word' 和 \`backward-word'
 在中文环境不能按用户预期的样子执行，而是 forward/backward “句子” ，Chinese-pyim
@@ -547,7 +567,7 @@ Chinese-pyim 包含了一个简单的命令：\`pyim-get-words-list-at-point', �
     (global-set-key (kbd "M-f") 'pyim-forward-word)
     (global-set-key (kbd "M-b") 'pyim-backward-word)
 
-### 为 isearch 相关命令添加拼音搜索支持<a id="orgheadline39"></a>
+### 为 isearch 相关命令添加拼音搜索支持<a id="orgheadline40"></a>
 
 chinese-pyim 安装后，可以通过下面的设置开启拼音搜索功能：
 
@@ -560,7 +580,7 @@ chinese-pyim 安装后，可以通过下面的设置开启拼音搜索功能：
     (setq-default pyim-english-input-switch-functions
                   '(pyim-probe-isearch-mode))
 
-### 使用 Chinese-pyim 改善 company-mode 中文补全的体验<a id="orgheadline40"></a>
+### 使用 Chinese-pyim 改善 company-mode 中文补全的体验<a id="orgheadline41"></a>
 
 中文词语之间没有分割字符，所以 Company-mode 在中文环境下， **补全词条** 变成了 **补全句子** ，可用性很差，chinese-pyim-company 通过 Chinese-pyim 自带的分词函数来分割中文字符串，改善了中文补全的体验 。
 
