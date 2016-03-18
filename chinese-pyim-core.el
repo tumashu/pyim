@@ -1935,7 +1935,8 @@ Return the input string."
            `(,@dabbrev-accurate-words
              ,@guess-dict-accurate-words
              ,@dabbrev-similar-words
-             ,@(pyim-sort-words:count personal-words)
+             ,(car personal-words)
+             ,@(pyim-sort-words:count (cdr personal-words))
              ,@pinyin-dict-words
              ,@(when (and pinyin-dict-words
                           (not (member (car pinyin-dict-words) pinyin-shouzimu-similar-words)))
