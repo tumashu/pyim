@@ -1922,6 +1922,7 @@ Return the input string."
     (when pyim-debug
       (princ (list :dabbrev-accurate-words dabbrev-accurate-words
                    :guess-dict-accurate-words guess-dict-accurate-words
+                   :guess-dict-similar-words guess-dict-similar-words
                    :personal-words personal-words
                    :pinyin-dict-words pinyin-dict-words
                    :pinyin-shouzimu-words pinyin-shouzimu-similar-words
@@ -1942,6 +1943,7 @@ Return the input string."
                           (not (member (car pinyin-dict-words) pinyin-shouzimu-similar-words)))
                  pinyin-shouzimu-similar-words)
              ,@pinyin-similar-words
+             ,@guess-dict-similar-words
              ,@pinyin-znabc-similar-words
              ,@chars)))))
 
@@ -1989,7 +1991,8 @@ Return the input string."
           ;; 这里通过限制循环次数来提高输入法的响应，经验数值。
           (when (> count 200)
             (setq words nil))))
-      (list (reverse words-accurate) (reverse words-similar)))))
+      (list (delete-dups words-accurate)
+            (delete-dups words-similar)))))
 
 (defun pyim-get-choices:dabbrev (pylist)
   (when (member 'dabbrev pyim-enable-words-predict)
@@ -2020,8 +2023,8 @@ Return the input string."
         (setq count (1+ count))
         (when (> count 500)
           (setq words-all nil)))
-      (list  (reverse words-accurate)
-             (reverse words-similar)))))
+      (list (delete-dups words-accurate)
+            (delete-dups words-similar)))))
 
 (defun pyim-get-choices:pinyin-znabc (pylist)
   ;; 将输入的拼音按照声母和韵母打散，得到尽可能多的拼音组合，
