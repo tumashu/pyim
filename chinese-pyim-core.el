@@ -1997,9 +1997,6 @@ Return the input string."
 (defun pyim-get-choices:dabbrev (pylist)
   (when (member 'dabbrev pyim-enable-words-predict)
     (let* ((py-str (pyim-pylist-to-string pylist nil 'default))
-           (prefix (pyim-grab-chinese-word (length pyim-current-str) pyim-last-input-word))
-           (prefix-length (length prefix))
-           (count 0)
            (words-all
             ;; 在所有指定的 buffer 中，搜索拼音匹配 `pylist' 中文词条，
             ;; 搜索得到的结果作为联想词。
@@ -2011,6 +2008,7 @@ Return the input string."
                 (pcase pyim-dabbrev-other-buffers
                   (`t (list major-mode))
                   (`all `all))))))
+           (count 0)
            words-accurate words-similar)
       (while words-all
         (setq word (pop words-all))
