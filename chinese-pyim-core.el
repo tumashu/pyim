@@ -1951,46 +1951,48 @@ Return the input string."
   ;; 如果上一次输入词条 "你好" ，那么以 “你好” 为 code，从 guessdict 词库中搜索词条
   ;; 将搜索得到的词条的拼音与 *当前输入的拼音* 进行比较，类似或者精确匹配的词条作为联想词。
   (when (member 'guess-words pyim-enable-words-predict)
-    (let* ((py-str (pyim-pylist-to-string pylist nil 'default))
-           (prefix (pyim-grab-chinese-word
-                    (length pyim-current-str) pyim-last-input-word))
-           (length-prefix (length prefix))
-           (words-all (pyim-get (pyim-hanzi2pinyin prefix nil "-" nil t) '(guess-dict)))
-           (count 0)
-           words words-accurate words-similar)
-      ;; 光标前获取的 prefix 字符串长度大于1并且小于5时，
-      ;; 才进行 guess-words 词语联想，prefix 长度太小时，搜索
-      ;; 得到的词条太多，处理起来容易卡顿，prefix 长度太大时，
-      ;; 词库中大多数没有，搜索是浪费时间。
-      (when (and (> length-prefix 1)
-                 (< length-prefix 5))
-        (while words-all
-          (setq word (pop words-all))
-          ;; 下面功能使用函数 `pyim-match-chinese-with-pylist' 实现比较直接，
-          ;; `pyim-match-chinese-with-pylist' 这个函数 benchmark 显示速度比较快，
-          ;; 但用到这个地方后，chinese-pyim 卡顿明显，暂时找不到原因。
-          (let ((pinyins (pyim-hanzi2pinyin word nil "-" t))
-                boundary)
-            (when (cl-some
-                   #'(lambda (x)
-                       (setq boundary (pyim-pinyin-match py-str x t t)))
-                   pinyins)
-              (push word words-similar))
-            ;; 搜索拼音与 py-list "^" 匹配的词条，比如:
-            ;; 拼音 "ni-hao" 就匹配 "你好我的家乡"，然后根据拼音的长度，
-            ;; 提取一个子字符串作为词条，比如：字符串 "你好我的家乡" 的子字符串
-            ;; "你好" 会被提取出来。
-            (when (cl-some
-                   #'(lambda (x)
-                       (setq boundary (pyim-pinyin-match py-str x t t t)))
-                   pinyins)
-              (push (substring word (car boundary) (cdr boundary))
-                    words-accurate)))
-          (setq count (1+ count))
-          ;; 当 `words' 包含的元素太多时，后面处理会极其缓慢，
-          ;; 这里通过限制循环次数来提高输入法的响应，经验数值。
-          (when (> count 200)
-            (setq words nil))))
+    (let ((py-str (pyim-pylist-to-string pylist nil 'default))
+          (prefixs (delete-dups
+                    (pyim-grab-chinese-word
+                     (length pyim-current-str) pyim-last-input-word t)))
+          words words-accurate words-similar)
+      (dolist (prefix prefixs)
+        (let ((length-prefix (length prefix))
+              (words-all (pyim-get (pyim-hanzi2pinyin prefix nil "-" nil t) '(guess-dict)))
+              (count 0))
+          ;; 光标前获取的 prefix 字符串长度大于1并且小于5时，
+          ;; 才进行 guess-words 词语联想，prefix 长度太小时，搜索
+          ;; 得到的词条太多，处理起来容易卡顿，prefix 长度太大时，
+          ;; 词库中大多数没有，搜索是浪费时间。
+          (when (and (> length-prefix 1)
+                     (< length-prefix 5))
+            (while words-all
+              (setq word (pop words-all))
+              ;; 下面功能使用函数 `pyim-match-chinese-with-pylist' 实现比较直接，
+              ;; `pyim-match-chinese-with-pylist' 这个函数 benchmark 显示速度比较快，
+              ;; 但用到这个地方后，chinese-pyim 卡顿明显，暂时找不到原因。
+              (let ((pinyins (pyim-hanzi2pinyin word nil "-" t))
+                    boundary)
+                (when (cl-some
+                       #'(lambda (x)
+                           (setq boundary (pyim-pinyin-match py-str x t t)))
+                       pinyins)
+                  (push word words-similar))
+                ;; 搜索拼音与 py-list "^" 匹配的词条，比如:
+                ;; 拼音 "ni-hao" 就匹配 "你好我的家乡"，然后根据拼音的长度，
+                ;; 提取一个子字符串作为词条，比如：字符串 "你好我的家乡" 的子字符串
+                ;; "你好" 会被提取出来。
+                (when (cl-some
+                       #'(lambda (x)
+                           (setq boundary (pyim-pinyin-match py-str x t t t)))
+                       pinyins)
+                  (push (substring word (car boundary) (cdr boundary))
+                        words-accurate)))
+              (setq count (1+ count))
+              ;; 当 `words' 包含的元素太多时，后面处理会极其缓慢，
+              ;; 这里通过限制循环次数来提高输入法的响应，经验数值。
+              (when (> count 200)
+                (setq words nil))))))
       (list (delete-dups words-accurate)
             (delete-dups words-similar)))))
 
@@ -2100,9 +2102,8 @@ Return the input string."
                   #'(lambda (a b)
                       (> (car a) (car b)))))))
 
-(defun pyim-grab-chinese-word (&optional backward-char-number fallback)
-  "获取光标处一个 *有效的* 中文词语，较长的词语优先。
-如果提取不到合适的中文词语，就返回 `pyim-last-input-word' 的值。"
+(defun pyim-grab-chinese-word (&optional backward-char-number fallback return-list)
+  "获取光标处一个 *有效的* 中文词语，较长的词语优先。"
   (unless (featurep 'chinese-pyim-utils)
     (require 'chinese-pyim-utils))
   (let* ((backward-char-number (or backward-char-number 0))
@@ -2125,13 +2126,22 @@ Return the input string."
           (if (> (length string) 6)
               (substring string -6)
             string))
-         (length (+ (length string) 1)))
-    (or (cl-some
-         #'(lambda (x)
-             (if (= (nth 2 x) length)
-                 (car x)))
-         (nreverse (pyim-split-chinese-string string)))
-        (or fallback ""))))
+         (length (length string))
+         output)
+    (setq output
+          `(,(or (cl-some #'(lambda (x)
+                              (if (= (nth 2 x) (+ 1 length))
+                                  (car x)))
+                          (nreverse (pyim-split-chinese-string string)))
+                 (or fallback ""))
+            ,@(when (stringp string)
+                (let (results)
+                  (dotimes (i length)
+                    (push (substring string i) results))
+                  results))))
+    (if return-list
+        output
+      (car output))))
 
 (defun pyim-pinyin-match (pinyin1 pinyin2 &optional match-beginning first-equal all-equal)
   "判断拼音 `pinyin1' 是否和拼音 `pinyin2' 相匹配，如果匹配，
