@@ -120,10 +120,6 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
       string
     (let (string-list pinyins-list pinyins-list-permutated pinyins-list-adjusted)
 
-      ;; 确保 `pyim-char-table' 已经生成。
-      (unless (pyim-cchar2pinyin-get ?文)
-        (pyim-cchar2pinyin-create-cache))
-
       ;; 将汉字字符串转换为字符list，英文原样输出。
       ;; 比如： “Hello银行” -> ("Hello" "银" "行")
       (setq string-list
