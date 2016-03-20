@@ -111,8 +111,15 @@
 这个函数用于：`pyim-english-input-switch-functions' 。"
   (let ((str-before-1 (pyim-char-before-to-string 0)))
     (unless (string= (buffer-name) " *temp*") ; Make sure this probe can work with exim of exwm.
-      (not (or (pyim-string-match-p "\\cc" str-before-1)
-               (> (length pyim-current-key) 0))))))
+      (if (or (= (- (point) (point-at-bol)) (current-indentation))
+	      (= (point) (point-at-bol)))
+	  (not (or (pyim-string-match-p "\\cc" (save-excursion
+						 ;; 查找前一个非空格字符。
+						 (if (re-search-backward "[^[:space:]]" nil t)
+						     (char-to-string (char-after (point))))))
+		   (> (length pyim-current-key) 0)))
+	(not (or (pyim-string-match-p "\\cc" str-before-1)
+		 (> (length pyim-current-key) 0)))))))
 ;; #+END_SRC
 
 ;; ** 根据环境自动切换到半角标点输入模式
