@@ -477,6 +477,7 @@
 “man” -> (\"忙茫盲芒氓莽蟒邙漭硭\" \"满慢漫曼蛮馒瞒蔓颟谩墁幔螨鞔鳗缦熳镘\")
 
 如果 `sort' 设置为 t, 则对结果按照字母顺序排序。"
+  (pyim-pinyin2cchar-create-cache)
   (let* ((pymap pyim-pinyin-pymap)
          (length (length pymap))
          (beg (substring pinyin 0 1))
@@ -529,6 +530,7 @@
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-cchar2pinyin-get (char-or-str)
   "Get the code of the character CHAR"
+  (pyim-cchar2pinyin-create-cache)
   (let ((key (if (characterp char-or-str)
                  (char-to-string char-or-str)
                char-or-str)))
