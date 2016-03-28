@@ -421,10 +421,14 @@ Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面四�
     时创建了一个中文拼音词库，词条数量大约60万，文件大约20M，(注意：请使用另存为，不要直接点击链接)。
 
     <http://tumashu.github.io/chinese-pyim-bigdict/pyim-bigdict.pyim>
+    
+    用户@xiaowl 根据NLP的一个自然语料库进行处理后的拼音词库，已按照词频进行排序。包涵词条330万，文件在80M左右：
+    
+    <http://pan.baidu.com/s/1pKRthBP>
 
-    下载上述词库后，运行 \`pyim-dicts-manager' ，按照命令提示，将下载得到的词库文件信息添加到 \`pyim-dicts' 中，最后运行命令 \`pyim-restart' 或者重启
+    下载上述任意一个词库后，运行 \`pyim-dicts-manager' ，按照命令提示，将下载得到的词库文件信息添加到 \`pyim-dicts' 中，最后运行命令 \`pyim-restart' 或者重启
     emacs，这个词库使用 \`utf-8-unix' 编码。
-
+    
 2.  第二种方式 (Windows 用户推荐使用)
 
     使用词库转换工具将其他输入法的词库转化为Chinese-pyim使用的词库：这里只介绍windows平台下的一个词库转换软件：
