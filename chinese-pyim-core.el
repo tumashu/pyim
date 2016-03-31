@@ -1056,6 +1056,15 @@ BUG: 这个函数需要进一步优化，使其判断更准确。"
          (point (plist-get cache :point))
          (content (plist-get cache :content)))
     ;; (princ cache)
+
+    ;; Create init cache
+    (when (> (point-max) 100000) ; buffer 太小时，预先建立 cache 得不偿失，经验数值。
+      (unless (gethash "@" pyim-buffer-cache)
+        (let ((pinyins (mapcar #'car pyim-pinyin-pymap)))
+          (puthash "@" "@" pyim-buffer-cache)
+          (dolist (pinyin pinyins)
+            (pyim-bisearch-word-internal pinyin (point-min) (point-max))))))
+
     (cond (content
            ;; Jump to the line of words, which is need by `pyim-intern-personal-file'
            ;; and `pyim-intern-property-file'
@@ -1063,62 +1072,43 @@ BUG: 这个函数需要进一步优化，使其判断更准确。"
            content)
           (point (pyim-bisearch-word-internal
                   code point point))
-          (t (let* ((index-char (string-to-char (substring code 0 1)))
-                    (index-start (cdr (cl-some
-                                       #'(lambda (n)
-                                           (let* ((char (- index-char n))
-                                                  (index (char-to-string char)))
-                                             (plist-get (gethash index pyim-buffer-cache) :boundary)))
-                                       '(1 2 3 4 5 6 7 8 9 10))))
-                    (index-end (car (cl-some
-                                     #'(lambda (n)
-                                         (let* ((char (+ index-char n))
-                                                (index (char-to-string char)))
-                                           (plist-get (gethash index pyim-buffer-cache) :boundary)))
-                                     '(1 2 3 4 5 6 7 8 9 10)))))
+          (t (let* ((boundary (pyim-pinyin2boundary-get code))
+                    (index-start (plist-get (gethash (car boundary) pyim-buffer-cache) :point))
+                    (index-end (plist-get (gethash (cdr boundary) pyim-buffer-cache) :point)))
+               ;; (princ (format "%s %s %s %s %s:" boundarys index-start index-end (point-min) (point-max)))
+               ;; (setq index-start nil index-end nil)
                (pyim-bisearch-word-internal code index-start index-end))))))
 
 (defun pyim-bisearch-word-internal (code start end)
   (let* ((start (or start (point-min)))
          (end (or end (point-max)))
          (mid (/ (+ start end) 2))
+         (regexp "[ \f\t\n\r\v]+\\|:")
          ccode)
-    (goto-char mid)
-    (beginning-of-line)
-    (setq ccode (pyim-code-at-point))
-
-    ;; Create point number cache
-    (let ((code-cache (gethash ccode pyim-buffer-cache)))
-      (setq code-cache (plist-put code-cache :point (point)))
-      (puthash ccode code-cache pyim-buffer-cache))
-
-    ;; Split first char of ccode as index, then create it's cache
-    (let* ((index (substring ccode 0 1))
-           (point (point))
-           (index-cache (gethash index pyim-buffer-cache))
-           (index-boundary
-            (or (plist-get index-cache :boundary)
-                (cons point point))))
-      (setq index-cache
-            (plist-put index-cache
-                       :boundary
-                       (cons (min point (car index-boundary))
-                             (max point (cdr index-boundary)))))
-      (puthash index index-cache pyim-buffer-cache))
-
-    ;; (message "%d, %d, %d: %s" start mid end ccode)
-    (if (equal ccode code)
-        (let* ((content (pyim-line-content "[ \f\t\n\r\v]+\\|:"))
-               (code-cache (gethash code pyim-buffer-cache)))
-          ;; Create point number cache and words list cache
-          (setq code-cache (plist-put code-cache :point (point)))
-          (setq code-cache (plist-put code-cache :content content))
-          (puthash code code-cache pyim-buffer-cache)
-          content)
-      (if (> mid start)
-          (if (string< ccode code)
-              (pyim-bisearch-word-internal code mid end)
-            (pyim-bisearch-word-internal code start mid))))))
+    (if (= start end)
+        (progn (goto-char start)
+               (beginning-of-line)
+               (pyim-line-content regexp))
+      (goto-char mid)
+      (beginning-of-line)
+      (setq ccode (pyim-code-at-point))
+      ;; Create point number cache
+      (let ((code-cache (gethash ccode pyim-buffer-cache)))
+        (setq code-cache (plist-put code-cache :point (point)))
+        (puthash ccode code-cache pyim-buffer-cache))
+      ;; (message "%d, %d, %d: %s" start mid end ccode)
+      (if (equal ccode code)
+          (let* ((content (pyim-line-content regexp))
+                 (code-cache (gethash code pyim-buffer-cache)))
+            ;; Create point number cache and words list cache
+            (setq code-cache (plist-put code-cache :point (point)))
+            (setq code-cache (plist-put code-cache :content content))
+            (puthash code code-cache pyim-buffer-cache)
+            content)
+        (if (> mid start)
+            (if (string< ccode code)
+                (pyim-bisearch-word-internal code mid end)
+              (pyim-bisearch-word-internal code start mid)))))))
 
 (defun pyim-code-at-point ()
   "Before calling this function, be sure that the point is at the

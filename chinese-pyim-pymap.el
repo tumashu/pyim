@@ -453,6 +453,7 @@
 
 (defvar pyim-pinyin2cchar-cache nil)
 (defvar pyim-cchar2pinyin-cache nil)
+(defvar pyim-pinyin2boundary-cache nil)
 
 (defun pyim-pinyin2cchar-create-cache (&optional force)
   "构建 pinyin 到 chinese char 的缓存，用于加快搜索速度，这个函数
@@ -552,6 +553,27 @@ in package `chinese-pyim-pymap'"
             (if cache
                 (puthash key (append (list py) cache) pyim-cchar2pinyin-cache)
               (puthash key (list py) pyim-cchar2pinyin-cache))))))))
+;; #+END_SRC
+
+;; #+BEGIN_SRC emacs-lisp
+(defun pyim-pinyin2boundary-get (code)
+  "Get the two boundary of code"
+  (pyim-pinyin2boundary-create-cache)
+  (let* ((pinyin (car (split-string code "-"))))
+    (gethash pinyin pyim-pinyin2boundary-cache)))
+
+(defun pyim-pinyin2boundary-create-cache (&optional force)
+  "Build pinyin index hashtable from `pyim-pinyin-pymap'
+in package `chinese-pyim-pymap'"
+  (when (or force (not pyim-pinyin2boundary-cache))
+    (setq pyim-pinyin2boundary-cache
+          (make-hash-table :size 1000 :test #'equal))
+    (let ((pinyins (mapcar #'car pyim-pinyin-pymap))
+          pinyin)
+      (while pinyins
+        (setq pinyin (pop pinyins))
+        (puthash pinyin (cons pinyin (car pinyins))
+                 pyim-pinyin2boundary-cache)))))
 ;; #+END_SRC
 
 
