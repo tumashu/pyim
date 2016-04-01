@@ -567,12 +567,20 @@ in package `chinese-pyim-pymap'"
 in package `chinese-pyim-pymap'"
   (when (or force (not pyim-pinyin2boundary-cache))
     (setq pyim-pinyin2boundary-cache
-          (make-hash-table :size 1000 :test #'equal))
+          (make-hash-table :size 1500 :test #'equal))
     (let ((pinyins (mapcar #'car pyim-pinyin-pymap))
-          pinyin)
-      (while pinyins
-        (setq pinyin (pop pinyins))
-        (puthash pinyin (cons pinyin (car pinyins))
+          index-list pinyin)
+      (dotimes (i 6)
+        (dolist (py pinyins)
+          (push (substring py 0 (min (length py) i)) index-list)))
+      (setq index-list (delq "" (delete-dups index-list)))
+      (dolist (index index-list)
+        (puthash index (list (cl-find-if #'(lambda (x)
+                                             (string< x index))
+                                         (reverse pinyins))
+                             (cl-find-if-not #'(lambda (x)
+                                                 (string< x (concat index "z")))
+                                             pinyins))
                  pyim-pinyin2boundary-cache)))))
 ;; #+END_SRC
 

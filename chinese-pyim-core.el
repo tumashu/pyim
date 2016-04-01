@@ -1074,7 +1074,7 @@ BUG: 这个函数需要进一步优化，使其判断更准确。"
                   code point point))
           (t (let* ((boundary (pyim-pinyin2boundary-get code))
                     (index-start (plist-get (gethash (car boundary) pyim-buffer-cache) :point))
-                    (index-end (plist-get (gethash (cdr boundary) pyim-buffer-cache) :point)))
+                    (index-end (plist-get (gethash (cadr boundary) pyim-buffer-cache) :point)))
                ;; (princ (format "%s %s %s %s %s:" boundarys index-start index-end (point-min) (point-max)))
                ;; (setq index-start nil index-end nil)
                (pyim-bisearch-word-internal code index-start index-end))))))
