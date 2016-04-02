@@ -1998,8 +1998,8 @@ Return the input string."
      (delq nil
            `(,@(pyim-sort-words:count dabbrev-accurate-words)
              ,@(pyim-sort-words:count guess-dict-accurate-words)
-             ,@(pyim-sort-words:count dabbrev-similar-words)
              ,(car personal-words)
+             ,@(pyim-sort-words:count dabbrev-similar-words)
              ,@(pyim-sort-words:count (cdr personal-words))
              ,@pinyin-dict-words
              ,@(when (and pinyin-dict-words
