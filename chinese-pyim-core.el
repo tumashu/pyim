@@ -770,8 +770,30 @@ If you don't like this funciton, set the variable to nil")
           (make-hash-table :size 50000 :test #'equal))
     `(("buffer" . ,(current-buffer))
       ("file" . ,file)
-      ("dict-type" . ,dict-type))))
+      ("dict-type" . ,dict-type)
+      ("table" . ,(if (equal dict-type 'pinyin-dict) (pyim-lookup-table) (make-hash-table))))))
+
 ;; #+END_SRC
+
+(defun pyim-point-of-first (chr)
+  "找出buffer中第一次出现字符 chr 的位置"
+  (let ((pos (re-search-forward (concat "^" chr) nil t)))
+    (if pos (- pos 1) 0)))
+
+(defun pyim-lookup-table ()
+  "为当前的字典buffer构造一个快查表，
+
+{a: 1
+ b: 100
+ c: 200...}
+
+例如，当要检索拼音 'bu-cuo' 时，根据 'b' 定位到其在字典中的位置为[100, 200]
+进而加速二分查找定位拼音的过程。
+"
+  (let (table)
+    (setq table (make-hash-table :test #'equal))
+    (dolist (char (append "abcdefghjklmnopqrstuvwxyz" nil) table)
+      (if char (puthash (string char) (pyim-point-of-first (string char)) table)))))
 
 ;; 当使用 `pyim-start' 或者 `pyim-restart' 命令激活  Chinese-pyim 时，上述对应表保存到变量 `pyim-buffer-list'。
 ;; 供 Chinese-pyim 后续使用。
@@ -878,13 +900,19 @@ If you don't like this funciton, set the variable to nil")
     (setq buffer-list (reverse buffer-list))
     (dolist (buf buffer-list)
       (let ((dict-type (cdr (assoc "dict-type" buf)))
-            (buffer (cdr (assoc "buffer" buf))))
+            (buffer (cdr (assoc "buffer" buf)))
+            (table (cdr (assoc "table" buf)))
+            (anchor (substring code 0 1)))
         (with-current-buffer buffer
-          (setq words
-                (append words
-                        (cdr (pyim-bisearch-word code
-                                                 (point-min)
-                                                 (point-max))))))))
+          ;; 尝试从lookup-table中获取 code 的字典二分查找区间
+          (let ((from (gethash anchor table (point-min)))
+                (to (gethash (char-to-string (+ 1 (string-to-char anchor))) table (point-max))))
+            (setq words
+                  (append words
+                          (cdr (pyim-bisearch-word code
+                                                   from
+                                                   to))))
+            ))))
     words))
 
 ;; Shameless steal from company-dabbrev.el in `company' package
