@@ -422,8 +422,8 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
 (defvar pyim-load-hook nil)
 (defvar pyim-active-hook nil)
 
-(defvar pyim-punctuation-translate-p t
-  "*Non-nil means will translate punctuation.")
+(defvar pyim-punctuation-translate-p '(auto yes no)
+  "The car of its value will control the translation of punctuation.")
 
 (defvar pyim-pair-punctuation-status
   '(("\"" nil) ("'" nil))
@@ -3054,22 +3054,22 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
 ;;; 切换中英文标点符号
 (defun pyim-punctuation-full-width-p ()
   "判断是否需要切换到全角标点输入模式"
-  (and pyim-punctuation-translate-p
-       ;; 如果用户手动或者根据环境自动切换为英文输入模式，
-       ;; 那么标点符号也要切换为半角模式。
-       (not pyim-input-ascii)
-       (not (pyim-auto-switch-english-input-p))))
+  (case (car pyim-punctuation-translate-p)
+    (yes t)
+    (no nil)
+    (auto
+     ;; 如果用户手动或者根据环境自动切换为英文输入模式，
+     ;; 那么标点符号也要切换为半角模式。
+     (and (not pyim-input-ascii)
+          (not (pyim-auto-switch-english-input-p))))))
 
-(defun pyim-toggle-full-width-punctuation (arg &optional silent)
-  (interactive "P")
+(defun pyim-toggle-full-width-punctuation ()
+  (interactive)
   (setq pyim-punctuation-translate-p
-        (if (null arg)
-            (not pyim-punctuation-translate-p)
-          (> (prefix-numeric-value arg) 0)))
-  (unless silent
-    (if pyim-punctuation-translate-p
-        (message "开启标点转换功能（使用全角标点）")
-      (message "关闭标点转换功能（使用半角标点）"))))
+        `(,@(cdr pyim-punctuation-translate-p)
+          ,(car pyim-punctuation-translate-p)))
+  (message "设置全角标点切换模式为：\"%s\" 模式"
+           (car pyim-punctuation-translate-p)))
 ;; #+END_SRC
 
 ;; 每次运行 `pyim-toggle-full-width-punctuation' 命令，都会反转变量 `pyim-punctuation-translate-p'
