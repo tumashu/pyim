@@ -3068,8 +3068,11 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
   (setq pyim-punctuation-translate-p
         `(,@(cdr pyim-punctuation-translate-p)
           ,(car pyim-punctuation-translate-p)))
-  (message "设置全角标点切换模式为：\"%s\" 模式"
-           (car pyim-punctuation-translate-p)))
+  (message
+   (case (car pyim-punctuation-translate-p)
+     (yes "开启全角标点输入模式。")
+     (no "开启半角标点输入模式。")
+     (auto "开启全半角标点自动转换模式。"))))
 ;; #+END_SRC
 
 ;; 每次运行 `pyim-toggle-full-width-punctuation' 命令，都会反转变量 `pyim-punctuation-translate-p'
