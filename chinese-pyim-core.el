@@ -774,7 +774,7 @@ If you don't like this funciton, set the variable to nil")
       ("file" . ,file)
       ("dict-type" . ,dict-type))))
 
-(defun pyim-buffer-create-cache (&optional force full-cache)
+(defun pyim-buffer-create-cache (&optional force)
   (interactive)
   (when (or force (not pyim-buffer-create-cache-p))
     (setq pyim-buffer-create-cache-p t)
@@ -794,17 +794,7 @@ If you don't like this funciton, set the variable to nil")
                    (index-end (plist-get (gethash (nth 2 index) pyim-buffer-cache) :point))
                    (index-cache (gethash key pyim-buffer-cache)))
               (setq index-cache (plist-put index-cache :boundary (list index-start index-end)))
-              (puthash key index-cache pyim-buffer-cache)))))
-      ;; When full-cache is t, Cache all pinyins in personal-file
-      (when full-cache
-        (with-current-buffer personal-buffer
-          (goto-char (point-min))
-          (while (not (eobp))
-            (push (pyim-code-at-point) personal-pinyin-list)
-            (forward-line 1)))
-        (setq personal-index-list (pyim-get-pinyin-index-list personal-pinyin-list))
-        (dolist (index personal-index-list)
-          (pyim-get (nth 0 index) '(pinyin-dict guess-dict)))))))
+              (puthash key index-cache pyim-buffer-cache))))))))
 
 (defun pyim-get-pinyin-index-list (string-list &optional string-max-length)
   (let ((pinyin-list (mapcar #'car pyim-pinyin-pymap))
