@@ -3044,7 +3044,7 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
 ;;; 切换中英文标点符号
 (defun pyim-punctuation-full-width-p ()
   "判断是否需要切换到全角标点输入模式"
-  (case (car pyim-punctuation-translate-p)
+  (cl-case (car pyim-punctuation-translate-p)
     (yes t)
     (no nil)
     (auto
@@ -3059,7 +3059,7 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
         `(,@(cdr pyim-punctuation-translate-p)
           ,(car pyim-punctuation-translate-p)))
   (message
-   (case (car pyim-punctuation-translate-p)
+   (cl-case (car pyim-punctuation-translate-p)
      (yes "开启全角标点输入模式。")
      (no "开启半角标点输入模式。")
      (auto "开启全半角标点自动转换模式。"))))
