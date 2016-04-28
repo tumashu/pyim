@@ -462,6 +462,7 @@ Guessdict 用来保存，一个中文词条（code）后面经常跟随出现的
    1. 安装教程请参考： https://github.com/fxsjy/jieba
    2. 使用命令： python -m jieba -d \" \" 源文件.txt  > 目标文件.txt
    3. 命令帮助： python -m jieba --help
+   注意：如果词条已经使用 *空格* 或者 *换行符* 隔开，可以跳过 “分词处理” 这一步。
 3. 添加拼音：运行下面4个命令
    1. `pyim-article2dict-chars'
    2. `pyim-article2dict-words'
