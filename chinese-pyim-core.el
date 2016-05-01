@@ -308,8 +308,8 @@ Chinese-pyim 内建的功能有：
   :group 'chinese-pyim)
 
 (defface pyim-minibuffer-string-face '((t (:background "gray40")))
-         "Face to current string show in minibuffer"
-         :group 'chinese-pyim)
+  "Face to current string show in minibuffer"
+  :group 'chinese-pyim)
 
 (defcustom pyim-english-input-switch-functions nil
   "这个变量的取值为一个函数列表，这个函数列表中的任意一个函数的运行结果为 t 时，
