@@ -433,7 +433,7 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
   "Punctuation will not insert after this characters.
 If you don't like this funciton, set the variable to nil")
 
-(defvar pyim-dabbrev-time-limit .1
+(defvar pyim-dabbrev-time-limit .05
   "Determines how many seconds should look for dabbrev matches.")
 
 (defvar pyim-buffer-cache nil)
@@ -933,14 +933,14 @@ If you don't like this funciton, set the variable to nil")
     words))
 
 ;; Shameless steal from company-dabbrev.el in `company' package
-(defmacro pyim-get-dabbrev-time-limit-while (test start limit &rest body)
+(defmacro pyim-get-dabbrev-time-limit-while (test start limit freq &rest body)
   (declare (indent 3) (debug t))
   `(let ((pyim-time-limit-while-counter 0))
      (catch 'done
        (while ,test
          ,@body
          (and ,limit
-              (eq (cl-incf pyim-time-limit-while-counter) 25)
+              (= (cl-incf pyim-time-limit-while-counter) ,freq)
               (setq pyim-time-limit-while-counter 0)
               (> (float-time (time-since ,start)) ,limit)
               (throw 'done 'pyim-time-out))))))
@@ -956,23 +956,23 @@ If you don't like this funciton, set the variable to nil")
       (goto-char (if pos (1- pos) (point-min)))
       ;; Search before pos.
       (let ((tmp-end (point)))
-        (pyim-get-dabbrev-time-limit-while
-            (not (bobp)) start limit
-          (ignore-errors
-            (forward-char -10000))
-          (forward-line 0)
-          (save-excursion
-            ;; Before, we used backward search, but it matches non-greedily, and
-            ;; that forced us to use the "beginning/end of word" anchors in
-            ;; search regexp.
-            (while (re-search-forward regexp tmp-end t)
-              (maybe-collect-match)))
-          (setq tmp-end (point))))
+        (pyim-get-dabbrev-time-limit-while (> tmp-end (point-min))
+            start limit 1
+            (ignore-errors
+              (forward-char -10000))
+            (forward-line 0)
+            (save-excursion
+              ;; Before, we used backward search, but it matches non-greedily, and
+              ;; that forced us to use the "beginning/end of word" anchors in
+              ;; search regexp.
+              (while (re-search-forward regexp tmp-end t)
+                (maybe-collect-match)))
+            (setq tmp-end (point))))
       (goto-char (or pos (point-min)))
       ;; Search after pos.
-      (pyim-get-dabbrev-time-limit-while
-          (re-search-forward regexp nil t)
-          start limit (maybe-collect-match))
+      (pyim-get-dabbrev-time-limit-while (re-search-forward regexp nil t)
+          start limit 10
+          (maybe-collect-match))
       symbols)))
 
 ;; Shameless steal from company-dabbrev.el in `company' package
