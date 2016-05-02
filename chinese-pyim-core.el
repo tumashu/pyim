@@ -433,7 +433,7 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
   "Punctuation will not insert after this characters.
 If you don't like this funciton, set the variable to nil")
 
-(defvar pyim-dabbrev-time-limit .05
+(defvar pyim-dabbrev-time-limit .03
   "Determines how many seconds should look for dabbrev matches.")
 
 (defvar pyim-buffer-cache nil)
