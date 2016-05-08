@@ -2111,8 +2111,20 @@ Return the input string."
       (list nil (pyim-get-pinyin-similar-words py-str '(personal-file))))))
 
 (defun pyim-get-choices:personal-file (pylist)
-  (let ((py-str (pyim-pylist-to-string pylist nil 'default)))
-    (list (pyim-get py-str '(personal-file)) nil)))
+  (let* ((py-str (pyim-pylist-to-string pylist nil 'default))
+         (py-str-shouzimu (pyim-pylist-to-string pylist t 'default))
+         (words (pyim-get py-str '(personal-file)))
+         (words-shouzimu (pyim-get py-str-shouzimu '(personal-file)))
+         words-similar)
+    (while words-shouzimu
+      (setq word (pop words-shouzimu))
+      (let ((pinyins (pyim-hanzi2pinyin word nil "-" t)))
+        (when (cl-some
+               #'(lambda (x)
+                   (pyim-pinyin-match py-str x t t))
+               pinyins)
+          (push word words-similar))))
+    (list `(,@words ,@(reverse words-similar)) nil)))
 
 (defun pyim-get-choices:pinyin-dict (pylist)
   (let ((py-str (pyim-pylist-to-string pylist nil 'default)))
