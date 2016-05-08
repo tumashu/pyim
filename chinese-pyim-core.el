@@ -2121,7 +2121,7 @@ Return the input string."
       (let ((pinyins (pyim-hanzi2pinyin word nil "-" t)))
         (when (cl-some
                #'(lambda (x)
-                   (pyim-pinyin-match py-str x t t))
+                   (pyim-pinyin-match py-str x t))
                pinyins)
           (push word words-similar))))
     (list `(,@words ,@(reverse words-similar)) nil)))
