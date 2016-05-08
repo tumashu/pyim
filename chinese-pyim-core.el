@@ -1973,7 +1973,8 @@ Return the input string."
 
     ;; Debug
     (when pyim-debug
-      (princ (list :dabbrev-accurate-words dabbrev-accurate-words
+      (princ (list :pylist-list list-of-pylist
+                   :dabbrev-accurate-words dabbrev-accurate-words
                    :guess-dict-accurate-words guess-dict-accurate-words
                    :guess-dict-similar-words guess-dict-similar-words
                    :personal-words personal-words
