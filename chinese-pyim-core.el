@@ -1734,11 +1734,18 @@ Return the input string."
   (when (and py (string< "" py))
     (let* ((sm (pyim-get-sm py))
            (ym (pyim-get-ym (cdr sm)))
-           (chpy (concat (car sm) (car ym))))
-      (if (or (null ym)                 ; 如果韵母为空
+           (charpys (mapcar #'(lambda (x)
+                                (concat (car x) (cdr x)))
+                            (pyim-find-fuzzy-pinyins
+                             (cons (car sm) (car ym))))))
+      (if (or (null ym) ;如果韵母为空
               (and (string< "" (car ym))
-                   (not (assoc chpy pyim-pinyin-pymap))
-                   (not (pyim-get chpy)))) ; 错误的拼音
+                   (not (cl-some
+                         #'(lambda (charpy)
+                             (or (assoc charpy pyim-pinyin-pymap)
+                                 (pyim-get charpy)))
+                         charpys))  ;错误的拼音
+                   ))
           (cons sm "")
         (cons (cons (car sm) (car ym)) (cdr ym))))))
 
