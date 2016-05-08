@@ -2831,8 +2831,12 @@ guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
             (pyim-terminate-translation)
             ;; Chinese-pyim 使用这个 hook 来处理联想词。
             (run-hooks 'pyim-select-word-finish-hook))
-        (setq pylist (nthcdr pyim-pinyin-position (car pyim-pylist-list)))
-        (setq pyim-current-choices (list (pyim-get-choices (list pylist)))
+        (setq pylist-list (delete-dups
+                           (mapcar
+                            #'(lambda (pylist)
+                                (nthcdr pyim-pinyin-position pylist))
+                            pyim-pylist-list)))
+        (setq pyim-current-choices (list (pyim-get-choices pylist-list))
               pyim-current-pos 1)
         (pyim-update-current-str)
         (pyim-format-page)
