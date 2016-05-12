@@ -208,7 +208,9 @@
 ;;    字字符组成字符串，并将其加入个人词库。
 ;; 3. `pyim-translate-trigger-char' 以默认设置为例：在“我爱吃红烧肉”后输
 ;;    入“5v” 可以将“爱吃红烧肉”这个词条保存到用户个人词频文件。
-;; 4. `pyim-delete-word-from-personal-buffer' 从个人词频文件对应的 buffer
+;; 4. `pyim-create-word-from-selection', 选择一个词条，运行这个命令后，就
+;;    可以将这个词条添加到个人文件。
+;; 5. `pyim-delete-word-from-personal-buffer' 从个人词频文件对应的 buffer
 ;;    中删除当前高亮选择的词条。
 
 ;; *** Chinese-pyim 高级功能

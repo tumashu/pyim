@@ -1391,6 +1391,18 @@ BUG：无法有效的处理多音字。"
       (unless (pyim-string-match-p "[^ a-z-]" pinyin)
         (pyim-intern-personal-file word pinyin nil t)))))
 
+(defun pyim-create-word-from-selection ()
+  "Add the selected text as a Chinese word into the personal dictionary."
+  (interactive)
+  (when (region-active-p)
+    (let ((string (buffer-substring-no-properties (region-beginning) (region-end))))
+      (if (> (length string) 6)
+          (error "词条太长")
+        (if (not (string-match-p "^\\cc+\\'" string))
+            (error "不是纯中文字符串")
+          (pyim-create-or-rearrange-word string)
+          (message "将词条: \"%s\" 插入 personal file。" string))))))
+
 (defun pyim-delete-word-from-personal-buffer ()
   "将高亮选择的字符从 personel-file 对应的 buffer 中删除。"
   (interactive)
