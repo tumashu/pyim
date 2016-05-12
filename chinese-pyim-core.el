@@ -3351,10 +3351,12 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
   (if pyim-isearch-enable-pinyin-search
       ;; Return the function to use for pinyin search
       `(lambda (string &optional bound noerror count)
-         (funcall (if ,isearch-forward
-                      're-search-forward
-                    're-search-backward)
-                  (pyim-isearch-build-search-regexp string) bound noerror count))
+         (if (pyim-string-match-p "[^a-z]+" string)
+             (funcall (isearch-search-fun-default) string bound noerror count)
+           (funcall (if ,isearch-forward
+                        're-search-forward
+                      're-search-backward)
+                    (pyim-isearch-build-search-regexp string) bound noerror count)))
     ;; Return default function
     (isearch-search-fun-default)))
 
