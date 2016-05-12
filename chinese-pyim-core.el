@@ -1805,14 +1805,14 @@ Return the input string."
 用处。"
   (when (and py (string< "" py))
     (list (apply 'append
-                 (mapcar (lambda (p)
-                           (let (chpy pylist)
-                             (setq p (replace-regexp-in-string "[ -]" "" p))
-                             (while (when (string< "" p)
-                                      (setq chpy (pyim-get-charpy p))
-                                      (setq pylist (append pylist (list (car chpy))))
-                                      (setq p (cdr chpy))))
-                             pylist))
+                 (mapcar #'(lambda (p)
+                             (let (chpy pylist)
+                               (setq p (replace-regexp-in-string "[ -]" "" p))
+                               (while (when (string< "" p)
+                                        (setq chpy (pyim-get-charpy p))
+                                        (setq pylist (append pylist (list (car chpy))))
+                                        (setq p (cdr chpy))))
+                               pylist))
                          (split-string py "'"))))))
 
 ;; "nihc" -> (((\"n\" . \"i\") (\"h\" . \"ao\")))
