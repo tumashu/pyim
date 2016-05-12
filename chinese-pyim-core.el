@@ -1295,40 +1295,41 @@ buffer中，当前词条追加到已有词条之后。`pyim-create-or-rearrange-
 `pyim-hanzi2pinyin' 来获取中文词条的拼音code。
 
 BUG：无法有效的处理多音字。"
-  (let* ((pinyins (pyim-hanzi2pinyin word nil "-" t nil t)) ;使用了多音字校正
-         (word-property (pyim-get-word-properties word)))
+  (when (> (length word) 0)
+    (let* ((pinyins (pyim-hanzi2pinyin word nil "-" t nil t)) ;使用了多音字校正
+           (word-property (pyim-get-word-properties word)))
 
-    ;; Update count property
-    (setq word-property
-          (plist-put word-property 'count
-                     (+ (plist-get word-property 'count) 1)))
-    ;; 当 word 长度大于1且词频大于1时，在 property-file 对应的 buffer 中
-    ;; 记录 word 的其他属性（比如：精确词频），用于词条联想和排序。
-    (when (and (> (length word) 1)
-               (cl-some #'(lambda (py)
-                            (member word (pyim-get py '(personal-file))))
-                        pinyins))
-      (pyim-intern-property-file
-       word
-       (delq nil (let ((n 0))
-                   (mapcar
-                    #'(lambda (x)
-                        (setq n (+ 1 n))
-                        (when (eq (% n 2) 0) x))
-                    word-property)))))
+      ;; Update count property
+      (setq word-property
+            (plist-put word-property 'count
+                       (+ (plist-get word-property 'count) 1)))
+      ;; 当 word 长度大于1且词频大于1时，在 property-file 对应的 buffer 中
+      ;; 记录 word 的其他属性（比如：精确词频），用于词条联想和排序。
+      (when (and (> (length word) 1)
+                 (cl-some #'(lambda (py)
+                              (member word (pyim-get py '(personal-file))))
+                          pinyins))
+        (pyim-intern-property-file
+         word
+         (delq nil (let ((n 0))
+                     (mapcar
+                      #'(lambda (x)
+                          (setq n (+ 1 n))
+                          (when (eq (% n 2) 0) x))
+                      word-property)))))
 
-    (dolist (py pinyins)
-      (unless (pyim-string-match-p "[^ a-z-]" py)
-        ;; 添加词库： ”拼音“ - ”中文词条“
-        (pyim-intern-personal-file word py (not rearrange-word))
-        ;; 添加词库： ”拼音首字母“ - ”中文词条“
-        (pyim-intern-personal-file
-         word (mapconcat
-               #'(lambda (x)
-                   (substring x 0 1))
-               (split-string py "-")
-               "-")
-         (not rearrange-word))))))
+      (dolist (py pinyins)
+        (unless (pyim-string-match-p "[^ a-z-]" py)
+          ;; 添加词库： ”拼音“ - ”中文词条“
+          (pyim-intern-personal-file word py (not rearrange-word))
+          ;; 添加词库： ”拼音首字母“ - ”中文词条“
+          (pyim-intern-personal-file
+           word (mapconcat
+                 #'(lambda (x)
+                     (substring x 0 1))
+                 (split-string py "-")
+                 "-")
+           (not rearrange-word)))))))
 
 (defun pyim-chinese-string-at-point (&optional number)
   "获取光标一个中文字符串，字符数量为：`number'"
