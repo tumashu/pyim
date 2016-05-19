@@ -3270,9 +3270,10 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-backward-kill-py ()
   (interactive)
-  (string-match "['-][^'-]+$" pyim-current-key)
-  (setq pyim-current-key
-        (replace-match "" nil nil pyim-current-key))
+  (if (string-match "['-][^'-]+$" pyim-current-key)
+    (setq pyim-current-key
+          (replace-match "" nil nil pyim-current-key))
+    (setq pyim-current-key ""))
   (pyim-handle-string))
 ;; #+END_SRC
 
