@@ -453,8 +453,11 @@ If you don't like this funciton, set the variable to nil")
       (define-key map (char-to-string i) 'pyim-number-select))
     (define-key map " " 'pyim-select-current)
     (define-key map [backspace] 'pyim-delete-last-char)
-    (define-key map (kbd "M-DEL") 'pyim-backward-kill-py)
     (define-key map [delete] 'pyim-delete-last-char)
+    (define-key map [M-backspace] 'pyim-backward-kill-py)
+    (define-key map [M-delete] 'pyim-backward-kill-py)
+    (define-key map [C-backspace] 'pyim-backward-kill-py)
+    (define-key map [C-delete] 'pyim-backward-kill-py)
     (define-key map "\177" 'pyim-delete-last-char)
     (define-key map "\C-n" 'pyim-next-page)
     (define-key map "\C-p" 'pyim-previous-page)
@@ -3271,10 +3274,12 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
 (defun pyim-backward-kill-py ()
   (interactive)
   (if (string-match "['-][^'-]+$" pyim-current-key)
-    (setq pyim-current-key
-          (replace-match "" nil nil pyim-current-key))
-    (setq pyim-current-key ""))
-  (pyim-handle-string))
+      (progn (setq pyim-current-key
+                   (replace-match "" nil nil pyim-current-key))
+             (pyim-handle-string))
+    (setq pyim-current-key "")
+    (setq pyim-current-str "")
+    (pyim-terminate-translation)))
 ;; #+END_SRC
 
 ;; *** 将光标前的拼音字符串转换为中文
