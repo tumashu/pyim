@@ -263,19 +263,18 @@ Chinese-pyim 内建的功能有：
   :group 'chinese-pyim)
 
 (defcustom pyim-enable-words-predict
-  '(dabbrev pinyin-shouzimu pinyin-similar pinyin-znabc guess-words)
+  '(dabbrev pinyin-shouzimu pinyin-znabc guess-words)
   "一个 list，用于设置词语联想方式，当前支持：
 
-1. `pinyin-similar' 搜索拼音类似的词条做为联想词。
-2. `pinyin-shouzimu' 搜索拼音首字母对应的词条做为联想词。
-3. `pinyin-znabc' 类似智能ABC的词语联想(源于 emacs-eim)。
-4. `guess-words' 以上次输入的词条为 code，然后在 guessdict 中搜索，
+1. `pinyin-shouzimu' 搜索拼音首字母对应的词条做为联想词。
+2. `pinyin-znabc' 类似智能ABC的词语联想(源于 emacs-eim)。
+3. `guess-words' 以上次输入的词条为 code，然后在 guessdict 中搜索，
                  用搜索得到的词条来提高输入法识别精度。
 
                  注意：这个方法需要用户安装 guessdict 词库，
                        guessdict 词库文件可以用 `pyim-article2dict-guessdict'
                        命令生成。
-5. `dabbrev'  搜索当前 buffer, 或者其他 buffer 中已经存在的中文文本，得到匹配的
+4. `dabbrev'  搜索当前 buffer, 或者其他 buffer 中已经存在的中文文本，得到匹配的
               候选词，通过这些候选词来提高输入法的识别精度。
 
               注意：如果用户打开的 buffer 太多或者太大，输入法 *可能* 会出现 *卡顿* 。
@@ -1010,44 +1009,6 @@ If you don't like this funciton, set the variable to nil")
        (stringp string)
        (string-match-p regexp string start)))
 
-(defun pyim-get-pinyin-similar-words (code &optional search-from)
-  "得到 `code' 对应的联想词。"
-  (let ((search-from (or search-from '(personal-file pinyin-dict)))
-        (regexp (pyim-build-pinyin-regexp code t t))
-        buffer-list words-list predicted-words)
-    (when (and (stringp code)
-               (string< "" code)
-               (pyim-string-match-p "[a-z]+-[a-z]+" code))
-      (dolist (buf pyim-buffer-list)
-        (let ((dict-type (cdr (assoc "dict-type" buf))))
-          (when (member dict-type search-from)
-            (push buf buffer-list))))
-      (setq buffer-list (reverse buffer-list))
-      (dolist (buf buffer-list)
-        (with-current-buffer (cdr (assoc "buffer" buf))
-          (when (pyim-dict-buffer-valid-p)
-            (pyim-bisearch-word code (point-min) (point-max))
-            (let* ((begin (when (re-search-forward regexp nil t)
-                            (beginning-of-line)
-                            (point)))
-                   ;; 提取20行内容来获取分析联想词，太多的联想词
-                   ;; 用处不大，还会使输入法响应速度减慢(经验数字)。
-                   (end (progn (forward-line 20)
-                               (end-of-line)
-                               (point))))
-              (when begin
-                (setq words-list
-                      (append words-list
-                              (pyim-multiline-content begin end))))))))
-      (dolist (line-words words-list)
-        (when (pyim-string-match-p regexp (car line-words))
-          (let ((line-words (cdr line-words)))
-            (dolist (word line-words)
-              (when (and (stringp word)
-                         (> (length word) 0))
-                (push word predicted-words))))))
-      (delete-dups (reverse predicted-words)))))
-
 (defun pyim-build-pinyin-regexp (code &optional match-beginning first-equal all-equal)
   "从`code' 构建一个 regexp，用于搜索联想词，
 比如：ni-hao-si-j --> ^ni-hao[a-z]*-si[a-z]*-j[a-z]* , when `first-equal' set to `t'
@@ -1164,28 +1125,6 @@ beginning of line"
     (if omit-nulls
         (cl-delete-if 'pyim-string-emptyp items)
       items)))
-
-(defun pyim-multiline-content (begin end &optional seperaters omit-nulls)
-  "将当前 buffer 中，`begin' 到 `end' 之间的内容分解，生成一个 list，
-这个函数用于搜索联想词函数 `pyim-get-pinyin-similar-words' 。"
-  ;;  ni-hao 你好 倪浩         (("ni-hao" "你好" "倪浩")
-  ;;  ni-hao-a 你好啊    -->    ("ni-hao-a" "你好啊")
-  ;;  ni-hao-b 你好吧           ("ni-hao-ba" "你好吧"))
-  (let ((items (split-string
-                (buffer-substring-no-properties
-                 (if (> begin (point-min))
-                     begin
-                   (point-min))
-                 (if (< end (point-max))
-                     end
-                   (point-max))) "\n")))
-    (mapcar
-     #'(lambda (x)
-         (let ((line-items (split-string x (or seperaters " "))))
-           (if omit-nulls
-               (cl-delete-if 'pyim-string-emptyp line-items)
-             line-items)))
-     items)))
 
 (defun pyim-string-emptyp (str)
   (not (string< "" str)))
@@ -1964,7 +1903,7 @@ Return the input string."
          pinyin-dict-words
          dabbrev-accurate-words dabbrev-similar-words
          guess-dict-accurate-words guess-dict-similar-words
-         pinyin-similar-words pinyin-shouzimu-similar-words pinyin-znabc-similar-words
+         pinyin-shouzimu-similar-words pinyin-znabc-similar-words
          chars)
 
     (dolist (pylist list-of-pylist)
@@ -1995,10 +1934,6 @@ Return the input string."
     (let ((words (pyim-get-choices:pinyin-znabc (car list-of-pylist))))
       (setq pinyin-znabc-similar-words (car (cdr words))))
 
-    ;; Pinyin similar words
-    (let ((words (pyim-get-choices:pinyin-similar (car list-of-pylist))))
-      (setq pinyin-similar-words (car (cdr words))))
-
     ;; Debug
     (when pyim-debug
       (princ (list :pylist-list list-of-pylist
@@ -2009,7 +1944,6 @@ Return the input string."
                    :pinyin-dict-words pinyin-dict-words
                    :pinyin-shouzimu-words pinyin-shouzimu-similar-words
                    :dabbrev-similar-words dabbrev-similar-words
-                   :pinyin-similar-words pinyin-similar-words
                    :pinyin-znabc-similar-words pinyin-znabc-similar-words
                    :chars chars)))
 
@@ -2024,7 +1958,6 @@ Return the input string."
              ,@(when (and pinyin-dict-words
                           (not (member (car pinyin-dict-words) pinyin-shouzimu-similar-words)))
                  pinyin-shouzimu-similar-words)
-             ,@pinyin-similar-words
              ,@guess-dict-similar-words
              ,@pinyin-znabc-similar-words
              ,@chars)))))
@@ -2123,13 +2056,6 @@ Return the input string."
                (> (length pylist) 1))
       (list nil (pyim-sort-words:count
                  (pyim-get py-str-shouzimu '(personal-file)))))))
-
-(defun pyim-get-choices:pinyin-similar (pylist)
-  ;; 如果输入 "ni-hao" ，搜索拼音与 "ni-hao" 类似的词条作为联想词。
-  ;; 搜索相似词得到的联想词太多，这里限制只搜索个人文件。
-  (let ((py-str (pyim-pylist-to-string pylist nil 'default)))
-    (when (member 'pinyin-similar pyim-enable-words-predict)
-      (list nil (pyim-get-pinyin-similar-words py-str '(personal-file))))))
 
 (defun pyim-get-choices:personal-file (pylist)
   (let* ((py-str (pyim-pylist-to-string pylist nil 'default))
