@@ -543,12 +543,12 @@ If you don't like this funciton, set the variable to nil")
 ;;    请参考： [[pyim-kill-buffers]]
 
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-start (name &optional active-func restart save-personal-file)
+(defun pyim-start (name &optional active-func restart save-files)
   (interactive)
   (mapc 'kill-local-variable pyim-local-variable-list)
   (mapc 'make-local-variable pyim-local-variable-list)
   ;; 重启时，kill 所有已经打开的 buffer。
-  (when (and restart save-personal-file)
+  (when (and restart save-files)
     (pyim-save-files))
   (when restart
     (pyim-kill-buffers)
