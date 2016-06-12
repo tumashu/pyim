@@ -1073,9 +1073,9 @@ BUG: 这个函数需要进一步优化，使其判断更准确。"
 ;; 5. 这样递归的操作，最终会将光标移动到 buffer 的某一行，这一行中的拼音
 ;;    字符串和待搜索的拼音字符串一致。
 ;; 6. 最后使用 `pyim-line-content' 返回当前行的内容，其结果是一个列表，类
-;;    似：
+;;    似，注意, `pyim-line-content' 的返回值没有包含 code .
 ;;    #+BEGIN_EXAMPLE
-;;    ("ni-hao" "你好" "你号" ...)
+;;    ("你好" "你号" ...)
 ;;    #+END_EXAMPLE
 
 ;; #+BEGIN_SRC emacs-lisp
@@ -1100,8 +1100,7 @@ BUG: 这个函数需要进一步优化，使其判断更准确。"
           (pyim-bisearch-word-internal code start mid))))))
 
 (defun pyim-code-at-point ()
-  "Before calling this function, be sure that the point is at the
-beginning of line"
+  "Get code in the current line."
   (save-excursion
     (beginning-of-line)
     (if (re-search-forward "[ \t:]" (line-end-position) t)
@@ -1109,7 +1108,8 @@ beginning of line"
       (error "文件类型错误！%s 的第 %d 行没有词条！" (buffer-name) (line-number-at-pos)))))
 
 (defun pyim-line-content (&optional seperaters return-plist omit-nulls)
-  "用 SEPERATERS 分解当前行，所有参数传递给 split-string 函数"
+  "用 SEPERATERS 分解当前行，所有参数传递给 split-string 函数, 如果 return-plist
+设置为 t, 则返回一个 plist 而不是默认的 list."
   (let* ((begin (line-beginning-position))
          (end (line-end-position))
          (end (if (> (- end begin) pyim-line-content-limit)
@@ -1127,7 +1127,7 @@ beginning of line"
             (setq i (1+ i)))
           (nreverse return))
       items)
-    (if omit-nulls
+    (if (and omit-nulls (not return-plist))
         (cl-delete-if 'pyim-string-emptyp items)
       items)))
 
