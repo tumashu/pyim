@@ -2039,8 +2039,7 @@ Return the input string."
 
 (defun pyim-get-word-property (word property &optional value-converter default-value)
   "从 `pyim-property-file' 文件中获取 `word' 对应属性 `property' 的取值。"
-  (let* ((plist (cdr (pyim-get word '(property-file))))
-         (value (plist-get plist property))
+  (let* ((value (plist-get (pyim-get word '(property-file)) property))
          (value-converter (or value-converter #'identity)))
     (or (when value (funcall value-converter value))
         default-value)))
