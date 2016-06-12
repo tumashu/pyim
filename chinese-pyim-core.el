@@ -1167,6 +1167,10 @@ beginning of line"
 ;;    `pyim-create-word-at-point' 的包装命令。
 
 ;; #+BEGIN_SRC emacs-lisp
+(defun pyim-delete-line ()
+  (delete-region (line-beginning-position)
+                 (min (+ (line-end-position) 1) (point-max))))
+
 (defmacro pyim-intern-file (dict-type code &rest body)
   "用于更新 personal-file 或者 property-file 的宏，
 运行 `body' 并用其返回值覆盖 buffer 变量 `pyim-buffer-cache'
