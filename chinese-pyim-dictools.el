@@ -249,9 +249,8 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
 当 `sort-by-freq' 为 t 时，首先按照当前行词条出现频率对词条排序，
 然后再删除重复词条，用于：从中文文章构建词库。"
   (interactive)
-  (let* ((line-content (pyim-line-content " "))
-         (code (car line-content)) ;; 编码和词条分开操作，因为在guessdict词库中，编码是中文。
-         (words-list (cdr line-content))
+  (let* ((code (pyim-code-at-point))
+         (words-list (pyim-line-content " "))
          (length (length words-list)))
     ;; 从文章中构建词库时，首先会将词条按照出现频率
     ;; 排序，这样频率高的词条就会排在前面。
@@ -298,10 +297,11 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
 
         (goto-char (point-min))
         (while (not (eobp))
-          (let* ((line-content (pyim-line-content))
-                 (length (length line-content)))
-            (if (or (> length 1) ;; 删除只包含 code，但没有词条的行
-                    (pyim-string-match-p " *^;+" (car line-content)))
+          (let* ((words-list (pyim-line-content))
+                 (code (pyim-code-at-point))
+                 (length (length words-list)))
+            (if (or (> length 0) ;; 删除只包含 code，但没有词条的行
+                    (pyim-string-match-p " *^;+" code))
                 (forward-line 1)
               (pyim-delete-line))))
 
@@ -386,7 +386,9 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
                          #'(lambda (pinyin)
                              (concat pinyin "  " (mapconcat #'identity x " ")))
                          pinyin-list "\n")))
-                  (pyim-guessdict-list-convert (pyim-line-content nil t))
+                  (pyim-guessdict-list-convert
+                   `(,(pyim-code-at-point)
+                     ,@(pyim-line-content nil nil t)))
                   "\n")))
     (delete-region (line-beginning-position) (line-end-position))
     (insert string)))
