@@ -454,7 +454,7 @@
 (defvar pyim-pinyin2cchar-cache nil)
 (defvar pyim-cchar2pinyin-cache nil)
 
-(defun pyim-pinyin2cchar-create-cache (&optional force)
+(defun pyim-pinyin2cchar-cache-create (&optional force)
   "构建 pinyin 到 chinese char 的缓存，用于加快搜索速度，这个函数
 将缓存保存到 `pyim-pinyin2cchar-cache' 变量中，
 如果 force 设置为 t, 强制更新索引。"
@@ -477,7 +477,7 @@
 “man” -> (\"忙茫盲芒氓莽蟒邙漭硭\" \"满慢漫曼蛮馒瞒蔓颟谩墁幔螨鞔鳗缦熳镘\")
 
 如果 `sort' 设置为 t, 则对结果按照字母顺序排序。"
-  (pyim-pinyin2cchar-create-cache)
+  (pyim-pinyin2cchar-cache-create)
   (let* ((pymap pyim-pinyin-pymap)
          (length (length pymap))
          (beg (substring pinyin 0 1))
@@ -530,14 +530,14 @@
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-cchar2pinyin-get (char-or-str)
   "Get the code of the character CHAR"
-  (pyim-cchar2pinyin-create-cache)
+  (pyim-cchar2pinyin-cache-create)
   (let ((key (if (characterp char-or-str)
                  (char-to-string char-or-str)
                char-or-str)))
     (when (= (length key) 1)
       (gethash key pyim-cchar2pinyin-cache))))
 
-(defun pyim-cchar2pinyin-create-cache (&optional force)
+(defun pyim-cchar2pinyin-cache-create (&optional force)
   "Build pinyin cchar to pinyin hashtable from `pyim-pinyin-pymap'
 in package `chinese-pyim-pymap'"
   (when (or force (not pyim-cchar2pinyin-cache))
