@@ -1287,12 +1287,12 @@ BUG：无法有效的处理多音字。"
     (dolist (pinyin pinyins)
       (unless (pyim-string-match-p "[^ a-z-]" pinyin)
         (pyim-intern-file
-          'personal-file word
+          'personal-file pinyin
           (remove word orig-value))))
     (dolist (pinyin pinyins-szm)
       (unless (pyim-string-match-p "[^ a-z-]" pinyin)
         (pyim-intern-file
-         'personal-file word
+         'personal-file pinyin
          (remove word orig-value))))))
 
 (defun pyim-create-word-from-selection ()
