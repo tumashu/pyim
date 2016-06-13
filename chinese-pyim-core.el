@@ -520,8 +520,7 @@ If you don't like this funciton, set the variable to nil")
 ;; 真正启动 Chinese-pyim 的命令是 `pyim-start' ，这个命令做如下工作：
 ;; 1. 重置 `pyim-local-variable-list' 中所有的 local 变量。
 ;; 2. 使用 `pyim-load-file’加载词库文件，具体细节请参考：[[#load-dicts]]
-;; 3. 使用 `pyim-cchar2pinyin-create-cache' 创建汉字到拼音的 hash table，具体细节请
-;;    参考：[[#make-char-table]]
+;; 3. 使用 `pyim-cchar2pinyin-create-cache' 创建汉字到拼音的 hash table 。
 ;; 4. 运行hook： `pyim-load-hook'。
 ;; 5. 将 `pyim-save-files' 命令添加到 `kill-emacs-hook' emacs 关
 ;;    闭之前将个人词频 buffer 的内容保存到个人词频文件。具体细节请参考：
