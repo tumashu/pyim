@@ -2720,7 +2720,7 @@ guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
         (setq pyim-current-str (pyim-translate last-command-event))
         (pyim-terminate-translation))
     (let ((str (pyim-choice (nth (1- pyim-current-pos) (car pyim-current-choices))))
-          pylist)
+          pylist-list)
       (pyim-create-or-rearrange-word str t)
       (setq pyim-pinyin-position (+ pyim-pinyin-position (length str)))
       (if (>= pyim-pinyin-position (length (car pyim-pylist-list)))
