@@ -666,8 +666,8 @@ If you don't like this funciton, set the variable to nil")
 ;; `pyim-create-template-dict' 自动创建这个文件。如果用户没有设定
 ;; `pyim-dicts'， `pyim-load-file' 会弹出警告信息，告知用户安装词库的命令。
 
-;; `pyim-load-file' 加载词库简单来说就是：创建一个buffer，然后将词
-;; 库文件的内容插入新创建的这个buffer，同时得到buffer和file的对应表。
+;; `pyim-load-file' 加载词库简单来说就是：创建一个 buffer ，然后将词
+;; 库文件的内容插入新创建的这个 buffer ，同时得到 buffer 和 file 的对应表。
 ;; 具体过程为：
 ;; 1. 首先创建一个 buffer，buffer 的名称源自 `pyim-buffer-name'，
 ;;    Chinese-pyim 默认创建的 buffer 名称类似：
@@ -682,10 +682,10 @@ If you don't like this funciton, set the variable to nil")
 ;; 4. 在运行的过程中，`pyim-load-file' 会创建一个词库文件名与 buffer 的对
 ;;    应表，其结构类似：
 ;;    #+BEGIN_EXAMPLE
-;;    ((("buffer" . #<buffer  *Chinese-pyim*>) ("file" . "/path/to/pyim-personal.txt"))
-;;     (("buffer" . #<buffer  *Chinese-pyim*-431862>) ("file" . "/path/to/pyim-bigdict.txt"))
-;;     (("buffer" . #<buffer  *Chinese-pyim*-208698>) ("file" . "/path/to/chinese-pyim-prettydict-2.txt"))
-;;     (("buffer" . #<buffer  *Chinese-pyim*-810662>) ("file" . "/path/to/chinese-pyim-prettydict-1.txt")))
+;;    ((("buffer" . " *Chinese-pyim*") ("file" . "/path/to/pyim-personal.txt"))
+;;     (("buffer" . " *Chinese-pyim*-431862") ("file" . "/path/to/pyim-bigdict.txt"))
+;;     (("buffer" . " *Chinese-pyim*-208698") ("file" . "/path/to/chinese-pyim-prettydict-2.txt"))
+;;     (("buffer" . " *Chinese-pyim*-810662") ("file" . "/path/to/chinese-pyim-prettydict-1.txt")))
 ;;    #+END_EXAMPLE
 ;; 5. 函数执行结束后，返回值为上述对应表。
 
