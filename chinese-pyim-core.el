@@ -791,7 +791,7 @@ If you don't like this funciton, set the variable to nil")
   "返回词库文件 `dict-file' 对应的 cache 文件。"
   (concat (file-name-as-directory pyim-cache-directory)
           "v4/"
-          (file-name-base file)
+          (file-name-base dict-file)
           "-"
           (md5 file)
           ".el"))
@@ -874,20 +874,23 @@ If you don't like this funciton, set the variable to nil")
          (coding (cdr (assoc "coding" item)))
          (dict-type (cdr (assoc "dict-type" item))))
     (if (buffer-live-p buffer)
-      (with-current-buffer buffer
-        (save-restriction
-          (erase-buffer)
-          (goto-char (point-min))
-          (insert ";; -*- coding: utf-8 -*-\n")
-          (maphash
-           #'(lambda (key value)
-               (insert (mapconcat
-                        #'(lambda (x)
-                            (format "%s" x)) `(,key ,@value) " "))
-               (insert "\n"))
-           pyim-dict-cache)
-          (write-region (point-min) (point-max) file)
-          (message "更新 Chinese-pyim 文件：%s。" file))))))
+        (with-current-buffer buffer
+          (if (and (boundp 'pyim-dict-cache)
+                   (hash-table-p pyim-dict-cache))
+              (save-restriction
+                (erase-buffer)
+                (goto-char (point-min))
+                (insert ";; -*- coding: utf-8 -*-\n")
+                (maphash
+                 #'(lambda (key value)
+                     (insert (mapconcat
+                              #'(lambda (x)
+                                  (format "%s" x)) `(,key ,@value) " "))
+                     (insert "\n"))
+                 pyim-dict-cache)
+                (write-region (point-min) (point-max) file)
+                (message "更新 Chinese-pyim 文件：%s。" file))
+            (message "buffer 变量 `pyim-dict-cache' 无效，个人文件更新失败！"))))))
 
 (defun pyim-filter-buffer-list (dict-types)
   "从 `pyim-buffer-list' 中挑选符合的 buffer."
@@ -919,13 +922,13 @@ N 从 0 开始计数。"
         (bufname pyim-buffer-name)
         buffer file)
     (dolist (buf buflist)
-      (setq buffer (assoc "buffer" buf))
+      (setq buffer (get-buffer (cdr (assoc "buffer" buf))))
       (setq file (cdr (assoc "file" buf)))
-      (unless (buffer-live-p (cdr buffer))
+      (unless (buffer-live-p buffer)
         (if (file-exists-p file)
             (with-current-buffer (generate-new-buffer bufname)
               (insert-file-contents file)
-              (setcdr buffer (current-buffer)))
+              (setcdr buffer (buffer-name)))
           (message "%s for %s is not exists!" file bufname)
           (setq buflist (remove buf buflist)))))
     t))
