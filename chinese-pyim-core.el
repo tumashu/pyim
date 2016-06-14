@@ -809,7 +809,7 @@ If you don't like this funciton, set the variable to nil")
               (with-temp-buffer
                 (insert-file-contents cache-file)
                 (eval (read (current-buffer)))))
-        (message "pyim 缓存文件 %S 加载完成！" cache-file)))))
+        (message "")))))
 
 (defun pyim-generate-dict-cache-file (item)
   "根据 `item' 创建对应的 cache file.
