@@ -309,6 +309,13 @@
 
 ;;    http://tumashu.github.io/chinese-pyim-bigdict/pyim-bigdict.pyim
 
+;; 另外一个推荐的词库是：
+
+;;   https://github.com/tumashu/chinese-pyim-greatdict
+
+;; 这个词库由 [[https://github.com/xiaowl][WenLiang Xiao]] 同学开发制作，
+;; 词条有 300 万条，词库文件大约 80M, 但机器性能不太好的同学 *慎用* 。
+
 ;; 下载上述词库后，运行 `pyim-dicts-manager' ，按照命令提示，将下载得到的词库
 ;; 文件信息添加到 `pyim-dicts' 中，最后运行命令 `pyim-restart' 或者重启
 ;; emacs，这个词库使用 `utf-8-unix' 编码。
