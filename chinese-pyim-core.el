@@ -869,11 +869,11 @@ If you don't like this funciton, set the variable to nil")
 (defun pyim-generate-dict-file (item)
   "根据 `item' 更新对应的 dict 文件.
 `item' 是 `pyim-buffer-list' 的任意一个子列表。"
-  (let* ((buffer (get-buffer (cdr (assoc "buffer" item))))
+  (let* ((buffer (cdr (assoc "buffer" item)))
          (file (cdr (assoc "file" item)))
          (coding (cdr (assoc "coding" item)))
          (dict-type (cdr (assoc "dict-type" item))))
-    (if (buffer-live-p buffer)
+    (if (get-buffer buffer)
         (with-current-buffer buffer
           (if (and (boundp 'pyim-dict-cache)
                    (hash-table-p pyim-dict-cache))
@@ -922,9 +922,9 @@ N 从 0 开始计数。"
         (bufname pyim-buffer-name)
         buffer file)
     (dolist (buf buflist)
-      (setq buffer (get-buffer (cdr (assoc "buffer" buf))))
+      (setq buffer (cdr (assoc "buffer" buf)))
       (setq file (cdr (assoc "file" buf)))
-      (unless (buffer-live-p buffer)
+      (unless (get-buffer buffer)
         (if (file-exists-p file)
             (with-current-buffer (generate-new-buffer bufname)
               (insert-file-contents file)
@@ -939,7 +939,7 @@ N 从 0 开始计数。"
         buffer)
     (dolist (buf buflist)
       (setq buffer (cdr (assoc "buffer" buf)))
-      (when (buffer-live-p buffer)
+      (when (get-buffer buffer)
         (kill-buffer buffer)))))
 ;; #+END_SRC
 
