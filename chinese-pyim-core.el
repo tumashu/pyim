@@ -364,6 +364,7 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
 
 (defvar pyim-debug nil)
 (defvar pyim-title "灵拼" "Chinese-pyim 在 mode-line 中显示的名称。")
+(defvar pyim-extra-dicts nil "与 `pyim-dicts' 类似, 用于和 elpa 格式的词库包集成。")
 (defvar pyim-buffer-name " *Chinese-pyim*")
 (defvar pyim-buffer-list nil
   "一个列表，用来保存词库文件与 buffer 的对应信息。
@@ -723,7 +724,7 @@ If you don't like this funciton, set the variable to nil")
 排在最前面的词库首先被加载，相同的词库文件只加载一次。"
   (let ((personal-file (expand-file-name pyim-personal-file))
         (property-file (expand-file-name pyim-property-file))
-        (dicts-list pyim-dicts)
+        (dicts-list `(,@pyim-dicts ,@pyim-extra-dicts))
         (bufname pyim-buffer-name)
         buflist buf file coding disable dict-type)
     (save-excursion
