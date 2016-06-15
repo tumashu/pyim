@@ -761,15 +761,19 @@ If you don't like this funciton, set the variable to nil")
            buflist))
 
 (defun pyim-read-file (file name &optional coding dict-type)
-  (with-current-buffer (generate-new-buffer name)
-    (if coding
-        (let ((coding-system-for-read coding))
-          (insert-file-contents file))
-      (insert-file-contents file))
-    `(("buffer" . ,(buffer-name))
-      ("file" . ,file)
-      ("coding" . ,coding)
-      ("dict-type" . ,dict-type))))
+  (if (and (equal (file-name-extension file) "gz")
+           (not (executable-find "gzip")))
+      (message "Can't find gzip command to decompress dict file: %s.
+you need to install gzip (http://www.gzip.org/) and make sure system PATH set properly." file)
+    (with-current-buffer (generate-new-buffer name)
+      (if coding
+          (let ((coding-system-for-read coding))
+            (insert-file-contents file))
+        (insert-file-contents file))
+      `(("buffer" . ,(buffer-name))
+        ("file" . ,file)
+        ("coding" . ,coding)
+        ("dict-type" . ,dict-type)))))
 
 (defun pyim-dict-cache-create (&optional force)
   (interactive)
