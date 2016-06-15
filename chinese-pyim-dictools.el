@@ -867,6 +867,30 @@ Guessdict 用来保存，一个中文词条（code）后面经常跟随出现的
     (switch-to-buffer buffer)
     (pyim-dicts-manager-mode)
     (setq truncate-lines t)))
+
+(defun pyim-dicts-add-dict (new-dict)
+  "添加 `new-dict' 到 `pyim-dicts', 其中 `new-dict' 的格式为：
+
+   (:name \"XXX\" :file \"/path/to/XXX.pyim\"
+    :coding utf-8-unix :dict-type pinyin-dict
+    :elpa t)
+
+这个函数用于制作 elpa 格式的词库 ，不建议普通用户使用，
+`new-dict' 中 `:elpa' 这个关键字不可缺少，其取值 *必须* 为 t."
+  (let ((name (plist-get new-dict :name))
+        (elpa (plist-get new-dict :elpa))
+        replace result)
+    (if elpa
+        (progn (dolist (dict pyim-dicts)
+                 (if (and (equal (plist-get dict :name) name)
+                          (equal (plist-get dict :elpa) elpa))
+                     (progn (push new-dict result)
+                            (setq replace t))
+                   (push dict result)))
+               (setq result (reverse result))
+               (setq pyim-dicts
+                     (if replace result `(,@result ,new-dict))))
+      (message "注意: `pyim-dicts-add-dict' 添加的词库信息中没有 :elpa 关键字。"))))
 ;; #+END_SRC
 
 ;; ** TODO 词库 package 制作工具
