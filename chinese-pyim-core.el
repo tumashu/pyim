@@ -804,7 +804,7 @@ If you don't like this funciton, set the variable to nil")
          (cache-file (pyim-get-dict-cache-file file)))
     (with-current-buffer buffer
       (when (file-exists-p cache-file)
-        (message "正在加载 pyim 词库缓存: %S ..." cache-file)
+        (message "正在加载 pyim 词库缓存: %S ..." (file-name-nondirectory cache-file))
         (setq pyim-dict-cache
               (with-temp-buffer
                 (insert-file-contents cache-file)
@@ -814,8 +814,9 @@ If you don't like this funciton, set the variable to nil")
           ;; 清理后可以降低内存的消耗。
           (erase-buffer)
           (goto-char (point-min))
-          (insert ";; `pyim-dict-cache' has been created by `pyim-load-dict-cache-file', the buffer content is useless, clean it."))
-        (message "")))))
+          (insert (concat ";; `pyim-dict-cache' has been created by `pyim-load-dict-cache-file', "
+                          "the buffer content is useless, clean it.")))
+        (message "加载 pyim 词库缓存: %S 完成！" (file-name-nondirectory cache-file))))))
 
 (defun pyim-generate-dict-cache-file (item)
   "根据 `item' 创建对应的 cache file.
