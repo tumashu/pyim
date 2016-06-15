@@ -779,7 +779,7 @@ you need to install gzip (http://www.gzip.org/) and make sure system PATH set pr
   (interactive)
   (when (or force (not pyim-dict-cache-create-p))
     (setq pyim-dict-cache-create-p t)
-    (let* ((sleep-time 2))
+    (let* ((sleep-time 1))
       (dolist (item pyim-buffer-list)
         (async-start
          `(lambda ()
@@ -789,7 +789,7 @@ you need to install gzip (http://www.gzip.org/) and make sure system PATH set pr
             (pyim-generate-dict-cache-file (quote ,item)))
          `(lambda (result)
             (pyim-load-dict-cache-file (quote ,item) t)))
-        (setq sleep-time (+ sleep-time 5))))))
+        (setq sleep-time (+ sleep-time 3))))))
 
 (defun pyim-get-dict-cache-file (dict-file)
   "返回词库文件 `dict-file' 对应的 cache 文件。"
