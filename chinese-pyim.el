@@ -81,13 +81,32 @@
 ;; 大体了解一下 Chinese-pyim 的用法：[[https://github.com/tumashu/emacs-helper/blob/master/eh-basic.el][Tumashu's emacs configure]] 。
 
 ;; *** 添加词库文件
-;; 用户可以使用三种方法为 Chinese-pyim 添加拼音词库，具体方式请参考 [[如何添加自定义拼音词库]] 小结。
+;; 添加词库最简单的方式是直接安装 chinese-pyim-greatdict 。
 
-;; 注意：每一个词库文件必须按行排序（准确的说，是按每一行的拼音code排序），
-;; 因为`Chinese-pyim' 寻找词条时，使用二分法来优化速度，而二分法工作的前提
-;; 就是对文件按行排序。具体细节请参考：`pyim-bisearch-word' 。
-;; 当发现词库排序不正确时（比如：用户手动调整词库文件后），记得运行函数
-;; `pyim-update-dict-file' 重新对文件排序。
+;;   https://github.com/tumashu/chinese-pyim-greatdict
+
+;; Chinese-pyim-greatdict 包对应的词库由 [[https://github.com/xiaowl][WenLiang Xiao]] 同学开发制作，
+;; 词条有 300 万条，词库文件大约 80M, 是一个 *大而全* 的词库，
+;; 用户可以通过 Melpa 来安装它：
+
+;; 1. 配置melpa源，参考：http://melpa.org/#/getting-started
+;; 2. M-x package-install RET chinese-pyim-greatdict RET
+;; 3. 在emacs配置文件中（比如: ~/.emacs）添加如下代码：
+
+;;    #+BEGIN_EXAMPLE
+;;    (require 'chinese-pyim-greatdict)
+;;    (chinese-pyim-greatdict-enable)
+;;    #+END_EXAMPLE
+
+;; 但值得注意的是：
+
+;; 1. 如果机器性能不好，安装 chinese-pyim-greatdict 会导致 chinese-pyim 启动
+;;    非常缓慢，请仔细考虑。
+;; 2. 这个词库使用 gzip 压缩，非 Linux 用户需要安装 [[http://www.gzip.org/][gzip]] 程序，
+;;    并配置好系统 PATH 。
+
+;; 如果 chinese-pyim-greatdict 不能满足需求，用户可以使用其他方式为 Chinese-pyim 添加拼音词库，
+;; 具体方式请参考 [[如何添加自定义拼音词库]] 小结。
 
 ;; *** 激活 Chinese-pyim
 
@@ -298,7 +317,7 @@
 ;; #+END_EXAMPLE
 
 ;; *** 如何添加自定义拼音词库
-;; Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面四种方式，获取
+;; Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面五种方式，获取
 ;; 质量较好的拼音词库：
 
 ;; **** 第一种方式 (懒人推荐使用)
@@ -308,17 +327,6 @@
 ;; 另存为，不要直接点击链接)。
 
 ;;    http://tumashu.github.io/chinese-pyim-bigdict/pyim-bigdict.pyim
-
-;; 另外一个推荐的词库是：
-
-;;    https://github.com/tumashu/chinese-pyim-greatdict
-
-;; 这个词库由 [[https://github.com/xiaowl][WenLiang Xiao]] 同学开发制作，
-;; 词条有 300 万条，词库文件大约 80M, 但机器性能不太好的同学 *慎用* ,
-;; 另外这个词库默认使用 gzip 压缩，非 Linux 用户请事先安装 gzip,
-;; (也许需要设置 PATH 环境变量) 。
-
-;;    http://www.gzip.org/
 
 ;; 下载上述词库后，运行 `pyim-dicts-manager' ，按照命令提示，将下载得到的词库
 ;; 文件信息添加到 `pyim-dicts' 中，最后运行命令 `pyim-restart' 或者重启
