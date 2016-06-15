@@ -784,7 +784,7 @@ If you don't like this funciton, set the variable to nil")
             (require 'chinese-pyim-core)
             (pyim-generate-dict-cache-file (quote ,item)))
          `(lambda (result)
-            (pyim-load-dict-cache-file (quote ,item))))
+            (pyim-load-dict-cache-file (quote ,item) t)))
         (setq sleep-time (+ sleep-time 5))))))
 
 (defun pyim-get-dict-cache-file (dict-file)
@@ -796,7 +796,7 @@ If you don't like this funciton, set the variable to nil")
           (md5 file)
           ".el"))
 
-(defun pyim-load-dict-cache-file (item)
+(defun pyim-load-dict-cache-file (item &optional erase-buffer)
   "加载 `item' 对应的 cache file.
 `item' 是 `pyim-buffer-list' 的任意一个子列表."
   (let* ((buffer (cdr (assoc "buffer" item)))
@@ -809,6 +809,12 @@ If you don't like this funciton, set the variable to nil")
               (with-temp-buffer
                 (insert-file-contents cache-file)
                 (eval (read (current-buffer)))))
+        (when erase-buffer
+          ;; 当词库缓存创建后，词库 buffer 也就没有多大的用处了，
+          ;; 清理后可以降低内存的消耗。
+          (erase-buffer)
+          (goto-char (point-min))
+          (insert ";; `pyim-dict-cache' has been created by `pyim-load-dict-cache-file', the buffer content is useless, clean it."))
         (message "")))))
 
 (defun pyim-generate-dict-cache-file (item)
