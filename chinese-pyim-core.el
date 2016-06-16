@@ -563,7 +563,9 @@ If you don't like this funciton, set the variable to nil")
     (pyim-dict-cache-create t)
     (run-hooks 'pyim-load-hook)
     (message nil))
-
+  ;; pyim-buffer-list 可能在其它地方创建，这个
+  ;; 确保词库 cache 正确生成。
+  (pyim-dict-cache-create)
   (unless (member 'pyim-save-files kill-emacs-hook)
     (add-to-list 'kill-emacs-hook 'pyim-save-files))
 
