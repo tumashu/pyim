@@ -86,7 +86,10 @@ plist 来表示，比如：
 1. `:name'      代表词库名称，用户可以按照喜好来确定。
 2. `:coding'    表示词库文件使用的编码。
 3. `:file'      表示词库文件，
-4. `:dict-type' 表示词库文件是普通词库文件还是 guessdict 词库文件。"
+4. `:dict-type' 表示词库文件是普通词库文件还是 guessdict 词库文件。
+
+另外一个与这个变量功能类似的变量是： `pyim-extra-dicts', 专门
+用于和 elpa 格式的词库包集成。"
   :group 'chinese-pyim
   :type 'list)
 
@@ -648,7 +651,7 @@ If you don't like this funciton, set the variable to nil")
 ;; Guessdict 词库用于词语联想，它与普通词库文件有相同的结构，但得词条
 ;; 的意义不同。
 
-;; 我们使用变量 `pyim-dicts' 来设定普通词库文件和 guessdict 词库的信息：
+;; 我们使用变量 `pyim-dicts' 和 `pyim-extra-dicts' 来设定普通词库文件和 guessdict 词库的信息：
 ;; 1. `:name' 用户给词库设定的名称，暂时没有用处，未来可能用于构建词库包。
 ;; 2. `:file' 词库文件的绝对路径。
 ;; 3. `:coding' 词库文件的编码，词库文件是一个文本文件，window系统一般使
@@ -665,7 +668,8 @@ If you don't like this funciton, set the variable to nil")
 ;; Chinese-pyim 激活时，首先会使用 `pyim-load-file' 加载个人词频文件和普
 ;; 通词库文件，如果个人词频文件不存在时，Chinese-pyim 会使用函数：
 ;; `pyim-create-template-dict' 自动创建这个文件。如果用户没有设定
-;; `pyim-dicts'， `pyim-load-file' 会弹出警告信息，告知用户安装词库的命令。
+;; `pyim-dicts' 或 `pyim-extra-dicts'， `pyim-load-file' 会弹出警告信息，
+;; 告知用户安装词库的命令。
 
 ;; `pyim-load-file' 加载词库简单来说就是：创建一个 buffer ，然后将词
 ;; 库文件的内容插入新创建的这个 buffer ，同时得到 buffer 和 file 的对应表。
@@ -717,11 +721,13 @@ If you don't like this funciton, set the variable to nil")
 
 ;;;  read file functions
 (defun pyim-load-file ()
-  "为每一个词库文件创建一个buffer(这些buffer用户不可见)，然后将各个词库文件的内容插入
-与之对应的buffer。最后返回一个包含所有buffer对象以及词库文件名的alist。
+  "为每一个词库文件创建一个buffer(这些buffer用户不可见)，然后将各个词库
+文件的内容插入与之对应的buffer。最后返回一个包含所有buffer对象以及词库
+文件名的alist。
 
-`pyim-personal-file' 文件最先导入。然后按照先后顺序导入 `pyim-dicts' 中定义的词库
-排在最前面的词库首先被加载，相同的词库文件只加载一次。"
+`pyim-personal-file' 文件最先导入。然后按照先后顺序导入 `pyim-dicts'
+和 `pyim-extra-dicts' 中定义的词库，排在最前面的词库首先被加载，相同的
+词库文件只加载一次。"
   (let ((personal-file (expand-file-name pyim-personal-file))
         (property-file (expand-file-name pyim-property-file))
         (dicts-list `(,@pyim-dicts ,@pyim-extra-dicts))
