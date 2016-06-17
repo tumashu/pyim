@@ -801,13 +801,14 @@ you need to install gzip (http://www.gzip.org/) and make sure system PATH set pr
             (pyim-load-dict-cache-file (quote ,item) t)))
         (setq sleep-time (+ sleep-time 3))))))
 
-(defun pyim-get-dict-cache-file (dict-file)
+(defun pyim-return-dict-cache-filename (dict-file)
   "返回词库文件 `dict-file' 对应的 cache 文件。"
   (concat (file-name-as-directory pyim-cache-directory)
-          "v4/"
-          (file-name-base dict-file)
-          "-"
-          (md5 file)
+          "v5/"
+          ;; Deal with .pyim and pyim.gz
+          (file-name-base (file-name-base dict-file))
+          "/"
+          (md5 dict-file)
           ".el"))
 
 (defun pyim-load-dict-cache-file (item &optional erase-buffer)
@@ -815,10 +816,10 @@ you need to install gzip (http://www.gzip.org/) and make sure system PATH set pr
 `item' 是 `pyim-buffer-list' 的任意一个子列表."
   (let* ((buffer (cdr (assoc "buffer" item)))
          (file (cdr (assoc "file" item)))
-         (cache-file (pyim-get-dict-cache-file file)))
+         (cache-file (pyim-return-dict-cache-filename file)))
     (with-current-buffer buffer
       (when (file-exists-p cache-file)
-        (message "正在加载 pyim 词库缓存: %S ..." (file-name-nondirectory cache-file))
+        (message "词库 %S 缓存加载中 ..." (file-name-nondirectory file))
         (setq pyim-dict-cache
               (with-temp-buffer
                 (insert-file-contents cache-file)
@@ -830,7 +831,7 @@ you need to install gzip (http://www.gzip.org/) and make sure system PATH set pr
           (goto-char (point-min))
           (insert (concat ";; `pyim-dict-cache' has been created by `pyim-load-dict-cache-file', "
                           "the buffer content is useless, clean it.")))
-        (message "加载 pyim 词库缓存: %S 完成！" (file-name-nondirectory cache-file))))))
+        (message "词库 %S 缓存加载完成!" (file-name-nondirectory file))))))
 
 (defun pyim-generate-dict-cache-file (item)
   "根据 `item' 创建对应的 cache file.
@@ -838,7 +839,7 @@ you need to install gzip (http://www.gzip.org/) and make sure system PATH set pr
   (let* ((file (cdr (assoc "file" item)))
          (coding (cdr (assoc "coding" item)))
          (dict-type (cdr (assoc "dict-type" item)))
-         (cache-file (pyim-get-dict-cache-file file))
+         (cache-file (pyim-return-dict-cache-filename file))
          (return-plist (if (eq dict-type 'property-file) t nil))
          (hastable (make-hash-table :size 1000000 :test #'equal)))
     (when (or (not (file-exists-p cache-file))
