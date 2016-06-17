@@ -775,11 +775,11 @@ chinese-pyim-greatdict 包, 这个词库包有 300 多万词条，是一个 *大
   (interactive)
   (when (equal (buffer-name) pyim-dicts-manager-buffer-name)
     (let ((dict-name "BigDict-01")
-          (dict-url "http://tumashu.github.io/chinese-pyim-bigdict/pyim-bigdict.pyim")
+          (dict-url "http://tumashu.github.io/chinese-pyim-bigdict/pyim-bigdict.pyim.gz")
           (dict-file (expand-file-name
                       (concat (file-name-as-directory
                                pyim-dicts-directory)
-                              "pyim-bigdict.pyim"))))
+                              "pyim-bigdict.pyim.gz"))))
       (when (yes-or-no-p (format "从网址 (%s) 下载安装样例词库？ " dict-url))
         (unless (file-exists-p dict-file)
           (url-copy-file dict-url dict-file))

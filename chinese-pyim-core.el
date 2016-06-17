@@ -555,6 +555,7 @@ If you don't like this funciton, set the variable to nil")
     (pyim-kill-buffers)
     (setq pyim-buffer-list nil))
   (unless (and pyim-buffer-list
+               pyim-dict-cache-create-p
                (pyim-check-buffers)
                (not restart))
     (pyim-cchar2pinyin-cache-create)

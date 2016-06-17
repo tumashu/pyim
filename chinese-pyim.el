@@ -190,9 +190,9 @@
 
 ;;     注意：这个方法需要用户安装 guessdict 词库，guessdict 词库文件可以
 ;;     用 `pyim-article2dict-guessdict' 命令生成，不想折腾的用户也可以从
-;;     下面的地址下载样例词库：(注意：请使用另存为，不要直接点击链接)。
+;;     下面的地址下载样例词库：
 
-;;     http://tumashu.github.io/chinese-pyim-guessdict/pyim-guessdict.gpyim
+;;     http://tumashu.github.io/chinese-pyim-guessdict/pyim-guessdict.gpyim.gz
 
 ;; 4. `dabbrev'  搜索当前 buffer, 或者其他 buffer 中已经存在的中文文本，得到匹配的
 ;;    候选词，通过这些候选词来提高输入法的识别精度。
@@ -323,10 +323,9 @@
 ;; **** 第一种方式 (懒人推荐使用)
 
 ;; 获取其他 Chinese-pyim 用户的拼音词库，比如，某个同学测试 Chinese-pyim
-;; 时创建了一个中文拼音词库，词条数量大约60万，文件大约20M，(注意：请使用
-;; 另存为，不要直接点击链接)。
+;; 时创建了一个中文拼音词库，词条数量大约60万。
 
-;;    http://tumashu.github.io/chinese-pyim-bigdict/pyim-bigdict.pyim
+;;    http://tumashu.github.io/chinese-pyim-bigdict/pyim-bigdict.pyim.gz
 
 ;; 下载上述词库后，运行 `pyim-dicts-manager' ，按照命令提示，将下载得到的词库
 ;; 文件信息添加到 `pyim-dicts' 中，最后运行命令 `pyim-restart' 或者重启
@@ -432,7 +431,7 @@
 ;;   (interactive)
 ;;   (setq pyim-dicts
 ;;         '((:name "BigDict"
-;;                  :file "/path/to/pyim-bigdict.pyim"
+;;                  :file "/path/to/pyim-bigdict.pyim.gz"
 ;;                  :coding utf-8-unix
 ;;                  :dict-type pinyin-dict)))
 ;;   (pyim-restart-1 t))
