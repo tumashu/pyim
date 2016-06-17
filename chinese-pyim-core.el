@@ -799,7 +799,7 @@ you need to install gzip (http://www.gzip.org/) and make sure system PATH set pr
             (pyim-generate-dict-cache-file (quote ,item)))
          `(lambda (result)
             (pyim-load-dict-cache-file (quote ,item) t)))
-        (setq sleep-time (+ sleep-time 3))))))
+        (setq sleep-time (+ sleep-time 1))))))
 
 (defun pyim-return-dict-cache-filename (dict-file)
   "返回词库文件 `dict-file' 对应的 cache 文件。"
