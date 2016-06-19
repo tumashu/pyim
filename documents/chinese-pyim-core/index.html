@@ -34,68 +34,68 @@
 <h2>&#30446;&#24405;</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org66b67fb">1. 说明文档&#xa0;&#xa0;&#xa0;<span class="tag"><span class="doc">doc</span></span></a></li>
-<li><a href="#org7adecba">2. 核心代码&#xa0;&#xa0;&#xa0;<span class="tag"><span class="code">code</span></span></a>
+<li><a href="#orgb967d12">1. 说明文档&#xa0;&#xa0;&#xa0;<span class="tag"><span class="doc">doc</span></span></a></li>
+<li><a href="#org976fb26">2. 核心代码&#xa0;&#xa0;&#xa0;<span class="tag"><span class="code">code</span></span></a>
 <ul>
-<li><a href="#org3fd6ef9">2.1. require + defcustom + defvar</a></li>
-<li><a href="#orgbda2bac">2.2. 将变量转换为 local 变量</a></li>
-<li><a href="#org17f01dc">2.3. 输入法启动和重启</a></li>
-<li><a href="#orgffe452a">2.4. 处理词库文件</a>
+<li><a href="#org9e18d4c">2.1. require + defcustom + defvar</a></li>
+<li><a href="#orgb013d26">2.2. 将变量转换为 local 变量</a></li>
+<li><a href="#orgde9856f">2.3. 输入法启动和重启</a></li>
+<li><a href="#org5740d6a">2.4. 处理词库文件</a>
 <ul>
-<li><a href="#orga36278f">2.4.1. 自定义词库</a>
+<li><a href="#org468cff4">2.4.1. 自定义词库</a>
 <ul>
-<li><a href="#org25fc981">2.4.1.1. 词库文件格式</a></li>
-<li><a href="#org7e02989">2.4.1.2. 个人词频文件</a></li>
-<li><a href="#orgb347210">2.4.1.3. 普通词库文件 和 Guessdict词库</a></li>
+<li><a href="#org5d35637">2.4.1.1. 词库文件格式</a></li>
+<li><a href="#orgb5d037a">2.4.1.2. 个人词频文件</a></li>
+<li><a href="#org406f6bf">2.4.1.3. 普通词库文件 和 Guessdict词库</a></li>
 </ul>
 </li>
 <li><a href="#load-dicts">2.4.2. 加载词库</a></li>
-<li><a href="#org64ea56e">2.4.3. 从词库中搜索中文词条</a></li>
-<li><a href="#org18d7ced">2.4.4. 保存词条，删除词条以及调整词条位置</a>
+<li><a href="#orgb896f29">2.4.3. 从词库中搜索中文词条</a></li>
+<li><a href="#orged871eb">2.4.4. 保存词条，删除词条以及调整词条位置</a>
 <ul>
-<li><a href="#org31d33d5">2.4.4.1. 造词功能和词频调整功能</a></li>
-<li><a href="#org6116322">2.4.4.2. 删词功能</a></li>
+<li><a href="#orgc559bde">2.4.4.1. 造词功能和词频调整功能</a></li>
+<li><a href="#org36ebf51">2.4.4.2. 删词功能</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org5173b2e">2.5. 生成 `pyim-current-key' 并插入 `pyim-current-str'</a>
+<li><a href="#orge49d532">2.5. 生成 `pyim-current-key' 并插入 `pyim-current-str'</a>
 <ul>
-<li><a href="#org5d008d3">2.5.1. 生成拼音字符串 `pyim-current-key'</a></li>
-<li><a href="#org6a38745">2.5.2. 在待输入 buffer 中插入 `pyim-current-str'</a></li>
+<li><a href="#org0517d67">2.5.1. 生成拼音字符串 `pyim-current-key'</a></li>
+<li><a href="#org723b9d1">2.5.2. 在待输入 buffer 中插入 `pyim-current-str'</a></li>
 </ul>
 </li>
-<li><a href="#org1631f1d">2.6. 处理拼音字符串 `pyim-current-key'</a>
+<li><a href="#orgbd71351">2.6. 处理拼音字符串 `pyim-current-key'</a>
 <ul>
-<li><a href="#orgc1869a1">2.6.1. 拼音字符串 -&gt; 待选词列表</a>
+<li><a href="#orgf2e92ce">2.6.1. 拼音字符串 -&gt; 待选词列表</a>
 <ul>
-<li><a href="#orgb0d684a">2.6.1.1. 分解拼音字符串</a></li>
-<li><a href="#org9801461">2.6.1.2. 获得词语拼音并进一步查询得到备选词列表</a></li>
+<li><a href="#org24b2da3">2.6.1.1. 分解拼音字符串</a></li>
+<li><a href="#orgca55708">2.6.1.2. 获得词语拼音并进一步查询得到备选词列表</a></li>
 </ul>
 </li>
-<li><a href="#org9e5bd02">2.6.2. 核心函数：拼音字符串处理函数</a></li>
+<li><a href="#orgc5ec32f">2.6.2. 核心函数：拼音字符串处理函数</a></li>
 </ul>
 </li>
-<li><a href="#org4f78413">2.7. 处理当前需要插入字符串 `pyim-current-str'</a></li>
-<li><a href="#org7418000">2.8. 显示和选择备选词条</a>
+<li><a href="#orgfdf622e">2.7. 处理当前需要插入字符串 `pyim-current-str'</a></li>
+<li><a href="#orgc697be1">2.8. 显示和选择备选词条</a>
 <ul>
-<li><a href="#orgd9a5a6e">2.8.1. 构建词条菜单字符串</a></li>
-<li><a href="#orgad3017e">2.8.2. 显示选词框</a></li>
-<li><a href="#org99005e3">2.8.3. 选择备选词</a></li>
+<li><a href="#org30684b1">2.8.1. 构建词条菜单字符串</a></li>
+<li><a href="#org1c6a979">2.8.2. 显示选词框</a></li>
+<li><a href="#org496df94">2.8.3. 选择备选词</a></li>
 </ul>
 </li>
-<li><a href="#org65ea10f">2.9. 处理标点符号</a></li>
-<li><a href="#orgdd6defb">2.10. 处理特殊功能触发字符（单字符快捷键）</a></li>
-<li><a href="#org1f5f1e4">2.11. 与拼音输入相关的用户命令</a>
+<li><a href="#org71c4125">2.9. 处理标点符号</a></li>
+<li><a href="#org84f157b">2.10. 处理特殊功能触发字符（单字符快捷键）</a></li>
+<li><a href="#org5afaca3">2.11. 与拼音输入相关的用户命令</a>
 <ul>
-<li><a href="#org0388460">2.11.1. 删除拼音字符串最后一个字符</a></li>
-<li><a href="#orga8d830a">2.11.2. 删除拼音字符串最后一个拼音</a></li>
-<li><a href="#org3069ee9">2.11.3. 将光标前的拼音字符串转换为中文</a></li>
-<li><a href="#orgd144d7d">2.11.4. 取消当前输入</a></li>
-<li><a href="#orge95566e">2.11.5. 字母上屏</a></li>
-<li><a href="#org5537bd6">2.11.6. Chinese-pyim 取消激活</a></li>
-<li><a href="#org099de67">2.11.7. 切换中英文输入模式</a></li>
-<li><a href="#org244b926">2.11.8. 为 isearch 添加拼音搜索功能</a></li>
+<li><a href="#orgb78b1ca">2.11.1. 删除拼音字符串最后一个字符</a></li>
+<li><a href="#orgc1e1ba1">2.11.2. 删除拼音字符串最后一个拼音</a></li>
+<li><a href="#org1f4425c">2.11.3. 将光标前的拼音字符串转换为中文</a></li>
+<li><a href="#org9e30949">2.11.4. 取消当前输入</a></li>
+<li><a href="#orgc1913e9">2.11.5. 字母上屏</a></li>
+<li><a href="#orgd86906d">2.11.6. Chinese-pyim 取消激活</a></li>
+<li><a href="#orgb5be6e9">2.11.7. 切换中英文输入模式</a></li>
+<li><a href="#org87a24c7">2.11.8. 为 isearch 添加拼音搜索功能</a></li>
 </ul>
 </li>
 </ul>
@@ -103,8 +103,8 @@
 </ul>
 </div>
 </div>
-<div id="outline-container-org66b67fb" class="outline-2">
-<h2 id="org66b67fb"><span class="section-number-2">1</span> 说明文档&#xa0;&#xa0;&#xa0;<span class="tag"><span class="doc">doc</span></span></h2>
+<div id="outline-container-orgb967d12" class="outline-2">
+<h2 id="orgb967d12"><span class="section-number-2">1</span> 说明文档&#xa0;&#xa0;&#xa0;<span class="tag"><span class="doc">doc</span></span></h2>
 <div class="outline-text-2" id="text-1">
 <p>
 Chinese pyim 输入法的核心文件，包含了输入法的基本功能函数，比如：
@@ -121,11 +121,11 @@ Chinese pyim 输入法的核心文件，包含了输入法的基本功能函数�
 
 
 
-<div id="outline-container-org7adecba" class="outline-2">
-<h2 id="org7adecba"><span class="section-number-2">2</span> 核心代码&#xa0;&#xa0;&#xa0;<span class="tag"><span class="code">code</span></span></h2>
+<div id="outline-container-org976fb26" class="outline-2">
+<h2 id="org976fb26"><span class="section-number-2">2</span> 核心代码&#xa0;&#xa0;&#xa0;<span class="tag"><span class="code">code</span></span></h2>
 <div class="outline-text-2" id="text-2">
-</div><div id="outline-container-org3fd6ef9" class="outline-3">
-<h3 id="org3fd6ef9"><span class="section-number-3">2.1</span> require + defcustom + defvar</h3>
+</div><div id="outline-container-org9e18d4c" class="outline-3">
+<h3 id="org9e18d4c"><span class="section-number-3">2.1</span> require + defcustom + defvar</h3>
 <div class="outline-text-3" id="text-2-1">
 <div class="org-src-container">
 
@@ -176,7 +176,10 @@ Chinese pyim 输入法的核心文件，包含了输入法的基本功能函数�
 <span style="color: #FBDE2D;">1. `</span><span style="color: #96CBFE;">:name</span><span style="color: #FBDE2D;">'      &#20195;&#34920;&#35789;&#24211;&#21517;&#31216;&#65292;&#29992;&#25143;&#21487;&#20197;&#25353;&#29031;&#21916;&#22909;&#26469;&#30830;&#23450;&#12290;</span>
 <span style="color: #FBDE2D;">2. `</span><span style="color: #96CBFE;">:coding</span><span style="color: #FBDE2D;">'    &#34920;&#31034;&#35789;&#24211;&#25991;&#20214;&#20351;&#29992;&#30340;&#32534;&#30721;&#12290;</span>
 <span style="color: #FBDE2D;">3. `</span><span style="color: #96CBFE;">:file</span><span style="color: #FBDE2D;">'      &#34920;&#31034;&#35789;&#24211;&#25991;&#20214;&#65292;</span>
-<span style="color: #FBDE2D;">4. `</span><span style="color: #96CBFE;">:dict-type</span><span style="color: #FBDE2D;">' &#34920;&#31034;&#35789;&#24211;&#25991;&#20214;&#26159;&#26222;&#36890;&#35789;&#24211;&#25991;&#20214;&#36824;&#26159; guessdict &#35789;&#24211;&#25991;&#20214;&#12290;"</span>
+<span style="color: #FBDE2D;">4. `</span><span style="color: #96CBFE;">:dict-type</span><span style="color: #FBDE2D;">' &#34920;&#31034;&#35789;&#24211;&#25991;&#20214;&#26159;&#26222;&#36890;&#35789;&#24211;&#25991;&#20214;&#36824;&#26159; guessdict &#35789;&#24211;&#25991;&#20214;&#12290;</span>
+
+<span style="color: #FBDE2D;">&#21478;&#22806;&#19968;&#20010;&#19982;&#36825;&#20010;&#21464;&#37327;&#21151;&#33021;&#31867;&#20284;&#30340;&#21464;&#37327;&#26159;&#65306; `</span><span style="color: #96CBFE;">pyim-extra-dicts</span><span style="color: #FBDE2D;">', &#19987;&#38376;</span>
+<span style="color: #FBDE2D;">&#29992;&#20110;&#21644; elpa &#26684;&#24335;&#30340;&#35789;&#24211;&#21253;&#38598;&#25104;&#12290;"</span>
   <span style="color: #4c83ff;">:group</span> 'chinese-pyim
   <span style="color: #4c83ff;">:type</span> 'list)
 
@@ -454,6 +457,7 @@ Chinese pyim 输入法的核心文件，包含了输入法的基本功能函数�
 
 (<span style="color: #4c83ff;">defvar</span> <span style="color: #ff69b4;">pyim-debug</span> nil)
 (<span style="color: #4c83ff;">defvar</span> <span style="color: #ff69b4;">pyim-title</span> <span style="color: #61CE3C;">"&#28789;&#25340;"</span> <span style="color: #FBDE2D;">"Chinese-pyim &#22312; mode-line &#20013;&#26174;&#31034;&#30340;&#21517;&#31216;&#12290;"</span>)
+(<span style="color: #4c83ff;">defvar</span> <span style="color: #ff69b4;">pyim-extra-dicts</span> nil <span style="color: #FBDE2D;">"&#19982; `</span><span style="color: #96CBFE;">pyim-dicts</span><span style="color: #FBDE2D;">' &#31867;&#20284;, &#29992;&#20110;&#21644; elpa &#26684;&#24335;&#30340;&#35789;&#24211;&#21253;&#38598;&#25104;&#12290;"</span>)
 (<span style="color: #4c83ff;">defvar</span> <span style="color: #ff69b4;">pyim-buffer-name</span> <span style="color: #61CE3C;">" *Chinese-pyim*"</span>)
 (<span style="color: #4c83ff;">defvar</span> <span style="color: #ff69b4;">pyim-buffer-list</span> nil
   <span style="color: #FBDE2D;">"&#19968;&#20010;&#21015;&#34920;&#65292;&#29992;&#26469;&#20445;&#23384;&#35789;&#24211;&#25991;&#20214;&#19982; buffer &#30340;&#23545;&#24212;&#20449;&#24687;&#12290;</span>
@@ -523,8 +527,8 @@ Chinese pyim 输入法的核心文件，包含了输入法的基本功能函数�
 (<span style="color: #4c83ff;">defvar</span> <span style="color: #ff69b4;">pyim-dabbrev-time-limit</span> .03
   <span style="color: #FBDE2D;">"Determines how many seconds should look for dabbrev matches."</span>)
 
-(<span style="color: #4c83ff;">defvar</span> <span style="color: #ff69b4;">pyim-buffer-cache</span> nil)
-(<span style="color: #4c83ff;">defvar</span> <span style="color: #ff69b4;">pyim-buffer-create-cache-p</span> nil)
+(<span style="color: #4c83ff;">defvar</span> <span style="color: #ff69b4;">pyim-dict-cache</span> nil)
+(<span style="color: #4c83ff;">defvar</span> <span style="color: #ff69b4;">pyim-dict-cache-create-p</span> nil)
 
 (<span style="color: #4c83ff;">defvar</span> <span style="color: #ff69b4;">pyim-mode-map</span>
   (<span style="color: #4c83ff;">let</span> ((map (make-sparse-keymap))
@@ -564,8 +568,8 @@ Chinese pyim 输入法的核心文件，包含了输入法的基本功能函数�
 </div>
 </div>
 
-<div id="outline-container-orgbda2bac" class="outline-3">
-<h3 id="orgbda2bac"><span class="section-number-3">2.2</span> 将变量转换为 local 变量</h3>
+<div id="outline-container-orgb013d26" class="outline-3">
+<h3 id="orgb013d26"><span class="section-number-3">2.2</span> 将变量转换为 local 变量</h3>
 <div class="outline-text-3" id="text-2-2">
 <div class="org-src-container">
 
@@ -596,7 +600,7 @@ Chinese pyim 输入法的核心文件，包含了输入法的基本功能函数�
     pyim-pylist-list
     pyim-pinyin-position
 
-    pyim-buffer-cache)
+    pyim-dict-cache)
   <span style="color: #FBDE2D;">"A list of buffer local variable"</span>)
 
 (<span style="color: #4c83ff;">dolist</span> (var pyim-local-variable-list)
@@ -606,8 +610,8 @@ Chinese pyim 输入法的核心文件，包含了输入法的基本功能函数�
 </div>
 </div>
 </div>
-<div id="outline-container-org17f01dc" class="outline-3">
-<h3 id="org17f01dc"><span class="section-number-3">2.3</span> 输入法启动和重启</h3>
+<div id="outline-container-orgde9856f" class="outline-3">
+<h3 id="orgde9856f"><span class="section-number-3">2.3</span> 输入法启动和重启</h3>
 <div class="outline-text-3" id="text-2-3">
 <p>
 Chinese-pyim 使用 emacs 官方自带的输入法框架来启动输入法和重启输入法。所以我们首先需要使用 emacs 自带的命令 `register-input-method' 注册一个输入法。
@@ -629,7 +633,7 @@ Chinese-pyim 使用 emacs 官方自带的输入法框架来启动输入法和重
 <li>使用 `pyim-cchar2pinyin-create-cache' 创建汉字到拼音的 hash table 。</li>
 <li>运行hook： `pyim-load-hook'。</li>
 <li>将 `pyim-save-files' 命令添加到 `kill-emacs-hook' emacs 关闭之前将个人词频 buffer 的内容保存到个人词频文件。具体细节请参考：
-<a href="#org267a10c">2.4.2</a>。</li>
+<a href="#orgab0cbef">2.4.2</a>。</li>
 <li>设定变量：
 <ol class="org-ol">
 <li>`input-method-function'</li>
@@ -648,7 +652,7 @@ Chinese-pyim 使用 emacs 官方自带的输入法框架来启动输入法和重
 
 <ol class="org-ol">
 <li>输入法重启之前会询问用户，是否保存个人词频信息。</li>
-<li>重启之前会使用函数 `pyim-kill-buffers' 删除所有的词库 buffer，具体请参考：<a href="#orgc01a7ca">2.4.2</a></li>
+<li>重启之前会使用函数 `pyim-kill-buffers' 删除所有的词库 buffer，具体请参考：<a href="#org34152a7">2.4.2</a></li>
 </ol>
 
 <div class="org-src-container">
@@ -664,15 +668,18 @@ Chinese-pyim 使用 emacs 官方自带的输入法框架来启动输入法和重
     (pyim-kill-buffers)
     (<span style="color: #4c83ff;">setq</span> pyim-buffer-list nil))
   (<span style="color: #4c83ff;">unless</span> (<span style="color: #4c83ff;">and</span> pyim-buffer-list
+               pyim-dict-cache-create-p
                (pyim-check-buffers)
                (not restart))
-    (pyim-cchar2pinyin-create-cache)
-    (pyim-pinyin2cchar-create-cache)
+    (pyim-cchar2pinyin-cache-create)
+    (pyim-pinyin2cchar-cache-create)
     (<span style="color: #4c83ff;">setq</span> pyim-buffer-list (pyim-load-file))
-    (pyim-buffer-create-cache t)
+    (pyim-dict-cache-create t)
     (run-hooks 'pyim-load-hook)
     (message nil))
-
+  <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">pyim-buffer-list &#21487;&#33021;&#22312;&#20854;&#23427;&#22320;&#26041;&#21019;&#24314;&#65292;&#36825;&#20010;</span>
+  <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#30830;&#20445;&#35789;&#24211; cache &#27491;&#30830;&#29983;&#25104;&#12290;</span>
+  (pyim-dict-cache-create)
   (<span style="color: #4c83ff;">unless</span> (member 'pyim-save-files kill-emacs-hook)
     (add-to-list 'kill-emacs-hook 'pyim-save-files))
 
@@ -706,14 +713,14 @@ Chinese-pyim 使用 emacs 官方自带的输入法框架来启动输入法和重
 </div>
 </div>
 </div>
-<div id="outline-container-orgffe452a" class="outline-3">
-<h3 id="orgffe452a"><span class="section-number-3">2.4</span> 处理词库文件</h3>
+<div id="outline-container-org5740d6a" class="outline-3">
+<h3 id="org5740d6a"><span class="section-number-3">2.4</span> 处理词库文件</h3>
 <div class="outline-text-3" id="text-2-4">
-</div><div id="outline-container-orga36278f" class="outline-4">
-<h4 id="orga36278f"><span class="section-number-4">2.4.1</span> 自定义词库</h4>
+</div><div id="outline-container-org468cff4" class="outline-4">
+<h4 id="org468cff4"><span class="section-number-4">2.4.1</span> 自定义词库</h4>
 <div class="outline-text-4" id="text-2-4-1">
-</div><div id="outline-container-org25fc981" class="outline-5">
-<h5 id="org25fc981"><span class="section-number-5">2.4.1.1</span> 词库文件格式</h5>
+</div><div id="outline-container-org5d35637" class="outline-5">
+<h5 id="org5d35637"><span class="section-number-5">2.4.1.1</span> 词库文件格式</h5>
 <div class="outline-text-5" id="text-2-4-1-1">
 <p>
 Chinese-pyim 使用词库文件来保存各个拼音对应的中文词条，每一个词库文件都是简单的文本文件，其结构类似：
@@ -735,8 +742,8 @@ ni-hao  你好 妮好 你豪
 </div>
 </div>
 
-<div id="outline-container-org7e02989" class="outline-5">
-<h5 id="org7e02989"><span class="section-number-5">2.4.1.2</span> 个人词频文件</h5>
+<div id="outline-container-orgb5d037a" class="outline-5">
+<h5 id="orgb5d037a"><span class="section-number-5">2.4.1.2</span> 个人词频文件</h5>
 <div class="outline-text-5" id="text-2-4-1-2">
 <p>
 虽然 Chinese-pyim 只使用一种词库文件格式，但定义了多种词库类型，用于不同的目的：
@@ -775,8 +782,8 @@ BUG：当用户错误的将这个变量设定为其他重要文件时，也存�
 </div>
 </div>
 
-<div id="outline-container-orgb347210" class="outline-5">
-<h5 id="orgb347210"><span class="section-number-5">2.4.1.3</span> 普通词库文件 和 Guessdict词库</h5>
+<div id="outline-container-org406f6bf" class="outline-5">
+<h5 id="org406f6bf"><span class="section-number-5">2.4.1.3</span> 普通词库文件 和 Guessdict词库</h5>
 <div class="outline-text-5" id="text-2-4-1-3">
 <p>
 普通词库文件，也可以叫做共享词库文件，与个人词频文件相比，普通词库文件有如下特点：
@@ -792,7 +799,7 @@ Guessdict 词库用于词语联想，它与普通词库文件有相同的结构�
 </p>
 
 <p>
-我们使用变量 `pyim-dicts' 来设定普通词库文件和 guessdict 词库的信息：
+我们使用变量 `pyim-dicts' 和 `pyim-extra-dicts' 来设定普通词库文件和 guessdict 词库的信息：
 </p>
 <ol class="org-ol">
 <li>`:name' 用户给词库设定的名称，暂时没有用处，未来可能用于构建词库包。</li>
@@ -805,17 +812,17 @@ emacs 似乎不能自动识别中文编码，所以要求用户明确告知词�
 </div>
 </div>
 
-<div id="outline-container-org0f2560e" class="outline-4">
-<h4 id="load-dicts"><a id="org0f2560e"></a><span class="section-number-4">2.4.2</span> 加载词库</h4>
+<div id="outline-container-orgb406209" class="outline-4">
+<h4 id="load-dicts"><a id="orgb406209"></a><span class="section-number-4">2.4.2</span> 加载词库</h4>
 <div class="outline-text-4" id="text-load-dicts">
 <p>
 Chinese-pyim 激活时，首先会使用 `pyim-load-file' 加载个人词频文件和普通词库文件，如果个人词频文件不存在时，Chinese-pyim 会使用函数：
 `pyim-create-template-dict' 自动创建这个文件。如果用户没有设定
-`pyim-dicts'， `pyim-load-file' 会弹出警告信息，告知用户安装词库的命令。
+`pyim-dicts' 或 `pyim-extra-dicts'， `pyim-load-file' 会弹出警告信息，告知用户安装词库的命令。
 </p>
 
 <p>
-`pyim-load-file' 加载词库简单来说就是：创建一个buffer，然后将词库文件的内容插入新创建的这个buffer，同时得到buffer和file的对应表。具体过程为：
+`pyim-load-file' 加载词库简单来说就是：创建一个 buffer ，然后将词库文件的内容插入新创建的这个 buffer ，同时得到 buffer 和 file 的对应表。具体过程为：
 </p>
 <ol class="org-ol">
 <li><p>
@@ -835,10 +842,10 @@ Chinese-pyim 默认创建的 buffer 名称类似：
 在运行的过程中，`pyim-load-file' 会创建一个词库文件名与 buffer 的对应表，其结构类似：
 </p>
 <pre class="example">
-((("buffer" . #&lt;buffer  *Chinese-pyim*&gt;) ("file" . "/path/to/pyim-personal.txt"))
- (("buffer" . #&lt;buffer  *Chinese-pyim*-431862&gt;) ("file" . "/path/to/pyim-bigdict.txt"))
- (("buffer" . #&lt;buffer  *Chinese-pyim*-208698&gt;) ("file" . "/path/to/chinese-pyim-prettydict-2.txt"))
- (("buffer" . #&lt;buffer  *Chinese-pyim*-810662&gt;) ("file" . "/path/to/chinese-pyim-prettydict-1.txt")))
+((("buffer" . " *Chinese-pyim*") ("file" . "/path/to/pyim-personal.txt"))
+ (("buffer" . " *Chinese-pyim*-431862") ("file" . "/path/to/pyim-bigdict.txt"))
+ (("buffer" . " *Chinese-pyim*-208698") ("file" . "/path/to/chinese-pyim-prettydict-2.txt"))
+ (("buffer" . " *Chinese-pyim*-810662") ("file" . "/path/to/chinese-pyim-prettydict-1.txt")))
 </pre></li>
 <li>函数执行结束后，返回值为上述对应表。</li>
 </ol>
@@ -871,14 +878,16 @@ Chinese-pyim 默认创建的 buffer 名称类似：
 
 <span style="color: #8B8989; font-style: italic;">;;;  </span><span style="color: #8B8989; font-style: italic;">read file functions</span>
 (<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-load-file</span> ()
-  <span style="color: #FBDE2D;">"&#20026;&#27599;&#19968;&#20010;&#35789;&#24211;&#25991;&#20214;&#21019;&#24314;&#19968;&#20010;buffer(&#36825;&#20123;buffer&#29992;&#25143;&#19981;&#21487;&#35265;)&#65292;&#28982;&#21518;&#23558;&#21508;&#20010;&#35789;&#24211;&#25991;&#20214;&#30340;&#20869;&#23481;&#25554;&#20837;</span>
-<span style="color: #FBDE2D;">&#19982;&#20043;&#23545;&#24212;&#30340;buffer&#12290;&#26368;&#21518;&#36820;&#22238;&#19968;&#20010;&#21253;&#21547;&#25152;&#26377;buffer&#23545;&#35937;&#20197;&#21450;&#35789;&#24211;&#25991;&#20214;&#21517;&#30340;alist&#12290;</span>
+  <span style="color: #FBDE2D;">"&#20026;&#27599;&#19968;&#20010;&#35789;&#24211;&#25991;&#20214;&#21019;&#24314;&#19968;&#20010;buffer(&#36825;&#20123;buffer&#29992;&#25143;&#19981;&#21487;&#35265;)&#65292;&#28982;&#21518;&#23558;&#21508;&#20010;&#35789;&#24211;</span>
+<span style="color: #FBDE2D;">&#25991;&#20214;&#30340;&#20869;&#23481;&#25554;&#20837;&#19982;&#20043;&#23545;&#24212;&#30340;buffer&#12290;&#26368;&#21518;&#36820;&#22238;&#19968;&#20010;&#21253;&#21547;&#25152;&#26377;buffer&#23545;&#35937;&#20197;&#21450;&#35789;&#24211;</span>
+<span style="color: #FBDE2D;">&#25991;&#20214;&#21517;&#30340;alist&#12290;</span>
 
-<span style="color: #FBDE2D;">`</span><span style="color: #96CBFE;">pyim-personal-file</span><span style="color: #FBDE2D;">' &#25991;&#20214;&#26368;&#20808;&#23548;&#20837;&#12290;&#28982;&#21518;&#25353;&#29031;&#20808;&#21518;&#39034;&#24207;&#23548;&#20837; `</span><span style="color: #96CBFE;">pyim-dicts</span><span style="color: #FBDE2D;">' &#20013;&#23450;&#20041;&#30340;&#35789;&#24211;</span>
-<span style="color: #FBDE2D;">&#25490;&#22312;&#26368;&#21069;&#38754;&#30340;&#35789;&#24211;&#39318;&#20808;&#34987;&#21152;&#36733;&#65292;&#30456;&#21516;&#30340;&#35789;&#24211;&#25991;&#20214;&#21482;&#21152;&#36733;&#19968;&#27425;&#12290;"</span>
+<span style="color: #FBDE2D;">`</span><span style="color: #96CBFE;">pyim-personal-file</span><span style="color: #FBDE2D;">' &#25991;&#20214;&#26368;&#20808;&#23548;&#20837;&#12290;&#28982;&#21518;&#25353;&#29031;&#20808;&#21518;&#39034;&#24207;&#23548;&#20837; `</span><span style="color: #96CBFE;">pyim-dicts</span><span style="color: #FBDE2D;">'</span>
+<span style="color: #FBDE2D;">&#21644; `</span><span style="color: #96CBFE;">pyim-extra-dicts</span><span style="color: #FBDE2D;">' &#20013;&#23450;&#20041;&#30340;&#35789;&#24211;&#65292;&#25490;&#22312;&#26368;&#21069;&#38754;&#30340;&#35789;&#24211;&#39318;&#20808;&#34987;&#21152;&#36733;&#65292;&#30456;&#21516;&#30340;</span>
+<span style="color: #FBDE2D;">&#35789;&#24211;&#25991;&#20214;&#21482;&#21152;&#36733;&#19968;&#27425;&#12290;"</span>
   (<span style="color: #4c83ff;">let</span> ((personal-file (expand-file-name pyim-personal-file))
         (property-file (expand-file-name pyim-property-file))
-        (dicts-list pyim-dicts)
+        (dicts-list `(,@pyim-dicts ,@pyim-extra-dicts))
         (bufname pyim-buffer-name)
         buflist buf file coding disable dict-type)
     (<span style="color: #4c83ff;">save-excursion</span>
@@ -916,67 +925,104 @@ Chinese-pyim 默认创建的 buffer 名称类似：
            buflist))
 
 (<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-read-file</span> (file name <span style="color: #afd8af;">&amp;optional</span> coding dict-type)
-  (<span style="color: #4c83ff;">with-current-buffer</span> (generate-new-buffer name)
-    (<span style="color: #4c83ff;">if</span> coding
-        (<span style="color: #4c83ff;">let</span> ((coding-system-for-read coding))
-          (insert-file-contents file))
-      (insert-file-contents file))
-    `((<span style="color: #61CE3C;">"buffer"</span> . ,(current-buffer))
-      (<span style="color: #61CE3C;">"file"</span> . ,file)
-      (<span style="color: #61CE3C;">"coding"</span> . ,coding)
-      (<span style="color: #61CE3C;">"dict-type"</span> . ,dict-type))))
+  (<span style="color: #4c83ff;">if</span> (<span style="color: #4c83ff;">and</span> (equal (file-name-extension file) <span style="color: #61CE3C;">"gz"</span>)
+           (not (executable-find <span style="color: #61CE3C;">"gzip"</span>)))
+      (message <span style="color: #61CE3C;">"Can't find gzip command to decompress dict file: %s.</span>
+<span style="color: #61CE3C;">you need to install gzip (http://www.gzip.org/) and make sure system PATH set properly."</span> file)
+    (<span style="color: #4c83ff;">with-current-buffer</span> (generate-new-buffer name)
+      (<span style="color: #4c83ff;">if</span> coding
+          (<span style="color: #4c83ff;">let</span> ((coding-system-for-read coding))
+            (insert-file-contents file))
+        (insert-file-contents file))
+      `((<span style="color: #61CE3C;">"buffer"</span> . ,(buffer-name))
+        (<span style="color: #61CE3C;">"file"</span> . ,file)
+        (<span style="color: #61CE3C;">"coding"</span> . ,coding)
+        (<span style="color: #61CE3C;">"dict-type"</span> . ,dict-type)))))
 
-(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-buffer-create-cache</span> (<span style="color: #afd8af;">&amp;optional</span> force)
+(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-dict-cache-create</span> (<span style="color: #afd8af;">&amp;optional</span> force)
   (<span style="color: #4c83ff;">interactive</span>)
-  (<span style="color: #4c83ff;">when</span> (<span style="color: #4c83ff;">or</span> force (not pyim-buffer-create-cache-p))
-    (<span style="color: #4c83ff;">setq</span> pyim-buffer-create-cache-p t)
-    (<span style="color: #4c83ff;">dolist</span> (list pyim-buffer-list)
-      (<span style="color: #4c83ff;">let*</span> ((buffer (cdr (assoc <span style="color: #61CE3C;">"buffer"</span> list)))
-             (file (cdr (assoc <span style="color: #61CE3C;">"file"</span> list)))
-             (coding (cdr (assoc <span style="color: #61CE3C;">"coding"</span> list)))
-             (dict-type (cdr (assoc <span style="color: #61CE3C;">"dict-type"</span> list)))
-             (return-plist (<span style="color: #4c83ff;">if</span> (eq dict-type 'property-file) t nil))
-             (cache-file
-              (concat (file-name-as-directory pyim-cache-directory)
-                      <span style="color: #61CE3C;">"v2/"</span>
-                      (file-name-base file)
-                      <span style="color: #61CE3C;">"-"</span>
-                      (md5 file)
-                      <span style="color: #61CE3C;">".el"</span>)))
+  (<span style="color: #4c83ff;">when</span> (<span style="color: #4c83ff;">or</span> force (not pyim-dict-cache-create-p))
+    (<span style="color: #4c83ff;">setq</span> pyim-dict-cache-create-p t)
+    (<span style="color: #4c83ff;">let</span> ((cache-directory pyim-cache-directory)
+          (sleep-time 1))
+      (<span style="color: #4c83ff;">dolist</span> (item pyim-buffer-list)
         (async-start
          `(<span style="color: #4c83ff;">lambda</span> ()
-            (<span style="color: #4c83ff;">when</span> (<span style="color: #4c83ff;">or</span> (not (file-exists-p ,cache-file))
-                      (file-newer-than-file-p ,file ,cache-file)
-                      (memq (<span style="color: #4c83ff;">quote</span> ,dict-type) '(personal-file property-file)))
-              ,(async-inject-variables <span style="color: #61CE3C;">"^load-path$"</span>)
-              (<span style="color: #4c83ff;">require</span> '<span style="color: #96CBFE;">chinese-pyim-core</span>)
-              (<span style="color: #4c83ff;">if</span> (<span style="color: #4c83ff;">quote</span> ,coding)
-                  (<span style="color: #4c83ff;">let</span> ((coding-system-for-read (<span style="color: #4c83ff;">quote</span> ,coding)))
-                    (insert-file-contents ,file))
-                (insert-file-contents ,file))
-              (<span style="color: #4c83ff;">let</span> ((hastable (make-hash-table <span style="color: #4c83ff;">:size</span> 1000000 <span style="color: #4c83ff;">:test</span> #'equal)))
-                (goto-char (point-min))
-                (forward-line 1)
-                (<span style="color: #4c83ff;">while</span> (not (eobp))
-                  (<span style="color: #4c83ff;">let</span> ((code (pyim-code-at-point t))
-                        (content (pyim-line-content nil ,return-plist)))
-                    (<span style="color: #4c83ff;">when</span> (<span style="color: #4c83ff;">and</span> code content)
-                      (puthash code content hastable)))
-                  (forward-line 1))
-                (<span style="color: #4c83ff;">with-temp-buffer</span>
-                  (insert <span style="color: #61CE3C;">";; Auto generated by `</span><span style="color: #96CBFE;">pyim-buffer-create-cache</span><span style="color: #61CE3C;">', don't edit it by hand!\n\n"</span>)
-                  (insert <span style="color: #61CE3C;">"(setq pyim-buffer-cache\n"</span>)
-                  (insert (prin1-to-string hastable))
-                  (insert <span style="color: #61CE3C;">")"</span>)
-                  (make-directory (file-name-directory ,cache-file) t)
-                  (write-file ,cache-file)))))
+            (sleep-for ,sleep-time)
+            ,(async-inject-variables <span style="color: #61CE3C;">"^load-path$"</span>)
+            (<span style="color: #4c83ff;">require</span> '<span style="color: #96CBFE;">chinese-pyim-core</span>)
+            (pyim-generate-dict-cache-file
+             (<span style="color: #4c83ff;">quote</span> ,item) ,cache-directory))
          `(<span style="color: #4c83ff;">lambda</span> (result)
-            (<span style="color: #4c83ff;">with-current-buffer</span> ,buffer
-              (<span style="color: #4c83ff;">when</span> (file-exists-p ,cache-file)
-                <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">cache-file is a elisp file, which include</span>
-                <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">a expression: (setq pyim-buffer-cache XXX)</span>
-                (load ,cache-file t t)
-                (message <span style="color: #61CE3C;">"&#21152;&#36733; pyim &#35789;&#24211;&#32531;&#23384;&#25991;&#20214;&#65306;%S&#65281;"</span> ,cache-file)))))))))
+            (pyim-load-dict-cache-file
+             (<span style="color: #4c83ff;">quote</span> ,item) ,cache-directory t)))
+        (<span style="color: #4c83ff;">setq</span> sleep-time (+ sleep-time 1))))))
+
+(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-return-dict-cache-filename</span> (dict-file cache-directory)
+  <span style="color: #FBDE2D;">"&#36820;&#22238;&#35789;&#24211;&#25991;&#20214; `</span><span style="color: #96CBFE;">dict-file</span><span style="color: #FBDE2D;">' &#23545;&#24212;&#30340; cache &#25991;&#20214;&#12290;"</span>
+  (concat (file-name-as-directory cache-directory)
+          <span style="color: #61CE3C;">"v5/"</span>
+          <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">Deal with .pyim and pyim.gz</span>
+          (file-name-base (file-name-base dict-file))
+          <span style="color: #61CE3C;">"/"</span>
+          (md5 dict-file)
+          <span style="color: #61CE3C;">".el"</span>))
+
+(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-load-dict-cache-file</span> (item cache-directory <span style="color: #afd8af;">&amp;optional</span> erase-buffer)
+  <span style="color: #FBDE2D;">"&#21152;&#36733; `</span><span style="color: #96CBFE;">item</span><span style="color: #FBDE2D;">' &#23545;&#24212;&#30340; cache file.</span>
+<span style="color: #FBDE2D;">`</span><span style="color: #96CBFE;">item</span><span style="color: #FBDE2D;">' &#26159; `</span><span style="color: #96CBFE;">pyim-buffer-list</span><span style="color: #FBDE2D;">' &#30340;&#20219;&#24847;&#19968;&#20010;&#23376;&#21015;&#34920;."</span>
+  (<span style="color: #4c83ff;">let*</span> ((buffer (cdr (assoc <span style="color: #61CE3C;">"buffer"</span> item)))
+         (file (cdr (assoc <span style="color: #61CE3C;">"file"</span> item)))
+         (cache-file (pyim-return-dict-cache-filename file cache-directory)))
+    (<span style="color: #4c83ff;">with-current-buffer</span> buffer
+      (<span style="color: #4c83ff;">when</span> (file-exists-p cache-file)
+        (message <span style="color: #61CE3C;">"&#35789;&#24211; %S &#32531;&#23384;&#21152;&#36733;&#20013; ..."</span> (file-name-nondirectory file))
+        (<span style="color: #4c83ff;">setq</span> pyim-dict-cache
+              (<span style="color: #4c83ff;">with-temp-buffer</span>
+                (insert-file-contents cache-file)
+                (eval (read (current-buffer)))))
+        (<span style="color: #4c83ff;">when</span> erase-buffer
+          <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#24403;&#35789;&#24211;&#32531;&#23384;&#21019;&#24314;&#21518;&#65292;&#35789;&#24211; buffer &#20063;&#23601;&#27809;&#26377;&#22810;&#22823;&#30340;&#29992;&#22788;&#20102;&#65292;</span>
+          <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#28165;&#29702;&#21518;&#21487;&#20197;&#38477;&#20302;&#20869;&#23384;&#30340;&#28040;&#32791;&#12290;</span>
+          (erase-buffer)
+          (goto-char (point-min))
+          (insert (concat <span style="color: #61CE3C;">";; `</span><span style="color: #96CBFE;">pyim-dict-cache</span><span style="color: #61CE3C;">' has been created by `</span><span style="color: #96CBFE;">pyim-load-dict-cache-file</span><span style="color: #61CE3C;">', "</span>
+                          <span style="color: #61CE3C;">"the buffer content is useless, clean it."</span>)))
+        (message <span style="color: #61CE3C;">"&#35789;&#24211; %S &#32531;&#23384;&#21152;&#36733;&#23436;&#25104;!"</span> (file-name-nondirectory file))))))
+
+(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-generate-dict-cache-file</span> (item cache-directory)
+  <span style="color: #FBDE2D;">"&#26681;&#25454; `</span><span style="color: #96CBFE;">item</span><span style="color: #FBDE2D;">' &#21019;&#24314;&#23545;&#24212;&#30340; cache file.</span>
+<span style="color: #FBDE2D;">`</span><span style="color: #96CBFE;">item</span><span style="color: #FBDE2D;">' &#26159; `</span><span style="color: #96CBFE;">pyim-buffer-list</span><span style="color: #FBDE2D;">' &#30340;&#20219;&#24847;&#19968;&#20010;&#23376;&#21015;&#34920;&#12290;"</span>
+  (<span style="color: #4c83ff;">let*</span> ((file (cdr (assoc <span style="color: #61CE3C;">"file"</span> item)))
+         (coding (cdr (assoc <span style="color: #61CE3C;">"coding"</span> item)))
+         (dict-type (cdr (assoc <span style="color: #61CE3C;">"dict-type"</span> item)))
+         (cache-file (pyim-return-dict-cache-filename file cache-directory))
+         (return-plist (<span style="color: #4c83ff;">if</span> (eq dict-type 'property-file) t nil))
+         (hastable (make-hash-table <span style="color: #4c83ff;">:size</span> 1000000 <span style="color: #4c83ff;">:test</span> #'equal)))
+    (<span style="color: #4c83ff;">when</span> (<span style="color: #4c83ff;">or</span> (not (file-exists-p cache-file))
+              (file-newer-than-file-p file cache-file))
+      (<span style="color: #4c83ff;">with-temp-buffer</span>
+        (<span style="color: #4c83ff;">if</span> coding
+            (<span style="color: #4c83ff;">let</span> ((coding-system-for-read coding))
+              (insert-file-contents file))
+          (insert-file-contents file))
+        (goto-char (point-min))
+        (forward-line 1)
+        (<span style="color: #4c83ff;">while</span> (not (eobp))
+          (<span style="color: #4c83ff;">let</span> ((code (pyim-code-at-point t))
+                (content (pyim-line-content nil return-plist)))
+            (<span style="color: #4c83ff;">when</span> (<span style="color: #4c83ff;">and</span> code content)
+              (<span style="color: #4c83ff;">if</span> return-plist
+                  (puthash code content hastable)
+                (puthash
+                 code (delete-dups `(,@content ,@(gethash code hastable)))
+                 hastable))))
+          (forward-line 1)))
+      (<span style="color: #4c83ff;">with-temp-buffer</span>
+        (insert <span style="color: #61CE3C;">";; Auto generated by `</span><span style="color: #96CBFE;">pyim-generate-dict-cache-file</span><span style="color: #61CE3C;">', don't edit it by hand!\n\n"</span>)
+        (insert (prin1-to-string hastable))
+        (make-directory (file-name-directory cache-file) t)
+        (write-file cache-file)))))
 </pre>
 </div>
 
@@ -987,7 +1033,7 @@ Chinese-pyim 默认创建的 buffer 名称类似：
 <p>
 `pyim-buffer-list' 包含的第一个buffer，永远对应着个人词频文件，Chinese-pyim 使用 `pyim-save-files'
 将 `pyim-buffer-list' 第一个 buffer 的内容保存到个人词频文件，这个命令用于更新个人词频文件。
-<a id="org267a10c"></a>
+<a id="orgab0cbef"></a>
 </p>
 
 <div class="org-src-container">
@@ -998,30 +1044,41 @@ Chinese-pyim 默认创建的 buffer 名称类似：
 <span style="color: #FBDE2D;">1. `</span><span style="color: #96CBFE;">pyim-personal-file</span><span style="color: #FBDE2D;">'</span>
 <span style="color: #FBDE2D;">2. `</span><span style="color: #96CBFE;">pyim-property-file</span><span style="color: #FBDE2D;">'</span>
 
+<span style="color: #FBDE2D;">3. `</span><span style="color: #96CBFE;">pyim-personal-file</span><span style="color: #FBDE2D;">' &#30340;&#32531;&#23384;&#25991;&#20214;</span>
+<span style="color: #FBDE2D;">4. `</span><span style="color: #96CBFE;">pyim-property-file</span><span style="color: #FBDE2D;">' &#30340;&#32531;&#23384;&#25991;&#20214;</span>
+
 <span style="color: #FBDE2D;">&#36825;&#20010;&#20989;&#25968;&#40664;&#35748;&#20316;&#20026;`</span><span style="color: #96CBFE;">kill-emacs-hook</span><span style="color: #FBDE2D;">'&#20351;&#29992;&#12290;"</span>
   (<span style="color: #4c83ff;">interactive</span>)
-  (<span style="color: #4c83ff;">let</span> ((buffers-list (pyim-filter-buffer-list '(personal-file property-file))))
-    (<span style="color: #4c83ff;">dolist</span> (buffer-list buffers-list)
-      (<span style="color: #4c83ff;">let*</span> ((buffer (cdr (assoc <span style="color: #61CE3C;">"buffer"</span> buffer-list)))
-             (file (cdr (assoc <span style="color: #61CE3C;">"file"</span> buffer-list)))
-             (dict-type (cdr (assoc <span style="color: #61CE3C;">"dict-type"</span> buffer-list))))
-        (<span style="color: #4c83ff;">when</span> (buffer-live-p buffer)
-          (<span style="color: #4c83ff;">with-current-buffer</span> buffer
-            (<span style="color: #4c83ff;">save-restriction</span>
-              (<span style="color: #4c83ff;">if</span> (file-exists-p file)
-                  (<span style="color: #4c83ff;">progn</span> (erase-buffer)
-                         (goto-char (point-min))
-                         (insert <span style="color: #61CE3C;">";; -*- coding: utf-8 -*-\n"</span>)
-                         (maphash
-                          #'(lambda (key value)
-                              (insert (mapconcat
-                                       #'(lambda (x)
-                                           (format <span style="color: #61CE3C;">"%s"</span> x)) `(,key ,@value) <span style="color: #61CE3C;">" "</span>))
-                              (insert <span style="color: #61CE3C;">"\n"</span>))
-                          pyim-buffer-cache)
-                         (write-region (point-min) (point-max) file)
-                         (message <span style="color: #61CE3C;">"&#26356;&#26032; Chinese-pyim &#25991;&#20214;&#65306;%s&#12290;"</span> file))
-                (message <span style="color: #61CE3C;">"Chinese-pyim &#25991;&#20214;&#65306;%s &#19981;&#23384;&#22312;&#12290;"</span> file)))))))))
+  (<span style="color: #4c83ff;">let</span> ((items (pyim-subseq pyim-buffer-list 0 2)))
+    (<span style="color: #4c83ff;">dolist</span> (item items)
+      (pyim-generate-dict-file item)
+      (pyim-generate-dict-cache-file item pyim-cache-directory))))
+
+(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-generate-dict-file</span> (item)
+  <span style="color: #FBDE2D;">"&#26681;&#25454; `</span><span style="color: #96CBFE;">item</span><span style="color: #FBDE2D;">' &#26356;&#26032;&#23545;&#24212;&#30340; dict &#25991;&#20214;.</span>
+<span style="color: #FBDE2D;">`</span><span style="color: #96CBFE;">item</span><span style="color: #FBDE2D;">' &#26159; `</span><span style="color: #96CBFE;">pyim-buffer-list</span><span style="color: #FBDE2D;">' &#30340;&#20219;&#24847;&#19968;&#20010;&#23376;&#21015;&#34920;&#12290;"</span>
+  (<span style="color: #4c83ff;">let*</span> ((buffer (cdr (assoc <span style="color: #61CE3C;">"buffer"</span> item)))
+         (file (cdr (assoc <span style="color: #61CE3C;">"file"</span> item)))
+         (coding (cdr (assoc <span style="color: #61CE3C;">"coding"</span> item)))
+         (dict-type (cdr (assoc <span style="color: #61CE3C;">"dict-type"</span> item))))
+    (<span style="color: #4c83ff;">if</span> (get-buffer buffer)
+        (<span style="color: #4c83ff;">with-current-buffer</span> buffer
+          (<span style="color: #4c83ff;">if</span> (<span style="color: #4c83ff;">and</span> (boundp 'pyim-dict-cache)
+                   (hash-table-p pyim-dict-cache))
+              (<span style="color: #4c83ff;">save-restriction</span>
+                (erase-buffer)
+                (goto-char (point-min))
+                (insert <span style="color: #61CE3C;">";; -*- coding: utf-8 -*-\n"</span>)
+                (maphash
+                 #'(lambda (key value)
+                     (insert (mapconcat
+                              #'(lambda (x)
+                                  (format <span style="color: #61CE3C;">"%s"</span> x)) `(,key ,@value) <span style="color: #61CE3C;">" "</span>))
+                     (insert <span style="color: #61CE3C;">"\n"</span>))
+                 pyim-dict-cache)
+                (write-region (point-min) (point-max) file)
+                (message <span style="color: #61CE3C;">"&#26356;&#26032; Chinese-pyim &#25991;&#20214;&#65306;%s&#12290;"</span> file))
+            (message <span style="color: #61CE3C;">"buffer &#21464;&#37327; `</span><span style="color: #96CBFE;">pyim-dict-cache</span><span style="color: #61CE3C;">' &#26080;&#25928;&#65292;&#20010;&#20154;&#25991;&#20214;&#26356;&#26032;&#22833;&#36133;&#65281;"</span>))))))
 
 (<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-filter-buffer-list</span> (dict-types)
   <span style="color: #FBDE2D;">"&#20174; `</span><span style="color: #96CBFE;">pyim-buffer-list</span><span style="color: #FBDE2D;">' &#20013;&#25361;&#36873;&#31526;&#21512;&#30340; buffer."</span>
@@ -1045,7 +1102,7 @@ Chinese-pyim 默认创建的 buffer 名称类似：
 
 <p>
 而 `pyim-kill-buffers' 会删除 `pyim-buffer-list' 中所有的 buffer。这个函数用于重新启动输入法前的清理工作。
-<a id="orgc01a7ca"></a>
+<a id="org34152a7"></a>
 </p>
 
 <div class="org-src-container">
@@ -1057,13 +1114,13 @@ Chinese-pyim 默认创建的 buffer 名称类似：
         (bufname pyim-buffer-name)
         buffer file)
     (<span style="color: #4c83ff;">dolist</span> (buf buflist)
-      (<span style="color: #4c83ff;">setq</span> buffer (assoc <span style="color: #61CE3C;">"buffer"</span> buf))
+      (<span style="color: #4c83ff;">setq</span> buffer (cdr (assoc <span style="color: #61CE3C;">"buffer"</span> buf)))
       (<span style="color: #4c83ff;">setq</span> file (cdr (assoc <span style="color: #61CE3C;">"file"</span> buf)))
-      (<span style="color: #4c83ff;">unless</span> (buffer-live-p (cdr buffer))
+      (<span style="color: #4c83ff;">unless</span> (get-buffer buffer)
         (<span style="color: #4c83ff;">if</span> (file-exists-p file)
             (<span style="color: #4c83ff;">with-current-buffer</span> (generate-new-buffer bufname)
               (insert-file-contents file)
-              (setcdr buffer (current-buffer)))
+              (setcdr buffer (buffer-name)))
           (message <span style="color: #61CE3C;">"%s for %s is not exists!"</span> file bufname)
           (<span style="color: #4c83ff;">setq</span> buflist (remove buf buflist)))))
     t))
@@ -1074,15 +1131,15 @@ Chinese-pyim 默认创建的 buffer 名称类似：
         buffer)
     (<span style="color: #4c83ff;">dolist</span> (buf buflist)
       (<span style="color: #4c83ff;">setq</span> buffer (cdr (assoc <span style="color: #61CE3C;">"buffer"</span> buf)))
-      (<span style="color: #4c83ff;">when</span> (buffer-live-p buffer)
+      (<span style="color: #4c83ff;">when</span> (get-buffer buffer)
         (kill-buffer buffer)))))
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org64ea56e" class="outline-4">
-<h4 id="org64ea56e"><span class="section-number-4">2.4.3</span> 从词库中搜索中文词条</h4>
+<div id="outline-container-orgb896f29" class="outline-4">
+<h4 id="orgb896f29"><span class="section-number-4">2.4.3</span> 从词库中搜索中文词条</h4>
 <div class="outline-text-4" id="text-2-4-3">
 <p>
 当个人词频文件以及普通词库文件加载完成后， Chinese-pyim 就可以搜索某个拼音字符串对应的中文词条了，这个工作由函数 `pyim-get' 完成，其基本原理是：递归的搜索 `pyim-buffer-list' 中所有的 buffer，将得到的搜索结果汇总成一个列表，去除重复元素后返回。
@@ -1259,8 +1316,8 @@ BUG: 这个函数需要进一步优化，使其判断更准确。
 <div class="org-src-container">
 
 <pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-bisearch-word</span> (code start end)
-  (<span style="color: #4c83ff;">if</span> pyim-buffer-cache
-      (gethash code pyim-buffer-cache)
+  (<span style="color: #4c83ff;">if</span> pyim-dict-cache
+      (gethash code pyim-dict-cache)
     (pyim-bisearch-word-internal code start end)))
 
 (<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-bisearch-word-internal</span> (code start end)
@@ -1328,15 +1385,15 @@ BUG: 这个函数需要进一步优化，使其判断更准确。
 </div>
 </div>
 
-<div id="outline-container-org18d7ced" class="outline-4">
-<h4 id="org18d7ced"><span class="section-number-4">2.4.4</span> 保存词条，删除词条以及调整词条位置</h4>
+<div id="outline-container-orged871eb" class="outline-4">
+<h4 id="orged871eb"><span class="section-number-4">2.4.4</span> 保存词条，删除词条以及调整词条位置</h4>
 <div class="outline-text-4" id="text-2-4-4">
 <p>
 Chinese-pyim 不会更改普通词库文件的内容，只会将运行过程中的词频信息保存到个人词频文件，这个过程分为两步：
 </p>
 <ol class="org-ol">
-<li>调整 buffer 变量 `pyim-buffer-cache'，这个过程使用宏 `pyim-intern-file' 完成。</li>
-<li>格式化 `pyim-buffer-cache'，并将结果保存到对应文件，这个使用函数 `pyim-save-files' 完成。</li>
+<li>调整 buffer 变量 `pyim-dict-cache'，这个过程使用宏 `pyim-intern-file' 完成。</li>
+<li>格式化 `pyim-dict-cache'，并将结果保存到对应文件，这个使用函数 `pyim-save-files' 完成。</li>
 </ol>
 
 <p>
@@ -1349,8 +1406,8 @@ Chinese-pyim 不会更改普通词库文件的内容，只会将运行过程中�
 </ol>
 </div>
 
-<div id="outline-container-org31d33d5" class="outline-5">
-<h5 id="org31d33d5"><span class="section-number-5">2.4.4.1</span> 造词功能和词频调整功能</h5>
+<div id="outline-container-orgc559bde" class="outline-5">
+<h5 id="orgc559bde"><span class="section-number-5">2.4.4.1</span> 造词功能和词频调整功能</h5>
 <div class="outline-text-5" id="text-2-4-4-1">
 <ol class="org-ol">
 <li><p>
@@ -1380,7 +1437,7 @@ chinese-pyim 个人文件<b>不纯洁</b>  :-)，但不影响使用。Emacs-eim
 
 (<span style="color: #4c83ff;">defmacro</span> <span style="color: #ff1493;">pyim-intern-file</span> (dict-type code <span style="color: #afd8af;">&amp;rest</span> body)
   <span style="color: #FBDE2D;">"&#29992;&#20110;&#26356;&#26032; personal-file &#25110;&#32773; property-file &#30340;&#23439;&#65292;</span>
-<span style="color: #FBDE2D;">&#36816;&#34892; `</span><span style="color: #96CBFE;">body</span><span style="color: #FBDE2D;">' &#24182;&#29992;&#20854;&#36820;&#22238;&#20540;&#35206;&#30422; buffer &#21464;&#37327; `</span><span style="color: #96CBFE;">pyim-buffer-cache</span><span style="color: #FBDE2D;">'</span>
+<span style="color: #FBDE2D;">&#36816;&#34892; `</span><span style="color: #96CBFE;">body</span><span style="color: #FBDE2D;">' &#24182;&#29992;&#20854;&#36820;&#22238;&#20540;&#35206;&#30422; buffer &#21464;&#37327; `</span><span style="color: #96CBFE;">pyim-dict-cache</span><span style="color: #FBDE2D;">'</span>
 <span style="color: #FBDE2D;">&#20013; `</span><span style="color: #96CBFE;">code</span><span style="color: #FBDE2D;">' &#21407;&#26469;&#30340;&#21462;&#20540;&#65292;&#34920;&#36798;&#24335; `</span><span style="color: #96CBFE;">bode</span><span style="color: #FBDE2D;">' &#20013;&#65292;&#21487;&#20197;&#20351;&#29992; `</span><span style="color: #96CBFE;">orig-value</span><span style="color: #FBDE2D;">'</span>
 <span style="color: #FBDE2D;">&#24341;&#29992; `</span><span style="color: #96CBFE;">code</span><span style="color: #FBDE2D;">' &#21407;&#26469;&#30340;&#21462;&#20540;&#12290;"</span>
   (<span style="color: #4c83ff;">declare</span> (indent 0) (debug t))
@@ -1388,8 +1445,9 @@ chinese-pyim 个人文件<b>不纯洁</b>  :-)，但不影响使用。Emacs-eim
     `(<span style="color: #4c83ff;">let</span> ((,buffer (pyim-get-buffer ,dict-type)))
        (<span style="color: #4c83ff;">with-current-buffer</span> ,buffer
          (<span style="color: #4c83ff;">unwind-protect</span>
-             (<span style="color: #4c83ff;">let</span> ((orig-value (gethash ,code pyim-buffer-cache)))
-               (puthash ,code (<span style="color: #4c83ff;">or</span> (<span style="color: #4c83ff;">progn</span> ,@body) orig-value) pyim-buffer-cache)))))))
+             (<span style="color: #4c83ff;">when</span> pyim-dict-cache
+               (<span style="color: #4c83ff;">let</span> ((orig-value (gethash ,code pyim-dict-cache)))
+                 (puthash ,code (<span style="color: #4c83ff;">or</span> (<span style="color: #4c83ff;">progn</span> ,@body) orig-value) pyim-dict-cache))))))))
 
 (<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-create-or-rearrange-word</span> (word <span style="color: #afd8af;">&amp;optional</span> rearrange-word)
   <span style="color: #FBDE2D;">"&#23558;&#20013;&#25991;&#35789;&#26465; `</span><span style="color: #96CBFE;">word</span><span style="color: #FBDE2D;">' &#28155;&#21152;&#25340;&#38899;&#21518;&#65292;&#20445;&#23384;&#21040; personal-file &#23545;&#24212;&#30340;</span>
@@ -1472,8 +1530,8 @@ chinese-pyim 个人文件<b>不纯洁</b>  :-)，但不影响使用。Emacs-eim
 </div>
 </div>
 
-<div id="outline-container-org6116322" class="outline-5">
-<h5 id="org6116322"><span class="section-number-5">2.4.4.2</span> 删词功能</h5>
+<div id="outline-container-org36ebf51" class="outline-5">
+<h5 id="org36ebf51"><span class="section-number-5">2.4.4.2</span> 删词功能</h5>
 <div class="outline-text-5" id="text-2-4-4-2">
 <p>
 `pyim-delete-word-from-personal-buffer' 从个人词频 buffer 中删除用户高亮选择的词条。
@@ -1531,11 +1589,11 @@ chinese-pyim 个人文件<b>不纯洁</b>  :-)，但不影响使用。Emacs-eim
 </div>
 </div>
 
-<div id="outline-container-org5173b2e" class="outline-3">
-<h3 id="org5173b2e"><span class="section-number-3">2.5</span> 生成 `pyim-current-key' 并插入 `pyim-current-str'</h3>
+<div id="outline-container-orge49d532" class="outline-3">
+<h3 id="orge49d532"><span class="section-number-3">2.5</span> 生成 `pyim-current-key' 并插入 `pyim-current-str'</h3>
 <div class="outline-text-3" id="text-2-5">
-</div><div id="outline-container-org5d008d3" class="outline-4">
-<h4 id="org5d008d3"><span class="section-number-4">2.5.1</span> 生成拼音字符串 `pyim-current-key'</h4>
+</div><div id="outline-container-org0517d67" class="outline-4">
+<h4 id="org0517d67"><span class="section-number-4">2.5.1</span> 生成拼音字符串 `pyim-current-key'</h4>
 <div class="outline-text-4" id="text-2-5-1">
 <p>
 Chinese-pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
@@ -1581,8 +1639,8 @@ Chinese-pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
 </div>
 </div>
 
-<div id="outline-container-org6a38745" class="outline-4">
-<h4 id="org6a38745"><span class="section-number-4">2.5.2</span> 在待输入 buffer 中插入 `pyim-current-str'</h4>
+<div id="outline-container-org723b9d1" class="outline-4">
+<h4 id="org723b9d1"><span class="section-number-4">2.5.2</span> 在待输入 buffer 中插入 `pyim-current-str'</h4>
 <div class="outline-text-4" id="text-2-5-2">
 <p>
 `pyim-self-insert-command' 会调用 `pyim-handle-string' 来处理
@@ -1745,11 +1803,11 @@ event list。
 </div>
 </div>
 
-<div id="outline-container-org1631f1d" class="outline-3">
-<h3 id="org1631f1d"><span class="section-number-3">2.6</span> 处理拼音字符串 `pyim-current-key'</h3>
+<div id="outline-container-orgbd71351" class="outline-3">
+<h3 id="orgbd71351"><span class="section-number-3">2.6</span> 处理拼音字符串 `pyim-current-key'</h3>
 <div class="outline-text-3" id="text-2-6">
-</div><div id="outline-container-orgc1869a1" class="outline-4">
-<h4 id="orgc1869a1"><span class="section-number-4">2.6.1</span> 拼音字符串 -&gt; 待选词列表</h4>
+</div><div id="outline-container-orgf2e92ce" class="outline-4">
+<h4 id="orgf2e92ce"><span class="section-number-4">2.6.1</span> 拼音字符串 -&gt; 待选词列表</h4>
 <div class="outline-text-4" id="text-2-6-1">
 <p>
 从一个拼音字符串获取其待选词列表，大致可以分成3个步骤：
@@ -1774,8 +1832,8 @@ woaimeinv -&gt; (("w" . "o") ("" . "ai") ("m" . "ei") ("n" . "v"))
 <li>递归的查询上述多个词语拼音，将得到的结果合并为待选词列表。</li>
 </ol>
 </div>
-<div id="outline-container-orgb0d684a" class="outline-5">
-<h5 id="orgb0d684a"><span class="section-number-5">2.6.1.1</span> 分解拼音字符串</h5>
+<div id="outline-container-org24b2da3" class="outline-5">
+<h5 id="org24b2da3"><span class="section-number-5">2.6.1.1</span> 分解拼音字符串</h5>
 <div class="outline-text-5" id="text-2-6-1-1">
 <p>
 拼音字符串操作主要做两方面的工作：
@@ -2164,8 +2222,8 @@ Chinese-pyim 使用函数 `pyim-pylist-to-string' 将一个拼音列表合并为
 </div>
 </div>
 
-<div id="outline-container-org9801461" class="outline-5">
-<h5 id="org9801461"><span class="section-number-5">2.6.1.2</span> 获得词语拼音并进一步查询得到备选词列表</h5>
+<div id="outline-container-orgca55708" class="outline-5">
+<h5 id="orgca55708"><span class="section-number-5">2.6.1.2</span> 获得词语拼音并进一步查询得到备选词列表</h5>
 <div class="outline-text-5" id="text-2-6-1-2">
 <div class="org-src-container">
 
@@ -2571,8 +2629,8 @@ Chinese-pyim 使用函数 `pyim-pylist-to-string' 将一个拼音列表合并为
 </div>
 </div>
 
-<div id="outline-container-org9e5bd02" class="outline-4">
-<h4 id="org9e5bd02"><span class="section-number-4">2.6.2</span> 核心函数：拼音字符串处理函数</h4>
+<div id="outline-container-orgc5ec32f" class="outline-4">
+<h4 id="orgc5ec32f"><span class="section-number-4">2.6.2</span> 核心函数：拼音字符串处理函数</h4>
 <div class="outline-text-4" id="text-2-6-2">
 <p>
 `pyim-handle-string' 这个函数是一个重要的<b>核心函数</b>，其大致工作流程为：
@@ -2617,8 +2675,8 @@ Chinese-pyim 使用函数 `pyim-pylist-to-string' 将一个拼音列表合并为
 </div>
 </div>
 
-<div id="outline-container-org4f78413" class="outline-3">
-<h3 id="org4f78413"><span class="section-number-3">2.7</span> 处理当前需要插入字符串 `pyim-current-str'</h3>
+<div id="outline-container-orgfdf622e" class="outline-3">
+<h3 id="orgfdf622e"><span class="section-number-3">2.7</span> 处理当前需要插入字符串 `pyim-current-str'</h3>
 <div class="outline-text-3" id="text-2-7">
 <p>
 Chinese-pyim 使用变量 `pyim-current-str' 保存<b>当前需要在 buffer 中插入的字符串</b>。
@@ -2713,11 +2771,11 @@ Chinese-pyim 会使用 emacs overlay 机制在<b>待输入buffer</b>光标处高
 </div>
 </div>
 
-<div id="outline-container-org7418000" class="outline-3">
-<h3 id="org7418000"><span class="section-number-3">2.8</span> 显示和选择备选词条</h3>
+<div id="outline-container-orgc697be1" class="outline-3">
+<h3 id="orgc697be1"><span class="section-number-3">2.8</span> 显示和选择备选词条</h3>
 <div class="outline-text-3" id="text-2-8">
-</div><div id="outline-container-orgd9a5a6e" class="outline-4">
-<h4 id="orgd9a5a6e"><span class="section-number-4">2.8.1</span> 构建词条菜单字符串</h4>
+</div><div id="outline-container-org30684b1" class="outline-4">
+<h4 id="org30684b1"><span class="section-number-4">2.8.1</span> 构建词条菜单字符串</h4>
 <div class="outline-text-4" id="text-2-8-1">
 <p>
 Chinese-pyim 内建两种方式显示选词框：
@@ -3039,8 +3097,8 @@ sublist:
 </div>
 </div>
 
-<div id="outline-container-orgad3017e" class="outline-4">
-<h4 id="orgad3017e"><span class="section-number-4">2.8.2</span> 显示选词框</h4>
+<div id="outline-container-org1c6a979" class="outline-4">
+<h4 id="org1c6a979"><span class="section-number-4">2.8.2</span> 显示选词框</h4>
 <div class="outline-text-4" id="text-2-8-2">
 <p>
 当`pyim-guidance-list' 构建完成后，Chinese-pyim 使用函数 `pyim-show' 重新显示选词框，`pyim-show' 会根据 `pyim-use-tooltip' 的取值来决定使用哪种方式来显示选词框（minibuffer 或者 tooltip ）。
@@ -3196,8 +3254,8 @@ sublist:
 </div>
 </div>
 
-<div id="outline-container-org99005e3" class="outline-4">
-<h4 id="org99005e3"><span class="section-number-4">2.8.3</span> 选择备选词</h4>
+<div id="outline-container-org496df94" class="outline-4">
+<h4 id="org496df94"><span class="section-number-4">2.8.3</span> 选择备选词</h4>
 <div class="outline-text-4" id="text-2-8-3">
 <div class="org-src-container">
 
@@ -3256,8 +3314,8 @@ sublist:
 </div>
 </div>
 
-<div id="outline-container-org65ea10f" class="outline-3">
-<h3 id="org65ea10f"><span class="section-number-3">2.9</span> 处理标点符号</h3>
+<div id="outline-container-org71c4125" class="outline-3">
+<h3 id="org71c4125"><span class="section-number-3">2.9</span> 处理标点符号</h3>
 <div class="outline-text-3" id="text-2-9">
 <p>
 常用的标点符号数量不多，所以 Chinese-pyim 没有使用文件而是使用一个变量
@@ -3617,8 +3675,8 @@ Chinese-pyim 在运行过程中调用函数 `pyim-translate' 进行标点符号�
 </div>
 </div>
 
-<div id="outline-container-orgdd6defb" class="outline-3">
-<h3 id="orgdd6defb"><span class="section-number-3">2.10</span> 处理特殊功能触发字符（单字符快捷键）</h3>
+<div id="outline-container-org84f157b" class="outline-3">
+<h3 id="org84f157b"><span class="section-number-3">2.10</span> 处理特殊功能触发字符（单字符快捷键）</h3>
 <div class="outline-text-3" id="text-2-10">
 <p>
 输入中文的时候，我们需要快速频繁的执行一些特定的命令，最直接的方法就是将上述命令绑定到一个容易按的快捷键上，但遗憾的是 emacs 大多数容易按的快捷键都<b>名花有主</b>了，甚至找一个 “Ctrl＋单字符”的快捷键都不太容易，特殊功能触发字符，可以帮助我们实现“单字符”快捷键，类似 org-mode 的 speed key。
@@ -3669,11 +3727,11 @@ Chinese-pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。�
 </div>
 
 
-<div id="outline-container-org1f5f1e4" class="outline-3">
-<h3 id="org1f5f1e4"><span class="section-number-3">2.11</span> 与拼音输入相关的用户命令</h3>
+<div id="outline-container-org5afaca3" class="outline-3">
+<h3 id="org5afaca3"><span class="section-number-3">2.11</span> 与拼音输入相关的用户命令</h3>
 <div class="outline-text-3" id="text-2-11">
-</div><div id="outline-container-org0388460" class="outline-4">
-<h4 id="org0388460"><span class="section-number-4">2.11.1</span> 删除拼音字符串最后一个字符</h4>
+</div><div id="outline-container-orgb78b1ca" class="outline-4">
+<h4 id="orgb78b1ca"><span class="section-number-4">2.11.1</span> 删除拼音字符串最后一个字符</h4>
 <div class="outline-text-4" id="text-2-11-1">
 <div class="org-src-container">
 
@@ -3690,8 +3748,8 @@ Chinese-pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。�
 </div>
 </div>
 
-<div id="outline-container-orga8d830a" class="outline-4">
-<h4 id="orga8d830a"><span class="section-number-4">2.11.2</span> 删除拼音字符串最后一个拼音</h4>
+<div id="outline-container-orgc1e1ba1" class="outline-4">
+<h4 id="orgc1e1ba1"><span class="section-number-4">2.11.2</span> 删除拼音字符串最后一个拼音</h4>
 <div class="outline-text-4" id="text-2-11-2">
 <div class="org-src-container">
 
@@ -3709,8 +3767,8 @@ Chinese-pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。�
 </div>
 </div>
 
-<div id="outline-container-org3069ee9" class="outline-4">
-<h4 id="org3069ee9"><span class="section-number-4">2.11.3</span> 将光标前的拼音字符串转换为中文</h4>
+<div id="outline-container-org1f4425c" class="outline-4">
+<h4 id="org1f4425c"><span class="section-number-4">2.11.3</span> 将光标前的拼音字符串转换为中文</h4>
 <div class="outline-text-4" id="text-2-11-3">
 <div class="org-src-container">
 
@@ -3737,8 +3795,8 @@ Chinese-pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。�
 </div>
 </div>
 
-<div id="outline-container-orgd144d7d" class="outline-4">
-<h4 id="orgd144d7d"><span class="section-number-4">2.11.4</span> 取消当前输入</h4>
+<div id="outline-container-org9e30949" class="outline-4">
+<h4 id="org9e30949"><span class="section-number-4">2.11.4</span> 取消当前输入</h4>
 <div class="outline-text-4" id="text-2-11-4">
 <div class="org-src-container">
 
@@ -3750,8 +3808,8 @@ Chinese-pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。�
 </div>
 </div>
 </div>
-<div id="outline-container-orge95566e" class="outline-4">
-<h4 id="orge95566e"><span class="section-number-4">2.11.5</span> 字母上屏</h4>
+<div id="outline-container-orgc1913e9" class="outline-4">
+<h4 id="orgc1913e9"><span class="section-number-4">2.11.5</span> 字母上屏</h4>
 <div class="outline-text-4" id="text-2-11-5">
 <div class="org-src-container">
 
@@ -3765,8 +3823,8 @@ Chinese-pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。�
 </div>
 </div>
 
-<div id="outline-container-org5537bd6" class="outline-4">
-<h4 id="org5537bd6"><span class="section-number-4">2.11.6</span> Chinese-pyim 取消激活</h4>
+<div id="outline-container-orgd86906d" class="outline-4">
+<h4 id="orgd86906d"><span class="section-number-4">2.11.6</span> Chinese-pyim 取消激活</h4>
 <div class="outline-text-4" id="text-2-11-6">
 <div class="org-src-container">
 
@@ -3778,8 +3836,8 @@ Chinese-pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。�
 </div>
 </div>
 
-<div id="outline-container-org099de67" class="outline-4">
-<h4 id="org099de67"><span class="section-number-4">2.11.7</span> 切换中英文输入模式</h4>
+<div id="outline-container-orgb5be6e9" class="outline-4">
+<h4 id="orgb5be6e9"><span class="section-number-4">2.11.7</span> 切换中英文输入模式</h4>
 <div class="outline-text-4" id="text-2-11-7">
 <div class="org-src-container">
 
@@ -3793,8 +3851,8 @@ Chinese-pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。�
 </div>
 </div>
 
-<div id="outline-container-org244b926" class="outline-4">
-<h4 id="org244b926"><span class="section-number-4">2.11.8</span> 为 isearch 添加拼音搜索功能</h4>
+<div id="outline-container-org87a24c7" class="outline-4">
+<h4 id="org87a24c7"><span class="section-number-4">2.11.8</span> 为 isearch 添加拼音搜索功能</h4>
 <div class="outline-text-4" id="text-2-11-8">
 <div class="org-src-container">
 
@@ -3854,8 +3912,8 @@ Chinese-pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。�
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2016-06-13</span>
-        <span title="last modification date" class="post-info">2016-06-13</span>
+        <span title="post date" class="post-info">2016-06-19</span>
+        <span title="last modification date" class="post-info">2016-06-19</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>

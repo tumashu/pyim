@@ -34,8 +34,8 @@
 <h2>&#30446;&#24405;</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org74961e9">1. 说明文档&#xa0;&#xa0;&#xa0;<span class="tag"><span class="doc">doc</span></span></a></li>
-<li><a href="#org29ba245">2. 代码&#xa0;&#xa0;&#xa0;<span class="tag"><span class="code">code</span></span></a>
+<li><a href="#org23f58c9">1. 说明文档&#xa0;&#xa0;&#xa0;<span class="tag"><span class="doc">doc</span></span></a></li>
+<li><a href="#org422097c">2. 代码&#xa0;&#xa0;&#xa0;<span class="tag"><span class="code">code</span></span></a>
 <ul>
 <li><a href="#make-char-table">2.1. 查询某个汉字的拼音</a></li>
 </ul>
@@ -43,8 +43,8 @@
 </ul>
 </div>
 </div>
-<div id="outline-container-org74961e9" class="outline-2">
-<h2 id="org74961e9"><span class="section-number-2">1</span> 说明文档&#xa0;&#xa0;&#xa0;<span class="tag"><span class="doc">doc</span></span></h2>
+<div id="outline-container-org23f58c9" class="outline-2">
+<h2 id="org23f58c9"><span class="section-number-2">1</span> 说明文档&#xa0;&#xa0;&#xa0;<span class="tag"><span class="doc">doc</span></span></h2>
 <div class="outline-text-2" id="text-1">
 <p>
 这个文件包含了与 quail/PY.el 文件内容相似的 "拼音-汉字" 对照表，这个对照表用来实现拼音查询功能，即，查询某个汉字对应的拼音代码。
@@ -59,8 +59,8 @@
 
 
 
-<div id="outline-container-org29ba245" class="outline-2">
-<h2 id="org29ba245"><span class="section-number-2">2</span> 代码&#xa0;&#xa0;&#xa0;<span class="tag"><span class="code">code</span></span></h2>
+<div id="outline-container-org422097c" class="outline-2">
+<h2 id="org422097c"><span class="section-number-2">2</span> 代码&#xa0;&#xa0;&#xa0;<span class="tag"><span class="code">code</span></span></h2>
 <div class="outline-text-2" id="text-2">
 <div class="org-src-container">
 
@@ -475,7 +475,7 @@
 (<span style="color: #4c83ff;">defvar</span> <span style="color: #ff69b4;">pyim-pinyin2cchar-cache</span> nil)
 (<span style="color: #4c83ff;">defvar</span> <span style="color: #ff69b4;">pyim-cchar2pinyin-cache</span> nil)
 
-(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-pinyin2cchar-create-cache</span> (<span style="color: #afd8af;">&amp;optional</span> force)
+(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-pinyin2cchar-cache-create</span> (<span style="color: #afd8af;">&amp;optional</span> force)
   <span style="color: #FBDE2D;">"&#26500;&#24314; pinyin &#21040; chinese char &#30340;&#32531;&#23384;&#65292;&#29992;&#20110;&#21152;&#24555;&#25628;&#32034;&#36895;&#24230;&#65292;&#36825;&#20010;&#20989;&#25968;</span>
 <span style="color: #FBDE2D;">&#23558;&#32531;&#23384;&#20445;&#23384;&#21040; `</span><span style="color: #96CBFE;">pyim-pinyin2cchar-cache</span><span style="color: #FBDE2D;">' &#21464;&#37327;&#20013;&#65292;</span>
 <span style="color: #FBDE2D;">&#22914;&#26524; force &#35774;&#32622;&#20026; t, &#24378;&#21046;&#26356;&#26032;&#32034;&#24341;&#12290;"</span>
@@ -498,7 +498,7 @@
 <span style="color: #FBDE2D;">&#8220;man&#8221; -&gt; (\"&#24537;&#33579;&#30450;&#33426;&#27667;&#33725;&#34770;&#37017;&#28461;&#30829;\" \"&#28385;&#24930;&#28459;&#26364;&#34542;&#39314;&#30610;&#34067;&#39071;&#35881;&#22657;&#24148;&#34728;&#38804;&#40151;&#32550;&#29107;&#38232;\")</span>
 
 <span style="color: #FBDE2D;">&#22914;&#26524; `</span><span style="color: #96CBFE;">sort</span><span style="color: #FBDE2D;">' &#35774;&#32622;&#20026; t, &#21017;&#23545;&#32467;&#26524;&#25353;&#29031;&#23383;&#27597;&#39034;&#24207;&#25490;&#24207;&#12290;"</span>
-  (pyim-pinyin2cchar-create-cache)
+  (pyim-pinyin2cchar-cache-create)
   (<span style="color: #4c83ff;">let*</span> ((pymap pyim-pinyin-pymap)
          (length (length pymap))
          (beg (substring pinyin 0 1))
@@ -524,8 +524,8 @@
 </div>
 </div>
 
-<div id="outline-container-org713972d" class="outline-3">
-<h3 id="make-char-table"><a id="org713972d"></a><span class="section-number-3">2.1</span> 查询某个汉字的拼音</h3>
+<div id="outline-container-orgd6543e7" class="outline-3">
+<h3 id="make-char-table"><a id="orgd6543e7"></a><span class="section-number-3">2.1</span> 查询某个汉字的拼音</h3>
 <div class="outline-text-3" id="text-make-char-table">
 <p>
 Chinese-pyim 在特定的时候需要读取一个汉字的拼音，这个工作由下面函数完成：
@@ -564,14 +564,14 @@ Chinese-pyim 在特定的时候需要读取一个汉字的拼音，这个工作�
 
 <pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-cchar2pinyin-get</span> (char-or-str)
   <span style="color: #FBDE2D;">"Get the code of the character CHAR"</span>
-  (pyim-cchar2pinyin-create-cache)
+  (pyim-cchar2pinyin-cache-create)
   (<span style="color: #4c83ff;">let</span> ((key (<span style="color: #4c83ff;">if</span> (characterp char-or-str)
                  (char-to-string char-or-str)
                char-or-str)))
     (<span style="color: #4c83ff;">when</span> (= (length key) 1)
       (gethash key pyim-cchar2pinyin-cache))))
 
-(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-cchar2pinyin-create-cache</span> (<span style="color: #afd8af;">&amp;optional</span> force)
+(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-cchar2pinyin-cache-create</span> (<span style="color: #afd8af;">&amp;optional</span> force)
   <span style="color: #FBDE2D;">"Build pinyin cchar to pinyin hashtable from `</span><span style="color: #96CBFE;">pyim-pinyin-pymap</span><span style="color: #FBDE2D;">'</span>
 <span style="color: #FBDE2D;">in package `</span><span style="color: #96CBFE;">chinese-pyim-pymap</span><span style="color: #FBDE2D;">'"</span>
   (<span style="color: #4c83ff;">when</span> (<span style="color: #4c83ff;">or</span> force (not pyim-cchar2pinyin-cache))
@@ -596,8 +596,8 @@ Chinese-pyim 在特定的时候需要读取一个汉字的拼音，这个工作�
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2016-06-13</span>
-        <span title="last modification date" class="post-info">2016-06-13</span>
+        <span title="post date" class="post-info">2016-06-19</span>
+        <span title="last modification date" class="post-info">2016-06-19</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>
