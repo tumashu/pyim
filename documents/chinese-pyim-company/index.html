@@ -34,20 +34,20 @@
 <h2>&#30446;&#24405;</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgeb791a0">1. 说明文档&#xa0;&#xa0;&#xa0;<span class="tag"><span class="doc">doc</span></span></a></li>
-<li><a href="#orgca94dc7">2. 代码&#xa0;&#xa0;&#xa0;<span class="tag"><span class="code">code</span></span></a>
+<li><a href="#orge035e92">1. 说明文档&#xa0;&#xa0;&#xa0;<span class="tag"><span class="doc">doc</span></span></a></li>
+<li><a href="#orgc87258e">2. 代码&#xa0;&#xa0;&#xa0;<span class="tag"><span class="code">code</span></span></a>
 <ul>
-<li><a href="#orgd6183de">2.1. Require + defcustom</a></li>
-<li><a href="#orgc85436f">2.2. 让 company-grab-word 正确的处理中文</a></li>
-<li><a href="#org75dab13">2.3. 让 pyim-company-dabbrev&#x2013;make-regexp 生成合适中文搜索的 regexp</a></li>
-<li><a href="#org4c87418">2.4. <span class="todo TODO">TODO</span> 让 pyim-company-dabbrev&#x2013;search 更好的处理中文</a></li>
+<li><a href="#org224b21a">2.1. Require + defcustom</a></li>
+<li><a href="#org7a0d978">2.2. 让 company-grab-word 正确的处理中文</a></li>
+<li><a href="#org41c207b">2.3. 让 pyim-company-dabbrev&#x2013;make-regexp 生成合适中文搜索的 regexp</a></li>
+<li><a href="#org994620a">2.4. <span class="todo TODO">TODO</span> 让 pyim-company-dabbrev&#x2013;search 更好的处理中文</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgeb791a0" class="outline-2">
-<h2 id="orgeb791a0"><span class="section-number-2">1</span> 说明文档&#xa0;&#xa0;&#xa0;<span class="tag"><span class="doc">doc</span></span></h2>
+<div id="outline-container-orge035e92" class="outline-2">
+<h2 id="orge035e92"><span class="section-number-2">1</span> 说明文档&#xa0;&#xa0;&#xa0;<span class="tag"><span class="doc">doc</span></span></h2>
 <div class="outline-text-2" id="text-1">
 <p>
 通过 Chinese-pyim 让 Company-dabbrev 更好的处理中文。
@@ -68,11 +68,11 @@
 
 
 
-<div id="outline-container-orgca94dc7" class="outline-2">
-<h2 id="orgca94dc7"><span class="section-number-2">2</span> 代码&#xa0;&#xa0;&#xa0;<span class="tag"><span class="code">code</span></span></h2>
+<div id="outline-container-orgc87258e" class="outline-2">
+<h2 id="orgc87258e"><span class="section-number-2">2</span> 代码&#xa0;&#xa0;&#xa0;<span class="tag"><span class="code">code</span></span></h2>
 <div class="outline-text-2" id="text-2">
-</div><div id="outline-container-orgd6183de" class="outline-3">
-<h3 id="orgd6183de"><span class="section-number-3">2.1</span> Require + defcustom</h3>
+</div><div id="outline-container-org224b21a" class="outline-3">
+<h3 id="org224b21a"><span class="section-number-3">2.1</span> Require + defcustom</h3>
 <div class="outline-text-3" id="text-2-1">
 <div class="org-src-container">
 
@@ -129,8 +129,8 @@
 </div>
 </div>
 
-<div id="outline-container-orgc85436f" class="outline-3">
-<h3 id="orgc85436f"><span class="section-number-3">2.2</span> 让 company-grab-word 正确的处理中文</h3>
+<div id="outline-container-org7a0d978" class="outline-3">
+<h3 id="org7a0d978"><span class="section-number-3">2.2</span> 让 company-grab-word 正确的处理中文</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 `company-grab-word' 可以获取光标处的一个英文词语，但只能获取光标处的一个<b>中文句子</b>，使用一个句子来搜索，得到的备选词条往往很少，并且用处不大（很少人在一篇文章中重复的写一个句子）。
@@ -153,8 +153,8 @@
 </div>
 </div>
 
-<div id="outline-container-org75dab13" class="outline-3">
-<h3 id="org75dab13"><span class="section-number-3">2.3</span> 让 pyim-company-dabbrev&#x2013;make-regexp 生成合适中文搜索的 regexp</h3>
+<div id="outline-container-org41c207b" class="outline-3">
+<h3 id="org41c207b"><span class="section-number-3">2.3</span> 让 pyim-company-dabbrev&#x2013;make-regexp 生成合适中文搜索的 regexp</h3>
 <div class="outline-text-3" id="text-2-3">
 <p>
 用 `pyim-company-dabbrev&#x2013;make-regexp' 得到的 regexp, 搜索中文时，会搜索到一个
@@ -176,8 +176,8 @@
 </div>
 </div>
 
-<div id="outline-container-org4c87418" class="outline-3">
-<h3 id="org4c87418"><span class="section-number-3">2.4</span> <span class="todo TODO">TODO</span> 让 pyim-company-dabbrev&#x2013;search 更好的处理中文</h3>
+<div id="outline-container-org994620a" class="outline-3">
+<h3 id="org994620a"><span class="section-number-3">2.4</span> <span class="todo TODO">TODO</span> 让 pyim-company-dabbrev&#x2013;search 更好的处理中文</h3>
 <div class="outline-text-3" id="text-2-4">
 <p>
 本来打算在这个地方对<b>候选词条列表</b>做一些筛选，比如，用 Chinese-pyim 自带的分词函数对候选词条进行分词，然后只提取第一个<b>有效</b>的中文词语，但由于分词函数速度太慢，导致补全时卡顿明显，所以暂时没有这么处理。
