@@ -316,10 +316,6 @@ Chinese-pyim 内建的功能有：
 Chinese-pyim 也开启英文输入功能。"
   :group 'chinese-pyim)
 
-(defalias 'pyim-english-input-switch-function 'pyim-english-input-switch-functions)
-(make-obsolete 'pyim-english-input-switch-function 'pyim-english-input-switch-functions
-               "Chinese-pyim 1.0")
-
 (defcustom pyim-punctuation-half-width-functions nil
   "取值为一个函数列表，这个函数列表中的任意一个函数的运行结果为 t 时，
 Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数：char ，表示
