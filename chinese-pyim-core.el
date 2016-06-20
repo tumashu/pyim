@@ -1715,7 +1715,7 @@ Return the input string."
               (and (string< "" (car ym))
                    (not (cl-some
                          #'(lambda (charpy)
-                             (or (assoc charpy pyim-pinyin-pymap)
+                             (or (pyim-pinyin2cchar-get charpy t)
                                  (pyim-get charpy)))
                          charpys))  ;错误的拼音
                    ))
