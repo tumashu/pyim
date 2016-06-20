@@ -2081,8 +2081,7 @@ Return the input string."
 (defun pyim-get-choices:chars (pylist)
   (let ((py-str (pyim-pylist-to-string pylist nil 'default)))
     (list `(,@(pyim-get (concat (caar pylist) (cdar pylist)))
-            ,@(mapcar #'char-to-string
-                      (cadr (assoc py-str pyim-pinyin-pymap))))
+            ,@(pyim-pinyin2cchar-get py-str t t))
           nil)))
 
 (defun pyim-get-word-property (word property &optional value-converter default-value)
