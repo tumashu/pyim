@@ -453,6 +453,7 @@
 
 (defvar pyim-pinyin2cchar-cache1 nil)
 (defvar pyim-pinyin2cchar-cache2 nil)
+(defvar pyim-pinyin2cchar-cache3 nil)
 (defvar pyim-cchar2pinyin-cache nil)
 
 (defun pyim-pinyin2cchar-cache-create (&optional force)
@@ -465,26 +466,32 @@
           (make-hash-table :size 50000 :test #'equal))
     (setq pyim-pinyin2cchar-cache2
           (make-hash-table :size 50000 :test #'equal))
+    (setq pyim-pinyin2cchar-cache3
+          (make-hash-table :size 50000 :test #'equal))
     (dolist (x pyim-pinyin-pymap)
       (let* ((py (car x))
              (cchars (cdr x))
              (n (min (length py) 7)))
         (puthash py cchars pyim-pinyin2cchar-cache1)
+        (puthash py (cdr (split-string (car cchars) ""))
+                 pyim-pinyin2cchar-cache2)
         (dotimes (i n)
           (let* ((key (substring py 0 (+ i 1)))
-                 (orig-value (gethash key pyim-pinyin2cchar-cache2)))
+                 (orig-value (gethash key pyim-pinyin2cchar-cache3)))
             (puthash key (delete-dups `(,@orig-value ,@cchars))
-                     pyim-pinyin2cchar-cache2)))))))
+                     pyim-pinyin2cchar-cache3)))))))
 
-(defun pyim-pinyin2cchar-get (pinyin &optional equal-match)
+(defun pyim-pinyin2cchar-get (pinyin &optional equal-match return-list)
   "获取拼音与 `pinyin' 想匹配的所有汉字，比如：
 
 “man” -> (\"忙茫盲芒氓莽蟒邙漭硭\" \"满慢漫曼蛮馒瞒蔓颟谩墁幔螨鞔鳗缦熳镘\")"
   (pyim-pinyin2cchar-cache-create)
   (when (and pinyin (stringp pinyin))
     (if equal-match
-        (gethash pinyin pyim-pinyin2cchar-cache1)
-      (gethash pinyin pyim-pinyin2cchar-cache2))))
+        (if return-list
+            (gethash pinyin pyim-pinyin2cchar-cache2)
+          (gethash pinyin pyim-pinyin2cchar-cache1))
+      (gethash pinyin pyim-pinyin2cchar-cache3))))
 
 ;; #+END_SRC
 
