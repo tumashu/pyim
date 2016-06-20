@@ -264,7 +264,7 @@ Chinese-pyim 内建的功能有：
   :group 'chinese-pyim)
 
 (defcustom pyim-enable-words-predict
-  '(dabbrev pinyin-shouzimu pinyin-znabc guess-words)
+  '(pinyin-shouzimu pinyin-znabc)
   "一个 list，用于设置词语联想方式，当前支持：
 
 1. `pinyin-shouzimu' 搜索拼音首字母对应的词条做为联想词。
@@ -430,7 +430,7 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
   "Punctuation will not insert after this characters.
 If you don't like this funciton, set the variable to nil")
 
-(defvar pyim-dabbrev-time-limit .03
+(defvar pyim-dabbrev-time-limit .003
   "Determines how many seconds should look for dabbrev matches.")
 
 (defvar pyim-dict-cache nil)
@@ -2071,20 +2071,8 @@ Return the input string."
                  (pyim-get py-str-shouzimu '(personal-file)))))))
 
 (defun pyim-get-choices:personal-file (pylist)
-  (let* ((py-str (pyim-pylist-to-string pylist nil 'default))
-         (py-str-shouzimu (pyim-pylist-to-string pylist t 'default))
-         (words (pyim-get py-str '(personal-file)))
-         (words-shouzimu (pyim-get py-str-shouzimu '(personal-file)))
-         words-similar)
-    (while words-shouzimu
-      (setq word (pop words-shouzimu))
-      (let ((pinyins (pyim-hanzi2pinyin word nil "-" t)))
-        (when (cl-some
-               #'(lambda (x)
-                   (pyim-pinyin-match py-str x t))
-               pinyins)
-          (push word words-similar))))
-    (list `(,@words ,@(reverse words-similar)) nil)))
+  (let ((py-str (pyim-pylist-to-string pylist nil 'default)))
+    (list (pyim-get py-str '(personal-file)) nil)))
 
 (defun pyim-get-choices:pinyin-dict (pylist)
   (let ((py-str (pyim-pylist-to-string pylist nil 'default)))
