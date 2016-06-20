@@ -1982,7 +1982,7 @@ Return the input string."
     (let ((py-str (pyim-pylist-to-string pylist nil 'default))
           (prefixs (pyim-grab-chinese-word
                     (length pyim-current-str) t))
-          words words-accurate words-similar)
+          words word words-accurate words-similar)
       (dolist (prefix prefixs)
         (let ((length-prefix (length prefix))
               (words-all (pyim-get (pyim-hanzi2pinyin prefix nil "-" nil t) '(guess-dict)))
@@ -2038,7 +2038,7 @@ Return the input string."
                   (`t (list major-mode))
                   (`all `all))))))
            (count 0)
-           words-accurate words-similar)
+           word words-accurate words-similar)
       (while words-all
         (setq word (pop words-all))
         ;; 从 buffer 中搜索得到的中文字符串，可能是一个无意义的的中文词语，这里做一下分类，
