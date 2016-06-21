@@ -59,9 +59,6 @@
     (message "## Benchmark `pyim-get-choices:personal-file' ...")
     (benchmark time '(pyim-get-choices:personal-file pylist))
 
-    (message "## Benchmark `pyim-get-choices:guess-words' ...")
-    (benchmark time '(pyim-get-choices:guess-words pylist))
-
     (message "## Benchmark `pyim-get-choices:dabbrev' ...")
     (benchmark time '(pyim-get-choices:dabbrev pylist))
 

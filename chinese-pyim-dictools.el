@@ -361,38 +361,6 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
     (when (> (length insert-string) 1)
       (insert insert-string))))
 
-;;                          (("a" "b")
-;;                           ("b" "c")
-;; ("a" "b" "c" "d" "e") ->  ("c" "d")
-;;                           ("d" "e")
-;;                           ("e" nil))
-(defun pyim-guessdict-list-convert (my-list)
-  (cond
-   ((null my-list) nil)
-   ((atom my-list) (list my-list))
-   (t (append (list (list (car my-list) (car (cdr my-list))))
-              (pyim-guessdict-list-convert (cdr my-list))))))
-
-;;                      你好 天空
-;; "你好 天空 大地" ->  天空 大地
-;;                      大地
-(defun pyim-convert-current-line-to-guessdict-format ()
-  (interactive)
-  (let* ((string (mapconcat
-                  #'(lambda (x)
-                      (let ((pinyin-list (pyim-hanzi2pinyin
-                                          (car x) nil "-" t)))
-                        (mapconcat
-                         #'(lambda (pinyin)
-                             (concat pinyin "  " (mapconcat #'identity x " ")))
-                         pinyin-list "\n")))
-                  (pyim-guessdict-list-convert
-                   `(,(pyim-code-at-point)
-                     ,@(pyim-line-content nil nil t)))
-                  "\n")))
-    (delete-region (line-beginning-position) (line-end-position))
-    (insert string)))
-
 ;;;###autoload
 (defun pyim-article2dict-chars ()
   "将一篇中文文章转换为 Chinese-pyim 可以识别的拼音词库。
@@ -433,22 +401,6 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
   (interactive)
   (pyim-article2dict 'misspell-words))
 
-;;;###autoload
-(defun pyim-article2dict-guessdict ()
-  "将一篇中文文章转换为 Chinese-pyim 可以识别的 guessdict。
-
-Guessdict 词库是 Chinese-pyim 用于词语联想的一种词库，其结构与普通词库
-类似，唯一不同的是，guessdict 词库的 code 是中文，而不是拼音，例如：
-
-   我爱 北京 美女 旅游
-   我们 去哪 去看海
-
-Guessdict 用来保存，一个中文词条（code）后面经常跟随出现的词条。当用户输入
-前一次输入：我爱，再输入拼音 lv 时，Chinese-pyim 会匹配词条： 旅游。这样就
-可以降低用户翻页的频率不同。"
-  (interactive)
-  (pyim-article2dict 'guessdict))
-
 (defun pyim-article2dict (object)
   "将一篇中文文章转换为 Chinese-pyim 可以识别的拼音词库。
 其步骤为：
@@ -469,7 +421,6 @@ Guessdict 用来保存，一个中文词条（code）后面经常跟随出现的
    1. `pyim-article2dict-chars'
    2. `pyim-article2dict-words'
    3. `pyim-article2dict-misspell-words'
-   3. `pyim-article2dict-guessdict'
 4. 保存文件
 
 另外，使用分词工具的目的是确保中文词语与词语之间用 *空格* 强制隔开。比如：
@@ -527,8 +478,7 @@ Guessdict 用来保存，一个中文词条（code）后面经常跟随出现的
                (goto-char (point-min))
                ;; 删除大于4个字符的中文字符串，没什么用处。
                (while (re-search-forward "\\cc\\{5,\\}" nil t)
-                 (replace-match "\n")))
-              ((eq object 'guessdict) t))
+                 (replace-match "\n"))))
         ;; 删除多余空白行。
         (goto-char (point-min))
         (while (re-search-forward "\n+" nil t)
@@ -539,9 +489,7 @@ Guessdict 用来保存，一个中文词条（code）后面经常跟随出现的
         ;; 为每一行的词条添加拼音code
         (goto-char (point-min))
         (while (not (eobp))
-          (if (eq object 'guessdict)
-              (pyim-convert-current-line-to-guessdict-format)
-            (pyim-convert-current-line-to-dict-format))
+          (pyim-convert-current-line-to-dict-format)
           (forward-line 1))
         (pyim-article2dict-write-stage-file file "ConvertStage-" t)
         ;; 将文件按行排序，并删除重复的词条，运行两次。
@@ -755,14 +703,11 @@ chinese-pyim-greatdict 包, 这个词库包有 300 多万词条，是一个 *大
       (setq coding (completing-read "词库文件编码: "
                                     '("utf-8-unix" "cjk-dos" "gb18030-dos")
                                     nil t nil nil "utf-8-unix"))
-      (setq dict-type (completing-read "词库类型: "
-                                       '("pinyin-dict" "guess-dict")
-                                       nil t nil nil "pinyin-dict"))
       (setq first-used  (yes-or-no-p "是否让 Chinese-pyim 优先使用词库？ "))
       (setq dict `(:name ,name
                          :file ,file
                          :coding ,(intern coding)
-                         :dict-type ,(intern dict-type)))
+                         :dict-type pinyin-dict))
       (if first-used
           (add-to-list 'pyim-dicts dict)
         (add-to-list 'pyim-dicts dict t))

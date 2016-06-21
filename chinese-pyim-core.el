@@ -86,7 +86,7 @@ plist 来表示，比如：
 1. `:name'      代表词库名称，用户可以按照喜好来确定。
 2. `:coding'    表示词库文件使用的编码。
 3. `:file'      表示词库文件，
-4. `:dict-type' 表示词库文件是普通词库文件还是 guessdict 词库文件。
+4. `:dict-type' 表示词库文件的类型。
 
 另外一个与这个变量功能类似的变量是： `pyim-extra-dicts', 专门
 用于和 elpa 格式的词库包集成。"
@@ -269,13 +269,7 @@ Chinese-pyim 内建的功能有：
 
 1. `pinyin-shouzimu' 搜索拼音首字母对应的词条做为联想词。
 2. `pinyin-znabc' 类似智能ABC的词语联想(源于 emacs-eim)。
-3. `guess-words' 以上次输入的词条为 code，然后在 guessdict 中搜索，
-                 用搜索得到的词条来提高输入法识别精度。
-
-                 注意：这个方法需要用户安装 guessdict 词库，
-                       guessdict 词库文件可以用 `pyim-article2dict-guessdict'
-                       命令生成。
-4. `dabbrev'  搜索当前 buffer, 或者其他 buffer 中已经存在的中文文本，得到匹配的
+3. `dabbrev'  搜索当前 buffer, 或者其他 buffer 中已经存在的中文文本，得到匹配的
               候选词，通过这些候选词来提高输入法的识别精度。
 
               注意：如果用户打开的 buffer 太多或者太大，输入法 *可能* 会出现 *卡顿* 。
@@ -618,7 +612,6 @@ If you don't like this funciton, set the variable to nil")
 ;; 1. 个人词频文件 (personal-file)
 ;; 2. 属性文件 (property-file)
 ;; 3. 普通词库文件 (pinyin-dict)
-;; 4. Guessdict词库文件 (guess-dict)
 
 ;; 个人词频文件用来保存用户曾经输入过的中文词条以及这些词条输入的先后顺序
 ;; （也就是词频信息）。Chinese-pyim 搜索中文词条时，个人词频文件里的词条
@@ -639,7 +632,7 @@ If you don't like this funciton, set the variable to nil")
 
 ;; 当这个文件中的词条数量增长到一定程度，用户可以直接将这个文件转换为词库。
 
-;; **** 普通词库文件 和 Guessdict词库
+;; **** 普通词库文件
 ;; 普通词库文件，也可以叫做共享词库文件，与个人词频文件相比，普通词库文件
 ;; 有如下特点：
 ;; 1. 词条数量巨大：普通词库文件中往往包含大量的词条信息（可能超过50万）。
@@ -647,18 +640,14 @@ If you don't like this funciton, set the variable to nil")
 ;;    所以普通词库文件的内容一般不会发生改变。
 ;; 3. 普通词库文件适宜制作词库包，在用户之间共享。
 
-;; Guessdict 词库用于词语联想，它与普通词库文件有相同的结构，但得词条
-;; 的意义不同。
-
-;; 我们使用变量 `pyim-dicts' 和 `pyim-extra-dicts' 来设定普通词库文件和 guessdict 词库的信息：
+;; 我们使用变量 `pyim-dicts' 和 `pyim-extra-dicts' 来设定普通词库文件的信息：
 ;; 1. `:name' 用户给词库设定的名称，暂时没有用处，未来可能用于构建词库包。
 ;; 2. `:file' 词库文件的绝对路径。
 ;; 3. `:coding' 词库文件的编码，词库文件是一个文本文件，window系统一般使
 ;;    用 GBK 编码来保存中文，而Linux系统一般使用 UTF-8 编码来保存中文，
 ;;    emacs 似乎不能自动识别中文编码，所以要求用户明确告知词库文件使用什
 ;;    么编码来保存。
-;; 4. `:dict-type' 当前词库文件是普通词库还是 guessdict 词库，普通词库
-;;     设置为 pinyin-dict，guessdict 词库设置为 guess-dict。
+;; 4. `:dict-type' 词库文件的类型。
 
 ;; *** 加载词库
 ;;    :PROPERTIES:
@@ -1915,7 +1904,6 @@ Return the input string."
   (let* (personal-words
          pinyin-dict-words
          dabbrev-accurate-words dabbrev-similar-words
-         guess-dict-accurate-words guess-dict-similar-words
          pinyin-shouzimu-similar-words pinyin-znabc-similar-words
          chars)
 
@@ -1934,11 +1922,6 @@ Return the input string."
       (setq dabbrev-accurate-words (car words))
       (setq dabbrev-similar-words (car (cdr words))))
 
-    ;; Guess-dict words
-    (let ((words (pyim-get-choices:guess-words (car list-of-pylist))))
-      (setq guess-dict-accurate-words (car words))
-      (setq guess-dict-similar-words (car (cdr words))))
-
     ;; Pinyin shouzimu similar words
     (let ((words (pyim-get-choices:pinyin-shouzimu (car list-of-pylist))))
       (setq pinyin-shouzimu-similar-words (car (cdr words))))
@@ -1951,8 +1934,6 @@ Return the input string."
     (when pyim-debug
       (princ (list :pylist-list list-of-pylist
                    :dabbrev-accurate-words dabbrev-accurate-words
-                   :guess-dict-accurate-words guess-dict-accurate-words
-                   :guess-dict-similar-words guess-dict-similar-words
                    :personal-words personal-words
                    :pinyin-dict-words pinyin-dict-words
                    :pinyin-shouzimu-words pinyin-shouzimu-similar-words
@@ -1963,7 +1944,6 @@ Return the input string."
     (delete-dups
      (delq nil
            `(,@(pyim-sort-words:count dabbrev-accurate-words)
-             ,@(pyim-sort-words:count guess-dict-accurate-words)
              ,(car personal-words)
              ,@(pyim-sort-words:count dabbrev-similar-words)
              ,@(pyim-sort-words:count (cdr personal-words))
@@ -1971,57 +1951,8 @@ Return the input string."
              ,@(when (and pinyin-dict-words
                           (not (member (car pinyin-dict-words) pinyin-shouzimu-similar-words)))
                  pinyin-shouzimu-similar-words)
-             ,@guess-dict-similar-words
              ,@pinyin-znabc-similar-words
              ,@chars)))))
-
-(defun pyim-get-choices:guess-words (pylist)
-  ;; 如果上一次输入词条 "你好" ，那么以 “你好” 为 code，从 guessdict 词库中搜索词条
-  ;; 将搜索得到的词条的拼音与 *当前输入的拼音* 进行比较，类似或者精确匹配的词条作为联想词。
-  (when (member 'guess-words pyim-enable-words-predict)
-    (let ((py-str (pyim-pylist-to-string pylist nil 'default))
-          (prefixs (pyim-grab-chinese-word
-                    (length pyim-current-str) t))
-          words word words-accurate words-similar)
-      (dolist (prefix prefixs)
-        (let ((length-prefix (length prefix))
-              (words-all (pyim-get (pyim-hanzi2pinyin prefix nil "-" nil t) '(guess-dict)))
-              (count 0))
-          ;; 光标前获取的 prefix 字符串长度大于1并且小于5时，
-          ;; 才进行 guess-words 词语联想，prefix 长度太小时，搜索
-          ;; 得到的词条太多，处理起来容易卡顿，prefix 长度太大时，
-          ;; 词库中大多数没有，搜索是浪费时间。
-          (when (and (> length-prefix 1)
-                     (< length-prefix 5))
-            (while words-all
-              (setq word (pop words-all))
-              ;; 下面功能使用函数 `pyim-match-chinese-with-pylist' 实现比较直接，
-              ;; `pyim-match-chinese-with-pylist' 这个函数 benchmark 显示速度比较快，
-              ;; 但用到这个地方后，chinese-pyim 卡顿明显，暂时找不到原因。
-              (let ((pinyins (pyim-hanzi2pinyin word nil "-" t))
-                    boundary)
-                (when (cl-some
-                       #'(lambda (x)
-                           (setq boundary (pyim-pinyin-match py-str x t t)))
-                       pinyins)
-                  (push word words-similar))
-                ;; 搜索拼音与 py-list "^" 匹配的词条，比如:
-                ;; 拼音 "ni-hao" 就匹配 "你好我的家乡"，然后根据拼音的长度，
-                ;; 提取一个子字符串作为词条，比如：字符串 "你好我的家乡" 的子字符串
-                ;; "你好" 会被提取出来。
-                (when (cl-some
-                       #'(lambda (x)
-                           (setq boundary (pyim-pinyin-match py-str x t t t)))
-                       pinyins)
-                  (push (substring word (car boundary) (cdr boundary))
-                        words-accurate)))
-              (setq count (1+ count))
-              ;; 当 `words' 包含的元素太多时，后面处理会极其缓慢，
-              ;; 这里通过限制循环次数来提高输入法的响应，经验数值。
-              (when (> count 200)
-                (setq words nil))))))
-      (list (delete-dups words-accurate)
-            (delete-dups words-similar)))))
 
 (defun pyim-get-choices:dabbrev (pylist)
   (when (member 'dabbrev pyim-enable-words-predict)
@@ -2098,86 +2029,6 @@ Return the input string."
             (> (pyim-get-word-property a :count nil 1)
                (pyim-get-word-property b :count nil 1)))))
 
-(defun pyim-grab-chinese-word (&optional backward-char-number return-possible-words)
-  "获取光标处一个 *有效的* 中文词语，较长的词语优先。"
-  (unless (featurep 'chinese-pyim-utils)
-    (require 'chinese-pyim-utils))
-  (let* ((backward-char-number (or backward-char-number 0))
-         (string (replace-regexp-in-string
-                  ".*\\CC" ""
-                  (buffer-substring
-                   (save-excursion
-                     ;; 在输入中文的时候，`pyim-current-str' 也会
-                     ;; 插入到光标处，跳过。。。
-                     (backward-char backward-char-number)
-                     (point))
-                   (save-excursion
-                     (backward-char backward-char-number)
-                     (skip-syntax-backward "w")
-                     (point)))))
-         (string
-          ;; 我们先提取一个中文字符串，然后将这个字符串分词，得到所需词语。
-          ;; 因为长字符串分词消耗的时间较长，影响输入法响应速度，所以这里限制
-          ;; 字符串长度为6，经验数值。
-          (if (> (length string) 6)
-              (substring string -6)
-            string))
-         (length (length string)))
-    (if return-possible-words
-        (when (stringp string)
-          (let (results)
-            (dotimes (i length)
-              (push (substring string i) results))
-            results))
-      (cl-some #'(lambda (x)
-                   (if (= (nth 2 x) (+ 1 length))
-                       (car x)))
-               (nreverse (pyim-split-chinese-string string))))))
-
-(defun pyim-pinyin-match (pinyin1 pinyin2 &optional match-beginning first-equal all-equal)
-  "判断拼音 `pinyin1' 是否和拼音 `pinyin2' 相匹配，如果匹配，
-则返回匹配的起点与终点，通过起点和终点，可以方便的从 `pinyin2'
-对应的汉字字符串中提取拼音为 `pinyin1' 的子字符串。比如：
-
-shi-shui 与  ni-shi-shui-ya 匹配，这个函数的返回值为 (1 . 3),
-我们可以使用下面这一个语句：
-
-       (substring \"你是谁啊\" 1 3)
-
-得到拼音 shi-shui 对应的子字符串: “是谁”。"
-  (when (and (stringp pinyin1)
-             (stringp pinyin2)
-             (> (length pinyin1) 0)
-             (> (length pinyin2) 0))
-    (let* ((long-pinyin (pyim-string-match-p "-" pinyin1))
-           (regexp (pyim-build-pinyin-regexp
-                    pinyin1
-                    match-beginning
-                    ;; 当 `pinyin1' 为一个汉字的拼音时，强制 equal 匹配
-                    (if long-pinyin
-                        first-equal
-                      t)
-                    all-equal))
-           (regexp
-            ;; 当 `pinyin1' 为一个汉字的拼音时，
-            ;; 强制尾端匹配，这样可以清除许多不需要的候选词。
-            ;; 比如：“jia” 匹配到 “将”。
-            (if long-pinyin
-                regexp
-              (format "%s$\\|%s[-]+" regexp regexp)))
-           (match (pyim-string-match-p regexp pinyin2))
-           (substring (when match
-                        (substring pinyin2 0 match)))
-           (begin (when substring
-                    (length (replace-regexp-in-string
-                             "[a-z]" "" substring))))
-           (length
-            (when pinyin1
-              (+ 1 (length (replace-regexp-in-string
-                            "[a-z]" "" pinyin1))))))
-      (when (and begin length)
-        (cons begin (+ begin length))))))
-
 (defun pyim-build-chinese-regexp-for-pylist (pylist &optional match-beginning
                                                     first-equal all-equal)
   "这个函数生成一个 regexp ，用这个 regexp 可以搜索到
@@ -2209,23 +2060,6 @@ shi-shui 与  ni-shi-shui-ya 匹配，这个函数的返回值为 (1 . 3),
     (unless (equal regexp "")
       (concat (if match-beginning "^" "")
               regexp))))
-
-(defun pyim-match-chinese-with-pylist (pylist chinese-string &optional match-beginning
-                                              first-equal all-equal)
-  "从中文字符串 `chinese-string' 中搜索一个拼音与 `pylist' 匹配的子字符串，
-然后返回匹配的起点与终点组成的 cons，通过起点和终点，可以方便的提取匹配的子字符串
-或者其他相关的子字符串。"
-  (when (and (listp pylist)
-             (stringp chinese-string))
-    (let* ((length-pylist (length pylist))
-           (length-str (length chinese-string))
-           (regexp (pyim-build-chinese-regexp-for-pylist
-                    pylist match-beginning first-equal all-equal))
-           (begin (pyim-string-match-p regexp chinese-string)))
-      (when begin
-        (cons begin
-              (min length-str
-                   (+ begin length-pylist)))))))
 
 (defun pyim-sublist (list start end)
   "Return a section of LIST, from START to END.
