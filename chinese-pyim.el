@@ -72,6 +72,7 @@
 
 ;; #+BEGIN_EXAMPLE
 ;; (require 'chinese-pyim)
+;; (chinese-pyim-basedict-enable) ; Enable the pyim default dict
 ;; #+END_EXAMPLE
 
 ;; ** 配置
@@ -81,7 +82,15 @@
 ;; 大体了解一下 Chinese-pyim 的用法：[[https://github.com/tumashu/emacs-helper/blob/master/eh-basic.el][Tumashu's emacs configure]] 。
 
 ;; *** 添加词库文件
-;; 添加词库最简单的方式是直接安装 chinese-pyim-greatdict 。
+;; Chinese-pyim 当前的默认词库是 chinese-pyim-basedict, 这个词库的词条量
+;; 8 万左右，是一个 *非常小* 得词库，词条的来源有两个：
+
+;; 1. libpinyin 项目的内置词库
+;; 2. chinese-pyim 用户贡献的个人词库
+
+;; 注意： 这个词库只能确保 Chinese-pyim 可以正常工作，如果用户想让
+;; chinese-pyim 更加顺手，需要添加附加的词库，一个比较好的选择是安装
+;; chinese-pyim-greatdict:
 
 ;;   https://github.com/tumashu/chinese-pyim-greatdict
 
