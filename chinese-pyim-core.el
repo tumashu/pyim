@@ -45,7 +45,6 @@
 (require 'popup)
 (require 'async)
 (require 'chinese-pyim-pymap)
-(require 'chinese-pyim-basedict)
 
 (defgroup chinese-pyim nil
   "Chinese pinyin input method"
