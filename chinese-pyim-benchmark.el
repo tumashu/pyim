@@ -59,46 +59,6 @@
     (message "## Benchmark `pyim-get-choices:personal-file' ...")
     (benchmark time '(pyim-get-choices:personal-file pylist))
 
-    (message "## Benchmark `pyim-get-choices:dabbrev' ...")
-    (benchmark time '(pyim-get-choices:dabbrev pylist))
-
-    (message "## Benchmark `pyim-get-dabbrev' 1 ...")
-    (benchmark time '(save-excursion
-                       (pyim-get-dabbrev
-                        (pyim-build-chinese-regexp-for-pylist pylist nil nil t)
-                        pyim-dabbrev-time-limit)))
-
-    (message "## Benchmark `pyim-get-dabbrev' 2  ...")
-    (benchmark time '(save-excursion
-                       (pyim-get-dabbrev
-                        "[你呢尼泥逆倪匿拟腻妮霓昵溺旎睨鲵坭猊怩伲祢慝铌年念廿粘碾捻蔫撵拈黏鲶鲇辇埝娘酿鸟尿袅嬲茑脲捏涅聂孽蹑嗫啮镊镍乜陧颞臬蘖您恁宁凝拧泞咛狞柠佞聍苎甯牛纽扭妞钮拗忸狃][好号毫豪浩耗皓嚎昊郝壕蒿貉灏镐嗥嚆薅濠蚝颢]"
-                        pyim-dabbrev-time-limit)))
-
-    (message "## Benchmark `pyim-get-dabbrev-time-limit-while' ...")
-    (benchmark time '(let ((tmp-end (point))
-                           (start (current-time))
-                           symbols)
-                       (pyim-get-dabbrev-time-limit-while (> tmp-end (point-min))
-                           start pyim-dabbrev-time-limit 1
-                           (ignore-errors
-                             (forward-char -10000))
-                           (forward-line 0)
-                           (save-excursion
-                             ;; Before, we used backward search, but it matches non-greedily, and
-                             ;; that forced us to use the "beginning/end of word" anchors in
-                             ;; search regexp.
-                             (while (re-search-forward " " tmp-end t)
-                               (let ((match (match-string-no-properties 0)))
-                                 (when (>= (length match) 2)
-                                   (push match symbols)))))
-                           (setq tmp-end (point)))))
-
-    (message "## Benchmark `re-search-forward' chinese chars ...")
-    (benchmark time '(save-excursion
-                       (re-search-forward
-                        (pyim-build-chinese-regexp-for-pylist pylist nil nil t)
-                        nil t)))
-
     (message "## Benchmark `pyim-get-choices:pinyin-dict' ...")
     (benchmark time '(pyim-get-choices:pinyin-dict pylist))
 
