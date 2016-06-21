@@ -36,17 +36,17 @@
     - [为 isearch 相关命令添加拼音搜索支持](#为-isearch-相关命令添加拼音搜索支持)
     - [使用 Chinese-pyim 改善 company-mode 中文补全的体验](#使用-chinese-pyim-改善-company-mode-中文补全的体验)
 
-# Chinese-pyim 使用说明<a id="org533599c"></a>
+# Chinese-pyim 使用说明<a id="orgb779617"></a>
 
-## 截图<a id="org70b1537"></a>
+## 截图<a id="org6305f4e"></a>
 
 ![img](./snapshots/pyim-linux-x-with-toolkit.png)
 
-## 简介<a id="orge2933c1"></a>
+## 简介<a id="orgc6d07b4"></a>
 
 Chinese-pyim (Chinese Pinyin Input Method) 是 emacs 环境下的一个中文拼音输入法。
 
-## 背景<a id="orga7ce0de"></a>
+## 背景<a id="org99abcc9"></a>
 
 Chinese-pyim 的代码源自 emacs-eim。
 
@@ -60,7 +60,7 @@ emacs-eim 是 emacs 环境下的一个中文输入法框架， 支持拼音，�
 
 于是我 fork 了 emacs-eim 拼音输入法相关的代码, 创建了一个项目：chinese-pyim。
 
-## 目标<a id="orga7d1076"></a>
+## 目标<a id="org20efec3"></a>
 
 Chinese-pyim 的目标是： **尽最大的努力成为一个好用的 emacs 中文拼音输入法** ，具体可表现为三个方面：
 
@@ -69,12 +69,12 @@ Chinese-pyim 的目标是： **尽最大的努力成为一个好用的 emacs 中
     的体验。
 3.  Exchange:     尽最大可能简化 Chinese-pyim 使用其他优秀输入法的词库的难度和复杂度。
 
-## 特点<a id="orgcef2b03"></a>
+## 特点<a id="orgc63d9f0"></a>
 
 1.  Chinese-pyim 只是一个拼音输入法，安装配置方便快捷，一般只能通过添加词库的方式优化输入法。
 2.  Chinese-pyim 只使用最简单的文本词库格式，可以快速方便的利用其他输入法的词库。
 
-## 安装<a id="orgff82673"></a>
+## 安装<a id="org93735da"></a>
 
 1.  配置melpa源，参考：<http://melpa.org/#/getting-started>
 2.  M-x package-install RET chinese-pyim RET
@@ -84,13 +84,13 @@ Chinese-pyim 的目标是： **尽最大的努力成为一个好用的 emacs 中
         (require 'chinese-pyim-basedict)
         (chinese-pyim-basedict-enable)
 
-## 配置<a id="org7c49b84"></a>
+## 配置<a id="orgce18299"></a>
 
-### 配置实例<a id="orged040f3"></a>
+### 配置实例<a id="org32a9937"></a>
 
 对 Chinese-pyim 感兴趣的同学，可以看看我的 Chinese-pyim 配置，大体了解一下 Chinese-pyim 的用法：[Tumashu's emacs configure](https://github.com/tumashu/emacs-helper/blob/master/eh-basic.el) 。
 
-### 添加词库文件<a id="orgc91de93"></a>
+### 添加词库文件<a id="org87fa6a9"></a>
 
 Chinese-pyim 当前的默认词库是 chinese-pyim-basedict, 这个词库的词条量
 8 万左右，是一个 **非常小** 得词库，词条的来源有两个：
@@ -118,16 +118,16 @@ Chinese-pyim-greatdict 包对应的词库由 [WenLiang Xiao](https://github.com/
 1.  如果机器性能不好，安装 chinese-pyim-greatdict 会导致 chinese-pyim 启动非常缓慢，请仔细考虑。
 2.  这个词库使用 gzip 压缩，非 Linux 用户需要安装 [gzip](http://www.gzip.org/) 程序，并配置好系统 PATH 。
 
-如果 chinese-pyim-greatdict 不能满足需求，用户可以使用其他方式为 Chinese-pyim 添加拼音词库，具体方式请参考 [1.10.5](#org3c196bf) 小结。
+如果 chinese-pyim-greatdict 不能满足需求，用户可以使用其他方式为 Chinese-pyim 添加拼音词库，具体方式请参考 [1.10.5](#orgd03d351) 小结。
 
-### 激活 Chinese-pyim<a id="org239c3bd"></a>
+### 激活 Chinese-pyim<a id="org28649ce"></a>
 
     (setq default-input-method "chinese-pyim")
     (global-set-key (kbd "C-\\") 'toggle-input-method)
 
-## 使用<a id="org09f6d29"></a>
+## 使用<a id="org5d8feda"></a>
 
-### 常用快捷键<a id="org1b23aef"></a>
+### 常用快捷键<a id="org5707618"></a>
 
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -218,7 +218,7 @@ Chinese-pyim-greatdict 包对应的词库由 [WenLiang Xiao](https://github.com/
 </tbody>
 </table>
 
-### 使用双拼模式<a id="org57e21e6"></a>
+### 使用双拼模式<a id="org0400df3"></a>
 
 Chinese-pyim 支持双拼模式，用户可以通过变量 \`pyim-default-pinyin-scheme' 来设定当前使用的双拼方案，比如：
 
@@ -229,7 +229,7 @@ Chinese-pyim 支持双拼模式，用户可以通过变量 \`pyim-default-pinyin
 1.  用户可以使用变量 \`pyim-pinyin-schemes' 添加自定义双拼方案。
 2.  用户可能需要重新设置 \`pyim-translate-trigger-char'。
 
-### 让选词框跟随光标<a id="org9988e8c"></a>
+### 让选词框跟随光标<a id="org5f4faff"></a>
 
 用户可以通过下面的设置让 Chinese-pyim 在 **光标处** 显示一个选词框：
 
@@ -247,7 +247,7 @@ Chinese-pyim 支持双拼模式，用户可以通过变量 \`pyim-default-pinyin
 
 GTK 选词框的字体设置可以参考：[GTK resources](https://www.gnu.org/software/emacs/manual/html_node/emacs/GTK-resources.html#GTK-resources) 。
 
-### 调整 tooltip 选词框的显示样式<a id="org8753c28"></a>
+### 调整 tooltip 选词框的显示样式<a id="orgb88a96d"></a>
 
 Chinese-pyim 的 tooltip 选词框默认使用 **双行显示** 的样式，在一些特殊的情况下（比如：popup 显示的菜单错位），用户可以使用 **单行显示**
 的样式：
@@ -256,11 +256,11 @@ Chinese-pyim 的 tooltip 选词框默认使用 **双行显示** 的样式，在�
 
 注：用户也可以自定义 guidance 格式化函数。
 
-### 设置模糊音<a id="orge32b6f6"></a>
+### 设置模糊音<a id="org8effbcf"></a>
 
 可以通过设置 \`pyim-fuzzy-pinyin-alist' 变量来自定义模糊音。
 
-### 词语联想<a id="org471133d"></a>
+### 词语联想<a id="org9383dc3"></a>
 
 Chinese-pyim **内置** 了几种词语联想方式：
 
@@ -275,13 +275,13 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
 
     (setq pyim-enable-words-predict nil)
 
-### 切换全角标点与半角标点<a id="orgf2de78d"></a>
+### 切换全角标点与半角标点<a id="orgd047e81"></a>
 
 1.  第一种方法：使用命令 \`pyim-toggle-full-width-punctuation'，全局切换。
 2.  第二种方法：使用命令 \`pyim-punctuation-translate-at-point' 只切换光标处标点的样式。
 3.  第三种方法：设置变量 \`pyim-translate-trigger-char' ，输入变量设定的字符会切换光标处标点的样式。
 
-### 手动加词和删词<a id="org3c1d69d"></a>
+### 手动加词和删词<a id="org96a7706"></a>
 
 1.  \`pyim-create-word-without-pinyin' 直接将一个中文词条加入个人词库的函数，用于编程环境。
 2.  \`pyim-create-word-at-point:"N"char' 这是一组命令，从光标前提取N个汉字字符组成字符串，并将其加入个人词库。
@@ -290,7 +290,7 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
 5.  \`pyim-delete-word-from-personal-buffer' 从个人词频文件对应的 buffer
     中删除当前高亮选择的词条。
 
-### Chinese-pyim 高级功能<a id="org0bb0d4b"></a>
+### Chinese-pyim 高级功能<a id="org1f992a4"></a>
 
 1.  根据环境自动切换到英文输入模式，使用 pyim-english-input-switch-functions 配置。
 2.  根据环境自动切换到半角标点输入模式，使用 pyim-punctuation-half-width-functions 配置。
@@ -413,7 +413,7 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
 
     注：上述函数列表中，任意一个函数的返回值为 t 时，Chinese-pyim 切换到半角标点输入模式。
 
-## 捐赠<a id="org1ba6dbb"></a>
+## 捐赠<a id="orgb38e61f"></a>
 
 您可以通过小额捐赠的方式支持 Chinese-pyim 的开发工作，具体方式：
 
@@ -422,30 +422,30 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
 
     ![img](snapshots/QR-code-for-author.jpg)
 
-## Tips<a id="org964cbdb"></a>
+## Tips<a id="orgc7e8f79"></a>
 
-### Chinese-pyim 出现错误时，如何开启 debug 模式<a id="org78dd2c7"></a>
+### Chinese-pyim 出现错误时，如何开启 debug 模式<a id="org7b46052"></a>
 
     (setq debug-on-error t)
 
-### 选词框弹出位置不合理或者选词框内容显示不全<a id="org5e1d37b"></a>
+### 选词框弹出位置不合理或者选词框内容显示不全<a id="orgf6ba87a"></a>
 
 可以通过设置 \`pyim-tooltip-width-adjustment' 变量来手动校正。
 
 1.  选词框内容显示不全：增大变量值
 2.  选词框弹出位置不合理：减小变量值
 
-### 如何查看 Chinese-pyim 文档。<a id="orgdc8f8ab"></a>
+### 如何查看 Chinese-pyim 文档。<a id="orga3b2f6f"></a>
 
 Chinese-pyim 开发使用 lentic 文学编程模式，代码文档隐藏在comment中，如果用户喜欢阅读 html 格式的文档，可以查看在线文档；
 
 <http://tumashu.github.io/chinese-pyim/>
 
-### 将光标处的拼音字符串转换为中文 (与 vimim 的 “点石成金” 功能类似)<a id="org908ebe6"></a>
+### 将光标处的拼音字符串转换为中文 (与 vimim 的 “点石成金” 功能类似)<a id="org7ecf15e"></a>
 
     (global-set-key (kbd "M-i") 'pyim-convert-pinyin-at-point)
 
-### 如何添加自定义拼音词库<a id="org3c196bf"></a>
+### 如何添加自定义拼音词库<a id="orgd03d351"></a>
 
 Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面五种方式，获取质量较好的拼音词库：
 
@@ -512,7 +512,7 @@ Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面五�
 
     最后将生成的词库按上述方法添加到 Chinese-pyim 中就可以了。
 
-### 如何手动安装和管理词库<a id="orga844981"></a>
+### 如何手动安装和管理词库<a id="org8ff60f1"></a>
 
 这里假设有两个词库文件：
 
@@ -522,15 +522,15 @@ Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面五�
 在~/.emacs文件中添加如下一行配置。
 
     (setq pyim-dicts
-          '((:name "dict1" :file "/path/to/pyim-dict1.pyim" :coding gbk-dos :dict-type pinyin-dict)
-            (:name "dict2" :file "/path/to/pyim-dict2.pyim" :coding gbk-dos :dict-type pinyin-dict)))
+          '((:name "dict1" :file "/path/to/pyim-dict1.pyim" :coding utf-8-unix :dict-type pinyin-dict)
+            (:name "dict2" :file "/path/to/pyim-dict2.pyim" :coding utf-8-unix :dict-type pinyin-dict)))
 
 注意事项:
 
 1.  必须使用词库文件的绝对路径。
 2.  正确设置coding，否则会出现乱码。
 
-### 如何合并两个词库文件<a id="org55876d8"></a>
+### 如何合并两个词库文件<a id="org789ef4d"></a>
 
 假设有两个词库文件：
 
@@ -545,7 +545,7 @@ Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面五�
 2.  使用 emacs 打开合并后的文件：output.pyim
 3.  运行 pyim-update-dict-file 命令对 output.pyim 的内容进行排序，然后保存。
 
-### 如何快速切换词库<a id="org20a417e"></a>
+### 如何快速切换词库<a id="org189b2dd"></a>
 
 用户可以自定义类似的命令来实现快速切换拼音词库。
 
@@ -558,7 +558,7 @@ Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面五�
                      :dict-type pinyin-dict)))
       (pyim-restart-1 t))
 
-### 将汉字字符串转换为拼音字符串<a id="orgd617180"></a>
+### 将汉字字符串转换为拼音字符串<a id="org48bbf01"></a>
 
 下面两个函数可以将中文字符串转换的拼音字符串或者列表，用于 emacs-lisp
 编程。
@@ -566,7 +566,7 @@ Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面五�
 1.  \`pyim-hanzi2pinyin' （考虑多音字）
 2.  \`pyim-hanzi2pinyin-simple'  （不考虑多音字）
 
-### 中文分词<a id="org010bc4e"></a>
+### 中文分词<a id="org6721996"></a>
 
 Chinese-pyim 包含了一个简单的分词函数：\`pyim-split-chinese-string'. 这个函数使用暴力匹配模式来分词，所以， **不能检测出** Chinese-pyim 词库中不存在的中文词条。另外，这个函数的分词速度比较慢，仅仅适用于中文短句的分词，不适用于文章分词。根据评估，20个汉字组成的字符串需要大约0.3s， 40个汉字消耗1s，随着字符串长度的增大消耗的时间呈几何倍数增加。
 
@@ -581,12 +581,12 @@ Chinese-pyim 包含了一个简单的分词函数：\`pyim-split-chinese-string'
 
 另外一个分词相关的函数是 \`pyim-split-chinese-string2string', 这个函数仅仅将一个中文字符串分词，在分词的位置用空格或者用户自定义的分隔符隔开，然后返回新的字符串。
 
-### 获取光标处的中文词条<a id="org8b60165"></a>
+### 获取光标处的中文词条<a id="org1e0eb26"></a>
 
 Chinese-pyim 包含了一个简单的命令：\`pyim-get-words-list-at-point', 这个命令可以得到光标处的 **英文** 或者 **中文** 词条的 \*列表\*，这个命令依赖分词函数：
 \`pyim-split-chinese-string'。
 
-### 让 \`forward-word' 和 \`back-backward’ 在中文环境下正常工作<a id="org5a3cf6a"></a>
+### 让 \`forward-word' 和 \`back-backward’ 在中文环境下正常工作<a id="org3871850"></a>
 
 中文词语没有强制用空格分词，所以 emacs 内置的命令 \`forward-word' 和 \`backward-word'
 在中文环境不能按用户预期的样子执行，而是 forward/backward “句子” ，Chinese-pyim
@@ -600,7 +600,7 @@ Chinese-pyim 包含了一个简单的命令：\`pyim-get-words-list-at-point', �
     (global-set-key (kbd "M-f") 'pyim-forward-word)
     (global-set-key (kbd "M-b") 'pyim-backward-word)
 
-### 为 isearch 相关命令添加拼音搜索支持<a id="org48152ed"></a>
+### 为 isearch 相关命令添加拼音搜索支持<a id="orge018c3f"></a>
 
 chinese-pyim 安装后，可以通过下面的设置开启拼音搜索功能：
 
@@ -613,7 +613,7 @@ chinese-pyim 安装后，可以通过下面的设置开启拼音搜索功能：
     (setq-default pyim-english-input-switch-functions
                   '(pyim-probe-isearch-mode))
 
-### 使用 Chinese-pyim 改善 company-mode 中文补全的体验<a id="orga83c5b7"></a>
+### 使用 Chinese-pyim 改善 company-mode 中文补全的体验<a id="org2e231a7"></a>
 
 中文词语之间没有分割字符，所以 Company-mode 在中文环境下， **补全词条** 变成了 **补全句子** ，可用性很差，chinese-pyim-company 通过 Chinese-pyim 自带的分词函数来分割中文字符串，改善了中文补全的体验 。
 

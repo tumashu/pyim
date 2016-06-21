@@ -394,8 +394,8 @@
 
 ;; #+BEGIN_EXAMPLE
 ;; (setq pyim-dicts
-;;       '((:name "dict1" :file "/path/to/pyim-dict1.pyim" :coding gbk-dos :dict-type pinyin-dict)
-;;         (:name "dict2" :file "/path/to/pyim-dict2.pyim" :coding gbk-dos :dict-type pinyin-dict)))
+;;       '((:name "dict1" :file "/path/to/pyim-dict1.pyim" :coding utf-8-unix :dict-type pinyin-dict)
+;;         (:name "dict2" :file "/path/to/pyim-dict2.pyim" :coding utf-8-unix :dict-type pinyin-dict)))
 ;; #+END_EXAMPLE
 
 ;; 注意事项:
