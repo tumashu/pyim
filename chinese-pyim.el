@@ -189,20 +189,16 @@
 ;; 可以通过设置 `pyim-fuzzy-pinyin-alist' 变量来自定义模糊音。
 
 ;; *** 词语联想
-;; Chinese-pyim *内置* 了5种词语联想方式：
+;; Chinese-pyim *内置* 了几种词语联想方式：
 
 ;; 1. `pinyin-shouzimu' 搜索拼音首字母对应的词条做为联想词，
 ;;     如果输入 "ni-hao" ，那么同时搜索 code 为 "n-h" 的词条做为联想词。
 ;; 2. `pinyin-znabc' 类似智能ABC的词语联想(源于 emacs-eim)。
-;; 3. `dabbrev'  搜索当前 buffer, 或者其他 buffer 中已经存在的中文文本，得到匹配的
-;;    候选词，通过这些候选词来提高输入法的识别精度。
-
-;;    注意: 如果 emacs 打开的 buffer 太多或者太大, 输入法 *可能* 出现卡顿。
 
 ;; Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的代码来调整设置，比如：
 
 ;; #+BEGIN_EXAMPLE
-;; (setq pyim-enable-words-predict '(dabbrev pinyin-shouzimu))
+;; (setq pyim-enable-words-predict '(pinyin-shouzimu pinyin-znabc))
 ;; #+END_EXAMPLE
 
 ;; 开启词语联想功能有时候会导致输入法卡顿，用户可以通过下面的方式关闭：

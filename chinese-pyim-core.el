@@ -269,23 +269,9 @@ Chinese-pyim 内建的功能有：
 
 1. `pinyin-shouzimu' 搜索拼音首字母对应的词条做为联想词。
 2. `pinyin-znabc' 类似智能ABC的词语联想(源于 emacs-eim)。
-3. `dabbrev'  搜索当前 buffer, 或者其他 buffer 中已经存在的中文文本，得到匹配的
-              候选词，通过这些候选词来提高输入法的识别精度。
-
-              注意：如果用户打开的 buffer 太多或者太大，输入法 *可能* 会出现 *卡顿* 。
 
 当这个变量设置为 nil 时，关闭词语联想功能。"
   :group 'chinese-pyim)
-
-(defcustom pyim-dabbrev-other-buffers nil
-  "设置 dabbrev 词语联想需要搜索的 buffer，如果设置为 `all', 搜索所有的 buffer,
-如果设置为 t, 搜索所有和当前 buffer 模式相同的 buffer, 如果设置为 nil, 则只搜索
-当前 buffer."
-  :group 'chinese-pyim)
-
-(defcustom pyim-dabbrev-ignore-buffers '("\\`[ *]" "\\.pyim" "\\.gpyim")
-  "Regexp list, matching the names of buffers to ignore."
-  :type 'list)
 
 (defcustom pyim-isearch-enable-pinyin-search nil
   "设置是否开启 isearch 中文拼音搜索功能。"
@@ -423,9 +409,6 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
 (defvar pyim-punctuation-escape-list (number-sequence ?0 ?9)
   "Punctuation will not insert after this characters.
 If you don't like this funciton, set the variable to nil")
-
-(defvar pyim-dabbrev-time-limit .003
-  "Determines how many seconds should look for dabbrev matches.")
 
 (defvar pyim-dict-cache nil)
 (defvar pyim-dict-cache-create-p nil)
@@ -995,74 +978,6 @@ N 从 0 开始计数。"
                         (pyim-bisearch-word
                          code (point-min) (point-max)))))))
     words))
-
-;; Shameless steal from company-dabbrev.el in `company' package
-(defmacro pyim-get-dabbrev-time-limit-while (test start limit freq &rest body)
-  (declare (indent 3) (debug t))
-  `(let ((pyim-time-limit-while-counter 0))
-     (catch 'done
-       (while ,test
-         ,@body
-         (and ,limit
-              (= (cl-incf pyim-time-limit-while-counter) ,freq)
-              (setq pyim-time-limit-while-counter 0)
-              (> (float-time (time-since ,start)) ,limit)
-              (throw 'done 'pyim-time-out))))))
-
-;; Shameless steal from company-dabbrev.el in `company' package
-(defun pyim-get-dabbrev-search-buffer (regexp pos symbols start limit)
-  (save-excursion
-    (cl-labels ((maybe-collect-match
-                 ()
-                 (let ((match (match-string-no-properties 0)))
-                   (when (>= (length match) 2)
-                     (push match symbols)))))
-      (goto-char (if pos (1- pos) (point-min)))
-      ;; Search before pos.
-      (let ((tmp-end (point)))
-        (pyim-get-dabbrev-time-limit-while (> tmp-end (point-min))
-            start limit 1
-            (ignore-errors
-              (forward-char -10000))
-            (forward-line 0)
-            (save-excursion
-              ;; Before, we used backward search, but it matches non-greedily, and
-              ;; that forced us to use the "beginning/end of word" anchors in
-              ;; search regexp.
-              (while (re-search-forward regexp tmp-end t)
-                (maybe-collect-match)))
-            (setq tmp-end (point))))
-      (goto-char (or pos (point-min)))
-      ;; Search after pos.
-      (pyim-get-dabbrev-time-limit-while (re-search-forward regexp nil t)
-          start limit 10
-          (maybe-collect-match))
-      symbols)))
-
-;; Shameless steal from company-dabbrev.el in `company' package
-(defun pyim-get-dabbrev (regexp &optional limit other-buffer-modes)
-  (when (and regexp
-             (stringp regexp)
-             (not (equal regexp "")))
-    (let* ((start (current-time))
-           (symbols (pyim-get-dabbrev-search-buffer
-                     regexp (point) nil start limit)))
-      (when other-buffer-modes
-        (cl-dolist (buffer (delq (current-buffer) (buffer-list)))
-          (with-current-buffer buffer
-            (when (if (eq other-buffer-modes 'all)
-                      (not (cl-some
-                            #'(lambda (regexp)
-                                (pyim-string-match-p regexp (buffer-name)))
-                            pyim-dabbrev-ignore-buffers))
-                    (apply #'derived-mode-p other-buffer-modes))
-              (setq symbols
-                    (pyim-get-dabbrev-search-buffer
-                     regexp nil symbols start limit))))
-          (and limit
-               (> (float-time (time-since start)) limit)
-               (cl-return))))
-      symbols)))
 
 (defun pyim-string-match-p (regexp string &optional start)
   (and (stringp regexp)
@@ -1903,7 +1818,6 @@ Return the input string."
   ;; 是一个比较麻烦的事情的事情。 注：这个地方需要进一步得改进。
   (let* (personal-words
          pinyin-dict-words
-         dabbrev-accurate-words dabbrev-similar-words
          pinyin-shouzimu-similar-words pinyin-znabc-similar-words
          chars)
 
@@ -1917,10 +1831,6 @@ Return the input string."
       (setq chars
             (append chars
                     (car (pyim-get-choices:chars pylist)))))
-    ;; Dabbrev words
-    (let ((words (pyim-get-choices:dabbrev (car list-of-pylist))))
-      (setq dabbrev-accurate-words (car words))
-      (setq dabbrev-similar-words (car (cdr words))))
 
     ;; Pinyin shouzimu similar words
     (let ((words (pyim-get-choices:pinyin-shouzimu (car list-of-pylist))))
@@ -1933,19 +1843,15 @@ Return the input string."
     ;; Debug
     (when pyim-debug
       (princ (list :pylist-list list-of-pylist
-                   :dabbrev-accurate-words dabbrev-accurate-words
                    :personal-words personal-words
                    :pinyin-dict-words pinyin-dict-words
                    :pinyin-shouzimu-words pinyin-shouzimu-similar-words
-                   :dabbrev-similar-words dabbrev-similar-words
                    :pinyin-znabc-similar-words pinyin-znabc-similar-words
                    :chars chars)))
 
     (delete-dups
      (delq nil
-           `(,@(pyim-sort-words:count dabbrev-accurate-words)
-             ,(car personal-words)
-             ,@(pyim-sort-words:count dabbrev-similar-words)
+           `(,(car personal-words)
              ,@(pyim-sort-words:count (cdr personal-words))
              ,@pinyin-dict-words
              ,@(when (and pinyin-dict-words
@@ -1953,36 +1859,6 @@ Return the input string."
                  pinyin-shouzimu-similar-words)
              ,@pinyin-znabc-similar-words
              ,@chars)))))
-
-(defun pyim-get-choices:dabbrev (pylist)
-  (when (member 'dabbrev pyim-enable-words-predict)
-    (let* ((py-str (pyim-pylist-to-string pylist nil 'default))
-           (words-all
-            ;; 在所有指定的 buffer 中，搜索拼音匹配 `pylist' 中文词条，
-            ;; 搜索得到的结果作为联想词。
-            (when (> (length pylist) 1)
-              (delete-dups
-               (pyim-get-dabbrev
-                (pyim-build-chinese-regexp-for-pylist pylist nil nil t)
-                pyim-dabbrev-time-limit
-                (pcase pyim-dabbrev-other-buffers
-                  (`t (list major-mode))
-                  (`all `all))))))
-           (count 0)
-           word words-accurate words-similar)
-      (while words-all
-        (setq word (pop words-all))
-        ;; 从 buffer 中搜索得到的中文字符串，可能是一个无意义的的中文词语，这里做一下分类，
-        ;; 如果这个字符串在词库中存在，那就说明这个字符串是精确匹配的候选词，优先显示；
-        ;; 如果从词库中搜索不到，那么这个词只能作为类似词，放到稍微靠后的位置显示，
-        (if (member word (pyim-get py-str))
-            (push word words-accurate)
-          (push word words-similar))
-        (setq count (1+ count))
-        (when (> count 500)
-          (setq words-all nil)))
-      (list (delete-dups words-accurate)
-            (delete-dups words-similar)))))
 
 (defun pyim-get-choices:pinyin-znabc (pylist)
   ;; 将输入的拼音按照声母和韵母打散，得到尽可能多的拼音组合，
