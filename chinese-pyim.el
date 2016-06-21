@@ -69,11 +69,10 @@
 ;; 1. 配置melpa源，参考：http://melpa.org/#/getting-started
 ;; 2. M-x package-install RET chinese-pyim RET
 ;; 3. 在emacs配置文件中（比如: ~/.emacs）添加如下代码：
-
-;; #+BEGIN_EXAMPLE
-;; (require 'chinese-pyim)
-;; (chinese-pyim-basedict-enable)
-;; #+END_EXAMPLE
+;;    #+BEGIN_EXAMPLE
+;;    (require 'chinese-pyim)
+;;    (chinese-pyim-basedict-enable)
+;;    #+END_EXAMPLE
 
 ;; ** 配置
 
