@@ -72,7 +72,7 @@
 
 ;; #+BEGIN_EXAMPLE
 ;; (require 'chinese-pyim)
-;; (chinese-pyim-basedict-enable) ; Enable the pyim default dict
+;; (chinese-pyim-basedict-enable)
 ;; #+END_EXAMPLE
 
 ;; ** 配置
