@@ -974,10 +974,10 @@ N 从 0 开始计数。"
             (buffer (cdr (assoc "buffer" buf))))
         (with-current-buffer buffer
           (setq words
-                (append words
-                        (pyim-bisearch-word
-                         code (point-min) (point-max)))))))
-    words))
+                `(,@words
+                  ,@(pyim-bisearch-word
+                     code (point-min) (point-max)))))))
+    `(,@words ,@(pyim-pinyin2cchar-get code t t))))
 
 (defun pyim-string-match-p (regexp string &optional start)
   (and (stringp regexp)
@@ -1887,8 +1887,7 @@ Return the input string."
 
 (defun pyim-get-choices:chars (pylist)
   (let ((py-str (pyim-pylist-to-string pylist nil 'default)))
-    (list `(,@(pyim-get (concat (caar pylist) (cdar pylist)))
-            ,@(pyim-pinyin2cchar-get py-str t t))
+    (list (pyim-get (concat (caar pylist) (cdar pylist)))
           nil)))
 
 (defun pyim-get-word-property (word property &optional value-converter default-value)
