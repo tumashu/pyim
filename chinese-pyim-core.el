@@ -790,7 +790,6 @@ you need to install gzip (http://www.gzip.org/) and make sure system PATH set pr
          (cache-file (pyim-return-dict-cache-filename file cache-directory)))
     (with-current-buffer buffer
       (when (file-exists-p cache-file)
-        (message "词库 %S 缓存加载中 ..." (file-name-nondirectory file))
         (setq pyim-dict-cache
               (with-temp-buffer
                 (insert-file-contents cache-file)
@@ -801,8 +800,7 @@ you need to install gzip (http://www.gzip.org/) and make sure system PATH set pr
           (erase-buffer)
           (goto-char (point-min))
           (insert (concat ";; `pyim-dict-cache' has been created by `pyim-load-dict-cache-file', "
-                          "the buffer content is useless, clean it.")))
-        (message "词库 %S 缓存加载完成!" (file-name-nondirectory file))))))
+                          "the buffer content is useless, clean it.")))))))
 
 (defun pyim-generate-dict-cache-file (item cache-directory)
   "根据 `item' 创建对应的 cache file.
