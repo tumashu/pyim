@@ -867,11 +867,16 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
         (goto-char (point-min))
         (insert
          "
-# --------------------------------------------------------------------------------
-# 请将 buffer 的内容通过 QQ (329985753)，QQ群 (59134186), Email (tumashu@163.com)
-# 或者 github issue 系统 (https://github.com/tumashu/chinese-pyim-basedict/issues)
+# --------------------------------------------
+# 请将 buffer 的内容通过下面 *任意一个* 方式：
+#
+# 1. QQ (329985753)
+# 2. QQ群 (59134186)
+# 3. Email (tumashu@163.com)
+# 4. Github Issue (https://github.com/tumashu/chinese-pyim-basedict/issues)
+#
 # 发送给 Chinese-pyim 的维护者：Feng Shu
-# --------------------------------------------------------------------------------
+# --------------------------------------------
 
 ")
         (insert (format "#+Author: %s\n" author))
