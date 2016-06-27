@@ -839,35 +839,38 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
 
 (defun pyim-contribute-words ()
   (interactive)
-  (when (yes-or-no-p "您你打算为 Chinese-pyim 贡献词条吗？ ")
-    (let* ((author (read-from-minibuffer "请输入您的名字： " user-full-name))
-           (email (read-from-minibuffer "请输入您的电子邮件： " user-mail-address))
-           (license (read-from-minibuffer "请输入提交词库使用的 license ：" "GPLv2"))
-           (cache (buffer-local-value
-                   'pyim-dict-cache
-                   (get-buffer (pyim-get-buffer 'property-file))))
-           (buffer (get-buffer-create "*pyim-contribute-words*"))
-           (dicts-string (with-temp-buffer
-                           (goto-char (point-min))
-                           (maphash
-                            #'(lambda (key value)
-                                (insert key "\n"))
-                            cache)
-                           (goto-char (point-min))
-                           (while (not (eobp))
-                             (pyim-convert-current-line-to-dict-format)
-                             (forward-line 1))
-                           (pyim-update-dict-file t t)
-                           (pyim-update-dict-file t t)
-                           (buffer-string))))
-      (with-current-buffer buffer
-        (when (featurep 'org)
-          (org-mode))
-        (erase-buffer)
-        (goto-char (point-min))
-        (insert
-         "
-# --------------------------------------------
+  (if (not (pyim-get-buffer 'property-file))
+      (message "请启动 Chinese-pyim 后再运行 `pyim-contribute-words' 命令。")
+    (when (yes-or-no-p "您你打算为 Chinese-pyim 贡献词条吗？ ")
+      (let* ((cache (buffer-local-value
+                     'pyim-dict-cache
+                     (get-buffer (pyim-get-buffer 'property-file))))
+             (author (read-from-minibuffer "请输入您的名字： " user-full-name))
+             (email (read-from-minibuffer "请输入您的电子邮件： " user-mail-address))
+             (license (read-from-minibuffer "请输入提交词库使用的 license ：" "GPLv2"))
+             (buffer (get-buffer-create "*pyim-contribute-words*"))
+             (dicts-string (with-temp-buffer
+                             (goto-char (point-min))
+                             (maphash
+                              #'(lambda (key value)
+                                  (insert key "\n"))
+                              cache)
+                             (goto-char (point-min))
+                             (while (not (eobp))
+                               (pyim-convert-current-line-to-dict-format)
+                               (forward-line 1))
+                             (pyim-update-dict-file t t)
+                             (pyim-update-dict-file t t)
+                             (buffer-string))))
+        (with-current-buffer buffer
+          (when (featurep 'org)
+            (org-mode))
+          (setq truncate-lines t)
+          (erase-buffer)
+          (goto-char (point-min))
+          (insert
+           "
+# ---------------------------------------------------------------------------
 # 请将 buffer 的内容通过下面 *任意一个* 方式：
 #
 # 1. QQ (329985753)
@@ -876,18 +879,18 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
 # 4. Github Issue (https://github.com/tumashu/chinese-pyim-basedict/issues)
 #
 # 发送给 Chinese-pyim 的维护者：Feng Shu
-# --------------------------------------------
+# ---------------------------------------------------------------------------
 
 ")
-        (insert (format "#+Author: %s\n" author))
-        (insert (format "#+Email: %s\n" email))
-        (insert (format "#+License: %s\n" license))
-        (insert "\n")
-        (insert "#+BEGIN_COMMENT\n")
-        (insert dicts-string)
-        (insert "\n#+END_COMMENT")
-        (goto-char (point-min)))
-      (pop-to-buffer buffer))))
+          (insert (format "#+Author: %s\n" author))
+          (insert (format "#+Email: %s\n" email))
+          (insert (format "#+License: %s\n" license))
+          (insert "\n")
+          (insert "#+BEGIN_COMMENT\n")
+          (insert dicts-string)
+          (insert "\n#+END_COMMENT")
+          (goto-char (point-min)))
+        (pop-to-buffer buffer)))))
 ;; #+END_SRC
 
 ;; ** TODO 词库 package 制作工具
