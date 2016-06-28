@@ -826,16 +826,17 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
 
 这个函数用于制作 elpa 格式的词库 ，不建议普通用户使用。"
   (let (replace result)
-    (progn (dolist (dict pyim-extra-dicts)
-             (if (equal (plist-get dict :name)
-                        (plist-get new-dict :name))
-                 (progn (push new-dict result)
-                        (setq replace t))
-               (push dict result)))
-           (setq result (reverse result))
-           (setq pyim-extra-dicts
-                 (if replace result `(,@result ,new-dict)))
-           (message "`pyim-extra-dicts-add-dict' 添加词库到 `pyim-extra-dicts'。"))))
+    (dolist (dict pyim-extra-dicts)
+      (if (equal (plist-get dict :name)
+                 (plist-get new-dict :name))
+          (progn (push new-dict result)
+                 (setq replace t))
+        (push dict result)))
+    (setq result (reverse result))
+    (setq pyim-extra-dicts
+          (if replace result `(,@result ,new-dict)))
+    (message "添加词库 %S 到 `pyim-extra-dicts'。" (plist-get new-dict :name))
+    t))
 
 (defun pyim-contribute-words ()
   (interactive)
