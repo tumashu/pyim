@@ -34,31 +34,31 @@
 <h2>&#30446;&#24405;</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org1db132e">1. 使用说明&#xa0;&#xa0;&#xa0;<span class="tag"><span class="doc">doc</span></span></a>
+<li><a href="#orgheadline5">1. 使用说明</a>
 <ul>
-<li><a href="#org74df8cb">1.1. 简介</a></li>
-<li><a href="#org643e553">1.2. 设置</a>
+<li><a href="#orgheadline1">1.1. 简介</a></li>
+<li><a href="#orgheadline4">1.2. 设置</a>
 <ul>
-<li><a href="#org632c44f">1.2.1. 根据环境自动切换到英文输入模式</a></li>
-<li><a href="#orgf616c6b">1.2.2. 根据环境自动切换到半角标点输入模式</a></li>
+<li><a href="#orgheadline2">1.2.1. 根据环境自动切换到英文输入模式</a></li>
+<li><a href="#orgheadline3">1.2.2. 根据环境自动切换到半角标点输入模式</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org98afee6">2. 代码&#xa0;&#xa0;&#xa0;<span class="tag"><span class="code">code</span></span></a>
+<li><a href="#orgheadline8">2. 代码</a>
 <ul>
-<li><a href="#orgacc7e22">2.1. 根据环境自动切换到英文输入模式</a></li>
-<li><a href="#org6b18a19">2.2. 根据环境自动切换到半角标点输入模式</a></li>
+<li><a href="#orgheadline6">2.1. 根据环境自动切换到英文输入模式</a></li>
+<li><a href="#orgheadline7">2.2. 根据环境自动切换到半角标点输入模式</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org1db132e" class="outline-2">
-<h2 id="org1db132e"><span class="section-number-2">1</span> 使用说明&#xa0;&#xa0;&#xa0;<span class="tag"><span class="doc">doc</span></span></h2>
+<div id="outline-container-orgheadline5" class="outline-2">
+<h2 id="orgheadline5"><span class="section-number-2">1</span> 使用说明</h2>
 <div class="outline-text-2" id="text-1">
-</div><div id="outline-container-org74df8cb" class="outline-3">
-<h3 id="org74df8cb"><span class="section-number-3">1.1</span> 简介</h3>
+</div><div id="outline-container-orgheadline1" class="outline-3">
+<h3 id="orgheadline1"><span class="section-number-3">1.1</span> 简介</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 这个文件包含了许多探针函数，用于实现两个功能：
@@ -71,11 +71,11 @@
 </div>
 </div>
 
-<div id="outline-container-org643e553" class="outline-3">
-<h3 id="org643e553"><span class="section-number-3">1.2</span> 设置</h3>
+<div id="outline-container-orgheadline4" class="outline-3">
+<h3 id="orgheadline4"><span class="section-number-3">1.2</span> 设置</h3>
 <div class="outline-text-3" id="text-1-2">
-</div><div id="outline-container-org632c44f" class="outline-4">
-<h4 id="org632c44f"><span class="section-number-4">1.2.1</span> 根据环境自动切换到英文输入模式</h4>
+</div><div id="outline-container-orgheadline2" class="outline-4">
+<h4 id="orgheadline2"><span class="section-number-4">1.2.1</span> 根据环境自动切换到英文输入模式</h4>
 <div class="outline-text-4" id="text-1-2-1">
 <p>
 用户将探针函数添加到 `pyim-english-input-switch-functions' 后, 就可以激活这个探针函数，比如：
@@ -94,8 +94,8 @@
 </div>
 </div>
 
-<div id="outline-container-orgf616c6b" class="outline-4">
-<h4 id="orgf616c6b"><span class="section-number-4">1.2.2</span> 根据环境自动切换到半角标点输入模式</h4>
+<div id="outline-container-orgheadline3" class="outline-4">
+<h4 id="orgheadline3"><span class="section-number-4">1.2.2</span> 根据环境自动切换到半角标点输入模式</h4>
 <div class="outline-text-4" id="text-1-2-2">
 <p>
 用户将探针函数添加到 `pyim-punctuation-half-width-functions' 后, 就可以激活这个探针函数。
@@ -106,11 +106,11 @@
 </div>
 
 
-<div id="outline-container-org98afee6" class="outline-2">
-<h2 id="org98afee6"><span class="section-number-2">2</span> 代码&#xa0;&#xa0;&#xa0;<span class="tag"><span class="code">code</span></span></h2>
+<div id="outline-container-orgheadline8" class="outline-2">
+<h2 id="orgheadline8"><span class="section-number-2">2</span> 代码</h2>
 <div class="outline-text-2" id="text-2">
-</div><div id="outline-container-orgacc7e22" class="outline-3">
-<h3 id="orgacc7e22"><span class="section-number-3">2.1</span> 根据环境自动切换到英文输入模式</h3>
+</div><div id="outline-container-orgheadline6" class="outline-3">
+<h3 id="orgheadline6"><span class="section-number-3">2.1</span> 根据环境自动切换到英文输入模式</h3>
 <div class="outline-text-3" id="text-2-1">
 <div class="org-src-container">
 
@@ -176,21 +176,21 @@
   (let ((str-before-1 (pyim-char-before-to-string 0)))
     (unless (string= (buffer-name) " <b>temp</b>") ; Make sure this probe can work with exim of exwm.
       (if (&lt;= (point) (save-excursion (back-to-indentation)
-				      (point)))
-	  (not (or (pyim-string-match-p "\\cc" (save-excursion
-						 ;; 查找前一个非空格字符。
-						 (if (re-search-backward "[^[:space:]\n]" nil t)
-						     (char-to-string (char-after (point))))))
-		   (&gt; (length pyim-current-key) 0)))
-	(not (or (pyim-string-match-p "\\cc" str-before-1)
-		 (&gt; (length pyim-current-key) 0)))))))
+                      (point)))
+      (not (or (pyim-string-match-p "\\cc" (save-excursion
+                         ;; 查找前一个非空格字符。
+                         (if (re-search-backward "[^[:space:]\n]" nil t)
+                             (char-to-string (char-after (point))))))
+           (&gt; (length pyim-current-key) 0)))
+    (not (or (pyim-string-match-p "\\cc" str-before-1)
+         (&gt; (length pyim-current-key) 0)))))))
 #+END_SRC
 </p>
 </div>
 </div>
 
-<div id="outline-container-org6b18a19" class="outline-3">
-<h3 id="org6b18a19"><span class="section-number-3">2.2</span> 根据环境自动切换到半角标点输入模式</h3>
+<div id="outline-container-orgheadline7" class="outline-3">
+<h3 id="orgheadline7"><span class="section-number-3">2.2</span> 根据环境自动切换到半角标点输入模式</h3>
 <div class="outline-text-3" id="text-2-2">
 <div class="org-src-container">
 
@@ -222,8 +222,8 @@
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2016-06-19</span>
-        <span title="last modification date" class="post-info">2016-06-19</span>
+        <span title="post date" class="post-info">2016-07-04</span>
+        <span title="last modification date" class="post-info">2016-07-04</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>

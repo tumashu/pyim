@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <title>chinese-pyim-benchmark - Chinese-pyim</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Feng Shu" />
+    <link rel="stylesheet" href="http://tumashu.github.com/chinese-pyim/media/css/main.css" type="text/css">
+  </head>
+<body class="container">
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="http://tumashu.github.com/chinese-pyim/">Chinese-pyim</a> <span class="subtitle">(一个 emacs 环境下的中文拼音输入法)</span></h1>
+        <ul>
+          <li><a href="http://tumashu.github.com/chinese-pyim/documents/">Documents</a></li>
+          <li><a href="http://tumashu.github.com/chinese-pyim/snapshots/">Snapshots</a></li>
+          <li><a href="http://tumashu.github.com/chinese-pyim/tags/">Tags</a></li>
+          <li><a href="http://tumashu.github.com/chinese-pyim/about/">About</a></li>
+          <li><a href="https://github.com/tumashu/chinese-pyim">GitHub</a></li>
+          <li><a href="http://tumashu.github.com/chinese-pyim/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="tumashu.github.com/chinese-pyim">
+        </form>
+        <img class="avatar" src="http://tumashu.github.com/chinese-pyim/media/img/horse.jpg" />
+      </header>
+    </div>
+
+<div class="content-and-footer">
+<div>
+<div class="post">
+<h1 class="post-title">chinese-pyim-benchmark</h1>
+<div id="table-of-contents">
+<h2>&#30446;&#24405;</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgheadline1">1. 说明文档</a></li>
+<li><a href="#orgheadline2">2. 代码</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgheadline1" class="outline-2">
+<h2 id="orgheadline1"><span class="section-number-2">1</span> 说明文档</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+这个文件包含了一些调试 Chinese-pyim 性能的工具
+</p>
+</div>
+</div>
+
+
+
+<div id="outline-container-orgheadline2" class="outline-2">
+<h2 id="orgheadline2"><span class="section-number-2">2</span> 代码</h2>
+<div class="outline-text-2" id="text-2">
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">require</span> '<span style="color: #96CBFE;">chinese-pyim</span>)
+
+(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-benchmark</span> ()
+  (<span style="color: #4c83ff;">interactive</span>)
+  (<span style="color: #4c83ff;">let</span> ((pylist (car (pyim-split-string:quanpin <span style="color: #61CE3C;">"ni-hao"</span> 'default)))
+        (time 1000))
+    (message <span style="color: #61CE3C;">"================================================="</span>)
+    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-get-sm</span><span style="color: #61CE3C;">' ..."</span>)
+    (benchmark time '(pyim-get-sm <span style="color: #61CE3C;">"ni"</span>))
+
+    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-get-ym</span><span style="color: #61CE3C;">' ..."</span>)
+    (benchmark time '(pyim-get-ym <span style="color: #61CE3C;">"iao"</span>))
+
+    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-get-charpy</span><span style="color: #61CE3C;">' ..."</span>)
+    (benchmark time '(pyim-get-charpy <span style="color: #61CE3C;">"ni"</span>))
+
+    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-split-string:quanpin</span><span style="color: #61CE3C;">' ..."</span>)
+    (benchmark time '(pyim-split-string:quanpin <span style="color: #61CE3C;">"ni-hao"</span> 'default))
+
+    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-pylist-to-string</span><span style="color: #61CE3C;">' ..."</span>)
+    (benchmark time '(pyim-pylist-to-string pylist nil 'default))
+
+    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-get-choices</span><span style="color: #61CE3C;">' ..."</span>)
+    (benchmark time '(pyim-get-choices (list pylist)))
+
+    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-get-choices:personal-file</span><span style="color: #61CE3C;">' ..."</span>)
+    (benchmark time '(pyim-get-choices:personal-file pylist))
+
+    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-get-choices:pinyin-dict</span><span style="color: #61CE3C;">' ..."</span>)
+    (benchmark time '(pyim-get-choices:pinyin-dict pylist))
+
+    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-get-choices:char</span><span style="color: #61CE3C;">' ..."</span>)
+    (benchmark time '(pyim-get-choices:chars pylist))
+
+    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-hanzi2pinyin</span><span style="color: #61CE3C;">' ..."</span>)
+    (benchmark time '(pyim-hanzi2pinyin <span style="color: #61CE3C;">"&#20320;&#22909;"</span> nil <span style="color: #61CE3C;">"-"</span> t))
+
+    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-cchar2pinyin-get</span><span style="color: #61CE3C;">' ..."</span>)
+    (benchmark time '(pyim-cchar2pinyin-get ?&#20320;))
+
+    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-pinyin2cchar-get</span><span style="color: #61CE3C;">' ..."</span>)
+    (benchmark time '(pyim-pinyin2cchar-get <span style="color: #61CE3C;">"ni"</span>))
+
+    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-build-chinese-regexp-for-pylist</span><span style="color: #61CE3C;">' ..."</span>)
+    (benchmark time '(pyim-build-chinese-regexp-for-pylist pylist nil nil t))
+
+    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-get</span><span style="color: #61CE3C;">' ..."</span>)
+    (benchmark time '(pyim-get <span style="color: #61CE3C;">"ni-hao"</span> '(pinyin-dict)))
+    (message <span style="color: #61CE3C;">"================================================="</span>)
+    (message <span style="color: #61CE3C;">""</span>)))
+</pre>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2016-07-04</span>
+        <span title="last modification date" class="post-info">2016-07-04</span>
+        <span title="tags" class="post-info">N/A</span>
+        <span title="author" class="post-info">Feng Shu</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'tumashu-website'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.x(<a href="http://orgmode.org">Org mode</a> 8.x)</p>
+        <p>
+          Copyright &copy; <span id="footerYear"></span> <a href="mailto:tumashu &lt;at&gt; 163 &lt;dot&gt; com">Feng Shu</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/tumashu/org-webpage" target="_blank">org-webpage</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+</div>
+</body>
+</html>

@@ -34,20 +34,20 @@
 <h2>&#30446;&#24405;</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orge035e92">1. 说明文档&#xa0;&#xa0;&#xa0;<span class="tag"><span class="doc">doc</span></span></a></li>
-<li><a href="#orgc87258e">2. 代码&#xa0;&#xa0;&#xa0;<span class="tag"><span class="code">code</span></span></a>
+<li><a href="#orgheadline1">1. 说明文档</a></li>
+<li><a href="#orgheadline6">2. 代码</a>
 <ul>
-<li><a href="#org224b21a">2.1. Require + defcustom</a></li>
-<li><a href="#org7a0d978">2.2. 让 company-grab-word 正确的处理中文</a></li>
-<li><a href="#org41c207b">2.3. 让 pyim-company-dabbrev&#x2013;make-regexp 生成合适中文搜索的 regexp</a></li>
-<li><a href="#org994620a">2.4. <span class="todo TODO">TODO</span> 让 pyim-company-dabbrev&#x2013;search 更好的处理中文</a></li>
+<li><a href="#orgheadline2">2.1. Require + defcustom</a></li>
+<li><a href="#orgheadline3">2.2. 让 company-grab-word 正确的处理中文</a></li>
+<li><a href="#orgheadline4">2.3. 让 pyim-company-dabbrev&#x2013;make-regexp 生成合适中文搜索的 regexp</a></li>
+<li><a href="#orgheadline5">2.4. <span class="todo TODO">TODO</span> 让 pyim-company-dabbrev&#x2013;search 更好的处理中文</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orge035e92" class="outline-2">
-<h2 id="orge035e92"><span class="section-number-2">1</span> 说明文档&#xa0;&#xa0;&#xa0;<span class="tag"><span class="doc">doc</span></span></h2>
+<div id="outline-container-orgheadline1" class="outline-2">
+<h2 id="orgheadline1"><span class="section-number-2">1</span> 说明文档</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 通过 Chinese-pyim 让 Company-dabbrev 更好的处理中文。
@@ -68,11 +68,11 @@
 
 
 
-<div id="outline-container-orgc87258e" class="outline-2">
-<h2 id="orgc87258e"><span class="section-number-2">2</span> 代码&#xa0;&#xa0;&#xa0;<span class="tag"><span class="code">code</span></span></h2>
+<div id="outline-container-orgheadline6" class="outline-2">
+<h2 id="orgheadline6"><span class="section-number-2">2</span> 代码</h2>
 <div class="outline-text-2" id="text-2">
-</div><div id="outline-container-org224b21a" class="outline-3">
-<h3 id="org224b21a"><span class="section-number-3">2.1</span> Require + defcustom</h3>
+</div><div id="outline-container-orgheadline2" class="outline-3">
+<h3 id="orgheadline2"><span class="section-number-3">2.1</span> Require + defcustom</h3>
 <div class="outline-text-3" id="text-2-1">
 <div class="org-src-container">
 
@@ -129,8 +129,8 @@
 </div>
 </div>
 
-<div id="outline-container-org7a0d978" class="outline-3">
-<h3 id="org7a0d978"><span class="section-number-3">2.2</span> 让 company-grab-word 正确的处理中文</h3>
+<div id="outline-container-orgheadline3" class="outline-3">
+<h3 id="orgheadline3"><span class="section-number-3">2.2</span> 让 company-grab-word 正确的处理中文</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 `company-grab-word' 可以获取光标处的一个英文词语，但只能获取光标处的一个<b>中文句子</b>，使用一个句子来搜索，得到的备选词条往往很少，并且用处不大（很少人在一篇文章中重复的写一个句子）。
@@ -148,13 +148,49 @@
         (<span style="color: #4c83ff;">or</span> (pyim-grab-chinese-word)
             (pyim-char-before-to-string 0)))
     (funcall orig-fun)))
+
+(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-grab-chinese-word</span> (<span style="color: #afd8af;">&amp;optional</span> backward-char-number return-possible-words)
+  <span style="color: #FBDE2D;">"&#33719;&#21462;&#20809;&#26631;&#22788;&#19968;&#20010; *&#26377;&#25928;&#30340;* &#20013;&#25991;&#35789;&#35821;&#65292;&#36739;&#38271;&#30340;&#35789;&#35821;&#20248;&#20808;&#12290;"</span>
+  (<span style="color: #4c83ff;">unless</span> (<span style="color: #4c83ff;">featurep</span> '<span style="color: #96CBFE;">chinese-pyim-utils</span>)
+    (<span style="color: #4c83ff;">require</span> '<span style="color: #96CBFE;">chinese-pyim-utils</span>))
+  (<span style="color: #4c83ff;">let*</span> ((backward-char-number (<span style="color: #4c83ff;">or</span> backward-char-number 0))
+         (string (replace-regexp-in-string
+                  <span style="color: #61CE3C;">".*\\CC"</span> <span style="color: #61CE3C;">""</span>
+                  (buffer-substring
+                   (<span style="color: #4c83ff;">save-excursion</span>
+                     <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#22312;&#36755;&#20837;&#20013;&#25991;&#30340;&#26102;&#20505;&#65292;`</span><span style="color: #96CBFE; font-style: italic;">pyim-current-str</span><span style="color: #8B8989; font-style: italic;">' &#20063;&#20250;</span>
+                     <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#25554;&#20837;&#21040;&#20809;&#26631;&#22788;&#65292;&#36339;&#36807;&#12290;&#12290;&#12290;</span>
+                     (backward-char backward-char-number)
+                     (point))
+                   (<span style="color: #4c83ff;">save-excursion</span>
+                     (backward-char backward-char-number)
+                     (skip-syntax-backward <span style="color: #61CE3C;">"w"</span>)
+                     (point)))))
+         (string
+          <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#25105;&#20204;&#20808;&#25552;&#21462;&#19968;&#20010;&#20013;&#25991;&#23383;&#31526;&#20018;&#65292;&#28982;&#21518;&#23558;&#36825;&#20010;&#23383;&#31526;&#20018;&#20998;&#35789;&#65292;&#24471;&#21040;&#25152;&#38656;&#35789;&#35821;&#12290;</span>
+          <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#22240;&#20026;&#38271;&#23383;&#31526;&#20018;&#20998;&#35789;&#28040;&#32791;&#30340;&#26102;&#38388;&#36739;&#38271;&#65292;&#24433;&#21709;&#36755;&#20837;&#27861;&#21709;&#24212;&#36895;&#24230;&#65292;&#25152;&#20197;&#36825;&#37324;&#38480;&#21046;</span>
+          <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#23383;&#31526;&#20018;&#38271;&#24230;&#20026;6&#65292;&#32463;&#39564;&#25968;&#20540;&#12290;</span>
+          (<span style="color: #4c83ff;">if</span> (&gt; (length string) 6)
+              (substring string -6)
+            string))
+         (length (length string)))
+    (<span style="color: #4c83ff;">if</span> return-possible-words
+        (<span style="color: #4c83ff;">when</span> (stringp string)
+          (<span style="color: #4c83ff;">let</span> (results)
+            (<span style="color: #4c83ff;">dotimes</span> (i length)
+              (<span style="color: #4c83ff;">push</span> (substring string i) results))
+            results))
+      (cl-some #'(lambda (x)
+                   (<span style="color: #4c83ff;">if</span> (= (nth 2 x) (+ 1 length))
+                       (car x)))
+               (nreverse (pyim-split-chinese-string string))))))
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org41c207b" class="outline-3">
-<h3 id="org41c207b"><span class="section-number-3">2.3</span> 让 pyim-company-dabbrev&#x2013;make-regexp 生成合适中文搜索的 regexp</h3>
+<div id="outline-container-orgheadline4" class="outline-3">
+<h3 id="orgheadline4"><span class="section-number-3">2.3</span> 让 pyim-company-dabbrev&#x2013;make-regexp 生成合适中文搜索的 regexp</h3>
 <div class="outline-text-3" id="text-2-3">
 <p>
 用 `pyim-company-dabbrev&#x2013;make-regexp' 得到的 regexp, 搜索中文时，会搜索到一个
@@ -176,8 +212,8 @@
 </div>
 </div>
 
-<div id="outline-container-org994620a" class="outline-3">
-<h3 id="org994620a"><span class="section-number-3">2.4</span> <span class="todo TODO">TODO</span> 让 pyim-company-dabbrev&#x2013;search 更好的处理中文</h3>
+<div id="outline-container-orgheadline5" class="outline-3">
+<h3 id="orgheadline5"><span class="section-number-3">2.4</span> <span class="todo TODO">TODO</span> 让 pyim-company-dabbrev&#x2013;search 更好的处理中文</h3>
 <div class="outline-text-3" id="text-2-4">
 <p>
 本来打算在这个地方对<b>候选词条列表</b>做一些筛选，比如，用 Chinese-pyim 自带的分词函数对候选词条进行分词，然后只提取第一个<b>有效</b>的中文词语，但由于分词函数速度太慢，导致补全时卡顿明显，所以暂时没有这么处理。
@@ -211,8 +247,8 @@
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2016-06-19</span>
-        <span title="last modification date" class="post-info">2016-06-19</span>
+        <span title="post date" class="post-info">2016-07-04</span>
+        <span title="last modification date" class="post-info">2016-07-04</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>
