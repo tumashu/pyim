@@ -2740,7 +2740,7 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
     (when punc-list
       (delete-char -1)
       (if (equal current-char (car punc-list))
-          (insert (pyim-return-proper-punctuation punc-list t))
+          (insert (pyim-return-proper-punctuation punc-list))
         (insert (car punc-list))))))
 
 (defun pyim-punctuation-translate-last-n-punctuations (&optional punct-style)
