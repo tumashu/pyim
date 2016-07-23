@@ -356,7 +356,7 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
                (unless (or (pyim-string-match-p "[^a-z-]" x)
                            (pyim-string-match-p "[:ascii:]" line-content)
                            (not (pyim-string-match-p "\\cc" line-content)))
-                 (format "%s  %s" x line-content)))
+                 (format "%s %s" x line-content)))
            pinyin-list "\n"))
     (when (> (length insert-string) 1)
       (insert insert-string))))
