@@ -2900,13 +2900,14 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
   (interactive)
   (unless (equal input-method-function 'pyim-input-method)
     (toggle-input-method))
-  (let* ((pyim-force-input-chinese t)
+  (let* ((case-fold-search nil)
+         (pyim-force-input-chinese t)
          (string (if mark-active
                      (buffer-substring-no-properties
                       (region-beginning) (region-end))
                    (buffer-substring (point) (line-beginning-position))))
          pinyin length)
-    (and (string-match "[a-zA-Z'-]+ *$" string)
+    (and (string-match "[a-z'-]+ *$" string)
          (setq pinyin (match-string 0 string))
          (setq length (length pinyin))
          (setq pinyin (replace-regexp-in-string " +" "" pinyin)))
