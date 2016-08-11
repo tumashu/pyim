@@ -103,7 +103,7 @@
 <h2 id="orgheadline44"><span class="section-number-2">1</span> Chinese-pyim 使用说明</h2>
 <div class="outline-text-2" id="text-1">
 </div><div id="outline-container-orgheadline1" class="outline-3">
-<h3 id="orgheadline1"><span class="section-number-3">1.1</span>截图</h3>
+<h3 id="orgheadline1"><span class="section-number-3">1.1</span> 截图</h3>
 <div class="outline-text-3" id="text-1-1">
 
 <div class="figure">
@@ -114,7 +114,7 @@
 </div>
 
 <div id="outline-container-orgheadline2" class="outline-3">
-<h3 id="orgheadline2"><span class="section-number-3">1.2</span>简介</h3>
+<h3 id="orgheadline2"><span class="section-number-3">1.2</span> 简介</h3>
 <div class="outline-text-3" id="text-1-2">
 <p>
 Chinese-pyim (Chinese Pinyin Input Method) 是 emacs 环境下的一个中文拼音输入法。
@@ -124,7 +124,7 @@ Chinese-pyim (Chinese Pinyin Input Method) 是 emacs 环境下的一个中文拼
 
 
 <div id="outline-container-orgheadline3" class="outline-3">
-<h3 id="orgheadline3"><span class="section-number-3">1.3</span>背景</h3>
+<h3 id="orgheadline3"><span class="section-number-3">1.3</span> 背景</h3>
 <div class="outline-text-3" id="text-1-3">
 <p>
 Chinese-pyim 的代码源自 emacs-eim。
@@ -151,7 +151,7 @@ emacs-eim 是 emacs 环境下的一个中文输入法框架， 支持拼音，�
 </div>
 
 <div id="outline-container-orgheadline4" class="outline-3">
-<h3 id="orgheadline4"><span class="section-number-3">1.4</span>目标</h3>
+<h3 id="orgheadline4"><span class="section-number-3">1.4</span> 目标</h3>
 <div class="outline-text-3" id="text-1-4">
 <p>
 Chinese-pyim 的目标是：<b>尽最大的努力成为一个好用的 emacs 中文拼音输入法</b>，具体可表现为三个方面：
@@ -167,7 +167,7 @@ Chinese-pyim 的目标是：<b>尽最大的努力成为一个好用的 emacs 中
 </div>
 
 <div id="outline-container-orgheadline5" class="outline-3">
-<h3 id="orgheadline5"><span class="section-number-3">1.5</span>特点</h3>
+<h3 id="orgheadline5"><span class="section-number-3">1.5</span> 特点</h3>
 <div class="outline-text-3" id="text-1-5">
 <ol class="org-ol">
 <li>Chinese-pyim 只是一个拼音输入法，安装配置方便快捷，一般只能通过添加词库的方式优化输入法。</li>
@@ -177,7 +177,7 @@ Chinese-pyim 的目标是：<b>尽最大的努力成为一个好用的 emacs 中
 </div>
 
 <div id="outline-container-orgheadline6" class="outline-3">
-<h3 id="orgheadline6"><span class="section-number-3">1.6</span>安装</h3>
+<h3 id="orgheadline6"><span class="section-number-3">1.6</span> 安装</h3>
 <div class="outline-text-3" id="text-1-6">
 <ol class="org-ol">
 <li>配置melpa源，参考：<a href="http://melpa.org/#/getting-started">http://melpa.org/#/getting-started</a></li>
@@ -195,10 +195,10 @@ Chinese-pyim 的目标是：<b>尽最大的努力成为一个好用的 emacs 中
 </div>
 
 <div id="outline-container-orgheadline11" class="outline-3">
-<h3 id="orgheadline11"><span class="section-number-3">1.7</span>配置</h3>
+<h3 id="orgheadline11"><span class="section-number-3">1.7</span> 配置</h3>
 <div class="outline-text-3" id="text-1-7">
 </div><div id="outline-container-orgheadline7" class="outline-4">
-<h4 id="orgheadline7"><span class="section-number-4">1.7.1</span>配置实例</h4>
+<h4 id="orgheadline7"><span class="section-number-4">1.7.1</span> 配置实例</h4>
 <div class="outline-text-4" id="text-1-7-1">
 <p>
 对 Chinese-pyim 感兴趣的同学，可以看看我的 Chinese-pyim 配置，大体了解一下 Chinese-pyim 的用法：<a href="https://github.com/tumashu/emacs-helper/blob/master/eh-basic.el">Tumashu's emacs configure</a>。
@@ -207,7 +207,7 @@ Chinese-pyim 的目标是：<b>尽最大的努力成为一个好用的 emacs 中
 </div>
 
 <div id="outline-container-orgheadline9" class="outline-4">
-<h4 id="orgheadline9"><span class="section-number-4">1.7.2</span>添加词库文件</h4>
+<h4 id="orgheadline9"><span class="section-number-4">1.7.2</span> 添加词库文件</h4>
 <div class="outline-text-4" id="text-1-7-2">
 <p>
 Chinese-pyim 当前的默认词库是 chinese-pyim-basedict, 这个词库的词条量
@@ -262,7 +262,7 @@ Chinese-pyim-greatdict 包对应的词库由<a href="https://github.com/xiaowl">
 </div>
 
 <div id="outline-container-orgheadline10" class="outline-4">
-<h4 id="orgheadline10"><span class="section-number-4">1.7.3</span>激活 Chinese-pyim</h4>
+<h4 id="orgheadline10"><span class="section-number-4">1.7.3</span> 激活 Chinese-pyim</h4>
 <div class="outline-text-4" id="text-1-7-3">
 <pre class="example">
 (setq default-input-method "chinese-pyim")
@@ -273,10 +273,10 @@ Chinese-pyim-greatdict 包对应的词库由<a href="https://github.com/xiaowl">
 </div>
 
 <div id="outline-container-orgheadline23" class="outline-3">
-<h3 id="orgheadline23"><span class="section-number-3">1.8</span>使用</h3>
+<h3 id="orgheadline23"><span class="section-number-3">1.8</span> 使用</h3>
 <div class="outline-text-3" id="text-1-8">
 </div><div id="outline-container-orgheadline12" class="outline-4">
-<h4 id="orgheadline12"><span class="section-number-4">1.8.1</span>常用快捷键</h4>
+<h4 id="orgheadline12"><span class="section-number-4">1.8.1</span> 常用快捷键</h4>
 <div class="outline-text-4" id="text-1-8-1">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -358,7 +358,7 @@ Chinese-pyim-greatdict 包对应的词库由<a href="https://github.com/xiaowl">
 </div>
 
 <div id="outline-container-orgheadline13" class="outline-4">
-<h4 id="orgheadline13"><span class="section-number-4">1.8.2</span>使用双拼模式</h4>
+<h4 id="orgheadline13"><span class="section-number-4">1.8.2</span> 使用双拼模式</h4>
 <div class="outline-text-4" id="text-1-8-2">
 <p>
 Chinese-pyim 支持双拼模式，用户可以通过变量 `pyim-default-pinyin-scheme' 来设定当前使用的双拼方案，比如：
@@ -379,7 +379,7 @@ Chinese-pyim 支持双拼模式，用户可以通过变量 `pyim-default-pinyin-
 </div>
 
 <div id="outline-container-orgheadline14" class="outline-4">
-<h4 id="orgheadline14"><span class="section-number-4">1.8.3</span>让选词框跟随光标</h4>
+<h4 id="orgheadline14"><span class="section-number-4">1.8.3</span> 让选词框跟随光标</h4>
 <div class="outline-text-4" id="text-1-8-3">
 <p>
 用户可以通过下面的设置让 Chinese-pyim 在<b>光标处</b>显示一个选词框：
@@ -416,7 +416,7 @@ GTK 选词框的字体设置可以参考：<a href="https://www.gnu.org/software
 </div>
 
 <div id="outline-container-orgheadline15" class="outline-4">
-<h4 id="orgheadline15"><span class="section-number-4">1.8.4</span>调整 tooltip 选词框的显示样式</h4>
+<h4 id="orgheadline15"><span class="section-number-4">1.8.4</span> 调整 tooltip 选词框的显示样式</h4>
 <div class="outline-text-4" id="text-1-8-4">
 <p>
 Chinese-pyim 的 tooltip 选词框默认使用<b>双行显示</b>的样式，在一些特殊的情况下（比如：popup 显示的菜单错位），用户可以使用<b>单行显示</b>
@@ -434,7 +434,7 @@ Chinese-pyim 的 tooltip 选词框默认使用<b>双行显示</b>的样式，在
 </div>
 
 <div id="outline-container-orgheadline16" class="outline-4">
-<h4 id="orgheadline16"><span class="section-number-4">1.8.5</span>设置模糊音</h4>
+<h4 id="orgheadline16"><span class="section-number-4">1.8.5</span> 设置模糊音</h4>
 <div class="outline-text-4" id="text-1-8-5">
 <p>
 可以通过设置 `pyim-fuzzy-pinyin-alist' 变量来自定义模糊音。
@@ -443,7 +443,7 @@ Chinese-pyim 的 tooltip 选词框默认使用<b>双行显示</b>的样式，在
 </div>
 
 <div id="outline-container-orgheadline17" class="outline-4">
-<h4 id="orgheadline17"><span class="section-number-4">1.8.6</span>词语联想</h4>
+<h4 id="orgheadline17"><span class="section-number-4">1.8.6</span> 词语联想</h4>
 <div class="outline-text-4" id="text-1-8-6">
 <p>
 Chinese-pyim <b>内置</b>了几种词语联想方式：
@@ -473,7 +473,7 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
 </div>
 
 <div id="outline-container-orgheadline18" class="outline-4">
-<h4 id="orgheadline18"><span class="section-number-4">1.8.7</span>切换全角标点与半角标点</h4>
+<h4 id="orgheadline18"><span class="section-number-4">1.8.7</span> 切换全角标点与半角标点</h4>
 <div class="outline-text-4" id="text-1-8-7">
 <ol class="org-ol">
 <li>第一种方法：使用命令 `pyim-toggle-full-width-punctuation'，全局切换。</li>
@@ -484,7 +484,7 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
 </div>
 
 <div id="outline-container-orgheadline19" class="outline-4">
-<h4 id="orgheadline19"><span class="section-number-4">1.8.8</span>手动加词和删词</h4>
+<h4 id="orgheadline19"><span class="section-number-4">1.8.8</span> 手动加词和删词</h4>
 <div class="outline-text-4" id="text-1-8-8">
 <ol class="org-ol">
 <li>`pyim-create-word-without-pinyin' 直接将一个中文词条加入个人词库的函数，用于编程环境。</li>
@@ -511,7 +511,7 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
 </div>
 
 <div id="outline-container-orgheadline20" class="outline-5">
-<h5 id="orgheadline20"><span class="section-number-5">1.8.9.1</span>根据环境自动切换到英文输入模式</h5>
+<h5 id="orgheadline20"><span class="section-number-5">1.8.9.1</span> 根据环境自动切换到英文输入模式</h5>
 <div class="outline-text-5" id="text-1-8-9-1">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -589,7 +589,7 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
 </div>
 
 <div id="outline-container-orgheadline21" class="outline-5">
-<h5 id="orgheadline21"><span class="section-number-5">1.8.9.2</span>根据环境自动切换到半角标点输入模式</h5>
+<h5 id="orgheadline21"><span class="section-number-5">1.8.9.2</span> 根据环境自动切换到半角标点输入模式</h5>
 <div class="outline-text-5" id="text-1-8-9-2">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -637,7 +637,7 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
 </div>
 
 <div id="outline-container-orgheadline24" class="outline-3">
-<h3 id="orgheadline24"><span class="section-number-3">1.9</span>捐赠</h3>
+<h3 id="orgheadline24"><span class="section-number-3">1.9</span> 捐赠</h3>
 <div class="outline-text-3" id="text-1-9">
 <p>
 您可以通过小额捐赠的方式支持 Chinese-pyim 的开发工作，具体方式：
@@ -663,7 +663,7 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
 <h3 id="orgheadline43"><span class="section-number-3">1.10</span> Tips</h3>
 <div class="outline-text-3" id="text-1-10">
 </div><div id="outline-container-orgheadline25" class="outline-4">
-<h4 id="orgheadline25"><span class="section-number-4">1.10.1</span>如何为 Chinese-pyim 贡献词条</h4>
+<h4 id="orgheadline25"><span class="section-number-4">1.10.1</span> 如何为 Chinese-pyim 贡献词条</h4>
 <div class="outline-text-4" id="text-1-10-1">
 <pre class="example">
 M-x: pyim-contribute-words
@@ -681,7 +681,7 @@ M-x: pyim-contribute-words
 </div>
 
 <div id="outline-container-orgheadline27" class="outline-4">
-<h4 id="orgheadline27"><span class="section-number-4">1.10.3</span>选词框弹出位置不合理或者选词框内容显示不全</h4>
+<h4 id="orgheadline27"><span class="section-number-4">1.10.3</span> 选词框弹出位置不合理或者选词框内容显示不全</h4>
 <div class="outline-text-4" id="text-1-10-3">
 <p>
 可以通过设置 `pyim-tooltip-width-adjustment' 变量来手动校正。
@@ -695,7 +695,7 @@ M-x: pyim-contribute-words
 </div>
 
 <div id="outline-container-orgheadline28" class="outline-4">
-<h4 id="orgheadline28"><span class="section-number-4">1.10.4</span>如何查看 Chinese-pyim 文档。</h4>
+<h4 id="orgheadline28"><span class="section-number-4">1.10.4</span> 如何查看 Chinese-pyim 文档。</h4>
 <div class="outline-text-4" id="text-1-10-4">
 <p>
 Chinese-pyim 开发使用 lentic 文学编程模式，代码文档隐藏在comment中，如果用户喜欢阅读 html 格式的文档，可以查看在线文档；
@@ -708,7 +708,7 @@ Chinese-pyim 开发使用 lentic 文学编程模式，代码文档隐藏在comme
 </div>
 
 <div id="outline-container-orgheadline29" class="outline-4">
-<h4 id="orgheadline29"><span class="section-number-4">1.10.5</span>将光标处的拼音字符串转换为中文 (与 vimim 的 “点石成金” 功能类似)</h4>
+<h4 id="orgheadline29"><span class="section-number-4">1.10.5</span> 将光标处的拼音字符串转换为中文 (与 vimim 的 “点石成金” 功能类似)</h4>
 <div class="outline-text-4" id="text-1-10-5">
 <pre class="example">
 (global-set-key (kbd "M-i") 'pyim-convert-pinyin-at-point)
@@ -717,7 +717,7 @@ Chinese-pyim 开发使用 lentic 文学编程模式，代码文档隐藏在comme
 </div>
 
 <div id="outline-container-orgheadline8" class="outline-4">
-<h4 id="orgheadline8"><span class="section-number-4">1.10.6</span>如何添加自定义拼音词库</h4>
+<h4 id="orgheadline8"><span class="section-number-4">1.10.6</span> 如何添加自定义拼音词库</h4>
 <div class="outline-text-4" id="text-1-10-6">
 <p>
 Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面五种方式，获取质量较好的拼音词库：
@@ -725,7 +725,7 @@ Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面五�
 </div>
 
 <div id="outline-container-orgheadline30" class="outline-5">
-<h5 id="orgheadline30"><span class="section-number-5">1.10.6.1</span>第一种方式 (懒人推荐使用)</h5>
+<h5 id="orgheadline30"><span class="section-number-5">1.10.6.1</span> 第一种方式 (懒人推荐使用)</h5>
 <div class="outline-text-5" id="text-1-10-6-1">
 <p>
 获取其他 Chinese-pyim 用户的拼音词库，比如，某个同学测试 Chinese-pyim
@@ -744,7 +744,7 @@ emacs，这个词库使用 `utf-8-unix' 编码。
 </div>
 
 <div id="outline-container-orgheadline31" class="outline-5">
-<h5 id="orgheadline31"><span class="section-number-5">1.10.6.2</span>第二种方式 (Windows 用户推荐使用)</h5>
+<h5 id="orgheadline31"><span class="section-number-5">1.10.6.2</span> 第二种方式 (Windows 用户推荐使用)</h5>
 <div class="outline-text-5" id="text-1-10-6-2">
 <p>
 使用词库转换工具将其他输入法的词库转化为Chinese-pyim使用的词库：这里只介绍windows平台下的一个词库转换软件：
@@ -784,7 +784,7 @@ emacs，这个词库使用 `utf-8-unix' 编码。
 </div>
 
 <div id="outline-container-orgheadline32" class="outline-5">
-<h5 id="orgheadline32"><span class="section-number-5">1.10.6.3</span>第三种方式 (Linux &amp; Unix 用户推荐使用)</h5>
+<h5 id="orgheadline32"><span class="section-number-5">1.10.6.3</span> 第三种方式 (Linux &amp; Unix 用户推荐使用)</h5>
 <div class="outline-text-5" id="text-1-10-6-3">
 <p>
 E-Neo 同学编写了一个简单的词库转换工具: <a href="https://github.com/E-Neo/scel2pyim">scel2pyim</a> ,
@@ -809,7 +809,7 @@ pyim-dicts-manager 中 “导入搜狗输入法细胞词库” 功能就是依�
 </div>
 
 <div id="outline-container-orgheadline33" class="outline-5">
-<h5 id="orgheadline33"><span class="section-number-5">1.10.6.4</span>第四种方式 (喜欢折腾的人推荐使用)</h5>
+<h5 id="orgheadline33"><span class="section-number-5">1.10.6.4</span> 第四种方式 (喜欢折腾的人推荐使用)</h5>
 <div class="outline-text-5" id="text-1-10-6-4">
 <p>
 获取中文词条，然后使用命令为词条添加拼音code。中文词条的获取途径很多，比如：
@@ -845,7 +845,7 @@ pyim-dicts-manager 中 “导入搜狗输入法细胞词库” 功能就是依�
 </div>
 
 <div id="outline-container-orgheadline34" class="outline-4">
-<h4 id="orgheadline34"><span class="section-number-4">1.10.7</span>如何手动安装和管理词库</h4>
+<h4 id="orgheadline34"><span class="section-number-4">1.10.7</span> 如何手动安装和管理词库</h4>
 <div class="outline-text-4" id="text-1-10-7">
 <p>
 这里假设有两个词库文件：
@@ -878,7 +878,7 @@ pyim-dicts-manager 中 “导入搜狗输入法细胞词库” 功能就是依�
 
 
 <div id="outline-container-orgheadline35" class="outline-4">
-<h4 id="orgheadline35"><span class="section-number-4">1.10.8</span>如何合并两个词库文件</h4>
+<h4 id="orgheadline35"><span class="section-number-4">1.10.8</span> 如何合并两个词库文件</h4>
 <div class="outline-text-4" id="text-1-10-8">
 <p>
 假设有两个词库文件：
@@ -907,7 +907,7 @@ cat file-a.pyim file-b.pyim &gt; output.pyim
 </div>
 
 <div id="outline-container-orgheadline36" class="outline-4">
-<h4 id="orgheadline36"><span class="section-number-4">1.10.9</span>如何快速切换词库</h4>
+<h4 id="orgheadline36"><span class="section-number-4">1.10.9</span> 如何快速切换词库</h4>
 <div class="outline-text-4" id="text-1-10-9">
 <p>
 用户可以自定义类似的命令来实现快速切换拼音词库。
@@ -927,7 +927,7 @@ cat file-a.pyim file-b.pyim &gt; output.pyim
 </div>
 
 <div id="outline-container-orgheadline37" class="outline-4">
-<h4 id="orgheadline37"><span class="section-number-4">1.10.10</span>将汉字字符串转换为拼音字符串</h4>
+<h4 id="orgheadline37"><span class="section-number-4">1.10.10</span> 将汉字字符串转换为拼音字符串</h4>
 <div class="outline-text-4" id="text-1-10-10">
 <p>
 下面两个函数可以将中文字符串转换的拼音字符串或者列表，用于 emacs-lisp
@@ -942,7 +942,7 @@ cat file-a.pyim file-b.pyim &gt; output.pyim
 </div>
 
 <div id="outline-container-orgheadline38" class="outline-4">
-<h4 id="orgheadline38"><span class="section-number-4">1.10.11</span>中文分词</h4>
+<h4 id="orgheadline38"><span class="section-number-4">1.10.11</span> 中文分词</h4>
 <div class="outline-text-4" id="text-1-10-11">
 <p>
 Chinese-pyim 包含了一个简单的分词函数：`pyim-split-chinese-string'. 这个函数使用暴力匹配模式来分词，所以，<b>不能检测出</b> Chinese-pyim 词库中不存在的中文词条。另外，这个函数的分词速度比较慢，仅仅适用于中文短句的分词，不适用于文章分词。根据评估，20个汉字组成的字符串需要大约0.3s， 40个汉字消耗1s，随着字符串长度的增大消耗的时间呈几何倍数增加。
@@ -970,7 +970,7 @@ Chinese-pyim 包含了一个简单的分词函数：`pyim-split-chinese-string'.
 </div>
 
 <div id="outline-container-orgheadline39" class="outline-4">
-<h4 id="orgheadline39"><span class="section-number-4">1.10.12</span>获取光标处的中文词条</h4>
+<h4 id="orgheadline39"><span class="section-number-4">1.10.12</span> 获取光标处的中文词条</h4>
 <div class="outline-text-4" id="text-1-10-12">
 <p>
 Chinese-pyim 包含了一个简单的命令：`pyim-get-words-list-at-point', 这个命令可以得到光标处的<b>英文</b>或者<b>中文</b>词条的 *列表*，这个命令依赖分词函数：
@@ -980,7 +980,7 @@ Chinese-pyim 包含了一个简单的命令：`pyim-get-words-list-at-point', �
 </div>
 
 <div id="outline-container-orgheadline40" class="outline-4">
-<h4 id="orgheadline40"><span class="section-number-4">1.10.13</span>让 `forward-word' 和 `back-backward’ 在中文环境下正常工作</h4>
+<h4 id="orgheadline40"><span class="section-number-4">1.10.13</span> 让 `forward-word' 和 `back-backward’ 在中文环境下正常工作</h4>
 <div class="outline-text-4" id="text-1-10-13">
 <p>
 中文词语没有强制用空格分词，所以 emacs 内置的命令 `forward-word' 和 `backward-word'
@@ -1005,7 +1005,7 @@ Chinese-pyim 包含了一个简单的命令：`pyim-get-words-list-at-point', �
 </div>
 
 <div id="outline-container-orgheadline41" class="outline-4">
-<h4 id="orgheadline41"><span class="section-number-4">1.10.14</span>为 isearch 相关命令添加拼音搜索支持</h4>
+<h4 id="orgheadline41"><span class="section-number-4">1.10.14</span> 为 isearch 相关命令添加拼音搜索支持</h4>
 <div class="outline-text-4" id="text-1-10-14">
 <p>
 chinese-pyim 安装后，可以通过下面的设置开启拼音搜索功能：
@@ -1033,7 +1033,7 @@ chinese-pyim 安装后，可以通过下面的设置开启拼音搜索功能：
 
 
 <div id="outline-container-orgheadline42" class="outline-4">
-<h4 id="orgheadline42"><span class="section-number-4">1.10.15</span>使用 Chinese-pyim 改善 company-mode 中文补全的体验</h4>
+<h4 id="orgheadline42"><span class="section-number-4">1.10.15</span> 使用 Chinese-pyim 改善 company-mode 中文补全的体验</h4>
 <div class="outline-text-4" id="text-1-10-15">
 <p>
 中文词语之间没有分割字符，所以 Company-mode 在中文环境下，<b>补全词条</b>变成了<b>补全句子</b>，可用性很差，chinese-pyim-company 通过 Chinese-pyim 自带的分词函数来分割中文字符串，改善了中文补全的体验 。
