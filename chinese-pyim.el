@@ -438,6 +438,13 @@
 ;;   (pyim-restart-1 t))
 ;; #+END_EXAMPLE
 
+;; *** emacs 启动时加载 chinese-pyim 词库
+
+;; #+BEGIN_EXAMPLE
+;; (add-hook 'emacs-startup-hook
+;;           #'(lambda () (pyim-restart-1 t)))
+;; #+END_EXAMPLE
+
 ;; *** 将汉字字符串转换为拼音字符串
 ;; 下面两个函数可以将中文字符串转换的拼音字符串或者列表，用于 emacs-lisp
 ;; 编程。
