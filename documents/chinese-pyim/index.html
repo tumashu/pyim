@@ -4,25 +4,25 @@
     <title>chinese-pyim - Chinese-pyim</title>
     <meta charset="utf-8" />
     <meta name="author" content="Feng Shu" />
-    <link rel="stylesheet" href="http://tumashu.github.com/chinese-pyim/media/css/main.css" type="text/css">
+    <link rel="stylesheet" href="https://tumashu.github.io/chinese-pyim/media/css/main.css" type="text/css">
   </head>
 <body class="container">
     <div>
       <header class="masthead">
-        <h1 class="masthead-title"><a href="http://tumashu.github.com/chinese-pyim/">Chinese-pyim</a> <span class="subtitle">(一个 emacs 环境下的中文拼音输入法)</span></h1>
+        <h1 class="masthead-title"><a href="https://tumashu.github.io/chinese-pyim/">Chinese-pyim</a> <span class="subtitle">(一个 emacs 环境下的中文拼音输入法)</span></h1>
         <ul>
-          <li><a href="http://tumashu.github.com/chinese-pyim/documents/">Documents</a></li>
-          <li><a href="http://tumashu.github.com/chinese-pyim/snapshots/">Snapshots</a></li>
-          <li><a href="http://tumashu.github.com/chinese-pyim/tags/">Tags</a></li>
-          <li><a href="http://tumashu.github.com/chinese-pyim/about/">About</a></li>
+          <li><a href="https://tumashu.github.io/chinese-pyim/documents/">Documents</a></li>
+          <li><a href="https://tumashu.github.io/chinese-pyim/snapshots/">Snapshots</a></li>
+          <li><a href="https://tumashu.github.io/chinese-pyim/tags/">Tags</a></li>
+          <li><a href="https://tumashu.github.io/chinese-pyim/about/">About</a></li>
           <li><a href="https://github.com/tumashu/chinese-pyim">GitHub</a></li>
-          <li><a href="http://tumashu.github.com/chinese-pyim/rss.xml">RSS</a></li>
+          <li><a href="https://tumashu.github.io/chinese-pyim/rss.xml">RSS</a></li>
         </ul>
         <form method="get" id="searchform" action="http://www.google.com/search">
           <input type="text" class="field" name="q" id="s" placeholder="Search">
-          <input type="hidden" name="as_sitesearch" value="tumashu.github.com/chinese-pyim">
+          <input type="hidden" name="as_sitesearch" value="tumashu.github.io/chinese-pyim">
         </form>
-        <img class="avatar" src="http://tumashu.github.com/chinese-pyim/media/img/horse.jpg" />
+        <img class="avatar" src="https://tumashu.github.io/chinese-pyim/media/img/horse.jpg" />
       </header>
     </div>
 
@@ -34,7 +34,7 @@
 <h2>&#30446;&#24405;</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgheadline44">1. Chinese-pyim 使用说明</a>
+<li><a href="#orgheadline45">1. Chinese-pyim 使用说明</a>
 <ul>
 <li><a href="#orgheadline1">1.1. 截图</a></li>
 <li><a href="#orgheadline2">1.2. 简介</a></li>
@@ -68,7 +68,7 @@
 </ul>
 </li>
 <li><a href="#orgheadline24">1.9. 捐赠</a></li>
-<li><a href="#orgheadline43">1.10. Tips</a>
+<li><a href="#orgheadline44">1.10. Tips</a>
 <ul>
 <li><a href="#orgheadline25">1.10.1. 如何为 Chinese-pyim 贡献词条</a></li>
 <li><a href="#orgheadline26">1.10.2. Chinese-pyim 出现错误时，如何开启 debug 模式</a></li>
@@ -86,29 +86,30 @@
 <li><a href="#orgheadline34">1.10.7. 如何手动安装和管理词库</a></li>
 <li><a href="#orgheadline35">1.10.8. 如何合并两个词库文件</a></li>
 <li><a href="#orgheadline36">1.10.9. 如何快速切换词库</a></li>
-<li><a href="#orgheadline37">1.10.10. 将汉字字符串转换为拼音字符串</a></li>
-<li><a href="#orgheadline38">1.10.11. 中文分词</a></li>
-<li><a href="#orgheadline39">1.10.12. 获取光标处的中文词条</a></li>
-<li><a href="#orgheadline40">1.10.13. 让 `forward-word' 和 `back-backward’ 在中文环境下正常工作</a></li>
-<li><a href="#orgheadline41">1.10.14. 为 isearch 相关命令添加拼音搜索支持</a></li>
-<li><a href="#orgheadline42">1.10.15. 使用 Chinese-pyim 改善 company-mode 中文补全的体验</a></li>
+<li><a href="#orgheadline37">1.10.10. emacs 启动时加载 chinese-pyim 词库</a></li>
+<li><a href="#orgheadline38">1.10.11. 将汉字字符串转换为拼音字符串</a></li>
+<li><a href="#orgheadline39">1.10.12. 中文分词</a></li>
+<li><a href="#orgheadline40">1.10.13. 获取光标处的中文词条</a></li>
+<li><a href="#orgheadline41">1.10.14. 让 `forward-word' 和 `back-backward’ 在中文环境下正常工作</a></li>
+<li><a href="#orgheadline42">1.10.15. 为 isearch 相关命令添加拼音搜索支持</a></li>
+<li><a href="#orgheadline43">1.10.16. 使用 Chinese-pyim 改善 company-mode 中文补全的体验</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orgheadline45">2. 代码</a></li>
+<li><a href="#orgheadline46">2. 代码</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgheadline44" class="outline-2">
-<h2 id="orgheadline44"><span class="section-number-2">1</span> Chinese-pyim 使用说明</h2>
+<div id="outline-container-orgheadline45" class="outline-2">
+<h2 id="orgheadline45"><span class="section-number-2">1</span> Chinese-pyim 使用说明</h2>
 <div class="outline-text-2" id="text-1">
 </div><div id="outline-container-orgheadline1" class="outline-3">
 <h3 id="orgheadline1"><span class="section-number-3">1.1</span> 截图</h3>
 <div class="outline-text-3" id="text-1-1">
 
 <div class="figure">
-<p><img src="http://tumashu.github.com/chinese-pyim/assets/documents/chinese-pyim/pyim-linux-x-with-toolkit.png" alt="pyim-linux-x-with-toolkit.png" />
+<p><img src="https://tumashu.github.io/chinese-pyim/assets/documents/chinese-pyim/pyim-linux-x-with-toolkit.png" alt="pyim-linux-x-with-toolkit.png" />
 </p>
 </div>
 </div>
@@ -652,7 +653,7 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
 
 
 <div class="figure">
-<p><img src="http://tumashu.github.com/chinese-pyim/assets/documents/chinese-pyim/QR-code-for-author.jpg" alt="QR-code-for-author.jpg" />
+<p><img src="https://tumashu.github.io/chinese-pyim/assets/documents/chinese-pyim/QR-code-for-author.jpg" alt="QR-code-for-author.jpg" />
 </p>
 </div></li>
 </ol>
@@ -660,8 +661,8 @@ Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的�
 </div>
 
 
-<div id="outline-container-orgheadline43" class="outline-3">
-<h3 id="orgheadline43"><span class="section-number-3">1.10</span> Tips</h3>
+<div id="outline-container-orgheadline44" class="outline-3">
+<h3 id="orgheadline44"><span class="section-number-3">1.10</span> Tips</h3>
 <div class="outline-text-3" id="text-1-10">
 </div><div id="outline-container-orgheadline25" class="outline-4">
 <h4 id="orgheadline25"><span class="section-number-4">1.10.1</span> 如何为 Chinese-pyim 贡献词条</h4>
@@ -764,7 +765,7 @@ emacs，这个词库使用 `utf-8-unix' 编码。
 
 
 <div class="figure">
-<p><img src="http://tumashu.github.com/chinese-pyim/assets/documents/chinese-pyim/imewlconverter-basic.gif" alt="imewlconverter-basic.gif" />
+<p><img src="https://tumashu.github.io/chinese-pyim/assets/documents/chinese-pyim/imewlconverter-basic.gif" alt="imewlconverter-basic.gif" />
 </p>
 </div>
 
@@ -774,7 +775,7 @@ emacs，这个词库使用 `utf-8-unix' 编码。
 
 
 <div class="figure">
-<p><img src="http://tumashu.github.com/chinese-pyim/assets/documents/chinese-pyim/imewlconverter-wordfreq.gif" alt="imewlconverter-wordfreq.gif" />
+<p><img src="https://tumashu.github.io/chinese-pyim/assets/documents/chinese-pyim/imewlconverter-wordfreq.gif" alt="imewlconverter-wordfreq.gif" />
 </p>
 </div>
 
@@ -928,8 +929,18 @@ cat file-a.pyim file-b.pyim &gt; output.pyim
 </div>
 
 <div id="outline-container-orgheadline37" class="outline-4">
-<h4 id="orgheadline37"><span class="section-number-4">1.10.10</span> 将汉字字符串转换为拼音字符串</h4>
+<h4 id="orgheadline37"><span class="section-number-4">1.10.10</span> emacs 启动时加载 chinese-pyim 词库</h4>
 <div class="outline-text-4" id="text-1-10-10">
+<pre class="example">
+(add-hook 'emacs-startup-hook
+          #'(lambda () (pyim-restart-1 t)))
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgheadline38" class="outline-4">
+<h4 id="orgheadline38"><span class="section-number-4">1.10.11</span> 将汉字字符串转换为拼音字符串</h4>
+<div class="outline-text-4" id="text-1-10-11">
 <p>
 下面两个函数可以将中文字符串转换的拼音字符串或者列表，用于 emacs-lisp
 编程。
@@ -942,9 +953,9 @@ cat file-a.pyim file-b.pyim &gt; output.pyim
 </div>
 </div>
 
-<div id="outline-container-orgheadline38" class="outline-4">
-<h4 id="orgheadline38"><span class="section-number-4">1.10.11</span> 中文分词</h4>
-<div class="outline-text-4" id="text-1-10-11">
+<div id="outline-container-orgheadline39" class="outline-4">
+<h4 id="orgheadline39"><span class="section-number-4">1.10.12</span> 中文分词</h4>
+<div class="outline-text-4" id="text-1-10-12">
 <p>
 Chinese-pyim 包含了一个简单的分词函数：`pyim-split-chinese-string'. 这个函数使用暴力匹配模式来分词，所以，<b>不能检测出</b> Chinese-pyim 词库中不存在的中文词条。另外，这个函数的分词速度比较慢，仅仅适用于中文短句的分词，不适用于文章分词。根据评估，20个汉字组成的字符串需要大约0.3s， 40个汉字消耗1s，随着字符串长度的增大消耗的时间呈几何倍数增加。
 </p>
@@ -970,9 +981,9 @@ Chinese-pyim 包含了一个简单的分词函数：`pyim-split-chinese-string'.
 </div>
 </div>
 
-<div id="outline-container-orgheadline39" class="outline-4">
-<h4 id="orgheadline39"><span class="section-number-4">1.10.12</span> 获取光标处的中文词条</h4>
-<div class="outline-text-4" id="text-1-10-12">
+<div id="outline-container-orgheadline40" class="outline-4">
+<h4 id="orgheadline40"><span class="section-number-4">1.10.13</span> 获取光标处的中文词条</h4>
+<div class="outline-text-4" id="text-1-10-13">
 <p>
 Chinese-pyim 包含了一个简单的命令：`pyim-get-words-list-at-point', 这个命令可以得到光标处的<b>英文</b>或者<b>中文</b>词条的 *列表*，这个命令依赖分词函数：
 `pyim-split-chinese-string'。
@@ -980,9 +991,9 @@ Chinese-pyim 包含了一个简单的命令：`pyim-get-words-list-at-point', �
 </div>
 </div>
 
-<div id="outline-container-orgheadline40" class="outline-4">
-<h4 id="orgheadline40"><span class="section-number-4">1.10.13</span> 让 `forward-word' 和 `back-backward’ 在中文环境下正常工作</h4>
-<div class="outline-text-4" id="text-1-10-13">
+<div id="outline-container-orgheadline41" class="outline-4">
+<h4 id="orgheadline41"><span class="section-number-4">1.10.14</span> 让 `forward-word' 和 `back-backward’ 在中文环境下正常工作</h4>
+<div class="outline-text-4" id="text-1-10-14">
 <p>
 中文词语没有强制用空格分词，所以 emacs 内置的命令 `forward-word' 和 `backward-word'
 在中文环境不能按用户预期的样子执行，而是 forward/backward “句子” ，Chinese-pyim
@@ -1005,9 +1016,9 @@ Chinese-pyim 包含了一个简单的命令：`pyim-get-words-list-at-point', �
 </div>
 </div>
 
-<div id="outline-container-orgheadline41" class="outline-4">
-<h4 id="orgheadline41"><span class="section-number-4">1.10.14</span> 为 isearch 相关命令添加拼音搜索支持</h4>
-<div class="outline-text-4" id="text-1-10-14">
+<div id="outline-container-orgheadline42" class="outline-4">
+<h4 id="orgheadline42"><span class="section-number-4">1.10.15</span> 为 isearch 相关命令添加拼音搜索支持</h4>
+<div class="outline-text-4" id="text-1-10-15">
 <p>
 chinese-pyim 安装后，可以通过下面的设置开启拼音搜索功能：
 </p>
@@ -1033,9 +1044,9 @@ chinese-pyim 安装后，可以通过下面的设置开启拼音搜索功能：
 
 
 
-<div id="outline-container-orgheadline42" class="outline-4">
-<h4 id="orgheadline42"><span class="section-number-4">1.10.15</span> 使用 Chinese-pyim 改善 company-mode 中文补全的体验</h4>
-<div class="outline-text-4" id="text-1-10-15">
+<div id="outline-container-orgheadline43" class="outline-4">
+<h4 id="orgheadline43"><span class="section-number-4">1.10.16</span> 使用 Chinese-pyim 改善 company-mode 中文补全的体验</h4>
+<div class="outline-text-4" id="text-1-10-16">
 <p>
 中文词语之间没有分割字符，所以 Company-mode 在中文环境下，<b>补全词条</b>变成了<b>补全句子</b>，可用性很差，chinese-pyim-company 通过 Chinese-pyim 自带的分词函数来分割中文字符串，改善了中文补全的体验 。
 </p>
@@ -1069,8 +1080,8 @@ chinese-pyim 安装后，可以通过下面的设置开启拼音搜索功能：
 
 
 
-<div id="outline-container-orgheadline45" class="outline-2">
-<h2 id="orgheadline45"><span class="section-number-2">2</span> 代码</h2>
+<div id="outline-container-orgheadline46" class="outline-2">
+<h2 id="orgheadline46"><span class="section-number-2">2</span> 代码</h2>
 <div class="outline-text-2" id="text-2">
 <div class="org-src-container">
 
@@ -1088,8 +1099,8 @@ chinese-pyim 安装后，可以通过下面的设置开启拼音搜索功能：
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2016-08-11</span>
-        <span title="last modification date" class="post-info">2016-06-27</span>
+        <span title="post date" class="post-info">2016-09-24</span>
+        <span title="last modification date" class="post-info">2016-09-01</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>
