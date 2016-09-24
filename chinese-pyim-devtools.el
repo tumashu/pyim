@@ -45,7 +45,7 @@
  '("chinese-pyim"
    :repository-directory (:eval pyim-website-repository-directory)
    :remote (git "https://github.com/tumashu/chinese-pyim.git" "gh-pages")
-   :site-domain "http://tumashu.github.com/chinese-pyim"
+   :site-domain "https://tumashu.github.io/chinese-pyim"
    :site-main-title "Chinese-pyim"
    :site-sub-title "(一个 emacs 环境下的中文拼音输入法)"
    :default-category "documents"
