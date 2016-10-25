@@ -1,11 +1,11 @@
 ;;; chinese-pyim-company.el --- Integrate company-mode with Chinese-pyim
 
 ;; * Header
-;; Copyright  2015 Feng Shu
+;; Copyright 2015-2016 Feng Shu
 
 ;; Author: Feng Shu <tumashu@163.com>
 ;; URL: https://github.com/tumashu/chinese-pyim
-;; Version: 0.0.1
+;; Version: 1.0
 ;; Keywords: convenience, Chinese, pinyin, input-method, complete
 
 ;; This program is free software; you can redistribute it and/or modify

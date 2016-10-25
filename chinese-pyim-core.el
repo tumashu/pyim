@@ -2,11 +2,11 @@
 
 ;; * Header
 ;; Copyright 2006 Ye Wenbin
-;;           2014-2015 Feng Shu
+;;           2014-2016 Feng Shu
 
 ;; Author: Ye Wenbin <wenbinye@163.com>, Feng Shu <tumashu@163.com>
 ;; URL: https://github.com/tumashu/chinese-pyim
-;; Version: 0.0.1
+;; Version: 1.0
 ;; Package-Requires: ((cl-lib "0.5") (pos-tip "0.4") (popup "0.1") (async "1.6"))
 ;; Keywords: convenience, Chinese, pinyin, input-method
 

@@ -1,11 +1,11 @@
 ;;; chinese-pyim.el --- Chinese pinyin input method
 
 ;; * Header
-;; Copyright 2015 Feng Shu
+;; Copyright 2015-2016 Feng Shu
 
 ;; Author: Feng Shu <tumashu@163.com>
 ;; URL: https://github.com/tumashu/chinese-pyim
-;; Version: 0.0.1
+;; Version: 1.0
 ;; Package-Requires: ((cl-lib "0.5") (pos-tip "0.4") (popup "0.1") (async "1.6") (chinese-pyim-basedict "0.1"))
 ;; Keywords: convenience, Chinese, pinyin, input-method
 
