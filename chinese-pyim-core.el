@@ -141,90 +141,92 @@ plist 来表示，比如：
      :first-chars "abcdefghijklmnpqrstuvwxyz"
      :rest-chars "abcdefghijklmnopqrstuvwxyz"
      :prefer-trigger-chars "o"
-     :keymaps-general (("a" "a" "a")
-                       ("b" "b" "in")
-                       ("c" "c" "ao")
-                       ("d" "d" "ai")
-                       ("e" "e" "e")
-                       ("f" "f" "en")
-                       ("g" "g" "eng")
-                       ("h" "h" "ang")
-                       ("i" "ch" "i")
-                       ("j" "j" "an")
-                       ("k" "k" "ing" "uai")
-                       ("l" "l" "iang" "uang")
-                       ("m" "m" "ian")
-                       ("n" "n" "iao")
-                       ("o" "o" "uo" "o")
-                       ("p" "p" "ie")
-                       ("q" "q" "iu")
-                       ("r" "r" "uan")
-                       ("s" "s" "iong" "ong")
-                       ("t" "t" "ue" "ve")
-                       ("u" "sh" "u")
-                       ("v" "zh" "v" "ui")
-                       ("w" "w" "ei")
-                       ("x" "x" "ia" "ua")
-                       ("y" "y" "un")
-                       ("z" "z" "ou"))
-     :keymaps-special ((("a" . "a") ("" . "a"))
-                       (("a" . "j") ("" . "an"))
-                       (("a" . "d") ("" . "ai"))
-                       (("a" . "c") ("" . "ao"))
-                       (("a" . "h") ("" . "ang"))
-                       (("e" . "e") ("" . "e"))
-                       (("e" . "w") ("" . "ei"))
-                       (("e" . "f") ("" . "en"))
-                       (("e" . "r") ("" . "er"))
-                       (("e" . "g") ("" . "eng"))
-                       (("a" . "g") ("" . "ng"))
-                       (("a" . "o") ("" . "o"))
-                       (("a" . "u") ("" . "ou"))))
+     :keymaps
+     (("a" "a" "a")
+      ("b" "b" "in")
+      ("c" "c" "ao")
+      ("d" "d" "ai")
+      ("e" "e" "e")
+      ("f" "f" "en")
+      ("g" "g" "eng")
+      ("h" "h" "ang")
+      ("i" "ch" "i")
+      ("j" "j" "an")
+      ("k" "k" "ing" "uai")
+      ("l" "l" "iang" "uang")
+      ("m" "m" "ian")
+      ("n" "n" "iao")
+      ("o" "o" "uo" "o")
+      ("p" "p" "ie")
+      ("q" "q" "iu")
+      ("r" "r" "uan")
+      ("s" "s" "iong" "ong")
+      ("t" "t" "ue" "ve")
+      ("u" "sh" "u")
+      ("v" "zh" "v" "ui")
+      ("w" "w" "ei")
+      ("x" "x" "ia" "ua")
+      ("y" "y" "un")
+      ("z" "z" "ou")
+      ("aa" "a")
+      ("aj" "an")
+      ("ad" "ai")
+      ("ac" "ao")
+      ("ah" "ang")
+      ("ee" "e")
+      ("ew" "ei")
+      ("ef" "en")
+      ("er" "er")
+      ("eg" "eng")
+      ("ag" "ng")
+      ("ao" "o")
+      ("au" "ou")))
     (xiaohe-shuangpin
      :document "小鹤双拼输入法方案。"
      :class shuangpin
      :first-chars "abcdefghijklmnopqrstuvwxyz"
      :rest-chars "abcdefghijklmnopqrstuvwxyz"
      :prefer-trigger-chars nil
-     :keymaps-general (("a" "a" "a")
-                       ("b" "b" "in")
-                       ("c" "c" "ao")
-                       ("d" "d" "ai")
-                       ("e" "e" "e")
-                       ("f" "f" "en")
-                       ("g" "g" "eng")
-                       ("h" "h" "ang")
-                       ("i" "ch" "i")
-                       ("j" "j" "an")
-                       ("k" "k" "ing" "uai")
-                       ("l" "l" "iang" "uang")
-                       ("m" "m" "ian")
-                       ("n" "n" "iao")
-                       ("o" "o" "uo" "o")
-                       ("p" "p" "ie")
-                       ("q" "q" "iu")
-                       ("r" "r" "uan")
-                       ("s" "s" "iong" "ong")
-                       ("t" "t" "ue" "ve")
-                       ("u" "sh" "u")
-                       ("v" "zh" "v" "ui")
-                       ("w" "w" "ei")
-                       ("x" "x" "ia" "ua")
-                       ("y" "y" "un")
-                       ("z" "z" "ou"))
-     :keymaps-special ((("a" . "a") ("" . "a"))
-                       (("a" . "j") ("" . "an"))
-                       (("a" . "d") ("" . "ai"))
-                       (("a" . "c") ("" . "ao"))
-                       (("a" . "h") ("" . "ang"))
-                       (("e" . "e") ("" . "e"))
-                       (("e" . "w") ("" . "ei"))
-                       (("e" . "f") ("" . "en"))
-                       (("e" . "r") ("" . "er"))
-                       (("e" . "g") ("" . "eng"))
-                       (("o" . "g") ("" . "ng"))
-                       (("o" . "o") ("" . "o"))
-                       (("o" . "u") ("" . "ou")))))
+     :keymaps
+     (("a" "a" "a")
+      ("b" "b" "in")
+      ("c" "c" "ao")
+      ("d" "d" "ai")
+      ("e" "e" "e")
+      ("f" "f" "en")
+      ("g" "g" "eng")
+      ("h" "h" "ang")
+      ("i" "ch" "i")
+      ("j" "j" "an")
+      ("k" "k" "ing" "uai")
+      ("l" "l" "iang" "uang")
+      ("m" "m" "ian")
+      ("n" "n" "iao")
+      ("o" "o" "uo" "o")
+      ("p" "p" "ie")
+      ("q" "q" "iu")
+      ("r" "r" "uan")
+      ("s" "s" "iong" "ong")
+      ("t" "t" "ue" "ve")
+      ("u" "sh" "u")
+      ("v" "zh" "v" "ui")
+      ("w" "w" "ei")
+      ("x" "x" "ia" "ua")
+      ("y" "y" "un")
+      ("z" "z" "ou")
+      ("aa" "a")
+      ("aj" "an")
+      ("ad" "ai")
+      ("ac" "ao")
+      ("ah" "ang")
+      ("ee" "e")
+      ("ew" "ei")
+      ("ef" "en")
+      ("er" "er")
+      ("eg" "eng")
+      ("og" "ng")
+      ("oo" "o")
+      ("ou" "ou"))))
   "Chinese-pyim 支持的所有拼音方案。")
 
 (defcustom pyim-translate-trigger-char "v"
@@ -333,13 +335,6 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
 (defvar pyim-debug nil)
 (defvar pyim-title "灵拼" "Chinese-pyim 在 mode-line 中显示的名称。")
 (defvar pyim-extra-dicts nil "与 `pyim-dicts' 类似, 用于和 elpa 格式的词库包集成。")
-(defvar pyim-buffer-name " *Chinese-pyim*")
-(defvar pyim-buffer-list nil
-  "一个列表，用来保存词库文件与 buffer 的对应信息。
-1. 每个元素都是一个 alist。
-2. 每一个 alist 都包含两个部份：
-   1. buffer 词库文件导入时创建的 buffer (用户不可见)。
-   2. file   词库文件的路径。")
 
 (defvar pyim-shen-mu
   '("b" "p" "m" "f" "d" "t" "n" "l" "g" "k" "h"
@@ -399,7 +394,10 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
 If you don't like this funciton, set the variable to nil")
 
 (defvar pyim-dict-cache nil)
-(defvar pyim-dict-cache-create-p nil)
+(defvar pyim-dict-cache-md5 nil)
+(defvar pyim-words-count-cache nil)
+(defvar pyim-personal-dict-cache nil)
+(defvar pyim-personal-words-count-cache nil)
 
 (defvar pyim-mode-map
   (let ((map (make-sparse-keymap))
@@ -462,9 +460,7 @@ If you don't like this funciton, set the variable to nil")
     pyim-punctuation-escape-list
 
     pyim-pylist-list
-    pyim-pinyin-position
-
-    pyim-dict-cache)
+    pyim-pinyin-position)
   "A list of buffer local variable")
 
 (dolist (var pyim-local-variable-list)
@@ -483,16 +479,15 @@ If you don't like this funciton, set the variable to nil")
 
 ;; 真正启动 Chinese-pyim 的命令是 `pyim-start' ，这个命令做如下工作：
 ;; 1. 重置 `pyim-local-variable-list' 中所有的 local 变量。
-;; 2. 使用 `pyim-load-file’加载词库文件，具体细节请参考：[[#load-dicts]]
-;; 3. 使用 `pyim-cchar2pinyin-create-cache' 创建汉字到拼音的 hash table 。
-;; 4. 运行hook： `pyim-load-hook'。
-;; 5. 将 `pyim-save-files' 命令添加到 `kill-emacs-hook' emacs 关
-;;    闭之前将个人词频 buffer 的内容保存到个人词频文件。具体细节请参考：
-;;    [[save-personal-file]]。
-;; 6. 设定变量：
+;; 2. 使用 `pyim-cchar2pinyin-create-cache' 创建汉字到拼音的 hash table 。
+;; 3. 运行hook： `pyim-load-hook'。
+;; 4. 将 `pyim-save-caches' 命令添加到 `kill-emacs-hook' , emacs 关闭
+;;    之前将 `pyim-personal-dict-cache' 和 `pyim-personal-words-count-cache'
+;;    保存到文件，供以后使用。
+;; 5. 设定变量：
 ;;    1. `input-method-function'
 ;;    2. `deactivate-current-input-method-function'
-;; 7. 运行 `pyim-active-hook'
+;; 6. 运行 `pyim-active-hook'
 
 ;; `pyim-start' 先后会运行两个 hook，所以我们需要事先定义：
 
@@ -508,27 +503,16 @@ If you don't like this funciton, set the variable to nil")
   (interactive)
   (mapc 'kill-local-variable pyim-local-variable-list)
   (mapc 'make-local-variable pyim-local-variable-list)
-  ;; 重启时，kill 所有已经打开的 buffer。
   (when (and restart save-files)
-    (pyim-save-files))
-  (when restart
-    (pyim-kill-buffers)
-    (setq pyim-buffer-list nil))
-  (unless (and pyim-buffer-list
-               pyim-dict-cache-create-p
-               (pyim-check-buffers)
-               (not restart))
-    (pyim-cchar2pinyin-cache-create)
-    (pyim-pinyin2cchar-cache-create)
-    (setq pyim-buffer-list (pyim-load-file))
-    (pyim-dict-cache-create t)
-    (run-hooks 'pyim-load-hook)
-    (message nil))
-  ;; pyim-buffer-list 可能在其它地方创建，这个
-  ;; 确保词库 cache 正确生成。
-  (pyim-dict-cache-create)
-  (unless (member 'pyim-save-files kill-emacs-hook)
-    (add-to-list 'kill-emacs-hook 'pyim-save-files))
+    (pyim-save-caches))
+  (pyim-dcache-init)
+  (pyim-cchar2pinyin-cache-create)
+  (pyim-pinyin2cchar-cache-create)
+  (run-hooks 'pyim-load-hook)
+  ;; 如果 dicts 有变化，重新生成 dict cache。
+  (pyim-dcache-create-dict-cache)
+  (unless (member 'pyim-save-caches kill-emacs-hook)
+    (add-to-list 'kill-emacs-hook 'pyim-save-caches))
 
   (setq input-method-function 'pyim-input-method)
   (setq deactivate-current-input-method-function 'pyim-inactivate)
@@ -561,408 +545,141 @@ If you don't like this funciton, set the variable to nil")
 ;; *** 自定义词库
 ;; **** 词库文件格式
 ;; Chinese-pyim 使用词库文件来保存各个拼音对应的中文词条，每一个词库文件都
-;; 是简单的文本文件，其结构类似：
+;; 是简单的文本文件，编码强制为 utf-8-unix, 结构类似：
 
 ;; #+BEGIN_EXAMPLE
 ;; ni-bu-hao 你不好
 ;; ni-hao  你好 妮好 你豪
 ;; #+END_EXAMPLE
 
-;; 第一个空白字符之前的内容为拼音code，空白字符之后为中文词条列表。
+;; 第一个空白字符之前的内容为拼音 code，空白字符之后为中文词条列表。
 ;; 拼音词库 *不处理* 中文标点符号。
 
-;; 注意：词库文件必须按行排序（准确的说，是按每一行的 code 排序），因为
-;; `Chinese-pyim' 为优化搜索速度，使用二分法寻找词条，而二分法工作的前提就是对
-;; 文件按行排序。具体细节请参考：`pyim-bisearch-word' 。当用户手动调整词库文
-;; 件后，记得运行 `pyim-update-dict-file' 来对文件排序。
-
-;; **** 个人词频文件
-;; 虽然 Chinese-pyim 只使用一种词库文件格式，但定义了多种词库类型，用于不
-;; 同的目的：
-;; 1. 个人词频文件 (personal-file)
-;; 2. 属性文件 (property-file)
-;; 3. 普通词库文件 (pinyin-dict)
-
-;; 个人词频文件用来保存用户曾经输入过的中文词条以及这些词条输入的先后顺序
-;; （也就是词频信息）。Chinese-pyim 搜索中文词条时，个人词频文件里的词条
-;; 优先显示。我们使用变量 `pyim-personal-file' 来保存个人词频文件的路径:
-
-;; 个人词频文件使用上述词库文件的格式来保存上述信息，将其独立出来的原因是：
-;; 1. 随着 `Chinese-pyim' 使用时间的延长，个人词频文件会保存越来越多的用
-;;    户常用的词条，属于用户隐私（提醒用户不要随意将这个文件泄露他人）。
-;; 2. 个人词频文件的内容在 Chinese-pyim 使用过程中频繁的变动。
-;; 3. 随着个人词频文件的积累，Chinese-pyim 会越来越顺手，所以个人词频文件
-;;    需要用户经常备份。
-
-;; 值得注意的是：不建议用户 *手动编辑* 这个文件，因为：每次 emacs 关闭之
-;; 前，emacs 会运行命令：`pyim-save-files' 来更新这个文件，编辑过
-;; 的内容将会被覆盖。
-
-;; BUG：当用户错误的将这个变量设定为其他重要文件时，也存在文件内容破坏的风险。
-
-;; 当这个文件中的词条数量增长到一定程度，用户可以直接将这个文件转换为词库。
-
-;; **** 普通词库文件
-;; 普通词库文件，也可以叫做共享词库文件，与个人词频文件相比，普通词库文件
-;; 有如下特点：
-;; 1. 词条数量巨大：普通词库文件中往往包含大量的词条信息（可能超过50万）。
-;; 2. 内容变化很小：用户一般不需要编辑普通词库文件（开发词库的用户除外），
-;;    所以普通词库文件的内容一般不会发生改变。
-;; 3. 普通词库文件适宜制作词库包，在用户之间共享。
-
 ;; 我们使用变量 `pyim-dicts' 和 `pyim-extra-dicts' 来设定普通词库文件的信息：
-;; 1. `:name' 用户给词库设定的名称，暂时没有用处，未来可能用于构建词库包。
+;; 1. `:name' 用户给词库设定的名称（可选项）。
 ;; 2. `:file' 词库文件的绝对路径。
-;; 3. `:coding' 词库文件的编码，词库文件是一个文本文件，window系统一般使
-;;    用 GBK 编码来保存中文，而Linux系统一般使用 UTF-8 编码来保存中文，
-;;    emacs 似乎不能自动识别中文编码，所以要求用户明确告知词库文件使用什
-;;    么编码来保存。
-;; 4. `:dict-type' 词库文件的类型。
-
-;; *** 加载词库
-;;    :PROPERTIES:
-;;    :CUSTOM_ID: load-dicts
-;;    :END:
-;; Chinese-pyim 激活时，首先会使用 `pyim-load-file' 加载个人词频文件和普
-;; 通词库文件，如果个人词频文件不存在时，Chinese-pyim 会使用函数：
-;; `pyim-create-template-dict' 自动创建这个文件。如果用户没有设定
-;; `pyim-dicts' 或 `pyim-extra-dicts'， `pyim-load-file' 会弹出警告信息，
-;; 告知用户安装词库的命令。
-
-;; `pyim-load-file' 加载词库简单来说就是：创建一个 buffer ，然后将词
-;; 库文件的内容插入新创建的这个 buffer ，同时得到 buffer 和 file 的对应表。
-;; 具体过程为：
-;; 1. 首先创建一个 buffer，buffer 的名称源自 `pyim-buffer-name'，
-;;    Chinese-pyim 默认创建的 buffer 名称类似：
-;;    #+BEGIN_EXAMPLE
-;;    -空格-*Chinese-pyim*
-;;    -空格-*Chinese-pyim*-10000
-;;    #+END_EXAMPLE
-;;    这些buffer的名称前面都包含一个空格，所以在 emacs buffer列表中 *不可见* 。
-;; 2. 将个人词频文件 `pyim-personal-file' 的内容插入到已经创建的 buffer。
-;; 3. 使用类似上述方法，递归的为每个普通词库文件创建 buffer 并插入对应词
-;;    库文件的内容，忽略不存在的文件和已经加载过的文件。
-;; 4. 在运行的过程中，`pyim-load-file' 会创建一个词库文件名与 buffer 的对
-;;    应表，其结构类似：
-;;    #+BEGIN_EXAMPLE
-;;    ((("buffer" . " *Chinese-pyim*") ("file" . "/path/to/pyim-personal.txt"))
-;;     (("buffer" . " *Chinese-pyim*-431862") ("file" . "/path/to/pyim-bigdict.txt"))
-;;     (("buffer" . " *Chinese-pyim*-208698") ("file" . "/path/to/chinese-pyim-prettydict-2.txt"))
-;;     (("buffer" . " *Chinese-pyim*-810662") ("file" . "/path/to/chinese-pyim-prettydict-1.txt")))
-;;    #+END_EXAMPLE
-;; 5. 函数执行结束后，返回值为上述对应表。
 
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-create-template-dict (file)
-  "生成模版词库。"
-  (condition-case error
-      (unless (file-exists-p file)
-        (with-temp-buffer
-          (erase-buffer)
-          (insert ";; -*- coding: utf-8 -*-\n")
-          (make-directory (file-name-directory file) t)
-          (write-file (expand-file-name file))
-          (message "自动创建 Chinese-pyim 文件: %s" file)))
-    (error
-     (warn "`Chinese-pyim' 模版词库创建失败！" ))))
-
-(defun pyim-show-help (string)
-  "显示 Chinese-pyim 帮助信息，让用户快速的了解如何安装词库。"
-  (let ((buffer-name "*Chinese-pyim-dict-help*"))
-    (with-output-to-temp-buffer buffer-name
-      (set-buffer buffer-name)
-      (when (featurep 'org)
-        (org-mode))
-      (setq truncate-lines 1)
-      (insert string)
-      (goto-char (point-min)))))
-
-;;;  read file functions
-(defun pyim-load-file ()
-  "为每一个词库文件创建一个buffer(这些buffer用户不可见)，然后将各个词库
-文件的内容插入与之对应的buffer。最后返回一个包含所有buffer对象以及词库
-文件名的alist。
-
-`pyim-personal-file' 文件最先导入。然后按照先后顺序导入 `pyim-dicts'
-和 `pyim-extra-dicts' 中定义的词库，排在最前面的词库首先被加载，相同的
-词库文件只加载一次。"
-  (let ((personal-file (expand-file-name pyim-personal-file))
-        (property-file (expand-file-name pyim-property-file))
-        (dicts-list `(,@pyim-dicts ,@pyim-extra-dicts))
-        (bufname pyim-buffer-name)
-        buflist buf file coding disable dict-type)
-    (save-excursion
-      (unless (file-exists-p personal-file)
-        ;; 如果 `pyim-personal-file' 对应的文件不存在，
-        ;; 创建一个模版文件。
-        (pyim-create-template-dict personal-file))
-      (unless (file-exists-p property-file)
-        (pyim-create-template-dict property-file))
-
-      (setq buf (pyim-read-file personal-file bufname nil 'personal-file))
-      (setq buflist (append buflist (list buf)))
-      (setq buf (pyim-read-file property-file bufname nil 'property-file))
-      (setq buflist (append buflist (list buf)))
-
-      (if dicts-list
-          (dolist (dict dicts-list)
-            (setq file (expand-file-name (plist-get dict :file)))
-            (setq coding (plist-get dict :coding))
-            (setq disable (plist-get dict :disable))
-            (setq dict-type (plist-get dict :dict-type))
-            (if (and (not disable)
-                     (file-exists-p file)
-                     (not (pyim-file-load-p file buflist)))
-                (setq buflist (append buflist (list (pyim-read-file file bufname coding dict-type))))
-              (message "忽略导入重复的词库文件：%s。" file)))
-        ;; 当用户没有设置词库信息时，弹出帮助信息。
-        (warn "Chinese-pyim 没有安装词库，请运行词库管理命令 `pyim-dicts-manager' 来安装词库。")))
-    buflist))
-
-(defun pyim-file-load-p (file buflist)
-  "判断 file 是否已经加载"
-  (cl-some (lambda (x)
-             (rassoc file x))
-           buflist))
-
-(defun pyim-read-file (file name &optional coding dict-type)
-  (if (and (equal (file-name-extension file) "gz")
-           (not (executable-find "gzip")))
-      (message "Can't find gzip command to decompress dict file: %s.
-you need to install gzip (http://www.gzip.org/) and make sure system PATH set properly." file)
-    (with-current-buffer (generate-new-buffer name)
-      (if coding
-          (let ((coding-system-for-read coding))
-            (insert-file-contents file))
-        (insert-file-contents file))
-      `(("buffer" . ,(buffer-name))
-        ("file" . ,file)
-        ("coding" . ,coding)
-        ("dict-type" . ,dict-type)))))
-
-(defun pyim-dict-cache-create (&optional force)
+(defun pyim-dcache-create-dict-cache (&optional force)
   (interactive)
-  (when (or force (not pyim-dict-cache-create-p))
-    (setq pyim-dict-cache-create-p t)
-    (let ((cache-directory pyim-cache-directory)
-          (sleep-time 1))
-      (dolist (item pyim-buffer-list)
-        (async-start
-         `(lambda ()
-            (sleep-for ,sleep-time)
-            ,(async-inject-variables "^load-path$")
-            (require 'chinese-pyim-core)
-            (pyim-generate-dict-cache-file
-             (quote ,item) ,cache-directory))
-         `(lambda (result)
-            (pyim-load-dict-cache-file
-             (quote ,item) ,cache-directory t)))
-        (setq sleep-time (+ sleep-time 1))))))
+  (let* ((dict-files (mapcar #'(lambda (x)
+                                 (unless (plist-get x :disable)
+                                   (plist-get x :file)))
+                             `(,@pyim-dicts ,@pyim-extra-dicts)))
+         (dicts-md5 (md5 (prin1-to-string
+                          (mapcar #'(lambda (file)
+                                      (list file (nth 5 (file-attributes file 'string))))
+                                  dict-files))))
+         (dict-cache-file (concat (file-name-as-directory pyim-cache-directory)
+                                  "pyim-dict-cache"))
+         (dict-md5-file (concat (file-name-as-directory pyim-cache-directory)
+                                "pyim-dict-cache-md5")))
+    (when (or force (not (equal dicts-md5 (pyim-dcache-get-value-from-file dict-md5-file))))
+      (async-start
+       `(lambda ()
+          ,(async-inject-variables "^load-path$")
+          (require 'chinese-pyim-core)
+          (pyim-dcache-generate-cache-file ',dict-files ,dict-cache-file)
+          (pyim-dcache-save-value-to-file ',dicts-md5 ,dict-md5-file))
+       `(lambda (result)
+          (setq pyim-dict-cache
+                (pyim-dcache-get-value-from-file ,dict-cache-file)))))))
 
-(defun pyim-return-dict-cache-filename (dict-file cache-directory)
-  "返回词库文件 `dict-file' 对应的 cache 文件。"
-  (concat (file-name-as-directory cache-directory)
-          "v5/"
-          ;; Deal with .pyim and pyim.gz
-          (file-name-base (file-name-base dict-file))
-          "/"
-          (md5 dict-file)
-          ".el"))
+(defun pyim-dcache-init ()
+  (pyim-dcache-restore-variable 'pyim-dict-cache (make-hash-table :test #'equal))
+  (pyim-dcache-restore-variable 'pyim-words-count-cache (make-hash-table :test #'equal))
+  (pyim-dcache-restore-variable 'pyim-personal-dict-cache (make-hash-table :test #'equal))
+  (pyim-dcache-restore-variable 'pyim-personal-words-count-cache (make-hash-table :test #'equal)))
 
-(defun pyim-load-dict-cache-file (item cache-directory &optional erase-buffer)
-  "加载 `item' 对应的 cache file.
-`item' 是 `pyim-buffer-list' 的任意一个子列表."
-  (let* ((buffer (cdr (assoc "buffer" item)))
-         (file (cdr (assoc "file" item)))
-         (cache-file (pyim-return-dict-cache-filename file cache-directory)))
-    (with-current-buffer buffer
-      (when (file-exists-p cache-file)
-        (setq pyim-dict-cache
-              (with-temp-buffer
-                (insert-file-contents cache-file)
-                (eval (read (current-buffer)))))
-        (when erase-buffer
-          ;; 当词库缓存创建后，词库 buffer 也就没有多大的用处了，
-          ;; 清理后可以降低内存的消耗。
-          (erase-buffer)
-          (goto-char (point-min))
-          (insert (concat ";; `pyim-dict-cache' has been created by `pyim-load-dict-cache-file', "
-                          "the buffer content is useless, clean it.")))))))
+(defun pyim-dcache-restore-variable (variable &optional fallback-value)
+  (unless (symbol-value variable)
+    (let ((file (concat (file-name-as-directory pyim-cache-directory)
+                        (symbol-name variable))))
+      (set variable (or (pyim-dcache-get-value-from-file file)
+                        fallback-value)))))
 
-(defun pyim-generate-dict-cache-file (item cache-directory)
-  "根据 `item' 创建对应的 cache file.
-`item' 是 `pyim-buffer-list' 的任意一个子列表。"
-  (let* ((file (cdr (assoc "file" item)))
-         (coding (cdr (assoc "coding" item)))
-         (dict-type (cdr (assoc "dict-type" item)))
-         (cache-file (pyim-return-dict-cache-filename file cache-directory))
-         (return-plist (if (eq dict-type 'property-file) t nil))
-         (hastable (make-hash-table :size 1000000 :test #'equal)))
-    (when (or (not (file-exists-p cache-file))
-              (file-newer-than-file-p file cache-file))
+(defun pyim-dcache-get-value-from-file (file)
+  (when (file-exists-p file)
+    (with-temp-buffer
+      (insert-file-contents file)
+      (eval (read (current-buffer))))))
+
+(defun pyim-dcache-save-variable (variable)
+  (let ((file (concat (file-name-as-directory pyim-cache-directory)
+                      (symbol-name variable)))
+        (value (symbol-value variable)))
+    (pyim-dcache-save-value-to-file value file)))
+
+(defun pyim-dcache-save-value-to-file (value file)
+  (when value
+    (with-temp-buffer
+      (insert ";; Auto generated by `pyim-dcache-save-variable-to-file', don't edit it by hand!\n\n")
+      (insert (prin1-to-string value))
+      (insert "\n
+;; Local Variables:
+;; coding: utf-8-unix
+;; End:")
+      (make-directory (file-name-directory file) t)
+      (write-file file))))
+
+(defun pyim-dcache-generate-cache-file (dict-files cache-file)
+  (let ((hastable (make-hash-table :size 1000000 :test #'equal)))
+    (dolist (file dict-files)
       (with-temp-buffer
-        (if coding
-            (let ((coding-system-for-read coding))
-              (insert-file-contents file))
+        (let ((coding-system-for-read 'utf-8-unix))
           (insert-file-contents file))
         (goto-char (point-min))
         (forward-line 1)
         (while (not (eobp))
-          (let ((code (pyim-code-at-point t))
-                (content (pyim-line-content nil return-plist)))
+          (let ((code (pyim-code-at-point))
+                (content (pyim-line-content)))
             (when (and code content)
-              (if return-plist
-                  (puthash code content hastable)
-                (puthash
-                 code (delete-dups `(,@content ,@(gethash code hastable)))
-                 hastable))))
-          (forward-line 1)))
-      (with-temp-buffer
-        (insert ";; Auto generated by `pyim-generate-dict-cache-file', don't edit it by hand!\n\n")
-        (insert (prin1-to-string hastable))
-        (make-directory (file-name-directory cache-file) t)
-        (write-file cache-file)))))
-;; #+END_SRC
+              (puthash code (delete-dups `(,@content ,@(gethash code hastable)))
+                       hastable)))
+          (forward-line 1))))
+    (pyim-dcache-save-value-to-file hastable cache-file)))
 
-;; 当使用 `pyim-start' 或者 `pyim-restart' 命令激活  Chinese-pyim 时，上述对应表保存到变量 `pyim-buffer-list'。
-;; 供 Chinese-pyim 后续使用。
+(defun pyim-code-at-point ()
+  "Get code in the current line."
+  (save-excursion
+    (beginning-of-line)
+    (if (re-search-forward "[ \t:]" (line-end-position) t)
+        (buffer-substring-no-properties (line-beginning-position) (1- (point))))))
 
-;; `pyim-buffer-list' 包含的第一个buffer，永远对应着个人词频文件，Chinese-pyim 使用 `pyim-save-files'
-;; 将 `pyim-buffer-list' 第一个 buffer 的内容保存到个人词频文件，这个命令用于更新个人词频文件。
-;; <<save-personal-file>>
+(defun pyim-line-content (&optional seperaters)
+  "用 SEPERATERS 分解当前行，所有参数传递给 split-string 函数。"
+  (let* ((begin (line-beginning-position))
+         (end (line-end-position))
+         (items (cdr (split-string
+                      (buffer-substring-no-properties begin end)
+                      seperaters))))
+    items))
 
-;; #+BEGIN_SRC emacs-lisp
-(defun pyim-save-files ()
+(defun pyim-save-caches ()
   "将下面几个文件更新后内容保存。
-
-1. `pyim-personal-file'
-2. `pyim-property-file'
-
-3. `pyim-personal-file' 的缓存文件
-4. `pyim-property-file' 的缓存文件
-
 这个函数默认作为`kill-emacs-hook'使用。"
   (interactive)
-  (let ((items (pyim-subseq pyim-buffer-list 0 2)))
-    (dolist (item items)
-      (pyim-generate-dict-file item)
-      (pyim-generate-dict-cache-file item pyim-cache-directory))))
-
-(defun pyim-generate-dict-file (item)
-  "根据 `item' 更新对应的 dict 文件.
-`item' 是 `pyim-buffer-list' 的任意一个子列表。"
-  (let* ((buffer (cdr (assoc "buffer" item)))
-         (file (cdr (assoc "file" item)))
-         (coding (cdr (assoc "coding" item)))
-         (dict-type (cdr (assoc "dict-type" item))))
-    (if (get-buffer buffer)
-        (with-current-buffer buffer
-          (if (and (boundp 'pyim-dict-cache)
-                   (hash-table-p pyim-dict-cache))
-              (save-restriction
-                (erase-buffer)
-                (goto-char (point-min))
-                (insert ";; -*- coding: utf-8 -*-\n")
-                (maphash
-                 #'(lambda (key value)
-                     (insert (mapconcat
-                              #'(lambda (x)
-                                  (format "%s" x)) `(,key ,@value) " "))
-                     (insert "\n"))
-                 pyim-dict-cache)
-                (write-region (point-min) (point-max) file)
-                (message "更新 Chinese-pyim 文件：%s。" file))
-            (message "buffer 变量 `pyim-dict-cache' 无效，个人文件更新失败！"))))))
-
-(defun pyim-filter-buffer-list (dict-types)
-  "从 `pyim-buffer-list' 中挑选符合的 buffer."
-  (delq nil
-        (mapcar
-         #'(lambda (buf)
-             (when (member (cdr (assoc "dict-type" buf)) dict-types)
-               buf))
-         pyim-buffer-list)))
-
-(defun pyim-get-buffer (dict-type &optional n)
-  "获取词库类型为 `dict-type' 的第 N 个 buffer, 并返回。
-N 从 0 开始计数。"
-  (cdar (nth (or n 0) (pyim-filter-buffer-list (list dict-type)))))
-
-;; #+END_SRC
-
-;; `pyim-check-buffers' 函数会检查 `pyim-buffer-list' 中的所有 buffer 是否存在，如果某个 buffer 不存在，
-;; 这个函数会重新创建一个buffer，并插入对应词库文件的内容，如果对应词库文件也不存在，那么这个函数会删除这条记录。
-
-;; 而 `pyim-kill-buffers' 会删除 `pyim-buffer-list' 中所有的 buffer。这个函数用于重新启动输入法前的清理工作。
-;; <<pyim-kill-buffers>>
-
-;; #+BEGIN_SRC emacs-lisp
-(defun pyim-check-buffers ()
-  "检查所有的 buffer 是否还存在，如果不存在，重新打开文件，如果文件不
-存在，从 buffer-list 中删除这个 buffer"
-  (let ((buflist pyim-buffer-list)
-        (bufname pyim-buffer-name)
-        buffer file)
-    (dolist (buf buflist)
-      (setq buffer (cdr (assoc "buffer" buf)))
-      (setq file (cdr (assoc "file" buf)))
-      (unless (get-buffer buffer)
-        (if (file-exists-p file)
-            (with-current-buffer (generate-new-buffer bufname)
-              (insert-file-contents file)
-              (setcdr buffer (buffer-name)))
-          (message "%s for %s is not exists!" file bufname)
-          (setq buflist (remove buf buflist)))))
-    t))
-
-(defun pyim-kill-buffers ()
-  "删除所有词库文件对应的 buffer ，用于重启 Chinese-pyim 。"
-  (let ((buflist pyim-buffer-list)
-        buffer)
-    (dolist (buf buflist)
-      (setq buffer (cdr (assoc "buffer" buf)))
-      (when (get-buffer buffer)
-        (kill-buffer buffer)))))
+  (pyim-dcache-save-variable 'pyim-personal-dict-cache)
+  (pyim-dcache-save-variable 'pyim-personal-words-count-cache)
+  t)
 ;; #+END_SRC
 
 ;; *** 从词库中搜索中文词条
 ;; 当个人词频文件以及普通词库文件加载完成后， Chinese-pyim 就可以搜索某个
-;; 拼音字符串对应的中文词条了，这个工作由函数 `pyim-get' 完成，其基本原理
-;; 是：递归的搜索 `pyim-buffer-list' 中所有的 buffer，将得到的搜索结果汇
-;; 总成一个列表，去除重复元素后返回。
-
-;; 在搜索 buffer 之前，Chinese-pyim 会使用函数 `pyim-dict-buffer-valid-p'
-;; 大致的判断当前 buffer 是否是一个有效的词库 buffer，判断标准为：
-
-;; 1. buffer 必须多于5行。
-;; 2. buffer 中间一行必须包含空格或者TAB。
-;; 2. buffer 中间一行必须包含中文字符(\\cc)。
-
-;; 由于 chinese-pyim 文本词库没有包含 meta 信息，所以这个函数只能粗略的做
-;; 出判断，另外这个函数使用 `count-lines' 计算行数，我限定其参数 END 不超
-;; 过 20000, 这样可以优化性能，防止输入法卡顿。
-
-;; BUG: 这个函数需要进一步优化，使其判断更准确。
+;; 拼音字符串对应的中文词条了，这个工作由函数 `pyim-get' 完成
 
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-get (code &optional search-from)
-  (let ((search-from (or search-from '(personal-file pinyin-dict)))
-        words buffer-list)
-    ;; 直接用二分法搜索 *普通词库* buffer（速度比较慢）。
-    (dolist (buf pyim-buffer-list)
-      (let ((dict-type (cdr (assoc "dict-type" buf))))
-        (when (member dict-type search-from)
-          (push buf buffer-list))))
-    (setq buffer-list (reverse buffer-list))
-    (dolist (buf buffer-list)
-      (let ((dict-type (cdr (assoc "dict-type" buf)))
-            (buffer (cdr (assoc "buffer" buf))))
-        (with-current-buffer buffer
-          (setq words
-                `(,@words
-                  ,@(pyim-bisearch-word
-                     code (point-min) (point-max)))))))
-    `(,@words ,@(pyim-pinyin2cchar-get code t t))))
+(defun pyim-get (code &optional cache-list)
+  (let ((cache-list (or (if (listp cache-list)
+                            cache-list
+                          (list cache-list))
+                        (list pyim-personal-dict-cache pyim-dict-cache)))
+        result)
+    (dolist (cache cache-list)
+      (let ((value (gethash code cache)))
+        (when value
+          (setq result (append result value)))))
+    `(,@result ,@(pyim-pinyin2cchar-get code t t))))
 
 (defun pyim-string-match-p (regexp string &optional start)
   (and (stringp regexp)
@@ -987,191 +704,64 @@ N 从 0 开始计数。"
                      x))
                pylist "-")))))
 
-(defun pyim-dict-buffer-valid-p ()
-  "粗略地确定当前 buffer 是否是一个有效的词库产生的 buffer。
-确定标准：
-
-1. buffer 必须多于5行。
-2. buffer 中间一行必须包含空格或者TAB。
-
-BUG: 这个函数需要进一步优化，使其判断更准确。"
-  (when (> (count-lines (point-min)
-                        (min 20000 (point-max))) 5)
-    (save-excursion
-      (let ((mid (/ (+ (point-min) (point-max)) 2))
-            ccode)
-        (goto-char mid)
-        (beginning-of-line)
-        (re-search-forward "[ \t]" (line-end-position) t)))))
 ;; #+END_SRC
-
-;; `pyim-buffer-list' 中每一个 buffer 都使用函数：`pyim-bisearch-word' 来
-;; 搜索，其具体方式是：
-
-;; 1. 获取 buffer 的 max-point 和 min-point
-;; 2. 将光标移动到上述两个值的中间。
-;; 3. 使用 `pyim-code-at-point' 获取当前行的拼音字符串。
-;; 4. 比较上述拼音字符串和待搜索的字符串，来决定搜索 buffer 的上半部份还
-;;    是下半部份。
-;; 5. 这样递归的操作，最终会将光标移动到 buffer 的某一行，这一行中的拼音
-;;    字符串和待搜索的拼音字符串一致。
-;; 6. 最后使用 `pyim-line-content' 返回当前行的内容，其结果是一个列表，类
-;;    似，注意, `pyim-line-content' 的返回值没有包含 code .
-;;    #+BEGIN_EXAMPLE
-;;    ("你好" "你号" ...)
-;;    #+END_EXAMPLE
-
-;; #+BEGIN_SRC emacs-lisp
-(defun pyim-bisearch-word (code start end)
-  (if pyim-dict-cache
-      (gethash code pyim-dict-cache)
-    (pyim-bisearch-word-internal code start end)))
-
-(defun pyim-bisearch-word-internal (code start end)
-  (let* ((regexp "[ \f\t\n\r\v]+")
-         (mid (/ (+ start end) 2))
-         ccode)
-    (goto-char mid)
-    (beginning-of-line)
-    (setq ccode (pyim-code-at-point))
-    ;; (message "%d, %d, %d: %s" start mid end ccode)
-    (if (equal ccode code)
-        (pyim-line-content regexp)
-      (when (> mid start)
-        (if (string< ccode code)
-            (pyim-bisearch-word-internal code mid end)
-          (pyim-bisearch-word-internal code start mid))))))
-
-(defun pyim-code-at-point (&optional ignore-error)
-  "Get code in the current line."
-  (save-excursion
-    (beginning-of-line)
-    (if (re-search-forward "[ \t:]" (line-end-position) t)
-        (buffer-substring-no-properties (line-beginning-position) (1- (point)))
-      (unless ignore-error
-        (error "文件类型错误！%s 的第 %d 行没有词条！" (buffer-name) (line-number-at-pos))))))
-
-(defun pyim-line-content (&optional seperaters return-plist omit-nulls)
-  "用 SEPERATERS 分解当前行，所有参数传递给 split-string 函数, 如果 return-plist
-设置为 t, 则返回一个 plist 而不是默认的 list."
-  (let* ((begin (line-beginning-position))
-         (end (line-end-position))
-         (end (if (> (- end begin) pyim-line-content-limit)
-                  (+ begin pyim-line-content-limit)
-                end))
-         (items (cdr (split-string
-                      (buffer-substring-no-properties begin end)
-                      seperaters))))
-    (if return-plist
-        (let ((i 0) return)
-          (dolist (item items)
-            (if (= (% i 2) 0)
-                (push (intern item) return)
-              (push
-               ;; 最常用的属性有两种： 1. 字符串 2. 数字
-               ;; 这里将读取的数字字符串转换为真正的数字,
-               (if (equal (number-to-string
-                           (string-to-number item)) item)
-                   (string-to-number item)
-                 item)
-               return))
-            (setq i (1+ i)))
-          (nreverse return))
-      (if omit-nulls
-          (cl-delete-if 'pyim-string-emptyp items)
-        items))))
-
-(defun pyim-string-emptyp (str)
-  (not (string< "" str)))
-;; #+END_SRC
-
-;; `pyim-bisearch-word' 是 Chinese-pyim 搜索词条的最基本最核心的函数，只
-;; 要涉及到搜索词条，必须调用这个函数。
 
 ;; *** 保存词条，删除词条以及调整词条位置
-;; Chinese-pyim 不会更改普通词库文件的内容，只会将运行过程中的词频信息保存到个人词频文件，这个过程
-;; 分为两步：
-;; 1. 调整 buffer 变量 `pyim-dict-cache'，这个过程使用宏 `pyim-intern-file' 完成。
-;; 2. 格式化 `pyim-dict-cache'，并将结果保存到对应文件，这个使用函数 `pyim-save-files' 完成。
-
-;; 围绕着 `pyim-intern-file'，Chinese-pyim 构建了3类命令：
-;; 1. 将一个中文词条加入个人词频文件（造词功能）
-;; 2. 将一个中文词条从个人词频文件中删除（删词功能）
-;; 3. 调整一个中文词条选项的位置（词频调整功能）
-
-;; **** 造词功能和词频调整功能
-;; 1. `pyim-create-or-rearrange-word' 当用户选择了一个词库中不存在的中文词条时，
-;;    `pyim-select-current' 会调用这个函数来自动造词。其工作流程是：
-;;     1. 使用 `chinese-hanzi2pinyin' 获取中文词条的拼音。
-;;     2. 然后调用 `pyim-intern-file' 保存词条，多音字重复操作
-;;        另外，这个函数也用于 *词频调整*  。
-
-;;     BUG：这种处理方式最大的问题是 *无法正确处理* 多音字，从而导致
-;;     chinese-pyim 个人文件 *不纯洁*  :-)，但不影响使用。Emacs-eim
-;;     使用的方式不存在这种问题，但其增加了代码的复杂度，并且灵活性太差
-;;     增加高级功能，比如 “词语联想”，时存在问题。
-
-;; 2. `pyim-create-word-at-point' 这个命令会提取光标前 `number' 个中文字
-;;     符，将其组成字符串后，调用 `pyim-create-word' 将其加入个人词频文件。
-;; 3. `pyim-create-word-at-point:<NUM>char' 这组命令是
-;;    `pyim-create-word-at-point' 的包装命令。
-
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-delete-line ()
-  (delete-region (line-beginning-position)
-                 (min (+ (line-end-position) 1) (point-max))))
-
-(defmacro pyim-intern-file (dict-type code &rest body)
-  "用于更新 personal-file 或者 property-file 的宏，
-运行 `body' 并用其返回值覆盖 buffer 变量 `pyim-dict-cache'
-中 `code' 原来的取值，表达式 `bode' 中，可以使用 `orig-value'
-引用 `code' 原来的取值。"
-  (declare (indent 0) (debug t))
-  (let ((buffer (make-symbol "buffer")))
-    `(let ((,buffer (pyim-get-buffer ,dict-type)))
-       (with-current-buffer ,buffer
-         (unwind-protect
-             (when pyim-dict-cache
-               (let ((orig-value (gethash ,code pyim-dict-cache)))
-                 (puthash ,code (or (progn ,@body) orig-value) pyim-dict-cache))))))))
+(defmacro pyim-update-cache (cache code &rest body)
+  (declare (indent 0))
+  (let ((key (make-symbol "key"))
+        (table (make-symbol "table"))
+        (new-value (make-symbol "new-value")))
+    `(let* ((,key ,code)
+            (,table ,cache)
+            (orig-value (gethash ,key ,table))
+            ,new-value)
+       (setq ,new-value (progn ,@body))
+       (unless (equal orig-value ,new-value)
+         (puthash ,key ,new-value ,table)))))
 
 (defun pyim-create-or-rearrange-word (word &optional rearrange-word)
-  "将中文词条 `word' 添加拼音后，保存到 personal-file 对应的
-buffer中，当前词条追加到已有词条之后。`pyim-create-or-rearrange-word'
+  "将中文词条 `word' 添加拼音后，保存到 `pyim-personal-dict-cache' 中，
+当前词条追加到已有词条之后。`pyim-create-or-rearrange-word'
 会调用 `pyim-hanzi2pinyin' 来获取中文词条的拼音code。
 
 BUG：无法有效的处理多音字。"
   (when (> (length word) 0)
     (let* ((pinyins (pyim-hanzi2pinyin word nil "-" t nil t))) ;使用了多音字校正
-      ;; 记录 word 的其他属性（比如：精确词频），用于词条联想和排序。
-      (when (and (> (length word) 1)
-                 (cl-some #'(lambda (py)
-                              (member word (pyim-get py '(personal-file))))
-                          pinyins))
-        (pyim-intern-file
-          'property-file word
-          (let ((count (or (plist-get orig-value :count) 1)))
-            (plist-put orig-value :count (+ count 1)))))
 
+      ;; 保存词频
+      (when (> (length word) 1)
+        (pyim-update-cache
+          pyim-personal-words-count-cache word
+          (+ (or orig-value 0) 1)))
       (dolist (py pinyins)
         (unless (pyim-string-match-p "[^ a-z-]" py)
           ;; 添加词库： ”拼音“ - ”中文词条“
-          (pyim-intern-file
-            'personal-file py
-            (delete-dups
-             (if rearrange-word
-                 `(,word ,@orig-value)
-               `(,@orig-value ,word))))
+          (pyim-update-cache
+            pyim-personal-dict-cache py
+            (if rearrange-word
+                (pyim-list-merge word orig-value)
+              (pyim-list-merge orig-value word)))
           ;; 添加词库： ”拼音首字母“ - ”中文词条“
-          (pyim-intern-file
-            'personal-file
+          (pyim-update-cache
+            pyim-personal-dict-cache
             (mapconcat #'(lambda (x)
                            (substring x 0 1))
                        (split-string py "-") "-")
-            (delete-dups
-             (if rearrange-word
-                 `(,word ,@orig-value)
-               `(,@orig-value ,word)))))))))
+            (if rearrange-word
+                (pyim-list-merge word orig-value)
+              (pyim-list-merge orig-value word))))))))
+
+(defun pyim-list-merge (a b)
+  "Join list A and B to a new list, then delete dups."
+  (let ((a (if (listp a)
+               a
+             (list a)))
+        (b (if (listp b)
+               b
+             (list b))))
+    (delete-dups `(,@a ,@b))))
 
 (defun pyim-chinese-string-at-point (&optional number)
   "获取光标一个中文字符串，字符数量为：`number'"
@@ -1229,13 +819,13 @@ BUG：无法有效的处理多音字。"
                        pinyins)))
     (dolist (pinyin pinyins)
       (unless (pyim-string-match-p "[^ a-z-]" pinyin)
-        (pyim-intern-file
-          'personal-file pinyin
+        (pyim-update-cache
+          pyim-personal-dict-cache pinyin
           (remove word orig-value))))
     (dolist (pinyin pinyins-szm)
       (unless (pyim-string-match-p "[^ a-z-]" pinyin)
-        (pyim-intern-file
-          'personal-file pinyin
+        (pyim-update-cache
+          pyim-personal-dict-cache pinyin
           (remove word orig-value))))))
 
 (defun pyim-create-word-from-selection ()
@@ -1424,6 +1014,9 @@ Return the input string."
                    (mapcar 'identity rest-chars)))
          (setq current-input-method-title pyim-title))))
 
+(defun pyim-string-emptyp (str)
+  (not (string< "" str)))
+
 (defun pyim-self-insert-command ()
   "如果在 pyim-first-char 列表中，则查找相应的词条，否则停止转换，插入对应的字符"
   (interactive "*")
@@ -1606,8 +1199,8 @@ Return the input string."
                          #'(lambda (charpy)
                              (or (pyim-pinyin2cchar-get charpy t)
                                  (pyim-get charpy)))
-                         charpys))  ;错误的拼音
-                   ))
+                         charpys))))
+
           (cons sm "")
         (cons (cons (car sm) (car ym)) (cdr ym))))))
 
@@ -1664,24 +1257,23 @@ Return the input string."
 ;; "nihc" -> (((\"n\" . \"i\") (\"h\" . \"ao\")))
 (defun pyim-split-string:shuangpin (str &optional pinyin-scheme-name)
   "按照 `pyim-scheme-name' 对应的拼音方案，把一个双拼字符串分解成一个 pylist 组成的列表。"
-  (let ((keymaps-general (pyim-get-pinyin-scheme-option pinyin-scheme-name :keymaps-general))
-        (keymaps-special (pyim-get-pinyin-scheme-option pinyin-scheme-name :keymaps-special))
-        (list (string-to-list
-               (replace-regexp-in-string "-" ""str)))
+  (let ((keymaps (pyim-get-pinyin-scheme-option pinyin-scheme-name :keymaps))
+        (list (string-to-list (replace-regexp-in-string "-" "" str)))
         results)
     (while list
       (let* ((sp-sm (pop list))
              (sp-ym (pop list))
              (sp-sm (when sp-sm (char-to-string sp-sm)))
              (sp-ym (when sp-ym (char-to-string sp-ym)))
-             (sm (nth 1 (assoc sp-sm keymaps-general)))
-             (ym (cdr (cdr (assoc sp-ym keymaps-general)))))
+             (sm (nth 1 (assoc sp-sm keymaps)))
+             (ym (cdr (cdr (assoc sp-ym keymaps)))))
         (push (mapcar
                #'(lambda (x)
-                   (let* ((y (cons sp-sm sp-ym))
-                          (z (car (cdr (assoc y keymaps-special)))))
-                     (or z (cons sm x))))
-               (or ym (list ""))) results)))
+                   (let* ((y (concat sp-sm sp-ym))
+                          (z (cadr (assoc y keymaps))))
+                     (if z (cons "" z) (cons sm x))))
+               (or ym (list "")))
+              results)))
     (pyim-permutate-list (nreverse results))))
 
 (defun pyim-find-fuzzy-pinyins (pycons)
@@ -1769,28 +1361,24 @@ Return the input string."
   "把一个拼音列表合并为一个双拼字符串，当 `shou-zi-mu' 设置为 t 时，
 生成双拼首字母字符串，比如 p-y。"
   (when pinyin-scheme-name
-    (let* ((keymaps-general (pyim-get-pinyin-scheme-option pinyin-scheme-name :keymaps-general))
-           (keymaps-special (pyim-get-pinyin-scheme-option pinyin-scheme-name :keymaps-special)))
+    (let ((keymaps (pyim-get-pinyin-scheme-option pinyin-scheme-name :keymaps)))
       (mapconcat 'identity
                  (mapcar
                   #'(lambda (w)
-                      (let ((special
-                             (car (rassoc (list w)
-                                          keymaps-special)))
-                            (sm (car w))
+                      (let ((sm (car w))
                             (ym (cdr w)))
-                        (if special
-                            (concat (car special) (cdr special))
+                        (if (equal sm "")
+                            (car (rassoc (list ym) keymaps))
                           (concat (cl-some
                                    #'(lambda (x)
                                        (when (equal sm (nth 1 x))
-                                         (car x))) keymaps-general)
+                                         (car x))) keymaps)
                                   (unless shou-zi-mu
                                     (cl-some
                                      #'(lambda (x)
                                          (when (or (equal ym (nth 2 x))
                                                    (equal ym (nth 3 x)))
-                                           (car x))) keymaps-general))))))
+                                           (car x))) keymaps))))))
                   pylist)
                  "-"))))
 ;; #+END_SRC
@@ -1836,8 +1424,7 @@ Return the input string."
 
     (delete-dups
      (delq nil
-           `(,(car personal-words)
-             ,@(pyim-sort-words:count (cdr personal-words))
+           `(,@personal-words
              ,@pinyin-dict-words
              ,@(when (and pinyin-dict-words
                           (not (member (car pinyin-dict-words) pinyin-shouzimu-similar-words)))
@@ -1859,35 +1446,28 @@ Return the input string."
   (let ((py-str-shouzimu (pyim-pylist-to-string pylist t 'default)))
     (when (and (member 'pinyin-shouzimu pyim-enable-words-predict)
                (> (length pylist) 1))
-      (list nil (pyim-sort-words:count
-                 (pyim-get py-str-shouzimu '(personal-file)))))))
+      (list nil (gethash py-str-shouzimu pyim-personal-dict-cache)))))
 
 (defun pyim-get-choices:personal-file (pylist)
   (let ((py-str (pyim-pylist-to-string pylist nil 'default)))
-    (list (pyim-get py-str '(personal-file)) nil)))
+    (list (pyim-get py-str pyim-personal-dict-cache) nil)))
 
 (defun pyim-get-choices:pinyin-dict (pylist)
   (let ((py-str (pyim-pylist-to-string pylist nil 'default)))
-    (list (pyim-get py-str '(pinyin-dict)) nil)))
+    (list (pyim-get py-str pyim-dict-cache) nil)))
 
 (defun pyim-get-choices:chars (pylist)
   (let ((py-str (pyim-pylist-to-string pylist nil 'default)))
     (list (pyim-get (concat (caar pylist) (cdar pylist)))
           nil)))
 
-(defun pyim-get-word-property (word property &optional value-converter default-value)
-  "从 `pyim-property-file' 文件中获取 `word' 对应属性 `property' 的取值。"
-  (let* ((value (plist-get (pyim-get word '(property-file)) property))
-         (value-converter (or value-converter #'identity)))
-    (or (when value (funcall value-converter value))
-        default-value)))
-
 (defun pyim-sort-words:count (words-list)
   "根据 `pyim-property-file' 提供的信息，对 `words-list' 中的词条进行排序。"
   (sort words-list
         #'(lambda (a b)
-            (> (pyim-get-word-property a :count nil 1)
-               (pyim-get-word-property b :count nil 1)))))
+            (let ((count-a (or (gethash a pyim-personal-words-count-cache) 0))
+                  (count-b (or (gethash b pyim-personal-words-count-cache) 0)))
+              (> count-a count-b)))))
 
 (defun pyim-build-chinese-regexp-for-pylist (pylist &optional match-beginning
                                                     first-equal all-equal)
@@ -2935,9 +2515,6 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
 \"nihao\" -> \"[你呢...][好号...] \\| nihao\""
   (if (pyim-string-match-p "[^a-z']+" pystr)
       pystr
-    ;; 确保 pyim 词库已经加载
-    (unless pyim-buffer-list
-      (setq pyim-buffer-list (pyim-load-file)))
     (let* ((pylist-list
             ;; Slowly operating, need to improve.
             (pyim-split-string pystr pyim-default-pinyin-scheme))

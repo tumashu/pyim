@@ -157,15 +157,13 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
 
       ;; 使用 Chinese-pyim 的安装的词库来校正多音字。
       (when adjuct-duo-yin-zi
-        (unless pyim-buffer-list ;确保 pyim-get 可以正常运行
-          (setq pyim-buffer-list (pyim-load-file)))
         (dolist (pinyin-list pinyins-list-permutated)
           (let* ((py-str (mapconcat #'identity pinyin-list "-"))
                  (words-from-dicts
                   ;; pyim-buffer-list 中第一个 buffer 对应的是个人词库文件
                   ;; 个人词库文件中的词条，极有可能存在 *多音字污染*。
                   ;; 这是由 Chinese-pyim 保存词条的机制决定的。
-                  (pyim-get py-str '(pinyin-dict))))
+                  (pyim-get py-str pyim-dict-cache)))
             (when (member string words-from-dicts)
               (push pinyin-list pinyins-list-adjusted))))
         (setq pinyins-list-adjusted
@@ -416,67 +414,6 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
     (message "Add Chinese-pyim dict %S to `pyim-extra-dicts'。" (plist-get new-dict :name))
     t))
 
-(defun pyim-contribute-words ()
-  (interactive)
-  (if (not (pyim-get-buffer 'property-file))
-      (message "请启动 Chinese-pyim 后再运行 `pyim-contribute-words' 命令。")
-    (when (yes-or-no-p "您你打算为 Chinese-pyim 贡献词条吗？ ")
-      (let* ((cache (buffer-local-value
-                     'pyim-dict-cache
-                     (get-buffer (pyim-get-buffer 'property-file))))
-             (author (read-from-minibuffer "请输入您的名字： " user-full-name))
-             (email (read-from-minibuffer "请输入您的电子邮件： " user-mail-address))
-             (license (read-from-minibuffer "请输入提交词库使用的 license ：" "GPLv2"))
-             (buffer (get-buffer-create "*pyim-contribute-words*"))
-             (dicts-string (with-temp-buffer
-                             (goto-char (point-min))
-                             (maphash
-                              #'(lambda (key value)
-                                  (insert key "\n"))
-                              cache)
-                             (goto-char (point-min))
-                             (while (not (eobp))
-                               (pyim-convert-current-line-to-dict-format)
-                               (forward-line 1))
-                             (pyim-update-dict-file t t)
-                             (pyim-update-dict-file t t)
-                             (buffer-string))))
-        (with-current-buffer buffer
-          (when (featurep 'org)
-            (org-mode))
-          (setq truncate-lines t)
-          (erase-buffer)
-          (goto-char (point-min))
-          (insert
-           "
-# ---------------------------------------------------------------------------
-# 请将 buffer 的内容通过下面 *任意一个* 方式：
-#
-# 1. QQ (329985753)
-# 2. QQ群 (59134186)
-# 3. Email (tumashu@163.com)
-# 4. Github Issue (https://github.com/tumashu/chinese-pyim-basedict/issues)
-#
-# 发送给 Chinese-pyim 的维护者：Feng Shu
-# ---------------------------------------------------------------------------
-
-")
-          (insert (format "#+Author: %s\n" author))
-          (insert (format "#+Email: %s\n" email))
-          (insert (format "#+License: %s\n" license))
-          (insert "\n")
-          (insert "#+BEGIN_COMMENT\n")
-          (insert dicts-string)
-          (insert "\n#+END_COMMENT")
-          (goto-char (point-min)))
-        (pop-to-buffer buffer)))))
-;; #+END_SRC
-
-;; ** TODO 词库 package 制作工具
-;; 每一个流行的拼音输入法制定了自己的词库包格式，比如：搜狗拼音输入法的细胞词库，QQ输入法的QQ词库等，
-;; Chinese-pyim 打算使用 emacs package 来分发词库包。
-
-;; #+BEGIN_SRC emacs-lisp
 (defun pyim-dict-name-available-p (dict-name)
   "查询 `pyim-dicts' 中 `:name' 为 `dict-name' 的词库信息是否存在。
   这个函数主要用于词库 package。"

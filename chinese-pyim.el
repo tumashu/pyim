@@ -289,12 +289,6 @@
 
 ;; ** Tips
 
-;; *** 如何为 Chinese-pyim 贡献词条
-
-;; #+BEGIN_EXAMPLE
-;; M-x: pyim-contribute-words
-;; #+END_EXAMPLE
-
 ;; *** Chinese-pyim 出现错误时，如何开启 debug 模式
 
 ;; #+BEGIN_EXAMPLE
