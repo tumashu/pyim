@@ -319,7 +319,7 @@
 ;; #+END_EXAMPLE
 
 ;; *** 如何添加自定义拼音词库
-;; Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面五种方式，获取
+;; Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面几种方式，获取
 ;; 质量较好的拼音词库：
 
 ;; **** 第一种方式 (懒人推荐使用)
@@ -355,40 +355,12 @@
 ;; 完成后运行命令 `pyim-restart' 或者重启emacs。
 
 ;; **** 第三种方式 (Linux & Unix 用户推荐使用)
-;; E-Neo 同学编写了一个简单的词库转换工具: [[https://github.com/E-Neo/scel2pyim][scel2pyim]] ,
-;; 这个小工具可以直接将搜狗输入法的细胞词库转换为 Chinese-pyim 使用的文本词库，
-;; pyim-dicts-manager 中 “导入搜狗输入法细胞词库” 功能就是依靠这个工具实现。
+;; E-Neo 同学编写了一个词库转换工具: [[https://github.com/E-Neo/scel2pyim][scel2pyim]] ,
+;; 可以将一个搜狗词库转换为 pyim 词库。
 
 ;; 1. 软件名称： scel2pyim
 ;; 2. 下载地址： https://github.com/E-Neo/scel2pyim
 ;; 3. 编写语言： C语言
-
-;; 按照说明安装好 scel2pyim 后，将scel2pyim命令所在的目录添加到系统PATH，或者在 emacs 配置文件中
-;; 添加代码：
-
-;; #+BEGIN_EXAMPLE
-;; (setq pyim-dicts-manager-scel2pyim-command "/path/to/scel2pyim")
-;; #+END_EXAMPLE
-
-;; **** 第四种方式 (喜欢折腾的人推荐使用)
-;; 获取中文词条，然后使用命令为词条添加拼音code。中文词条的获取途径很多，比如：
-
-;; 1. 从其它输入法中导出。
-;; 2. 获取中文文章，通过分词系统分词得到。
-;; 3. 中文处理工具自带的dict。
-;; 4. 其它。
-
-;; 相关命令有三个：
-
-;; 1. `pyim-article2dict-chars' 将文章中游离汉字字符转换为拼音词库。
-;; 2. `pyim-article2dict-words' 将文章中中文词语转换为拼音词库。
-;; 3. `pyim-article2dict-misspell-words' 将文章中连续的游离词组成字符串后，
-;;    转换为拼音词库。
-
-;; 注意：在运行上述两个命令之前，必须确保待转换的文章中，中文词汇已经使用
-;; *空格* 强制隔开。
-
-;; 最后将生成的词库按上述方法添加到 Chinese-pyim 中就可以了。
 
 ;; *** 如何手动安装和管理词库
 ;; 这里假设有两个词库文件：
@@ -400,29 +372,14 @@
 
 ;; #+BEGIN_EXAMPLE
 ;; (setq pyim-dicts
-;;       '((:name "dict1" :file "/path/to/pyim-dict1.pyim" :coding utf-8-unix :dict-type pinyin-dict)
-;;         (:name "dict2" :file "/path/to/pyim-dict2.pyim" :coding utf-8-unix :dict-type pinyin-dict)))
+;;       '((:name "dict1" :file "/path/to/pyim-dict1.pyim")
+;;         (:name "dict2" :file "/path/to/pyim-dict2.pyim")))
 ;; #+END_EXAMPLE
 
 ;; 注意事项:
-;; 1. 必须使用词库文件的绝对路径。
-;; 2. 正确设置coding，否则会出现乱码。
-
-
-;; *** 如何合并两个词库文件
-;; 假设有两个词库文件：
-
-;; 1. file-a.pyim
-;; 2. file-b.pyim
-
-;; 合并方法：
-
-;; 1. 将两个词库文件的内容合并到一起，比如：
-;;    #+BEGIN_EXAMPLE
-;;    cat file-a.pyim file-b.pyim > output.pyim
-;;    #+END_EXAMPLE
-;; 2. 使用 emacs 打开合并后的文件：output.pyim
-;; 3. 运行 pyim-update-dict-file 命令对 output.pyim 的内容进行排序，然后保存。
+;; 1. 只有 :file 是 *必须* 设置的。
+;; 2. 必须使用词库文件的绝对路径。
+;; 3. 词库文件的编码必须为 utf-8-unix，否则会出现乱码。
 
 ;; *** 如何快速切换词库
 ;; 用户可以自定义类似的命令来实现快速切换拼音词库。
@@ -432,9 +389,7 @@
 ;;   (interactive)
 ;;   (setq pyim-dicts
 ;;         '((:name "BigDict"
-;;                  :file "/path/to/pyim-bigdict.pyim.gz"
-;;                  :coding utf-8-unix
-;;                  :dict-type pinyin-dict)))
+;;                  :file "/path/to/pyim-bigdict.pyim.gz" )))
 ;;   (pyim-restart-1 t))
 ;; #+END_EXAMPLE
 

@@ -77,27 +77,16 @@
 用户可以使用词库管理命令 `pyim-dicts-manager' 来添加词库信息，每一条词库信息都使用一个
 plist 来表示，比如：
 
-    (:name \"100万大词库\"
-     :file \"/path/to/pinyin-bigdict.txt\"
-     :coding utf-8-unix
-     :dict-type pinyin-dict)
+    (:name \"100万大词库\" :file \"/path/to/pinyin-bigdict.txt\")
 
 其中：
-1. `:name'      代表词库名称，用户可以按照喜好来确定。
-2. `:coding'    表示词库文件使用的编码。
-3. `:file'      表示词库文件，
-4. `:dict-type' 表示词库文件的类型。
+1. `:name'      代表词库名称，用户可以按照喜好来确定（可选项）。
+2. `:file'      表示词库文件，
 
 另外一个与这个变量功能类似的变量是： `pyim-extra-dicts', 专门
 用于和 elpa 格式的词库包集成。"
   :group 'chinese-pyim
   :type 'list)
-
-(defcustom pyim-dicts-directory
-  (concat (file-name-as-directory pyim-directory)
-          "dicts/")
-  "一个目录，用于保存 Chinese-pyim 词库管理器下载或者导入的词库文件"
-  :group 'chinese-pyim)
 
 (defcustom pyim-punctuation-dict
   '(("'" "‘" "’")
@@ -368,7 +357,6 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
 
 (defvar pyim-current-key "" "已经输入的代码")
 (defvar pyim-current-str "" "当前选择的词条")
-(defvar pyim-last-input-word "" "保存上一次输入过的词条，用于实现某种词语联想功能。")
 (defvar pyim-input-ascii nil  "是否开启 Chinese-pyim 英文输入模式。")
 (defvar pyim-force-input-chinese nil "是否强制开启中文输入模式。")
 
@@ -456,7 +444,6 @@ If you don't like this funciton, set the variable to nil")
     pyim-current-choices
     pyim-current-pos
     pyim-input-ascii
-    pyim-english-input-switch-function ;; obsolete
     pyim-english-input-switch-functions
     pyim-punctuation-half-width-functions
     pyim-guidance-list
@@ -1248,8 +1235,8 @@ BUG：无法有效的处理多音字。"
     (dolist (pinyin pinyins-szm)
       (unless (pyim-string-match-p "[^ a-z-]" pinyin)
         (pyim-intern-file
-         'personal-file pinyin
-         (remove word orig-value))))))
+          'personal-file pinyin
+          (remove word orig-value))))))
 
 (defun pyim-create-word-from-selection ()
   "Add the selected text as a Chinese word into the personal dictionary."
@@ -2478,7 +2465,6 @@ guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
           (progn
             (if (not (member pyim-current-str (car pyim-current-choices)))
                 (pyim-create-or-rearrange-word pyim-current-str))
-            (setq pyim-last-input-word pyim-current-str)
             (pyim-terminate-translation)
             ;; Chinese-pyim 使用这个 hook 来处理联想词。
             (run-hooks 'pyim-select-word-finish-hook))
@@ -2587,17 +2573,12 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
 
      ;; 关闭标点转换功能时，只插入英文标点。
      ((not (pyim-punctuation-full-width-p))
-      ;; `pyim-last-input-word' 保存的词条用于词语联想，
-      ;; 逻辑上，当输入标点符号后，保存的词条已经失效，
-      ;; 应该将其清空。
-      (setq pyim-last-input-word nil)
       str)
 
      ;; 当前字符属于 `pyim-punctuation-escape-list'时，
      ;; 插入英文标点。
      ((member (char-before)
               pyim-punctuation-escape-list)
-      (setq pyim-last-input-word nil)
       str)
 
      ;; 当 `pyim-punctuation-half-width-functions' 中
@@ -2607,7 +2588,6 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
                        (funcall x char)
                      nil))
                pyim-punctuation-half-width-functions)
-      (setq pyim-last-input-word nil)
       str)
 
      ;; 当光标前面为英文标点时， 按 `pyim-translate-trigger-char'
@@ -2615,7 +2595,6 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
      ((and (numberp punc-posit-before-1)
            (= punc-posit-before-1 0)
            (equal str trigger-str))
-      (setq pyim-last-input-word nil)
       (pyim-punctuation-translate-last-n-punctuations 'full-width)
       "")
 
@@ -2624,13 +2603,11 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
      ((and (numberp punc-posit-before-1)
            (> punc-posit-before-1 0)
            (equal str trigger-str))
-      (setq pyim-last-input-word nil)
       (pyim-punctuation-translate-last-n-punctuations 'half-width)
       "")
 
      ;; 正常输入标点符号。
      (punc-list
-      (setq pyim-last-input-word nil)
       (pyim-return-proper-punctuation punc-list))
 
      ;; 当输入的字符不是标点符号时，原样插入。
