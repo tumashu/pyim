@@ -2177,7 +2177,7 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
 
      ;; 正常输入标点符号。
      (punc-list
-      (pyim-return-proper-punctuation punc-list))
+      (pyim-punctuation-return-proper-punct punc-list))
 
      ;; 当输入的字符不是标点符号时，原样插入。
      (t str))))
@@ -2286,7 +2286,7 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
     (when punc-list
       (delete-char -1)
       (if (equal current-char (car punc-list))
-          (insert (pyim-return-proper-punctuation punc-list))
+          (insert (pyim-punctuation-return-proper-punct punc-list))
         (insert (car punc-list))))))
 
 (defun pyim-punctuation-translate-last-n-punctuations (&optional punct-style)
@@ -2317,7 +2317,7 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
             (cond
              ((eq punct-style 'full-width)
               (if (= position 0)
-                  (push (pyim-return-proper-punctuation puncts) result)
+                  (push (pyim-punctuation-return-proper-punct puncts) result)
                 (push punct result)))
              ((eq punct-style 'half-width)
               (if (= position 0)
@@ -2326,7 +2326,7 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
     (insert (mapconcat #'identity (reverse result) ""))))
 ;; #+END_SRC
 
-;; 使用上述命令切换光标前标点符号的样式时，我们使用函数 `pyim-return-proper-punctuation'
+;; 使用上述命令切换光标前标点符号的样式时，我们使用函数 `pyim-punctuation-return-proper-punct'
 ;; 来处理成对的全角标点符号， 比如：
 
 ;; #+BEGIN_EXAMPLE
@@ -2342,8 +2342,8 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
 ;; 第一个元素为半角标点，第二个和第三个元素（如果有）为对应的全角标点。
 
 ;; #+BEGIN_EXAMPLE
-;; (list (pyim-return-proper-punctuation '("'" "‘" "’"))
-;;       (pyim-return-proper-punctuation '("'" "‘" "’")))
+;; (list (pyim-punctuation-return-proper-punct '("'" "‘" "’"))
+;;       (pyim-punctuation-return-proper-punct '("'" "‘" "’")))
 ;; #+END_EXAMPLE
 
 ;; 结果为:
@@ -2355,7 +2355,7 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
 
 ;; #+BEGIN_SRC emacs-lisp
 ;; 处理标点符号
-(defun pyim-return-proper-punctuation (punc-list &optional before)
+(defun pyim-punctuation-return-proper-punct (punc-list &optional before)
   "返回合适的标点符号，`punc-list'为标点符号列表，其格式类似：
       `(\",\" \"，\") 或者：`(\"'\" \"‘\" \"’\")
 当 `before' 为 t 时，只返回切换之前的结果，这个用来获取切换之前
@@ -2375,7 +2375,7 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
 
 ;; #+END_SRC
 
-;; 函数 `pyim-return-proper-punctuation' 内部，我们使用变量 `pyim-punctuation-pair-status'
+;; 函数 `pyim-punctuation-return-proper-punct' 内部，我们使用变量 `pyim-punctuation-pair-status'
 ;; 来记录“成对”中文标点符号的状态。
 
 ;; ** 处理特殊功能触发字符（单字符快捷键）
