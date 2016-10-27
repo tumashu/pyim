@@ -366,8 +366,8 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
 (defvar pyim-overlay nil "显示当前选择词条的 overlay")
 
 (defvar pyim-pinyin-position nil)
-(defvar pyim-pylist-list nil
-  "Chinese-pyim 会将一个拼音字符串分解为一个或者多个 pylist （常见于双拼模式）,
+(defvar pyim-spinyin-list nil
+  "Chinese-pyim 会将一个拼音字符串分解为一个或者多个 spinyin （常见于双拼模式）,
 这个变量用于保存分解得到的结果。")
 
 (defvar pyim-guidance-list nil
@@ -457,7 +457,7 @@ If you don't like this funciton, set the variable to nil")
     pyim-pair-punctuation-status
     pyim-punctuation-escape-list
 
-    pyim-pylist-list
+    pyim-spinyin-list
     pyim-pinyin-position)
   "A list of buffer local variable")
 
@@ -689,7 +689,7 @@ If you don't like this funciton, set the variable to nil")
 比如：ni-hao-si-j --> ^ni-hao[a-z]*-si[a-z]*-j[a-z]* , when `first-equal' set to `t'
                   --> ^ni[a-z]*-hao[a-z]*-si[a-z]*-j[a-z]* , when `first-equal' set to `nil'"
   (when (and code (stringp code))
-    (let ((pylist (split-string code "-"))
+    (let ((spinyin (split-string code "-"))
           (count 0))
       (concat (if match-beginning "^" "")
               (mapconcat
@@ -700,7 +700,7 @@ If you don't like this funciton, set the variable to nil")
                            x
                          (concat x "[a-z]*"))
                      x))
-               pylist "-")))))
+               spinyin "-")))))
 
 ;; #+END_SRC
 
@@ -1229,13 +1229,13 @@ Return the input string."
     (pyim-find-fuzzy-pinyin
      (list (apply 'append
                   (mapcar #'(lambda (p)
-                              (let (chpy pylist)
+                              (let (chpy spinyin)
                                 (setq p (replace-regexp-in-string "[ -]" "" p))
                                 (while (when (string< "" p)
                                          (setq chpy (pyim-get-charpy p))
-                                         (setq pylist (append pylist (list (car chpy))))
+                                         (setq spinyin (append spinyin (list (car chpy))))
                                          (setq p (cdr chpy))))
-                                pylist))
+                                spinyin))
                           (split-string py "'")))))))
 
 ;; "nihc" -> (((\"n\" . \"i\") (\"h\" . \"ao\")))
@@ -1261,15 +1261,15 @@ Return the input string."
     (pyim-find-fuzzy-pinyin
      (pyim-permutate-list (nreverse results)))))
 
-(defun pyim-find-fuzzy-pinyin (pylist-list)
+(defun pyim-find-fuzzy-pinyin (spinyin-list)
   "用于处理模糊音的函数。"
-  (let (fuzzy-pylist-list result1 result2)
-    (dolist (pylist pylist-list)
-      (setq fuzzy-pylist-list
+  (let (fuzzy-spinyin-list result1 result2)
+    (dolist (spinyin spinyin-list)
+      (setq fuzzy-spinyin-list
             (pyim-permutate-list
-             (mapcar 'pyim-find-fuzzy-pinyin-1 pylist)))
-      (push (car fuzzy-pylist-list) result1)
-      (setq result2 (append result2 (cdr fuzzy-pylist-list))))
+             (mapcar 'pyim-find-fuzzy-pinyin-1 spinyin)))
+      (push (car fuzzy-spinyin-list) result1)
+      (setq result2 (append result2 (cdr fuzzy-spinyin-list))))
     (append result1 result2)))
 
 (defun pyim-find-fuzzy-pinyin-1 (pycons)
@@ -1294,15 +1294,15 @@ Return the input string."
           (push (cons a b) result)))
       (reverse result))))
 
-(defun pyim-validp (pylist)
+(defun pyim-validp (spinyin)
   "检查得到的拼音是否含有声母为空，而韵母又不正确的拼音"
   (let ((valid t) py)
     (while (progn
-             (setq py (car pylist))
+             (setq py (car spinyin))
              (if (and (not (string< "" (car py)))
                       (not (member (cdr py) pyim-valid-yun-mu)))
                  (setq valid nil)
-               (setq pylist (cdr pylist)))))
+               (setq spinyin (cdr spinyin)))))
     valid))
 
 (defun pyim-user-divide-pos (py)
@@ -1340,7 +1340,7 @@ Return the input string."
                                (symbol-name pinyin-class)))
                scode shou-zi-mu scheme-name))))
 
-(defun pyim-code-concat:quanpin (pylist &optional shou-zi-mu scheme-name)
+(defun pyim-code-concat:quanpin (spinyin &optional shou-zi-mu scheme-name)
   "把一个拼音列表合并为一个全拼字符串，当 `shou-zi-mu' 设置为 t
 时，生成拼音首字母字符串，比如 p-y。"
   (mapconcat 'identity
@@ -1350,10 +1350,10 @@ Return the input string."
                     (if shou-zi-mu
                         (substring py 0 1)
                       py)))
-              pylist)
+              spinyin)
              "-"))
 
-(defun pyim-code-concat:shuangpin (pylist &optional shou-zi-mu scheme-name)
+(defun pyim-code-concat:shuangpin (spinyin &optional shou-zi-mu scheme-name)
   "把一个拼音列表合并为一个双拼字符串，当 `shou-zi-mu' 设置为 t 时，
 生成双拼首字母字符串，比如 p-y。"
   (when scheme-name
@@ -1375,43 +1375,43 @@ Return the input string."
                                          (when (or (equal ym (nth 2 x))
                                                    (equal ym (nth 3 x)))
                                            (car x))) keymaps))))))
-                  pylist)
+                  spinyin)
                  "-"))))
 ;; #+END_SRC
 
 ;; **** 获得词语拼音并进一步查询得到备选词列表
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-get-choices (list-of-pylist)
+(defun pyim-get-choices (spinyin-list)
   "得到可能的词组和汉字。"
-  ;; list-of-pylist 可以包含多个 pylist, 从而得到多个子候选词列表，如何将多个 *子候选词列表* 合理的合并，
+  ;; spinyin-list 可以包含多个 spinyin, 从而得到多个子候选词列表，如何将多个 *子候选词列表* 合理的合并，
   ;; 是一个比较麻烦的事情的事情。 注：这个地方需要进一步得改进。
   (let* (personal-words
          pinyin-dict-words
          pinyin-shouzimu-similar-words pinyin-znabc-similar-words
          chars)
 
-    (dolist (pylist list-of-pylist)
+    (dolist (spinyin spinyin-list)
       (setq personal-words
             (append personal-words
-                    (car (pyim-get-choices:personal pylist))))
+                    (car (pyim-get-choices:personal spinyin))))
       (setq pinyin-dict-words
             (append pinyin-dict-words
-                    (car (pyim-get-choices:dicts pylist))))
+                    (car (pyim-get-choices:dicts spinyin))))
       (setq chars
             (append chars
-                    (car (pyim-get-choices:chars pylist)))))
+                    (car (pyim-get-choices:chars spinyin)))))
 
     ;; Pinyin shouzimu similar words
-    (let ((words (pyim-get-choices:pinyin-shouzimu (car list-of-pylist))))
+    (let ((words (pyim-get-choices:pinyin-shouzimu (car spinyin-list))))
       (setq pinyin-shouzimu-similar-words (car (cdr words))))
 
     ;; Pinyin znabc-style similar words
-    (let ((words (pyim-get-choices:pinyin-znabc (car list-of-pylist))))
+    (let ((words (pyim-get-choices:pinyin-znabc (car spinyin-list))))
       (setq pinyin-znabc-similar-words (car (cdr words))))
 
     ;; Debug
     (when pyim-debug
-      (princ (list :pylist-list list-of-pylist
+      (princ (list :spinyin-list spinyin-list
                    :personal-words personal-words
                    :pinyin-dict-words pinyin-dict-words
                    :pinyin-shouzimu-words pinyin-shouzimu-similar-words
@@ -1428,36 +1428,36 @@ Return the input string."
              ,@pinyin-znabc-similar-words
              ,@chars)))))
 
-(defun pyim-get-choices:pinyin-znabc (pylist)
+(defun pyim-get-choices:pinyin-znabc (spinyin)
   ;; 将输入的拼音按照声母和韵母打散，得到尽可能多的拼音组合，
   ;; 查询这些拼音组合，得到的词条做为联想词。
   (when (member 'pinyin-znabc pyim-backends)
     (list nil (pyim-possible-words
-               (pyim-possible-words-py pylist)))))
+               (pyim-possible-words-py spinyin)))))
 
-(defun pyim-get-choices:pinyin-shouzimu (pylist)
+(defun pyim-get-choices:pinyin-shouzimu (spinyin)
   ;; 如果输入 "ni-hao" ，搜索 code 为 "n-h" 的词条做为联想词。
   ;; 搜索首字母得到的联想词太多，这里限制联想词要大于两个汉字并且只搜索
   ;; 个人文件。
   (when (and (member 'pinyin-shouzimu pyim-backends)
-             (> (length pylist) 1))
-    (let ((py-str-shouzimu (pyim-code-concat pylist t 'quanpin)))
+             (> (length spinyin) 1))
+    (let ((py-str-shouzimu (pyim-code-concat spinyin t 'quanpin)))
       (list nil (gethash py-str-shouzimu pyim-personal-dict-cache)))))
 
-(defun pyim-get-choices:personal (pylist)
+(defun pyim-get-choices:personal (spinyin)
   (when (member 'personal pyim-backends)
-    (let ((py-str (pyim-code-concat pylist nil 'quanpin)))
+    (let ((py-str (pyim-code-concat spinyin nil 'quanpin)))
       (list (pyim-get py-str pyim-personal-dict-cache) nil))))
 
-(defun pyim-get-choices:dicts (pylist)
+(defun pyim-get-choices:dicts (spinyin)
   (when (member 'dicts pyim-backends)
-    (let ((py-str (pyim-code-concat pylist nil 'quanpin)))
+    (let ((py-str (pyim-code-concat spinyin nil 'quanpin)))
       (list (pyim-get py-str pyim-dict-cache) nil))))
 
-(defun pyim-get-choices:chars (pylist)
+(defun pyim-get-choices:chars (spinyin)
   (when (member 'chars pyim-backends)
-    (let ((py-str (pyim-code-concat pylist nil 'quanpin)))
-      (list (pyim-get (concat (caar pylist) (cdar pylist)))
+    (let ((py-str (pyim-code-concat spinyin nil 'quanpin)))
+      (list (pyim-get (concat (caar spinyin) (cdar spinyin)))
             nil))))
 
 (defun pyim-sort-words:count (words-list)
@@ -1468,17 +1468,17 @@ Return the input string."
                   (count-b (or (gethash b pyim-personal-words-count-cache) 0)))
               (> count-a count-b)))))
 
-(defun pyim-build-chinese-regexp-for-pylist (pylist &optional match-beginning
+(defun pyim-build-chinese-regexp-for-spinyin (spinyin &optional match-beginning
                                                     first-equal all-equal)
   "这个函数生成一个 regexp ，用这个 regexp 可以搜索到
-拼音匹配 `pylist' 的中文字符串。"
-  (let* ((pylist (mapcar
+拼音匹配 `spinyin' 的中文字符串。"
+  (let* ((spinyin (mapcar
                   #'(lambda (x)
                       (concat (car x) (cdr x)))
-                  pylist))
+                  spinyin))
          (cchar-list
           (let ((n 0) results)
-            (dolist (py pylist)
+            (dolist (py spinyin)
               (push
                (mapconcat #'identity
                           (pyim-pinyin2cchar-get
@@ -1529,25 +1529,25 @@ Counting starts at 1."
         (setq words (append words (pyim-get word)))))
     words))
 
-(defun pyim-possible-words-py (pylist)
+(defun pyim-possible-words-py (spinyin)
   "所有可能的词组拼音。从第一个字开始，每个字断开形成一个拼音。如果是
 完整拼音，则给出完整的拼音，如果是给出声母，则为一个 CONS CELL，CAR 是
 拼音，CDR 是拼音列表。例如：
 
- (setq foo-pylist (pyim-code-split \"pin-yin-sh-r\" 'quanpin))
+ (setq foo-spinyin (pyim-code-split \"pin-yin-sh-r\" 'quanpin))
   => ((\"p\" . \"in\") (\"y\" . \"in\") (\"sh\" . \"\") (\"r\" . \"\"))
 
- (pyim-possible-words-py foo-pylist)
+ (pyim-possible-words-py foo-spinyin)
   => (\"pin-yin\" (\"p-y-sh\" (\"p\" . \"in\") (\"y\" . \"in\") (\"sh\" . \"\")) (\"p-y-sh-r\" (\"p\" . \"in\") (\"y\" . \"in\") (\"sh\" . \"\") (\"r\" . \"\")))
  "
   (let (pys fullpy smpy wordlist (full t))
-    (if (string< "" (cdar pylist))
-        (setq fullpy (concat (caar pylist) (cdar pylist))
-              smpy (pyim-essential-py (car pylist)))
-      (setq smpy (caar pylist)
+    (if (string< "" (cdar spinyin))
+        (setq fullpy (concat (caar spinyin) (cdar spinyin))
+              smpy (pyim-essential-py (car spinyin)))
+      (setq smpy (caar spinyin)
             full nil))
-    (setq wordlist (list (car pylist)))
-    (dolist (py (cdr pylist))
+    (setq wordlist (list (car spinyin)))
+    (dolist (py (cdr spinyin))
       (setq wordlist (append wordlist (list py)))
       (if (and full (string< "" (cdr py)))
           (setq fullpy (concat fullpy "-" (car py) (cdr py))
@@ -1577,15 +1577,15 @@ Counting starts at 1."
   (let ((scheme-name pyim-default-scheme)
         (str pyim-current-key)
         userpos wordspy)
-    (setq pyim-pylist-list (pyim-code-split str scheme-name)
+    (setq pyim-spinyin-list (pyim-code-split str scheme-name)
           pyim-pinyin-position 0)
-    (unless (and (pyim-validp (car pyim-pylist-list))
+    (unless (and (pyim-validp (car pyim-spinyin-list))
                  (progn
                    (setq userpos (pyim-user-divide-pos str)
                          pyim-current-key (pyim-restore-user-divide
-                                           (pyim-code-concat (car pyim-pylist-list) nil scheme-name)
+                                           (pyim-code-concat (car pyim-spinyin-list) nil scheme-name)
                                            userpos))
-                   (setq pyim-current-choices (list (delete-dups (pyim-get-choices pyim-pylist-list))))
+                   (setq pyim-current-choices (list (delete-dups (pyim-get-choices pyim-spinyin-list))))
                    (when  (car pyim-current-choices)
                      (setq pyim-current-pos 1)
                      (pyim-update-current-str)
@@ -1639,7 +1639,7 @@ Counting starts at 1."
                                    (pyim-choice (nth pos choices)))
           rest (mapconcat (lambda (py)
                             (concat (car py) (cdr py)))
-                          (nthcdr (length pyim-current-str) (car pyim-pylist-list))
+                          (nthcdr (length pyim-current-str) (car pyim-spinyin-list))
                           "'"))
     (if (string< "" rest)
         (setq pyim-current-str (concat pyim-current-str rest)))))
@@ -2034,10 +2034,10 @@ guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
         (setq pyim-current-str (pyim-translate last-command-event))
         (pyim-terminate-translation))
     (let ((str (pyim-choice (nth (1- pyim-current-pos) (car pyim-current-choices))))
-          pylist-list)
+          spinyin-list)
       (pyim-create-or-rearrange-word str t)
       (setq pyim-pinyin-position (+ pyim-pinyin-position (length str)))
-      (if (>= pyim-pinyin-position (length (car pyim-pylist-list)))
+      (if (>= pyim-pinyin-position (length (car pyim-spinyin-list)))
                                         ; 如果是最后一个，检查
                                         ; 是不是在文件中，没有的话，创
                                         ; 建这个词
@@ -2047,12 +2047,12 @@ guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
             (pyim-terminate-translation)
             ;; Chinese-pyim 使用这个 hook 来处理联想词。
             (run-hooks 'pyim-select-word-finish-hook))
-        (setq pylist-list (delete-dups
+        (setq spinyin-list (delete-dups
                            (mapcar
-                            #'(lambda (pylist)
-                                (nthcdr pyim-pinyin-position pylist))
-                            pyim-pylist-list)))
-        (setq pyim-current-choices (list (pyim-get-choices pylist-list))
+                            #'(lambda (spinyin)
+                                (nthcdr pyim-pinyin-position spinyin))
+                            pyim-spinyin-list)))
+        (setq pyim-current-choices (list (pyim-get-choices spinyin-list))
               pyim-current-pos 1)
         (pyim-update-current-str)
         (pyim-format-page)
@@ -2514,14 +2514,14 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
 \"nihao\" -> \"[你呢...][好号...] \\| nihao\""
   (if (pyim-string-match-p "[^a-z']+" pystr)
       pystr
-    (let* ((pylist-list
+    (let* ((spinyin-list
             ;; Slowly operating, need to improve.
             (pyim-code-split pystr pyim-default-scheme))
            (regexp-list
             (mapcar
-             #'(lambda (pylist)
-                 (pyim-build-chinese-regexp-for-pylist pylist))
-             pylist-list))
+             #'(lambda (spinyin)
+                 (pyim-build-chinese-regexp-for-spinyin spinyin))
+             spinyin-list))
            (regexp
             (when regexp-list
               (mapconcat #'identity
