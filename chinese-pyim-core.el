@@ -667,7 +667,7 @@ If you don't like this funciton, set the variable to nil")
 ;; 拼音字符串对应的中文词条了，这个工作由函数 `pyim-get' 完成
 
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-get (code &optional cache-list)
+(defun pyim-dcache-get (code &optional cache-list)
   (let ((cache-list (or (if (listp cache-list)
                             cache-list
                           (list cache-list))
@@ -706,7 +706,7 @@ If you don't like this funciton, set the variable to nil")
 
 ;; *** 保存词条，删除词条以及调整词条位置
 ;; #+BEGIN_SRC emacs-lisp
-(defmacro pyim-update-cache (cache code &rest body)
+(defmacro pyim-dcache-put (cache code &rest body)
   (declare (indent 0))
   (let ((key (make-symbol "key"))
         (table (make-symbol "table"))
@@ -730,19 +730,19 @@ BUG：无法有效的处理多音字。"
 
       ;; 保存词频
       (when (> (length word) 1)
-        (pyim-update-cache
+        (pyim-dcache-put
           pyim-personal-words-count-cache word
           (+ (or orig-value 0) 1)))
       (dolist (py pinyins)
         (unless (pyim-string-match-p "[^ a-z-]" py)
           ;; 添加词库： ”拼音“ - ”中文词条“
-          (pyim-update-cache
+          (pyim-dcache-put
             pyim-personal-dict-cache py
             (if rearrange-word
                 (pyim-list-merge word orig-value)
               (pyim-list-merge orig-value word)))
           ;; 添加词库： ”拼音首字母“ - ”中文词条“
-          (pyim-update-cache
+          (pyim-dcache-put
             pyim-personal-dict-cache
             (mapconcat #'(lambda (x)
                            (substring x 0 1))
@@ -838,12 +838,12 @@ BUG：无法有效的处理多音字。"
                        pinyins)))
     (dolist (pinyin pinyins)
       (unless (pyim-string-match-p "[^ a-z-]" pinyin)
-        (pyim-update-cache
+        (pyim-dcache-put
           pyim-personal-dict-cache pinyin
           (remove word orig-value))))
     (dolist (pinyin pinyins-szm)
       (unless (pyim-string-match-p "[^ a-z-]" pinyin)
-        (pyim-update-cache
+        (pyim-dcache-put
           pyim-personal-dict-cache pinyin
           (remove word orig-value))))))
 ;; #+END_SRC
@@ -1193,7 +1193,7 @@ Return the input string."
                    (not (cl-some
                          #'(lambda (charpy)
                              (or (pyim-pinyin2cchar-get charpy t)
-                                 (pyim-get charpy)))
+                                 (pyim-dcache-get charpy)))
                          charpys))))
 
           (cons sm "")
@@ -1447,17 +1447,17 @@ Return the input string."
 (defun pyim-choices-get:personal (spinyin)
   (when (member 'personal pyim-backends)
     (let ((py-str (pyim-code-concat spinyin nil 'quanpin)))
-      (list (pyim-get py-str pyim-personal-dict-cache) nil))))
+      (list (pyim-dcache-get py-str pyim-personal-dict-cache) nil))))
 
 (defun pyim-choices-get:dicts (spinyin)
   (when (member 'dicts pyim-backends)
     (let ((py-str (pyim-code-concat spinyin nil 'quanpin)))
-      (list (pyim-get py-str pyim-dict-cache) nil))))
+      (list (pyim-dcache-get py-str pyim-dict-cache) nil))))
 
 (defun pyim-choices-get:chars (spinyin)
   (when (member 'chars pyim-backends)
     (let ((py-str (pyim-code-concat spinyin nil 'quanpin)))
-      (list (pyim-get (concat (caar spinyin) (cdar spinyin)))
+      (list (pyim-dcache-get (concat (caar spinyin) (cdar spinyin)))
             nil))))
 
 (defun pyim-sort-words:count (words-list)
@@ -1525,8 +1525,8 @@ Counting starts at 1."
   (let (words)
     (dolist (word (reverse wordspy))
       (if (listp word)
-          (setq words (append words (pyim-get (car word))))
-        (setq words (append words (pyim-get word)))))
+          (setq words (append words (pyim-dcache-get (car word))))
+        (setq words (append words (pyim-dcache-get word)))))
     words))
 
 (defun pyim-possible-words-py (spinyin)
