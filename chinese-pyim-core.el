@@ -243,7 +243,7 @@ Chinese-pyim 内建的功能有：
 当前拼音方案下，这个快捷键设置是否合理有效，如果不是一个合理的设置，
 则使用拼音方案默认的 :prefer-trigger-chars 。
 
-具体请参考 `pyim-get-translate-trigger-char' 。"
+具体请参考 `pyim-translate-get-trigger-char' 。"
   :group 'chinese-pyim
   :type 'character)
 
@@ -408,8 +408,8 @@ If you don't like this funciton, set the variable to nil")
       (define-key map (vector i) 'pyim-self-insert-command)
       (setq i (1+ i)))
     (dolist (i (number-sequence ?1 ?9))
-      (define-key map (char-to-string i) 'pyim-number-select))
-    (define-key map " " 'pyim-select-current)
+      (define-key map (char-to-string i) 'pyim-page-select-word-by-number))
+    (define-key map " " 'pyim-page-select-word)
     (define-key map [backspace] 'pyim-delete-last-char)
     (define-key map [delete] 'pyim-delete-last-char)
     (define-key map [M-backspace] 'pyim-backward-kill-py)
@@ -417,14 +417,14 @@ If you don't like this funciton, set the variable to nil")
     (define-key map [C-backspace] 'pyim-backward-kill-py)
     (define-key map [C-delete] 'pyim-backward-kill-py)
     (define-key map "\177" 'pyim-delete-last-char)
-    (define-key map "\C-n" 'pyim-next-page)
-    (define-key map "\C-p" 'pyim-previous-page)
-    (define-key map "\C-f" 'pyim-next-word)
-    (define-key map "\C-b" 'pyim-previous-word)
-    (define-key map "=" 'pyim-next-page)
-    (define-key map "-" 'pyim-previous-page)
-    (define-key map "\M-n" 'pyim-next-page)
-    (define-key map "\M-p" 'pyim-previous-page)
+    (define-key map "\C-n" 'pyim-page-next-page)
+    (define-key map "\C-p" 'pyim-page-previous-page)
+    (define-key map "\C-f" 'pyim-page-next-word)
+    (define-key map "\C-b" 'pyim-page-previous-word)
+    (define-key map "=" 'pyim-page-next-page)
+    (define-key map "-" 'pyim-page-previous-page)
+    (define-key map "\M-n" 'pyim-page-next-page)
+    (define-key map "\M-p" 'pyim-page-previous-page)
     (define-key map "\C-m" 'pyim-quit-no-clear)
     (define-key map [return] 'pyim-quit-no-clear)
     (define-key map "\C-c" 'pyim-quit-clear)
@@ -1579,7 +1579,7 @@ Return the input string."
                    (when  (car pyim-current-choices)
                      (setq pyim-current-pos 1)
                      (pyim-update-current-str)
-                     (pyim-format-page)
+                     (pyim-page-format-page)
                      (pyim-show)
                      t)))
       (setq pyim-current-str (replace-regexp-in-string "-" "" pyim-current-key))
@@ -1725,11 +1725,11 @@ Return the input string."
 ;; | 第5页 | "祢"     | "慝"  |         |      |      |      |      |      |          |
 
 ;; 假设 `pyim-current-pos' 为 A 所在的位置。那么：
-;; 1. 函数 `pyim-current-page' 返回值为3， 说明当前 page 为第3页。
-;; 2. 函数 `pyim-total-page'  返回值为5，说明 page 共有5页。
+;; 1. 函数 `pyim-page-current-page' 返回值为3， 说明当前 page 为第3页。
+;; 2. 函数 `pyim-page-total-page'  返回值为5，说明 page 共有5页。
 ;; 3. 函数 `pyim-page-start' 返回 B 所在的位置。
 ;; 4. 函数 `pyim-page-end' 返回 E 所在的位置。
-;; 5. 函数 `pyim-format-page' 会从 `pyim-current-choices' 中提取一个
+;; 5. 函数 `pyim-page-format-page' 会从 `pyim-current-choices' 中提取一个
 ;;    sublist:
 ;;    #+BEGIN_EXAMPLE
 ;;    ("薿" "旎" "睨" "铌" "昵" "匿" "倪" "霓" "暱")
@@ -1741,13 +1741,13 @@ Return the input string."
 ;;    "1. 薿 2.旎 3.睨 4.铌 5.昵 6.匿 7.倪 8.霓 9.暱"
 ;;    #+END_EXAMPLE
 
-;; `pyim-next-page' 这个命令用来翻页，其原理是：改变 `pyim-current-pos'的
+;; `pyim-page-next-page' 这个命令用来翻页，其原理是：改变 `pyim-current-pos'的
 ;; 取值，假设一次只翻一页，那么这个函数所做的工作就是：
 ;; 1. 首先将 `pyim-current-pos' 增加 `pyim-page-length' ，确保其指定的位
 ;;    置在下一页。
 ;; 2. 然后将 `pyim-current-pos' 的值设定为 `pyim-page-start' 的返回值，确
 ;;    保 `pyim-current-pos' 的取值为下一页第一个词条的位置。
-;; 3. 最后调用 `pyim-format-page' 来重新设置 `pyim-guidance-list' 。
+;; 3. 最后调用 `pyim-page-format-page' 来重新设置 `pyim-guidance-list' 。
 
 ;; #+BEGIN_SRC emacs-lisp
 ;;;  page format
@@ -1767,10 +1767,10 @@ Return the input string."
       (car choice)
     choice))
 
-(defun pyim-current-page ()
+(defun pyim-page-current-page ()
   (1+ (/ (1- pyim-current-pos) pyim-page-length)))
 
-(defun pyim-total-page ()
+(defun pyim-page-total-page ()
   (1+ (/ (1- (length (car pyim-current-choices))) pyim-page-length)))
 
 (defun pyim-page-start ()
@@ -1791,7 +1791,7 @@ Return the input string."
           whole
         (pyim-page-end t)))))
 
-(defun pyim-format-page (&optional hightlight-current)
+(defun pyim-page-format-page (&optional hightlight-current)
   "按当前位置，生成候选词条"
   (let* ((end (pyim-page-end))
          (start (1- (pyim-page-start)))
@@ -1806,11 +1806,11 @@ Return the input string."
     (setq pyim-guidance-list
           (plist-put pyim-guidance-list
                      :current-page
-                     (pyim-current-page)))
+                     (pyim-page-current-page)))
     (setq pyim-guidance-list
           (plist-put pyim-guidance-list
                      :total-page
-                     (pyim-total-page)))
+                     (pyim-page-total-page)))
     (setq pyim-guidance-list
           (plist-put pyim-guidance-list
                      :words
@@ -1822,7 +1822,7 @@ Return the input string."
                                      (setq str (if (consp c)
                                                    (concat (car c) (cdr c))
                                                  c))
-                                     ;; 高亮当前选择的词条，用于 `pyim-next-word'
+                                     ;; 高亮当前选择的词条，用于 `pyim-page-next-word'
                                      (if (and hightlight-current
                                               (= i pos))
                                          (format "%d[%s]" i
@@ -1830,7 +1830,7 @@ Return the input string."
                                        (format "%d.%s " i str))))
                                  choice) "")))))
 
-(defun pyim-next-page (arg)
+(defun pyim-page-next-page (arg)
   (interactive "p")
   (if (= (length pyim-current-key) 0)
       (progn
@@ -1840,14 +1840,14 @@ Return the input string."
       (setq pyim-current-pos (if (> new 0) new 1)
             pyim-current-pos (pyim-page-start))
       (pyim-update-current-str)
-      (pyim-format-page)
+      (pyim-page-format-page)
       (pyim-show))))
 
-(defun pyim-previous-page (arg)
+(defun pyim-page-previous-page (arg)
   (interactive "p")
-  (pyim-next-page (- arg)))
+  (pyim-page-next-page (- arg)))
 
-(defun pyim-next-word (arg)
+(defun pyim-page-next-word (arg)
   (interactive "p")
   (if (= (length pyim-current-key) 0)
       (progn
@@ -1856,12 +1856,12 @@ Return the input string."
     (let ((new (+ pyim-current-pos arg)))
       (setq pyim-current-pos (if (> new 0) new 1))
       (pyim-update-current-str)
-      (pyim-format-page t)
+      (pyim-page-format-page t)
       (pyim-show))))
 
-(defun pyim-previous-word (arg)
+(defun pyim-page-previous-word (arg)
   (interactive "p")
-  (pyim-next-word (- arg)))
+  (pyim-page-next-word (- arg)))
 ;; #+END_SRC
 
 ;; *** 显示选词框
@@ -2017,7 +2017,7 @@ guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
 
 ;; *** 选择备选词
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-select-current ()
+(defun pyim-page-select-word ()
   (interactive)
   (if (null (car pyim-current-choices))  ; 如果没有选项，输入空格
       (progn
@@ -2045,10 +2045,10 @@ guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
         (setq pyim-current-choices (list (pyim-choices-get spinyin-list))
               pyim-current-pos 1)
         (pyim-update-current-str)
-        (pyim-format-page)
+        (pyim-page-format-page)
         (pyim-show)))))
 
-(defun pyim-number-select ()
+(defun pyim-page-select-word-by-number ()
   "如果没有可选项，插入数字，否则选择对应的词条"
   (interactive)
   (if (car pyim-current-choices)
@@ -2062,7 +2062,7 @@ guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
                                          (pyim-choice
                                           (nth (1- pyim-current-pos)
                                                (car pyim-current-choices)))))
-          (pyim-select-current)))
+          (pyim-page-select-word)))
     (pyim-append-string (char-to-string last-command-event))
     (pyim-terminate-translation)))
 ;; #+END_SRC
@@ -2074,7 +2074,7 @@ guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
 ;; Chinese-pyim 在运行过程中调用函数 `pyim-translate' 进行标点符号格式的转换。
 
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-get-translate-trigger-char ()
+(defun pyim-translate-get-trigger-char ()
   "检查 `pyim-translate-trigger-char' 是否为一个合理的 trigger char 。
 
 Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
@@ -2117,7 +2117,7 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
          (punc-posit-before-1
           (cl-position str-before-1 punc-list-before-1
                        :test #'equal))
-         (trigger-str (pyim-get-translate-trigger-char)))
+         (trigger-str (pyim-translate-get-trigger-char)))
     (cond
      ;; 空格之前的字符什么也不输入。
      ((< char ? ) "")
