@@ -255,7 +255,7 @@ Chinese-pyim 内建的功能有：
   :group 'chinese-pyim)
 
 (defcustom pyim-enable-words-predict
-  '(pinyin-shouzimu pinyin-znabc)
+  '(personal dicts chars pinyin-shouzimu pinyin-znabc)
   "一个 list，用于设置词语联想方式，当前支持：
 
 1. `pinyin-shouzimu' 搜索拼音首字母对应的词条做为联想词。
@@ -1445,17 +1445,20 @@ Return the input string."
       (list nil (gethash py-str-shouzimu pyim-personal-dict-cache)))))
 
 (defun pyim-get-choices:personal (pylist)
-  (let ((py-str (pyim-pylist-to-string pylist nil 'default)))
-    (list (pyim-get py-str pyim-personal-dict-cache) nil)))
+  (when (member 'personal pyim-enable-words-predict)
+    (let ((py-str (pyim-pylist-to-string pylist nil 'default)))
+      (list (pyim-get py-str pyim-personal-dict-cache) nil))))
 
 (defun pyim-get-choices:dicts (pylist)
-  (let ((py-str (pyim-pylist-to-string pylist nil 'default)))
-    (list (pyim-get py-str pyim-dict-cache) nil)))
+  (when (member 'dicts pyim-enable-words-predict)
+    (let ((py-str (pyim-pylist-to-string pylist nil 'default)))
+      (list (pyim-get py-str pyim-dict-cache) nil))))
 
 (defun pyim-get-choices:chars (pylist)
-  (let ((py-str (pyim-pylist-to-string pylist nil 'default)))
-    (list (pyim-get (concat (caar pylist) (cdar pylist)))
-          nil)))
+  (when (member 'chars pyim-enable-words-predict)
+    (let ((py-str (pyim-pylist-to-string pylist nil 'default)))
+      (list (pyim-get (concat (caar pylist) (cdar pylist)))
+            nil))))
 
 (defun pyim-sort-words:count (words-list)
   "根据 `pyim-property-file' 提供的信息，对 `words-list' 中的词条进行排序。"
