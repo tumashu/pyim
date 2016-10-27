@@ -142,15 +142,15 @@
 ;; | M-DEL 或  M-BACKSPACE | 删除最后一个拼音           |
 
 ;; *** 使用双拼模式
-;; Chinese-pyim 支持双拼模式，用户可以通过变量 `pyim-default-pinyin-scheme' 来设定当前使用的
+;; Chinese-pyim 支持双拼模式，用户可以通过变量 `pyim-default-scheme' 来设定当前使用的
 ;; 双拼方案，比如：
 
 ;; #+BEGIN_EXAMPLE
-;; (setq pyim-default-pinyin-scheme 'pyim-shuangpin)
+;; (setq pyim-default-scheme 'pyim-shuangpin)
 ;; #+END_EXAMPLE
 
 ;; 注意：
-;; 1. 用户可以使用变量 `pyim-pinyin-schemes' 添加自定义双拼方案。
+;; 1. 用户可以使用变量 `pyim-schemes' 添加自定义双拼方案。
 ;; 2. 用户可能需要重新设置 `pyim-translate-trigger-char'。
 
 ;; *** 让选词框跟随光标
