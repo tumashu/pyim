@@ -1443,9 +1443,9 @@ Return the input string."
   ;; 如果输入 "ni-hao" ，搜索 code 为 "n-h" 的词条做为联想词。
   ;; 搜索首字母得到的联想词太多，这里限制联想词要大于两个汉字并且只搜索
   ;; 个人文件。
-  (let ((py-str-shouzimu (pyim-pylist-to-string pylist t 'default)))
-    (when (and (member 'pinyin-shouzimu pyim-enable-words-predict)
-               (> (length pylist) 1))
+  (when (and (member 'pinyin-shouzimu pyim-enable-words-predict)
+             (> (length pylist) 1))
+    (let ((py-str-shouzimu (pyim-pylist-to-string pylist t 'default)))
       (list nil (gethash py-str-shouzimu pyim-personal-dict-cache)))))
 
 (defun pyim-get-choices:personal-file (pylist)
