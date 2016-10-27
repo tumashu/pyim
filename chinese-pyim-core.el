@@ -997,8 +997,8 @@ Return the input string."
 (defun pyim-input-chinese-p ()
   "确定 Chinese-pyim 是否启动中文输入模式"
   (let* ((scheme-name pyim-default-scheme)
-         (first-chars (pyim-get-scheme-option scheme-name :first-chars))
-         (rest-chars (pyim-get-scheme-option scheme-name :rest-chars)))
+         (first-chars (pyim-scheme-get-option scheme-name :first-chars))
+         (rest-chars (pyim-scheme-get-option scheme-name :rest-chars)))
     (and (or pyim-force-input-chinese
              (and (not pyim-input-ascii)
                   (not (pyim-auto-switch-english-input-p))))
@@ -1200,13 +1200,13 @@ Return the input string."
         (cons (cons (car sm) (car ym)) (cdr ym))))))
 
 ;;; 处理输入的拼音
-(defun pyim-get-scheme (scheme-name)
+(defun pyim-scheme-get (scheme-name)
   "获取名称为 `scheme-name' 的拼音方案。"
   (assoc scheme-name pyim-schemes))
 
-(defun pyim-get-scheme-option (scheme-name option)
+(defun pyim-scheme-get-option (scheme-name option)
   "获取名称为 `scheme-name' 的拼音方案，并提取其属性 `option' 。"
-  (let ((scheme (pyim-get-scheme scheme-name)))
+  (let ((scheme (pyim-scheme-get scheme-name)))
     (when scheme
       (plist-get (cdr scheme) option))))
 
@@ -1217,7 +1217,7 @@ Return the input string."
 注：1, 每一个 pylist 都有类似的结构: ((\"n\" . \"i\")(\"h\" . \"ao\"))
     2. 使用这么复杂的list的原因是为了支持双拼，因为一个双拼字符串有可能转换为多个有效的全拼。
     3. 变量 `pyim-schemes' 保存所有可用的 scheme 。"
-  (let ((pinyin-class (pyim-get-scheme-option scheme-name :class)))
+  (let ((pinyin-class (pyim-scheme-get-option scheme-name :class)))
     (when pinyin-class
       (funcall (intern (concat "pyim-split-string:"
                                (symbol-name pinyin-class)))
@@ -1243,7 +1243,7 @@ Return the input string."
 ;; "nihc" -> (((\"n\" . \"i\") (\"h\" . \"ao\")))
 (defun pyim-split-string:shuangpin (str &optional scheme-name)
   "按照 `pyim-scheme-name' 对应的拼音方案，把一个双拼字符串分解成一个 pylist 组成的列表。"
-  (let ((keymaps (pyim-get-scheme-option scheme-name :keymaps))
+  (let ((keymaps (pyim-scheme-get-option scheme-name :keymaps))
         (list (string-to-list (replace-regexp-in-string "-" "" str)))
         results)
     (while list
@@ -1336,7 +1336,7 @@ Return the input string."
 (defun pyim-pylist-to-string (pylist &optional shou-zi-mu scheme-name)
   "按照 `scheme' 对应的拼音方案，把一个拼音列表合并为一个全拼字符串
 或者双拼字符串，常常用于搜索。"
-  (let ((pinyin-class (pyim-get-scheme-option scheme-name :class)))
+  (let ((pinyin-class (pyim-scheme-get-option scheme-name :class)))
     (when pinyin-class
       (funcall (intern (concat "pyim-pylist-to-string:"
                                (symbol-name pinyin-class)))
@@ -1359,7 +1359,7 @@ Return the input string."
   "把一个拼音列表合并为一个双拼字符串，当 `shou-zi-mu' 设置为 t 时，
 生成双拼首字母字符串，比如 p-y。"
   (when scheme-name
-    (let ((keymaps (pyim-get-scheme-option scheme-name :keymaps)))
+    (let ((keymaps (pyim-scheme-get-option scheme-name :keymaps)))
       (mapconcat 'identity
                  (mapcar
                   #'(lambda (w)
@@ -2098,10 +2098,10 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
               (char-to-string user-trigger-char)
             (when (= (length user-trigger-char) 1)
               user-trigger-char)))
-         (first-char (pyim-get-scheme-option
+         (first-char (pyim-scheme-get-option
                       pyim-default-scheme
                       :first-chars))
-         (prefer-trigger-chars (pyim-get-scheme-option
+         (prefer-trigger-chars (pyim-scheme-get-option
                                 pyim-default-scheme
                                 :prefer-trigger-chars)))
     (if (pyim-string-match-p user-trigger-char first-char)
