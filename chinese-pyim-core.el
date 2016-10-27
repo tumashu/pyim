@@ -1381,7 +1381,7 @@ Return the input string."
 
 ;; **** 获得词语拼音并进一步查询得到备选词列表
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-get-choices (spinyin-list)
+(defun pyim-choices-get (spinyin-list)
   "得到可能的词组和汉字。"
   ;; spinyin-list 可以包含多个 spinyin, 从而得到多个子候选词列表，如何将多个 *子候选词列表* 合理的合并，
   ;; 是一个比较麻烦的事情的事情。 注：这个地方需要进一步得改进。
@@ -1393,20 +1393,20 @@ Return the input string."
     (dolist (spinyin spinyin-list)
       (setq personal-words
             (append personal-words
-                    (car (pyim-get-choices:personal spinyin))))
+                    (car (pyim-choices-get:personal spinyin))))
       (setq pinyin-dict-words
             (append pinyin-dict-words
-                    (car (pyim-get-choices:dicts spinyin))))
+                    (car (pyim-choices-get:dicts spinyin))))
       (setq chars
             (append chars
-                    (car (pyim-get-choices:chars spinyin)))))
+                    (car (pyim-choices-get:chars spinyin)))))
 
     ;; Pinyin shouzimu similar words
-    (let ((words (pyim-get-choices:pinyin-shouzimu (car spinyin-list))))
+    (let ((words (pyim-choices-get:pinyin-shouzimu (car spinyin-list))))
       (setq pinyin-shouzimu-similar-words (car (cdr words))))
 
     ;; Pinyin znabc-style similar words
-    (let ((words (pyim-get-choices:pinyin-znabc (car spinyin-list))))
+    (let ((words (pyim-choices-get:pinyin-znabc (car spinyin-list))))
       (setq pinyin-znabc-similar-words (car (cdr words))))
 
     ;; Debug
@@ -1428,14 +1428,14 @@ Return the input string."
              ,@pinyin-znabc-similar-words
              ,@chars)))))
 
-(defun pyim-get-choices:pinyin-znabc (spinyin)
+(defun pyim-choices-get:pinyin-znabc (spinyin)
   ;; 将输入的拼音按照声母和韵母打散，得到尽可能多的拼音组合，
   ;; 查询这些拼音组合，得到的词条做为联想词。
   (when (member 'pinyin-znabc pyim-backends)
     (list nil (pyim-possible-words
                (pyim-possible-words-py spinyin)))))
 
-(defun pyim-get-choices:pinyin-shouzimu (spinyin)
+(defun pyim-choices-get:pinyin-shouzimu (spinyin)
   ;; 如果输入 "ni-hao" ，搜索 code 为 "n-h" 的词条做为联想词。
   ;; 搜索首字母得到的联想词太多，这里限制联想词要大于两个汉字并且只搜索
   ;; 个人文件。
@@ -1444,17 +1444,17 @@ Return the input string."
     (let ((py-str-shouzimu (pyim-code-concat spinyin t 'quanpin)))
       (list nil (gethash py-str-shouzimu pyim-personal-dict-cache)))))
 
-(defun pyim-get-choices:personal (spinyin)
+(defun pyim-choices-get:personal (spinyin)
   (when (member 'personal pyim-backends)
     (let ((py-str (pyim-code-concat spinyin nil 'quanpin)))
       (list (pyim-get py-str pyim-personal-dict-cache) nil))))
 
-(defun pyim-get-choices:dicts (spinyin)
+(defun pyim-choices-get:dicts (spinyin)
   (when (member 'dicts pyim-backends)
     (let ((py-str (pyim-code-concat spinyin nil 'quanpin)))
       (list (pyim-get py-str pyim-dict-cache) nil))))
 
-(defun pyim-get-choices:chars (spinyin)
+(defun pyim-choices-get:chars (spinyin)
   (when (member 'chars pyim-backends)
     (let ((py-str (pyim-code-concat spinyin nil 'quanpin)))
       (list (pyim-get (concat (caar spinyin) (cdar spinyin)))
@@ -1585,7 +1585,7 @@ Counting starts at 1."
                          pyim-current-key (pyim-restore-user-divide
                                            (pyim-code-concat (car pyim-spinyin-list) nil scheme-name)
                                            userpos))
-                   (setq pyim-current-choices (list (delete-dups (pyim-get-choices pyim-spinyin-list))))
+                   (setq pyim-current-choices (list (delete-dups (pyim-choices-get pyim-spinyin-list))))
                    (when  (car pyim-current-choices)
                      (setq pyim-current-pos 1)
                      (pyim-update-current-str)
@@ -2052,7 +2052,7 @@ guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
                             #'(lambda (spinyin)
                                 (nthcdr pyim-pinyin-position spinyin))
                             pyim-spinyin-list)))
-        (setq pyim-current-choices (list (pyim-get-choices spinyin-list))
+        (setq pyim-current-choices (list (pyim-choices-get spinyin-list))
               pyim-current-pos 1)
         (pyim-update-current-str)
         (pyim-format-page)
