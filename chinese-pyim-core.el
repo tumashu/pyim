@@ -334,17 +334,17 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
 (defvar pyim-title "灵拼" "Chinese-pyim 在 mode-line 中显示的名称。")
 (defvar pyim-extra-dicts nil "与 `pyim-dicts' 类似, 用于和 elpa 格式的词库包集成。")
 
-(defvar pyim-shen-mu
+(defvar pyim-pinyin-shen-mu
   '("b" "p" "m" "f" "d" "t" "n" "l" "g" "k" "h"
     "j" "q" "x" "z" "c" "s" "zh" "ch" "sh" "r" "y" "w"))
 
-(defvar pyim-yun-mu
+(defvar pyim-pinyin-yun-mu
   '("a" "o" "e" "i" "u" "v" "ai" "ei" "ui" "ao" "ou" "iu"
     "ie" "ia" "ua" "ve" "er" "an" "en" "in" "un" "vn" "ang" "iong"
     "eng" "ing" "ong" "uan" "uang" "ian" "iang" "iao" "ue"
     "uai" "uo"))
 
-(defvar pyim-valid-yun-mu
+(defvar pyim-pinyin-valid-yun-mu
   '("a" "o" "e" "ai" "ei" "ui" "ao" "ou" "er" "an" "en"
     "ang" "eng"))
 
@@ -1056,9 +1056,9 @@ Return the input string."
 ;; 2. 将拼音列表合并成拼音字符串。
 
 ;; 在这之前，Chinese-pyim 定义了三个变量：
-;; 1. 声母表： `pyim-shen-mu'
-;; 2. 韵母表：`pyim-yun-mu'
-;; 3. 有效韵母表： `pyim-valid-yun-mu'
+;; 1. 声母表： `pyim-pinyin-shen-mu'
+;; 2. 韵母表：`pyim-pinyin-yun-mu'
+;; 3. 有效韵母表： `pyim-pinyin-valid-yun-mu'
 
 ;; Chinese-pyim 使用函数 `pyim-code-split' 将拼音字符串分解为一个由声母和韵母组成的拼音列表，比如：
 
@@ -1146,14 +1146,14 @@ Return the input string."
   (when (and py (string< "" py))
     (let (shenmu yunmu len)
       (if (< (length py) 2)
-          (if (member py pyim-shen-mu)
+          (if (member py pyim-pinyin-shen-mu)
               (cons py "")
             (cons "" py))
         (setq shenmu (substring py 0 2))
-        (if (member shenmu pyim-shen-mu)
+        (if (member shenmu pyim-pinyin-shen-mu)
             (setq py (substring py 2))
           (setq shenmu (substring py 0 1))
-          (if (member shenmu pyim-shen-mu)
+          (if (member shenmu pyim-pinyin-shen-mu)
               (setq py (substring py 1))
             (setq shenmu "")))
         (cons shenmu py)))))
@@ -1164,14 +1164,14 @@ Return the input string."
     (let (yunmu len)
       (setq len (min (length py) 5))
       (setq yunmu (substring py 0 len))
-      (while (and (not (member yunmu pyim-yun-mu))
+      (while (and (not (member yunmu pyim-pinyin-yun-mu))
                   (> len 0))
         (setq yunmu (substring py 0 (setq len (1- len)))))
       (setq py (substring py len))
       (if (and (string< "" py)
-               (not (member (substring py 0 1) pyim-shen-mu))
-               (member (substring yunmu -1) pyim-shen-mu)
-               (member (substring yunmu 0 -1) pyim-yun-mu)
+               (not (member (substring py 0 1) pyim-pinyin-shen-mu))
+               (member (substring yunmu -1) pyim-pinyin-shen-mu)
+               (member (substring yunmu 0 -1) pyim-pinyin-yun-mu)
                (not (and (member (substring yunmu -1) '("n" "g"))
                          (or (string= (substring py 0 1) "o")
                              (string= (substring py 0 (min (length py) 2)) "er")))))
@@ -1300,7 +1300,7 @@ Return the input string."
     (while (progn
              (setq py (car spinyin))
              (if (and (not (string< "" (car py)))
-                      (not (member (cdr py) pyim-valid-yun-mu)))
+                      (not (member (cdr py) pyim-pinyin-valid-yun-mu)))
                  (setq valid nil)
                (setq spinyin (cdr spinyin)))))
     valid))
