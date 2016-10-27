@@ -1393,10 +1393,10 @@ Return the input string."
     (dolist (pylist list-of-pylist)
       (setq personal-words
             (append personal-words
-                    (car (pyim-get-choices:personal-file pylist))))
+                    (car (pyim-get-choices:personal pylist))))
       (setq pinyin-dict-words
             (append pinyin-dict-words
-                    (car (pyim-get-choices:pinyin-dict pylist))))
+                    (car (pyim-get-choices:dicts pylist))))
       (setq chars
             (append chars
                     (car (pyim-get-choices:chars pylist)))))
@@ -1444,11 +1444,11 @@ Return the input string."
     (let ((py-str-shouzimu (pyim-pylist-to-string pylist t 'default)))
       (list nil (gethash py-str-shouzimu pyim-personal-dict-cache)))))
 
-(defun pyim-get-choices:personal-file (pylist)
+(defun pyim-get-choices:personal (pylist)
   (let ((py-str (pyim-pylist-to-string pylist nil 'default)))
     (list (pyim-get py-str pyim-personal-dict-cache) nil)))
 
-(defun pyim-get-choices:pinyin-dict (pylist)
+(defun pyim-get-choices:dicts (pylist)
   (let ((py-str (pyim-pylist-to-string pylist nil 'default)))
     (list (pyim-get py-str pyim-dict-cache) nil)))
 
