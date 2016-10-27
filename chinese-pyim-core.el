@@ -479,7 +479,7 @@ If you don't like this funciton, set the variable to nil")
 ;; 1. 重置 `pyim-local-variable-list' 中所有的 local 变量。
 ;; 2. 使用 `pyim-cchar2pinyin-create-cache' 创建汉字到拼音的 hash table 。
 ;; 3. 运行hook： `pyim-load-hook'。
-;; 4. 将 `pyim-save-caches' 命令添加到 `kill-emacs-hook' , emacs 关闭
+;; 4. 将 `pyim-dcache-save-caches' 命令添加到 `kill-emacs-hook' , emacs 关闭
 ;;    之前将 `pyim-personal-dict-cache' 和 `pyim-personal-words-count-cache'
 ;;    保存到文件，供以后使用。
 ;; 5. 设定变量：
@@ -502,15 +502,15 @@ If you don't like this funciton, set the variable to nil")
   (mapc 'kill-local-variable pyim-local-variable-list)
   (mapc 'make-local-variable pyim-local-variable-list)
   (when (and restart save-files)
-    (pyim-save-caches))
+    (pyim-dcache-save-caches))
   (pyim-dcache-init)
   (pyim-cchar2pinyin-cache-create)
   (pyim-pinyin2cchar-cache-create)
   (run-hooks 'pyim-load-hook)
   ;; 如果 dicts 有变化，重新生成 dict cache。
   (pyim-dcache-create-dict-cache)
-  (unless (member 'pyim-save-caches kill-emacs-hook)
-    (add-to-list 'kill-emacs-hook 'pyim-save-caches))
+  (unless (member 'pyim-dcache-save-caches kill-emacs-hook)
+    (add-to-list 'kill-emacs-hook 'pyim-dcache-save-caches))
 
   (setq input-method-function 'pyim-input-method)
   (setq deactivate-current-input-method-function 'pyim-inactivate)
@@ -653,7 +653,7 @@ If you don't like this funciton, set the variable to nil")
                       seperaters))))
     items))
 
-(defun pyim-save-caches ()
+(defun pyim-dcache-save-caches ()
   "将下面几个文件更新后内容保存。
 这个函数默认作为`kill-emacs-hook'使用。"
   (interactive)
