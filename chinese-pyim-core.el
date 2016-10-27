@@ -328,10 +328,6 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
 注：这个选项只适用于 `pyim-use-tooltip' 取值为 'pos-tip 的时候。"
   :group 'chinese-pyim)
 
-(defcustom pyim-line-content-limit 400
-  "限制词库文件中的行长度。如果行太长，在windows平台下会出现严重的性能问题。"
-  :group 'chinese-pyim)
-
 (defvar pyim-debug nil)
 (defvar pyim-title "灵拼" "Chinese-pyim 在 mode-line 中显示的名称。")
 (defvar pyim-extra-dicts nil "与 `pyim-dicts' 类似, 用于和 elpa 格式的词库包集成。")
