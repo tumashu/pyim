@@ -1092,7 +1092,7 @@ Return the input string."
 ;; 2. pyim-pinyin-get-ym 从一个拼音字符串中提出第一个韵母
 
 ;; #+BEGIN_EXAMPLE
-;; (pyim-get-sm "woaimeinv")
+;; (pyim-pinyin-get-sm "woaimeinv")
 ;; #+END_EXAMPLE
 
 ;; 结果为:
@@ -1136,7 +1136,7 @@ Return the input string."
 ;; 结果为:
 ;; : "wo-ai-mei-nv"
 
-;; 最后： `pyim-user-divide-pos' 和 `pyim-restore-user-divide' 用来处理隔
+;; 最后： `pyim-pinyin-user-divide-pos' 和 `pyim-pinyin-restore-user-divide' 用来处理隔
 ;; 音符，比如： xi'an
 
 ;; #+BEGIN_SRC emacs-lisp
@@ -1182,7 +1182,7 @@ Return the input string."
 (defun pyim-pinyin-get-charpy (py)
   "分解一个拼音字符串成声母和韵母。"
   (when (and py (string< "" py))
-    (let* ((sm (pyim-get-sm py))
+    (let* ((sm (pyim-pinyin-get-sm py))
            (ym (pyim-pinyin-get-ym (cdr sm)))
            (charpys (mapcar #'(lambda (x)
                                 (concat (car x) (cdr x)))
@@ -1305,7 +1305,7 @@ Return the input string."
                (setq spinyin (cdr spinyin)))))
     valid))
 
-(defun pyim-user-divide-pos (py)
+(defun pyim-pinyin-user-divide-pos (py)
   "检测出用户分割的位置"
   (setq py (replace-regexp-in-string "-" "" py))
   (let (poslist (start 0))
@@ -1314,7 +1314,7 @@ Return the input string."
       (setq poslist (append poslist (list (match-beginning 0)))))
     poslist))
 
-(defun pyim-restore-user-divide (py pos)
+(defun pyim-pinyin-restore-user-divide (py pos)
   "按检测出的用户分解的位置，重新设置拼音"
   (let ((i 0) (shift 0) cur)
     (setq cur (car pos)
@@ -1468,7 +1468,7 @@ Return the input string."
                   (count-b (or (gethash b pyim-personal-words-count-cache) 0)))
               (> count-a count-b)))))
 
-(defun pyim-build-chinese-regexp-for-spinyin (spinyin &optional match-beginning
+(defun pyim-spinyin-build-chinese-regexp (spinyin &optional match-beginning
                                                     first-equal all-equal)
   "这个函数生成一个 regexp ，用这个 regexp 可以搜索到
 拼音匹配 `spinyin' 的中文字符串。"
@@ -1581,8 +1581,8 @@ Counting starts at 1."
           pyim-pinyin-position 0)
     (unless (and (pyim-spinyin-validp (car pyim-spinyin-list))
                  (progn
-                   (setq userpos (pyim-user-divide-pos str)
-                         pyim-current-key (pyim-restore-user-divide
+                   (setq userpos (pyim-pinyin-user-divide-pos str)
+                         pyim-current-key (pyim-pinyin-restore-user-divide
                                            (pyim-code-concat (car pyim-spinyin-list) nil scheme-name)
                                            userpos))
                    (setq pyim-current-choices (list (delete-dups (pyim-choices-get pyim-spinyin-list))))
@@ -2520,7 +2520,7 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
            (regexp-list
             (mapcar
              #'(lambda (spinyin)
-                 (pyim-build-chinese-regexp-for-spinyin spinyin))
+                 (pyim-spinyin-build-chinese-regexp spinyin))
              spinyin-list))
            (regexp
             (when regexp-list
