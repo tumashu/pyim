@@ -1186,7 +1186,7 @@ Return the input string."
            (ym (pyim-get-ym (cdr sm)))
            (charpys (mapcar #'(lambda (x)
                                 (concat (car x) (cdr x)))
-                            (pyim-find-fuzzy-pinyins
+                            (pyim-find-fuzzy-pinyin-1
                              (cons (car sm) (car ym))))))
       (if (or (null ym) ;如果韵母为空
               (and (string< "" (car ym))
@@ -1217,37 +1217,28 @@ Return the input string."
 注：1, 每一个 pylist 都有类似的结构: ((\"n\" . \"i\")(\"h\" . \"ao\"))
     2. 使用这么复杂的list的原因是为了支持双拼，因为一个双拼字符串有可能转换为多个有效的全拼。
     3. 变量 `pyim-schemes' 保存所有可用的 scheme 。"
-  (let ((pinyin-class (pyim-get-scheme-option scheme-name :class))
-        pylist-list fuzzy-pylist-list result1 result2)
+  (let ((pinyin-class (pyim-get-scheme-option scheme-name :class)))
     (when pinyin-class
-      (setq pylist-list
-            (funcall (intern (concat "pyim-split-string:"
-                                     (symbol-name pinyin-class)))
-                     str scheme-name)))
-    ;; Deal with fuzzy pinyins
-    (dolist (pylist pylist-list)
-      (setq fuzzy-pylist-list
-            (pyim-permutate-list
-             (mapcar 'pyim-find-fuzzy-pinyins pylist)))
-      (push (car fuzzy-pylist-list) result1)
-      (setq result2 (append result2 (cdr fuzzy-pylist-list))))
-    (append result1 result2)))
+      (funcall (intern (concat "pyim-split-string:"
+                               (symbol-name pinyin-class)))
+               str scheme-name))))
 
 (defun pyim-split-string:quanpin (py &optional scheme-name)
   "把一个拼音字符串分解。如果含有 '，优先在这个位置中断，否则，自动分
 解成声母和韵母的组合，可选参数 `scheme' 只是一个虚参数，暂时没有
 用处。"
   (when (and py (string< "" py))
-    (list (apply 'append
-                 (mapcar #'(lambda (p)
-                             (let (chpy pylist)
-                               (setq p (replace-regexp-in-string "[ -]" "" p))
-                               (while (when (string< "" p)
-                                        (setq chpy (pyim-get-charpy p))
-                                        (setq pylist (append pylist (list (car chpy))))
-                                        (setq p (cdr chpy))))
-                               pylist))
-                         (split-string py "'"))))))
+    (pyim-find-fuzzy-pinyin
+     (list (apply 'append
+                  (mapcar #'(lambda (p)
+                              (let (chpy pylist)
+                                (setq p (replace-regexp-in-string "[ -]" "" p))
+                                (while (when (string< "" p)
+                                         (setq chpy (pyim-get-charpy p))
+                                         (setq pylist (append pylist (list (car chpy))))
+                                         (setq p (cdr chpy))))
+                                pylist))
+                          (split-string py "'")))))))
 
 ;; "nihc" -> (((\"n\" . \"i\") (\"h\" . \"ao\")))
 (defun pyim-split-string:shuangpin (str &optional scheme-name)
@@ -1269,12 +1260,24 @@ Return the input string."
                      (if z (cons "" z) (cons sm x))))
                (or ym (list "")))
               results)))
-    (pyim-permutate-list (nreverse results))))
+    (pyim-find-fuzzy-pinyin
+     (pyim-permutate-list (nreverse results)))))
 
-(defun pyim-find-fuzzy-pinyins (pycons)
+(defun pyim-find-fuzzy-pinyin (pylist-list)
+  "处理模糊音的函数"
+  (let (fuzzy-pylist-list result1 result2)
+    (dolist (pylist pylist-list)
+      (setq fuzzy-pylist-list
+            (pyim-permutate-list
+             (mapcar 'pyim-find-fuzzy-pinyin-1 pylist)))
+      (push (car fuzzy-pylist-list) result1)
+      (setq result2 (append result2 (cdr fuzzy-pylist-list))))
+    (append result1 result2)))
+
+(defun pyim-find-fuzzy-pinyin-1 (pycons)
   "Find all fuzzy pinyins, for example:
 
-(\"f\" . \"en\") -> ((\"f\" . \"en\")(\"f\" . \"eng\"))"
+(\"f\" . \"en\") -> ((\"f\" . \"en\") (\"f\" . \"eng\"))"
   (cl-labels ((find-list (str list)
                          (let (result)
                            (dolist (x list)
