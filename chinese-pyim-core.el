@@ -54,7 +54,7 @@
   "一个目录，用于保存与 Chinese-pyim 相关的文件。"
   :group 'chinese-pyim)
 
-(defcustom pyim-cache-directory (locate-user-emacs-file "pyim/cache")
+(defcustom pyim-dcache-directory (locate-user-emacs-file "pyim/cache")
   "一个目录，用于保存 Chinese-pyim 词库对应的 cache 文件。"
   :group 'chinese-pyim)
 
@@ -568,9 +568,9 @@ If you don't like this funciton, set the variable to nil")
                           (mapcar #'(lambda (file)
                                       (list file (nth 5 (file-attributes file 'string))))
                                   dict-files))))
-         (dict-cache-file (concat (file-name-as-directory pyim-cache-directory)
+         (dict-cache-file (concat (file-name-as-directory pyim-dcache-directory)
                                   "pyim-dict-cache"))
-         (dict-md5-file (concat (file-name-as-directory pyim-cache-directory)
+         (dict-md5-file (concat (file-name-as-directory pyim-dcache-directory)
                                 "pyim-dict-cache-md5")))
     (when (or force (not (equal dicts-md5 (pyim-dcache-get-value-from-file dict-md5-file))))
       (async-start
@@ -591,7 +591,7 @@ If you don't like this funciton, set the variable to nil")
 
 (defun pyim-dcache-restore-variable (variable &optional fallback-value)
   (unless (symbol-value variable)
-    (let ((file (concat (file-name-as-directory pyim-cache-directory)
+    (let ((file (concat (file-name-as-directory pyim-dcache-directory)
                         (symbol-name variable))))
       (set variable (or (pyim-dcache-get-value-from-file file)
                         fallback-value)))))
@@ -603,7 +603,7 @@ If you don't like this funciton, set the variable to nil")
       (eval (read (current-buffer))))))
 
 (defun pyim-dcache-save-variable (variable)
-  (let ((file (concat (file-name-as-directory pyim-cache-directory)
+  (let ((file (concat (file-name-as-directory pyim-dcache-directory)
                       (symbol-name variable)))
         (value (symbol-value variable)))
     (pyim-dcache-save-value-to-file value file)))
