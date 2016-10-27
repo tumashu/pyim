@@ -684,12 +684,12 @@ If you don't like this funciton, set the variable to nil")
        (stringp string)
        (string-match-p regexp string start)))
 
-(defun pyim-build-pinyin-regexp (code &optional match-beginning first-equal all-equal)
-  "从`code' 构建一个 regexp，用于搜索联想词，
+(defun pyim-pinyin-build-regexp (pinyin &optional match-beginning first-equal all-equal)
+  "从 `pinyin' 构建一个 regexp，用于搜索联想词，
 比如：ni-hao-si-j --> ^ni-hao[a-z]*-si[a-z]*-j[a-z]* , when `first-equal' set to `t'
                   --> ^ni[a-z]*-hao[a-z]*-si[a-z]*-j[a-z]* , when `first-equal' set to `nil'"
-  (when (and code (stringp code))
-    (let ((spinyin (split-string code "-"))
+  (when (and pinyin (stringp pinyin))
+    (let ((pinyin-list (split-string pinyin "-"))
           (count 0))
       (concat (if match-beginning "^" "")
               (mapconcat
@@ -700,7 +700,7 @@ If you don't like this funciton, set the variable to nil")
                            x
                          (concat x "[a-z]*"))
                      x))
-               spinyin "-")))))
+               pinyin-list "-")))))
 
 ;; #+END_SRC
 
