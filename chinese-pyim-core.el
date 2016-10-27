@@ -383,7 +383,7 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
 (defvar pyim-punctuation-translate-p '(auto yes no)
   "The car of its value will control the translation of punctuation.")
 
-(defvar pyim-pair-punctuation-status
+(defvar pyim-punctuation-pair-status
   '(("\"" nil) ("'" nil))
   "成对标点符号切换状态")
 
@@ -454,7 +454,7 @@ If you don't like this funciton, set the variable to nil")
     describe-current-input-method-function
 
     pyim-punctuation-translate-p
-    pyim-pair-punctuation-status
+    pyim-punctuation-pair-status
     pyim-punctuation-escape-list
 
     pyim-spinyin-list
@@ -2372,12 +2372,12 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
 的标点符号。"
   (let* ((str (car punc-list))
          (punc (cdr punc-list))
-         (switch-p (cdr (assoc str pyim-pair-punctuation-status))))
+         (switch-p (cdr (assoc str pyim-punctuation-pair-status))))
     (if (= (safe-length punc) 1)
         (car punc)
       (if before
           (setq switch-p (not switch-p))
-        (setf (cdr (assoc str pyim-pair-punctuation-status))
+        (setf (cdr (assoc str pyim-punctuation-pair-status))
               (not switch-p)))
       (if switch-p
           (car punc)
@@ -2385,7 +2385,7 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
 
 ;; #+END_SRC
 
-;; 函数 `pyim-return-proper-punctuation' 内部，我们使用变量 `pyim-pair-punctuation-status'
+;; 函数 `pyim-return-proper-punctuation' 内部，我们使用变量 `pyim-punctuation-pair-status'
 ;; 来记录“成对”中文标点符号的状态。
 
 ;; ** 处理特殊功能触发字符（单字符快捷键）
