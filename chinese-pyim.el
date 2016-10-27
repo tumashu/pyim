@@ -212,7 +212,7 @@
 
 ;; *** 切换全角标点与半角标点
 
-;; 1. 第一种方法：使用命令 `pyim-toggle-full-width-punctuation'，全局切换。
+;; 1. 第一种方法：使用命令 `pyim-punctuation-toggle'，全局切换。
 ;; 2. 第二种方法：使用命令 `pyim-punctuation-translate-at-point' 只切换光
 ;;    标处标点的样式。
 ;; 3. 第三种方法：设置变量 `pyim-translate-trigger-char' ，输入变量设定的

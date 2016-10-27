@@ -1220,7 +1220,7 @@ Return the input string."
     (when pinyin-class
       (funcall (intern (concat "pyim-code-split:"
                                (symbol-name pinyin-class)))
-               str scheme-name))))
+               code scheme-name))))
 
 (defun pyim-code-split:quanpin (py &optional -)
   "把一个拼音字符串分解成由声母和韵母组成的复杂列表。
@@ -1459,14 +1459,6 @@ Return the input string."
     (let ((py-str (pyim-code-concat spinyin nil 'quanpin)))
       (list (pyim-dcache-get (concat (caar spinyin) (cdar spinyin)))
             nil))))
-
-(defun pyim-sort-words:count (words-list)
-  "根据 `pyim-property-file' 提供的信息，对 `words-list' 中的词条进行排序。"
-  (sort words-list
-        #'(lambda (a b)
-            (let ((count-a (or (gethash a pyim-personal-words-count-cache) 0))
-                  (count-b (or (gethash b pyim-personal-words-count-cache) 0)))
-              (> count-a count-b)))))
 
 (defun pyim-spinyin-build-chinese-regexp (spinyin &optional match-beginning
                                                   first-equal all-equal)
@@ -2238,7 +2230,7 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
 ;; 3. Chinese-pyim 是否根据环境自动切换到英文输入模式？
 
 ;; 三方面的综合结果为： 只要当前的输入模式是英文输入模式，那么输入的标点符号 *必定* 是半角标点，
-;; 如果当前输入模式是中文输入模式，那么，输入标点的样式用户可以使用 `pyim-toggle-full-width-punctuation'
+;; 如果当前输入模式是中文输入模式，那么，输入标点的样式用户可以使用 `pyim-punctuation-toggle'
 ;; 手动控制，具体请参考 `pyim-punctuation-full-width-p'。
 
 ;; #+BEGIN_SRC emacs-lisp
@@ -2254,7 +2246,7 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
      (and (not pyim-input-ascii)
           (not (pyim-auto-switch-english-input-p))))))
 
-(defun pyim-toggle-full-width-punctuation ()
+(defun pyim-punctuation-toggle ()
   (interactive)
   (setq pyim-punctuation-translate-p
         `(,@(cdr pyim-punctuation-translate-p)
@@ -2266,7 +2258,7 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
      (auto "开启全半角标点自动转换模式。"))))
 ;; #+END_SRC
 
-;; 每次运行 `pyim-toggle-full-width-punctuation' 命令，都会反转变量 `pyim-punctuation-translate-p'
+;; 每次运行 `pyim-punctuation-toggle' 命令，都会反转变量 `pyim-punctuation-translate-p'
 ;; 的取值，`pyim-translate' 会检测 `pyim-punctuation-full-width-p' 函数的返回值，当返回值为 t 时，
 ;; `pyim-translate' 转换标点符号，从而输入全角标点，反之，`pyim-translate' 忽略转换，
 ;; 从而输入半角标点。
