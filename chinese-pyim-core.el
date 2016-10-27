@@ -254,14 +254,16 @@ Chinese-pyim 内建的功能有：
   "设定糢糊音"
   :group 'chinese-pyim)
 
-(defcustom pyim-enable-words-predict
+(defcustom pyim-backends
   '(personal dicts chars pinyin-shouzimu pinyin-znabc)
-  "一个 list，用于设置词语联想方式，当前支持：
+  "pyim 词语获取 backends ，当前支持：
 
-1. `pinyin-shouzimu' 搜索拼音首字母对应的词条做为联想词。
-2. `pinyin-znabc' 类似智能ABC的词语联想(源于 emacs-eim)。
-
-当这个变量设置为 nil 时，关闭词语联想功能。"
+1. `personal'           从 `pyim-personal-dict-cache' 中获取词条。
+2. `dicts'              从 `pyim-dict-cache' 中获取词条。
+3. `chars'              逐一获取一个拼音对应的多个汉字。
+4. `pinyin-shouzimu'    获取 *拼音首字母* 对应的词条，
+     如果输入 \"ni-hao\" ，那么同时搜索 code 为 \"n-h\" 的词条。
+5. `pinyin-znabc'       类似智能ABC的词语获取方式(源于 emacs-eim)."
   :group 'chinese-pyim)
 
 (defcustom pyim-isearch-enable-pinyin-search nil
@@ -1431,7 +1433,7 @@ Return the input string."
 (defun pyim-get-choices:pinyin-znabc (pylist)
   ;; 将输入的拼音按照声母和韵母打散，得到尽可能多的拼音组合，
   ;; 查询这些拼音组合，得到的词条做为联想词。
-  (when (member 'pinyin-znabc pyim-enable-words-predict)
+  (when (member 'pinyin-znabc pyim-backends)
     (list nil (pyim-possible-words
                (pyim-possible-words-py pylist)))))
 
@@ -1439,23 +1441,23 @@ Return the input string."
   ;; 如果输入 "ni-hao" ，搜索 code 为 "n-h" 的词条做为联想词。
   ;; 搜索首字母得到的联想词太多，这里限制联想词要大于两个汉字并且只搜索
   ;; 个人文件。
-  (when (and (member 'pinyin-shouzimu pyim-enable-words-predict)
+  (when (and (member 'pinyin-shouzimu pyim-backends)
              (> (length pylist) 1))
     (let ((py-str-shouzimu (pyim-pylist-to-string pylist t 'default)))
       (list nil (gethash py-str-shouzimu pyim-personal-dict-cache)))))
 
 (defun pyim-get-choices:personal (pylist)
-  (when (member 'personal pyim-enable-words-predict)
+  (when (member 'personal pyim-backends)
     (let ((py-str (pyim-pylist-to-string pylist nil 'default)))
       (list (pyim-get py-str pyim-personal-dict-cache) nil))))
 
 (defun pyim-get-choices:dicts (pylist)
-  (when (member 'dicts pyim-enable-words-predict)
+  (when (member 'dicts pyim-backends)
     (let ((py-str (pyim-pylist-to-string pylist nil 'default)))
       (list (pyim-get py-str pyim-dict-cache) nil))))
 
 (defun pyim-get-choices:chars (pylist)
-  (when (member 'chars pyim-enable-words-predict)
+  (when (member 'chars pyim-backends)
     (let ((py-str (pyim-pylist-to-string pylist nil 'default)))
       (list (pyim-get (concat (caar pylist) (cdar pylist)))
             nil))))

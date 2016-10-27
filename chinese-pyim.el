@@ -188,23 +188,26 @@
 ;; *** 设置模糊音
 ;; 可以通过设置 `pyim-fuzzy-pinyin-alist' 变量来自定义模糊音。
 
-;; *** 词语联想
-;; Chinese-pyim *内置* 了几种词语联想方式：
+;; *** 词条获取
+;; Chinese-pyim *内置* 了多种词条获取的方式：
 
-;; 1. `pinyin-shouzimu' 搜索拼音首字母对应的词条做为联想词，
-;;     如果输入 "ni-hao" ，那么同时搜索 code 为 "n-h" 的词条做为联想词。
-;; 2. `pinyin-znabc' 类似智能ABC的词语联想(源于 emacs-eim)。
+;; 1. `personal'           从 `pyim-personal-dict-cache' 中获取词条。
+;; 2. `dicts'              从 `pyim-dict-cache' 中获取词条。
+;; 3. `chars'              逐一获取一个拼音对应的多个汉字。
+;; 4. `pinyin-shouzimu'    获取 *拼音首字母* 对应的词条，
+;;     如果输入 "ni-hao" ，那么同时搜索 code 为 "n-h" 的词条。
+;; 5. `pinyin-znabc'       类似智能ABC的词语获取方式(源于 emacs-eim)。
 
-;; Chinese-pyim 默认开启了词语联想功能，但用户可以通过下面的代码来调整设置，比如：
+;; 用户可以通过下面的代码来调整 backends 设置，比如：
 
 ;; #+BEGIN_EXAMPLE
-;; (setq pyim-enable-words-predict '(pinyin-shouzimu pinyin-znabc))
+;; (setq pyim-backends '(personal dicts chars pinyin-shouzimu pinyin-znabc))
 ;; #+END_EXAMPLE
 
-;; 开启词语联想功能有时候会导致输入法卡顿，用户可以通过下面的方式关闭：
+;; 一些 backends 可能会导致输入法卡顿，用户可以通过下面的方式关闭：
 
 ;; #+BEGIN_EXAMPLE
-;; (setq pyim-enable-words-predict nil)
+;; (setq pyim-backends '(personal dicts chars))
 ;; #+END_EXAMPLE
 
 ;; *** 切换全角标点与半角标点
