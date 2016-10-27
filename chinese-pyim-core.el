@@ -667,13 +667,13 @@ If you don't like this funciton, set the variable to nil")
 ;; 拼音字符串对应的中文词条了，这个工作由函数 `pyim-get' 完成
 
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-dcache-get (code &optional cache-list)
-  (let ((cache-list (or (if (listp cache-list)
-                            cache-list
-                          (list cache-list))
+(defun pyim-dcache-get (code &optional dcache-list)
+  (let ((dcache-list (or (if (listp dcache-list)
+                            dcache-list
+                          (list dcache-list))
                         (list pyim-personal-dict-cache pyim-dict-cache)))
         result)
-    (dolist (cache cache-list)
+    (dolist (cache dcache-list)
       (let ((value (gethash code cache)))
         (when value
           (setq result (append result value)))))
@@ -1469,13 +1469,13 @@ Return the input string."
               (> count-a count-b)))))
 
 (defun pyim-spinyin-build-chinese-regexp (spinyin &optional match-beginning
-                                                    first-equal all-equal)
+                                                  first-equal all-equal)
   "这个函数生成一个 regexp ，用这个 regexp 可以搜索到
 拼音匹配 `spinyin' 的中文字符串。"
   (let* ((spinyin (mapcar
-                  #'(lambda (x)
-                      (concat (car x) (cdr x)))
-                  spinyin))
+                   #'(lambda (x)
+                       (concat (car x) (cdr x)))
+                   spinyin))
          (cchar-list
           (let ((n 0) results)
             (dolist (py spinyin)
@@ -1499,16 +1499,6 @@ Return the input string."
     (unless (equal regexp "")
       (concat (if match-beginning "^" "")
               regexp))))
-
-(defun pyim-sublist (list start end)
-  "Return a section of LIST, from START to END.
-Counting starts at 1."
-  (let (rtn (c start))
-    (setq list (nthcdr (1- start) list))
-    (while (and list (<= c end))
-      (push (pop list) rtn)
-      (setq c (1+ c)))
-    (nreverse rtn)))
 
 (defun pyim-flatten-list (my-list)
   (cond
