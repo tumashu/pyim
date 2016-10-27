@@ -124,17 +124,17 @@ plist 来表示，比如：
   :group 'chinese-pyim
   :type 'list)
 
-(defcustom pyim-default-scheme 'default
+(defcustom pyim-default-scheme 'quanpin
   "设置 Chinese-pyim 使用哪一种拼音方案，默认使用全拼输入。"
   :group 'chinese-pyim)
 
 (defcustom pyim-schemes
-  '((default
-      :document "全拼输入法方案（不可删除）。"
-      :class quanpin
-      :first-chars "abcdefghjklmnopqrstwxyz"
-      :rest-chars "vmpfwckzyjqdltxuognbhsrei'-a"
-      :prefer-trigger-chars "v")
+  '((quanpin
+     :document "全拼输入法方案（不可删除）。"
+     :class quanpin
+     :first-chars "abcdefghjklmnopqrstwxyz"
+     :rest-chars "vmpfwckzyjqdltxuognbhsrei'-a"
+     :prefer-trigger-chars "v")
     (pyim-shuangpin
      :document "与 Chinese-pyim 配合良好的双拼输入法方案，源自小鹤双拼方案。"
      :class shuangpin
@@ -1060,10 +1060,10 @@ Return the input string."
 ;; 2. 韵母表：`pyim-yun-mu'
 ;; 3. 有效韵母表： `pyim-valid-yun-mu'
 
-;; Chinese-pyim 使用函数 `pyim-split-string' 将拼音字符串分解为一个由声母和韵母组成的拼音列表，比如：
+;; Chinese-pyim 使用函数 `pyim-code-split' 将拼音字符串分解为一个由声母和韵母组成的拼音列表，比如：
 
 ;; #+BEGIN_EXAMPLE
-;; (pyim-split-string "woaimeinv" 'default)
+;; (pyim-code-split "woaimeinv" 'quanpin)
 ;; #+END_EXAMPLE
 
 ;; 结果为:
@@ -1105,10 +1105,10 @@ Return the input string."
 ;; 结果为:
 ;; : ("o" . "aimeinv")
 
-;; 当用户输入一个错误的拼音时，`pyim-split-string' 会产生一个声母为空而韵母又不正确的拼音列表 ，比如：
+;; 当用户输入一个错误的拼音时，`pyim-code-split' 会产生一个声母为空而韵母又不正确的拼音列表 ，比如：
 
 ;; #+BEGIN_EXAMPLE
-;; (pyim-split-string "ua" 'default)
+;; (pyim-code-split "ua" 'quanpin)
 ;; #+END_EXAMPLE
 
 ;; 结果为:
@@ -1116,21 +1116,21 @@ Return the input string."
 
 ;; 这种错误可以使用函数 `pyim-validp' 来检测。
 ;; #+BEGIN_EXAMPLE
-;; (list (pyim-validp (car (pyim-split-string "ua" 'default)))
-;;       (pyim-validp (car (pyim-split-string "a" 'default)))
-;;       (pyim-validp (car (pyim-split-string "wa" 'default)))
-;;       (pyim-validp (car (pyim-split-string "wua" 'default))))
+;; (list (pyim-validp (car (pyim-code-split "ua" 'quanpin)))
+;;       (pyim-validp (car (pyim-code-split "a" 'quanpin)))
+;;       (pyim-validp (car (pyim-code-split "wa" 'quanpin)))
+;;       (pyim-validp (car (pyim-code-split "wua" 'quanpin))))
 ;; #+END_EXAMPLE
 
 ;; 结果为:
 ;; : (nil t t t)
 
-;; Chinese-pyim 使用函数 `pyim-pylist-to-string' 将一个拼音列表合并为拼音
-;; 字符串，这个可以认为是 `pyim-split-string' 的反向操作。构建得到的拼音
+;; Chinese-pyim 使用函数 `pyim-code-concat' 将一个拼音列表合并为拼音
+;; 字符串，这个可以认为是 `pyim-code-split' 的反向操作。构建得到的拼音
 ;; 字符串用于搜索词条。
 
 ;; #+BEGIN_EXAMPLE
-;; (pyim-pylist-to-string '(("w" . "o") ("" . "ai") ("m" . "ei") ("n" . "v")) nil 'default)
+;; (pyim-code-concat '(("w" . "o") ("" . "ai") ("m" . "ei") ("n" . "v")) nil 'quanpin)
 ;; #+END_EXAMPLE
 
 ;; 结果为:
@@ -1210,23 +1210,21 @@ Return the input string."
     (when scheme
       (plist-get (cdr scheme) option))))
 
-(defun pyim-split-string (str &optional scheme-name)
-  "按照 `scheme-name' 对应的拼音方案，把一个全拼或者双拼字符串分解为 *一个或者多个* pylist,
-返回所有 pylist 的组成的一个 *列表* 。
+(defun pyim-code-split (code &optional scheme-name)
+  "按照 `scheme-name' 对应的输入法方案，把一个 code 字符串分解为一个列表。
+得到的列表有类似:
 
-注：1, 每一个 pylist 都有类似的结构: ((\"n\" . \"i\")(\"h\" . \"ao\"))
-    2. 使用这么复杂的list的原因是为了支持双拼，因为一个双拼字符串有可能转换为多个有效的全拼。
-    3. 变量 `pyim-schemes' 保存所有可用的 scheme 。"
+1. pinyin:  (((\"n\" . \"i\") (\"h\" . \"ao\")))
+"
   (let ((pinyin-class (pyim-scheme-get-option scheme-name :class)))
     (when pinyin-class
-      (funcall (intern (concat "pyim-split-string:"
+      (funcall (intern (concat "pyim-code-split:"
                                (symbol-name pinyin-class)))
                str scheme-name))))
 
-(defun pyim-split-string:quanpin (py &optional scheme-name)
-  "把一个拼音字符串分解。如果含有 '，优先在这个位置中断，否则，自动分
-解成声母和韵母的组合，可选参数 `scheme' 只是一个虚参数，暂时没有
-用处。"
+(defun pyim-code-split:quanpin (py &optional -)
+  "把一个拼音字符串分解成由声母和韵母组成的复杂列表。
+如果含有 ' 的位置优先处理。"
   (when (and py (string< "" py))
     (pyim-find-fuzzy-pinyin
      (list (apply 'append
@@ -1241,8 +1239,8 @@ Return the input string."
                           (split-string py "'")))))))
 
 ;; "nihc" -> (((\"n\" . \"i\") (\"h\" . \"ao\")))
-(defun pyim-split-string:shuangpin (str &optional scheme-name)
-  "按照 `pyim-scheme-name' 对应的拼音方案，把一个双拼字符串分解成一个 pylist 组成的列表。"
+(defun pyim-code-split:shuangpin (str &optional scheme-name)
+  "把一个双拼字符串分解成一个声母和韵母组成的复杂列表。"
   (let ((keymaps (pyim-scheme-get-option scheme-name :keymaps))
         (list (string-to-list (replace-regexp-in-string "-" "" str)))
         results)
@@ -1264,7 +1262,7 @@ Return the input string."
      (pyim-permutate-list (nreverse results)))))
 
 (defun pyim-find-fuzzy-pinyin (pylist-list)
-  "处理模糊音的函数"
+  "用于处理模糊音的函数。"
   (let (fuzzy-pylist-list result1 result2)
     (dolist (pylist pylist-list)
       (setq fuzzy-pylist-list
@@ -1333,16 +1331,16 @@ Return the input string."
     (if cur (setq py (concat py "'")))  ; the last char is `''
     py))
 
-(defun pyim-pylist-to-string (pylist &optional shou-zi-mu scheme-name)
-  "按照 `scheme' 对应的拼音方案，把一个拼音列表合并为一个全拼字符串
-或者双拼字符串，常常用于搜索。"
+(defun pyim-code-concat (scode &optional shou-zi-mu scheme-name)
+  "按照 `scheme' 对应的输入法方案，将一个 scode (已经分解的 code )
+重新合并为字符串，用于搜索。"
   (let ((pinyin-class (pyim-scheme-get-option scheme-name :class)))
     (when pinyin-class
-      (funcall (intern (concat "pyim-pylist-to-string:"
+      (funcall (intern (concat "pyim-code-concat:"
                                (symbol-name pinyin-class)))
-               pylist shou-zi-mu scheme-name))))
+               scode shou-zi-mu scheme-name))))
 
-(defun pyim-pylist-to-string:quanpin (pylist &optional shou-zi-mu scheme-name)
+(defun pyim-code-concat:quanpin (pylist &optional shou-zi-mu scheme-name)
   "把一个拼音列表合并为一个全拼字符串，当 `shou-zi-mu' 设置为 t
 时，生成拼音首字母字符串，比如 p-y。"
   (mapconcat 'identity
@@ -1355,7 +1353,7 @@ Return the input string."
               pylist)
              "-"))
 
-(defun pyim-pylist-to-string:shuangpin (pylist &optional shou-zi-mu scheme-name)
+(defun pyim-code-concat:shuangpin (pylist &optional shou-zi-mu scheme-name)
   "把一个拼音列表合并为一个双拼字符串，当 `shou-zi-mu' 设置为 t 时，
 生成双拼首字母字符串，比如 p-y。"
   (when scheme-name
@@ -1443,22 +1441,22 @@ Return the input string."
   ;; 个人文件。
   (when (and (member 'pinyin-shouzimu pyim-backends)
              (> (length pylist) 1))
-    (let ((py-str-shouzimu (pyim-pylist-to-string pylist t 'default)))
+    (let ((py-str-shouzimu (pyim-code-concat pylist t 'quanpin)))
       (list nil (gethash py-str-shouzimu pyim-personal-dict-cache)))))
 
 (defun pyim-get-choices:personal (pylist)
   (when (member 'personal pyim-backends)
-    (let ((py-str (pyim-pylist-to-string pylist nil 'default)))
+    (let ((py-str (pyim-code-concat pylist nil 'quanpin)))
       (list (pyim-get py-str pyim-personal-dict-cache) nil))))
 
 (defun pyim-get-choices:dicts (pylist)
   (when (member 'dicts pyim-backends)
-    (let ((py-str (pyim-pylist-to-string pylist nil 'default)))
+    (let ((py-str (pyim-code-concat pylist nil 'quanpin)))
       (list (pyim-get py-str pyim-dict-cache) nil))))
 
 (defun pyim-get-choices:chars (pylist)
   (when (member 'chars pyim-backends)
-    (let ((py-str (pyim-pylist-to-string pylist nil 'default)))
+    (let ((py-str (pyim-code-concat pylist nil 'quanpin)))
       (list (pyim-get (concat (caar pylist) (cdar pylist)))
             nil))))
 
@@ -1536,7 +1534,7 @@ Counting starts at 1."
 完整拼音，则给出完整的拼音，如果是给出声母，则为一个 CONS CELL，CAR 是
 拼音，CDR 是拼音列表。例如：
 
- (setq foo-pylist (pyim-split-string \"pin-yin-sh-r\" 'default))
+ (setq foo-pylist (pyim-code-split \"pin-yin-sh-r\" 'quanpin))
   => ((\"p\" . \"in\") (\"y\" . \"in\") (\"sh\" . \"\") (\"r\" . \"\"))
 
  (pyim-possible-words-py foo-pylist)
@@ -1579,13 +1577,13 @@ Counting starts at 1."
   (let ((scheme-name pyim-default-scheme)
         (str pyim-current-key)
         userpos wordspy)
-    (setq pyim-pylist-list (pyim-split-string str scheme-name)
+    (setq pyim-pylist-list (pyim-code-split str scheme-name)
           pyim-pinyin-position 0)
     (unless (and (pyim-validp (car pyim-pylist-list))
                  (progn
                    (setq userpos (pyim-user-divide-pos str)
                          pyim-current-key (pyim-restore-user-divide
-                                           (pyim-pylist-to-string (car pyim-pylist-list) nil scheme-name)
+                                           (pyim-code-concat (car pyim-pylist-list) nil scheme-name)
                                            userpos))
                    (setq pyim-current-choices (list (delete-dups (pyim-get-choices pyim-pylist-list))))
                    (when  (car pyim-current-choices)
@@ -2518,7 +2516,7 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
       pystr
     (let* ((pylist-list
             ;; Slowly operating, need to improve.
-            (pyim-split-string pystr pyim-default-scheme))
+            (pyim-code-split pystr pyim-default-scheme))
            (regexp-list
             (mapcar
              #'(lambda (pylist)
