@@ -802,12 +802,33 @@ BUG：无法有效的处理多音字。"
 ;; #+END_SRC
 
 ;; **** 删词功能
-;; `pyim-delete-word-from-personal-buffer' 从个人词频 buffer 中删除用户高
-;; 亮选择的词条。
-
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-delete-word (word)
-  "将中文词条 `word' 从 personal-file 对应的 buffer 中删除"
+(defun pyim-create-word-from-selection ()
+  "Add the selected text as a Chinese word into the personal dictionary."
+  (interactive)
+  (when (region-active-p)
+    (let ((string (buffer-substring-no-properties (region-beginning) (region-end))))
+      (if (> (length string) 6)
+          (error "词条太长")
+        (if (not (string-match-p "^\\cc+\\'" string))
+            (error "不是纯中文字符串")
+          (pyim-create-or-rearrange-word string)
+          (message "将词条: \"%s\" 插入 personal file。" string))))))
+
+(defun pyim-delete-word ()
+  "将高亮选择的词条从 `pyim-personal-dict-cache' 中删除。"
+  (interactive)
+  (if mark-active
+      (let ((string (buffer-substring-no-properties
+                     (region-beginning) (region-end))))
+        (when (and (< (length string) 6)
+                   (> (length string) 0))
+          (pyim-delete-word-1 string)
+          (message "将词条: \"%s\" 从 personal file中删除。" string)))
+    (message "请首先高亮选择需要删除的词条。")))
+
+(defun pyim-delete-word-1 (word)
+  "将中文词条 `word' 从 `pyim-personal-dict-cache' 中删除"
   (let* ((pinyins (pyim-hanzi2pinyin word nil "-" t))
          (pinyins-szm (mapcar
                        #'(lambda (pinyin)
@@ -825,30 +846,6 @@ BUG：无法有效的处理多音字。"
         (pyim-update-cache
           pyim-personal-dict-cache pinyin
           (remove word orig-value))))))
-
-(defun pyim-create-word-from-selection ()
-  "Add the selected text as a Chinese word into the personal dictionary."
-  (interactive)
-  (when (region-active-p)
-    (let ((string (buffer-substring-no-properties (region-beginning) (region-end))))
-      (if (> (length string) 6)
-          (error "词条太长")
-        (if (not (string-match-p "^\\cc+\\'" string))
-            (error "不是纯中文字符串")
-          (pyim-create-or-rearrange-word string)
-          (message "将词条: \"%s\" 插入 personal file。" string))))))
-
-(defun pyim-delete-word-from-personal-buffer ()
-  "将高亮选择的字符从 personel-file 对应的 buffer 中删除。"
-  (interactive)
-  (if mark-active
-      (let ((string (buffer-substring-no-properties
-                     (region-beginning) (region-end))))
-        (when (and (< (length string) 6)
-                   (> (length string) 0))
-          (pyim-delete-word string)
-          (message "将词条: \"%s\" 从 personal file中删除。" string)))
-    (message "请首先高亮选择需要删除的词条。")))
 ;; #+END_SRC
 
 ;; ** 生成 `pyim-current-key' 并插入 `pyim-current-str'

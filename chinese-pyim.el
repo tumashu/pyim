@@ -220,16 +220,13 @@
 
 ;; *** 手动加词和删词
 
-;; 1. `pyim-create-word-without-pinyin' 直接将一个中文词条加入个人词库的
-;;    函数，用于编程环境。
-;; 2. `pyim-create-word-at-point:"N"char' 这是一组命令，从光标前提取N个汉
+;; 1. `pyim-create-word-at-point:"N"char' 这是一组命令，从光标前提取N个汉
 ;;    字字符组成字符串，并将其加入个人词库。
-;; 3. `pyim-translate-trigger-char' 以默认设置为例：在“我爱吃红烧肉”后输
-;;    入“5v” 可以将“爱吃红烧肉”这个词条保存到用户个人词频文件。
-;; 4. `pyim-create-word-from-selection', 选择一个词条，运行这个命令后，就
-;;    可以将这个词条添加到个人文件。
-;; 5. `pyim-delete-word-from-personal-buffer' 从个人词频文件对应的 buffer
-;;    中删除当前高亮选择的词条。
+;; 2. `pyim-translate-trigger-char' 以默认设置为例：在“我爱吃红烧肉”后输
+;;    入“5v” 可以将“爱吃红烧肉”这个词条保存到用户个人词库。
+;; 3. `pyim-create-word-from-selection', 选择一个词条，运行这个命令后，就
+;;    可以将这个词条添加到个人词库。
+;; 4. `pyim-delete-word' 从个人词库中删除当前高亮选择的词条。
 
 ;; *** Chinese-pyim 高级功能
 ;; 1. 根据环境自动切换到英文输入模式，使用 pyim-english-input-switch-functions 配置。
