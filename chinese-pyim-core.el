@@ -899,7 +899,7 @@ BUG：无法有效的处理多音字。"
           (list key-or-string)
         (mapcar 'identity key-or-string))
     ;; (message "call with key: %S" key-or-string)
-    (pyim-setup-overlays)
+    (pyim-overlays-setup)
     (with-silent-modifications
       (unwind-protect
           (let ((input-string (pyim-start-translation key-or-string)))
@@ -910,7 +910,7 @@ BUG：无法有效的处理多音字。"
               (if input-method-exit-on-first-char
                   (list (aref input-string 0))
                 (mapcar 'identity input-string))))
-        (pyim-delete-overlays)))))
+        (pyim-overlays-delete)))))
 
 (defun pyim-start-translation (key-or-string)
   "Start translation of the typed character KEY by Chinese-pyim.
@@ -1069,10 +1069,10 @@ Return the input string."
 ;; 结果为:
 ;; : ((("w" . "o") ("" . "ai") ("m" . "ei") ("n" . "v")))
 
-;; 这个过程通过递归的调用 `pyim-get-charpy' 来实现，整个过程类似用菜刀切黄瓜片，将一个拼音字符串逐渐切开。比如：
+;; 这个过程通过递归的调用 `pyim-pinyin-get-charpy' 来实现，整个过程类似用菜刀切黄瓜片，将一个拼音字符串逐渐切开。比如：
 
 ;; #+BEGIN_EXAMPLE
-;; (pyim-get-charpy "woaimeinv")
+;; (pyim-pinyin-get-charpy "woaimeinv")
 ;; #+END_EXAMPLE
 
 ;; 结果为:
@@ -1087,9 +1087,9 @@ Return the input string."
 ;; (("w" . "o") ("" . "ai") ("m" . "ei" ) ("n" . "v"))
 ;; #+END_EXAMPLE
 
-;; `pyim-get-charpy' 由两个基本函数配合实现：
-;; 1. pyim-get-sm 从一个拼音字符串中提出第一个声母
-;; 2. pyim-get-ym 从一个拼音字符串中提出第一个韵母
+;; `pyim-pinyin-get-charpy' 由两个基本函数配合实现：
+;; 1. pyim-pinyin-get-sm 从一个拼音字符串中提出第一个声母
+;; 2. pyim-pinyin-get-ym 从一个拼音字符串中提出第一个韵母
 
 ;; #+BEGIN_EXAMPLE
 ;; (pyim-get-sm "woaimeinv")
@@ -1099,7 +1099,7 @@ Return the input string."
 ;; : ("w" . "oaimeinv")
 
 ;; #+BEGIN_EXAMPLE
-;; (pyim-get-ym "oaimeinv")
+;; (pyim-pinyin-get-ym "oaimeinv")
 ;; #+END_EXAMPLE
 
 ;; 结果为:
@@ -1114,12 +1114,12 @@ Return the input string."
 ;; 结果为:
 ;; : ((("" . "ua")))
 
-;; 这种错误可以使用函数 `pyim-validp' 来检测。
+;; 这种错误可以使用函数 `pyim-spinyin-validp' 来检测。
 ;; #+BEGIN_EXAMPLE
-;; (list (pyim-validp (car (pyim-code-split "ua" 'quanpin)))
-;;       (pyim-validp (car (pyim-code-split "a" 'quanpin)))
-;;       (pyim-validp (car (pyim-code-split "wa" 'quanpin)))
-;;       (pyim-validp (car (pyim-code-split "wua" 'quanpin))))
+;; (list (pyim-spinyin-validp (car (pyim-code-split "ua" 'quanpin)))
+;;       (pyim-spinyin-validp (car (pyim-code-split "a" 'quanpin)))
+;;       (pyim-spinyin-validp (car (pyim-code-split "wa" 'quanpin)))
+;;       (pyim-spinyin-validp (car (pyim-code-split "wua" 'quanpin))))
 ;; #+END_EXAMPLE
 
 ;; 结果为:
@@ -1141,7 +1141,7 @@ Return the input string."
 
 ;; #+BEGIN_SRC emacs-lisp
 ;; 将汉字的拼音分成声母和其它
-(defun pyim-get-sm (py)
+(defun pyim-pinyin-get-sm (py)
   "从一个拼音字符串中提出第一个声母。"
   (when (and py (string< "" py))
     (let (shenmu yunmu len)
@@ -1158,7 +1158,7 @@ Return the input string."
             (setq shenmu "")))
         (cons shenmu py)))))
 
-(defun pyim-get-ym (py)
+(defun pyim-pinyin-get-ym (py)
   "从一个拼音字符串中提出第一个韵母"
   (when (and py (string< "" py))
     (let (yunmu len)
@@ -1179,14 +1179,14 @@ Return the input string."
                 yunmu (substring yunmu 0 -1)))
       (cons yunmu py))))
 
-(defun pyim-get-charpy (py)
+(defun pyim-pinyin-get-charpy (py)
   "分解一个拼音字符串成声母和韵母。"
   (when (and py (string< "" py))
     (let* ((sm (pyim-get-sm py))
-           (ym (pyim-get-ym (cdr sm)))
+           (ym (pyim-pinyin-get-ym (cdr sm)))
            (charpys (mapcar #'(lambda (x)
                                 (concat (car x) (cdr x)))
-                            (pyim-find-fuzzy-pinyin-1
+                            (pyim-spinyin-find-fuzzy-1
                              (cons (car sm) (car ym))))))
       (if (or (null ym) ;如果韵母为空
               (and (string< "" (car ym))
@@ -1226,13 +1226,13 @@ Return the input string."
   "把一个拼音字符串分解成由声母和韵母组成的复杂列表。
 如果含有 ' 的位置优先处理。"
   (when (and py (string< "" py))
-    (pyim-find-fuzzy-pinyin
+    (pyim-spinyin-find-fuzzy
      (list (apply 'append
                   (mapcar #'(lambda (p)
                               (let (chpy spinyin)
                                 (setq p (replace-regexp-in-string "[ -]" "" p))
                                 (while (when (string< "" p)
-                                         (setq chpy (pyim-get-charpy p))
+                                         (setq chpy (pyim-pinyin-get-charpy p))
                                          (setq spinyin (append spinyin (list (car chpy))))
                                          (setq p (cdr chpy))))
                                 spinyin))
@@ -1258,21 +1258,21 @@ Return the input string."
                      (if z (cons "" z) (cons sm x))))
                (or ym (list "")))
               results)))
-    (pyim-find-fuzzy-pinyin
+    (pyim-spinyin-find-fuzzy
      (pyim-permutate-list (nreverse results)))))
 
-(defun pyim-find-fuzzy-pinyin (spinyin-list)
+(defun pyim-spinyin-find-fuzzy (spinyin-list)
   "用于处理模糊音的函数。"
   (let (fuzzy-spinyin-list result1 result2)
     (dolist (spinyin spinyin-list)
       (setq fuzzy-spinyin-list
             (pyim-permutate-list
-             (mapcar 'pyim-find-fuzzy-pinyin-1 spinyin)))
+             (mapcar 'pyim-spinyin-find-fuzzy-1 spinyin)))
       (push (car fuzzy-spinyin-list) result1)
       (setq result2 (append result2 (cdr fuzzy-spinyin-list))))
     (append result1 result2)))
 
-(defun pyim-find-fuzzy-pinyin-1 (pycons)
+(defun pyim-spinyin-find-fuzzy-1 (pycons)
   "Find all fuzzy pinyins, for example:
 
 (\"f\" . \"en\") -> ((\"f\" . \"en\") (\"f\" . \"eng\"))"
@@ -1294,7 +1294,7 @@ Return the input string."
           (push (cons a b) result)))
       (reverse result))))
 
-(defun pyim-validp (spinyin)
+(defun pyim-spinyin-validp (spinyin)
   "检查得到的拼音是否含有声母为空，而韵母又不正确的拼音"
   (let ((valid t) py)
     (while (progn
@@ -1579,7 +1579,7 @@ Counting starts at 1."
         userpos wordspy)
     (setq pyim-spinyin-list (pyim-code-split str scheme-name)
           pyim-pinyin-position 0)
-    (unless (and (pyim-validp (car pyim-spinyin-list))
+    (unless (and (pyim-spinyin-validp (car pyim-spinyin-list))
                  (progn
                    (setq userpos (pyim-user-divide-pos str)
                          pyim-current-key (pyim-restore-user-divide
@@ -1647,7 +1647,7 @@ Counting starts at 1."
 
 ;; Chinese-pyim 会使用 emacs overlay 机制在 *待输入buffer* 光标处高亮显示
 ;; `pyim-current-str'，让用户快速了解当前输入的字符串，具体方式是：
-;; 1. 在 `pyim-input-method' 中调用 `pyim-setup-overlays' 创建 overlay ，并
+;; 1. 在 `pyim-input-method' 中调用 `pyim-overlays-setup' 创建 overlay ，并
 ;;    使用变量 `pyim-overlay' 保存，创建时将 overlay 的 face 属性设置为
 ;;    `pyim-string-face' ，用户可以使用这个变量来自定义 face。
 ;; 2. 使用函数 `pyim-show' 高亮显示 `pyim-current-str'
@@ -1655,7 +1655,7 @@ Counting starts at 1."
 ;;    2. 插入 `pyim-current-str'
 ;;    3. 使用 `move-overlay' 函数调整变量 `pyim-overlay' 中保存的 overlay，
 ;;       让其符合新插入的字符串。
-;; 3. 在 `pyim-input-method' 中调用 `pyim-delete-overlays' ，删除
+;; 3. 在 `pyim-input-method' 中调用 `pyim-overlays-delete' ，删除
 ;;    `pyim-overlay' 中保存的 overlay，这个函数同时也删除了 overlay 中包
 ;;    含的文本 `pyim-current-str'。
 
@@ -1663,7 +1663,7 @@ Counting starts at 1."
 ;; `read-event'，具体见 `pyim-input-method' 相关说明。
 
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-setup-overlays ()
+(defun pyim-overlays-setup ()
   (let ((pos (point)))
     (if (overlayp pyim-overlay)
         (move-overlay pyim-overlay pos pos)
@@ -1671,7 +1671,7 @@ Counting starts at 1."
       (if input-method-highlight-flag
           (overlay-put pyim-overlay 'face 'pyim-string-face)))))
 
-(defun pyim-delete-overlays ()
+(defun pyim-overlays-delete ()
   (if (and (overlayp pyim-overlay) (overlay-start pyim-overlay))
       (delete-overlay pyim-overlay)))
 ;; #+END_SRC
