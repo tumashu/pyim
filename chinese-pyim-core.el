@@ -54,7 +54,7 @@
   "一个目录，用于保存与 Chinese-pyim 相关的文件。"
   :group 'chinese-pyim)
 
-(defcustom pyim-dcache-directory (locate-user-emacs-file "pyim/cache")
+(defcustom pyim-dcache-directory (locate-user-emacs-file "pyim/dcache")
   "一个目录，用于保存 Chinese-pyim 词库对应的 cache 文件。"
   :group 'chinese-pyim)
 
