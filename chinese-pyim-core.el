@@ -1155,12 +1155,12 @@ Return the input string."
 ;; 结果为:
 ;; : ((("" . "ua")))
 
-;; 这种错误可以使用函数 `pyim-spinyin-validp' 来检测。
+;; 这种错误可以使用函数 `pyim-scode-validp' 来检测。
 ;; #+BEGIN_EXAMPLE
-;; (list (pyim-spinyin-validp (car (pyim-code-split "ua" 'quanpin)))
-;;       (pyim-spinyin-validp (car (pyim-code-split "a" 'quanpin)))
-;;       (pyim-spinyin-validp (car (pyim-code-split "wa" 'quanpin)))
-;;       (pyim-spinyin-validp (car (pyim-code-split "wua" 'quanpin))))
+;; (list (pyim-scode-validp (car (pyim-code-split "ua" 'quanpin)) 'quanpin)
+;;       (pyim-scode-validp (car (pyim-code-split "a" 'quanpin)) 'quanpin)
+;;       (pyim-scode-validp (car (pyim-code-split "wa" 'quanpin)) 'quanpin)
+;;       (pyim-scode-validp (car (pyim-code-split "wua" 'quanpin)) 'quanpin))
 ;; #+END_EXAMPLE
 
 ;; 结果为:
@@ -1336,7 +1336,15 @@ Return the input string."
           (push (cons a b) result)))
       (reverse result))))
 
-(defun pyim-spinyin-validp (spinyin)
+(defun pyim-scode-validp (scode scheme-name)
+  "检测一个 scode 是否正确。"
+  (let ((class (pyim-scheme-get-option scheme-name :class)))
+    (cond
+     ((member class '(quanpin shuangpin))
+      (pyim-scode-validp:spinyin scode))
+     (t t))))
+
+(defun pyim-scode-validp:spinyin (spinyin)
   "检查 `spinyin' 是否声母为空且韵母又不正确。"
   (let ((valid t) py)
     (while (progn
@@ -1602,7 +1610,8 @@ Return the input string."
         (str pyim-current-key))
     (setq pyim-scode-list (pyim-code-split str scheme-name)
           pyim-pinyin-position 0)
-    (unless (and (pyim-spinyin-validp (car pyim-scode-list))
+    (unless (and (pyim-scode-validp
+                  (car pyim-scode-list) scheme-name)
                  (progn
                    (setq pyim-current-key
                          (pyim-code-restore-user-divide
