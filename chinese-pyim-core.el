@@ -1125,12 +1125,12 @@ Return the input string."
 ;; 结果为:
 ;; : (nil t t t)
 
-;; Chinese-pyim 使用函数 `pyim-code-concat' 将一个拼音列表合并为拼音
+;; Chinese-pyim 使用函数 `pyim-scode-join' 将一个拼音列表合并为拼音
 ;; 字符串，这个可以认为是 `pyim-code-split' 的反向操作。构建得到的拼音
 ;; 字符串用于搜索词条。
 
 ;; #+BEGIN_EXAMPLE
-;; (pyim-code-concat '(("w" . "o") ("" . "ai") ("m" . "ei") ("n" . "v")) nil 'quanpin)
+;; (pyim-scode-join '(("w" . "o") ("" . "ai") ("m" . "ei") ("n" . "v")) nil 'quanpin)
 ;; #+END_EXAMPLE
 
 ;; 结果为:
@@ -1331,16 +1331,16 @@ Return the input string."
     (if cur (setq py (concat py "'")))  ; the last char is `''
     py))
 
-(defun pyim-code-concat (scode &optional shou-zi-mu scheme-name)
+(defun pyim-scode-join (scode &optional shou-zi-mu scheme-name)
   "按照 `scheme' 对应的输入法方案，将一个 scode (已经分解的 code )
 重新合并为字符串，用于搜索。"
   (let ((pinyin-class (pyim-scheme-get-option scheme-name :class)))
     (when pinyin-class
-      (funcall (intern (concat "pyim-code-concat:"
+      (funcall (intern (concat "pyim-scode-join:"
                                (symbol-name pinyin-class)))
                scode shou-zi-mu scheme-name))))
 
-(defun pyim-code-concat:quanpin (spinyin &optional shou-zi-mu scheme-name)
+(defun pyim-scode-join:quanpin (spinyin &optional shou-zi-mu scheme-name)
   "把一个拼音列表合并为一个全拼字符串，当 `shou-zi-mu' 设置为 t
 时，生成拼音首字母字符串，比如 p-y。"
   (mapconcat 'identity
@@ -1353,7 +1353,7 @@ Return the input string."
               spinyin)
              "-"))
 
-(defun pyim-code-concat:shuangpin (spinyin &optional shou-zi-mu scheme-name)
+(defun pyim-scode-join:shuangpin (spinyin &optional shou-zi-mu scheme-name)
   "把一个拼音列表合并为一个双拼字符串，当 `shou-zi-mu' 设置为 t 时，
 生成双拼首字母字符串，比如 p-y。"
   (when scheme-name
@@ -1441,22 +1441,22 @@ Return the input string."
   ;; 个人文件。
   (when (and (member 'pinyin-shouzimu pyim-backends)
              (> (length spinyin) 1))
-    (let ((py-str-shouzimu (pyim-code-concat spinyin t 'quanpin)))
+    (let ((py-str-shouzimu (pyim-scode-join spinyin t 'quanpin)))
       (list nil (gethash py-str-shouzimu pyim-personal-dict-cache)))))
 
 (defun pyim-choices-get:personal (spinyin)
   (when (member 'personal pyim-backends)
-    (let ((py-str (pyim-code-concat spinyin nil 'quanpin)))
+    (let ((py-str (pyim-scode-join spinyin nil 'quanpin)))
       (list (pyim-dcache-get py-str pyim-personal-dict-cache) nil))))
 
 (defun pyim-choices-get:dicts (spinyin)
   (when (member 'dicts pyim-backends)
-    (let ((py-str (pyim-code-concat spinyin nil 'quanpin)))
+    (let ((py-str (pyim-scode-join spinyin nil 'quanpin)))
       (list (pyim-dcache-get py-str pyim-dict-cache) nil))))
 
 (defun pyim-choices-get:chars (spinyin)
   (when (member 'chars pyim-backends)
-    (let ((py-str (pyim-code-concat spinyin nil 'quanpin)))
+    (let ((py-str (pyim-scode-join spinyin nil 'quanpin)))
       (list (pyim-dcache-get (concat (caar spinyin) (cdar spinyin)))
             nil))))
 
@@ -1565,7 +1565,7 @@ Return the input string."
                  (progn
                    (setq userpos (pyim-pinyin-user-divide-pos str)
                          pyim-current-key (pyim-pinyin-restore-user-divide
-                                           (pyim-code-concat (car pyim-spinyin-list) nil scheme-name)
+                                           (pyim-scode-join (car pyim-spinyin-list) nil scheme-name)
                                            userpos))
                    (setq pyim-current-choices (list (delete-dups (pyim-choices-get pyim-spinyin-list))))
                    (when  (car pyim-current-choices)
