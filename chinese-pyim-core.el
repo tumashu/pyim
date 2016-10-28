@@ -366,8 +366,8 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
 (defvar pyim-overlay nil "显示当前选择词条的 overlay")
 
 (defvar pyim-pinyin-position nil)
-(defvar pyim-spinyin-list nil
-  "Chinese-pyim 会将一个拼音字符串分解为一个或者多个 spinyin （常见于双拼模式）,
+(defvar pyim-scode-list nil
+  "Chinese-pyim 会将一个 code 分解为一个或者多个 scode （splited code）,
 这个变量用于保存分解得到的结果。")
 
 (defvar pyim-guidance-list nil
@@ -457,7 +457,7 @@ If you don't like this funciton, set the variable to nil")
     pyim-punctuation-pair-status
     pyim-punctuation-escape-list
 
-    pyim-spinyin-list
+    pyim-scode-list
     pyim-pinyin-position)
   "A list of buffer local variable")
 
@@ -1569,15 +1569,15 @@ Return the input string."
   (let ((scheme-name pyim-default-scheme)
         (str pyim-current-key)
         userpos wordspy)
-    (setq pyim-spinyin-list (pyim-code-split str scheme-name)
+    (setq pyim-scode-list (pyim-code-split str scheme-name)
           pyim-pinyin-position 0)
-    (unless (and (pyim-spinyin-validp (car pyim-spinyin-list))
+    (unless (and (pyim-spinyin-validp (car pyim-scode-list))
                  (progn
                    (setq userpos (pyim-pinyin-user-divide-pos str)
                          pyim-current-key (pyim-pinyin-restore-user-divide
-                                           (pyim-scode-join (car pyim-spinyin-list) nil scheme-name)
+                                           (pyim-scode-join (car pyim-scode-list) nil scheme-name)
                                            userpos))
-                   (setq pyim-current-choices (list (delete-dups (pyim-choices-get pyim-spinyin-list))))
+                   (setq pyim-current-choices (list (delete-dups (pyim-choices-get pyim-scode-list))))
                    (when  (car pyim-current-choices)
                      (setq pyim-current-pos 1)
                      (pyim-update-current-str)
@@ -1631,7 +1631,7 @@ Return the input string."
                                    (pyim-choice (nth pos choices)))
           rest (mapconcat (lambda (py)
                             (concat (car py) (cdr py)))
-                          (nthcdr (length pyim-current-str) (car pyim-spinyin-list))
+                          (nthcdr (length pyim-current-str) (car pyim-scode-list))
                           "'"))
     (if (string< "" rest)
         (setq pyim-current-str (concat pyim-current-str rest)))))
@@ -2030,7 +2030,7 @@ guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
           spinyin-list)
       (pyim-create-or-rearrange-word str t)
       (setq pyim-pinyin-position (+ pyim-pinyin-position (length str)))
-      (if (>= pyim-pinyin-position (length (car pyim-spinyin-list)))
+      (if (>= pyim-pinyin-position (length (car pyim-scode-list)))
                                         ; 如果是最后一个，检查
                                         ; 是不是在文件中，没有的话，创
                                         ; 建这个词
@@ -2044,7 +2044,7 @@ guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
                             (mapcar
                              #'(lambda (spinyin)
                                  (nthcdr pyim-pinyin-position spinyin))
-                             pyim-spinyin-list)))
+                             pyim-scode-list)))
         (setq pyim-current-choices (list (pyim-choices-get spinyin-list))
               pyim-current-pos 1)
         (pyim-update-current-str)
