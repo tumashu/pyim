@@ -1567,18 +1567,18 @@ Return the input string."
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-handle-string ()
   (let ((scheme-name pyim-default-scheme)
-        (str pyim-current-key)
-        userpos wordspy)
+        (str pyim-current-key))
     (setq pyim-scode-list (pyim-code-split str scheme-name)
           pyim-pinyin-position 0)
     (unless (and (pyim-spinyin-validp (car pyim-scode-list))
                  (progn
-                   (setq userpos (pyim-pinyin-user-divide-pos str)
-                         pyim-current-key (pyim-pinyin-restore-user-divide
-                                           (pyim-scode-join (car pyim-scode-list) nil scheme-name)
-                                           userpos))
-                   (setq pyim-current-choices (list (delete-dups (pyim-choices-get pyim-scode-list))))
-                   (when  (car pyim-current-choices)
+                   (setq pyim-current-key
+                         (pyim-pinyin-restore-user-divide
+                          (pyim-scode-join (car pyim-scode-list) nil scheme-name)
+                          (pyim-pinyin-user-divide-pos str)))
+                   (setq pyim-current-choices
+                         (list (delete-dups (pyim-choices-get pyim-scode-list))))
+                   (when (car pyim-current-choices)
                      (setq pyim-current-pos 1)
                      (pyim-update-current-str)
                      (pyim-page-format-page)
