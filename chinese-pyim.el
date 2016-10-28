@@ -1,4 +1,4 @@
-;;; chinese-pyim.el --- Chinese pinyin input method
+;;; chinese-pyim.el --- A Chinese input method
 
 ;; * Header
 ;; Copyright 2015-2016 Feng Shu
@@ -30,9 +30,10 @@
 ;; [[./snapshots/pyim-linux-x-with-toolkit.png]]
 
 ;; ** 简介
-;; Chinese-pyim (Chinese Pinyin Input Method) 是 emacs 环境下的一个中文拼
-;; 音输入法。
-
+;; Chinese-pyim 是 emacs 环境下的一个中文输入法，最初它只支持全拼输入，所以当时
+;; "Chinese-pyim" 代表 "Chinese Pinyin Input Method" 的意思，后来根据同学的提议，
+;; 添加了五笔的支持，再叫 “拼音输入法” 就不太合适了，所以你现在可以将它理解
+;; 为 “PengYou input method”： 平时像朋友一样帮助你，偶尔也像朋友一样犯二 。。。
 
 ;; ** 背景
 ;; Chinese-pyim 的代码源自 emacs-eim。
@@ -43,16 +44,16 @@
 ;; 虽然外部输入法功能强大，但不能和 emacs 默契的配合，这一点极大的损害了 emacs 那种 *行云流水*
 ;; 的感觉。而本人在使用（或者叫折腾） emacs-eim 的过程中发现：
 
-;; 1. *当 emacs-eim 拼音词库词条超过100万时，选词频率大大降低，中文体验增强。*
-;; 3. *随着使用时间的延长，emacs-eim会越来越好用（个人词库的积累）。*
+;; 1. *当 emacs-eim 词库词条超过 100 万时，选词频率大大降低，中文体验增强。*
+;; 3. *随着使用时间的延长，emacs-eim 会越来越好用（个人词库的积累）。*
 
-;; 于是我 fork 了 emacs-eim 拼音输入法相关的代码, 创建了一个项目：chinese-pyim。
+;; 于是我 fork 了 emacs-eim 输入法的部分代码, 创建了一个项目：chinese-pyim。
 
 ;; ** 目标
-;; Chinese-pyim 的目标是： *尽最大的努力成为一个好用的 emacs 中文拼音输入法* ，
+;; Chinese-pyim 的目标是： *尽最大的努力成为一个好用的 emacs 中文输入法* ，
 ;; 具体可表现为三个方面：
 
-;; 1. Fallback:     当外部输入法不能使用时，比如在 console或者cygwin环境
+;; 1. Fallback:     当外部输入法不能使用时，比如在 console 或者 cygwin 环境
 ;;    下，尽最大可能让 emacs 用户不必为输入中文而烦恼。
 ;; 2. Integration:  尽最大可能减少输入法切换频率，让中文输入不影响 emacs
 ;;    的体验。
@@ -60,15 +61,14 @@
 ;;    的难度和复杂度。
 
 ;; ** 特点
-;; 1. Chinese-pyim 只是一个拼音输入法，安装配置方便快捷，一般只能通过添加词
-;;    库的方式优化输入法。
-;; 2. Chinese-pyim 只使用最简单的文本词库格式，可以快速方便的利用其他输入
-;;    法的词库。
+;; 1. Chinese-pyim 支持全拼，双拼和五笔，其中对全拼的支持最好。
+;; 2. Chinese-pyim 通过添加词库的方式优化输入法。
+;; 3. Chinese-pyim 使用文本词库格式，方便处理。
 
 ;; ** 安装
-;; 1. 配置melpa源，参考：http://melpa.org/#/getting-started
+;; 1. 配置 melpa 源，参考：http://melpa.org/#/getting-started
 ;; 2. M-x package-install RET chinese-pyim RET
-;; 3. 在emacs配置文件中（比如: ~/.emacs）添加如下代码：
+;; 3. 在 emacs 配置文件中（比如: ~/.emacs）添加如下代码：
 ;;    #+BEGIN_EXAMPLE
 ;;    (require 'chinese-pyim)
 ;;    (require 'chinese-pyim-basedict)
@@ -82,8 +82,8 @@
 ;; 大体了解一下 Chinese-pyim 的用法：[[https://github.com/tumashu/emacs-helper/blob/master/eh-basic.el][Tumashu's emacs configure]] 。
 
 ;; *** 添加词库文件
-;; Chinese-pyim 当前的默认词库是 chinese-pyim-basedict, 这个词库的词条量
-;; 8 万左右，是一个 *非常小* 得词库，词条的来源有两个：
+;; Chinese-pyim 当前的默认的拼音词库是 chinese-pyim-basedict, 这个词库的词条量
+;; 8 万左右，是一个 *非常小* 的拼音词库，词条的来源有两个：
 
 ;; 1. libpinyin 项目的内置词库
 ;; 2. chinese-pyim 用户贡献的个人词库
