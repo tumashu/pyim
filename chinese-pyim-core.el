@@ -58,20 +58,6 @@
   "一个目录，用于保存 Chinese-pyim 词库对应的 cache 文件。"
   :group 'chinese-pyim)
 
-(defcustom pyim-personal-file
-  (concat (file-name-as-directory pyim-directory)
-          "pyim-personal.txt")
-  "这个文件用来保存用户曾经输入过的中文词条，和这些词条输入的先后顺序。"
-  :group 'chinese-pyim
-  :type 'file)
-
-(defcustom pyim-property-file
-  (concat (file-name-as-directory pyim-directory)
-          "pyim-words-property.txt")
-  "这个文件用来保存已输入中文词条的其他有用属性。"
-  :group 'chinese-pyim
-  :type 'file)
-
 (defcustom pyim-dicts nil
   "一个列表，用于保存 `Chinese-pyim' 的词库信息，每一个 element 都代表一条词库的信息。
 用户可以使用词库管理命令 `pyim-dicts-manager' 来添加词库信息，每一条词库信息都使用一个
