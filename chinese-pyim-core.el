@@ -531,7 +531,7 @@ If you don't like this funciton, set the variable to nil")
   (mapc 'make-local-variable pyim-local-variable-list)
   (when (and restart save-files)
     (pyim-dcache-save-caches))
-  (pyim-dcache-init)
+  (pyim-dcache-init-variables)
   (pyim-cchar2pinyin-cache-create)
   (pyim-pinyin2cchar-cache-create)
   (run-hooks 'pyim-load-hook)
@@ -614,7 +614,7 @@ If you don't like this funciton, set the variable to nil")
           (setq pyim-dcache-dict
                 (pyim-dcache-get-value-from-file ,dict-cache-file)))))))
 
-(defun pyim-dcache-init ()
+(defun pyim-dcache-init-variables ()
   "初始化 dcache 缓存相关变量。"
   (pyim-dcache-restore-variable 'pyim-dcache-dict (make-hash-table :test #'equal))
   (pyim-dcache-restore-variable 'pyim-dcache-wordcount (make-hash-table :test #'equal))
