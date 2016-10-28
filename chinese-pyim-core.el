@@ -397,7 +397,7 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
 
 (defvar pyim-overlay nil "显示当前选择词条的 overlay")
 
-(defvar pyim-pinyin-position nil)
+(defvar pyim-code-position nil)
 (defvar pyim-scode-list nil
   "Chinese-pyim 会将一个 code 分解为一个或者多个 scode （splited code）,
 这个变量用于保存分解得到的结果。")
@@ -490,7 +490,7 @@ If you don't like this funciton, set the variable to nil")
     pyim-punctuation-escape-list
 
     pyim-scode-list
-    pyim-pinyin-position)
+    pyim-code-position)
   "A list of buffer local variable")
 
 (dolist (var pyim-local-variable-list)
@@ -1609,7 +1609,7 @@ Return the input string."
   (let ((scheme-name pyim-default-scheme)
         (str pyim-current-key))
     (setq pyim-scode-list (pyim-code-split str scheme-name)
-          pyim-pinyin-position 0)
+          pyim-code-position 0)
     (unless (and (pyim-scode-validp
                   (car pyim-scode-list) scheme-name)
                  (progn
@@ -1668,7 +1668,7 @@ Return the input string."
          (choice (pyim-subseq choices start end))
          (pos (1- (min pyim-current-pos (length choices))))
          rest)
-    (setq pyim-current-str (concat (substring pyim-current-str 0 pyim-pinyin-position)
+    (setq pyim-current-str (concat (substring pyim-current-str 0 pyim-code-position)
                                    (pyim-choice (nth pos choices)))
           rest (mapconcat (lambda (py)
                             (concat (car py) (cdr py)))
@@ -2070,8 +2070,8 @@ guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
     (let ((str (pyim-choice (nth (1- pyim-current-pos) (car pyim-current-choices))))
           spinyin-list)
       (pyim-create-or-rearrange-word str t)
-      (setq pyim-pinyin-position (+ pyim-pinyin-position (length str)))
-      (if (>= pyim-pinyin-position (length (car pyim-scode-list)))
+      (setq pyim-code-position (+ pyim-code-position (length str)))
+      (if (>= pyim-code-position (length (car pyim-scode-list)))
                                         ; 如果是最后一个，检查
                                         ; 是不是在文件中，没有的话，创
                                         ; 建这个词
@@ -2084,7 +2084,7 @@ guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
         (setq spinyin-list (delete-dups
                             (mapcar
                              #'(lambda (spinyin)
-                                 (nthcdr pyim-pinyin-position spinyin))
+                                 (nthcdr pyim-code-position spinyin))
                              pyim-scode-list)))
         (setq pyim-current-choices (list (pyim-choices-get spinyin-list))
               pyim-current-pos 1)
@@ -2102,7 +2102,7 @@ guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
             (pyim-show)
           (setq pyim-current-pos (+ pyim-current-pos index))
           (setq pyim-current-str (concat (substring pyim-current-str 0
-                                                    pyim-pinyin-position)
+                                                    pyim-code-position)
                                          (pyim-choice
                                           (nth (1- pyim-current-pos)
                                                (car pyim-current-choices)))))
