@@ -1258,10 +1258,10 @@ Return the input string."
 1. pinyin:  (((\"n\" . \"i\") (\"h\" . \"ao\")))
 
 注意： 不同的输入法，scode 的结构也是不一样的。"
-  (let ((pinyin-class (pyim-scheme-get-option scheme-name :class)))
-    (when pinyin-class
+  (let ((class (pyim-scheme-get-option scheme-name :class)))
+    (when class
       (funcall (intern (concat "pyim-code-split:"
-                               (symbol-name pinyin-class)))
+                               (symbol-name class)))
                code scheme-name))))
 
 (defun pyim-code-split:quanpin (py &optional -)
@@ -1384,10 +1384,10 @@ Return the input string."
 (defun pyim-scode-join (scode &optional shou-zi-mu scheme-name)
   "按照 `scheme' 对应的输入法方案，将一个 scode (splited code)
 重新合并为 code 字符串，用于搜索。"
-  (let ((pinyin-class (pyim-scheme-get-option scheme-name :class)))
-    (when pinyin-class
+  (let ((class (pyim-scheme-get-option scheme-name :class)))
+    (when class
       (funcall (intern (concat "pyim-scode-join:"
-                               (symbol-name pinyin-class)))
+                               (symbol-name class)))
                scode shou-zi-mu scheme-name))))
 
 (defun pyim-scode-join:quanpin (spinyin &optional shou-zi-mu scheme-name)
