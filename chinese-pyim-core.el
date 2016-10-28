@@ -908,7 +908,7 @@ BUG：无法有效的处理多音字。"
           (list key-or-string)
         (mapcar 'identity key-or-string))
     ;; (message "call with key: %S" key-or-string)
-    (pyim-overlays-setup)
+    (pyim-overlay-setup)
     (with-silent-modifications
       (unwind-protect
           (let ((input-string (pyim-start-translation key-or-string)))
@@ -919,7 +919,7 @@ BUG：无法有效的处理多音字。"
               (if input-method-exit-on-first-char
                   (list (aref input-string 0))
                 (mapcar 'identity input-string))))
-        (pyim-overlays-delete)))))
+        (pyim-overlay-delete)))))
 
 (defun pyim-start-translation (key-or-string)
   "Start translation of the typed character KEY by Chinese-pyim.
@@ -1639,7 +1639,7 @@ Return the input string."
 
 ;; Chinese-pyim 会使用 emacs overlay 机制在 *待输入buffer* 光标处高亮显示
 ;; `pyim-current-str'，让用户快速了解当前输入的字符串，具体方式是：
-;; 1. 在 `pyim-input-method' 中调用 `pyim-overlays-setup' 创建 overlay ，并
+;; 1. 在 `pyim-input-method' 中调用 `pyim-overlay-setup' 创建 overlay ，并
 ;;    使用变量 `pyim-overlay' 保存，创建时将 overlay 的 face 属性设置为
 ;;    `pyim-string-face' ，用户可以使用这个变量来自定义 face。
 ;; 2. 使用函数 `pyim-show' 高亮显示 `pyim-current-str'
@@ -1647,7 +1647,7 @@ Return the input string."
 ;;    2. 插入 `pyim-current-str'
 ;;    3. 使用 `move-overlay' 函数调整变量 `pyim-overlay' 中保存的 overlay，
 ;;       让其符合新插入的字符串。
-;; 3. 在 `pyim-input-method' 中调用 `pyim-overlays-delete' ，删除
+;; 3. 在 `pyim-input-method' 中调用 `pyim-overlay-delete' ，删除
 ;;    `pyim-overlay' 中保存的 overlay，这个函数同时也删除了 overlay 中包
 ;;    含的文本 `pyim-current-str'。
 
@@ -1655,7 +1655,7 @@ Return the input string."
 ;; `read-event'，具体见 `pyim-input-method' 相关说明。
 
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-overlays-setup ()
+(defun pyim-overlay-setup ()
   (let ((pos (point)))
     (if (overlayp pyim-overlay)
         (move-overlay pyim-overlay pos pos)
@@ -1663,7 +1663,7 @@ Return the input string."
       (if input-method-highlight-flag
           (overlay-put pyim-overlay 'face 'pyim-string-face)))))
 
-(defun pyim-overlays-delete ()
+(defun pyim-overlay-delete ()
   (if (and (overlayp pyim-overlay) (overlay-start pyim-overlay))
       (delete-overlay pyim-overlay)))
 ;; #+END_SRC
