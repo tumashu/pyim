@@ -1692,7 +1692,7 @@ Return the input string."
 ;; #+END_EXAMPLE
 
 ;; minibuffer 或者 tooltip 选词框中显示的字符串通过
-;; `pyim-guidance-format-function' 变量对应的函数生成,
+;; `pyim-guidance' 变量对应的函数生成,
 ;; chinese-pyim 当前内置了两个 format 函数：
 
 ;; 1. pyim-guidance:two-lines
@@ -1895,7 +1895,7 @@ Return the input string."
       (let ((message-log-max nil))
         (if pyim-use-tooltip
             (pyim-tooltip-show
-             (funcall pyim-guidance-format-function pyim-guidance-list)
+             (funcall pyim-guidance pyim-guidance-list)
              (overlay-start pyim-overlay))
           (message "%s" (pyim-guidance:minibuffer pyim-guidance-list)))))))
 
@@ -2020,6 +2020,7 @@ guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
 ;; *** 选择备选词
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-page-select-word ()
+  "从选词框中选择当前词条。"
   (interactive)
   (if (null (car pyim-current-choices))  ; 如果没有选项，输入空格
       (progn
@@ -2040,10 +2041,10 @@ guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
             ;; Chinese-pyim 使用这个 hook 来处理联想词。
             (run-hooks 'pyim-select-word-finish-hook))
         (setq spinyin-list (delete-dups
-                           (mapcar
-                            #'(lambda (spinyin)
-                                (nthcdr pyim-pinyin-position spinyin))
-                            pyim-spinyin-list)))
+                            (mapcar
+                             #'(lambda (spinyin)
+                                 (nthcdr pyim-pinyin-position spinyin))
+                             pyim-spinyin-list)))
         (setq pyim-current-choices (list (pyim-choices-get spinyin-list))
               pyim-current-pos 1)
         (pyim-update-current-str)
@@ -2051,7 +2052,7 @@ guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
         (pyim-show)))))
 
 (defun pyim-page-select-word-by-number ()
-  "如果没有可选项，插入数字，否则选择对应的词条"
+  "使用数字编号来选择对应的词条。"
   (interactive)
   (if (car pyim-current-choices)
       (let ((index (- last-command-event ?1))
@@ -2268,17 +2269,20 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
      (auto "开启全半角标点自动转换模式。"))))
 ;; #+END_SRC
 
-;; 每次运行 `pyim-punctuation-toggle' 命令，都会反转变量 `pyim-punctuation-translate-p'
-;; 的取值，`pyim-translate' 会检测 `pyim-punctuation-full-width-p' 函数的返回值，当返回值为 t 时，
-;; `pyim-translate' 转换标点符号，从而输入全角标点，反之，`pyim-translate' 忽略转换，
-;; 从而输入半角标点。
+;; 每次运行 `pyim-punctuation-toggle' 命令，都会调整变量 `pyim-punctuation-translate-p'
+;; 的取值，`pyim-translate' 根据 `pyim-punctuation-full-width-p' 函数的返回值，来决定
+;; 是否转换标点符号：
+
+;; 1. 当返回值为 'yes 时，`pyim-translate' 转换标点符号，从而输入全角标点。
+;; 2. 当返回值为 'no 时，`pyim-translate' 忽略转换，从而输入半角标点。
+;; 3. 当返回值为 'auto 时，根据中英文环境，自动切换。
 
 ;; 用户也可以使用命令 `pyim-punctuation-translate-at-point' 来切换 *光标前* 标点符号的样式。
 
 
 ;; #+BEGIN_SRC emacs-lisp
-;; 切换光标处标点的样式（全角 or 半角）
 (defun pyim-punctuation-translate-at-point ()
+  "切换光标处标点的样式（全角 or 半角）。"
   (interactive)
   (let* ((current-char (char-to-string (preceding-char)))
          (punc-list
