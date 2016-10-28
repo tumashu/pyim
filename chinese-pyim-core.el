@@ -121,6 +121,12 @@ plist 来表示，比如：
      :first-chars "abcdefghjklmnopqrstwxyz"
      :rest-chars "vmpfwckzyjqdltxuognbhsrei'-a"
      :prefer-trigger-chars "v")
+    (wubi
+     :document "全拼输入法方案（不可删除）。"
+     :class wubi
+     :first-chars "abcdefghjklmnopqrstwxyz"
+     :rest-chars "vmpfwckzyjqdltxuognbhsrei'-a"
+     :prefer-trigger-chars "z")
     (pyim-shuangpin
      :document "与 Chinese-pyim 配合良好的双拼输入法方案，源自小鹤双拼方案。"
      :class shuangpin
@@ -1303,6 +1309,10 @@ Return the input string."
     (pyim-spinyin-find-fuzzy
      (pyim-permutate-list (nreverse results)))))
 
+(defun pyim-code-split:wubi (wbcode &optional -)
+  "将一个 `wbcode' 分解。"
+  (list (list wubi)))
+
 (defun pyim-spinyin-find-fuzzy (spinyin-list)
   "用于处理模糊音的函数。"
   (let (fuzzy-spinyin-list result1 result2)
@@ -1427,6 +1437,11 @@ Return the input string."
                                            (car x))) keymaps))))))
                   spinyin)
                  "-"))))
+
+(defun pyim-scode-join:wubi (swbcode &optional shou-zi-mu scheme-name)
+  "把一个 `swbcode' (splited wubi code) 合并为一个五笔字符串。"
+  (car swbcode))
+
 ;; #+END_SRC
 
 ;; **** 获得词语拼音并进一步查询得到备选词列表
