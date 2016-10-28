@@ -1301,7 +1301,7 @@ Return the input string."
              (ym (cdr (cdr (assoc sp-ym keymaps)))))
         (push (mapcar
                #'(lambda (x)
-                   (let* ((y (concat sp-sm sp-ym))
+                   (let* ((y (concat sp-sm (or sp-ym " ")))
                           (z (cadr (assoc y keymaps))))
                      (if z (cons "" z) (cons sm x))))
                (or ym (list "")))
@@ -1391,16 +1391,16 @@ Return the input string."
     (if cur (setq code (concat code "'")))  ; the last char is `''
     code))
 
-(defun pyim-scode-join (scode scheme-name &optional shou-zi-mu)
+(defun pyim-scode-join (scode scheme-name &optional as-search-key shou-zi-mu)
   "按照 `scheme' 对应的输入法方案，将一个 scode (splited code)
 重新合并为 code 字符串，用于搜索。"
   (let ((class (pyim-scheme-get-option scheme-name :class)))
     (when class
       (funcall (intern (concat "pyim-scode-join:"
                                (symbol-name class)))
-               scode shou-zi-mu scheme-name))))
+               scode scheme-name as-search-key shou-zi-mu))))
 
-(defun pyim-scode-join:quanpin (spinyin scheme-name &optional shou-zi-mu)
+(defun pyim-scode-join:quanpin (spinyin scheme-name &optional as-search-key shou-zi-mu)
   "把一个 `spinyin' (splited pinyin) 合并为一个全拼字符串，当 `shou-zi-mu'
 设置为 t 时，生成拼音首字母字符串，比如 p-y。"
   (mapconcat 'identity
@@ -1413,32 +1413,35 @@ Return the input string."
               spinyin)
              "-"))
 
-(defun pyim-scode-join:shuangpin (spinyin scheme-name &optional shou-zi-mu)
+(defun pyim-scode-join:shuangpin (spinyin scheme-name &optional as-search-key shou-zi-mu)
   "把一个 `spinyin' (splited pinyin) 合并为一个双拼字符串，当 `shou-zi-mu'
 设置为 t 时，生成双拼首字母字符串，比如 p-y。"
-  (when scheme-name
-    (let ((keymaps (pyim-scheme-get-option scheme-name :keymaps)))
-      (mapconcat 'identity
-                 (mapcar
-                  #'(lambda (w)
-                      (let ((sm (car w))
-                            (ym (cdr w)))
-                        (if (equal sm "")
-                            (car (rassoc (list ym) keymaps))
-                          (concat (cl-some
-                                   #'(lambda (x)
-                                       (when (equal sm (nth 1 x))
-                                         (car x))) keymaps)
-                                  (unless shou-zi-mu
-                                    (cl-some
+  (if as-search-key
+      ;; 双拼使用全拼输入法的词库，所以搜索 dcache 用的 key 要使用全拼
+      (pyim-scode-join:quanpin spinyin scheme-name as-search-key shou-zi-mu)
+    (when scheme-name
+      (let ((keymaps (pyim-scheme-get-option scheme-name :keymaps)))
+        (mapconcat 'identity
+                   (mapcar
+                    #'(lambda (w)
+                        (let ((sm (car w))
+                              (ym (cdr w)))
+                          (if (equal sm "")
+                              (car (rassoc (list ym) keymaps))
+                            (concat (cl-some
                                      #'(lambda (x)
-                                         (when (or (equal ym (nth 2 x))
-                                                   (equal ym (nth 3 x)))
-                                           (car x))) keymaps))))))
-                  spinyin)
-                 "-"))))
+                                         (when (equal sm (nth 1 x))
+                                           (car x))) keymaps)
+                                    (unless shou-zi-mu
+                                      (cl-some
+                                       #'(lambda (x)
+                                           (when (or (equal ym (nth 2 x))
+                                                     (equal ym (nth 3 x)))
+                                             (car x))) keymaps))))))
+                    spinyin)
+                   "-")))))
 
-(defun pyim-scode-join:wubi (swbcode scheme-name &optional shou-zi-mu)
+(defun pyim-scode-join:wubi (swbcode scheme-name &optional as-search-key shou-zi-mu)
   "把一个 `swbcode' (splited wubi code) 合并为一个五笔字符串。"
   (car swbcode))
 
@@ -1446,7 +1449,7 @@ Return the input string."
 
 ;; **** 获得词语拼音并进一步查询得到备选词列表
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-choices-get (scode-list)
+(defun pyim-choices-get (scode-list scheme-name)
   "根据 `spinyin-list', 得到可能的词组和汉字。"
   ;; scode-list 可以包含多个 scode, 从而得到多个子候选词列表，如何将多个 *子候选词列表* 合理的合并，
   ;; 是一个比较麻烦的事情的事情。 注：这个地方需要进一步得改进。
@@ -1458,20 +1461,20 @@ Return the input string."
     (dolist (spinyin scode-list)
       (setq personal-words
             (append personal-words
-                    (car (pyim-choices-get:personal spinyin))))
+                    (car (pyim-choices-get:personal spinyin scheme-name))))
       (setq pinyin-dict-words
             (append pinyin-dict-words
-                    (car (pyim-choices-get:dicts spinyin))))
+                    (car (pyim-choices-get:dicts spinyin scheme-name))))
       (setq chars
             (append chars
-                    (car (pyim-choices-get:chars spinyin)))))
+                    (car (pyim-choices-get:chars spinyin scheme-name)))))
 
     ;; Pinyin shouzimu similar words
-    (let ((words (pyim-choices-get:pinyin-shouzimu (car scode-list))))
+    (let ((words (pyim-choices-get:pinyin-shouzimu (car scode-list) scheme-name)))
       (setq pinyin-shouzimu-similar-words (car (cdr words))))
 
     ;; Pinyin znabc-style similar words
-    (let ((words (pyim-choices-get:pinyin-znabc (car scode-list))))
+    (let ((words (pyim-choices-get:pinyin-znabc (car scode-list) scheme-name)))
       (setq pinyin-znabc-similar-words (car (cdr words))))
 
     ;; Debug
@@ -1493,37 +1496,40 @@ Return the input string."
              ,@pinyin-znabc-similar-words
              ,@chars)))))
 
-(defun pyim-choices-get:pinyin-znabc (spinyin)
+(defun pyim-choices-get:pinyin-znabc (spinyin scheme-name)
   ;; 将输入的拼音按照声母和韵母打散，得到尽可能多的拼音组合，
   ;; 查询这些拼音组合，得到的词条做为联想词。
-  (when (member 'pinyin-znabc pyim-backends)
-    (list nil (pyim-possible-words
-               (pyim-possible-words-py spinyin)))))
+  (let ((class (pyim-scheme-get-option scheme-name :class)))
+    (when (and (member 'pinyin-znabc pyim-backends)
+               (member class '(quanpin shuangpin)))
+      (list nil (pyim-possible-words
+                 (pyim-possible-words-py spinyin))))))
 
-(defun pyim-choices-get:pinyin-shouzimu (spinyin)
+(defun pyim-choices-get:pinyin-shouzimu (spinyin scheme-name)
   ;; 如果输入 "ni-hao" ，搜索 code 为 "n-h" 的词条做为联想词。
   ;; 搜索首字母得到的联想词太多，这里限制联想词要大于两个汉字并且只搜索
   ;; 个人文件。
   (when (and (member 'pinyin-shouzimu pyim-backends)
              (> (length spinyin) 1))
-    (let ((py-str-shouzimu (pyim-scode-join spinyin 'quanpin t)))
-      (list nil (gethash py-str-shouzimu pyim-dcache-personal)))))
+    (let ((py-str-shouzimu (pyim-scode-join spinyin scheme-name t t)))
+      (list nil (pyim-dcache-get py-str-shouzimu pyim-dcache-personal)))))
 
-(defun pyim-choices-get:personal (spinyin)
+(defun pyim-choices-get:personal (spinyin scheme-name)
   (when (member 'personal pyim-backends)
-    (let ((py-str (pyim-scode-join spinyin 'quanpin)))
+    (let ((py-str (pyim-scode-join spinyin scheme-name t)))
       (list (pyim-dcache-get py-str pyim-dcache-personal) nil))))
 
-(defun pyim-choices-get:dicts (spinyin)
+(defun pyim-choices-get:dicts (spinyin scheme-name)
   (when (member 'dicts pyim-backends)
-    (let ((py-str (pyim-scode-join spinyin 'quanpin)))
+    (let ((py-str (pyim-scode-join spinyin scheme-name t)))
       (list (pyim-dcache-get py-str pyim-dcache-dict) nil))))
 
-(defun pyim-choices-get:chars (spinyin)
+(defun pyim-choices-get:chars (spinyin scheme-name)
   (when (member 'chars pyim-backends)
-    (let ((py-str (pyim-scode-join spinyin 'quanpin)))
-      (list (pyim-dcache-get (concat (caar spinyin) (cdar spinyin)))
-            nil))))
+    (let ((class (pyim-scheme-get-option scheme-name :class)))
+      (when (member class '(quanpin shuangpin))
+        (list (pyim-dcache-get (concat (caar spinyin) (cdar spinyin)))
+              nil)))))
 
 (defun pyim-spinyin-build-chinese-regexp (spinyin &optional match-beginning
                                                   first-equal all-equal)
@@ -1633,7 +1639,7 @@ Return the input string."
                           (pyim-scode-join (car pyim-scode-list) scheme-name)
                           (pyim-code-user-divide-pos str)))
                    (setq pyim-current-choices
-                         (list (delete-dups (pyim-choices-get pyim-scode-list))))
+                         (list (delete-dups (pyim-choices-get pyim-scode-list scheme-name))))
                    (when (car pyim-current-choices)
                      (setq pyim-current-pos 1)
                      (pyim-update-current-str)
@@ -2101,7 +2107,7 @@ guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
                              #'(lambda (spinyin)
                                  (nthcdr pyim-code-position spinyin))
                              pyim-scode-list)))
-        (setq pyim-current-choices (list (pyim-choices-get spinyin-list))
+        (setq pyim-current-choices (list (pyim-choices-get spinyin-list pyim-default-scheme))
               pyim-current-pos 1)
         (pyim-update-current-str)
         (pyim-page-format-page)
