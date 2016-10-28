@@ -1177,7 +1177,7 @@ Return the input string."
 ;; 结果为:
 ;; : "wo-ai-mei-nv"
 
-;; 最后： `pyim-pinyin-user-divide-pos' 和 `pyim-pinyin-restore-user-divide' 用来处理隔
+;; 最后： `pyim-code-user-divide-pos' 和 `pyim-code-restore-user-divide' 用来处理隔
 ;; 音符，比如： xi'an
 
 ;; #+BEGIN_SRC emacs-lisp
@@ -1347,31 +1347,31 @@ Return the input string."
                (setq spinyin (cdr spinyin)))))
     valid))
 
-(defun pyim-pinyin-user-divide-pos (py)
-  "检测 `py' 中用户分割的位置，也就是'的位置。"
-  (setq py (replace-regexp-in-string "-" "" py))
+(defun pyim-code-user-divide-pos (code)
+  "检测 `code' 中用户分割的位置，也就是'的位置，主要用于拼音输入法。"
+  (setq code (replace-regexp-in-string "-" "" code))
   (let (poslist (start 0))
-    (while (string-match "'" py start)
+    (while (string-match "'" code start)
       (setq start (match-end 0))
       (setq poslist (append poslist (list (match-beginning 0)))))
     poslist))
 
-(defun pyim-pinyin-restore-user-divide (py pos)
-  "按检测出的用户分解的位置，重新设置拼音。"
+(defun pyim-code-restore-user-divide (code pos)
+  "按检测出的用户分解的位置，重新设置 code，主要用于拼音输入法。"
   (let ((i 0) (shift 0) cur)
     (setq cur (car pos)
           pos (cdr pos))
-    (while (and cur (< i (length py)))
-      (if (= (aref py i) ?-)
+    (while (and cur (< i (length code)))
+      (if (= (aref code i) ?-)
           (if (= i (+ cur shift))
               (progn
-                (aset py i ?')
+                (aset code i ?')
                 (setq cur (car pos)
                       pos (cdr pos)))
             (setq shift (1+ shift))))
       (setq i (1+ i)))
-    (if cur (setq py (concat py "'")))  ; the last char is `''
-    py))
+    (if cur (setq code (concat code "'")))  ; the last char is `''
+    code))
 
 (defun pyim-scode-join (scode &optional shou-zi-mu scheme-name)
   "按照 `scheme' 对应的输入法方案，将一个 scode (splited code)
@@ -1605,9 +1605,9 @@ Return the input string."
     (unless (and (pyim-spinyin-validp (car pyim-scode-list))
                  (progn
                    (setq pyim-current-key
-                         (pyim-pinyin-restore-user-divide
+                         (pyim-code-restore-user-divide
                           (pyim-scode-join (car pyim-scode-list) nil scheme-name)
-                          (pyim-pinyin-user-divide-pos str)))
+                          (pyim-code-user-divide-pos str)))
                    (setq pyim-current-choices
                          (list (delete-dups (pyim-choices-get pyim-scode-list))))
                    (when (car pyim-current-choices)
