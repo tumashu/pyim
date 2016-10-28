@@ -315,7 +315,7 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
 3. 当取值为 nil 时，将 minibuffer 做为选词框；"
   :group 'chinese-pyim)
 
-(defcustom pyim-guidance-format-function 'pyim-guidance-format-function-two-lines
+(defcustom pyim-guidance 'pyim-guidance:two-lines
   "这个变量保存的函数用于 format 选词框中的字符串。"
   :group 'chinese-pyim
   :type 'function)
@@ -1695,8 +1695,8 @@ Return the input string."
 ;; `pyim-guidance-format-function' 变量对应的函数生成,
 ;; chinese-pyim 当前内置了两个 format 函数：
 
-;; 1. pyim-guidance-format-function-two-lines
-;; 2. pyim-guidance-format-function-one-line
+;; 1. pyim-guidance:two-lines
+;; 2. pyim-guidance:one-line
 
 ;; 这些函数会根据 `pyim-guidance-list' 中的信息来得到所需要的字符串。
 
@@ -1897,9 +1897,9 @@ Return the input string."
             (pyim-tooltip-show
              (funcall pyim-guidance-format-function pyim-guidance-list)
              (overlay-start pyim-overlay))
-          (message "%s" (pyim-guidance-format-function-minibuffer pyim-guidance-list)))))))
+          (message "%s" (pyim-guidance:minibuffer pyim-guidance-list)))))))
 
-(defun pyim-guidance-format-function-two-lines (guidance-list)
+(defun pyim-guidance:two-lines (guidance-list)
   "将 guidance-list 格式化为类似下面格式的字符串，这个字符串将在
 tooltip 选词框中显示。
 
@@ -1915,7 +1915,7 @@ guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
           (plist-get guidance-list :total-page)
           (plist-get guidance-list :words)))
 
-(defun pyim-guidance-format-function-one-line (guidance-list)
+(defun pyim-guidance:one-line (guidance-list)
   "将 guidance-list 格式化为类似下面格式的字符串，这个字符串将在
 tooltip 选词框中显示。
 
@@ -1932,7 +1932,7 @@ guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
           (plist-get guidance-list :current-page)
           (plist-get guidance-list :total-page)))
 
-(defun pyim-guidance-format-function-vertical (guidance-list)
+(defun pyim-guidance:vertical (guidance-list)
   "将 guidance-list 格式化为类似下面格式的字符串，这个字符串将在
 tooltip 选词框中显示。
 
@@ -1953,7 +1953,7 @@ guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
             " +" "\n"
             (plist-get guidance-list :words)))))
 
-(defun pyim-guidance-format-function-minibuffer (guidance-list)
+(defun pyim-guidance:minibuffer (guidance-list)
   "将 guidance-list 格式化为类似下面格式的字符串，这个字符串
 将在 minibuffer 中显示。
 

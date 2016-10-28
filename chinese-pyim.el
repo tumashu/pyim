@@ -180,7 +180,7 @@
 ;; 的样式：
 
 ;; #+BEGIN_EXAMPLE
-;; (setq pyim-guidance-format-function 'pyim-guidance-format-function-one-line)
+;; (setq pyim-guidance 'pyim-guidance:one-line)
 ;; #+END_EXAMPLE
 
 ;; 注：用户也可以自定义 guidance 格式化函数。
