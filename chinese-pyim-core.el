@@ -181,6 +181,52 @@ plist 来表示，比如：
       ("ag" "ng")
       ("ao" "o")
       ("au" "ou")))
+    (microsoft-shuangpin
+     :document "微软双拼方案。"
+     :class shuangpin
+     :first-chars "abcdefghijklmnpqrstuvwxyz"
+     :rest-chars "abcdefghijklmnopqrstuvwxyz;"
+     :prefer-trigger-chars "o"
+     :keymaps
+     (("a" "a" "a")
+      ("b" "b" "ou")
+      ("c" "c" "iao")
+      ("d" "d" "uang" "iang")
+      ("e" "e" "e")
+      ("f" "f" "en")
+      ("g" "g" "eng")
+      ("h" "h" "ang")
+      ("i" "ch" "i")
+      ("j" "j" "an")
+      ("k" "k" "ao")
+      ("l" "l" "ai")
+      ("m" "m" "ian")
+      ("n" "n" "in")
+      ("o" "o" "uo" "o")
+      ("p" "p" "un")
+      ("q" "q" "iu")
+      ("r" "r" "uan" "er")
+      ("s" "s" "iong" "ong")
+      ("t" "t" "ue")
+      ("u" "sh" "u")
+      ("v" "zh" "ve" "ui")
+      ("w" "w" "ia" "ua")
+      ("x" "x" "ie")
+      ("y" "y" "uai" "v")
+      ("z" "z" "ei")
+      (";" ";" "ing")
+      ("oa" "a")
+      ("oj" "an")
+      ("ol" "ai")
+      ("ok" "ao")
+      ("oh" "ang")
+      ("oe" "e")
+      ("oz" "ei")
+      ("of" "en")
+      ("or" "er")
+      ("og" "eng")
+      ("oo" "o")
+      ("ob" "ou")))
     (xiaohe-shuangpin
      :document "小鹤双拼输入法方案。"
      :class shuangpin
