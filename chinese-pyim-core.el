@@ -258,8 +258,8 @@ Chinese-pyim 内建的功能有：
   '(personal dicts chars pinyin-shouzimu pinyin-znabc)
   "pyim 词语获取 backends ，当前支持：
 
-1. `personal'           从 `pyim-personal-dict-cache' 中获取词条。
-2. `dicts'              从 `pyim-dict-cache' 中获取词条。
+1. `personal'           从 `pyim-dcache-personal' 中获取词条。
+2. `dicts'              从 `pyim-dcache-dict' 中获取词条。
 3. `chars'              逐一获取一个拼音对应的多个汉字。
 4. `pinyin-shouzimu'    获取 *拼音首字母* 对应的词条，
      如果输入 \"ni-hao\" ，那么同时搜索 code 为 \"n-h\" 的词条。
@@ -391,11 +391,11 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
   "Punctuation will not insert after this characters.
 If you don't like this funciton, set the variable to nil")
 
-(defvar pyim-dict-cache nil)
-(defvar pyim-dict-cache-md5 nil)
-(defvar pyim-words-count-cache nil)
-(defvar pyim-personal-dict-cache nil)
-(defvar pyim-personal-words-count-cache nil)
+(defvar pyim-dcache-dict nil)
+(defvar pyim-dcache-dict-md5 nil)
+(defvar pyim-dcache-wordcount nil)
+(defvar pyim-dcache-personal nil)
+(defvar pyim-dcache-personal-wordcount nil)
 
 (defvar pyim-mode-map
   (let ((map (make-sparse-keymap))
@@ -480,7 +480,7 @@ If you don't like this funciton, set the variable to nil")
 ;; 2. 使用 `pyim-cchar2pinyin-create-cache' 创建汉字到拼音的 hash table 。
 ;; 3. 运行hook： `pyim-load-hook'。
 ;; 4. 将 `pyim-dcache-save-caches' 命令添加到 `kill-emacs-hook' , emacs 关闭
-;;    之前将 `pyim-personal-dict-cache' 和 `pyim-personal-words-count-cache'
+;;    之前将 `pyim-dcache-personal' 和 `pyim-dcache-personal-wordcount'
 ;;    保存到文件，供以后使用。
 ;; 5. 设定变量：
 ;;    1. `input-method-function'
@@ -569,9 +569,9 @@ If you don't like this funciton, set the variable to nil")
                                       (list file (nth 5 (file-attributes file 'string))))
                                   dict-files))))
          (dict-cache-file (concat (file-name-as-directory pyim-dcache-directory)
-                                  "pyim-dict-cache"))
+                                  "pyim-dcache-dict"))
          (dict-md5-file (concat (file-name-as-directory pyim-dcache-directory)
-                                "pyim-dict-cache-md5")))
+                                "pyim-dcache-dict-md5")))
     (when (or force (not (equal dicts-md5 (pyim-dcache-get-value-from-file dict-md5-file))))
       (async-start
        `(lambda ()
@@ -580,14 +580,14 @@ If you don't like this funciton, set the variable to nil")
           (pyim-dcache-generate-cache-file ',dict-files ,dict-cache-file)
           (pyim-dcache-save-value-to-file ',dicts-md5 ,dict-md5-file))
        `(lambda (result)
-          (setq pyim-dict-cache
+          (setq pyim-dcache-dict
                 (pyim-dcache-get-value-from-file ,dict-cache-file)))))))
 
 (defun pyim-dcache-init ()
-  (pyim-dcache-restore-variable 'pyim-dict-cache (make-hash-table :test #'equal))
-  (pyim-dcache-restore-variable 'pyim-words-count-cache (make-hash-table :test #'equal))
-  (pyim-dcache-restore-variable 'pyim-personal-dict-cache (make-hash-table :test #'equal))
-  (pyim-dcache-restore-variable 'pyim-personal-words-count-cache (make-hash-table :test #'equal)))
+  (pyim-dcache-restore-variable 'pyim-dcache-dict (make-hash-table :test #'equal))
+  (pyim-dcache-restore-variable 'pyim-dcache-wordcount (make-hash-table :test #'equal))
+  (pyim-dcache-restore-variable 'pyim-dcache-personal (make-hash-table :test #'equal))
+  (pyim-dcache-restore-variable 'pyim-dcache-personal-wordcount (make-hash-table :test #'equal)))
 
 (defun pyim-dcache-restore-variable (variable &optional fallback-value)
   (unless (symbol-value variable)
@@ -657,8 +657,8 @@ If you don't like this funciton, set the variable to nil")
   "将下面几个文件更新后内容保存。
 这个函数默认作为`kill-emacs-hook'使用。"
   (interactive)
-  (pyim-dcache-save-variable 'pyim-personal-dict-cache)
-  (pyim-dcache-save-variable 'pyim-personal-words-count-cache)
+  (pyim-dcache-save-variable 'pyim-dcache-personal)
+  (pyim-dcache-save-variable 'pyim-dcache-personal-wordcount)
   t)
 ;; #+END_SRC
 
@@ -671,7 +671,7 @@ If you don't like this funciton, set the variable to nil")
   (let ((dcache-list (or (if (listp dcache-list)
                             dcache-list
                           (list dcache-list))
-                        (list pyim-personal-dict-cache pyim-dict-cache)))
+                        (list pyim-dcache-personal pyim-dcache-dict)))
         result)
     (dolist (cache dcache-list)
       (let ((value (gethash code cache)))
@@ -720,7 +720,7 @@ If you don't like this funciton, set the variable to nil")
          (puthash ,key ,new-value ,table)))))
 
 (defun pyim-create-or-rearrange-word (word &optional rearrange-word)
-  "将中文词条 `word' 添加拼音后，保存到 `pyim-personal-dict-cache' 中，
+  "将中文词条 `word' 添加拼音后，保存到 `pyim-dcache-personal' 中，
 当前词条追加到已有词条之后。`pyim-create-or-rearrange-word'
 会调用 `pyim-hanzi2pinyin' 来获取中文词条的拼音code。
 
@@ -731,19 +731,19 @@ BUG：无法有效的处理多音字。"
       ;; 保存词频
       (when (> (length word) 1)
         (pyim-dcache-put
-          pyim-personal-words-count-cache word
+          pyim-dcache-personal-wordcount word
           (+ (or orig-value 0) 1)))
       (dolist (py pinyins)
         (unless (pyim-string-match-p "[^ a-z-]" py)
           ;; 添加词库： ”拼音“ - ”中文词条“
           (pyim-dcache-put
-            pyim-personal-dict-cache py
+            pyim-dcache-personal py
             (if rearrange-word
                 (pyim-list-merge word orig-value)
               (pyim-list-merge orig-value word)))
           ;; 添加词库： ”拼音首字母“ - ”中文词条“
           (pyim-dcache-put
-            pyim-personal-dict-cache
+            pyim-dcache-personal
             (mapconcat #'(lambda (x)
                            (substring x 0 1))
                        (split-string py "-") "-")
@@ -816,7 +816,7 @@ BUG：无法有效的处理多音字。"
           (message "将词条: \"%s\" 插入 personal file。" string))))))
 
 (defun pyim-delete-word ()
-  "将高亮选择的词条从 `pyim-personal-dict-cache' 中删除。"
+  "将高亮选择的词条从 `pyim-dcache-personal' 中删除。"
   (interactive)
   (if mark-active
       (let ((string (buffer-substring-no-properties
@@ -828,7 +828,7 @@ BUG：无法有效的处理多音字。"
     (message "请首先高亮选择需要删除的词条。")))
 
 (defun pyim-delete-word-1 (word)
-  "将中文词条 `word' 从 `pyim-personal-dict-cache' 中删除"
+  "将中文词条 `word' 从 `pyim-dcache-personal' 中删除"
   (let* ((pinyins (pyim-hanzi2pinyin word nil "-" t))
          (pinyins-szm (mapcar
                        #'(lambda (pinyin)
@@ -839,12 +839,12 @@ BUG：无法有效的处理多音字。"
     (dolist (pinyin pinyins)
       (unless (pyim-string-match-p "[^ a-z-]" pinyin)
         (pyim-dcache-put
-          pyim-personal-dict-cache pinyin
+          pyim-dcache-personal pinyin
           (remove word orig-value))))
     (dolist (pinyin pinyins-szm)
       (unless (pyim-string-match-p "[^ a-z-]" pinyin)
         (pyim-dcache-put
-          pyim-personal-dict-cache pinyin
+          pyim-dcache-personal pinyin
           (remove word orig-value))))))
 ;; #+END_SRC
 
@@ -1442,17 +1442,17 @@ Return the input string."
   (when (and (member 'pinyin-shouzimu pyim-backends)
              (> (length spinyin) 1))
     (let ((py-str-shouzimu (pyim-scode-join spinyin t 'quanpin)))
-      (list nil (gethash py-str-shouzimu pyim-personal-dict-cache)))))
+      (list nil (gethash py-str-shouzimu pyim-dcache-personal)))))
 
 (defun pyim-choices-get:personal (spinyin)
   (when (member 'personal pyim-backends)
     (let ((py-str (pyim-scode-join spinyin nil 'quanpin)))
-      (list (pyim-dcache-get py-str pyim-personal-dict-cache) nil))))
+      (list (pyim-dcache-get py-str pyim-dcache-personal) nil))))
 
 (defun pyim-choices-get:dicts (spinyin)
   (when (member 'dicts pyim-backends)
     (let ((py-str (pyim-scode-join spinyin nil 'quanpin)))
-      (list (pyim-dcache-get py-str pyim-dict-cache) nil))))
+      (list (pyim-dcache-get py-str pyim-dcache-dict) nil))))
 
 (defun pyim-choices-get:chars (spinyin)
   (when (member 'chars pyim-backends)
