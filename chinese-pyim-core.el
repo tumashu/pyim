@@ -1446,6 +1446,8 @@ Return the input string."
 (defun pyim-scode-join:wubi (swbcode scheme-name &optional as-search-key shou-zi-mu)
   "把一个 `swbcode' (splited wubi code) 合并为一个五笔字符串。"
   (if as-search-key
+      ;; pyim 直接将拼音词库和五笔词库合并到一个 dcache 文件中（简化代码和提高速度），
+      ;; 为了不引起混乱，pyim 规定 五笔 code 都以 '.' 开头，比如 '.aaaa'.
       (concat "." (car swbcode))
     (car swbcode)))
 
