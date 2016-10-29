@@ -2584,26 +2584,30 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
 根据 str 构建一个 regexp, 比如：
 
 \"nihao\" -> \"[你呢...][好号...] \\| nihao\""
-  (if (pyim-string-match-p "[^a-z']+" pystr)
-      pystr
-    (let* ((spinyin-list
-            ;; Slowly operating, need to improve.
-            (pyim-code-split pystr pyim-default-scheme))
-           (regexp-list
-            (mapcar
-             #'(lambda (spinyin)
-                 (pyim-spinyin-build-chinese-regexp spinyin))
-             spinyin-list))
-           (regexp
-            (when regexp-list
-              (mapconcat #'identity
-                         (delq nil regexp-list)
-                         "\\|")))
-           (regexp
-            (if (> (length regexp) 0)
-                (concat pystr "\\|" regexp)
-              pystr)))
-      regexp)))
+  (let ((class (pyim-scheme-get-option pyim-default-scheme :class))
+        scheme-name)
+    (when (not (member class '(quanpin shuangpin)))
+      (setq scheme-name 'quanpin))
+    (if (or (pyim-string-match-p "[^a-z']+" pystr))
+        pystr
+      (let* ((spinyin-list
+              ;; Slowly operating, need to improve.
+              (pyim-code-split pystr scheme-name))
+             (regexp-list
+              (mapcar
+               #'(lambda (spinyin)
+                   (pyim-spinyin-build-chinese-regexp spinyin))
+               spinyin-list))
+             (regexp
+              (when regexp-list
+                (mapconcat #'identity
+                           (delq nil regexp-list)
+                           "\\|")))
+             (regexp
+              (if (> (length regexp) 0)
+                  (concat pystr "\\|" regexp)
+                pystr)))
+        regexp))))
 
 (defun pyim-isearch-pinyin-search-function ()
   "这个函数为 isearch 相关命令添加中文拼音搜索功能，
