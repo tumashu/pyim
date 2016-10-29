@@ -126,6 +126,8 @@ plist 来表示，比如：
      :class wubi
      :first-chars "abcdefghjklmnopqrstwxyz"
      :rest-chars "vmpfwckzyjqdltxuognbhsrei'-a"
+     :auto-select-word t    ; 只有一个候选词时，是否自动选择这个候选词。
+     :tooltip-show-limit 2  ; 只有候选词大于等于这个数时，才显示显示选词框。
      :prefer-trigger-chars "z")
     (pyim-shuangpin
      :document "与 Chinese-pyim 配合良好的双拼输入法方案，源自小鹤双拼方案。"
@@ -1443,7 +1445,9 @@ Return the input string."
 
 (defun pyim-scode-join:wubi (swbcode scheme-name &optional as-search-key shou-zi-mu)
   "把一个 `swbcode' (splited wubi code) 合并为一个五笔字符串。"
-  (car swbcode))
+  (if as-search-key
+      (concat "." (car swbcode))
+    (car swbcode)))
 
 ;; #+END_SRC
 
@@ -1645,6 +1649,7 @@ Return the input string."
                      (pyim-update-current-str)
                      (pyim-page-format-page)
                      (pyim-show)
+                     (pyim-page-auto-select-word scheme-name)
                      t)))
       (setq pyim-current-str (replace-regexp-in-string "-" "" pyim-current-key))
       (setq pyim-guidance-list
@@ -1943,7 +1948,9 @@ Return the input string."
   (insert pyim-current-str)
   (move-overlay pyim-overlay (overlay-start pyim-overlay) (point))
   ;; Then, show the guidance.
-  (when (and (not input-method-use-echo-area)
+  (when (and (>= (length (car pyim-current-choices))
+                 (or (pyim-scheme-get-option pyim-default-scheme :tooltip-show-limit) 0))
+             (not input-method-use-echo-area)
              (null unread-command-events)
              (null unread-post-input-method-events))
     (if (eq (selected-window) (minibuffer-window))
@@ -2081,6 +2088,13 @@ guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
 
 ;; *** 选择备选词
 ;; #+BEGIN_SRC emacs-lisp
+(defun pyim-page-auto-select-word (scheme-name)
+  "当只有一个词条时，依据 `scheme-name' 的设置，自动选择当前词条，
+这个函数主要用于五笔输入法。"
+  (when (and (pyim-scheme-get-option scheme-name :auto-select-word)
+             (= 1 (length (car pyim-current-choices))))
+    (call-interactively 'pyim-page-select-word)))
+
 (defun pyim-page-select-word ()
   "从选词框中选择当前词条。"
   (interactive)
