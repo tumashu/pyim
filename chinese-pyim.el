@@ -71,8 +71,8 @@
 ;; 3. 在 emacs 配置文件中（比如: ~/.emacs）添加如下代码：
 ;;    #+BEGIN_EXAMPLE
 ;;    (require 'chinese-pyim)
-;;    (require 'chinese-pyim-basedict)
-;;    (chinese-pyim-basedict-enable)
+;;    (require 'chinese-pyim-basedict) ; 拼音词库，五笔用户 *不要* 安装
+;;    (chinese-pyim-basedict-enable)   ; 拼音词库
 ;;    #+END_EXAMPLE
 
 ;; ** 配置
@@ -175,9 +175,12 @@
 ;; .aak 戒
 ;; #+END_EXAMPLE
 
-;; 注意：为了简化代码和提高输入法响应速度，pyim 直接将拼音词库和五笔词库合并到同一个
-;; dcache 文件中，所以 chinese-pyim *强制规定* 五笔编码 *必须* 都以 '.' 开头，比如 '.aaaa' 。
-;; 这样可以避免出现不必要的混乱。
+;; 最简单的方式是从 melpa 中安装 chinese-pyim-wbdict 包，然后根据它的
+;; [[https://github.com/tumashu/chinese-pyim-wbdict][README]] 配置。
+
+;; 注意：为了简化代码和提高输入法响应速度，pyim 直接将拼音词库和五笔
+;; 词库合并到同一个dcache 文件中，所以 chinese-pyim *强制规定* 五笔编码
+;; *必须* 都以 '.' 开头，比如 '.aaaa' ,这样可以避免出现不必要的混乱。
 
 
 ;; *** 让选词框跟随光标
