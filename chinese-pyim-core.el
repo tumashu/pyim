@@ -295,15 +295,15 @@ Chinese-pyim 内建的功能有：
   :group 'chinese-pyim)
 
 (defcustom pyim-backends
-  '(personal dicts chars pinyin-shouzimu pinyin-znabc)
+  '(dcache-personal dcache-common pinyin-chars pinyin-shouzimu pinyin-znabc)
   "pyim 词语获取 backends ，当前支持：
 
-1. `personal'           从 `pyim-dcache-personal' 中获取词条。
-2. `dicts'              从 `pyim-dcache-dict' 中获取词条。
-3. `chars'              逐一获取一个拼音对应的多个汉字。
-4. `pinyin-shouzimu'    获取 *拼音首字母* 对应的词条，
-     如果输入 \"ni-hao\" ，那么同时搜索 code 为 \"n-h\" 的词条。
-5. `pinyin-znabc'       类似智能ABC的词语获取方式(源于 emacs-eim)."
+1. `dcache-personal'     从 `pyim-dcache-personal' 中获取词条。
+2. `dcache-common'       从 `pyim-dcache-common' 中获取词条。
+3. `pinyin-chars'        逐一获取一个拼音对应的多个汉字。
+4. `pinyin-shouzimu'     获取 *拼音首字母* 对应的词条，
+    如果输入 \"ni-hao\" ，那么同时搜索 code 为 \"n-h\" 的词条。
+5. `pinyin-znabc'        类似智能ABC的词语获取方式(源于 emacs-eim)."
   :group 'chinese-pyim)
 
 (defcustom pyim-isearch-enable-pinyin-search nil
@@ -431,11 +431,11 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
   "Punctuation will not insert after this characters.
 If you don't like this funciton, set the variable to nil")
 
-(defvar pyim-dcache-dict nil)
-(defvar pyim-dcache-dict-md5 nil)
-(defvar pyim-dcache-wordcount nil)
+(defvar pyim-dcache-common nil)
+(defvar pyim-dcache-common:md5 nil)
+(defvar pyim-dcache-common:wordcount nil)
 (defvar pyim-dcache-personal nil)
-(defvar pyim-dcache-personal-wordcount nil)
+(defvar pyim-dcache-personal:wordcount nil)
 
 (defvar pyim-mode-map
   (let ((map (make-sparse-keymap))
@@ -520,7 +520,7 @@ If you don't like this funciton, set the variable to nil")
 ;; 2. 使用 `pyim-cchar2pinyin-create-cache' 创建汉字到拼音的 hash table 。
 ;; 3. 运行hook： `pyim-load-hook'。
 ;; 4. 将 `pyim-dcache-save-caches' 命令添加到 `kill-emacs-hook' , emacs 关闭
-;;    之前将 `pyim-dcache-personal' 和 `pyim-dcache-personal-wordcount'
+;;    之前将 `pyim-dcache-personal' 和 `pyim-dcache-personal:wordcount'
 ;;    保存到文件，供以后使用。
 ;; 5. 设定变量：
 ;;    1. `input-method-function'
@@ -608,9 +608,9 @@ If you don't like this funciton, set the variable to nil")
                                       (list file (nth 5 (file-attributes file 'string))))
                                   dict-files))))
          (dict-cache-file (concat (file-name-as-directory pyim-dcache-directory)
-                                  "pyim-dcache-dict"))
+                                  "pyim-dcache-common"))
          (dict-md5-file (concat (file-name-as-directory pyim-dcache-directory)
-                                "pyim-dcache-dict-md5")))
+                                "pyim-dcache-common:md5")))
     (when (or force (not (equal dicts-md5 (pyim-dcache-get-value-from-file dict-md5-file))))
       (async-start
        `(lambda ()
@@ -619,15 +619,15 @@ If you don't like this funciton, set the variable to nil")
           (pyim-dcache-generate-cache-file ',dict-files ,dict-cache-file)
           (pyim-dcache-save-value-to-file ',dicts-md5 ,dict-md5-file))
        `(lambda (result)
-          (setq pyim-dcache-dict
+          (setq pyim-dcache-common
                 (pyim-dcache-get-value-from-file ,dict-cache-file)))))))
 
 (defun pyim-dcache-init-variables ()
   "初始化 dcache 缓存相关变量。"
-  (pyim-dcache-restore-variable 'pyim-dcache-dict (make-hash-table :test #'equal))
-  (pyim-dcache-restore-variable 'pyim-dcache-wordcount (make-hash-table :test #'equal))
+  (pyim-dcache-restore-variable 'pyim-dcache-common (make-hash-table :test #'equal))
+  (pyim-dcache-restore-variable 'pyim-dcache-common:wordcount (make-hash-table :test #'equal))
   (pyim-dcache-restore-variable 'pyim-dcache-personal (make-hash-table :test #'equal))
-  (pyim-dcache-restore-variable 'pyim-dcache-personal-wordcount (make-hash-table :test #'equal)))
+  (pyim-dcache-restore-variable 'pyim-dcache-personal:wordcount (make-hash-table :test #'equal)))
 
 (defun pyim-dcache-restore-variable (variable &optional fallback-value)
   "使用 `pyim-dcache-directory' 中对应文件的内容来恢复 `variable' 变量的取值。"
@@ -699,13 +699,13 @@ If you don't like this funciton, set the variable to nil")
     items))
 
 (defun pyim-dcache-save-caches ()
-  "将 `pyim-dcache-personal' 和 `pyim-dcache-personal-wordcount' 取值
+  "将 `pyim-dcache-personal' 和 `pyim-dcache-personal:wordcount' 取值
 保存到它们对应的文件中。
 
 这个函数默认作为 `kill-emacs-hook' 使用。"
   (interactive)
   (pyim-dcache-save-variable 'pyim-dcache-personal)
-  (pyim-dcache-save-variable 'pyim-dcache-personal-wordcount)
+  (pyim-dcache-save-variable 'pyim-dcache-personal:wordcount)
   t)
 ;; #+END_SRC
 
@@ -718,7 +718,7 @@ If you don't like this funciton, set the variable to nil")
   (let ((dcache-list (or (if (listp dcache-list)
                             dcache-list
                           (list dcache-list))
-                        (list pyim-dcache-personal pyim-dcache-dict)))
+                        (list pyim-dcache-personal pyim-dcache-common)))
         result)
     (dolist (cache dcache-list)
       (let ((value (gethash code cache)))
@@ -780,7 +780,7 @@ BUG：无法有效的处理多音字。"
       ;; 保存词频
       (when (> (length word) 1)
         (pyim-dcache-put
-          pyim-dcache-personal-wordcount word
+          pyim-dcache-personal:wordcount word
           (+ (or orig-value 0) 1)))
       (dolist (py pinyins)
         (unless (pyim-string-match-p "[^ a-z-]" py)
@@ -1460,114 +1460,84 @@ Return the input string."
   ;; scode-list 可以包含多个 scode, 从而得到多个子候选词列表，如何将多个 *子候选词列表* 合理的合并，
   ;; 是一个比较麻烦的事情的事情。 注：这个地方需要进一步得改进。
   (let* (personal-words
-         pinyin-dict-words
-         pinyin-shouzimu-similar-words pinyin-znabc-similar-words
-         chars)
+         common-words
+         pinyin-shouzimu-words pinyin-znabc-words
+         pinyin-chars)
 
     (dolist (scode scode-list)
       (setq personal-words
             (append personal-words
-                    (car (pyim-choices-get:personal scode scheme-name))))
-      (setq pinyin-dict-words
-            (append pinyin-dict-words
-                    (car (pyim-choices-get:dicts scode scheme-name))))
-      (setq chars
-            (append chars
-                    (car (pyim-choices-get:chars scode scheme-name)))))
+                    (car (pyim-choices-get:dcache-personal scode scheme-name))))
+      (setq common-words
+            (append common-words
+                    (car (pyim-choices-get:dcache-common scode scheme-name))))
+      (setq pinyin-chars
+            (append pinyin-chars
+                    (car (pyim-choices-get:pinyin-chars scode scheme-name)))))
 
     ;; Pinyin shouzimu similar words
     (let ((words (pyim-choices-get:pinyin-shouzimu (car scode-list) scheme-name)))
-      (setq pinyin-shouzimu-similar-words (car (cdr words))))
+      (setq pinyin-shouzimu-words (car (cdr words))))
 
     ;; Pinyin znabc-style similar words
     (let ((words (pyim-choices-get:pinyin-znabc (car scode-list) scheme-name)))
-      (setq pinyin-znabc-similar-words (car (cdr words))))
+      (setq pinyin-znabc-words (car (cdr words))))
 
     ;; Debug
     (when pyim-debug
       (princ (list :scode-list scode-list
                    :personal-words personal-words
-                   :pinyin-dict-words pinyin-dict-words
-                   :pinyin-shouzimu-words pinyin-shouzimu-similar-words
-                   :pinyin-znabc-similar-words pinyin-znabc-similar-words
-                   :chars chars)))
+                   :common-words common-words
+                   :pinyin-shouzimu-words pinyin-shouzimu-words
+                   :pinyin-znabc-words pinyin-znabc-words
+                   :pinyin-chars pinyin-chars)))
 
     (delete-dups
      (delq nil
            `(,@personal-words
-             ,@pinyin-dict-words
-             ,@(when (and pinyin-dict-words
-                          (not (member (car pinyin-dict-words) pinyin-shouzimu-similar-words)))
-                 pinyin-shouzimu-similar-words)
-             ,@pinyin-znabc-similar-words
-             ,@chars)))))
+             ,@common-words
+             ,@(when (and common-words
+                          (not (member (car common-words) pinyin-shouzimu-words)))
+                 pinyin-shouzimu-words)
+             ,@pinyin-znabc-words
+             ,@pinyin-chars)))))
 
 (defun pyim-choices-get:pinyin-znabc (spinyin scheme-name)
   ;; 将输入的拼音按照声母和韵母打散，得到尽可能多的拼音组合，
   ;; 查询这些拼音组合，得到的词条做为联想词。
-  (let ((class (pyim-scheme-get-option scheme-name :class)))
-    (when (and (member 'pinyin-znabc pyim-backends)
-               (member class '(quanpin shuangpin)))
-      (list nil (pyim-possible-words
-                 (pyim-possible-words-py spinyin))))))
+  (when (member 'pinyin-znabc pyim-backends)
+    (let ((class (pyim-scheme-get-option scheme-name :class)))
+      (when (member class '(quanpin shuangpin))
+        (list nil (pyim-possible-words
+                   (pyim-possible-words-py spinyin)))))))
 
 (defun pyim-choices-get:pinyin-shouzimu (spinyin scheme-name)
   ;; 如果输入 "ni-hao" ，搜索 code 为 "n-h" 的词条做为联想词。
   ;; 搜索首字母得到的联想词太多，这里限制联想词要大于两个汉字并且只搜索
   ;; 个人文件。
-  (when (and (member 'pinyin-shouzimu pyim-backends)
-             (> (length spinyin) 1))
-    (let ((py-str-shouzimu (pyim-scode-join spinyin scheme-name t t)))
-      (list nil (pyim-dcache-get py-str-shouzimu pyim-dcache-personal)))))
+  (when (member 'pinyin-shouzimu pyim-backends)
+    (let ((class (pyim-scheme-get-option scheme-name :class)))
+      (when (and (> (length spinyin) 1)
+                 (member class '(quanpin shuangpin)))
+        (let ((py-str-shouzimu (pyim-scode-join spinyin scheme-name t t)))
+          (list nil (pyim-dcache-get py-str-shouzimu pyim-dcache-personal)))))))
 
-(defun pyim-choices-get:personal (spinyin scheme-name)
-  (when (member 'personal pyim-backends)
-    (let ((py-str (pyim-scode-join spinyin scheme-name t)))
-      (list (pyim-dcache-get py-str pyim-dcache-personal) nil))))
-
-(defun pyim-choices-get:dicts (spinyin scheme-name)
-  (when (member 'dicts pyim-backends)
-    (let ((py-str (pyim-scode-join spinyin scheme-name t)))
-      (list (pyim-dcache-get py-str pyim-dcache-dict) nil))))
-
-(defun pyim-choices-get:chars (spinyin scheme-name)
-  (when (member 'chars pyim-backends)
+(defun pyim-choices-get:pinyin-chars (spinyin scheme-name)
+  (when (member 'pinyin-chars pyim-backends)
     (let ((class (pyim-scheme-get-option scheme-name :class)))
       (when (member class '(quanpin shuangpin))
         (list (pyim-dcache-get (concat (caar spinyin) (cdar spinyin)))
               nil)))))
 
-(defun pyim-spinyin-build-chinese-regexp (spinyin &optional match-beginning
-                                                  first-equal all-equal)
-  "这个函数生成一个 regexp ，用这个 regexp 可以搜索到
-拼音匹配 `spinyin' 的中文字符串。"
-  (let* ((spinyin (mapcar
-                   #'(lambda (x)
-                       (concat (car x) (cdr x)))
-                   spinyin))
-         (cchar-list
-          (let ((n 0) results)
-            (dolist (py spinyin)
-              (push
-               (mapconcat #'identity
-                          (pyim-pinyin2cchar-get
-                           py
-                           (or all-equal
-                               (and first-equal
-                                    (= n 0)))) "")
-               results)
-              (setq n (+ 1 n)))
-            (nreverse results)))
-         (regexp
-          (mapconcat
-           #'(lambda (x)
-               (when (pyim-string-match-p "\\cc" x)
-                 (format "[%s]" x)))
-           cchar-list
-           "")))
-    (unless (equal regexp "")
-      (concat (if match-beginning "^" "")
-              regexp))))
+(defun pyim-choices-get:dcache-personal (scode scheme-name)
+  (when (member 'dcache-personal pyim-backends)
+    (let ((code (pyim-scode-join scode scheme-name t)))
+      (list (pyim-dcache-get code pyim-dcache-personal) nil))))
+
+(defun pyim-choices-get:dcache-common (scode scheme-name)
+  (when (member 'dcache-common pyim-backends)
+    (let ((code (pyim-scode-join scode scheme-name t)))
+      (list (pyim-dcache-get code pyim-dcache-common) nil))))
 
 (defun pyim-flatten-list (my-list)
   (cond
@@ -2614,6 +2584,38 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
                   (concat pystr "\\|" regexp)
                 pystr)))
         regexp))))
+
+(defun pyim-spinyin-build-chinese-regexp (spinyin &optional match-beginning
+                                                  first-equal all-equal)
+  "这个函数生成一个 regexp ，用这个 regexp 可以搜索到
+拼音匹配 `spinyin' 的中文字符串。"
+  (let* ((spinyin (mapcar
+                   #'(lambda (x)
+                       (concat (car x) (cdr x)))
+                   spinyin))
+         (cchar-list
+          (let ((n 0) results)
+            (dolist (py spinyin)
+              (push
+               (mapconcat #'identity
+                          (pyim-pinyin2cchar-get
+                           py
+                           (or all-equal
+                               (and first-equal
+                                    (= n 0)))) "")
+               results)
+              (setq n (+ 1 n)))
+            (nreverse results)))
+         (regexp
+          (mapconcat
+           #'(lambda (x)
+               (when (pyim-string-match-p "\\cc" x)
+                 (format "[%s]" x)))
+           cchar-list
+           "")))
+    (unless (equal regexp "")
+      (concat (if match-beginning "^" "")
+              regexp))))
 
 (defun pyim-isearch-pinyin-search-function ()
   "这个函数为 isearch 相关命令添加中文拼音搜索功能，

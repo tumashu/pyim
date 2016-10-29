@@ -163,7 +163,7 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
                   ;; pyim-buffer-list 中第一个 buffer 对应的是个人词库文件
                   ;; 个人词库文件中的词条，极有可能存在 *多音字污染*。
                   ;; 这是由 Chinese-pyim 保存词条的机制决定的。
-                  (pyim-dcache-get py-str pyim-dcache-dict)))
+                  (pyim-dcache-get py-str pyim-dcache-common)))
             (when (member string words-from-dicts)
               (push pinyin-list pinyins-list-adjusted))))
         (setq pinyins-list-adjusted
