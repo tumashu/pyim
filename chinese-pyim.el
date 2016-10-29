@@ -153,6 +153,33 @@
 ;; 1. 用户可以使用变量 `pyim-schemes' 添加自定义双拼方案。
 ;; 2. 用户可能需要重新设置 `pyim-translate-trigger-char'。
 
+;; *** 使用五笔输入
+;; Chinese-pyim 支持五笔输入模式，用户可以通过变量 `pyim-default-scheme' 来设定：
+
+;; #+BEGIN_EXAMPLE
+;; (setq pyim-default-scheme 'wubi)
+;; #+END_EXAMPLE
+
+;; 在使用五笔输入法之前，请用 pyim-dicts-manager 添加一个五笔词库，词库的格式类似：
+
+;; #+BEGIN_EXAMPLE
+;;; -*- coding: utf-8 -*-
+;; .aaaa 工
+;; .aad 式
+;; .aadk 匿
+;; .aadn 慝 葚
+;; .aadw 萁
+;; .aafd 甙
+;; .aaff 苷
+;; .aaht 芽
+;; .aak 戒
+;; #+END_EXAMPLE
+
+;; 注意：为了简化代码和提高输入法响应速度，pyim 直接将拼音词库和五笔词库合并到同一个
+;; dcache 文件中，所以 chinese-pyim *强制规定* 五笔编码 *必须* 都以 '.' 开头，比如 '.aaaa' 。
+;; 这样可以避免出现不必要的混乱。
+
+
 ;; *** 让选词框跟随光标
 ;; 用户可以通过下面的设置让 Chinese-pyim 在 *光标处* 显示一个选词框：
 
