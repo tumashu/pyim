@@ -1456,7 +1456,7 @@ Return the input string."
 ;; **** 获得词语拼音并进一步查询得到备选词列表
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-choices-get (scode-list scheme-name)
-  "根据 `spinyin-list', 得到可能的词组和汉字。"
+  "根据 `scode-list', 得到可能的词组和汉字。"
   ;; scode-list 可以包含多个 scode, 从而得到多个子候选词列表，如何将多个 *子候选词列表* 合理的合并，
   ;; 是一个比较麻烦的事情的事情。 注：这个地方需要进一步得改进。
   (let* (personal-words
@@ -1464,16 +1464,16 @@ Return the input string."
          pinyin-shouzimu-similar-words pinyin-znabc-similar-words
          chars)
 
-    (dolist (spinyin scode-list)
+    (dolist (scode scode-list)
       (setq personal-words
             (append personal-words
-                    (car (pyim-choices-get:personal spinyin scheme-name))))
+                    (car (pyim-choices-get:personal scode scheme-name))))
       (setq pinyin-dict-words
             (append pinyin-dict-words
-                    (car (pyim-choices-get:dicts spinyin scheme-name))))
+                    (car (pyim-choices-get:dicts scode scheme-name))))
       (setq chars
             (append chars
-                    (car (pyim-choices-get:chars spinyin scheme-name)))))
+                    (car (pyim-choices-get:chars scode scheme-name)))))
 
     ;; Pinyin shouzimu similar words
     (let ((words (pyim-choices-get:pinyin-shouzimu (car scode-list) scheme-name)))
@@ -1485,7 +1485,7 @@ Return the input string."
 
     ;; Debug
     (when pyim-debug
-      (princ (list :spinyin-list spinyin-list
+      (princ (list :scode-list scode-list
                    :personal-words personal-words
                    :pinyin-dict-words pinyin-dict-words
                    :pinyin-shouzimu-words pinyin-shouzimu-similar-words
