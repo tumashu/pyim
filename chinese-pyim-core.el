@@ -2620,7 +2620,7 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
              (regexp-list
               (mapcar
                #'(lambda (spinyin)
-                   (pyim-spinyin-build-chinese-regexp spinyin))
+                   (pyim-spinyin-build-cregexp spinyin))
                spinyin-list))
              (regexp
               (when regexp-list
@@ -2633,7 +2633,7 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
                 pystr)))
         regexp))))
 
-(defun pyim-spinyin-build-chinese-regexp (spinyin &optional match-beginning
+(defun pyim-spinyin-build-cregexp (spinyin &optional match-beginning
                                                   first-equal all-equal)
   "这个函数生成一个 regexp ，用这个 regexp 可以搜索到
 拼音匹配 `spinyin' 的中文字符串。"
