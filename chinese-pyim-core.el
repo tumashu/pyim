@@ -544,7 +544,7 @@ If you don't like this funciton, set the variable to nil")
   (pyim-pinyin2cchar-cache-create)
   (run-hooks 'pyim-load-hook)
   ;; 如果 dicts 有变化，重新生成 dict cache。
-  (pyim-dcache-create-dict-cache)
+  (pyim-dcache-create-common-dcache)
   (unless (member 'pyim-dcache-save-caches kill-emacs-hook)
     (add-to-list 'kill-emacs-hook 'pyim-dcache-save-caches))
 
@@ -595,7 +595,7 @@ If you don't like this funciton, set the variable to nil")
 ;; 2. `:file' 词库文件的绝对路径。
 
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-dcache-create-dict-cache (&optional force)
+(defun pyim-dcache-create-common-dcache (&optional force)
   "读取 `pyim-dicts' 和 `pyim-extra-dicts' 里面的词库文件，生成对应的词库缓冲文件。
 然后加载词库缓存。"
   (interactive)
@@ -607,20 +607,20 @@ If you don't like this funciton, set the variable to nil")
                           (mapcar #'(lambda (file)
                                       (list file (nth 5 (file-attributes file 'string))))
                                   dict-files))))
-         (dict-cache-file (concat (file-name-as-directory pyim-dcache-directory)
-                                  "pyim-dcache-common"))
-         (dict-md5-file (concat (file-name-as-directory pyim-dcache-directory)
-                                "pyim-dcache-common:md5")))
-    (when (or force (not (equal dicts-md5 (pyim-dcache-get-value-from-file dict-md5-file))))
+         (dcache-file (concat (file-name-as-directory pyim-dcache-directory)
+                              "pyim-dcache-common"))
+         (dcache-md5-file (concat (file-name-as-directory pyim-dcache-directory)
+                                  "pyim-dcache-common:md5")))
+    (when (or force (not (equal dicts-md5 (pyim-dcache-get-value-from-file dcache-md5-file))))
       (async-start
        `(lambda ()
           ,(async-inject-variables "^load-path$")
           (require 'chinese-pyim-core)
-          (pyim-dcache-generate-cache-file ',dict-files ,dict-cache-file)
-          (pyim-dcache-save-value-to-file ',dicts-md5 ,dict-md5-file))
+          (pyim-dcache-generate-dcache-file ',dict-files ,dcache-file)
+          (pyim-dcache-save-value-to-file ',dicts-md5 ,dcache-md5-file))
        `(lambda (result)
           (setq pyim-dcache-common
-                (pyim-dcache-get-value-from-file ,dict-cache-file)))))))
+                (pyim-dcache-get-value-from-file ,dcache-file)))))))
 
 (defun pyim-dcache-init-variables ()
   "初始化 dcache 缓存相关变量。"
@@ -665,8 +665,8 @@ If you don't like this funciton, set the variable to nil")
       (make-directory (file-name-directory file) t)
       (write-file file))))
 
-(defun pyim-dcache-generate-cache-file (dict-files cache-file)
-  "读取词库文件列表： `dict-files', 生成一个词库缓冲文件 `cache-file'. "
+(defun pyim-dcache-generate-dcache-file (dict-files dcache-file)
+  "读取词库文件列表： `dict-files', 生成一个词库缓冲文件 `dcache-file'. "
   (let ((hastable (make-hash-table :size 1000000 :test #'equal)))
     (dolist (file dict-files)
       (with-temp-buffer
@@ -681,7 +681,7 @@ If you don't like this funciton, set the variable to nil")
               (puthash code (delete-dups `(,@content ,@(gethash code hastable)))
                        hastable)))
           (forward-line 1))))
-    (pyim-dcache-save-value-to-file hastable cache-file)))
+    (pyim-dcache-save-value-to-file hastable dcache-file)))
 
 (defun pyim-code-at-point ()
   "Get code in the current line."
