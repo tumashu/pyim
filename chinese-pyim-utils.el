@@ -271,7 +271,8 @@
     (let ((string (buffer-substring-no-properties
                    (line-beginning-position)
                    (line-end-position))))
-      (pyim-delete-line)
+      (delete-region (line-beginning-position)
+                 (min (+ (line-end-position) 1) (point-max)))
       (insert (pyim-split-chinese-string2string string))
       (insert "\n")))
   (goto-char (point-min))
