@@ -76,7 +76,7 @@
 1. 使用 `thing-at-point' 获取当前光标处的一个字符串，一般而言：英文会得到
    一个单词，中文会得到一个句子。
 2. 英文单词直接返回这个单词的列表。
-3. 中文句子首先用 `pyim-split-chinese-string' 分词，然后根据光标在中文句子
+3. 中文句子首先用 `pyim-cstring:split2list' 分词，然后根据光标在中文句子
    中的位置，筛选出符合要求的中文词条。得到并返回 *一个* 或者 *多个* 词条
    的列表。"
   ;;
@@ -105,7 +105,7 @@
               (1+ (- current-pos str-beginning-pos)))))
          str-offset-adjusted words-alist results)
 
-    ;; 当字符串长度太长时， `pyim-split-chinese-string'
+    ;; 当字符串长度太长时， `pyim-cstring:split2list'
     ;; 的速度比较慢，这里确保待分词的字符串长度不超过10.
     (when (and str (not (pyim-string-match-p "\\CC" str)))
       (if (> str-offset 5)
@@ -119,7 +119,7 @@
     (cond
      ((and str (not (pyim-string-match-p "\\CC" str)))
       (setq words-alist
-            (pyim-split-chinese-string str))
+            (pyim-cstring:split2list str))
       (dolist (word-list words-alist)
         (let ((word-begin (nth 1 word-list))
               (word-end (nth 2 word-list)))
@@ -140,7 +140,7 @@
                       (- current-pos str-beginning-pos)
                       (- str-end-pos current-pos)))))))
 
-(defun pyim-split-chinese-string (chinese-string &optional max-word-length)
+(defun pyim-cstring:split2list (chinese-string &optional max-word-length)
   "一个基于 Chinese-pyim 的中文分词函数。这个函数可以将中文字符
 串 `chinese-string' 分词，得到一个词条 alist，这个 alist 的元素
 都是列表，其中第一个元素为分词得到的词条，第二个元素为词条相对于
@@ -200,13 +200,13 @@
       result)))
 
 ;; (let ((str "医生随时都有可能被患者及其家属反咬一口"))
-;;   (benchmark 1 '(pyim-split-chinese-string str)))
+;;   (benchmark 1 '(pyim-cstring:split2list str)))
 
 ;; (let ((str "医生随时都有可能被患者及其家属反咬一口"))
-;;   (pyim-split-chinese-string str))
+;;   (pyim-cstring:split2list str))
 
-(defun pyim-split-chinese-string2string (string &optional prefer-short-word
-                                                separator max-word-length)
+(defun pyim-cstring:split2string (string &optional prefer-short-word
+                                         separator max-word-length)
   "将一个中文字符串分词，并且在分词的位置插入空格或者自定义分隔符 `separator'，
 较长的词条优先使用，如果 `prefer-short-word' 设置为 t，则优先使用较短的词条。
 最长词条默认不超过6个字符，用户可以通 `max-word-length' 来自定义词条的最大长度，
@@ -221,20 +221,20 @@
      #'(lambda (str)
          (when (> (length str) 0)
            (if (not (pyim-string-match-p "\\CC" str))
-               (pyim-split-chinese-string2string-internal
+               (pyim-cstring:split2string-1
                 str prefer-short-word separator max-word-length)
              (concat " " str " "))))
      string-list "")))
 
-(defun pyim-split-chinese-string2string-internal (chinese-string &optional prefer-short-word
-                                                                 separator max-word-length)
-  "`pyim-split-chinese-string2string' 内部函数。"
+(defun pyim-cstring:split2string-1 (chinese-string &optional prefer-short-word
+                                                   separator max-word-length)
+  "`pyim-cstring:split2string' 内部函数。"
   (let ((str-length (length chinese-string))
         (word-list (cl-delete-duplicates
                     ;;  判断两个词条在字符串中的位置
                     ;;  是否冲突，如果冲突，仅保留一个，
                     ;;  删除其它。
-                    (pyim-split-chinese-string chinese-string max-word-length)
+                    (pyim-cstring:split2list chinese-string max-word-length)
                     :test #'(lambda (x1 x2)
                               (let ((begin1 (nth 1 x1))
                                     (begin2 (nth 1 x2))
@@ -262,7 +262,7 @@
     (setq result (nreverse result))
     (mapconcat #'identity result "")))
 
-(defun pyim-split-chinese-buffer ()
+(defun pyim-cstring:split-buffer ()
   "将一个 buffer 中的中文文章，进行分词操作。"
   (interactive)
   (message "分词开始！")
@@ -272,8 +272,8 @@
                    (line-beginning-position)
                    (line-end-position))))
       (delete-region (line-beginning-position)
-                 (min (+ (line-end-position) 1) (point-max)))
-      (insert (pyim-split-chinese-string2string string))
+                     (min (+ (line-end-position) 1) (point-max)))
+      (insert (pyim-cstring:split2string string))
       (insert "\n")))
   (goto-char (point-min))
   (message "分词完成！"))
