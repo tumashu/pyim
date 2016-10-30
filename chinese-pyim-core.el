@@ -388,7 +388,7 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
   '("a" "o" "e" "ai" "ei" "ui" "ao" "ou" "er" "an" "en"
     "ang" "eng"))
 
-(defvar pyim-current-key "" "已经输入的代码")
+(defvar pyim-entered-code "" "已经输入的代码")
 (defvar pyim-current-str "" "当前选择的词条")
 (defvar pyim-input-ascii nil  "是否开启 Chinese-pyim 英文输入模式。")
 (defvar pyim-force-input-chinese nil "是否强制开启中文输入模式。")
@@ -476,7 +476,7 @@ If you don't like this funciton, set the variable to nil")
 ;; ** 将变量转换为 local 变量
 ;; #+BEGIN_SRC emacs-lisp
 (defvar pyim-local-variable-list
-  '(pyim-current-key
+  '(pyim-entered-code
     pyim-current-str
     pyim-current-choices
     pyim-current-pos
@@ -748,9 +748,9 @@ If you don't like this funciton, set the variable to nil")
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-dcache-get (code &optional dcache-list)
   (let ((dcache-list (or (if (listp dcache-list)
-                            dcache-list
-                          (list dcache-list))
-                        (list pyim-dcache-personal pyim-dcache-common)))
+                             dcache-list
+                           (list dcache-list))
+                         (list pyim-dcache-personal pyim-dcache-common)))
         result)
     (dolist (cache dcache-list)
       (let ((value (gethash code cache)))
@@ -942,8 +942,8 @@ BUG：无法有效的处理多音字。"
           (remove word orig-value))))))
 ;; #+END_SRC
 
-;; ** 生成 `pyim-current-key' 并插入 `pyim-current-str'
-;; *** 生成拼音字符串 `pyim-current-key'
+;; ** 生成 `pyim-entered-code' 并插入 `pyim-current-str'
+;; *** 生成拼音字符串 `pyim-entered-code'
 ;; Chinese-pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
 ;; `input-method-function' 设置为 `pyim-input-method' ，这个变量
 ;; 会影响 `read-event' 的行为。
@@ -961,7 +961,7 @@ BUG：无法有效的处理多音字。"
 ;;    `pyim-start-translation' 会调用这个函数。
 
 ;; `pyim-self-insert-command' 这个函数的核心工作就是将用户输入的字符，组
-;; 合成拼音字符串并保存到变量 `pyim-current-key' 中。
+;; 合成拼音字符串并保存到变量 `pyim-entered-code' 中。
 
 ;; 中英文输入模式切换功能也是在 'pyim-self-insert-command' 中实现。
 
@@ -976,7 +976,7 @@ BUG：无法有效的处理多音字。"
 
 ;; *** 在待输入 buffer 中插入 `pyim-current-str'
 ;; `pyim-self-insert-command' 会调用 `pyim-handle-string' 来处理
-;; `pyim-current-key'，得到对应的 `pyim-current-str'，然后，
+;; `pyim-entered-code'，得到对应的 `pyim-current-str'，然后，
 ;; `pyim-start-translation' 返回 `pyim-current-str' 的取值。
 
 ;; 在 `pyim-input-method' 函数内部，`pyim-start-translation' 返回值分解为
@@ -1029,7 +1029,7 @@ Return the input string."
           (setq str (substring key-or-string 0 -1)))
 
         (setq pyim-current-str ""
-              pyim-current-key (or str "")
+              pyim-entered-code (or str "")
               pyim-translating t)
 
         (when key
@@ -1040,7 +1040,7 @@ Return the input string."
           (set-buffer-modified-p modified-p)
           (let* ((prompt (when input-method-use-echo-area
                            (format "[%s]: %s"
-                                   (replace-regexp-in-string "-" "" pyim-current-key)
+                                   (replace-regexp-in-string "-" "" pyim-entered-code)
                                    (gethash :words pyim-guidance-hashtable))))
                  (keyseq (read-key-sequence prompt nil nil t))
                  (cmd (lookup-key pyim-mode-map keyseq)))
@@ -1096,7 +1096,7 @@ Return the input string."
     (and (or pyim-force-input-chinese
              (and (not pyim-input-ascii)
                   (not (pyim-auto-switch-english-input-p))))
-         (if (pyim-string-emptyp pyim-current-key)
+         (if (pyim-string-emptyp pyim-entered-code)
              (member last-command-event
                      (mapcar 'identity first-chars))
            (member last-command-event
@@ -1111,8 +1111,8 @@ Return the input string."
   (interactive "*")
   ;; (message "%s" (current-buffer))
   (if (pyim-input-chinese-p)
-      (progn (setq pyim-current-key
-                   (concat pyim-current-key (char-to-string last-command-event)))
+      (progn (setq pyim-entered-code
+                   (concat pyim-entered-code (char-to-string last-command-event)))
              (pyim-handle-string))
     (pyim-append-string (pyim-translate last-command-event))
     (pyim-terminate-translation)))
@@ -1128,7 +1128,7 @@ Return the input string."
     (pos-tip-hide)))
 ;; #+END_SRC
 
-;; ** 处理拼音字符串 `pyim-current-key'
+;; ** 处理拼音字符串 `pyim-entered-code'
 ;; *** 拼音字符串 -> 待选词列表
 ;; 从一个拼音字符串获取其待选词列表，大致可以分成3个步骤：
 ;; 1. 分解这个拼音字符串，得到一个拼音列表。
@@ -1642,20 +1642,20 @@ Return the input string."
 
 ;; *** 核心函数：拼音字符串处理函数
 ;; `pyim-handle-string' 这个函数是一个重要的 *核心函数* ，其大致工作流程为：
-;; 1. 查询拼音字符串 `pyim-current-key' 得到： 待选词列表
-;;    `pyim-current-choices' 和 当前选择的词条 `pyim-current-key'
+;; 1. 查询拼音字符串 `pyim-entered-code' 得到： 待选词列表
+;;    `pyim-current-choices' 和 当前选择的词条 `pyim-entered-code'
 ;; 2. 显示备选词条和选择备选词等待用户选择。
 
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-handle-string ()
   (let ((scheme-name pyim-default-scheme)
-        (str pyim-current-key))
+        (str pyim-entered-code))
     (setq pyim-scode-list (pyim-code-split str scheme-name)
           pyim-code-position 0)
     (unless (and (pyim-scode-validp
                   (car pyim-scode-list) scheme-name)
                  (progn
-                   (setq pyim-current-key
+                   (setq pyim-entered-code
                          (pyim-code-restore-user-divide
                           (pyim-scode-join (car pyim-scode-list) scheme-name)
                           (pyim-code-user-divide-pos str)))
@@ -1668,10 +1668,10 @@ Return the input string."
                      (pyim-show)
                      (pyim-page-auto-select-word scheme-name)
                      t)))
-      (setq pyim-current-str (replace-regexp-in-string "-" "" pyim-current-key))
+      (setq pyim-current-str (replace-regexp-in-string "-" "" pyim-entered-code))
       (puthash :words
                (format "%s" (replace-regexp-in-string
-                             "-" " " pyim-current-key))
+                             "-" " " pyim-entered-code))
                pyim-guidance-hashtable)
       (pyim-show))))
 
@@ -1683,7 +1683,7 @@ Return the input string."
 
 ;; 处理 `pyim-current-str' 的代码分散在多个函数中，可以按照下面的方式分类：
 ;; 1. 英文字符串：Chinese-pyim 没有找到相应的候选词时（比如：用户输入错
-;;    误的拼音），`pyim-current-str' 的值与 `pyim-current-key' 大致相同。
+;;    误的拼音），`pyim-current-str' 的值与 `pyim-entered-code' 大致相同。
 ;;    相关代码很简单，分散在 `pyim-handle-string' 或者
 ;;    `pyim-append-string' 等相关函数。
 ;; 2. 汉字或者拼音和汉字的混合：当 Chinese-pyim 找到相应的候选词条时，
@@ -1884,7 +1884,7 @@ Return the input string."
          (choice (pyim-subseq choices start end))
          (pos (- (min pyim-current-pos (length choices)) start))
          (i 0))
-    (puthash :key (replace-regexp-in-string "-" " " pyim-current-key)
+    (puthash :key (replace-regexp-in-string "-" " " pyim-entered-code)
              pyim-guidance-hashtable)
     (puthash :current-page (pyim-page-current-page) pyim-guidance-hashtable)
     (puthash :total-page (pyim-page-total-page) pyim-guidance-hashtable)
@@ -1908,7 +1908,7 @@ Return the input string."
 
 (defun pyim-page-next-page (arg)
   (interactive "p")
-  (if (= (length pyim-current-key) 0)
+  (if (= (length pyim-entered-code) 0)
       (progn
         (pyim-append-string (pyim-translate last-command-event))
         (pyim-terminate-translation))
@@ -1925,7 +1925,7 @@ Return the input string."
 
 (defun pyim-page-next-word (arg)
   (interactive "p")
-  (if (= (length pyim-current-key) 0)
+  (if (= (length pyim-entered-code) 0)
       (progn
         (pyim-append-string (pyim-translate last-command-event))
         (pyim-terminate-translation))
@@ -1948,7 +1948,7 @@ Return the input string."
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-show ()
   (unless enable-multibyte-characters
-    (setq pyim-current-key nil
+    (setq pyim-entered-code nil
           pyim-current-str nil)
     (error "Can't input characters in current unibyte buffer"))
   (pyim-delete-region)
@@ -2101,7 +2101,7 @@ guidance-hashtable 的结构与 `pyim-guidance-hashtable' 的结构相同。"
 这个函数主要用于五笔输入法。"
   (when (and (= 1 (length (car pyim-current-choices)))
              (pyim-scheme-get-option scheme-name :auto-select)
-             (>= (length pyim-current-key)
+             (>= (length pyim-entered-code)
                  (pyim-scheme-get-option scheme-name :auto-select-minimum-input)))
     (call-interactively 'pyim-page-select-word)))
 
@@ -2511,9 +2511,9 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-delete-last-char ()
   (interactive)
-  (if (> (length pyim-current-key) 1)
+  (if (> (length pyim-entered-code) 1)
       (progn
-        (setq pyim-current-key (substring pyim-current-key 0 -1))
+        (setq pyim-entered-code (substring pyim-entered-code 0 -1))
         (pyim-handle-string))
     (setq pyim-current-str "")
     (pyim-terminate-translation)))
@@ -2523,11 +2523,11 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-backward-kill-py ()
   (interactive)
-  (if (string-match "['-][^'-]+$" pyim-current-key)
-      (progn (setq pyim-current-key
-                   (replace-match "" nil nil pyim-current-key))
+  (if (string-match "['-][^'-]+$" pyim-entered-code)
+      (progn (setq pyim-entered-code
+                   (replace-match "" nil nil pyim-entered-code))
              (pyim-handle-string))
-    (setq pyim-current-key "")
+    (setq pyim-entered-code "")
     (setq pyim-current-str "")
     (pyim-terminate-translation)))
 ;; #+END_SRC
@@ -2570,7 +2570,7 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
 (defun pyim-quit-no-clear ()
   (interactive)
   (setq pyim-current-str
-        (replace-regexp-in-string "-" "" pyim-current-key))
+        (replace-regexp-in-string "-" "" pyim-entered-code))
   (pyim-terminate-translation))
 ;; #+END_SRC
 
@@ -2624,7 +2624,7 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
         regexp))))
 
 (defun pyim-spinyin-build-cregexp (spinyin &optional match-beginning
-                                                  first-equal all-equal)
+                                           first-equal all-equal)
   "这个函数生成一个 regexp ，用这个 regexp 可以搜索到
 拼音匹配 `spinyin' 的中文字符串。"
   (let* ((spinyin (mapcar
