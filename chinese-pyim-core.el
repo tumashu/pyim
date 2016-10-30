@@ -434,6 +434,7 @@ If you don't like this funciton, set the variable to nil")
 (defvar pyim-dcache-common nil)
 (defvar pyim-dcache-common:md5 nil)
 (defvar pyim-dcache-common:wordcount nil)
+(defvar pyim-dcache-common:word2code nil)
 (defvar pyim-dcache-personal nil)
 (defvar pyim-dcache-personal:wordcount nil)
 
@@ -609,6 +610,8 @@ If you don't like this funciton, set the variable to nil")
                                   dict-files))))
          (dcache-file (concat (file-name-as-directory pyim-dcache-directory)
                               "pyim-dcache-common"))
+         (dcache-word2code-file (concat (file-name-as-directory pyim-dcache-directory)
+                                        "pyim-dcache-common:word2code"))
          (dcache-md5-file (concat (file-name-as-directory pyim-dcache-directory)
                                   "pyim-dcache-common:md5")))
     (when (or force (not (equal dicts-md5 (pyim-dcache-get-value-from-file dcache-md5-file))))
@@ -616,16 +619,20 @@ If you don't like this funciton, set the variable to nil")
        `(lambda ()
           ,(async-inject-variables "^load-path$")
           (require 'chinese-pyim-core)
-          (pyim-dcache-generate-dcache-file ',dict-files ,dcache-file)
+          (let ((dcache (pyim-dcache-generate-dcache-file ',dict-files ,dcache-file)))
+            (pyim-dcache-generate-word2code-dcache-file dcache ,dcache-word2code-file))
           (pyim-dcache-save-value-to-file ',dicts-md5 ,dcache-md5-file))
        `(lambda (result)
           (setq pyim-dcache-common
-                (pyim-dcache-get-value-from-file ,dcache-file)))))))
+                (pyim-dcache-get-value-from-file ,dcache-file))
+          (setq pyim-dcache-common:word2code
+                (pyim-dcache-get-value-from-file ,dcache-word2code-file)))))))
 
 (defun pyim-dcache-init-variables ()
   "初始化 dcache 缓存相关变量。"
   (pyim-dcache-restore-variable 'pyim-dcache-common (make-hash-table :test #'equal))
   (pyim-dcache-restore-variable 'pyim-dcache-common:wordcount (make-hash-table :test #'equal))
+  (pyim-dcache-restore-variable 'pyim-dcache-common:word2code (make-hash-table :test #'equal))
   (pyim-dcache-restore-variable 'pyim-dcache-personal (make-hash-table :test #'equal))
   (pyim-dcache-restore-variable 'pyim-dcache-personal:wordcount (make-hash-table :test #'equal)))
 
@@ -667,7 +674,7 @@ If you don't like this funciton, set the variable to nil")
 
 (defun pyim-dcache-generate-dcache-file (dict-files dcache-file)
   "读取词库文件列表： `dict-files', 生成一个词库缓冲文件 `dcache-file'. "
-  (let ((hastable (make-hash-table :size 1000000 :test #'equal)))
+  (let ((hashtable (make-hash-table :size 1000000 :test #'equal)))
     (dolist (file dict-files)
       (with-temp-buffer
         (let ((coding-system-for-read 'utf-8-unix))
@@ -678,10 +685,24 @@ If you don't like this funciton, set the variable to nil")
           (let ((code (pyim-code-at-point))
                 (content (pyim-line-content)))
             (when (and code content)
-              (puthash code (delete-dups `(,@content ,@(gethash code hastable)))
-                       hastable)))
+              (puthash code (delete-dups `(,@content ,@(gethash code hashtable)))
+                       hashtable)))
           (forward-line 1))))
-    (pyim-dcache-save-value-to-file hastable dcache-file)))
+    (pyim-dcache-save-value-to-file hashtable dcache-file)
+    hashtable))
+
+(defun pyim-dcache-generate-word2code-dcache-file (dcache file)
+  "`dcache' 是一个 code -> words 的 hashtable, 根据这个表的
+内容，生成一个 word -> code 的反向查询表。"
+  (when (hash-table-p dcache)
+    (let ((hashtable (make-hash-table :size 1000000 :test #'equal)))
+      (maphash
+       #'(lambda (code words)
+           (unless (pyim-string-match-p "-" code)
+             (dolist (word words)
+               (puthash word code hashtable))))
+       dcache)
+      (pyim-dcache-save-value-to-file hashtable file))))
 
 (defun pyim-code-at-point ()
   "Get code in the current line."
@@ -864,6 +885,19 @@ BUG：无法有效的处理多音字。"
             (error "不是纯中文字符串")
           (pyim-create-or-rearrange-word string)
           (message "将词条: \"%s\" 插入 personal file。" string))))))
+
+(defun pyim-search-word-code ()
+  "选择词条，然后反查它的 code. 这个功能对五笔用户有用。"
+  (interactive)
+  (when (region-active-p)
+    (let ((string (buffer-substring-no-properties (region-beginning) (region-end)))
+          code)
+      (if (not (string-match-p "^\\cc+\\'" string))
+          (error "不是纯中文字符串")
+        (setq code (gethash string pyim-dcache-common:word2code))
+        (if code
+            (message "%S -> %S " string code)
+          (message "没有找到 %S 对应的编码。" string))))))
 
 (defun pyim-delete-word ()
   "将高亮选择的词条从 `pyim-dcache-personal' 中删除。"
