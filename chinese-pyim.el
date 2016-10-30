@@ -500,7 +500,7 @@
 ;; 词库中不存在的中文词条。
 
 ;; *** 获取光标处的中文词条
-;; Chinese-pyim 包含了一个简单的命令：`pyim-aptwords-get', 这个命令
+;; Chinese-pyim 包含了一个简单的命令：`pyim-cwords-at-point', 这个命令
 ;; 可以得到光标处的 *英文* 或者 *中文* 词条的 *列表*，这个命令依赖分词函数：
 ;; `pyim-cstring-split-to-list'。
 

@@ -43,7 +43,7 @@
   (interactive "P")
   (or arg (setq arg 1))
   (dotimes (i arg)
-    (let* ((words (pyim-aptwords-get t))
+    (let* ((words (pyim-cwords-at-point t))
            (max-length
             (cl-reduce #'max
                        (cons 0 (mapcar #'(lambda (word)
@@ -57,7 +57,7 @@
   (interactive "P")
   (or arg (setq arg 1))
   (dotimes (i arg)
-    (let* ((words (pyim-aptwords-get))
+    (let* ((words (pyim-cwords-at-point))
            (max-length
             (cl-reduce #'max
                        (cons 0 (mapcar #'(lambda (word)
@@ -66,11 +66,11 @@
            (max-length (max (or max-length 1) 1)))
       (backward-char max-length))))
 
-(defalias 'pyim-get-words-list-at-point 'pyim-aptwords-get)
-(make-obsolete 'pyim-get-words-list-at-point 'pyim-aptwords-get
+(defalias 'pyim-get-words-list-at-point 'pyim-cwords-at-point)
+(make-obsolete 'pyim-get-words-list-at-point 'pyim-cwords-at-point
                "Chinese-pyim 2.0")
 
-(defun pyim-aptwords-get (&optional end-of-point)
+(defun pyim-cwords-at-point (&optional end-of-point)
   "获取光标当前的词条列表，当 `end-of-point' 设置为 t 时，获取光标后的词条列表。
 词条列表的每一个元素都是列表，这些列表的第一个元素为词条，第二个元素为光标处到词条
 头部的距离，第三个元素为光标处到词条尾部的距离。

@@ -624,7 +624,7 @@ Chinese-pyim 包含了一个简单的分词函数：\`pyim-cstring-split-to-list
 
 ### 获取光标处的中文词条<a id="orgheadline38"></a>
 
-Chinese-pyim 包含了一个简单的命令：\`pyim-aptwords-get', 这个命令可以得到光标处的 **英文** 或者 **中文** 词条的 \*列表\*，这个命令依赖分词函数：
+Chinese-pyim 包含了一个简单的命令：\`pyim-cwords-at-point', 这个命令可以得到光标处的 **英文** 或者 **中文** 词条的 \*列表\*，这个命令依赖分词函数：
 \`pyim-cstring-split-to-list'。
 
 ### 让 \`forward-word' 和 \`back-backward’ 在中文环境下正常工作<a id="orgheadline39"></a>
