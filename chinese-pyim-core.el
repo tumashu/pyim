@@ -544,7 +544,7 @@ If you don't like this funciton, set the variable to nil")
   (pyim-cchar2pinyin-cache-create)
   (pyim-pinyin2cchar-cache-create)
   (run-hooks 'pyim-load-hook)
-  ;; 如果 dicts 有变化，重新生成 dict cache。
+  ;; 如果 dicts 有变化，重新生成 `pyim-dcache-common' 缓存。
   (pyim-dcache-create-common-dcache)
   (unless (member 'pyim-dcache-save-caches kill-emacs-hook)
     (add-to-list 'kill-emacs-hook 'pyim-dcache-save-caches))
