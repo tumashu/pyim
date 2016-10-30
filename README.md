@@ -25,7 +25,7 @@
     - [Chinese-pyim 出现错误时，如何开启 debug 模式](#chinese-pyim-出现错误时，如何开启-debug-模式)
     - [选词框弹出位置不合理或者选词框内容显示不全](#选词框弹出位置不合理或者选词框内容显示不全)
     - [如何查看 Chinese-pyim 文档。](#如何查看-chinese-pyim-文档。)
-    - [将光标处的拼音字符串转换为中文 (与 vimim 的 “点石成金” 功能类似)](#将光标处的拼音字符串转换为中文-(与-vimim-的-“点石成金”-功能类似))
+    - [将光标处的拼音或者五笔字符串转换为中文 (与 vimim 的 “点石成金” 功能类似)](#将光标处的拼音或者五笔字符串转换为中文-(与-vimim-的-“点石成金”-功能类似))
     - [如何添加自定义拼音词库](#如何添加自定义拼音词库)
     - [如何手动安装和管理词库](#如何手动安装和管理词库)
     - [如何快速切换词库](#如何快速切换词库)
@@ -84,8 +84,8 @@ Chinese-pyim 的目标是： **尽最大的努力成为一个好用的 emacs 中
 3.  在 emacs 配置文件中（比如: ~/.emacs）添加如下代码：
 
         (require 'chinese-pyim)
-        (require 'chinese-pyim-basedict) ; 拼音词库，五笔用户 *不要* 安装
-        (chinese-pyim-basedict-enable)   ; 拼音词库
+        (require 'chinese-pyim-basedict) ; 拼音词库设置，五笔用户 *不需要* 此行设置
+        (chinese-pyim-basedict-enable)   ; 拼音词库，五笔用户 *不需要* 此行设置
 
 ## 配置<a id="orgheadline11"></a>
 
@@ -223,14 +223,15 @@ Chinese-pyim-greatdict 包对应的词库由 [WenLiang Xiao](https://github.com/
 
 ### 使用双拼模式<a id="orgheadline13"></a>
 
-Chinese-pyim 支持双拼模式，用户可以通过变量 \`pyim-default-scheme' 来设定当前使用的双拼方案，比如：
+Chinese-pyim 支持双拼输入模式，用户可以通过变量 \`pyim-default-scheme' 来设定：
 
     (setq pyim-default-scheme 'pyim-shuangpin)
 
 注意：
 
-1.  用户可以使用变量 \`pyim-schemes' 添加自定义双拼方案。
-2.  用户可能需要重新设置 \`pyim-translate-trigger-char'。
+1.  chinese-pyim 支持微软双拼（microsoft-shuangpin）和小鹤双拼（xiaohe-shuangpin）。
+2.  用户可以使用变量 \`pyim-schemes' 添加自定义双拼方案。
+3.  用户可能需要重新设置 \`pyim-translate-trigger-char'。
 
 ### 使用五笔输入<a id="orgheadline14"></a>
 
@@ -240,7 +241,7 @@ Chinese-pyim 支持五笔输入模式，用户可以通过变量 \`pyim-default-
 
 在使用五笔输入法之前，请用 pyim-dicts-manager 添加一个五笔词库，词库的格式类似：
 
-    ;;; -*- coding: utf-8 -*-
+    ;;; -*- coding: utf-8-unix -*-
     .aaaa 工
     .aad 式
     .aadk 匿
@@ -252,10 +253,9 @@ Chinese-pyim 支持五笔输入模式，用户可以通过变量 \`pyim-default-
     .aak 戒
 
 最简单的方式是从 melpa 中安装 chinese-pyim-wbdict 包，然后根据它的
-[README](https://github.com/tumashu/chinese-pyim-wbdict) 配置。
+[README](https://github.com/tumashu/chinese-pyim-wbdict) 来配置。
 
-注意：为了简化代码和提高输入法响应速度，pyim 直接将拼音词库和五笔词库合并到同一个dcache 文件中，所以 chinese-pyim **强制规定** 五笔编码
-**必须** 都以 '.' 开头，比如 '.aaaa' ,这样可以避免出现不必要的混乱。
+注意：为了简化代码和提高输入法响应速度，pyim 直接将拼音词库和五笔词库合并到同一个dcache 文件中，所以 chinese-pyim **强制规定** 在词库中，五笔编码 **必须** 都以 '.' 开头，比如 '.aaaa' ,这样可以避免出现不必要的混乱。
 
 用户可以使用命令：\`pyim-search-word-code' 来查询当前选择词条的五笔编码。
 
@@ -302,11 +302,11 @@ Chinese-pyim **内置** 了多种词条获取的方式：
 
 用户可以通过下面的代码来调整 backends 设置，比如：
 
-    (setq pyim-backends '(personal dicts chars pinyin-shouzimu pinyin-znabc))
+    (setq pyim-backends '(dcache-personal dcache-common pinyin-chars pinyin-shouzimu pinyin-znabc))
 
 一些 backends 可能会导致输入法卡顿，用户可以通过下面的方式关闭：
 
-    (setq pyim-backends '(personal dicts chars))
+    (setq pyim-backends '(dcache-personal dcache-common pinyin-chars))
 
 ### 切换全角标点与半角标点<a id="orgheadline19"></a>
 
@@ -472,7 +472,7 @@ Chinese-pyim 开发使用 lentic 文学编程模式，代码文档隐藏在comme
 
 <http://tumashu.github.io/chinese-pyim/>
 
-### 将光标处的拼音字符串转换为中文 (与 vimim 的 “点石成金” 功能类似)<a id="orgheadline29"></a>
+### 将光标处的拼音或者五笔字符串转换为中文 (与 vimim 的 “点石成金” 功能类似)<a id="orgheadline29"></a>
 
     (global-set-key (kbd "M-i") 'pyim-convert-pinyin-at-point)
 
