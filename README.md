@@ -135,7 +135,7 @@ Chinese-pyim 的目标是： **尽最大的努力成为一个好用的 emacs 中
       (add-hook 'emacs-startup-hook
                 #'(lambda () (pyim-restart-1 t)))
       :bind
-      (("M-j" . pyim-convert-pinyin-at-point) ;与 pyim-probe-dynamic-english 配合
+      (("M-j" . pyim-convert-code-at-point) ;与 pyim-probe-dynamic-english 配合
        ("C-;" . pyim-delete-word-from-personal-buffer)))
 
 ### 添加词库文件<a id="orgheadline9"></a>
@@ -438,7 +438,7 @@ Chinese-pyim **内置** 了多种词条获取的方式：
 
     <tr>
     <td class="org-left">&#xa0;</td>
-    <td class="org-left">3. 使用命令 pyim-convert-pinyin-at-point 可以将光标前的拼音字符串强制转换为中文。</td>
+    <td class="org-left">3. 使用命令 pyim-convert-code-at-point 可以将光标前的拼音字符串强制转换为中文。</td>
     </tr>
     </tbody>
     </table>
@@ -519,7 +519,7 @@ Chinese-pyim 开发使用 lentic 文学编程模式，代码文档隐藏在comme
 
 ### 将光标处的拼音或者五笔字符串转换为中文 (与 vimim 的 “点石成金” 功能类似)<a id="orgheadline29"></a>
 
-    (global-set-key (kbd "M-i") 'pyim-convert-pinyin-at-point)
+    (global-set-key (kbd "M-i") 'pyim-convert-code-at-point)
 
 ### 如何添加自定义拼音词库<a id="orgheadline8"></a>
 

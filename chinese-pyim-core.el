@@ -2542,9 +2542,9 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
     (pyim-terminate-translation)))
 ;; #+END_SRC
 
-;; *** 将光标前的拼音字符串转换为中文
+;; *** 将光标前的 code 字符串转换为中文
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-convert-pinyin-at-point ()
+(defun pyim-convert-code-at-point ()
   (interactive)
   (unless (equal input-method-function 'pyim-input-method)
     (toggle-input-method))
@@ -2554,15 +2554,15 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
                      (buffer-substring-no-properties
                       (region-beginning) (region-end))
                    (buffer-substring (point) (line-beginning-position))))
-         pinyin length)
+         code length)
     (and (string-match "[a-z'-]+ *$" string)
-         (setq pinyin (match-string 0 string))
-         (setq length (length pinyin))
-         (setq pinyin (replace-regexp-in-string " +" "" pinyin)))
+         (setq code (match-string 0 string))
+         (setq length (length code))
+         (setq code (replace-regexp-in-string " +" "" code)))
     (when (and length (> length 0))
       (delete-char (- 0 length))
       (insert (mapconcat #'char-to-string
-                         (pyim-input-method pinyin) "")))))
+                         (pyim-input-method code) "")))))
 ;; #+END_SRC
 
 ;; *** 取消当前输入
