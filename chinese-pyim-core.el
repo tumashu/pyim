@@ -540,6 +540,7 @@ If you don't like this funciton, set the variable to nil")
   (mapc 'make-local-variable pyim-local-variable-list)
   (when (and restart save-dcache)
     (pyim-dcache-save-caches))
+  ;; 设置于 dcache 相关的几个变量。
   (pyim-dcache-init-variables)
   (pyim-cchar2pinyin-cache-create)
   (pyim-pinyin2cchar-cache-create)
