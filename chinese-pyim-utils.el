@@ -80,7 +80,7 @@
 1. 使用 `thing-at-point' 获取当前光标处的一个字符串，一般而言：英文会得到
    一个单词，中文会得到一个句子。
 2. 英文单词直接返回这个单词的列表。
-3. 中文句子首先用 `pyim-cstring:split2list' 分词，然后根据光标在中文句子
+3. 中文句子首先用 `pyim-cstring-split-to-list' 分词，然后根据光标在中文句子
    中的位置，筛选出符合要求的中文词条。得到并返回 *一个* 或者 *多个* 词条
    的列表。"
   ;;
@@ -109,7 +109,7 @@
               (1+ (- current-pos str-beginning-pos)))))
          str-offset-adjusted words-alist results)
 
-    ;; 当字符串长度太长时， `pyim-cstring:split2list'
+    ;; 当字符串长度太长时， `pyim-cstring-split-to-list'
     ;; 的速度比较慢，这里确保待分词的字符串长度不超过10.
     (when (and str (not (pyim-string-match-p "\\CC" str)))
       (if (> str-offset 5)
@@ -123,7 +123,7 @@
     (cond
      ((and str (not (pyim-string-match-p "\\CC" str)))
       (setq words-alist
-            (pyim-cstring:split2list str))
+            (pyim-cstring-split-to-list str))
       (dolist (word-list words-alist)
         (let ((word-begin (nth 1 word-list))
               (word-end (nth 2 word-list)))
@@ -144,7 +144,7 @@
                       (- current-pos str-beginning-pos)
                       (- str-end-pos current-pos)))))))
 
-(defun pyim-cstring:split2list (chinese-string &optional max-word-length)
+(defun pyim-cstring-split-to-list (chinese-string &optional max-word-length)
   "一个基于 Chinese-pyim 的中文分词函数。这个函数可以将中文字符
 串 `chinese-string' 分词，得到一个词条 alist，这个 alist 的元素
 都是列表，其中第一个元素为分词得到的词条，第二个元素为词条相对于
@@ -204,10 +204,10 @@
       result)))
 
 ;; (let ((str "医生随时都有可能被患者及其家属反咬一口"))
-;;   (benchmark 1 '(pyim-cstring:split2list str)))
+;;   (benchmark 1 '(pyim-cstring-split-to-list str)))
 
 ;; (let ((str "医生随时都有可能被患者及其家属反咬一口"))
-;;   (pyim-cstring:split2list str))
+;;   (pyim-cstring-split-to-list str))
 
 (defun pyim-cstring:split2string (string &optional prefer-short-word
                                          separator max-word-length)
@@ -238,7 +238,7 @@
                     ;;  判断两个词条在字符串中的位置
                     ;;  是否冲突，如果冲突，仅保留一个，
                     ;;  删除其它。
-                    (pyim-cstring:split2list chinese-string max-word-length)
+                    (pyim-cstring-split-to-list chinese-string max-word-length)
                     :test #'(lambda (x1 x2)
                               (let ((begin1 (nth 1 x1))
                                     (begin2 (nth 1 x2))

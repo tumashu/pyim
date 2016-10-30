@@ -480,7 +480,7 @@
 ;; 2. `pyim-hanzi2pinyin-simple'  （不考虑多音字）
 
 ;; *** 中文分词
-;; Chinese-pyim 包含了一个简单的分词函数：`pyim-cstring:split2list', 可以
+;; Chinese-pyim 包含了一个简单的分词函数：`pyim-cstring-split-to-list', 可以
 ;; 将一个中文字符串分成一个词条列表，比如：
 
 ;; #+BEGIN_EXAMPLE
@@ -502,7 +502,7 @@
 ;; *** 获取光标处的中文词条
 ;; Chinese-pyim 包含了一个简单的命令：`pyim-aptwords-get', 这个命令
 ;; 可以得到光标处的 *英文* 或者 *中文* 词条的 *列表*，这个命令依赖分词函数：
-;; `pyim-cstring:split2list'。
+;; `pyim-cstring-split-to-list'。
 
 ;; *** 让 `forward-word' 和 `back-backward’ 在中文环境下正常工作
 ;; 中文词语没有强制用空格分词，所以 emacs 内置的命令 `forward-word' 和 `backward-word'
