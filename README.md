@@ -29,7 +29,7 @@
     - [如何添加自定义拼音词库](#如何添加自定义拼音词库)
     - [如何手动安装和管理词库](#如何手动安装和管理词库)
     - [如何快速切换词库](#如何快速切换词库)
-    - [emacs 启动时加载 chinese-pyim 词库](#emacs-启动时加载-chinese-pyim-词库)
+    - [Emacs 启动时加载 chinese-pyim 词库](#emacs-启动时加载-chinese-pyim-词库)
     - [将汉字字符串转换为拼音字符串](#将汉字字符串转换为拼音字符串)
     - [中文分词](#中文分词)
     - [获取光标处的中文词条](#获取光标处的中文词条)
@@ -593,7 +593,7 @@ Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面几�
                      :file "/path/to/pyim-bigdict.pyim.gz" )))
       (pyim-restart-1 t))
 
-### emacs 启动时加载 chinese-pyim 词库<a id="orgheadline35"></a>
+### Emacs 启动时加载 chinese-pyim 词库<a id="orgheadline35"></a>
 
     (add-hook 'emacs-startup-hook
               #'(lambda () (pyim-restart-1 t)))

@@ -465,7 +465,7 @@
 ;;   (pyim-restart-1 t))
 ;; #+END_EXAMPLE
 
-;; *** emacs 启动时加载 chinese-pyim 词库
+;; *** Emacs 启动时加载 chinese-pyim 词库
 
 ;; #+BEGIN_EXAMPLE
 ;; (add-hook 'emacs-startup-hook
