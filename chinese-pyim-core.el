@@ -534,11 +534,11 @@ If you don't like this funciton, set the variable to nil")
 ;; 只是在输入法重启之前，询问用户，是否保存个人词频信息。
 
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-start (name &optional active-func restart save-dcache)
+(defun pyim-start (name &optional active-func restart save-personal-dcache refresh-common-dcache)
   (interactive)
   (mapc 'kill-local-variable pyim-local-variable-list)
   (mapc 'make-local-variable pyim-local-variable-list)
-  (when (and restart save-dcache)
+  (when (and restart save-personal-dcache)
     (pyim-dcache-save-caches))
   ;; 设置于 dcache 相关的几个变量。
   (pyim-dcache-init-variables)
@@ -546,7 +546,7 @@ If you don't like this funciton, set the variable to nil")
   (pyim-pinyin2cchar-cache-create)
   (run-hooks 'pyim-load-hook)
   ;; 如果 `pyim-dicts' 有变化，重新生成 `pyim-dcache-common' 缓存。
-  (pyim-dcache-create-common-dcache)
+  (pyim-dcache-create-common-dcache refresh-common-dcache)
   (unless (member 'pyim-dcache-save-caches kill-emacs-hook)
     (add-to-list 'kill-emacs-hook 'pyim-dcache-save-caches))
 
@@ -559,7 +559,8 @@ If you don't like this funciton, set the variable to nil")
     (add-hook 'minibuffer-exit-hook 'pyim-exit-from-minibuffer))
   (run-hooks 'pyim-active-hook)
   (when restart
-    (message "Chinese-pyim 重启完成。")))
+    (message "Chinese-pyim 重启完成。"))
+  nil)
 
 (defun pyim-exit-from-minibuffer ()
   (deactivate-input-method)
@@ -568,14 +569,17 @@ If you don't like this funciton, set the variable to nil")
 
 (defun pyim-restart ()
   "重启 Chinese-pyim，不建议用于编程环境。"
-  (interactive)
-  (let ((save-dcache-p
-         (yes-or-no-p "重启 Chinese-pyim 前，需要保存个人词频信息吗？ ")))
-    (pyim-restart-1 save-dcache-p)))
+  (interactive
+   (let ((save-personal-dcache
+          (yes-or-no-p "重启 Chinese-pyim 前，需要保存个人词频信息吗？ "))
+         (refresh-common-dcache
+          (yes-or-no-p "需要强制刷新词库缓存吗？ ")))
+     (pyim-restart-1 save-personal-dcache refresh-common-dcache))))
 
-(defun pyim-restart-1 (save-dcache)
+(defun pyim-restart-1 (&optional save-personal-dcache refresh-common-dcache)
   "重启 Chinese-pyim，用于编程环境。"
-  (pyim-start "Chinese-pyim" nil t save-dcache))
+  (pyim-start "Chinese-pyim" nil t
+              save-personal-dcache refresh-common-dcache))
 ;; #+END_SRC
 ;; ** 处理词库文件
 ;; *** 自定义词库
