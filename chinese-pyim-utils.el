@@ -182,9 +182,8 @@
                     (get-possible-words (cdr my-list) (1+ number)))))))
 
     ;; 如果 Chinese-pyim 词库没有加载，加载 Chinese-pyim 词库，
-    ;; 确保 pyim-get 可以正常运行。
-    (unless pyim-buffer-list
-      (setq pyim-buffer-list (pyim-load-file)))
+    ;; 确保 pyim-dcache-get 可以正常运行。
+    (pyim-dcache-init-variables)
 
     (let ((string-alist
            (get-possible-words
@@ -194,7 +193,7 @@
       (dolist (string-list string-alist)
         (let ((pinyin-list (pyim-hanzi2pinyin (car string-list) nil "-" t)))
           (dolist (pinyin pinyin-list)
-            (let ((words (pyim-get pinyin '(pinyin-dict)))) ; 忽略个人词库 buffer 可以提高速度
+            (let ((words (pyim-dcache-get pinyin pyim-dcache-common))) ; 忽略个人词库可以提高速度
               (dolist (word words)
                 (when (equal word (car string-list))
                   (push string-list result)))))))
