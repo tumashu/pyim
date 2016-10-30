@@ -2555,14 +2555,17 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
                       (region-beginning) (region-end))
                    (buffer-substring (point) (line-beginning-position))))
          code length)
-    (and (string-match "[a-z'-]+ *$" string)
-         (setq code (match-string 0 string))
-         (setq length (length code))
-         (setq code (replace-regexp-in-string " +" "" code)))
-    (when (and length (> length 0))
-      (delete-char (- 0 length))
-      (insert (mapconcat #'char-to-string
-                         (pyim-input-method code) "")))))
+    (if (pyim-string-match-p "[[:punct:]]" (pyim-char-before-to-string 0))
+        ;; 当光标前的一个字符是标点符号时，半角/全角切换。
+        (call-interactively 'pyim-punctuation-translate-at-point)
+      (and (string-match "[a-z'-]+ *$" string)
+           (setq code (match-string 0 string))
+           (setq length (length code))
+           (setq code (replace-regexp-in-string " +" "" code)))
+      (when (and length (> length 0))
+        (delete-char (- 0 length))
+        (insert (mapconcat #'char-to-string
+                           (pyim-input-method code) ""))))))
 ;; #+END_SRC
 
 ;; *** 取消当前输入
