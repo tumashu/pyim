@@ -410,8 +410,8 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
   "Chinese-pyim 会将一个 code 分解为一个或者多个 scode （splited code）,
 这个变量用于保存分解得到的结果。")
 
-(defvar pyim-guidance-list nil
-  "这个 list 用于构建选词框中显示的字符串，其结构类似：
+(defvar pyim-guidance-hashtable (make-hash-table)
+  "这个 hashtable 的信息用于构建选词框中显示的字符串，其内容类似：
 
 (:key \"ni hao\" :current-page 1 :total-page 9 :words \"1.你好 2.你好 ...\")")
 
@@ -483,7 +483,7 @@ If you don't like this funciton, set the variable to nil")
     pyim-input-ascii
     pyim-english-input-switch-functions
     pyim-punctuation-half-width-functions
-    pyim-guidance-list
+    pyim-guidance-hashtable
     pyim-translating
     pyim-overlay
 
@@ -998,7 +998,7 @@ BUG：无法有效的处理多音字。"
       (unwind-protect
           (let ((input-string (pyim-start-translation key-or-string)))
             ;; (message "input-string: %s" input-string)
-            (setq pyim-guidance-list nil)
+            (clrhash pyim-guidance-hashtable)
             (when (and (stringp input-string)
                        (> (length input-string) 0))
               (if input-method-exit-on-first-char
@@ -1041,7 +1041,7 @@ Return the input string."
           (let* ((prompt (when input-method-use-echo-area
                            (format "[%s]: %s"
                                    (replace-regexp-in-string "-" "" pyim-current-key)
-                                   (plist-get pyim-guidance-list :words))))
+                                   (gethash :words pyim-guidance-hashtable))))
                  (keyseq (read-key-sequence prompt nil nil t))
                  (cmd (lookup-key pyim-mode-map keyseq)))
             ;; (message "key: %s, cmd:%s\nlcmd: %s, lcmdv: %s, tcmd: %s"
@@ -1122,7 +1122,7 @@ Return the input string."
   (setq pyim-translating nil)
   (pyim-delete-region)
   (setq pyim-current-choices nil)
-  (setq pyim-guidance-list nil)
+  (clrhash pyim-guidance-hashtable)
   (when (and (eq pyim-use-tooltip 'pos-tip)
              (pyim-tooltip-pos-tip-usable-p))
     (pos-tip-hide)))
@@ -1669,11 +1669,10 @@ Return the input string."
                      (pyim-page-auto-select-word scheme-name)
                      t)))
       (setq pyim-current-str (replace-regexp-in-string "-" "" pyim-current-key))
-      (setq pyim-guidance-list
-            (plist-put pyim-guidance-list
-                       :words
-                       (format "%s" (replace-regexp-in-string
-                                     "-" " " pyim-current-key))))
+      (puthash :words
+               (format "%s" (replace-regexp-in-string
+                             "-" " " pyim-current-key))
+               pyim-guidance-hashtable)
       (pyim-show))))
 
 ;; #+END_SRC
@@ -1782,7 +1781,7 @@ Return the input string."
 ;; 1. pyim-guidance:two-lines
 ;; 2. pyim-guidance:one-line
 
-;; 这些函数会根据 `pyim-guidance-list' 中的信息来得到所需要的字符串。
+;; 这些函数会根据 `pyim-guidance-hashtable' 中的信息来得到所需要的字符串。
 
 ;;  *待选词列表* 一般都很长，不可能在一行中完全显示，所以 Chinese-pyim 使
 ;;  用了 page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以逻辑的分
@@ -1822,7 +1821,7 @@ Return the input string."
 ;;    #+END_EXAMPLE
 ;;    这个 sublist 的起点为  `pyim-page-start' 的返回值，终点为
 ;;    `pyim-page-end' 的返回值。然后使用这个 sublist 来构建类似下面的字符
-;;    串，并保存到 `pyim-guidance-list'  :words 关键字对应的位置。
+;;    串，并保存到 `pyim-guidance-hashtable'  :words 关键字对应的位置。
 ;;    #+BEGIN_EXAMPLE
 ;;    "1. 薿 2.旎 3.睨 4.铌 5.昵 6.匿 7.倪 8.霓 9.暱"
 ;;    #+END_EXAMPLE
@@ -1833,7 +1832,7 @@ Return the input string."
 ;;    置在下一页。
 ;; 2. 然后将 `pyim-current-pos' 的值设定为 `pyim-page-start' 的返回值，确
 ;;    保 `pyim-current-pos' 的取值为下一页第一个词条的位置。
-;; 3. 最后调用 `pyim-page-format-page' 来重新设置 `pyim-guidance-list' 。
+;; 3. 最后调用 `pyim-page-format-page' 来重新设置 `pyim-guidance-hashtable' 。
 
 ;; #+BEGIN_SRC emacs-lisp
 ;;;  page format
@@ -1885,36 +1884,27 @@ Return the input string."
          (choice (pyim-subseq choices start end))
          (pos (- (min pyim-current-pos (length choices)) start))
          (i 0))
-    (setq pyim-guidance-list
-          (plist-put pyim-guidance-list
-                     :key
-                     (replace-regexp-in-string "-" " " pyim-current-key)))
-    (setq pyim-guidance-list
-          (plist-put pyim-guidance-list
-                     :current-page
-                     (pyim-page-current-page)))
-    (setq pyim-guidance-list
-          (plist-put pyim-guidance-list
-                     :total-page
-                     (pyim-page-total-page)))
-    (setq pyim-guidance-list
-          (plist-put pyim-guidance-list
-                     :words
-                     (mapconcat 'identity
-                                (mapcar
-                                 (lambda (c)
-                                   (setq i (1+ i))
-                                   (let (str)
-                                     (setq str (if (consp c)
-                                                   (concat (car c) (cdr c))
-                                                 c))
-                                     ;; 高亮当前选择的词条，用于 `pyim-page-next-word'
-                                     (if (and hightlight-current
-                                              (= i pos))
-                                         (format "%d[%s]" i
-                                                 (propertize str 'face 'pyim-minibuffer-string-face))
-                                       (format "%d.%s " i str))))
-                                 choice) "")))))
+    (puthash :key (replace-regexp-in-string "-" " " pyim-current-key)
+             pyim-guidance-hashtable)
+    (puthash :current-page (pyim-page-current-page) pyim-guidance-hashtable)
+    (puthash :total-page (pyim-page-total-page) pyim-guidance-hashtable)
+    (puthash :words
+             (mapconcat 'identity
+                        (mapcar
+                         (lambda (c)
+                           (setq i (1+ i))
+                           (let (str)
+                             (setq str (if (consp c)
+                                           (concat (car c) (cdr c))
+                                         c))
+                             ;; 高亮当前选择的词条，用于 `pyim-page-next-word'
+                             (if (and hightlight-current
+                                      (= i pos))
+                                 (format "%d[%s]" i
+                                         (propertize str 'face 'pyim-minibuffer-string-face))
+                               (format "%d.%s " i str))))
+                         choice) "")
+             pyim-guidance-hashtable)))
 
 (defun pyim-page-next-page (arg)
   (interactive "p")
@@ -1951,7 +1941,7 @@ Return the input string."
 ;; #+END_SRC
 
 ;; *** 显示选词框
-;; 当`pyim-guidance-list' 构建完成后，Chinese-pyim 使用函数 `pyim-show' 重
+;; 当`pyim-guidance-hashtable' 构建完成后，Chinese-pyim 使用函数 `pyim-show' 重
 ;; 新显示选词框，`pyim-show' 会根据 `pyim-use-tooltip' 的取值来决定使用
 ;; 哪种方式来显示选词框（minibuffer 或者 tooltip ）。
 
@@ -1977,17 +1967,17 @@ Return the input string."
         (pyim-minibuffer-message
          (format "  [%s]\n%s"
                  current-input-method-title
-                 (plist-get pyim-guidance-list :words)))
+                 (gethash :words pyim-guidance-hashtable)))
       ;; Show the guidance in echo area without logging.
       (let ((message-log-max nil))
         (if pyim-use-tooltip
             (pyim-tooltip-show
-             (funcall pyim-guidance pyim-guidance-list)
+             (funcall pyim-guidance pyim-guidance-hashtable)
              (overlay-start pyim-overlay))
-          (message "%s" (pyim-guidance:minibuffer pyim-guidance-list)))))))
+          (message "%s" (pyim-guidance:minibuffer pyim-guidance-hashtable)))))))
 
-(defun pyim-guidance:two-lines (guidance-list)
-  "将 guidance-list 格式化为类似下面格式的字符串，这个字符串将在
+(defun pyim-guidance:two-lines (guidance-hashtable)
+  "将 guidance-hashtable 格式化为类似下面格式的字符串，这个字符串将在
 tooltip 选词框中显示。
 
 +----------------------------+
@@ -1995,32 +1985,32 @@ tooltip 选词框中显示。
 | 1.你好 2.你号 ...          |
 +----------------------------+
 
-guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
+guidance-hashtable 的结构与 `pyim-guidance-hashtable' 的结构相同。"
   (format "=> %s [%s/%s]: \n%s"
-          (plist-get guidance-list :key)
-          (plist-get guidance-list :current-page)
-          (plist-get guidance-list :total-page)
-          (plist-get guidance-list :words)))
+          (gethash :key guidance-hashtable)
+          (gethash :current-page guidance-hashtable)
+          (gethash :total-page guidance-hashtable)
+          (gethash :words guidance-hashtable)))
 
-(defun pyim-guidance:one-line (guidance-list)
-  "将 guidance-list 格式化为类似下面格式的字符串，这个字符串将在
+(defun pyim-guidance:one-line (guidance-hashtable)
+  "将 guidance-hashtable 格式化为类似下面格式的字符串，这个字符串将在
 tooltip 选词框中显示。
 
 +-----------------------------------+
 | [ni hao]: 1.你好 2.你号 ... (1/9) |
 +-----------------------------------+
 
-guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
+guidance-hashtable 的结构与 `pyim-guidance-hashtable' 的结构相同。"
   (format "[%s]: %s(%s/%s)"
           (replace-regexp-in-string
            " +" ""
-           (plist-get guidance-list :key))
-          (plist-get guidance-list :words)
-          (plist-get guidance-list :current-page)
-          (plist-get guidance-list :total-page)))
+           (gethash :key guidance-hashtable))
+          (gethash :words guidance-hashtable)
+          (gethash :current-page guidance-hashtable)
+          (gethash :total-page guidance-hashtable)))
 
-(defun pyim-guidance:vertical (guidance-list)
-  "将 guidance-list 格式化为类似下面格式的字符串，这个字符串将在
+(defun pyim-guidance:vertical (guidance-hashtable)
+  "将 guidance-hashtable 格式化为类似下面格式的字符串，这个字符串将在
 tooltip 选词框中显示。
 
 +--------------+
@@ -2029,31 +2019,31 @@ tooltip 选词框中显示。
 | 2.你号 ...   |
 +--------------+
 
-guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
+guidance-hashtable 的结构与 `pyim-guidance-hashtable' 的结构相同。"
   (format "=> %s [%s/%s]: \n%s"
-          (plist-get guidance-list :key)
-          (plist-get guidance-list :current-page)
-          (plist-get guidance-list :total-page)
+          (gethash :key guidance-hashtable)
+          (gethash :current-page guidance-hashtable)
+          (gethash :total-page guidance-hashtable)
           (replace-regexp-in-string
            "]" "]\n"
            (replace-regexp-in-string
             " +" "\n"
-            (plist-get guidance-list :words)))))
+            (gethash :words guidance-hashtable)))))
 
-(defun pyim-guidance:minibuffer (guidance-list)
-  "将 guidance-list 格式化为类似下面格式的字符串，这个字符串
+(defun pyim-guidance:minibuffer (guidance-hashtable)
+  "将 guidance-hashtable 格式化为类似下面格式的字符串，这个字符串
 将在 minibuffer 中显示。
 
 +----------------------------------+
 | ni hao [1/9] 1.你好 2.你号 ...   |
 +----------------------------------+
 
-guidance-list 的结构与 `pyim-guidance-list' 的结构相同。"
+guidance-hashtable 的结构与 `pyim-guidance-hashtable' 的结构相同。"
   (format "%s [%s/%s]: %s"
-          (plist-get guidance-list :key)
-          (plist-get guidance-list :current-page)
-          (plist-get guidance-list :total-page)
-          (plist-get guidance-list :words)))
+          (gethash :key guidance-hashtable)
+          (gethash :current-page guidance-hashtable)
+          (gethash :total-page guidance-hashtable)
+          (gethash :words guidance-hashtable)))
 
 (defun pyim-delete-region ()
   "Delete the text in the current translation region of E+."
