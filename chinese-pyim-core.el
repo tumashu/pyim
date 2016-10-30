@@ -2579,8 +2579,8 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-quit-no-clear ()
   (interactive)
-  (setq pyim-current-str (replace-regexp-in-string "-" ""
-                                                   pyim-current-key))
+  (setq pyim-current-str
+        (replace-regexp-in-string "-" "" pyim-current-key))
   (pyim-terminate-translation))
 ;; #+END_SRC
 
