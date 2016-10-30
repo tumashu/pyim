@@ -122,7 +122,7 @@ plist 来表示，比如：
      :rest-chars "vmpfwckzyjqdltxuognbhsrei'-a"
      :prefer-trigger-chars "v")
     (wubi
-     :document "全拼输入法方案（不可删除）。"
+     :document "五笔输入法。"
      :class wubi
      :first-chars "abcdefghjklmnopqrstwxyz"
      :rest-chars "vmpfwckzyjqdltxuognbhsrei'-a"
