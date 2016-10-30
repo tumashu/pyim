@@ -209,7 +209,7 @@
 ;; (let ((str "医生随时都有可能被患者及其家属反咬一口"))
 ;;   (pyim-cstring-split-to-list str))
 
-(defun pyim-cstring:split2string (string &optional prefer-short-word
+(defun pyim-cstring-split-to-string (string &optional prefer-short-word
                                          separator max-word-length)
   "将一个中文字符串分词，并且在分词的位置插入空格或者自定义分隔符 `separator'，
 较长的词条优先使用，如果 `prefer-short-word' 设置为 t，则优先使用较短的词条。
@@ -225,14 +225,14 @@
      #'(lambda (str)
          (when (> (length str) 0)
            (if (not (pyim-string-match-p "\\CC" str))
-               (pyim-cstring:split2string-1
+               (pyim-cstring-split-to-string-1
                 str prefer-short-word separator max-word-length)
              (concat " " str " "))))
      string-list "")))
 
-(defun pyim-cstring:split2string-1 (chinese-string &optional prefer-short-word
+(defun pyim-cstring-split-to-string-1 (chinese-string &optional prefer-short-word
                                                    separator max-word-length)
-  "`pyim-cstring:split2string' 内部函数。"
+  "`pyim-cstring-split-to-string' 内部函数。"
   (let ((str-length (length chinese-string))
         (word-list (cl-delete-duplicates
                     ;;  判断两个词条在字符串中的位置
@@ -277,7 +277,7 @@
                    (line-end-position))))
       (delete-region (line-beginning-position)
                      (min (+ (line-end-position) 1) (point-max)))
-      (insert (pyim-cstring:split2string string))
+      (insert (pyim-cstring-split-to-string string))
       (insert "\n")))
   (goto-char (point-min))
   (message "分词完成！"))
