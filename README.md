@@ -91,7 +91,52 @@ Chinese-pyim 的目标是： **尽最大的努力成为一个好用的 emacs 中
 
 ### 配置实例<a id="orgheadline7"></a>
 
-对 Chinese-pyim 感兴趣的同学，可以看看我的 Chinese-pyim 配置，大体了解一下 Chinese-pyim 的用法：[Tumashu's emacs configure](https://github.com/tumashu/emacs-helper/blob/master/eh-basic.el) 。
+对 Chinese-pyim 感兴趣的同学，可以看看本人的 Chinese-pyim 配置（总是适用于最新版的 pyim）:
+
+    (use-package chinese-pyim
+      :ensure nil
+      :config
+      ;; 激活 basedict 拼音词库
+      (use-package chinese-pyim-basedict
+        :ensure nil
+        :config (chinese-pyim-basedict-enable))
+
+      ;; 五笔用户使用 wbdict 词库
+      ;; (use-package chinese-pyim-wbdict
+      ;;   :ensure nil
+      ;;   :config (chinese-pyim-wbdict-gbk-enable))
+
+      (setq default-input-method "chinese-pyim")
+
+      ;; 我使用全拼
+      (setq pyim-default-scheme 'quanpin)
+
+      ;; 设置 pyim 探针设置，可以实现 *无痛* 中英文切换 :-)
+      (setq-default pyim-english-input-switch-functions
+                    '(pyim-probe-dynamic-english
+                      pyim-probe-isearch-mode
+                      pyim-probe-program-mode
+                      pyim-probe-org-structure-template))
+
+      (setq-default pyim-punctuation-half-width-functions
+                    '(pyim-probe-punctuation-line-beginning
+                      pyim-probe-punctuation-after-punctuation))
+
+      ;; 开启拼音搜索功能
+      (setq pyim-isearch-enable-pinyin-search t)
+
+      ;; 使用 pupup-el 来绘制选词框
+      (setq pyim-use-tooltip 'popup)
+
+      ;; 选词框显示5个候选词
+      (setq pyim-page-length 5)
+
+      ;; 让 Emacs 启动时自动加载 pyim 词库
+      (add-hook 'emacs-startup-hook
+                #'(lambda () (pyim-restart-1 t)))
+      :bind
+      (("M-j" . pyim-convert-pinyin-at-point) ;与 pyim-probe-dynamic-english 配合
+       ("C-;" . pyim-delete-word-from-personal-buffer)))
 
 ### 添加词库文件<a id="orgheadline9"></a>
 
