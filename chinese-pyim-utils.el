@@ -266,7 +266,7 @@
     (setq result (nreverse result))
     (mapconcat #'identity result "")))
 
-(defun pyim-cstring:split-buffer ()
+(defun pyim-cstring-split-buffer ()
   "将一个 buffer 中的中文文章，进行分词操作。"
   (interactive)
   (message "分词开始！")
