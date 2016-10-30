@@ -700,12 +700,12 @@ If you don't like this funciton, set the variable to nil")
        #'(lambda (code words)
            (unless (pyim-string-match-p "-" code)
              (dolist (word words)
-               (puthash word
-                        ;; pyim 五笔编码都强制添加 "." ,防止和拼音编码冲突
-                        ;; 这里需要清理。
-                        (replace-regexp-in-string
-                         "^\\." ""  code)
-                        hashtable))))
+               (let ((value (gethash word hashtable)))
+                 (puthash word
+                          (if value
+                              `(,code ,@value)
+                            (list code))
+                          hashtable)))))
        dcache)
       (pyim-dcache-save-value-to-file hashtable file))))
 
