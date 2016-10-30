@@ -2263,7 +2263,7 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
      ((and (numberp punc-posit-before-1)
            (= punc-posit-before-1 0)
            (equal str trigger-str))
-      (pyim-punctuation-translate-last-n-punctuations 'full-width)
+      (pyim-punctuation-translate-last-n-puncts 'full-width)
       "")
 
      ;; 当光标前面为中文标点时， 按 `pyim-translate-trigger-char'
@@ -2271,7 +2271,7 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
      ((and (numberp punc-posit-before-1)
            (> punc-posit-before-1 0)
            (equal str trigger-str))
-      (pyim-punctuation-translate-last-n-punctuations 'half-width)
+      (pyim-punctuation-translate-last-n-puncts 'half-width)
       "")
 
      ;; 正常输入标点符号。
@@ -2391,7 +2391,7 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
           (insert (pyim-punctuation-return-proper-punct punc-list))
         (insert (car punc-list))))))
 
-(defun pyim-punctuation-translate-last-n-punctuations (&optional punct-style)
+(defun pyim-punctuation-translate-last-n-puncts (&optional punct-style)
   "将光标前面连续的n个标点符号进行全角/半角转换，当 `punct-style' 设置为 `full-width' 时，
 所有的标点符号转换为全角符号，设置为 `half-width' 时，转换为半角符号。"
   (interactive)
