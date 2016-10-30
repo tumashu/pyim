@@ -608,7 +608,7 @@ Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面几�
 
 ### 中文分词<a id="orgheadline37"></a>
 
-Chinese-pyim 包含了一个简单的分词函数：\`pyim-split-chinese-string'. 这个函数使用暴力匹配模式来分词，所以， **不能检测出** Chinese-pyim 词库中不存在的中文词条。另外，这个函数的分词速度比较慢，仅仅适用于中文短句的分词，不适用于文章分词。根据评估，20个汉字组成的字符串需要大约0.3s， 40个汉字消耗1s，随着字符串长度的增大消耗的时间呈几何倍数增加。
+Chinese-pyim 包含了一个简单的分词函数：\`pyim-cstring:split2list'. 这个函数使用暴力匹配模式来分词，所以， **不能检测出** Chinese-pyim 词库中不存在的中文词条。另外，这个函数的分词速度比较慢，仅仅适用于中文短句的分词，不适用于文章分词。根据评估，20个汉字组成的字符串需要大约0.3s， 40个汉字消耗1s，随着字符串长度的增大消耗的时间呈几何倍数增加。
 
 举例来说：
 
@@ -619,12 +619,12 @@ Chinese-pyim 包含了一个简单的分词函数：\`pyim-split-chinese-string'
 
 其中，每一个词条列表中包含三个元素，第一个元素为词条本身，第二个元素为词条相对于字符串的起始位置，第三个元素为词条结束位置。
 
-另外一个分词相关的函数是 \`pyim-split-chinese-string2string', 这个函数仅仅将一个中文字符串分词，在分词的位置用空格或者用户自定义的分隔符隔开，然后返回新的字符串。
+另外一个分词相关的函数是 \`pyim-cstring:split2string', 这个函数仅仅将一个中文字符串分词，在分词的位置用空格或者用户自定义的分隔符隔开，然后返回新的字符串。
 
 ### 获取光标处的中文词条<a id="orgheadline38"></a>
 
-Chinese-pyim 包含了一个简单的命令：\`pyim-get-words-list-at-point', 这个命令可以得到光标处的 **英文** 或者 **中文** 词条的 \*列表\*，这个命令依赖分词函数：
-\`pyim-split-chinese-string'。
+Chinese-pyim 包含了一个简单的命令：\`pyim-aptwords-get', 这个命令可以得到光标处的 **英文** 或者 **中文** 词条的 \*列表\*，这个命令依赖分词函数：
+\`pyim-cstring:split2list'。
 
 ### 让 \`forward-word' 和 \`back-backward’ 在中文环境下正常工作<a id="orgheadline39"></a>
 
