@@ -35,35 +35,35 @@
 
 (defun pyim-benchmark ()
   (interactive)
-  (let ((pylist (car (pyim-split-string:quanpin "ni-hao" 'default)))
+  (let ((pylist (car (pyim-code-split:quanpin "ni-hao" 'quanpin)))
         (time 1000))
     (message "=================================================")
     (message "## Benchmark `pyim-get-sm' ...")
-    (benchmark time '(pyim-get-sm "ni"))
+    (benchmark time '(pyim-pinyin-get-sm "ni"))
 
     (message "## Benchmark `pyim-get-ym' ...")
-    (benchmark time '(pyim-get-ym "iao"))
+    (benchmark time '(pyim-pinyin-get-ym "iao"))
 
     (message "## Benchmark `pyim-get-charpy' ...")
-    (benchmark time '(pyim-get-charpy "ni"))
+    (benchmark time '(pyim-pinyin-get-charpy "ni"))
 
-    (message "## Benchmark `pyim-split-string:quanpin' ...")
-    (benchmark time '(pyim-split-string:quanpin "ni-hao" 'default))
+    (message "## Benchmark `pyim-code-split:quanpin' ...")
+    (benchmark time '(pyim-code-split:quanpin "ni-hao" 'default))
 
-    (message "## Benchmark `pyim-pylist-to-string' ...")
-    (benchmark time '(pyim-pylist-to-string pylist nil 'default))
+    (message "## Benchmark `pyim-scode-join' ...")
+    (benchmark time '(pyim-scode-join pylist nil 'default))
 
-    (message "## Benchmark `pyim-get-choices' ...")
-    (benchmark time '(pyim-get-choices (list pylist)))
+    (message "## Benchmark `pyim-choices-get' ...")
+    (benchmark time '(pyim-choices-get (list pylist)'quanpin))
 
-    (message "## Benchmark `pyim-get-choices:personal-file' ...")
-    (benchmark time '(pyim-get-choices:personal-file pylist))
+    (message "## Benchmark `pyim-choices-get:dcache-personal' ...")
+    (benchmark time '(pyim-choices-get:dcache-personal pylist 'quanpin))
 
-    (message "## Benchmark `pyim-get-choices:pinyin-dict' ...")
-    (benchmark time '(pyim-get-choices:pinyin-dict pylist))
+    (message "## Benchmark `pyim-choices-get:dcache-common' ...")
+    (benchmark time '(pyim-choices-get:dcache-common pylist 'quanpin))
 
-    (message "## Benchmark `pyim-get-choices:char' ...")
-    (benchmark time '(pyim-get-choices:chars pylist))
+    (message "## Benchmark `pyim-choices-get:pinyin-char' ...")
+    (benchmark time '(pyim-choices-get:pinyin-chars pylist 'quanpin))
 
     (message "## Benchmark `pyim-hanzi2pinyin' ...")
     (benchmark time '(pyim-hanzi2pinyin "你好" nil "-" t))
@@ -75,10 +75,10 @@
     (benchmark time '(pyim-pinyin2cchar-get "ni"))
 
     (message "## Benchmark `pyim-build-chinese-regexp-for-pylist' ...")
-    (benchmark time '(pyim-build-chinese-regexp-for-pylist pylist nil nil t))
+    (benchmark time '(pyim-spinyin-build-chinese-regexp pylist nil nil t))
 
-    (message "## Benchmark `pyim-get' ...")
-    (benchmark time '(pyim-get "ni-hao" '(pinyin-dict)))
+    (message "## Benchmark `pyim-dcache-get' ...")
+    (benchmark time '(pyim-dcache-get "ni-hao"))
     (message "=================================================")
     (message "")))
 
