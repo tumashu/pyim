@@ -849,7 +849,7 @@ BUG：无法有效的处理多音字。"
              (list b))))
     (delete-dups `(,@a ,@b))))
 
-(defun pyim-chinese-string-at-point (&optional number)
+(defun pyim-cstring-at-point (&optional number)
   "获取光标一个中文字符串，字符数量为：`number'"
   (save-excursion
     (let* ((point (point))
@@ -867,7 +867,7 @@ BUG：无法有效的处理多音字。"
 (defun pyim-create-word-at-point (&optional number silent)
   "将光标前字符数为 `number' 的中文字符串添加到个人词库中
 当 `silent' 设置为 t 是，不显示提醒信息。"
-  (let* ((string (pyim-chinese-string-at-point (or number 2))))
+  (let* ((string (pyim-cstring-at-point (or number 2))))
     (when string
       (pyim-create-or-rearrange-word string)
       (unless silent
