@@ -410,7 +410,7 @@ chinese-pyim 称这个字符串为 \"dragger string\", 向 \"匕首\" 一样插�
 
 (defvar pyim-translating nil "记录是否在转换状态")
 
-(defvar pyim-dagger-overlay nil "显示当前选择词条的 overlay")
+(defvar pyim-dagger-overlay nil "用于保存 dagger 的 overlay")
 
 (defvar pyim-code-position nil)
 (defvar pyim-scode-list nil
@@ -1961,12 +1961,12 @@ Return the input string."
     (setq pyim-entered-code nil
           pyim-dagger-str nil)
     (error "Can't input characters in current unibyte buffer"))
-  ;; Update and show dagger string.
+  ;; Show dagger string.
   (pyim-dagger-delete-string)
   (insert pyim-dagger-str)
   (move-overlay pyim-dagger-overlay
                 (overlay-start pyim-dagger-overlay) (point))
-  ;; Update and show page.
+  ;; Show page.
   (when (and (if (pyim-scheme-get-option pyim-default-scheme :auto-select)
                  (>= (length (car pyim-current-choices)) 2)
                t)
@@ -2138,11 +2138,11 @@ guidance-hashtable 的结构与 `pyim-guidance-hashtable' 的结构相同。"
             (pyim-terminate-translation)
             ;; Chinese-pyim 使用这个 hook 来处理联想词。
             (run-hooks 'pyim-select-word-finish-hook))
-        (setq spinyin-list (delete-dups
-                            (mapcar
-                             #'(lambda (spinyin)
-                                 (nthcdr pyim-code-position spinyin))
-                             pyim-scode-list)))
+        (setq spinyin-list
+              (delete-dups (mapcar
+                            #'(lambda (spinyin)
+                                (nthcdr pyim-code-position spinyin))
+                            pyim-scode-list)))
         (setq pyim-current-choices (list (pyim-choices-get spinyin-list pyim-default-scheme))
               pyim-current-pos 1)
         (pyim-dagger-update)
@@ -2158,11 +2158,12 @@ guidance-hashtable 的结构与 `pyim-guidance-hashtable' 的结构相同。"
         (if (> (+ index (pyim-page-start)) end)
             (pyim-show)
           (setq pyim-current-pos (+ pyim-current-pos index))
-          (setq pyim-dagger-str (concat (substring pyim-dagger-str 0
-                                                   pyim-code-position)
-                                        (pyim-choice
-                                         (nth (1- pyim-current-pos)
-                                              (car pyim-current-choices)))))
+          (setq pyim-dagger-str
+                (concat (substring pyim-dagger-str 0
+                                   pyim-code-position)
+                        (pyim-choice
+                         (nth (1- pyim-current-pos)
+                              (car pyim-current-choices)))))
           (pyim-page-select-word)))
     (pyim-dagger-append (char-to-string last-command-event))
     (pyim-terminate-translation)))
