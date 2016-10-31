@@ -40,7 +40,7 @@
 </div>
 </div>
 <div id="outline-container-orgheadline1" class="outline-2">
-<h2 id="orgheadline1"><span class="section-number-2">1</span> 说明文档</h2>
+<h2 id="orgheadline1"><span class="section-number-2">1</span>说明文档</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 这个文件包含了一些调试 Chinese-pyim 性能的工具
@@ -51,60 +51,60 @@
 
 
 <div id="outline-container-orgheadline2" class="outline-2">
-<h2 id="orgheadline2"><span class="section-number-2">2</span> 代码</h2>
+<h2 id="orgheadline2"><span class="section-number-2">2</span>代码</h2>
 <div class="outline-text-2" id="text-2">
 <div class="org-src-container">
 
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">require</span> '<span style="color: #96CBFE;">chinese-pyim</span>)
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">require</span> '<span style="color: #96CBFE;">chinese-pyim</span><span style="color: #666666;">)</span>
 
-(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-benchmark</span> ()
-  (<span style="color: #4c83ff;">interactive</span>)
-  (<span style="color: #4c83ff;">let</span> ((pylist (car (pyim-split-string:quanpin <span style="color: #61CE3C;">"ni-hao"</span> 'default)))
-        (time 1000))
-    (message <span style="color: #61CE3C;">"================================================="</span>)
-    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-get-sm</span><span style="color: #61CE3C;">' ..."</span>)
-    (benchmark time '(pyim-get-sm <span style="color: #61CE3C;">"ni"</span>))
+(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-benchmark</span> (<span style="color: #666666;">)</span>
+  (<span style="color: #4c83ff;">interactive</span><span style="color: #666666;">)</span>
+  (<span style="color: #4c83ff;">let</span> ((pylist (car (pyim-code-split:quanpin <span style="color: #61CE3C;">"ni-hao"</span> 'quanpin<span style="color: #666666;">)))</span>
+        (time 1000<span style="color: #666666;">))</span>
+    (message <span style="color: #61CE3C;">"================================================="</span><span style="color: #666666;">)</span>
+    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-get-sm</span><span style="color: #61CE3C;">' ..."</span><span style="color: #666666;">)</span>
+    (benchmark time '(pyim-pinyin-get-sm <span style="color: #61CE3C;">"ni"</span><span style="color: #666666;">))</span>
 
-    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-get-ym</span><span style="color: #61CE3C;">' ..."</span>)
-    (benchmark time '(pyim-get-ym <span style="color: #61CE3C;">"iao"</span>))
+    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-get-ym</span><span style="color: #61CE3C;">' ..."</span><span style="color: #666666;">)</span>
+    (benchmark time '(pyim-pinyin-get-ym <span style="color: #61CE3C;">"iao"</span><span style="color: #666666;">))</span>
 
-    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-get-charpy</span><span style="color: #61CE3C;">' ..."</span>)
-    (benchmark time '(pyim-get-charpy <span style="color: #61CE3C;">"ni"</span>))
+    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-get-charpy</span><span style="color: #61CE3C;">' ..."</span><span style="color: #666666;">)</span>
+    (benchmark time '(pyim-pinyin-get-charpy <span style="color: #61CE3C;">"ni"</span><span style="color: #666666;">))</span>
 
-    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-split-string:quanpin</span><span style="color: #61CE3C;">' ..."</span>)
-    (benchmark time '(pyim-split-string:quanpin <span style="color: #61CE3C;">"ni-hao"</span> 'default))
+    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-code-split:quanpin</span><span style="color: #61CE3C;">' ..."</span><span style="color: #666666;">)</span>
+    (benchmark time '(pyim-code-split:quanpin <span style="color: #61CE3C;">"ni-hao"</span> 'default<span style="color: #666666;">))</span>
 
-    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-pylist-to-string</span><span style="color: #61CE3C;">' ..."</span>)
-    (benchmark time '(pyim-pylist-to-string pylist nil 'default))
+    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-scode-join</span><span style="color: #61CE3C;">' ..."</span><span style="color: #666666;">)</span>
+    (benchmark time '(pyim-scode-join pylist nil 'default<span style="color: #666666;">))</span>
 
-    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-get-choices</span><span style="color: #61CE3C;">' ..."</span>)
-    (benchmark time '(pyim-get-choices (list pylist)))
+    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-choices-get</span><span style="color: #61CE3C;">' ..."</span><span style="color: #666666;">)</span>
+    (benchmark time '(pyim-choices-get (list pylist<span style="color: #666666;">)</span>'quanpin<span style="color: #666666;">))</span>
 
-    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-get-choices:personal-file</span><span style="color: #61CE3C;">' ..."</span>)
-    (benchmark time '(pyim-get-choices:personal-file pylist))
+    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-choices-get:dcache-personal</span><span style="color: #61CE3C;">' ..."</span><span style="color: #666666;">)</span>
+    (benchmark time '(pyim-choices-get:dcache-personal pylist 'quanpin<span style="color: #666666;">))</span>
 
-    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-get-choices:pinyin-dict</span><span style="color: #61CE3C;">' ..."</span>)
-    (benchmark time '(pyim-get-choices:pinyin-dict pylist))
+    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-choices-get:dcache-common</span><span style="color: #61CE3C;">' ..."</span><span style="color: #666666;">)</span>
+    (benchmark time '(pyim-choices-get:dcache-common pylist 'quanpin<span style="color: #666666;">))</span>
 
-    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-get-choices:char</span><span style="color: #61CE3C;">' ..."</span>)
-    (benchmark time '(pyim-get-choices:chars pylist))
+    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-choices-get:pinyin-char</span><span style="color: #61CE3C;">' ..."</span><span style="color: #666666;">)</span>
+    (benchmark time '(pyim-choices-get:pinyin-chars pylist 'quanpin<span style="color: #666666;">))</span>
 
-    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-hanzi2pinyin</span><span style="color: #61CE3C;">' ..."</span>)
-    (benchmark time '(pyim-hanzi2pinyin <span style="color: #61CE3C;">"&#20320;&#22909;"</span> nil <span style="color: #61CE3C;">"-"</span> t))
+    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-hanzi2pinyin</span><span style="color: #61CE3C;">' ..."</span><span style="color: #666666;">)</span>
+    (benchmark time '(pyim-hanzi2pinyin <span style="color: #61CE3C;">"&#20320;&#22909;"</span> nil <span style="color: #61CE3C;">"-"</span> t<span style="color: #666666;">))</span>
 
-    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-cchar2pinyin-get</span><span style="color: #61CE3C;">' ..."</span>)
-    (benchmark time '(pyim-cchar2pinyin-get ?&#20320;))
+    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-cchar2pinyin-get</span><span style="color: #61CE3C;">' ..."</span><span style="color: #666666;">)</span>
+    (benchmark time '(pyim-cchar2pinyin-get ?&#20320;<span style="color: #666666;">))</span>
 
-    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-pinyin2cchar-get</span><span style="color: #61CE3C;">' ..."</span>)
-    (benchmark time '(pyim-pinyin2cchar-get <span style="color: #61CE3C;">"ni"</span>))
+    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-pinyin2cchar-get</span><span style="color: #61CE3C;">' ..."</span><span style="color: #666666;">)</span>
+    (benchmark time '(pyim-pinyin2cchar-get <span style="color: #61CE3C;">"ni"</span><span style="color: #666666;">))</span>
 
-    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-build-chinese-regexp-for-pylist</span><span style="color: #61CE3C;">' ..."</span>)
-    (benchmark time '(pyim-build-chinese-regexp-for-pylist pylist nil nil t))
+    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-build-chinese-regexp-for-pylist</span><span style="color: #61CE3C;">' ..."</span><span style="color: #666666;">)</span>
+    (benchmark time '(pyim-spinyin-build-chinese-regexp pylist nil nil t<span style="color: #666666;">))</span>
 
-    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-get</span><span style="color: #61CE3C;">' ..."</span>)
-    (benchmark time '(pyim-get <span style="color: #61CE3C;">"ni-hao"</span> '(pinyin-dict)))
-    (message <span style="color: #61CE3C;">"================================================="</span>)
-    (message <span style="color: #61CE3C;">""</span>)))
+    (message <span style="color: #61CE3C;">"## Benchmark `</span><span style="color: #96CBFE;">pyim-dcache-get</span><span style="color: #61CE3C;">' ..."</span><span style="color: #666666;">)</span>
+    (benchmark time '(pyim-dcache-get <span style="color: #61CE3C;">"ni-hao"</span><span style="color: #666666;">))</span>
+    (message <span style="color: #61CE3C;">"================================================="</span><span style="color: #666666;">)</span>
+    (message <span style="color: #61CE3C;">""</span><span style="color: #666666;">)))</span>
 </pre>
 </div>
 </div>
@@ -114,8 +114,8 @@
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2016-09-24</span>
-        <span title="last modification date" class="post-info">2016-08-18</span>
+        <span title="post date" class="post-info">2016-10-31</span>
+        <span title="last modification date" class="post-info">2016-10-31</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>

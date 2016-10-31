@@ -55,10 +55,10 @@
 </div>
 </div>
 <div id="outline-container-orgheadline5" class="outline-2">
-<h2 id="orgheadline5"><span class="section-number-2">1</span> 使用说明</h2>
+<h2 id="orgheadline5"><span class="section-number-2">1</span>使用说明</h2>
 <div class="outline-text-2" id="text-1">
 </div><div id="outline-container-orgheadline1" class="outline-3">
-<h3 id="orgheadline1"><span class="section-number-3">1.1</span> 简介</h3>
+<h3 id="orgheadline1"><span class="section-number-3">1.1</span>简介</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 这个文件包含了许多探针函数，用于实现两个功能：
@@ -72,10 +72,10 @@
 </div>
 
 <div id="outline-container-orgheadline4" class="outline-3">
-<h3 id="orgheadline4"><span class="section-number-3">1.2</span> 设置</h3>
+<h3 id="orgheadline4"><span class="section-number-3">1.2</span>设置</h3>
 <div class="outline-text-3" id="text-1-2">
 </div><div id="outline-container-orgheadline2" class="outline-4">
-<h4 id="orgheadline2"><span class="section-number-4">1.2.1</span> 根据环境自动切换到英文输入模式</h4>
+<h4 id="orgheadline2"><span class="section-number-4">1.2.1</span>根据环境自动切换到英文输入模式</h4>
 <div class="outline-text-4" id="text-1-2-1">
 <p>
 用户将探针函数添加到 `pyim-english-input-switch-functions' 后, 就可以激活这个探针函数，比如：
@@ -95,7 +95,7 @@
 </div>
 
 <div id="outline-container-orgheadline3" class="outline-4">
-<h4 id="orgheadline3"><span class="section-number-4">1.2.2</span> 根据环境自动切换到半角标点输入模式</h4>
+<h4 id="orgheadline3"><span class="section-number-4">1.2.2</span>根据环境自动切换到半角标点输入模式</h4>
 <div class="outline-text-4" id="text-1-2-2">
 <p>
 用户将探针函数添加到 `pyim-punctuation-half-width-functions' 后, 就可以激活这个探针函数。
@@ -107,37 +107,37 @@
 
 
 <div id="outline-container-orgheadline8" class="outline-2">
-<h2 id="orgheadline8"><span class="section-number-2">2</span> 代码</h2>
+<h2 id="orgheadline8"><span class="section-number-2">2</span>代码</h2>
 <div class="outline-text-2" id="text-2">
 </div><div id="outline-container-orgheadline6" class="outline-3">
-<h3 id="orgheadline6"><span class="section-number-3">2.1</span> 根据环境自动切换到英文输入模式</h3>
+<h3 id="orgheadline6"><span class="section-number-3">2.1</span>根据环境自动切换到英文输入模式</h3>
 <div class="outline-text-3" id="text-2-1">
 <div class="org-src-container">
 
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-probe-program-mode</span> ()
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-probe-program-mode</span> (<span style="color: #666666;">)</span>
   <span style="color: #FBDE2D;">"&#28608;&#27963;&#36825;&#20010; Chinese-pyim &#25506;&#38024;&#20989;&#25968;&#21518;&#65292;&#21482;&#33021;&#22312;&#23383;&#31526;&#20018;&#21644; comment &#20013;&#36755;&#20837;&#20013;&#25991;&#12290;</span>
 <span style="color: #FBDE2D;">&#27880;&#65306;&#20165;&#20165;&#24433;&#21709; `</span><span style="color: #96CBFE;">prog-mode</span><span style="color: #FBDE2D;">' &#34893;&#29983;&#30340; mode &#12290;</span>
 
 <span style="color: #FBDE2D;">&#29992;&#20110;&#65306;`</span><span style="color: #96CBFE;">pyim-english-input-switch-functions</span><span style="color: #FBDE2D;">' &#12290;"</span>
-  (<span style="color: #4c83ff;">interactive</span>)
-  (<span style="color: #4c83ff;">when</span> (derived-mode-p 'prog-mode)
-    (<span style="color: #4c83ff;">let*</span> ((pos (point))
-           (ppss (syntax-ppss pos)))
+  (<span style="color: #4c83ff;">interactive</span><span style="color: #666666;">)</span>
+  (<span style="color: #4c83ff;">when</span> (derived-mode-p 'prog-mode<span style="color: #666666;">)</span>
+    (<span style="color: #4c83ff;">let*</span> ((pos (point<span style="color: #666666;">))</span>
+           (ppss (syntax-ppss pos<span style="color: #666666;">)))</span>
       (not
-       (<span style="color: #4c83ff;">or</span> (car (<span style="color: #4c83ff;">setq</span> ppss (nthcdr 3 ppss)))
-           (car (<span style="color: #4c83ff;">setq</span> ppss (cdr ppss)))
-           (nth 3 ppss))))))
+       (<span style="color: #4c83ff;">or</span> (car (<span style="color: #4c83ff;">setq</span> ppss (nthcdr 3 ppss<span style="color: #666666;">)))</span>
+           (car (<span style="color: #4c83ff;">setq</span> ppss (cdr ppss<span style="color: #666666;">)))</span>
+           (nth 3 ppss<span style="color: #666666;">))))))</span>
 
-(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-probe-org-speed-commands</span> ()
+(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-probe-org-speed-commands</span> (<span style="color: #666666;">)</span>
   <span style="color: #FBDE2D;">"&#28608;&#27963;&#36825;&#20010; Chinese-pyim &#25506;&#38024;&#20989;&#25968;&#21518;&#65292;&#21487;&#20197;&#35299;&#20915; org-speed-commands &#19982; Chinese-pyim &#20914;&#31361;&#38382;&#39064;&#12290;</span>
 
 <span style="color: #FBDE2D;">&#29992;&#20110;&#65306;`</span><span style="color: #96CBFE;">pyim-english-input-switch-functions</span><span style="color: #FBDE2D;">' &#12290;"</span>
-  (<span style="color: #4c83ff;">and</span> (string= major-mode <span style="color: #61CE3C;">"org-mode"</span>)
-       (bolp)
-       (looking-at org-heading-regexp)
-       org-use-speed-commands))
+  (<span style="color: #4c83ff;">and</span> (string= major-mode <span style="color: #61CE3C;">"org-mode"</span><span style="color: #666666;">)</span>
+       (bolp<span style="color: #666666;">)</span>
+       (looking-at org-heading-regexp<span style="color: #666666;">)</span>
+       org-use-speed-commands<span style="color: #666666;">))</span>
 
-(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-probe-isearch-mode</span> ()
+(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-probe-isearch-mode</span> (<span style="color: #666666;">)</span>
   <span style="color: #FBDE2D;">"&#28608;&#27963;&#36825;&#20010; Chinese-pyim &#25506;&#38024;&#20989;&#25968;&#21518;&#65292;&#20351;&#29992; isearch &#25628;&#32034;&#26102;&#65292;&#31105;&#29992;&#20013;&#25991;&#36755;&#20837;&#65292;&#24378;&#21046;&#33521;&#25991;&#36755;&#20837;&#12290;</span>
 
 <span style="color: #FBDE2D;">&#29992;&#20110;&#65306;`</span><span style="color: #96CBFE;">pyim-english-input-switch-functions</span><span style="color: #FBDE2D;">' &#12290;"</span>
@@ -145,20 +145,20 @@
        <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">isearch &#21551;&#21160;&#30340;&#26102;&#20505;&#65292;&#20250;&#35774;&#32622;&#19968;&#20010; buffer variable: `</span><span style="color: #96CBFE; font-style: italic;">isearch-mode</span><span style="color: #8B8989; font-style: italic;">'</span>
        <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#26816;&#27979;&#25152;&#26377; buffer &#20013; `</span><span style="color: #96CBFE; font-style: italic;">isearch-mode</span><span style="color: #8B8989; font-style: italic;">' &#30340;&#21462;&#20540;&#65292;&#22914;&#26524;&#20219;&#20309;&#19968;&#20010;</span>
        <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#21462;&#20540;&#20026; t, &#23601;&#35828;&#26126; isearch &#24050;&#32463;&#21551;&#21160;&#12290;</span>
-       (cl-some #'(lambda (buf)
-                    (buffer-local-value 'isearch-mode buf))
-                (buffer-list))))
+       (cl-some #'(lambda (buf<span style="color: #666666;">)</span>
+                    (buffer-local-value 'isearch-mode buf<span style="color: #666666;">))</span>
+                (buffer-list<span style="color: #666666;">))))</span>
 
-(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-probe-org-structure-template</span> ()
+(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-probe-org-structure-template</span> (<span style="color: #666666;">)</span>
   <span style="color: #FBDE2D;">"&#28608;&#27963;&#36825;&#20010; Chinese-pyim &#25506;&#38024;&#20989;&#25968;&#21518;&#65292;&#36755;&#20837; org-structure-template &#26102;&#65292;&#19981;&#20250;&#24320;&#21551;&#20013;&#25991;&#36755;&#20837;&#12290;</span>
 
 <span style="color: #FBDE2D;">&#29992;&#20110;&#65306;`</span><span style="color: #96CBFE;">pyim-english-input-switch-functions</span><span style="color: #FBDE2D;">' &#12290;"</span>
-  (<span style="color: #4c83ff;">when</span> (eq major-mode 'org-mode)
-    (<span style="color: #4c83ff;">let</span> ((line-string (buffer-substring (point-at-bol) (point))))
-      (<span style="color: #4c83ff;">and</span> (looking-at <span style="color: #61CE3C;">"[ \t]*$"</span>)
-           (string-match <span style="color: #61CE3C;">"^[ \t]*&lt;</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">(</span><span style="color: #61CE3C;">[a-zA-Z]*</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">)</span><span style="color: #61CE3C;">$"</span> line-string)))))
+  (<span style="color: #4c83ff;">when</span> (eq major-mode 'org-mode<span style="color: #666666;">)</span>
+    (<span style="color: #4c83ff;">let</span> ((line-string (buffer-substring (point-at-bol<span style="color: #666666;">)</span> (point<span style="color: #666666;">))))</span>
+      (<span style="color: #4c83ff;">and</span> (looking-at <span style="color: #61CE3C;">"[ \t]*$"</span><span style="color: #666666;">)</span>
+           (string-match <span style="color: #61CE3C;">"^[ \t]*&lt;</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">(</span><span style="color: #61CE3C;">[a-zA-Z]*</span><span style="color: #E9C062;">\\</span><span style="color: #ff0000;">)</span><span style="color: #61CE3C;">$"</span> line-string<span style="color: #666666;">)))))</span>
 
-(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-probe-dynamic-english</span> ()
+(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-probe-dynamic-english</span> (<span style="color: #666666;">)</span>
   <span style="color: #FBDE2D;">"&#28608;&#27963;&#36825;&#20010; Chinese-pyim &#25506;&#38024;&#20989;&#25968;&#21518;&#65292;&#20351;&#29992;&#19979;&#38754;&#30340;&#35268;&#21017;&#21160;&#24577;&#20999;&#25442;&#20013;&#33521;&#25991;&#36755;&#20837;&#65306;</span>
 
 <span style="color: #FBDE2D;">1. &#24403;&#21069;&#23383;&#31526;&#20026;&#20013;&#25991;&#23383;&#31526;&#26102;&#65292;&#36755;&#20837;&#19979;&#19968;&#20010;&#23383;&#31526;&#26102;&#40664;&#35748;&#24320;&#21551;&#20013;&#25991;&#36755;&#20837;</span>
@@ -176,42 +176,42 @@
   (let ((str-before-1 (pyim-char-before-to-string 0)))
     (unless (string= (buffer-name) " <b>temp</b>") ; Make sure this probe can work with exim of exwm.
       (if (&lt;= (point) (save-excursion (back-to-indentation)
-                      (point)))
-      (not (or (pyim-string-match-p "\\cc" (save-excursion
-                         ;; 查找前一个非空格字符。
-                         (if (re-search-backward "[^[:space:]\n]" nil t)
-                             (char-to-string (char-after (point))))))
-           (&gt; (length pyim-current-key) 0)))
-    (not (or (pyim-string-match-p "\\cc" str-before-1)
-         (&gt; (length pyim-current-key) 0)))))))
+                                      (point)))
+          (not (or (pyim-string-match-p "\\cc" (save-excursion
+                                                 ;; 查找前一个非空格字符。
+                                                 (if (re-search-backward "[^[:space:]\n]" nil t)
+                                                     (char-to-string (char-after (point))))))
+                   (&gt; (length pyim-entered-code) 0)))
+        (not (or (pyim-string-match-p "\\cc" str-before-1)
+                 (&gt; (length pyim-entered-code) 0)))))))
 #+END_SRC
 </p>
 </div>
 </div>
 
 <div id="outline-container-orgheadline7" class="outline-3">
-<h3 id="orgheadline7"><span class="section-number-3">2.2</span> 根据环境自动切换到半角标点输入模式</h3>
+<h3 id="orgheadline7"><span class="section-number-3">2.2</span>根据环境自动切换到半角标点输入模式</h3>
 <div class="outline-text-3" id="text-2-2">
 <div class="org-src-container">
 
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-probe-punctuation-line-beginning</span> (char)
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-probe-punctuation-line-beginning</span> (char<span style="color: #666666;">)</span>
   <span style="color: #FBDE2D;">"&#28608;&#27963;&#36825;&#20010; Chinese-pyim &#25506;&#38024;&#20989;&#25968;&#21518;&#65292;&#34892;&#39318;&#36755;&#20837;&#26631;&#28857;&#26102;&#65292;&#24378;&#21046;&#36755;&#20837;&#21322;&#35282;&#26631;&#28857;&#12290;</span>
 
 <span style="color: #FBDE2D;">&#29992;&#20110;&#65306;`</span><span style="color: #96CBFE;">pyim-punctuation-half-width-functions</span><span style="color: #FBDE2D;">' &#12290;"</span>
-  (<span style="color: #4c83ff;">let</span> ((line-string (buffer-substring (point-at-bol) (point))))
-    (<span style="color: #4c83ff;">unless</span> (string= (buffer-name) <span style="color: #61CE3C;">" *temp*"</span>) <span style="color: #8B8989; font-style: italic;">; </span><span style="color: #8B8989; font-style: italic;">Make sure this probe can work with exim of exwm.</span>
-      (<span style="color: #4c83ff;">and</span> (member (char-to-string char)
-                   (mapcar 'car pyim-punctuation-dict))
-           (string-match <span style="color: #61CE3C;">"^[ \t]*$"</span> line-string)))))
+  (<span style="color: #4c83ff;">let</span> ((line-string (buffer-substring (point-at-bol<span style="color: #666666;">)</span> (point<span style="color: #666666;">))))</span>
+    (<span style="color: #4c83ff;">unless</span> (string= (buffer-name<span style="color: #666666;">)</span> <span style="color: #61CE3C;">" *temp*"</span><span style="color: #666666;">)</span> <span style="color: #8B8989; font-style: italic;">; </span><span style="color: #8B8989; font-style: italic;">Make sure this probe can work with exim of exwm.</span>
+      (<span style="color: #4c83ff;">and</span> (member (char-to-string char<span style="color: #666666;">)</span>
+                   (mapcar 'car pyim-punctuation-dict<span style="color: #666666;">))</span>
+           (string-match <span style="color: #61CE3C;">"^[ \t]*$"</span> line-string<span style="color: #666666;">)))))</span>
 
-(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-probe-punctuation-after-punctuation</span> (char)
+(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-probe-punctuation-after-punctuation</span> (char<span style="color: #666666;">)</span>
   <span style="color: #FBDE2D;">"&#28608;&#27963;&#36825;&#20010; Chinese-pyim &#25506;&#38024;&#20989;&#25968;&#21518;&#65292;&#21322;&#35282;&#26631;&#28857;&#21518;&#20877;&#36755;&#20837;&#19968;&#20010;&#26631;&#28857;&#31526;&#21495;&#26102;&#65292;&#24378;&#21046;&#36755;&#20837;&#21322;&#35282;&#26631;&#28857;&#12290;</span>
 
 <span style="color: #FBDE2D;">&#29992;&#20110;&#65306;`</span><span style="color: #96CBFE;">pyim-punctuation-half-width-functions</span><span style="color: #FBDE2D;">' &#12290;"</span>
-  (<span style="color: #4c83ff;">let</span> ((str-before-1 (pyim-char-before-to-string 0))
-        (puncts (mapcar 'car pyim-punctuation-dict)))
-    (<span style="color: #4c83ff;">and</span> (member str-before-1 puncts)
-         (member (char-to-string char) puncts))))
+  (<span style="color: #4c83ff;">let</span> ((str-before-1 (pyim-char-before-to-string 0<span style="color: #666666;">))</span>
+        (puncts (mapcar 'car pyim-punctuation-dict<span style="color: #666666;">)))</span>
+    (<span style="color: #4c83ff;">and</span> (member str-before-1 puncts<span style="color: #666666;">)</span>
+         (member (char-to-string char<span style="color: #666666;">)</span> puncts<span style="color: #666666;">))))</span>
 </pre>
 </div>
 </div>
@@ -222,8 +222,8 @@
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2016-09-24</span>
-        <span title="last modification date" class="post-info">2016-06-19</span>
+        <span title="post date" class="post-info">2016-10-31</span>
+        <span title="last modification date" class="post-info">2016-10-31</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>
