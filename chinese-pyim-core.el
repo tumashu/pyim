@@ -975,7 +975,7 @@ BUG：无法有效的处理多音字。"
 ;;    4. Reading One Event
 
 ;; *** 在待输入 buffer 中插入 `pyim-current-str'
-;; `pyim-self-insert-command' 会调用 `pyim-handle-string' 来处理
+;; `pyim-self-insert-command' 会调用 `pyim-handle-entered-code' 来处理
 ;; `pyim-entered-code'，得到对应的 `pyim-current-str'，然后，
 ;; `pyim-start-translation' 返回 `pyim-current-str' 的取值。
 
@@ -1113,7 +1113,7 @@ Return the input string."
   (if (pyim-input-chinese-p)
       (progn (setq pyim-entered-code
                    (concat pyim-entered-code (char-to-string last-command-event)))
-             (pyim-handle-string))
+             (pyim-handle-entered-code))
     (pyim-append-string (pyim-translate last-command-event))
     (pyim-terminate-translation)))
 
@@ -1641,13 +1641,13 @@ Return the input string."
 ;; #+END_SRC
 
 ;; *** 核心函数：拼音字符串处理函数
-;; `pyim-handle-string' 这个函数是一个重要的 *核心函数* ，其大致工作流程为：
+;; `pyim-handle-entered-code' 这个函数是一个重要的 *核心函数* ，其大致工作流程为：
 ;; 1. 查询拼音字符串 `pyim-entered-code' 得到： 待选词列表
 ;;    `pyim-current-choices' 和 当前选择的词条 `pyim-entered-code'
 ;; 2. 显示备选词条和选择备选词等待用户选择。
 
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-handle-string ()
+(defun pyim-handle-entered-code ()
   (let ((scheme-name pyim-default-scheme)
         (str pyim-entered-code))
     (setq pyim-scode-list (pyim-code-split str scheme-name)
@@ -1684,7 +1684,7 @@ Return the input string."
 ;; 处理 `pyim-current-str' 的代码分散在多个函数中，可以按照下面的方式分类：
 ;; 1. 英文字符串：Chinese-pyim 没有找到相应的候选词时（比如：用户输入错
 ;;    误的拼音），`pyim-current-str' 的值与 `pyim-entered-code' 大致相同。
-;;    相关代码很简单，分散在 `pyim-handle-string' 或者
+;;    相关代码很简单，分散在 `pyim-handle-entered-code' 或者
 ;;    `pyim-append-string' 等相关函数。
 ;; 2. 汉字或者拼音和汉字的混合：当 Chinese-pyim 找到相应的候选词条时，
 ;;    `pyim-current-str' 的值可以是完全的中文词条，比如：
@@ -2514,7 +2514,7 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
   (if (> (length pyim-entered-code) 1)
       (progn
         (setq pyim-entered-code (substring pyim-entered-code 0 -1))
-        (pyim-handle-string))
+        (pyim-handle-entered-code))
     (setq pyim-current-str "")
     (pyim-terminate-translation)))
 ;; #+END_SRC
@@ -2526,7 +2526,7 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
   (if (string-match "['-][^'-]+$" pyim-entered-code)
       (progn (setq pyim-entered-code
                    (replace-match "" nil nil pyim-entered-code))
-             (pyim-handle-string))
+             (pyim-handle-entered-code))
     (setq pyim-entered-code "")
     (setq pyim-current-str "")
     (pyim-terminate-translation)))
