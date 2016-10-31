@@ -316,7 +316,7 @@ Chinese-pyim 内建的功能有：
   :group 'chinese-pyim
   :type 'number)
 
-(defface pyim-string-face '((t (:underline t)))
+(defface pyim-dagger-face '((t (:underline t)))
   "Face to show current string"
   :group 'chinese-pyim)
 
@@ -388,8 +388,15 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
   '("a" "o" "e" "ai" "ei" "ui" "ao" "ou" "er" "an" "en"
     "ang" "eng"))
 
-(defvar pyim-entered-code "" "已经输入的代码")
-(defvar pyim-current-str "" "当前选择的词条")
+(defvar pyim-entered-code ""
+  "用户已经输入的 code，由用户输入的字符连接而成。")
+
+(defvar pyim-dagger-str ""
+  "输入法运行的时候，会在光标处会插入一个带下划线字符串，这个字符串
+提示用户当前选择的词条或者当前输入的 code 等许多有用的信息。
+chinese-pyim 称这个字符串为 \"dragger string\", 向 \"匕首\" 一样插入
+当前 buffer 的光标处。")
+
 (defvar pyim-input-ascii nil  "是否开启 Chinese-pyim 英文输入模式。")
 (defvar pyim-force-input-chinese nil "是否强制开启中文输入模式。")
 
@@ -403,7 +410,7 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
 
 (defvar pyim-translating nil "记录是否在转换状态")
 
-(defvar pyim-overlay nil "显示当前选择词条的 overlay")
+(defvar pyim-dagger-overlay nil "显示当前选择词条的 overlay")
 
 (defvar pyim-code-position nil)
 (defvar pyim-scode-list nil
@@ -477,7 +484,7 @@ If you don't like this funciton, set the variable to nil")
 ;; #+BEGIN_SRC emacs-lisp
 (defvar pyim-local-variable-list
   '(pyim-entered-code
-    pyim-current-str
+    pyim-dagger-str
     pyim-current-choices
     pyim-current-pos
     pyim-input-ascii
@@ -485,7 +492,7 @@ If you don't like this funciton, set the variable to nil")
     pyim-punctuation-half-width-functions
     pyim-guidance-hashtable
     pyim-translating
-    pyim-overlay
+    pyim-dagger-overlay
 
     pyim-load-hook
     pyim-active-hook
@@ -942,7 +949,7 @@ BUG：无法有效的处理多音字。"
           (remove word orig-value))))))
 ;; #+END_SRC
 
-;; ** 生成 `pyim-entered-code' 并插入 `pyim-current-str'
+;; ** 生成 `pyim-entered-code' 并插入 `pyim-dagger-str'
 ;; *** 生成拼音字符串 `pyim-entered-code'
 ;; Chinese-pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
 ;; `input-method-function' 设置为 `pyim-input-method' ，这个变量
@@ -961,7 +968,7 @@ BUG：无法有效的处理多音字。"
 ;;    `pyim-start-translation' 会调用这个函数。
 
 ;; `pyim-self-insert-command' 这个函数的核心工作就是将用户输入的字符，组
-;; 合成拼音字符串并保存到变量 `pyim-entered-code' 中。
+;; 合成 code 字符串并保存到变量 `pyim-entered-code' 中。
 
 ;; 中英文输入模式切换功能也是在 'pyim-self-insert-command' 中实现。
 
@@ -974,10 +981,10 @@ BUG：无法有效的处理多音字。"
 ;;    3. Miscellaneous Event Input Features
 ;;    4. Reading One Event
 
-;; *** 在待输入 buffer 中插入 `pyim-current-str'
+;; *** 在待输入 buffer 中插入 `pyim-dagger-str'
 ;; `pyim-self-insert-command' 会调用 `pyim-handle-entered-code' 来处理
-;; `pyim-entered-code'，得到对应的 `pyim-current-str'，然后，
-;; `pyim-start-translation' 返回 `pyim-current-str' 的取值。
+;; `pyim-entered-code'，并相应的得到对应的 `pyim-dagger-str'，然后，
+;; `pyim-start-translation' 返回 `pyim-dagger-str' 的取值。
 
 ;; 在 `pyim-input-method' 函数内部，`pyim-start-translation' 返回值分解为
 ;; event list。
@@ -993,7 +1000,7 @@ BUG：无法有效的处理多音字。"
           (list key-or-string)
         (mapcar 'identity key-or-string))
     ;; (message "call with key: %S" key-or-string)
-    (pyim-overlay-setup)
+    (pyim-dagger-setup-overlay)
     (with-silent-modifications
       (unwind-protect
           (let ((input-string (pyim-start-translation key-or-string)))
@@ -1004,7 +1011,7 @@ BUG：无法有效的处理多音字。"
               (if input-method-exit-on-first-char
                   (list (aref input-string 0))
                 (mapcar 'identity input-string))))
-        (pyim-overlay-delete)))))
+        (pyim-dagger-delete-overlay)))))
 
 (defun pyim-start-translation (key-or-string)
   "Start translation of the typed character KEY by Chinese-pyim.
@@ -1028,7 +1035,7 @@ Return the input string."
           (setq key (string-to-char (substring key-or-string -1)))
           (setq str (substring key-or-string 0 -1)))
 
-        (setq pyim-current-str ""
+        (setq pyim-dagger-str ""
               pyim-entered-code (or str "")
               pyim-translating t)
 
@@ -1065,8 +1072,8 @@ Return the input string."
                     (string-to-list (this-single-command-raw-keys)))
               ;; (message "unread-command-events: %s" unread-command-events)
               (pyim-terminate-translation))))
-        ;; (message "return: %s" pyim-current-str)
-        pyim-current-str)
+        ;; (message "return: %s" pyim-dagger-str)
+        pyim-dagger-str)
     ;; Since KEY doesn't start any translation, just return it.
     ;; But translate KEY if necessary.
     (char-to-string key-or-string)))
@@ -1114,13 +1121,13 @@ Return the input string."
       (progn (setq pyim-entered-code
                    (concat pyim-entered-code (char-to-string last-command-event)))
              (pyim-handle-entered-code))
-    (pyim-append-string (pyim-translate last-command-event))
+    (pyim-dagger-append (pyim-translate last-command-event))
     (pyim-terminate-translation)))
 
 (defun pyim-terminate-translation ()
   "Terminate the translation of the current key."
   (setq pyim-translating nil)
-  (pyim-delete-region)
+  (pyim-dagger-delete-string)
   (setq pyim-current-choices nil)
   (clrhash pyim-guidance-hashtable)
   (when (and (eq pyim-use-tooltip 'pos-tip)
@@ -1128,7 +1135,7 @@ Return the input string."
     (pos-tip-hide)))
 ;; #+END_SRC
 
-;; ** 处理拼音字符串 `pyim-entered-code'
+;; ** 处理拼音 code 字符串 `pyim-entered-code'
 ;; *** 拼音字符串 -> 待选词列表
 ;; 从一个拼音字符串获取其待选词列表，大致可以分成3个步骤：
 ;; 1. 分解这个拼音字符串，得到一个拼音列表。
@@ -1663,12 +1670,12 @@ Return the input string."
                          (list (delete-dups (pyim-choices-get pyim-scode-list scheme-name))))
                    (when (car pyim-current-choices)
                      (setq pyim-current-pos 1)
-                     (pyim-update-current-str)
+                     (pyim-dagger-update)
                      (pyim-page-format-page)
                      (pyim-show)
                      (pyim-page-auto-select-word scheme-name)
                      t)))
-      (setq pyim-current-str (replace-regexp-in-string "-" "" pyim-entered-code))
+      (setq pyim-dagger-str (replace-regexp-in-string "-" "" pyim-entered-code))
       (puthash :words
                (format "%s" (replace-regexp-in-string
                              "-" " " pyim-entered-code))
@@ -1677,17 +1684,17 @@ Return the input string."
 
 ;; #+END_SRC
 
-;; ** 处理当前需要插入字符串 `pyim-current-str'
-;; Chinese-pyim 使用变量 `pyim-current-str' 保存 *当前需要在 buffer 中插
+;; ** 处理当前需要插入 buffer 的 dagger 字符串： `pyim-dagger-str'
+;; Chinese-pyim 使用变量 `pyim-dagger-str' 保存 *当前需要在 buffer 中插
 ;; 入的字符串* 。
 
-;; 处理 `pyim-current-str' 的代码分散在多个函数中，可以按照下面的方式分类：
+;; 处理 `pyim-dagger-str' 的代码分散在多个函数中，可以按照下面的方式分类：
 ;; 1. 英文字符串：Chinese-pyim 没有找到相应的候选词时（比如：用户输入错
-;;    误的拼音），`pyim-current-str' 的值与 `pyim-entered-code' 大致相同。
+;;    误的拼音），`pyim-dagger-str' 的值与 `pyim-entered-code' 大致相同。
 ;;    相关代码很简单，分散在 `pyim-handle-entered-code' 或者
-;;    `pyim-append-string' 等相关函数。
+;;    `pyim-dagger-append' 等相关函数。
 ;; 2. 汉字或者拼音和汉字的混合：当 Chinese-pyim 找到相应的候选词条时，
-;;    `pyim-current-str' 的值可以是完全的中文词条，比如：
+;;    `pyim-dagger-str' 的值可以是完全的中文词条，比如：
 ;;    #+BEGIN_EXAMPLE
 ;;    你好
 ;;    #+END_EXAMPLE
@@ -1698,57 +1705,60 @@ Return the input string."
 ;;    这部份代码相对复杂，使用 `pyim-update-current-key' 专门处理。
 
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-append-string (str)
-  "append STR to pyim-current-str"
-  (setq pyim-current-str (concat pyim-current-str str)))
+(defun pyim-dagger-append (str)
+  "Append STR to `pyim-dagger-str'"
+  (setq pyim-dagger-str (concat pyim-dagger-str str)))
 
-(defun pyim-update-current-str ()
-  "update `pyim-current-str'"
+(defun pyim-dagger-update ()
+  "更新 `pyim-dagger-str' 的值。"
   (let* ((end (pyim-page-end))
          (start (1- (pyim-page-start)))
          (choices (car pyim-current-choices))
          (choice (pyim-subseq choices start end))
          (pos (1- (min pyim-current-pos (length choices))))
          rest)
-    (setq pyim-current-str (concat (substring pyim-current-str 0 pyim-code-position)
-                                   (pyim-choice (nth pos choices)))
-          rest (mapconcat (lambda (py)
-                            (concat (car py) (cdr py)))
-                          (nthcdr (length pyim-current-str) (car pyim-scode-list))
-                          "'"))
+    (setq pyim-dagger-str
+          (concat (substring pyim-dagger-str 0
+                             pyim-code-position)
+                  (pyim-choice (nth pos choices))))
+    (setq rest (mapconcat
+                #'(lambda (py)
+                    (concat (car py) (cdr py)))
+                (nthcdr (length pyim-dagger-str) (car pyim-scode-list))
+                "'"))
     (if (string< "" rest)
-        (setq pyim-current-str (concat pyim-current-str rest)))))
+        (setq pyim-dagger-str (concat pyim-dagger-str rest)))))
 ;; #+END_SRC
 
 ;; Chinese-pyim 会使用 emacs overlay 机制在 *待输入buffer* 光标处高亮显示
-;; `pyim-current-str'，让用户快速了解当前输入的字符串，具体方式是：
-;; 1. 在 `pyim-input-method' 中调用 `pyim-overlay-setup' 创建 overlay ，并
-;;    使用变量 `pyim-overlay' 保存，创建时将 overlay 的 face 属性设置为
-;;    `pyim-string-face' ，用户可以使用这个变量来自定义 face。
-;; 2. 使用函数 `pyim-show' 高亮显示 `pyim-current-str'
+;; `pyim-dagger-str'，让用户快速了解当前输入的字符串，具体方式是：
+;; 1. 在 `pyim-input-method' 中调用 `pyim-dagger-setup-overlay' 创建 overlay ，并
+;;    使用变量 `pyim-dagger-overlay' 保存，创建时将 overlay 的 face 属性设置为
+;;    `pyim-dagger-face' ，用户可以使用这个变量来自定义 face。
+;; 2. 使用函数 `pyim-show' 高亮显示 `pyim-dagger-str'
 ;;    1. 清除光标处原来的字符串。
-;;    2. 插入 `pyim-current-str'
-;;    3. 使用 `move-overlay' 函数调整变量 `pyim-overlay' 中保存的 overlay，
+;;    2. 插入 `pyim-dagger-str'
+;;    3. 使用 `move-overlay' 函数调整变量 `pyim-dagger-overlay' 中保存的 overlay，
 ;;       让其符合新插入的字符串。
-;; 3. 在 `pyim-input-method' 中调用 `pyim-overlay-delete' ，删除
-;;    `pyim-overlay' 中保存的 overlay，这个函数同时也删除了 overlay 中包
-;;    含的文本 `pyim-current-str'。
+;; 3. 在 `pyim-input-method' 中调用 `pyim-dagger-delete-overlay' ，删除
+;;    `pyim-dagger-overlay' 中保存的 overlay，这个函数同时也删除了 overlay 中包
+;;    含的文本 `pyim-dagger-str'。
 
-;; 真正在 *待输入buffer* 插入 `pyim-current-str' 字符串的函数是
+;; 真正在 *待输入buffer* 插入 `pyim-dagger-str' 字符串的函数是
 ;; `read-event'，具体见 `pyim-input-method' 相关说明。
 
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-overlay-setup ()
+(defun pyim-dagger-setup-overlay ()
   (let ((pos (point)))
-    (if (overlayp pyim-overlay)
-        (move-overlay pyim-overlay pos pos)
-      (setq pyim-overlay (make-overlay pos pos))
+    (if (overlayp pyim-dagger-overlay)
+        (move-overlay pyim-dagger-overlay pos pos)
+      (setq pyim-dagger-overlay (make-overlay pos pos))
       (if input-method-highlight-flag
-          (overlay-put pyim-overlay 'face 'pyim-string-face)))))
+          (overlay-put pyim-dagger-overlay 'face 'pyim-dagger-face)))))
 
-(defun pyim-overlay-delete ()
-  (if (and (overlayp pyim-overlay) (overlay-start pyim-overlay))
-      (delete-overlay pyim-overlay)))
+(defun pyim-dagger-delete-overlay ()
+  (if (and (overlayp pyim-dagger-overlay) (overlay-start pyim-dagger-overlay))
+      (delete-overlay pyim-dagger-overlay)))
 ;; #+END_SRC
 
 ;; ** 显示和选择备选词条
@@ -1910,12 +1920,12 @@ Return the input string."
   (interactive "p")
   (if (= (length pyim-entered-code) 0)
       (progn
-        (pyim-append-string (pyim-translate last-command-event))
+        (pyim-dagger-append (pyim-translate last-command-event))
         (pyim-terminate-translation))
     (let ((new (+ pyim-current-pos (* pyim-page-length arg) 1)))
       (setq pyim-current-pos (if (> new 0) new 1)
             pyim-current-pos (pyim-page-start))
-      (pyim-update-current-str)
+      (pyim-dagger-update)
       (pyim-page-format-page)
       (pyim-show))))
 
@@ -1927,11 +1937,11 @@ Return the input string."
   (interactive "p")
   (if (= (length pyim-entered-code) 0)
       (progn
-        (pyim-append-string (pyim-translate last-command-event))
+        (pyim-dagger-append (pyim-translate last-command-event))
         (pyim-terminate-translation))
     (let ((new (+ pyim-current-pos arg)))
       (setq pyim-current-pos (if (> new 0) new 1))
-      (pyim-update-current-str)
+      (pyim-dagger-update)
       (pyim-page-format-page t)
       (pyim-show))))
 
@@ -1949,12 +1959,14 @@ Return the input string."
 (defun pyim-show ()
   (unless enable-multibyte-characters
     (setq pyim-entered-code nil
-          pyim-current-str nil)
+          pyim-dagger-str nil)
     (error "Can't input characters in current unibyte buffer"))
-  (pyim-delete-region)
-  (insert pyim-current-str)
-  (move-overlay pyim-overlay (overlay-start pyim-overlay) (point))
-  ;; Then, show the guidance.
+  ;; Update and show dagger string.
+  (pyim-dagger-delete-string)
+  (insert pyim-dagger-str)
+  (move-overlay pyim-dagger-overlay
+                (overlay-start pyim-dagger-overlay) (point))
+  ;; Update and show page.
   (when (and (if (pyim-scheme-get-option pyim-default-scheme :auto-select)
                  (>= (length (car pyim-current-choices)) 2)
                t)
@@ -1973,7 +1985,7 @@ Return the input string."
         (if pyim-use-tooltip
             (pyim-tooltip-show
              (funcall pyim-guidance pyim-guidance-hashtable)
-             (overlay-start pyim-overlay))
+             (overlay-start pyim-dagger-overlay))
           (message "%s" (pyim-guidance:minibuffer pyim-guidance-hashtable)))))))
 
 (defun pyim-guidance:two-lines (guidance-hashtable)
@@ -2045,11 +2057,11 @@ guidance-hashtable 的结构与 `pyim-guidance-hashtable' 的结构相同。"
           (gethash :total-page guidance-hashtable)
           (gethash :words guidance-hashtable)))
 
-(defun pyim-delete-region ()
-  "Delete the text in the current translation region of E+."
-  (if (overlay-start pyim-overlay)
-      (delete-region (overlay-start pyim-overlay)
-                     (overlay-end pyim-overlay))))
+(defun pyim-dagger-delete-string ()
+  "Delete dagger string."
+  (if (overlay-start pyim-dagger-overlay)
+      (delete-region (overlay-start pyim-dagger-overlay)
+                     (overlay-end pyim-dagger-overlay))))
 
 (defun pyim-tooltip-show (string position)
   "在 `position' 位置，使用 pos-tip 或者 popup 显示字符串 `string' 。"
@@ -2110,7 +2122,7 @@ guidance-hashtable 的结构与 `pyim-guidance-hashtable' 的结构相同。"
   (interactive)
   (if (null (car pyim-current-choices))  ; 如果没有选项，输入空格
       (progn
-        (setq pyim-current-str (pyim-translate last-command-event))
+        (setq pyim-dagger-str (pyim-translate last-command-event))
         (pyim-terminate-translation))
     (let ((str (pyim-choice (nth (1- pyim-current-pos) (car pyim-current-choices))))
           spinyin-list)
@@ -2121,8 +2133,8 @@ guidance-hashtable 的结构与 `pyim-guidance-hashtable' 的结构相同。"
                                         ; 是不是在文件中，没有的话，创
                                         ; 建这个词
           (progn
-            (if (not (member pyim-current-str (car pyim-current-choices)))
-                (pyim-create-or-rearrange-word pyim-current-str))
+            (if (not (member pyim-dagger-str (car pyim-current-choices)))
+                (pyim-create-or-rearrange-word pyim-dagger-str))
             (pyim-terminate-translation)
             ;; Chinese-pyim 使用这个 hook 来处理联想词。
             (run-hooks 'pyim-select-word-finish-hook))
@@ -2133,7 +2145,7 @@ guidance-hashtable 的结构与 `pyim-guidance-hashtable' 的结构相同。"
                              pyim-scode-list)))
         (setq pyim-current-choices (list (pyim-choices-get spinyin-list pyim-default-scheme))
               pyim-current-pos 1)
-        (pyim-update-current-str)
+        (pyim-dagger-update)
         (pyim-page-format-page)
         (pyim-show)))))
 
@@ -2146,13 +2158,13 @@ guidance-hashtable 的结构与 `pyim-guidance-hashtable' 的结构相同。"
         (if (> (+ index (pyim-page-start)) end)
             (pyim-show)
           (setq pyim-current-pos (+ pyim-current-pos index))
-          (setq pyim-current-str (concat (substring pyim-current-str 0
-                                                    pyim-code-position)
-                                         (pyim-choice
-                                          (nth (1- pyim-current-pos)
-                                               (car pyim-current-choices)))))
+          (setq pyim-dagger-str (concat (substring pyim-dagger-str 0
+                                                   pyim-code-position)
+                                        (pyim-choice
+                                         (nth (1- pyim-current-pos)
+                                              (car pyim-current-choices)))))
           (pyim-page-select-word)))
-    (pyim-append-string (char-to-string last-command-event))
+    (pyim-dagger-append (char-to-string last-command-event))
     (pyim-terminate-translation)))
 ;; #+END_SRC
 
@@ -2515,7 +2527,7 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
       (progn
         (setq pyim-entered-code (substring pyim-entered-code 0 -1))
         (pyim-handle-entered-code))
-    (setq pyim-current-str "")
+    (setq pyim-dagger-str "")
     (pyim-terminate-translation)))
 ;; #+END_SRC
 
@@ -2528,7 +2540,7 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
                    (replace-match "" nil nil pyim-entered-code))
              (pyim-handle-entered-code))
     (setq pyim-entered-code "")
-    (setq pyim-current-str "")
+    (setq pyim-dagger-str "")
     (pyim-terminate-translation)))
 ;; #+END_SRC
 
@@ -2562,14 +2574,14 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-quit-clear ()
   (interactive)
-  (setq pyim-current-str "")
+  (setq pyim-dagger-str "")
   (pyim-terminate-translation))
 ;; #+END_SRC
 ;; *** 字母上屏
 ;; #+BEGIN_SRC emacs-lisp
 (defun pyim-quit-no-clear ()
   (interactive)
-  (setq pyim-current-str
+  (setq pyim-dagger-str
         (replace-regexp-in-string "-" "" pyim-entered-code))
   (pyim-terminate-translation))
 ;; #+END_SRC

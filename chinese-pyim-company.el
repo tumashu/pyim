@@ -105,7 +105,7 @@
                   ".*\\CC" ""
                   (buffer-substring
                    (save-excursion
-                     ;; 在输入中文的时候，`pyim-current-str' 也会
+                     ;; 在输入中文的时候，`pyim-dagger-str' 也会
                      ;; 插入到光标处，跳过。。。
                      (backward-char backward-char-number)
                      (point))
