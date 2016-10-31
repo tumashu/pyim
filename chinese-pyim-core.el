@@ -620,12 +620,9 @@ If you don't like this funciton, set the variable to nil")
                           (mapcar #'(lambda (file)
                                       (list file (nth 5 (file-attributes file 'string))))
                                   dict-files))))
-         (dcache-file (concat (file-name-as-directory pyim-dcache-directory)
-                              "pyim-dcache-common"))
-         (dcache-word2code-file (concat (file-name-as-directory pyim-dcache-directory)
-                                        "pyim-dcache-common:word2code"))
-         (dcache-md5-file (concat (file-name-as-directory pyim-dcache-directory)
-                                  "pyim-dcache-common:md5")))
+         (dcache-file (pyim-dcache-get-path 'pyim-dcache-common))
+         (dcache-word2code-file (pyim-dcache-get-path 'pyim-dcache-common:word2code))
+         (dcache-md5-file (pyim-dcache-get-path 'pyim-dcache-common:md5)))
     (when (or force (not (equal dicts-md5 (pyim-dcache-get-value-from-file dcache-md5-file))))
       (async-start
        `(lambda ()
@@ -637,6 +634,12 @@ If you don't like this funciton, set the variable to nil")
        `(lambda (result)
           (pyim-dcache-set-variable 'pyim-dcache-common t)
           (pyim-dcache-set-variable 'pyim-dcache-common:word2code t))))))
+
+(defun pyim-dcache-get-path (variable)
+  "获取保存 `variable' 取值的文件的路径。"
+  (when (symbolp variable)
+    (concat (file-name-as-directory pyim-dcache-directory)
+            (symbol-name variable))))
 
 (defun pyim-dcache-init-variables ()
   "初始化 dcache 缓存相关变量。"
