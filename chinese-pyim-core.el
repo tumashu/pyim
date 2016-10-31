@@ -635,26 +635,26 @@ If you don't like this funciton, set the variable to nil")
             (pyim-dcache-generate-word2code-dcache-file dcache ,dcache-word2code-file))
           (pyim-dcache-save-value-to-file ',dicts-md5 ,dcache-md5-file))
        `(lambda (result)
-          (setq pyim-dcache-common
-                (pyim-dcache-get-value-from-file ,dcache-file))
-          (setq pyim-dcache-common:word2code
-                (pyim-dcache-get-value-from-file ,dcache-word2code-file)))))))
+          (pyim-dcache-set-variable 'pyim-dcache-common t)
+          (pyim-dcache-set-variable 'pyim-dcache-common:word2code t))))))
 
 (defun pyim-dcache-init-variables ()
   "初始化 dcache 缓存相关变量。"
-  (pyim-dcache-restore-variable 'pyim-dcache-common (make-hash-table :test #'equal))
-  (pyim-dcache-restore-variable 'pyim-dcache-common:wordcount (make-hash-table :test #'equal))
-  (pyim-dcache-restore-variable 'pyim-dcache-common:word2code (make-hash-table :test #'equal))
-  (pyim-dcache-restore-variable 'pyim-dcache-personal (make-hash-table :test #'equal))
-  (pyim-dcache-restore-variable 'pyim-dcache-personal:wordcount (make-hash-table :test #'equal)))
+  (pyim-dcache-set-variable 'pyim-dcache-common)
+  (pyim-dcache-set-variable 'pyim-dcache-common:wordcount)
+  (pyim-dcache-set-variable 'pyim-dcache-common:word2code)
+  (pyim-dcache-set-variable 'pyim-dcache-personal)
+  (pyim-dcache-set-variable 'pyim-dcache-personal:wordcount))
 
-(defun pyim-dcache-restore-variable (variable &optional fallback-value)
-  "使用 `pyim-dcache-directory' 中对应文件的内容来恢复 `variable' 变量的取值。"
-  (unless (symbol-value variable)
+(defun pyim-dcache-set-variable (variable &optional force-restore fallback-value)
+  "如果 `variable' 的值为 nil, 则使用 `pyim-dcache-directory' 中对应文件的内容来设置
+`variable' 变量，`force-restore' 设置为 t 时，强制恢复，变量原来的值将丢失。"
+  (when (or force-restore (not (symbol-value variable)))
     (let ((file (concat (file-name-as-directory pyim-dcache-directory)
                         (symbol-name variable))))
       (set variable (or (pyim-dcache-get-value-from-file file)
-                        fallback-value)))))
+                        fallback-value
+                        (make-hash-table :test #'equal))))))
 
 (defun pyim-dcache-get-value-from-file (file)
   "读取保存到 FILE 里面的 value。"
