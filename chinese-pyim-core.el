@@ -904,7 +904,7 @@ BUG：无法有效的处理多音字。"
         (if (not (string-match-p "^\\cc+\\'" string))
             (error "不是纯中文字符串")
           (pyim-create-or-rearrange-word string)
-          (message "将词条: \"%s\" 插入 personal file。" string))))))
+          (message "将词条: %S 插入 personal file。" string))))))
 
 (defun pyim-search-word-code ()
   "选择词条，然后反查它的 code. 这个功能对五笔用户有用。"
@@ -928,7 +928,7 @@ BUG：无法有效的处理多音字。"
         (when (and (< (length string) 6)
                    (> (length string) 0))
           (pyim-delete-word-1 string)
-          (message "将词条: \"%s\" 从 personal file中删除。" string)))
+          (message "将词条: %S 从 personal 缓冲中删除。" string)))
     (message "请首先高亮选择需要删除的词条。")))
 
 (defun pyim-delete-word-1 (word)
