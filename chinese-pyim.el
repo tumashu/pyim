@@ -537,31 +537,7 @@
 ;;               '(pyim-probe-isearch-mode))
 ;; #+END_EXAMPLE
 
-
 ;;; Code:
-;; *** 使用 Chinese-pyim 改善 company-mode 中文补全的体验
-
-;; 中文词语之间没有分割字符，所以 Company-mode 在中文环境下， *补全词条* 变成了 *补全句子* ，
-;; 可用性很差，chinese-pyim-company 通过 Chinese-pyim 自带的分词函数来分割中文字符串，
-;; 改善了中文补全的体验 。
-
-;; 安装和使用方式：
-
-;; 1. 安装配置 `company-mode' 扩展包，具体可以参考：[[https://github.com/tumashu/emacs-helper/blob/master/eh-complete.el][emacs-helper's company configure]]
-;; 2. 在 emacs 配置中添加如下几行代码：
-;;    #+BEGIN_EXAMPLE
-;;    (require 'chinese-pyim-company)
-;;    (setq pyim-company-max-length 6)
-;;    #+END_EXAMPLE
-
-;; 用户也可以通过下面的方式 *禁用* company 中文补全
-
-;; #+BEGIN_EXAMPLE
-;; (setq pyim-company-complete-chinese-enable nil)
-;; #+END_EXAMPLE
-
-
-
 ;; * 代码                                                                 :code:
 ;; #+BEGIN_SRC emacs-lisp
 (require 'chinese-pyim-pymap)

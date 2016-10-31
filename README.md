@@ -35,9 +35,8 @@
     - [获取光标处的中文词条](#获取光标处的中文词条)
     - [让 \`forward-word' 和 \`back-backward’ 在中文环境下正常工作](#让-\`forward-word'-和-\`back-backward’-在中文环境下正常工作)
     - [为 isearch 相关命令添加拼音搜索支持](#为-isearch-相关命令添加拼音搜索支持)
-    - [使用 Chinese-pyim 改善 company-mode 中文补全的体验](#使用-chinese-pyim-改善-company-mode-中文补全的体验)
 
-# Chinese-pyim 使用说明<a id="orgheadline43"></a>
+# Chinese-pyim 使用说明<a id="orgheadline42"></a>
 
 ## 截图<a id="orgheadline1"></a>
 
@@ -498,7 +497,7 @@ Chinese-pyim **内置** 了多种词条获取的方式：
 
     ![img](snapshots/QR-code-for-author.jpg)
 
-## Tips<a id="orgheadline42"></a>
+## Tips<a id="orgheadline41"></a>
 
 ### Chinese-pyim 出现错误时，如何开启 debug 模式<a id="orgheadline26"></a>
 
@@ -653,19 +652,3 @@ chinese-pyim 安装后，可以通过下面的设置开启拼音搜索功能：
 
     (setq-default pyim-english-input-switch-functions
                   '(pyim-probe-isearch-mode))
-
-### 使用 Chinese-pyim 改善 company-mode 中文补全的体验<a id="orgheadline41"></a>
-
-中文词语之间没有分割字符，所以 Company-mode 在中文环境下， **补全词条** 变成了 **补全句子** ，可用性很差，chinese-pyim-company 通过 Chinese-pyim 自带的分词函数来分割中文字符串，改善了中文补全的体验 。
-
-安装和使用方式：
-
-1.  安装配置 \`company-mode' 扩展包，具体可以参考：[emacs-helper's company configure](https://github.com/tumashu/emacs-helper/blob/master/eh-complete.el)
-2.  在 emacs 配置中添加如下几行代码：
-
-        (require 'chinese-pyim-company)
-        (setq pyim-company-max-length 6)
-
-用户也可以通过下面的方式 **禁用** company 中文补全
-
-    (setq pyim-company-complete-chinese-enable nil)
