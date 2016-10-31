@@ -1671,7 +1671,7 @@ Return the input string."
                    (when (car pyim-current-choices)
                      (setq pyim-current-pos 1)
                      (pyim-dagger-update)
-                     (pyim-page-format-page)
+                     (pyim-page-update)
                      (pyim-show)
                      (pyim-page-auto-select-word scheme-name)
                      t)))
@@ -1824,7 +1824,7 @@ Return the input string."
 ;; 2. 函数 `pyim-page-total-page'  返回值为5，说明 page 共有5页。
 ;; 3. 函数 `pyim-page-start' 返回 B 所在的位置。
 ;; 4. 函数 `pyim-page-end' 返回 E 所在的位置。
-;; 5. 函数 `pyim-page-format-page' 会从 `pyim-current-choices' 中提取一个
+;; 5. 函数 `pyim-page-update' 会从 `pyim-current-choices' 中提取一个
 ;;    sublist:
 ;;    #+BEGIN_EXAMPLE
 ;;    ("薿" "旎" "睨" "铌" "昵" "匿" "倪" "霓" "暱")
@@ -1842,7 +1842,7 @@ Return the input string."
 ;;    置在下一页。
 ;; 2. 然后将 `pyim-current-pos' 的值设定为 `pyim-page-start' 的返回值，确
 ;;    保 `pyim-current-pos' 的取值为下一页第一个词条的位置。
-;; 3. 最后调用 `pyim-page-format-page' 来重新设置 `pyim-guidance-hashtable' 。
+;; 3. 最后调用 `pyim-page-update' 来重新设置 `pyim-guidance-hashtable' 。
 
 ;; #+BEGIN_SRC emacs-lisp
 ;;;  page format
@@ -1886,7 +1886,7 @@ Return the input string."
           whole
         (pyim-page-end t)))))
 
-(defun pyim-page-format-page (&optional hightlight-current)
+(defun pyim-page-update (&optional hightlight-current)
   "按当前位置，生成候选词条"
   (let* ((end (pyim-page-end))
          (start (1- (pyim-page-start)))
@@ -1926,7 +1926,7 @@ Return the input string."
       (setq pyim-current-pos (if (> new 0) new 1)
             pyim-current-pos (pyim-page-start))
       (pyim-dagger-update)
-      (pyim-page-format-page)
+      (pyim-page-update)
       (pyim-show))))
 
 (defun pyim-page-previous-page (arg)
@@ -1942,7 +1942,7 @@ Return the input string."
     (let ((new (+ pyim-current-pos arg)))
       (setq pyim-current-pos (if (> new 0) new 1))
       (pyim-dagger-update)
-      (pyim-page-format-page t)
+      (pyim-page-update t)
       (pyim-show))))
 
 (defun pyim-page-previous-word (arg)
@@ -2146,7 +2146,7 @@ guidance-hashtable 的结构与 `pyim-guidance-hashtable' 的结构相同。"
         (setq pyim-current-choices (list (pyim-choices-get spinyin-list pyim-default-scheme))
               pyim-current-pos 1)
         (pyim-dagger-update)
-        (pyim-page-format-page)
+        (pyim-page-update)
         (pyim-show)))))
 
 (defun pyim-page-select-word-by-number ()
