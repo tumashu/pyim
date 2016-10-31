@@ -874,7 +874,7 @@ BUG：无法有效的处理多音字。"
     (when string
       (pyim-create-or-rearrange-word string)
       (unless silent
-        (message "将词条: \"%s\" 插入 personal 缓冲。" string)))))
+        (message "将词条: \"%s\" 加入 personal 缓冲。" string)))))
 
 (defun pyim-create-word-at-point:2char ()
   "将光标前2个中文字符组成的字符串加入个人词库。"
