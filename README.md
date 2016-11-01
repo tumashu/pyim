@@ -28,7 +28,6 @@
     - [将光标处的拼音或者五笔字符串转换为中文 (与 vimim 的 “点石成金” 功能类似)](#将光标处的拼音或者五笔字符串转换为中文-(与-vimim-的-“点石成金”-功能类似))
     - [如何添加自定义拼音词库](#如何添加自定义拼音词库)
     - [如何手动安装和管理词库](#如何手动安装和管理词库)
-    - [如何快速切换词库](#如何快速切换词库)
     - [Emacs 启动时加载 chinese-pyim 词库](#emacs-启动时加载-chinese-pyim-词库)
     - [将汉字字符串转换为拼音字符串](#将汉字字符串转换为拼音字符串)
     - [中文分词](#中文分词)
@@ -36,7 +35,7 @@
     - [让 \`forward-word' 和 \`back-backward’ 在中文环境下正常工作](#让-\`forward-word'-和-\`back-backward’-在中文环境下正常工作)
     - [为 isearch 相关命令添加拼音搜索支持](#为-isearch-相关命令添加拼音搜索支持)
 
-# Chinese-pyim 使用说明<a id="orgheadline42"></a>
+# Chinese-pyim 使用说明<a id="orgheadline41"></a>
 
 ## 截图<a id="orgheadline1"></a>
 
@@ -110,7 +109,11 @@ Chinese-pyim 的目标是： **尽最大的努力成为一个好用的 emacs 中
       ;; 我使用全拼
       (setq pyim-default-scheme 'quanpin)
 
-      ;; 设置 pyim 探针设置，可以实现 *无痛* 中英文切换 :-)
+      ;; 设置 pyim 探针设置，这是 pyim 高级功能设置，可以实现 *无痛* 中英文切换 :-)
+      ;; 我自己使用的中英文动态切换规则是：
+      ;; 1. 光标只有在注释里面时，才可以输入中文。
+      ;; 2. 光标前是汉字字符时，才能输入中文。
+      ;; 3. 使用 M-j 快捷键，强制将光标前的拼音字符串转换为中文。
       (setq-default pyim-english-input-switch-functions
                     '(pyim-probe-dynamic-english
                       pyim-probe-isearch-mode
@@ -497,7 +500,7 @@ Chinese-pyim **内置** 了多种词条获取的方式：
 
     ![img](snapshots/QR-code-for-author.jpg)
 
-## Tips<a id="orgheadline41"></a>
+## Tips<a id="orgheadline40"></a>
 
 ### Chinese-pyim 出现错误时，如何开启 debug 模式<a id="orgheadline26"></a>
 
@@ -581,23 +584,12 @@ Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面几�
 2.  必须使用词库文件的绝对路径。
 3.  词库文件的编码必须为 utf-8-unix，否则会出现乱码。
 
-### 如何快速切换词库<a id="orgheadline34"></a>
-
-用户可以自定义类似的命令来实现快速切换拼音词库。
-
-    (defun pyim-use-dict:bigdict ()
-      (interactive)
-      (setq pyim-dicts
-            '((:name "BigDict"
-                     :file "/path/to/pyim-bigdict.pyim.gz" )))
-      (pyim-restart-1 t))
-
-### Emacs 启动时加载 chinese-pyim 词库<a id="orgheadline35"></a>
+### Emacs 启动时加载 chinese-pyim 词库<a id="orgheadline34"></a>
 
     (add-hook 'emacs-startup-hook
               #'(lambda () (pyim-restart-1 t)))
 
-### 将汉字字符串转换为拼音字符串<a id="orgheadline36"></a>
+### 将汉字字符串转换为拼音字符串<a id="orgheadline35"></a>
 
 下面两个函数可以将中文字符串转换的拼音字符串或者列表，用于 emacs-lisp
 编程。
@@ -605,7 +597,7 @@ Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面几�
 1.  \`pyim-hanzi2pinyin' （考虑多音字）
 2.  \`pyim-hanzi2pinyin-simple'  （不考虑多音字）
 
-### 中文分词<a id="orgheadline37"></a>
+### 中文分词<a id="orgheadline36"></a>
 
 Chinese-pyim 包含了一个简单的分词函数：\`pyim-cstring-split-to-list', 可以将一个中文字符串分成一个词条列表，比如：
 
@@ -621,12 +613,12 @@ Chinese-pyim 包含了一个简单的分词函数：\`pyim-cstring-split-to-list
 注意，上述两个分词函数使用暴力匹配模式来分词，所以， **不能检测出** Chinese-pyim
 词库中不存在的中文词条。
 
-### 获取光标处的中文词条<a id="orgheadline38"></a>
+### 获取光标处的中文词条<a id="orgheadline37"></a>
 
 Chinese-pyim 包含了一个简单的命令：\`pyim-cwords-at-point', 这个命令可以得到光标处的 **英文** 或者 **中文** 词条的 \*列表\*，这个命令依赖分词函数：
 \`pyim-cstring-split-to-list'。
 
-### 让 \`forward-word' 和 \`back-backward’ 在中文环境下正常工作<a id="orgheadline39"></a>
+### 让 \`forward-word' 和 \`back-backward’ 在中文环境下正常工作<a id="orgheadline38"></a>
 
 中文词语没有强制用空格分词，所以 emacs 内置的命令 \`forward-word' 和 \`backward-word'
 在中文环境不能按用户预期的样子执行，而是 forward/backward “句子” ，Chinese-pyim
@@ -640,7 +632,7 @@ Chinese-pyim 包含了一个简单的命令：\`pyim-cwords-at-point', 这个命
     (global-set-key (kbd "M-f") 'pyim-forward-word)
     (global-set-key (kbd "M-b") 'pyim-backward-word)
 
-### 为 isearch 相关命令添加拼音搜索支持<a id="orgheadline40"></a>
+### 为 isearch 相关命令添加拼音搜索支持<a id="orgheadline39"></a>
 
 chinese-pyim 安装后，可以通过下面的设置开启拼音搜索功能：
 
