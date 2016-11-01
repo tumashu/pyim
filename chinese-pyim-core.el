@@ -180,7 +180,7 @@ plist 来表示，比如：
      :class shuangpin
      :first-chars "abcdefghijklmnpqrstuvwxyz"
      :rest-chars "abcdefghijklmnopqrstuvwxyz;"
-     :prefer-trigger-chars "o"
+     :prefer-trigger-chars nil
      :keymaps
      (("a" "a" "a")
       ("b" "b" "ou")
