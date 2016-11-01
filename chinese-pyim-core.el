@@ -123,9 +123,10 @@ plist 来表示，比如：
      :prefer-trigger-chars "v")
     (wubi
      :document "五笔输入法。"
-     :class wubi
+     :class simple
      :first-chars "abcdefghjklmnopqrstwxy"
      :rest-chars "vmpfwckzyjqdltxuognbhsrei'-a"
+     :code-prefix "." ;五笔词库中所有的 code 都以 "." 开头，防止和拼音词库冲突。
      :auto-select t ;只有一个候选词时，是否自动选择这个候选词。
      :auto-select-minimum-input 4 ;自动选择候选词时要求的最小输入字符数量
      :prefer-trigger-chars "z")
@@ -1366,9 +1367,14 @@ Return the input string."
     (pyim-spinyin-find-fuzzy
      (pyim-permutate-list (nreverse results)))))
 
-(defun pyim-code-split:wubi (wbcode &optional -)
-  "将一个 `wbcode' 分解。"
-  (list (list wbcode)))
+(defun pyim-code-split:simple (code &optional -)
+  "这个函数只是对 code 做了一点简单的包装，实际并不真正的
+*分解* code, 比如：
+
+  \"aaaa\" -> ((\"aaaa\"))
+
+这个函数主要用于五笔等 code 规则相对简单固定的输入法。"
+  (list (list code)))
 
 (defun pyim-spinyin-find-fuzzy (spinyin-list)
   "用于处理模糊音的函数。"
@@ -1498,13 +1504,21 @@ Return the input string."
                     spinyin)
                    "-")))))
 
-(defun pyim-scode-join:wubi (swbcode scheme-name &optional as-search-key shou-zi-mu)
-  "把一个 `swbcode' (splited wubi code) 合并为一个五笔字符串。"
-  (if as-search-key
-      ;; pyim 直接将拼音词库和五笔词库合并到一个 dcache 文件中（简化代码和提高速度），
-      ;; 为了不引起混乱，pyim 规定 五笔 code 都以 '.' 开头，比如 '.aaaa'.
-      (concat "." (car swbcode))
-    (car swbcode)))
+(defun pyim-scode-join:simple (scode scheme-name &optional as-search-key shou-zi-mu)
+  "把一个 `scode' (splited code) 合并为一个 code 字符串。
+比如：
+
+    (\"aaaa\") --> \"aaaa\"   用于在 dagger 中显示。
+               `-> \".aaaa\"  用于搜索词库。
+
+这个函数主要用于五笔等 code 规则比较简单的输入法。"
+  (when scheme-name
+    (let ((code-prefix (pyim-scheme-get-option scheme-name :code-prefix)))
+      (if as-search-key
+          ;; pyim 直接将拼音词库和五笔词库合并到一个 dcache 文件中（简化代码和提高速度），
+          ;; 为了不引起混乱，pyim 规定 五笔 code 都以 '.' 开头，比如 '.aaaa'.
+          (concat (or code-prefix "") (car scode))
+        (car scode)))))
 
 ;; #+END_SRC
 
