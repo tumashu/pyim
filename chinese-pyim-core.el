@@ -418,11 +418,6 @@ chinese-pyim 称这个字符串为 \"dragger string\", 向 \"匕首\" 一样插�
   "Chinese-pyim 会将一个 code 分解为一个或者多个 scode （splited code）,
 这个变量用于保存分解得到的结果。")
 
-(defvar pyim-guidance-hashtable (make-hash-table)
-  "这个 hashtable 的信息用于构建选词框中显示的字符串，其内容类似：
-
-(:key \"ni hao\" :current-page 1 :total-page 9 :words \"1.你好 2.你好 ...\")")
-
 (defvar pyim-current-pos nil "当前选择的词条在 pyim-current-choices 中的位置")
 
 (defvar pyim-load-hook nil)
@@ -491,7 +486,6 @@ If you don't like this funciton, set the variable to nil")
     pyim-input-ascii
     pyim-english-input-switch-functions
     pyim-punctuation-half-width-functions
-    pyim-guidance-hashtable
     pyim-translating
     pyim-dagger-overlay
 
@@ -1009,7 +1003,6 @@ BUG：无法有效的处理多音字。"
       (unwind-protect
           (let ((input-string (pyim-start-translation key-or-string)))
             ;; (message "input-string: %s" input-string)
-            (clrhash pyim-guidance-hashtable)
             (when (and (stringp input-string)
                        (> (length input-string) 0))
               (if input-method-exit-on-first-char
@@ -1031,6 +1024,9 @@ Return the input string."
              (overriding-terminal-local-map pyim-mode-map)
              (generated-events nil)
              (input-method-function nil)
+             ;; Quail package 用这个变量来控制是否在 buffer 中
+             ;; 插入 dagger string, pyim *强制* 将其设置为 nil
+             (input-method-use-echo-area nil)
              (modified-p (buffer-modified-p))
              key str last-command-event last-command this-command)
 
@@ -1049,11 +1045,7 @@ Return the input string."
 
         (while pyim-translating
           (set-buffer-modified-p modified-p)
-          (let* ((prompt (when input-method-use-echo-area
-                           (format "[%s]: %s"
-                                   (replace-regexp-in-string "-" "" pyim-entered-code)
-                                   (gethash :words pyim-guidance-hashtable))))
-                 (keyseq (read-key-sequence prompt nil nil t))
+          (let* ((keyseq (read-key-sequence nil nil nil t))
                  (cmd (lookup-key pyim-mode-map keyseq)))
             ;; (message "key: %s, cmd:%s\nlcmd: %s, lcmdv: %s, tcmd: %s"
             ;;          key cmd last-command last-command-event this-command)
@@ -1133,7 +1125,6 @@ Return the input string."
   (setq pyim-translating nil)
   (pyim-dagger-delete-string)
   (setq pyim-current-choices nil)
-  (clrhash pyim-guidance-hashtable)
   (when (and (eq pyim-use-tooltip 'pos-tip)
              (pyim-tooltip-pos-tip-usable-p))
     (pos-tip-hide)))
@@ -1685,17 +1676,16 @@ Return the input string."
                          (list (delete-dups (pyim-choices-get pyim-scode-list scheme-name))))
                    (when (car pyim-current-choices)
                      (setq pyim-current-pos 1)
-                     (pyim-dagger-update)
-                     (pyim-page-update)
-                     (pyim-show)
+                     (pyim-dagger-refresh)
+                     (pyim-page-refresh)
                      (pyim-page-auto-select-word scheme-name)
                      t)))
       (setq pyim-dagger-str (replace-regexp-in-string "-" "" pyim-entered-code))
-      (puthash :words
-               (format "%s" (replace-regexp-in-string
-                             "-" " " pyim-entered-code))
-               pyim-guidance-hashtable)
-      (pyim-show))))
+      (setq pyim-current-choices
+            (list (list (format "%s" (replace-regexp-in-string
+                                      "-" " " pyim-entered-code)))))
+      (pyim-dagger-refresh)
+      (pyim-page-refresh))))
 
 ;; #+END_SRC
 
@@ -1719,38 +1709,12 @@ Return the input string."
 ;;    #+END_EXAMPLE
 ;;    这部份代码相对复杂，使用 `pyim-update-current-key' 专门处理。
 
-;; #+BEGIN_SRC emacs-lisp
-(defun pyim-dagger-append (str)
-  "Append STR to `pyim-dagger-str'"
-  (setq pyim-dagger-str (concat pyim-dagger-str str)))
-
-(defun pyim-dagger-update ()
-  "更新 `pyim-dagger-str' 的值。"
-  (let* ((end (pyim-page-end))
-         (start (1- (pyim-page-start)))
-         (choices (car pyim-current-choices))
-         (choice (pyim-subseq choices start end))
-         (pos (1- (min pyim-current-pos (length choices))))
-         rest)
-    (setq pyim-dagger-str
-          (concat (substring pyim-dagger-str 0
-                             pyim-code-position)
-                  (pyim-choice (nth pos choices))))
-    (setq rest (mapconcat
-                #'(lambda (py)
-                    (concat (car py) (cdr py)))
-                (nthcdr (length pyim-dagger-str) (car pyim-scode-list))
-                "'"))
-    (if (string< "" rest)
-        (setq pyim-dagger-str (concat pyim-dagger-str rest)))))
-;; #+END_SRC
-
 ;; Chinese-pyim 会使用 emacs overlay 机制在 *待输入buffer* 光标处高亮显示
 ;; `pyim-dagger-str'，让用户快速了解当前输入的字符串，具体方式是：
 ;; 1. 在 `pyim-input-method' 中调用 `pyim-dagger-setup-overlay' 创建 overlay ，并
 ;;    使用变量 `pyim-dagger-overlay' 保存，创建时将 overlay 的 face 属性设置为
 ;;    `pyim-dagger-face' ，用户可以使用这个变量来自定义 face。
-;; 2. 使用函数 `pyim-show' 高亮显示 `pyim-dagger-str'
+;; 2. 使用函数 `pyim-dagger-show' 高亮显示 `pyim-dagger-str'
 ;;    1. 清除光标处原来的字符串。
 ;;    2. 插入 `pyim-dagger-str'
 ;;    3. 使用 `move-overlay' 函数调整变量 `pyim-dagger-overlay' 中保存的 overlay，
@@ -1774,6 +1738,47 @@ Return the input string."
 (defun pyim-dagger-delete-overlay ()
   (if (and (overlayp pyim-dagger-overlay) (overlay-start pyim-dagger-overlay))
       (delete-overlay pyim-dagger-overlay)))
+
+(defun pyim-dagger-append (str)
+  "Append STR to `pyim-dagger-str'"
+  (setq pyim-dagger-str (concat pyim-dagger-str str)))
+
+(defun pyim-dagger-refresh ()
+  "更新 `pyim-dagger-str' 的值。"
+  (let* ((end (pyim-page-end))
+         (start (1- (pyim-page-start)))
+         (choices (car pyim-current-choices))
+         (choice (pyim-subseq choices start end))
+         (pos (1- (min pyim-current-pos (length choices))))
+         rest)
+    (setq pyim-dagger-str
+          (concat (substring pyim-dagger-str 0
+                             pyim-code-position)
+                  (pyim-choice (nth pos choices))))
+    (setq rest (mapconcat
+                #'(lambda (py)
+                    (concat (car py) (cdr py)))
+                (nthcdr (length pyim-dagger-str) (car pyim-scode-list))
+                "'"))
+    (if (string< "" rest)
+        (setq pyim-dagger-str (concat pyim-dagger-str rest)))
+    (unless enable-multibyte-characters
+      (setq pyim-entered-code nil
+            pyim-dagger-str nil)
+      (error "Can't input characters in current unibyte buffer"))
+    ;; Delete old dagger string.
+    (pyim-dagger-delete-string)
+    ;; Insert new dagger string.
+    (insert pyim-dagger-str)
+    ;; Hightlight new dagger string.
+    (move-overlay pyim-dagger-overlay
+                  (overlay-start pyim-dagger-overlay) (point))))
+
+(defun pyim-dagger-delete-string ()
+  "删除已经插入 buffer 的 dagger 字符串。"
+  (if (overlay-start pyim-dagger-overlay)
+      (delete-region (overlay-start pyim-dagger-overlay)
+                     (overlay-end pyim-dagger-overlay))))
 ;; #+END_SRC
 
 ;; ** 显示和选择备选词条
@@ -1806,7 +1811,7 @@ Return the input string."
 ;; 1. pyim-guidance:two-lines
 ;; 2. pyim-guidance:one-line
 
-;; 这些函数会根据 `pyim-guidance-hashtable' 中的信息来得到所需要的字符串。
+;; 这些函数会根据参数 `guidance-info' 中的信息来得到所需要的字符串。
 
 ;;  *待选词列表* 一般都很长，不可能在一行中完全显示，所以 Chinese-pyim 使
 ;;  用了 page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以逻辑的分
@@ -1839,14 +1844,15 @@ Return the input string."
 ;; 2. 函数 `pyim-page-total-page'  返回值为5，说明 page 共有5页。
 ;; 3. 函数 `pyim-page-start' 返回 B 所在的位置。
 ;; 4. 函数 `pyim-page-end' 返回 E 所在的位置。
-;; 5. 函数 `pyim-page-update' 会从 `pyim-current-choices' 中提取一个
-;;    sublist:
+;; 5. 函数 `pyim-page-refresh' 用于刷新显示 page
+;;    它会从 `pyim-current-choices' 中提取一个 sublist:
 ;;    #+BEGIN_EXAMPLE
 ;;    ("薿" "旎" "睨" "铌" "昵" "匿" "倪" "霓" "暱")
 ;;    #+END_EXAMPLE
 ;;    这个 sublist 的起点为  `pyim-page-start' 的返回值，终点为
 ;;    `pyim-page-end' 的返回值。然后使用这个 sublist 来构建类似下面的字符
-;;    串，并保存到 `pyim-guidance-hashtable'  :words 关键字对应的位置。
+;;    串，并保存到一个 hashtable 的 :words 关键字对应的位置，这个 hastable
+;;    最终会做为参数传递给 pyim-guidance 对应的函数，用于生成 page 内容。
 ;;    #+BEGIN_EXAMPLE
 ;;    "1. 薿 2.旎 3.睨 4.铌 5.昵 6.匿 7.倪 8.霓 9.暱"
 ;;    #+END_EXAMPLE
@@ -1857,7 +1863,7 @@ Return the input string."
 ;;    置在下一页。
 ;; 2. 然后将 `pyim-current-pos' 的值设定为 `pyim-page-start' 的返回值，确
 ;;    保 `pyim-current-pos' 的取值为下一页第一个词条的位置。
-;; 3. 最后调用 `pyim-page-update' 来重新设置 `pyim-guidance-hashtable' 。
+;; 3. 最后调用 `pyim-page-refresh' 来重新刷新页面。
 
 ;; #+BEGIN_SRC emacs-lisp
 ;;;  page format
@@ -1901,18 +1907,19 @@ Return the input string."
           whole
         (pyim-page-end t)))))
 
-(defun pyim-page-update (&optional hightlight-current)
+(defun pyim-page-refresh (&optional hightlight-current)
   "按当前位置，生成候选词条"
   (let* ((end (pyim-page-end))
          (start (1- (pyim-page-start)))
          (choices (car pyim-current-choices))
          (choice (pyim-subseq choices start end))
          (pos (- (min pyim-current-pos (length choices)) start))
+         (guidance-info (make-hash-table))
          (i 0))
     (puthash :key (replace-regexp-in-string "-" " " pyim-entered-code)
-             pyim-guidance-hashtable)
-    (puthash :current-page (pyim-page-current-page) pyim-guidance-hashtable)
-    (puthash :total-page (pyim-page-total-page) pyim-guidance-hashtable)
+             guidance-info)
+    (puthash :current-page (pyim-page-current-page) guidance-info)
+    (puthash :total-page (pyim-page-total-page) guidance-info)
     (puthash :words
              (mapconcat 'identity
                         (mapcar
@@ -1929,7 +1936,27 @@ Return the input string."
                                          (propertize str 'face 'pyim-minibuffer-string-face))
                                (format "%d.%s " i str))))
                          choice) "")
-             pyim-guidance-hashtable)))
+             guidance-info)
+    ;; Show page.
+    (when (and (if (pyim-scheme-get-option pyim-default-scheme :auto-select)
+                   (>= (length (car pyim-current-choices)) 2)
+                 t)
+               (null unread-command-events)
+               (null unread-post-input-method-events))
+      (if (eq (selected-window) (minibuffer-window))
+          ;; Show the guidance in the next line of the currrent
+          ;; minibuffer.
+          (pyim-minibuffer-message
+           (format "  [%s]\n%s"
+                   current-input-method-title
+                   (gethash :words guidance-info)))
+        ;; Show the guidance in echo area without logging.
+        (let ((message-log-max nil))
+          (if pyim-use-tooltip
+              (pyim-tooltip-show
+               (funcall pyim-guidance guidance-info)
+               (overlay-start pyim-dagger-overlay))
+            (message "%s" (pyim-guidance:minibuffer guidance-info))))))))
 
 (defun pyim-page-next-page (arg)
   (interactive "p")
@@ -1940,9 +1967,8 @@ Return the input string."
     (let ((new (+ pyim-current-pos (* pyim-page-length arg) 1)))
       (setq pyim-current-pos (if (> new 0) new 1)
             pyim-current-pos (pyim-page-start))
-      (pyim-dagger-update)
-      (pyim-page-update)
-      (pyim-show))))
+      (pyim-dagger-refresh)
+      (pyim-page-refresh))))
 
 (defun pyim-page-previous-page (arg)
   (interactive "p")
@@ -1956,127 +1982,73 @@ Return the input string."
         (pyim-terminate-translation))
     (let ((new (+ pyim-current-pos arg)))
       (setq pyim-current-pos (if (> new 0) new 1))
-      (pyim-dagger-update)
-      (pyim-page-update t)
-      (pyim-show))))
+      (pyim-dagger-refresh)
+      (pyim-page-refresh t))))
 
 (defun pyim-page-previous-word (arg)
   (interactive "p")
   (pyim-page-next-word (- arg)))
-;; #+END_SRC
 
-;; *** 显示选词框
-;; 当`pyim-guidance-hashtable' 构建完成后，Chinese-pyim 使用函数 `pyim-show' 重
-;; 新显示选词框，`pyim-show' 会根据 `pyim-use-tooltip' 的取值来决定使用
-;; 哪种方式来显示选词框（minibuffer 或者 tooltip ）。
-
-;; #+BEGIN_SRC emacs-lisp
-(defun pyim-show ()
-  (unless enable-multibyte-characters
-    (setq pyim-entered-code nil
-          pyim-dagger-str nil)
-    (error "Can't input characters in current unibyte buffer"))
-  ;; Show dagger string.
-  (pyim-dagger-delete-string)
-  (insert pyim-dagger-str)
-  (move-overlay pyim-dagger-overlay
-                (overlay-start pyim-dagger-overlay) (point))
-  ;; Show page.
-  (when (and (if (pyim-scheme-get-option pyim-default-scheme :auto-select)
-                 (>= (length (car pyim-current-choices)) 2)
-               t)
-             (not input-method-use-echo-area)
-             (null unread-command-events)
-             (null unread-post-input-method-events))
-    (if (eq (selected-window) (minibuffer-window))
-        ;; Show the guidance in the next line of the currrent
-        ;; minibuffer.
-        (pyim-minibuffer-message
-         (format "  [%s]\n%s"
-                 current-input-method-title
-                 (gethash :words pyim-guidance-hashtable)))
-      ;; Show the guidance in echo area without logging.
-      (let ((message-log-max nil))
-        (if pyim-use-tooltip
-            (pyim-tooltip-show
-             (funcall pyim-guidance pyim-guidance-hashtable)
-             (overlay-start pyim-dagger-overlay))
-          (message "%s" (pyim-guidance:minibuffer pyim-guidance-hashtable)))))))
-
-(defun pyim-guidance:two-lines (guidance-hashtable)
-  "将 guidance-hashtable 格式化为类似下面格式的字符串，这个字符串将在
+(defun pyim-guidance:two-lines (guidance-info)
+  "将 guidance-info 格式化为类似下面格式的字符串，这个字符串将在
 tooltip 选词框中显示。
 
 +----------------------------+
 | ni hao [1/9]               |
 | 1.你好 2.你号 ...          |
-+----------------------------+
-
-guidance-hashtable 的结构与 `pyim-guidance-hashtable' 的结构相同。"
++----------------------------+"
   (format "=> %s [%s/%s]: \n%s"
-          (gethash :key guidance-hashtable)
-          (gethash :current-page guidance-hashtable)
-          (gethash :total-page guidance-hashtable)
-          (gethash :words guidance-hashtable)))
+          (gethash :key guidance-info)
+          (gethash :current-page guidance-info)
+          (gethash :total-page guidance-info)
+          (gethash :words guidance-info)))
 
-(defun pyim-guidance:one-line (guidance-hashtable)
-  "将 guidance-hashtable 格式化为类似下面格式的字符串，这个字符串将在
+(defun pyim-guidance:one-line (guidance-info)
+  "将 guidance-info 格式化为类似下面格式的字符串，这个字符串将在
 tooltip 选词框中显示。
 
 +-----------------------------------+
 | [ni hao]: 1.你好 2.你号 ... (1/9) |
-+-----------------------------------+
-
-guidance-hashtable 的结构与 `pyim-guidance-hashtable' 的结构相同。"
++-----------------------------------+"
   (format "[%s]: %s(%s/%s)"
           (replace-regexp-in-string
            " +" ""
-           (gethash :key guidance-hashtable))
-          (gethash :words guidance-hashtable)
-          (gethash :current-page guidance-hashtable)
-          (gethash :total-page guidance-hashtable)))
+           (gethash :key guidance-info))
+          (gethash :words guidance-info)
+          (gethash :current-page guidance-info)
+          (gethash :total-page guidance-info)))
 
-(defun pyim-guidance:vertical (guidance-hashtable)
-  "将 guidance-hashtable 格式化为类似下面格式的字符串，这个字符串将在
+(defun pyim-guidance:vertical (guidance-info)
+  "将 guidance-info 格式化为类似下面格式的字符串，这个字符串将在
 tooltip 选词框中显示。
 
 +--------------+
 | ni hao [1/9] |
 | 1.你好       |
 | 2.你号 ...   |
-+--------------+
-
-guidance-hashtable 的结构与 `pyim-guidance-hashtable' 的结构相同。"
++--------------+"
   (format "=> %s [%s/%s]: \n%s"
-          (gethash :key guidance-hashtable)
-          (gethash :current-page guidance-hashtable)
-          (gethash :total-page guidance-hashtable)
+          (gethash :key guidance-info)
+          (gethash :current-page guidance-info)
+          (gethash :total-page guidance-info)
           (replace-regexp-in-string
            "]" "]\n"
            (replace-regexp-in-string
             " +" "\n"
-            (gethash :words guidance-hashtable)))))
+            (gethash :words guidance-info)))))
 
-(defun pyim-guidance:minibuffer (guidance-hashtable)
-  "将 guidance-hashtable 格式化为类似下面格式的字符串，这个字符串
+(defun pyim-guidance:minibuffer (guidance-info)
+  "将 guidance-info 格式化为类似下面格式的字符串，这个字符串
 将在 minibuffer 中显示。
 
 +----------------------------------+
 | ni hao [1/9] 1.你好 2.你号 ...   |
-+----------------------------------+
-
-guidance-hashtable 的结构与 `pyim-guidance-hashtable' 的结构相同。"
++----------------------------------+"
   (format "%s [%s/%s]: %s"
-          (gethash :key guidance-hashtable)
-          (gethash :current-page guidance-hashtable)
-          (gethash :total-page guidance-hashtable)
-          (gethash :words guidance-hashtable)))
-
-(defun pyim-dagger-delete-string ()
-  "Delete dagger string."
-  (if (overlay-start pyim-dagger-overlay)
-      (delete-region (overlay-start pyim-dagger-overlay)
-                     (overlay-end pyim-dagger-overlay))))
+          (gethash :key guidance-info)
+          (gethash :current-page guidance-info)
+          (gethash :total-page guidance-info)
+          (gethash :words guidance-info)))
 
 (defun pyim-tooltip-show (string position)
   "在 `position' 位置，使用 pos-tip 或者 popup 显示字符串 `string' 。"
@@ -2140,7 +2112,7 @@ guidance-hashtable 的结构与 `pyim-guidance-hashtable' 的结构相同。"
         (setq pyim-dagger-str (pyim-translate last-command-event))
         (pyim-terminate-translation))
     (let ((str (pyim-choice (nth (1- pyim-current-pos) (car pyim-current-choices))))
-          spinyin-list)
+          scode-list)
       (pyim-create-or-rearrange-word str t)
       (setq pyim-code-position (+ pyim-code-position (length str)))
       (if (>= pyim-code-position (length (car pyim-scode-list)))
@@ -2153,16 +2125,15 @@ guidance-hashtable 的结构与 `pyim-guidance-hashtable' 的结构相同。"
             (pyim-terminate-translation)
             ;; Chinese-pyim 使用这个 hook 来处理联想词。
             (run-hooks 'pyim-select-word-finish-hook))
-        (setq spinyin-list
+        (setq scode-list
               (delete-dups (mapcar
-                            #'(lambda (spinyin)
-                                (nthcdr pyim-code-position spinyin))
+                            #'(lambda (scode)
+                                (nthcdr pyim-code-position scode))
                             pyim-scode-list)))
-        (setq pyim-current-choices (list (pyim-choices-get spinyin-list pyim-default-scheme))
+        (setq pyim-current-choices (list (pyim-choices-get scode-list pyim-default-scheme))
               pyim-current-pos 1)
-        (pyim-dagger-update)
-        (pyim-page-update)
-        (pyim-show)))))
+        (pyim-dagger-refresh)
+        (pyim-page-refresh)))))
 
 (defun pyim-page-select-word-by-number ()
   "使用数字编号来选择对应的词条。"
@@ -2171,7 +2142,7 @@ guidance-hashtable 的结构与 `pyim-guidance-hashtable' 的结构相同。"
       (let ((index (- last-command-event ?1))
             (end (pyim-page-end)))
         (if (> (+ index (pyim-page-start)) end)
-            (pyim-show)
+            (pyim-page-refresh)
           (setq pyim-current-pos (+ pyim-current-pos index))
           (setq pyim-dagger-str
                 (concat (substring pyim-dagger-str 0
