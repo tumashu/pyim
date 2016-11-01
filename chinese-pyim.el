@@ -453,18 +453,6 @@
 ;; 2. 必须使用词库文件的绝对路径。
 ;; 3. 词库文件的编码必须为 utf-8-unix，否则会出现乱码。
 
-;; *** 如何快速切换词库
-;; 用户可以自定义类似的命令来实现快速切换拼音词库。
-
-;; #+BEGIN_EXAMPLE
-;; (defun pyim-use-dict:bigdict ()
-;;   (interactive)
-;;   (setq pyim-dicts
-;;         '((:name "BigDict"
-;;                  :file "/path/to/pyim-bigdict.pyim.gz" )))
-;;   (pyim-restart-1 t))
-;; #+END_EXAMPLE
-
 ;; *** Emacs 启动时加载 chinese-pyim 词库
 
 ;; #+BEGIN_EXAMPLE
