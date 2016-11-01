@@ -1515,8 +1515,6 @@ Return the input string."
   (when scheme-name
     (let ((code-prefix (pyim-scheme-get-option scheme-name :code-prefix)))
       (if as-search-key
-          ;; pyim 直接将拼音词库和五笔词库合并到一个 dcache 文件中（简化代码和提高速度），
-          ;; 为了不引起混乱，pyim 规定 五笔 code 都以 '.' 开头，比如 '.aaaa'.
           (concat (or code-prefix "") (car scode))
         (car scode)))))
 
