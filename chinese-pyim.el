@@ -1,4 +1,4 @@
-;;; chinese-pyim.el --- A Chinese input method
+;;; chinese-pyim.el --- A Chinese input method which support quanpin, shuangpin and wubi.
 
 ;; * Header
 ;; Copyright 2015-2016 Feng Shu
