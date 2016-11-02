@@ -262,10 +262,10 @@
 ;; 的样式：
 
 ;; #+BEGIN_EXAMPLE
-;; (setq pyim-guidance 'pyim-guidance:one-line)
+;; (setq pyim-page-style 'one-line)
 ;; #+END_EXAMPLE
 
-;; 注：用户也可以自定义 guidance 格式化函数。
+;; 注：用户可以添加函数 pyim-page-style:style-name 来定义自己的选词框格式。
 
 ;; *** 设置模糊音
 ;; 可以通过设置 `pyim-fuzzy-pinyin-alist' 变量来自定义模糊音。

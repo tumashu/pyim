@@ -329,9 +329,9 @@ GTK 选词框的字体设置可以参考：[GTK resources](https://www.gnu.org/s
 Chinese-pyim 的 tooltip 选词框默认使用 **双行显示** 的样式，在一些特殊的情况下（比如：popup 显示的菜单错位），用户可以使用 **单行显示**
 的样式：
 
-    (setq pyim-guidance 'pyim-guidance:one-line)
+    (setq pyim-page-style 'one-line)
 
-注：用户也可以自定义 guidance 格式化函数。
+注：用户可以添加函数 pyim-page-style:style-name 来定义自己的选词框格式。
 
 ### 设置模糊音<a id="orgheadline17"></a>
 

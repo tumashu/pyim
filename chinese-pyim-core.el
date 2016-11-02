@@ -356,10 +356,16 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
 3. 当取值为 nil 时，将 minibuffer 做为选词框；"
   :group 'chinese-pyim)
 
-(defcustom pyim-guidance 'pyim-guidance:two-lines
-  "这个变量保存的函数用于 format 选词框中的字符串。"
+(defcustom pyim-page-style 'two-lines
+  "这个变量用来控制选词框的格式。
+
+pyim 内建的有三种选词框格式：
+
+1. one-line  单行选词框
+2. two-lines 双行选词框
+3. vertial   垂直选词框"
   :group 'chinese-pyim
-  :type 'function)
+  :type 'symbol)
 
 (defcustom pyim-tooltip-width-adjustment 1.2
   "校正 tooltip 选词框宽度的数值，表示校正后的宽度是未校正前宽度的倍数。
@@ -1804,14 +1810,7 @@ Return the input string."
 ;; ("你好" "倪皓" "泥" "你" "呢" "拟" "逆" "腻" "妮" "怩" "溺" "尼" "禰" "齯" "麑" "鲵" "蜺" "衵" "薿" "旎" "睨" "铌" "昵" "匿" "倪" "霓" "暱" "柅" "猊" "郳" "輗" "坭" "惄" "堄" "儗" "伲" "祢" "慝")
 ;; #+END_EXAMPLE
 
-;; minibuffer 或者 tooltip 选词框中显示的字符串通过
-;; `pyim-guidance' 变量对应的函数生成,
-;; chinese-pyim 当前内置了两个 format 函数：
-
-;; 1. pyim-guidance:two-lines
-;; 2. pyim-guidance:one-line
-
-;; 这些函数会根据参数 `guidance-info' 中的信息来得到所需要的字符串。
+;; 选词框的格式通过变量 `pyim-page-style' 来控制。
 
 ;;  *待选词列表* 一般都很长，不可能在一行中完全显示，所以 Chinese-pyim 使
 ;;  用了 page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以逻辑的分
@@ -1852,7 +1851,7 @@ Return the input string."
 ;;    这个 sublist 的起点为  `pyim-page-start' 的返回值，终点为
 ;;    `pyim-page-end' 的返回值。然后使用这个 sublist 来构建类似下面的字符
 ;;    串，并保存到一个 hashtable 的 :words 关键字对应的位置，这个 hastable
-;;    最终会做为参数传递给 pyim-guidance 对应的函数，用于生成 page 内容。
+;;    最终会做为参数传递给 `pyim-page-style' 相关的函数，用于生成 page。
 ;;    #+BEGIN_EXAMPLE
 ;;    "1. 薿 2.旎 3.睨 4.铌 5.昵 6.匿 7.倪 8.霓 9.暱"
 ;;    #+END_EXAMPLE
@@ -1914,12 +1913,12 @@ Return the input string."
          (choices (car pyim-current-choices))
          (choice (pyim-subseq choices start end))
          (pos (- (min pyim-current-pos (length choices)) start))
-         (guidance-info (make-hash-table))
+         (page-info (make-hash-table))
          (i 0))
     (puthash :key (replace-regexp-in-string "-" " " pyim-entered-code)
-             guidance-info)
-    (puthash :current-page (pyim-page-current-page) guidance-info)
-    (puthash :total-page (pyim-page-total-page) guidance-info)
+             page-info)
+    (puthash :current-page (pyim-page-current-page) page-info)
+    (puthash :total-page (pyim-page-total-page) page-info)
     (puthash :words
              (mapconcat 'identity
                         (mapcar
@@ -1936,7 +1935,7 @@ Return the input string."
                                          (propertize str 'face 'pyim-minibuffer-string-face))
                                (format "%d.%s " i str))))
                          choice) "")
-             guidance-info)
+             page-info)
     ;; Show page.
     (when (and (if (pyim-scheme-get-option pyim-default-scheme :auto-select)
                    (>= (length (car pyim-current-choices)) 2)
@@ -1949,14 +1948,17 @@ Return the input string."
           (pyim-minibuffer-message
            (format "  [%s]\n%s"
                    current-input-method-title
-                   (gethash :words guidance-info)))
+                   (gethash :words page-info)))
         ;; Show the guidance in echo area without logging.
         (let ((message-log-max nil))
           (if pyim-use-tooltip
               (pyim-tooltip-show
-               (funcall pyim-guidance guidance-info)
+               (let ((func (intern (format "pyim-page-style:%S" pyim-page-style))))
+                 (if (functionp func)
+                     (funcall func page-info)
+                   (pyim-page-style:two-lines page-info)))
                (overlay-start pyim-dagger-overlay))
-            (message "%s" (pyim-guidance:minibuffer guidance-info))))))))
+            (message "%s" (pyim-page-style:minibuffer page-info))))))))
 
 (defun pyim-page-next-page (arg)
   (interactive "p")
@@ -1989,8 +1991,8 @@ Return the input string."
   (interactive "p")
   (pyim-page-next-word (- arg)))
 
-(defun pyim-guidance:two-lines (guidance-info)
-  "将 guidance-info 格式化为类似下面格式的字符串，这个字符串将在
+(defun pyim-page-style:two-lines (page-info)
+  "将 page-info 格式化为类似下面格式的字符串，这个字符串将在
 tooltip 选词框中显示。
 
 +----------------------------+
@@ -1998,13 +2000,13 @@ tooltip 选词框中显示。
 | 1.你好 2.你号 ...          |
 +----------------------------+"
   (format "=> %s [%s/%s]: \n%s"
-          (gethash :key guidance-info)
-          (gethash :current-page guidance-info)
-          (gethash :total-page guidance-info)
-          (gethash :words guidance-info)))
+          (gethash :key page-info)
+          (gethash :current-page page-info)
+          (gethash :total-page page-info)
+          (gethash :words page-info)))
 
-(defun pyim-guidance:one-line (guidance-info)
-  "将 guidance-info 格式化为类似下面格式的字符串，这个字符串将在
+(defun pyim-page-style:one-line (page-info)
+  "将 page-info 格式化为类似下面格式的字符串，这个字符串将在
 tooltip 选词框中显示。
 
 +-----------------------------------+
@@ -2013,13 +2015,13 @@ tooltip 选词框中显示。
   (format "[%s]: %s(%s/%s)"
           (replace-regexp-in-string
            " +" ""
-           (gethash :key guidance-info))
-          (gethash :words guidance-info)
-          (gethash :current-page guidance-info)
-          (gethash :total-page guidance-info)))
+           (gethash :key page-info))
+          (gethash :words page-info)
+          (gethash :current-page page-info)
+          (gethash :total-page page-info)))
 
-(defun pyim-guidance:vertical (guidance-info)
-  "将 guidance-info 格式化为类似下面格式的字符串，这个字符串将在
+(defun pyim-page-style:vertical (page-info)
+  "将 page-info 格式化为类似下面格式的字符串，这个字符串将在
 tooltip 选词框中显示。
 
 +--------------+
@@ -2028,27 +2030,27 @@ tooltip 选词框中显示。
 | 2.你号 ...   |
 +--------------+"
   (format "=> %s [%s/%s]: \n%s"
-          (gethash :key guidance-info)
-          (gethash :current-page guidance-info)
-          (gethash :total-page guidance-info)
+          (gethash :key page-info)
+          (gethash :current-page page-info)
+          (gethash :total-page page-info)
           (replace-regexp-in-string
            "]" "]\n"
            (replace-regexp-in-string
             " +" "\n"
-            (gethash :words guidance-info)))))
+            (gethash :words page-info)))))
 
-(defun pyim-guidance:minibuffer (guidance-info)
-  "将 guidance-info 格式化为类似下面格式的字符串，这个字符串
+(defun pyim-page-style:minibuffer (page-info)
+  "将 page-info 格式化为类似下面格式的字符串，这个字符串
 将在 minibuffer 中显示。
 
 +----------------------------------+
 | ni hao [1/9] 1.你好 2.你号 ...   |
 +----------------------------------+"
   (format "%s [%s/%s]: %s"
-          (gethash :key guidance-info)
-          (gethash :current-page guidance-info)
-          (gethash :total-page guidance-info)
-          (gethash :words guidance-info)))
+          (gethash :key page-info)
+          (gethash :current-page page-info)
+          (gethash :total-page page-info)
+          (gethash :words page-info)))
 
 (defun pyim-tooltip-show (string position)
   "在 `position' 位置，使用 pos-tip 或者 popup 显示字符串 `string' 。"
