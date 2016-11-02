@@ -344,7 +344,7 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
 
 1. 当这个变量取值为 t 或者 'popup 时，使用 popup-el 包来绘制选词框；
 2. 当取值为 pos-tip 时，使用 pos-tip 包来绘制选词框；
-3. 当取值为 nil 时，将 minibuffer 做为选词框；"
+3. 当取值为 minibuffer 或者 nil 时，使用 minibuffer 做为选词框；"
   :group 'chinese-pyim)
 
 (defcustom pyim-page-style 'two-lines
@@ -2074,6 +2074,9 @@ tooltip 选词框中显示。
                                                  pyim-page-tooltip-width-adjustment))
                                        (pos-tip-tooltip-height 2 (frame-char-height frame) frame)
                                        nil nil 35))
+          ((eq tooltip 'minibuffer)
+           (let ((max-mini-window-height (+ pyim-page-length 2)))
+             (message string)))
           (t (error "`pyim-page-tooltip' 设置不对，请重新设置。")))))
 
 (defun pyim-minibuffer-message (string)
