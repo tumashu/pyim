@@ -348,7 +348,7 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
   :group 'chinese-pyim
   :type 'function)
 
-(defcustom pyim-use-tooltip 'popup
+(defcustom pyim-page-tooltip 'popup
   "如何绘制 Chinese-pyim 选词框。
 
 1. 当这个变量取值为 t 或者 'popup 时，使用 popup-el 包来绘制选词框；
@@ -367,14 +367,14 @@ pyim 内建的有三种选词框格式：
   :group 'chinese-pyim
   :type 'symbol)
 
-(defcustom pyim-tooltip-width-adjustment 1.2
+(defcustom pyim-page-tooltip-width-adjustment 1.2
   "校正 tooltip 选词框宽度的数值，表示校正后的宽度是未校正前宽度的倍数。
 
 由于字体设置等原因，pos-tip 选词框实际宽度会比 *预期宽度* 偏大或者偏小，
 这时，有可能会出现选词框词条显示不全或者选词框弹出位置不合理等问题。用户可以通过
 增大或者减小这个变量来改变 tooltip 选词框的宽度，取值大概在 0.5 ~ 2.0 范围之内。
 
-注：这个选项只适用于 `pyim-use-tooltip' 取值为 'pos-tip 的时候。"
+注：这个选项只适用于 `pyim-page-tooltip' 取值为 'pos-tip 的时候。"
   :group 'chinese-pyim)
 
 (defvar pyim-debug nil)
@@ -1132,7 +1132,7 @@ Return the input string."
   (setq pyim-translating nil)
   (pyim-dagger-delete-string)
   (setq pyim-current-choices nil)
-  (when (and (eq pyim-use-tooltip 'pos-tip)
+  (when (and (eq pyim-page-tooltip 'pos-tip)
              (pyim-tooltip-pos-tip-usable-p))
     (pos-tip-hide)))
 ;; #+END_SRC
@@ -1951,7 +1951,7 @@ Return the input string."
                    (gethash :words page-info)))
         ;; Show the guidance in echo area without logging.
         (let ((message-log-max nil))
-          (if pyim-use-tooltip
+          (if pyim-page-tooltip
               (pyim-tooltip-show
                (let ((func (intern (format "pyim-page-style:%S" pyim-page-style))))
                  (if (functionp func)
@@ -2056,7 +2056,7 @@ tooltip 选词框中显示。
   "在 `position' 位置，使用 pos-tip 或者 popup 显示字符串 `string' 。"
   (let ((frame (window-frame (selected-window)))
         (length (* pyim-page-length 10))
-        (tooltip pyim-use-tooltip)
+        (tooltip pyim-page-tooltip)
         (pos-tip-usable-p (pyim-tooltip-pos-tip-usable-p)))
     (cond ((or (eq tooltip t)
                (eq tooltip 'popup)
@@ -2069,10 +2069,10 @@ tooltip 选词框中显示。
                                        nil
                                        position nil 15
                                        (round (* (pos-tip-tooltip-width length (frame-char-width frame))
-                                                 pyim-tooltip-width-adjustment))
+                                                 pyim-page-tooltip-width-adjustment))
                                        (pos-tip-tooltip-height 2 (frame-char-height frame) frame)
                                        nil nil 35))
-          (t (error "`pyim-use-tooltip' 设置不对，请重新设置。")))))
+          (t (error "`pyim-page-tooltip' 设置不对，请重新设置。")))))
 
 (defun pyim-minibuffer-message (string)
   (message nil)

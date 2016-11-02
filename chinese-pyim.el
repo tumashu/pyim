@@ -118,7 +118,7 @@
 ;;   (setq pyim-isearch-enable-pinyin-search t)
 
 ;;   ;; 使用 pupup-el 来绘制选词框
-;;   (setq pyim-use-tooltip 'popup)
+;;   (setq pyim-page-tooltip 'popup)
 
 ;;   ;; 选词框显示5个候选词
 ;;   (setq pyim-page-length 5)
@@ -240,17 +240,17 @@
 
 ;; 1. 使用 popup 包来绘制选词框 （emacs overlay 机制）
 ;;    #+BEGIN_EXAMPLE
-;;    (setq pyim-use-tooltip 'popup)
+;;    (setq pyim-page-tooltip 'popup)
 ;;    #+END_EXAMPLE
 ;; 2. 使用 pos-tip 包来绘制选词框（emacs tooltip 机制）
 ;;    #+BEGIN_EXAMPLE
-;;    (setq pyim-use-tooltip 'pos-tip)
+;;    (setq pyim-page-tooltip 'pos-tip)
 ;;    #+END_EXAMPLE
 
 ;; 注：Linux 平台下，emacs 可以使用 GTK 来绘制选词框：
 
 ;; #+BEGIN_EXAMPLE
-;; (setq pyim-use-tooltip 'pos-tip)
+;; (setq pyim-page-tooltip 'pos-tip)
 ;; (setq x-gtk-use-system-tooltips t)
 ;; #+END_EXAMPLE
 

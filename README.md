@@ -128,7 +128,7 @@ Chinese-pyim 的目标是： **尽最大的努力成为一个好用的 emacs 中
       (setq pyim-isearch-enable-pinyin-search t)
 
       ;; 使用 pupup-el 来绘制选词框
-      (setq pyim-use-tooltip 'popup)
+      (setq pyim-page-tooltip 'popup)
 
       ;; 选词框显示5个候选词
       (setq pyim-page-length 5)
@@ -312,14 +312,14 @@ Chinese-pyim 支持五笔输入模式，用户可以通过变量 \`pyim-default-
 
 1.  使用 popup 包来绘制选词框 （emacs overlay 机制）
 
-        (setq pyim-use-tooltip 'popup)
+        (setq pyim-page-tooltip 'popup)
 2.  使用 pos-tip 包来绘制选词框（emacs tooltip 机制）
 
-        (setq pyim-use-tooltip 'pos-tip)
+        (setq pyim-page-tooltip 'pos-tip)
 
 注：Linux 平台下，emacs 可以使用 GTK 来绘制选词框：
 
-    (setq pyim-use-tooltip 'pos-tip)
+    (setq pyim-page-tooltip 'pos-tip)
     (setq x-gtk-use-system-tooltips t)
 
 GTK 选词框的字体设置可以参考：[GTK resources](https://www.gnu.org/software/emacs/manual/html_node/emacs/GTK-resources.html#GTK-resources) 。
