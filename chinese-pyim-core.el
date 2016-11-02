@@ -312,19 +312,8 @@ Chinese-pyim 内建的功能有：
   :group 'chinese-pyim
   :type 'boolean)
 
-(defcustom pyim-page-length 5
-  "每页显示的词条数目"
-  :group 'chinese-pyim
-  :type 'number)
-
 (defface pyim-dagger-face '((t (:underline t)))
-  "Face to show current string"
-  :group 'chinese-pyim)
-
-(defface pyim-page-selected-word-face '((t (:background "gray40")))
-  "选词框中已选词条的 face
-
-注意：当使用 minibuffer 为选词框时，这个选项才有用处。"
+  "dagger 字符串的 face"
   :group 'chinese-pyim)
 
 (defcustom pyim-english-input-switch-functions nil
@@ -350,6 +339,11 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
   :group 'chinese-pyim
   :type 'function)
 
+(defcustom pyim-page-length 5
+  "每页显示的词条数目"
+  :group 'chinese-pyim
+  :type 'number)
+
 (defcustom pyim-page-tooltip 'popup
   "如何绘制 Chinese-pyim 选词框。
 
@@ -368,6 +362,12 @@ pyim 内建的有三种选词框格式：
 3. vertial   垂直选词框"
   :group 'chinese-pyim
   :type 'symbol)
+
+(defface pyim-page-selected-word-face '((t (:background "gray40")))
+  "选词框中已选词条的 face
+
+注意：当使用 minibuffer 为选词框时，这个选项才有用处。"
+  :group 'chinese-pyim)
 
 (defcustom pyim-page-tooltip-width-adjustment 1.2
   "校正 tooltip 选词框宽度的数值，表示校正后的宽度是未校正前宽度的倍数。
