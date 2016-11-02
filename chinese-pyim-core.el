@@ -321,8 +321,10 @@ Chinese-pyim 内建的功能有：
   "Face to show current string"
   :group 'chinese-pyim)
 
-(defface pyim-minibuffer-string-face '((t (:background "gray40")))
-  "Face to current string show in minibuffer"
+(defface pyim-page-selected-word-face '((t (:background "gray40")))
+  "选词框中已选词条的 face
+
+注意：当使用 minibuffer 为选词框时，这个选项才有用处。"
   :group 'chinese-pyim)
 
 (defcustom pyim-english-input-switch-functions nil
@@ -1932,7 +1934,7 @@ Return the input string."
                              (if (and hightlight-current
                                       (= i pos))
                                  (format "%d[%s]" i
-                                         (propertize str 'face 'pyim-minibuffer-string-face))
+                                         (propertize str 'face 'pyim-page-selected-word-face))
                                (format "%d.%s " i str))))
                          choice) "")
              page-info)
