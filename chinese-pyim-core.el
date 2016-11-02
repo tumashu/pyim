@@ -657,11 +657,7 @@ personal 缓存中的词条进行排序，加载排序后的结果。"
         (pyim-dcache-set-variable 'pyim-dcache-personal:wordcount)
         (maphash
          #'(lambda (key value)
-             (puthash key
-                      (sort value
-                            #'(lambda (a b)
-                                (> (or (gethash a pyim-dcache-personal:wordcount) 0)
-                                   (or (gethash b pyim-dcache-personal:wordcount) 0))))
+             (puthash key (pyim-dcache-sort-words value)
                       pyim-dcache-personal))
          pyim-dcache-personal)
         (pyim-dcache-save-variable 'pyim-dcache-personal)
@@ -669,6 +665,14 @@ personal 缓存中的词条进行排序，加载排序后的结果。"
      `(lambda (result)
         (setq pyim-dcache-personal-dcache-sort-p t)
         (pyim-dcache-set-variable 'pyim-dcache-personal t)))))
+
+(defun pyim-dcache-sort-words (words-list)
+  "使用 `pyim-dcache-personal:word2code' 中记录的词频信息，
+对 `words-list' 排序，词频大的排在前面。"
+  (sort words-list
+        #'(lambda (a b)
+            (> (or (gethash a pyim-dcache-personal:wordcount) 0)
+               (or (gethash b pyim-dcache-personal:wordcount) 0)))))
 
 (defun pyim-dcache-get-path (variable)
   "获取保存 `variable' 取值的文件的路径。"
