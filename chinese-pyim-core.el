@@ -327,11 +327,6 @@ Chinese-pyim 输入半角标点，函数列表中每个函数都有一个参数�
 最后输入的一个字符，具体见: `pyim-translate' 。"
   :group 'chinese-pyim)
 
-(defcustom pyim-select-word-finish-hook nil
-  "Chinese-pyim 选词完成时运行的hook，"
-  :group 'chinese-pyim
-  :type 'hook)
-
 (defcustom pyim-wash-function 'pyim-wash-current-line-function
   "这个函数与『单字快捷键配合使用』，当光标前面的字符为汉字字符时，
 按 `pyim-translate-trigger-char' 对应字符，可以调用这个函数来清洗
@@ -362,6 +357,11 @@ pyim 内建的有三种选词框格式：
 3. vertial   垂直选词框"
   :group 'chinese-pyim
   :type 'symbol)
+
+(defcustom pyim-page-select-finish-hook nil
+  "Chinese-pyim 选词完成时运行的 hook。"
+  :group 'chinese-pyim
+  :type 'hook)
 
 (defface pyim-page-selected-word-face '((t (:background "gray40")))
   "选词框中已选词条的 face
@@ -2128,7 +2128,7 @@ tooltip 选词框中显示。
                 (pyim-create-or-rearrange-word pyim-dagger-str))
             (pyim-terminate-translation)
             ;; Chinese-pyim 使用这个 hook 来处理联想词。
-            (run-hooks 'pyim-select-word-finish-hook))
+            (run-hooks 'pyim-page-select-finish-hook))
         (setq scode-list
               (delete-dups (mapcar
                             #'(lambda (scode)
