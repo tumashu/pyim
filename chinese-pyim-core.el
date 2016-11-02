@@ -634,6 +634,7 @@ If you don't like this funciton, set the variable to nil")
       (async-start
        `(lambda ()
           ,(async-inject-variables "^load-path$")
+          ,(async-inject-variables "^exec-path$")
           (require 'chinese-pyim-core)
           (let ((dcache (pyim-dcache-generate-dcache-file ',dict-files ,dcache-file)))
             (pyim-dcache-generate-word2code-dcache-file dcache ,dcache-word2code-file))
@@ -650,6 +651,7 @@ personal 缓存中的词条进行排序，加载排序后的结果。"
     (async-start
      `(lambda ()
         ,(async-inject-variables "^load-path$")
+        ,(async-inject-variables "^exec-path$")
         (require 'chinese-pyim-core)
         (pyim-dcache-set-variable 'pyim-dcache-personal)
         (pyim-dcache-set-variable 'pyim-dcache-personal:wordcount)
