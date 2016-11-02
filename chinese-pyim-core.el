@@ -811,9 +811,8 @@ If you don't like this funciton, set the variable to nil")
        (unless (equal orig-value ,new-value)
          (puthash ,key ,new-value ,table)))))
 
-(defun pyim-create-or-rearrange-word (word &optional rearrange-word)
+(defun pyim-create-or-rearrange-word (word)
   "将中文词条 `word' 添加拼音后，保存到 `pyim-dcache-personal' 中，
-词条 `word' 会追加到已有词条的后面。
 
 `pyim-create-or-rearrange-word' 会调用 `pyim-hanzi2pinyin' 来获取中文词条
 的拼音 code。
@@ -824,7 +823,7 @@ BUG：无法有效的处理多音字。"
     (let* ((pinyins (pyim-hanzi2pinyin word nil "-" t nil t))) ;使用了多音字校正
 
       ;; 保存词频
-      (when (> (length word) 1)
+      (when (> (length word) 0)
         (pyim-dcache-put
           pyim-dcache-personal:wordcount word
           (+ (or orig-value 0) 1)))
@@ -833,28 +832,31 @@ BUG：无法有效的处理多音字。"
           ;; 添加词库： ”拼音“ - ”中文词条“
           (pyim-dcache-put
             pyim-dcache-personal py
-            (if rearrange-word
-                (pyim-list-merge word orig-value)
-              (pyim-list-merge orig-value word)))
+            `(,word ,@orig-value))
+          (pyim-dcache-sort pyim-dcache-personal py)
           ;; 添加词库： ”拼音首字母“ - ”中文词条“
-          (pyim-dcache-put
-            pyim-dcache-personal
-            (mapconcat #'(lambda (x)
-                           (substring x 0 1))
-                       (split-string py "-") "-")
-            (if rearrange-word
-                (pyim-list-merge word orig-value)
-              (pyim-list-merge orig-value word))))))))
+          (let ((szm (mapconcat
+                      #'(lambda (x)
+                          (substring x 0 1))
+                      (split-string py "-") "-")))
+            (pyim-dcache-put
+              pyim-dcache-personal szm
+              `(,word ,@orig-value))
+            (pyim-dcache-sort pyim-dcache-personal szm)))))))
 
-(defun pyim-list-merge (a b)
-  "Join list A and B to a new list, then delete dups."
-  (let ((a (if (listp a)
-               a
-             (list a)))
-        (b (if (listp b)
-               b
-             (list b))))
-    (delete-dups `(,@a ,@b))))
+(defun pyim-dcache-sort (dcache code)
+  (let ((words (pyim-dcache-get code dcache)))
+    (async-start
+     `(lambda ()
+        ,(async-inject-variables "^load-path$")
+        (require 'chinese-pyim-core)
+        (pyim-dcache-set-variable 'pyim-dcache-personal:wordcount)
+        (sort (delete-dups ',words)
+              '(lambda (a b)
+                 (>  (or (gethash a pyim-dcache-personal:wordcount) 0)
+                     (or (gethash b pyim-dcache-personal:wordcount) 0)))))
+     `(lambda (result)
+        (pyim-dcache-put ,dcache ,code result)))))
 
 (defun pyim-cstring-at-point (&optional number)
   "获取光标一个中文字符串，字符数量为：`number'"
@@ -2117,7 +2119,7 @@ tooltip 选词框中显示。
         (pyim-terminate-translation))
     (let ((str (pyim-choice (nth (1- pyim-current-pos) (car pyim-current-choices))))
           scode-list)
-      (pyim-create-or-rearrange-word str t)
+      (pyim-create-or-rearrange-word str)
       (setq pyim-code-position (+ pyim-code-position (length str)))
       (if (>= pyim-code-position (length (car pyim-scode-list)))
                                         ; 如果是最后一个，检查
