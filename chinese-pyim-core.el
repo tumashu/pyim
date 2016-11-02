@@ -811,7 +811,8 @@ If you don't like this funciton, set the variable to nil")
 的拼音 code。
 
 BUG：无法有效的处理多音字。"
-  (when (> (length word) 0)
+  (when (and (> (length word) 0)
+             (not (pyim-string-match-p "\\CC" word)))
     (let* ((pinyins (pyim-hanzi2pinyin word nil "-" t nil t))) ;使用了多音字校正
 
       ;; 保存词频
@@ -1680,7 +1681,6 @@ Return the input string."
                      (pyim-page-refresh)
                      (pyim-page-auto-select-word scheme-name)
                      t)))
-      (setq pyim-dagger-str (replace-regexp-in-string "-" "" pyim-entered-code))
       (setq pyim-current-choices
             (list (list (format "%s" (replace-regexp-in-string
                                       "-" " " pyim-entered-code)))))
@@ -1690,7 +1690,7 @@ Return the input string."
 ;; #+END_SRC
 
 ;; ** 处理当前需要插入 buffer 的 dagger 字符串： `pyim-dagger-str'
-;; Chinese-pyim 使用变量 `pyim-dagger-str' 保存 *当前需要在 buffer 中插
+;; Chinese-pyim 使用变量 `pyim-dagger-str' 保存 *需要在 buffer 光标处插
 ;; 入的字符串* 。
 
 ;; 处理 `pyim-dagger-str' 的代码分散在多个函数中，可以按照下面的方式分类：
