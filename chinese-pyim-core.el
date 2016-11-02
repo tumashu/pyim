@@ -449,6 +449,8 @@ If you don't like this funciton, set the variable to nil")
 (defvar pyim-dcache-personal nil)
 (defvar pyim-dcache-personal:wordcount nil)
 
+(defvar pyim-dcache-personal-dcache-sort-p nil)
+
 (defvar pyim-mode-map
   (let ((map (make-sparse-keymap))
         (i ?\ ))
@@ -552,6 +554,8 @@ If you don't like this funciton, set the variable to nil")
     (pyim-dcache-save-caches))
   ;; 设置于 dcache 相关的几个变量。
   (pyim-dcache-init-variables)
+  ;; 使用 pyim-dcache-personal:wordcount 中的信息对 personal 缓存中的词频进行调整。
+  (pyim-dcache-sort-personal-dcache)
   (pyim-cchar2pinyin-cache-create)
   (pyim-pinyin2cchar-cache-create)
   (run-hooks 'pyim-load-hook)
@@ -637,6 +641,32 @@ If you don't like this funciton, set the variable to nil")
        `(lambda (result)
           (pyim-dcache-set-variable 'pyim-dcache-common t)
           (pyim-dcache-set-variable 'pyim-dcache-common:word2code t))))))
+
+(defun pyim-dcache-sort-personal-dcache (&optional force)
+  "使用 pyim-dcache-personal:word2code 中记录的词频信息，对
+personal 缓存中的词条进行排序，加载排序后的结果。"
+  (interactive)
+  (unless pyim-dcache-personal-dcache-sort-p
+    (async-start
+     `(lambda ()
+        ,(async-inject-variables "^load-path$")
+        (require 'chinese-pyim-core)
+        (pyim-dcache-set-variable 'pyim-dcache-personal)
+        (pyim-dcache-set-variable 'pyim-dcache-personal:wordcount)
+        (maphash
+         #'(lambda (key value)
+             (puthash key
+                      (sort value
+                            #'(lambda (a b)
+                                (> (or (gethash a pyim-dcache-personal:wordcount) 0)
+                                   (or (gethash b pyim-dcache-personal:wordcount) 0))))
+                      pyim-dcache-personal))
+         pyim-dcache-personal)
+        (pyim-dcache-save-variable 'pyim-dcache-personal)
+        nil)
+     `(lambda (result)
+        (setq pyim-dcache-personal-dcache-sort-p t)
+        (pyim-dcache-set-variable 'pyim-dcache-personal t)))))
 
 (defun pyim-dcache-get-path (variable)
   "获取保存 `variable' 取值的文件的路径。"
