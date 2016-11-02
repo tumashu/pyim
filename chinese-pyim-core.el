@@ -1728,6 +1728,7 @@ Return the input string."
       (setq pyim-current-choices
             (list (list (format "%s" (replace-regexp-in-string
                                       "-" " " pyim-entered-code)))))
+      (setq pyim-current-pos 1)
       (pyim-dagger-refresh)
       (pyim-page-refresh))))
 
