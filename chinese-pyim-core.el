@@ -296,13 +296,13 @@ Chinese-pyim 内建的功能有：
   :group 'chinese-pyim)
 
 (defcustom pyim-backends
-  '(dcache-personal dcache-common pinyin-chars pinyin-shouzimu pinyin-znabc)
+  '(dcache-personal dcache-common pinyin-chars pinyin-abbrev pinyin-znabc)
   "pyim 词语获取 backends ，当前支持：
 
 1. `dcache-personal'     从 `pyim-dcache-personal' 中获取词条。
 2. `dcache-common'       从 `pyim-dcache-common' 中获取词条。
 3. `pinyin-chars'        逐一获取一个拼音对应的多个汉字。
-4. `pinyin-shouzimu'     获取 *拼音首字母* 对应的词条，
+4. `pinyin-abbrev'       获取简拼对应的词条，
     如果输入 \"ni-hao\" ，那么同时搜索 code 为 \"n-h\" 的词条。
 5. `pinyin-znabc'        类似智能ABC的词语获取方式(源于 emacs-eim)."
   :group 'chinese-pyim)
@@ -448,8 +448,10 @@ If you don't like this funciton, set the variable to nil")
 (defvar pyim-dcache-common:word2code nil)
 (defvar pyim-dcache-personal nil)
 (defvar pyim-dcache-personal:wordcount nil)
+(defvar pyim-dcache-personal:pyabbrevs nil)
 
 (defvar pyim-dcache-personal-dcache-sort-p nil)
+(defvar pyim-dcache-create-pyabbrev-dcache-p nil)
 
 (defvar pyim-mode-map
   (let ((map (make-sparse-keymap))
@@ -556,6 +558,8 @@ If you don't like this funciton, set the variable to nil")
   (pyim-dcache-init-variables)
   ;; 使用 pyim-dcache-personal:wordcount 中的信息对 personal 缓存中的词频进行调整。
   (pyim-dcache-sort-personal-dcache)
+  ;; 创建简拼缓存， 比如 "ni-hao" -> "n-h"
+  (pyim-dcache-create-pyabbrev-dcache)
   (pyim-cchar2pinyin-cache-create)
   (pyim-pinyin2cchar-cache-create)
   (run-hooks 'pyim-load-hook)
@@ -644,6 +648,40 @@ If you don't like this funciton, set the variable to nil")
           (pyim-dcache-set-variable 'pyim-dcache-common t)
           (pyim-dcache-set-variable 'pyim-dcache-common:word2code t))))))
 
+(defun pyim-dcache-create-pyabbrev-dcache (&optional force)
+  "读取 pyim-dcache-personal 中的词库，创建 *简拼* 缓存，然后加载这个缓存。"
+  (interactive)
+  (unless pyim-dcache-create-pyabbrev-dcache-p
+    (async-start
+     `(lambda ()
+        ,(async-inject-variables "^load-path$")
+        ,(async-inject-variables "^exec-path$")
+        (require 'chinese-pyim-core)
+        (pyim-dcache-set-variable 'pyim-dcache-personal)
+        (pyim-dcache-set-variable 'pyim-dcache-personal:wordcount)
+        (pyim-dcache-set-variable 'pyim-dcache-personal:pyabbrevs)
+        (maphash
+         #'(lambda (key value)
+             (let ((newkey (mapconcat
+                            #'(lambda (x)
+                                (substring x 0 1))
+                            (split-string key "-") "-")))
+               (puthash newkey
+                        (delete-dups
+                         `(,@value
+                           ,@(gethash newkey pyim-dcache-personal:pyabbrevs)))
+                        pyim-dcache-personal:pyabbrevs)))
+         pyim-dcache-personal)
+        (maphash
+         #'(lambda (key value)
+             (puthash key (pyim-dcache-sort-words value)
+                      pyim-dcache-personal:pyabbrevs))
+         pyim-dcache-personal:pyabbrevs)
+        (pyim-dcache-save-variable 'pyim-dcache-personal:pyabbrevs))
+     `(lambda (result)
+        (setq pyim-dcache-create-abbrev-dcache-p t)
+        (pyim-dcache-set-variable 'pyim-dcache-personal:pyabbrevs t)))))
+
 (defun pyim-dcache-sort-personal-dcache (&optional force)
   "使用 pyim-dcache-personal:word2code 中记录的词频信息，对
 personal 缓存中的词条进行排序，加载排序后的结果。"
@@ -687,7 +725,8 @@ personal 缓存中的词条进行排序，加载排序后的结果。"
   (pyim-dcache-set-variable 'pyim-dcache-common:wordcount)
   (pyim-dcache-set-variable 'pyim-dcache-common:word2code)
   (pyim-dcache-set-variable 'pyim-dcache-personal)
-  (pyim-dcache-set-variable 'pyim-dcache-personal:wordcount))
+  (pyim-dcache-set-variable 'pyim-dcache-personal:wordcount)
+  (pyim-dcache-set-variable 'pyim-dcache-personal:pyabbrevs))
 
 (defun pyim-dcache-set-variable (variable &optional force-restore fallback-value)
   "如果 `variable' 的值为 nil, 则使用 `pyim-dcache-directory' 中对应文件的内容来设置
@@ -888,26 +927,16 @@ BUG：无法有效的处理多音字。"
   (when (and (> (length word) 0)
              (not (pyim-string-match-p "\\CC" word)))
     (let* ((pinyins (pyim-hanzi2pinyin word nil "-" t nil t))) ;使用了多音字校正
-
-      ;; 保存词频
-      (when (> (length word) 1)
+      ;; 保存对应词条的词频
+      (when (> (length word) 0)
         (pyim-dcache-put
           pyim-dcache-personal:wordcount word
           (+ (or orig-value 0) 1)))
+      ;; 添加词条到个人缓存
       (dolist (py pinyins)
         (unless (pyim-string-match-p "[^ a-z-]" py)
-          ;; 添加词库： ”拼音“ - ”中文词条“
           (pyim-dcache-put
             pyim-dcache-personal py
-            (if rearrange-word
-                (pyim-list-merge word orig-value)
-              (pyim-list-merge orig-value word)))
-          ;; 添加词库： ”拼音首字母“ - ”中文词条“
-          (pyim-dcache-put
-            pyim-dcache-personal
-            (mapconcat #'(lambda (x)
-                           (substring x 0 1))
-                       (split-string py "-") "-")
             (if rearrange-word
                 (pyim-list-merge word orig-value)
               (pyim-list-merge orig-value word))))))))
@@ -1594,7 +1623,7 @@ Return the input string."
   ;; 是一个比较麻烦的事情的事情。 注：这个地方需要进一步得改进。
   (let* (personal-words
          common-words
-         pinyin-shouzimu-words pinyin-znabc-words
+         pinyin-abbrev-words pinyin-znabc-words
          pinyin-chars)
 
     (dolist (scode scode-list)
@@ -1609,8 +1638,8 @@ Return the input string."
                     (car (pyim-choices-get:pinyin-chars scode scheme-name)))))
 
     ;; Pinyin shouzimu similar words
-    (let ((words (pyim-choices-get:pinyin-shouzimu (car scode-list) scheme-name)))
-      (setq pinyin-shouzimu-words (car (cdr words))))
+    (let ((words (pyim-choices-get:pinyin-abbrev (car scode-list) scheme-name)))
+      (setq pinyin-abbrev-words (car (cdr words))))
 
     ;; Pinyin znabc-style similar words
     (let ((words (pyim-choices-get:pinyin-znabc (car scode-list) scheme-name)))
@@ -1621,7 +1650,7 @@ Return the input string."
       (princ (list :scode-list scode-list
                    :personal-words personal-words
                    :common-words common-words
-                   :pinyin-shouzimu-words pinyin-shouzimu-words
+                   :pinyin-abbrev-words pinyin-abbrev-words
                    :pinyin-znabc-words pinyin-znabc-words
                    :pinyin-chars pinyin-chars)))
 
@@ -1629,9 +1658,7 @@ Return the input string."
      (delq nil
            `(,@personal-words
              ,@common-words
-             ,@(when (and common-words
-                          (not (member (car common-words) pinyin-shouzimu-words)))
-                 pinyin-shouzimu-words)
+             ,@pinyin-abbrev-words
              ,@pinyin-znabc-words
              ,@pinyin-chars)))))
 
@@ -1644,16 +1671,16 @@ Return the input string."
         (list nil (pyim-possible-words
                    (pyim-possible-words-py spinyin)))))))
 
-(defun pyim-choices-get:pinyin-shouzimu (spinyin scheme-name)
+(defun pyim-choices-get:pinyin-abbrev (spinyin scheme-name)
   ;; 如果输入 "ni-hao" ，搜索 code 为 "n-h" 的词条做为联想词。
   ;; 搜索首字母得到的联想词太多，这里限制联想词要大于两个汉字并且只搜索
   ;; 个人文件。
-  (when (member 'pinyin-shouzimu pyim-backends)
+  (when (member 'pinyin-abbrev pyim-backends)
     (let ((class (pyim-scheme-get-option scheme-name :class)))
       (when (and (> (length spinyin) 1)
                  (member class '(quanpin shuangpin)))
-        (let ((py-str-shouzimu (pyim-scode-join spinyin scheme-name t t)))
-          (list nil (pyim-dcache-get py-str-shouzimu pyim-dcache-personal)))))))
+        (let ((pyabbrev (pyim-scode-join spinyin scheme-name t t)))
+          (list nil (pyim-dcache-get pyabbrev pyim-dcache-personal:pyabbrevs)))))))
 
 (defun pyim-choices-get:pinyin-chars (spinyin scheme-name)
   (when (member 'pinyin-chars pyim-backends)

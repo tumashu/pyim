@@ -276,14 +276,14 @@
 ;; 1. `dcache-personal'     从 `pyim-dcache-personal' 中获取词条。
 ;; 2. `dcache-common'       从 `pyim-dcache-common' 中获取词条。
 ;; 3. `pinyin-chars'        逐一获取一个拼音对应的多个汉字。
-;; 4. `pinyin-shouzimu'     获取 *拼音首字母* 对应的词条，
+;; 4. `pinyin-abbrev'       获取一个简拼对应的词条，
 ;;     如果输入 \"ni-hao\" ，那么同时搜索 code 为 \"n-h\" 的词条。
 ;; 5. `pinyin-znabc'        类似智能ABC的词语获取方式(源于 emacs-eim)."
 
 ;; 用户可以通过下面的代码来调整 backends 设置，比如：
 
 ;; #+BEGIN_EXAMPLE
-;; (setq pyim-backends '(dcache-personal dcache-common pinyin-chars pinyin-shouzimu pinyin-znabc))
+;; (setq pyim-backends '(dcache-personal dcache-common pinyin-chars pinyin-abbrev pinyin-znabc))
 ;; #+END_EXAMPLE
 
 ;; 一些 backends 可能会导致输入法卡顿，用户可以通过下面的方式关闭：
