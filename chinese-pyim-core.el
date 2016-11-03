@@ -619,13 +619,14 @@ If you don't like this funciton, set the variable to nil")
   "读取 `pyim-dicts' 和 `pyim-extra-dicts' 里面的词库文件，生成对应的词库缓冲文件。
 然后加载词库缓存。"
   (interactive)
-  (let* ((dict-files (mapcar #'(lambda (x)
+  (let* ((version "v1") ;当需要强制更新 dict 缓存时，更改这个字符串。
+         (dict-files (mapcar #'(lambda (x)
                                  (unless (plist-get x :disable)
                                    (plist-get x :file)))
                              `(,@pyim-dicts ,@pyim-extra-dicts)))
          (dicts-md5 (md5 (prin1-to-string
                           (mapcar #'(lambda (file)
-                                      (list file (nth 5 (file-attributes file 'string))))
+                                      (list version file (nth 5 (file-attributes file 'string))))
                                   dict-files))))
          (dcache-file (pyim-dcache-get-path 'pyim-dcache-common))
          (dcache-word2code-file (pyim-dcache-get-path 'pyim-dcache-common:word2code))
