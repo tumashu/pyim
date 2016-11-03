@@ -739,11 +739,40 @@ personal 缓存中的词条进行排序，加载排序后的结果。"
           (let ((code (pyim-code-at-point))
                 (content (pyim-line-content)))
             (when (and code content)
-              (puthash code (delete-dups `(,@content ,@(gethash code hashtable)))
-                       hashtable)))
+              (dolist (x (pyim-dcache-get-code-abbrevs code))
+                (puthash x
+                         (mapcar
+                          #'(lambda (word)
+                              ;; 这个地方的代码用于实现五笔 code 自动提示功能，
+                              ;; 比如输入 'aa' 后得到选词框：
+                              ;; ----------------------
+                              ;; | 1. 莁aa 2.匶wv ... |
+                              ;; ----------------------
+                              (if (string-match-p "::"  word)
+                                  word
+                                (concat word "::" (substring code (length x)))))
+                          (delete-dups `(,@content ,@(gethash x hashtable))))
+                         hashtable))))
           (forward-line 1))))
     (pyim-dcache-save-value-to-file hashtable dcache-file)
     hashtable))
+
+(defun pyim-dcache-get-code-abbrevs (code)
+  "获取一个 code 的所有简写。
+
+比如：.nihao -> .nihao .niha .nih .ni .n"
+  (if (and (> (length code) 0)
+           (not (string-match-p "-" code))
+           (pyim-string-match-p "^[[:punct:]]" code))
+      (let* ((code1 (substring code 1))
+             (prefix (substring code 0 1))
+             (n (+ (length code1) 1))
+             results)
+        (dotimes (i n)
+          (when (> i 1)
+            (push (concat prefix (substring code1 0 i)) results)))
+        results)
+    (list code)))
 
 (defun pyim-dcache-generate-word2code-dcache-file (dcache file)
   "`dcache' 是一个 code -> words 的 hashtable, 根据这个表的
@@ -1917,9 +1946,13 @@ Return the input string."
       base)))
 
 (defun pyim-choice (choice)
-  (if (consp choice)
-      (car choice)
-    choice))
+  (let ((output
+         (if (consp choice)
+             (car choice)
+           choice)))
+    (if (stringp output)
+        (car (split-string output "::"))
+     output)))
 
 (defun pyim-page-current-page ()
   (1+ (/ (1- pyim-current-pos) pyim-page-length)))
@@ -1950,7 +1983,12 @@ Return the input string."
   (let* ((end (pyim-page-end))
          (start (1- (pyim-page-start)))
          (choices (car pyim-current-choices))
-         (choice (pyim-subseq choices start end))
+         (choice
+          (mapcar #'(lambda (x)
+                      (if (stringp x)
+                          (replace-regexp-in-string "::" "" x)
+                        x))
+                  (pyim-subseq choices start end)))
          (pos (- (min pyim-current-pos (length choices)) start))
          (page-info (make-hash-table))
          (i 0))
