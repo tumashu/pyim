@@ -341,8 +341,8 @@ Chinese-pyim 的 tooltip 选词框默认使用 **双行显示** 的样式，在�
 
 Chinese-pyim **内置** 了多种词条获取的方式：
 
-1.  \`dcache-personal'     从 \`pyim-dcache-personal' 中获取词条。
-2.  \`dcache-common'       从 \`pyim-dcache-common' 中获取词条。
+1.  \`dcache-personal'     从 \`pyim-dcache:icode2word' 中获取词条。
+2.  \`dcache-common'       从 \`pyim-dcache:code2word' 中获取词条。
 3.  \`pinyin-chars'        逐一获取一个拼音对应的多个汉字。
 4.  \`pinyin-abbrev'       获取一个简拼对应的词条，如果输入 \\"ni-hao\\" ，那么同时搜索 code 为 \\"n-h\\" 的词条。
 5.  \`pinyin-znabc'        类似智能ABC的词语获取方式(源于 emacs-eim)."
