@@ -296,13 +296,13 @@ Chinese-pyim 内建的功能有：
   :group 'chinese-pyim)
 
 (defcustom pyim-backends
-  '(dcache-personal dcache-common pinyin-chars pinyin-abbrev pinyin-znabc)
+  '(dcache-personal dcache-common pinyin-chars pinyin-shortcode pinyin-znabc)
   "pyim 词语获取 backends ，当前支持：
 
 1. `dcache-personal'     从 `pyim-dcache:icode2word' 中获取词条。
 2. `dcache-common'       从 `pyim-dcache:code2word' 中获取词条。
 3. `pinyin-chars'        逐一获取一个拼音对应的多个汉字。
-4. `pinyin-abbrev'       获取简拼对应的词条，
+4. `pinyin-shortcode'    获取简拼对应的词条，
     如果输入 \"ni-hao\" ，那么同时搜索 code 为 \"n-h\" 的词条。
 5. `pinyin-znabc'        类似智能ABC的词语获取方式(源于 emacs-eim)."
   :group 'chinese-pyim)
@@ -444,11 +444,14 @@ If you don't like this funciton, set the variable to nil")
 
 (defvar pyim-dcache:code2word nil)
 (defvar pyim-dcache:code2word-md5 nil)
-(defvar pyim-dcache:word2count nil)
 (defvar pyim-dcache:word2code nil)
+(defvar pyim-dcache:word2count nil)
+(defvar pyim-dcache:shortcode2word nil)
 (defvar pyim-dcache:icode2word nil)
 (defvar pyim-dcache:iword2count nil)
 (defvar pyim-dcache:ishortcode2word nil)
+
+(defvar pyim-dcache-update:shortcode2word nil)
 
 (defvar pyim-dcache-update:icode2word nil)
 (defvar pyim-dcache-update:ishortcode2word nil)
@@ -557,17 +560,18 @@ If you don't like this funciton, set the variable to nil")
   ;; 设置于 dcache 相关的几个变量。
   (pyim-dcache-init-variables)
   ;; 使用 pyim-dcache:iword2count 中的信息对 personal 缓存中的词频进行调整。
-  (pyim-dcache-update:icode2word)
+  (pyim-dcache-update:icode2word restart)
   ;; 创建简拼缓存， 比如 "ni-hao" -> "n-h"
-  (pyim-dcache-update:ishortcode2word)
+  (pyim-dcache-update:ishortcode2word restart)
   (pyim-cchar2pinyin-cache-create)
   (pyim-pinyin2cchar-cache-create)
   (run-hooks 'pyim-load-hook)
   ;; 如果 `pyim-dicts' 有变化，重新生成 `pyim-dcache:code2word' 缓存。
   (pyim-dcache-update:code2word refresh-common-dcache)
+  ;; 这个命令 *当前* 主要用于五笔输入法。
+  (pyim-dcache-update:shortcode2word restart)
   (unless (member 'pyim-dcache-save-caches kill-emacs-hook)
     (add-to-list 'kill-emacs-hook 'pyim-dcache-save-caches))
-
   (setq input-method-function 'pyim-input-method)
   (setq deactivate-current-input-method-function 'pyim-inactivate)
   ;; (setq describe-current-input-method-function 'pyim-help)
@@ -659,7 +663,8 @@ If you don't like this funciton, set the variable to nil")
         (require 'chinese-pyim-core)
         (pyim-dcache-set-variable 'pyim-dcache:icode2word)
         (pyim-dcache-set-variable 'pyim-dcache:iword2count)
-        (pyim-dcache-set-variable 'pyim-dcache:ishortcode2word)
+        (setq pyim-dcache:ishortcode2word
+              (make-hash-table :test #'equal))
         (maphash
          #'(lambda (key value)
              (let ((newkey (mapconcat
@@ -705,13 +710,72 @@ If you don't like this funciton, set the variable to nil")
         (setq pyim-dcache-update:icode2word t)
         (pyim-dcache-set-variable 'pyim-dcache:icode2word t)))))
 
+(defun pyim-dcache-update:shortcode2word (&optional force)
+  "使用 pyim-dcache:code2word 中的词条，创建 简写code 词库缓存并加载。 "
+  (interactive)
+  (when (or force (not pyim-dcache-update:shortcode2word))
+    (async-start
+     `(lambda ()
+        ,(async-inject-variables "^load-path$")
+        ,(async-inject-variables "^exec-path$")
+        (require 'chinese-pyim-core)
+        (pyim-dcache-set-variable 'pyim-dcache:code2word)
+        (pyim-dcache-set-variable 'pyim-dcache:iword2count)
+        (setq pyim-dcache:shortcode2word
+              (make-hash-table :test #'equal))
+        (maphash
+         #'(lambda (key value)
+             (dolist (x (pyim-dcache-return-shortcode key))
+               (puthash x
+                        (mapcar
+                         #'(lambda (word)
+                             ;; 这个地方的代码用于实现五笔 code 自动提示功能，
+                             ;; 比如输入 'aa' 后得到选词框：
+                             ;; ----------------------
+                             ;; | 1. 莁aa 2.匶wv ... |
+                             ;; ----------------------
+                             (if (string-match-p ":"  word)
+                                 word
+                               (concat word ":" (substring key (length x)))))
+                         (delete-dups `(,@value ,@(gethash x pyim-dcache:shortcode2word))))
+                        pyim-dcache:shortcode2word)))
+         pyim-dcache:code2word)
+        (maphash
+         #'(lambda (key value)
+             (puthash key (pyim-dcache-sort-words value)
+                      pyim-dcache:shortcode2word))
+         pyim-dcache:shortcode2word)
+        (pyim-dcache-save-variable 'pyim-dcache:shortcode2word)
+        nil)
+     `(lambda (result)
+        (setq pyim-dcache-update:shortcode2word t)
+        (pyim-dcache-set-variable 'pyim-dcache:shortcode2word t)))))
+
+(defun pyim-dcache-return-shortcode (code)
+  "获取一个 code 的所有简写。
+
+比如：.nihao -> .nihao .niha .nih .ni .n"
+  (when (and (> (length code) 0)
+             (not (string-match-p "-" code))
+             (pyim-string-match-p "^[[:punct:]]" code))
+    (let* ((code1 (substring code 1))
+           (prefix (substring code 0 1))
+           (n (length code1))
+           results)
+      (dotimes (i n)
+        (when (> i 1)
+          (push (concat prefix (substring code1 0 i)) results)))
+      results)))
+
 (defun pyim-dcache-sort-words (words-list)
   "使用 `pyim-dcache:icode2count' 中记录的词频信息，
 对 `words-list' 排序，词频大的排在前面。"
   (sort words-list
         #'(lambda (a b)
-            (> (or (gethash a pyim-dcache:iword2count) 0)
-               (or (gethash b pyim-dcache:iword2count) 0)))))
+            (let ((a (car (split-string a ":")))
+                  (b (car (split-string b ":"))))
+              (> (or (gethash a pyim-dcache:iword2count) 0)
+                 (or (gethash b pyim-dcache:iword2count) 0))))))
 
 (defun pyim-dcache-get-path (variable)
   "获取保存 `variable' 取值的文件的路径。"
@@ -724,6 +788,7 @@ If you don't like this funciton, set the variable to nil")
   (pyim-dcache-set-variable 'pyim-dcache:code2word)
   (pyim-dcache-set-variable 'pyim-dcache:word2count)
   (pyim-dcache-set-variable 'pyim-dcache:word2code)
+  (pyim-dcache-set-variable 'pyim-dcache:shortcode2word)
   (pyim-dcache-set-variable 'pyim-dcache:icode2word)
   (pyim-dcache-set-variable 'pyim-dcache:iword2count)
   (pyim-dcache-set-variable 'pyim-dcache:ishortcode2word))
@@ -779,40 +844,12 @@ If you don't like this funciton, set the variable to nil")
           (let ((code (pyim-code-at-point))
                 (content (pyim-line-content)))
             (when (and code content)
-              (dolist (x (pyim-dcache-get-code-abbrevs code))
-                (puthash x
-                         (mapcar
-                          #'(lambda (word)
-                              ;; 这个地方的代码用于实现五笔 code 自动提示功能，
-                              ;; 比如输入 'aa' 后得到选词框：
-                              ;; ----------------------
-                              ;; | 1. 莁aa 2.匶wv ... |
-                              ;; ----------------------
-                              (if (string-match-p "::"  word)
-                                  word
-                                (concat word "::" (substring code (length x)))))
-                          (delete-dups `(,@content ,@(gethash x hashtable))))
-                         hashtable))))
+              (puthash code
+                       (delete-dups `(,@content ,@(gethash code hashtable)))
+                       hashtable)))
           (forward-line 1))))
     (pyim-dcache-save-value-to-file hashtable dcache-file)
     hashtable))
-
-(defun pyim-dcache-get-code-abbrevs (code)
-  "获取一个 code 的所有简写。
-
-比如：.nihao -> .nihao .niha .nih .ni .n"
-  (if (and (> (length code) 0)
-           (not (string-match-p "-" code))
-           (pyim-string-match-p "^[[:punct:]]" code))
-      (let* ((code1 (substring code 1))
-             (prefix (substring code 0 1))
-             (n (+ (length code1) 1))
-             results)
-        (dotimes (i n)
-          (when (> i 1)
-            (push (concat prefix (substring code1 0 i)) results)))
-        results)
-    (list code)))
 
 (defun pyim-dcache-generate-word2code-dcache-file (dcache file)
   "`dcache' 是一个 code -> words 的 hashtable, 根据这个表的
@@ -1623,7 +1660,7 @@ Return the input string."
   ;; 是一个比较麻烦的事情的事情。 注：这个地方需要进一步得改进。
   (let* (personal-words
          common-words
-         pinyin-abbrev-words pinyin-znabc-words
+         pinyin-shortcode-words pinyin-znabc-words
          pinyin-chars)
 
     (dolist (scode scode-list)
@@ -1638,8 +1675,8 @@ Return the input string."
                     (car (pyim-choices-get:pinyin-chars scode scheme-name)))))
 
     ;; Pinyin shouzimu similar words
-    (let ((words (pyim-choices-get:pinyin-abbrev (car scode-list) scheme-name)))
-      (setq pinyin-abbrev-words (car (cdr words))))
+    (let ((words (pyim-choices-get:pinyin-shortcode (car scode-list) scheme-name)))
+      (setq pinyin-shortcode-words (car (cdr words))))
 
     ;; Pinyin znabc-style similar words
     (let ((words (pyim-choices-get:pinyin-znabc (car scode-list) scheme-name)))
@@ -1650,7 +1687,7 @@ Return the input string."
       (princ (list :scode-list scode-list
                    :personal-words personal-words
                    :common-words common-words
-                   :pinyin-abbrev-words pinyin-abbrev-words
+                   :pinyin-shortcode-words pinyin-shortcode-words
                    :pinyin-znabc-words pinyin-znabc-words
                    :pinyin-chars pinyin-chars)))
 
@@ -1658,7 +1695,7 @@ Return the input string."
      (delq nil
            `(,@personal-words
              ,@common-words
-             ,@pinyin-abbrev-words
+             ,@pinyin-shortcode-words
              ,@pinyin-znabc-words
              ,@pinyin-chars)))))
 
@@ -1671,11 +1708,11 @@ Return the input string."
         (list nil (pyim-possible-words
                    (pyim-possible-words-py spinyin)))))))
 
-(defun pyim-choices-get:pinyin-abbrev (spinyin scheme-name)
+(defun pyim-choices-get:pinyin-shortcode (spinyin scheme-name)
   ;; 如果输入 "ni-hao" ，搜索 code 为 "n-h" 的词条做为联想词。
   ;; 搜索首字母得到的联想词太多，这里限制联想词要大于两个汉字并且只搜索
   ;; 个人文件。
-  (when (member 'pinyin-abbrev pyim-backends)
+  (when (member 'pinyin-shortcode pyim-backends)
     (let ((class (pyim-scheme-get-option scheme-name :class)))
       (when (and (> (length spinyin) 1)
                  (member class '(quanpin shuangpin)))
@@ -1692,12 +1729,16 @@ Return the input string."
 (defun pyim-choices-get:dcache-personal (scode scheme-name)
   (when (member 'dcache-personal pyim-backends)
     (let ((code (pyim-scode-join scode scheme-name t)))
-      (list (pyim-dcache-get code pyim-dcache:icode2word) nil))))
+      (list (pyim-dcache-get code (list pyim-dcache:icode2word
+                                        pyim-dcache:ishortcode2word))
+            nil))))
 
 (defun pyim-choices-get:dcache-common (scode scheme-name)
   (when (member 'dcache-common pyim-backends)
     (let ((code (pyim-scode-join scode scheme-name t)))
-      (list (pyim-dcache-get code pyim-dcache:code2word) nil))))
+      (list (pyim-dcache-get code (list pyim-dcache:code2word
+                                        pyim-dcache:shortcode2word))
+            nil))))
 
 (defun pyim-flatten-list (my-list)
   (cond
@@ -1979,7 +2020,7 @@ Return the input string."
              (car choice)
            choice)))
     (if (stringp output)
-        (car (split-string output "::"))
+        (car (split-string output ":"))
      output)))
 
 (defun pyim-page-current-page ()
@@ -2014,7 +2055,7 @@ Return the input string."
          (choice
           (mapcar #'(lambda (x)
                       (if (stringp x)
-                          (replace-regexp-in-string "::" "" x)
+                          (replace-regexp-in-string ":" "" x)
                         x))
                   (pyim-subseq choices start end)))
          (pos (- (min pyim-current-pos (length choices)) start))
