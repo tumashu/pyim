@@ -273,8 +273,8 @@
 ;; *** 词条获取
 ;; Chinese-pyim *内置* 了多种词条获取的方式：
 
-;; 1. `dcache-personal'     从 `pyim-dcache:icode2word' 中获取词条。
-;; 2. `dcache-common'       从 `pyim-dcache:code2word' 中获取词条。
+;; 1. `dcache-personal'     从 `pyim-dcache-icode2word' 中获取词条。
+;; 2. `dcache-common'       从 `pyim-dcache-code2word' 中获取词条。
 ;; 3. `pinyin-chars'        逐一获取一个拼音对应的多个汉字。
 ;; 4. `pinyin-shortcode'    获取一个简拼对应的词条，
 ;;     如果输入 \"ni-hao\" ，那么同时搜索 code 为 \"n-h\" 的词条。
