@@ -2751,6 +2751,8 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
 \"nihao\" -> \"[你呢...][好号...] \\| nihao\""
   (let* ((scheme-name pyim-default-scheme)
          (class (pyim-scheme-get-option scheme-name :class)))
+    ;; 确保 pyim 词库加载
+    (pyim-dcache-init-variables)
     ;; pyim 暂时只支持全拼和双拼搜索
     (when (not (member class '(quanpin shuangpin)))
       (setq scheme-name 'quanpin))
