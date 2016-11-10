@@ -120,6 +120,11 @@
                    (> (length pyim-entered-code) 0)))
         (not (or (pyim-string-match-p "\\cc" str-before-1)
                  (> (length pyim-entered-code) 0)))))))
+
+(defun pyim-probe-evil-normal-mode ()
+  "判断是否是evil的normal模式，如果是则返回true.
+这个函数用于：`pyim-english-input-switch-functions'."
+  (evil-normal-state-p))
 ;; #+END_SRC
 
 ;; ** 根据环境自动切换到半角标点输入模式
