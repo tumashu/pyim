@@ -101,11 +101,11 @@
 
 1. 当前字符为中文字符时，输入下一个字符时默认开启中文输入
 2. 当前字符为其他字符时，输入下一个字符时默认开启英文输入
-3. 使用 `pyim-convert-pinyin-at-point' 可以将光标前的拼音字符串转换为中文，
-   所以用户需要给 `pyim-convert-pinyin-at-point' 绑定一个快捷键，比如：
+3. 使用 `pyim-convert-code-at-point' 可以将光标前的 code 字符串转换为中文，
+   所以用户需要给 `pyim-convert-code-at-point' 绑定一个快捷键，比如：
 
    #+BEGIN_SRC elisp
-   (global-set-key (kbd \"M-i\") 'pyim-convert-pinyin-at-point)
+   (global-set-key (kbd \"M-i\") 'pyim-convert-code-at-point)
    #+END_SRC
 
 这个函数用于：`pyim-english-input-switch-functions' 。"
