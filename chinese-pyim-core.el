@@ -124,8 +124,8 @@ plist 来表示，比如：
     (wubi
      :document "五笔输入法。"
      :class simple
-     :first-chars "abcdefghjklmnopqrstwxy"
-     :rest-chars "vmpfwckzyjqdltxuognbhsrei'-a"
+     :first-chars "abcdefghijklmnopqrstuvwxy"
+     :rest-chars "abcdefghijklmnopqrstuvwxy"
      :code-prefix "." ;五笔词库中所有的 code 都以 "." 开头，防止和拼音词库冲突。
      :auto-select t ;只有一个候选词时，是否自动选择这个候选词。
      :auto-select-minimum-input 4 ;自动选择候选词时要求的最小输入字符数量
