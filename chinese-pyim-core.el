@@ -129,7 +129,7 @@ plist 来表示，比如：
      :code-prefix "." ;五笔词库中所有的 code 都以 "." 开头，防止和拼音词库冲突。
      :auto-select t ;只有一个候选词时，是否自动选择这个候选词。
      :auto-select-minimum-input 4 ;自动选择候选词时要求的最小输入字符数量
-     :prefer-trigger-chars "z")
+     :prefer-trigger-chars nil)
     (pyim-shuangpin
      :document "与 Chinese-pyim 配合良好的双拼输入法方案，源自小鹤双拼方案。"
      :class shuangpin
