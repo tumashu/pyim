@@ -104,9 +104,7 @@
 3. 使用 `pyim-convert-code-at-point' 可以将光标前的 code 字符串转换为中文，
    所以用户需要给 `pyim-convert-code-at-point' 绑定一个快捷键，比如：
 
-   #+BEGIN_SRC elisp
    (global-set-key (kbd \"M-i\") 'pyim-convert-code-at-point)
-   #+END_SRC
 
 这个函数用于：`pyim-english-input-switch-functions' 。"
   (let ((str-before-1 (pyim-char-before-to-string 0)))
