@@ -63,7 +63,7 @@
 用户可以使用词库管理命令 `pyim-dicts-manager' 来添加词库信息，每一条词库信息都使用一个
 plist 来表示，比如：
 
-    (:name \"100万大词库\" :file \"/path/to/pinyin-bigdict.txt\")
+    (:name \"100万大词库\" :file \"/path/to/pinyin-bigdict.pyim\")
 
 其中：
 1. `:name'      代表词库名称，用户可以按照喜好来确定（可选项）。
