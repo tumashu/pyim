@@ -2302,8 +2302,9 @@ tooltip 选词框中显示。
   "使用数字编号来选择对应的词条。"
   (interactive)
   (if (car pyim-current-choices)
-      (let ((index (or (- n 1)
-                       (- last-command-event ?1)))
+      (let ((index (if (numberp n)
+                       (- n 1)
+                     (- last-command-event ?1)))
             (end (pyim-page-end)))
         (if (> (+ index (pyim-page-start)) end)
             (pyim-page-refresh)
