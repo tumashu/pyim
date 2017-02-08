@@ -111,10 +111,12 @@
     (unless (string= (buffer-name) " *temp*") ; Make sure this probe can work with exim of exwm.
       (if (<= (point) (save-excursion (back-to-indentation)
                                       (point)))
-          (not (or (pyim-string-match-p "\\cc" (save-excursion
-                                                 ;; 查找前一个非空格字符。
-                                                 (if (re-search-backward "[^[:space:]\n]" nil t)
-                                                     (char-to-string (char-after (point))))))
+          (not (or (pyim-string-match-p
+                    "\\cc"
+                    (save-excursion
+                      ;; 查找前一个非空格字符。
+                      (if (re-search-backward "[^[:space:]\n]" nil t)
+                          (char-to-string (char-after (point))))))
                    (> (length pyim-entered-code) 0)))
         (not (or (pyim-string-match-p "\\cc" str-before-1)
                  (> (length pyim-entered-code) 0)))))))
