@@ -2,7 +2,7 @@
 
 ;; * Header
 ;; Copyright 2006 Ye Wenbin
-;;           2014-2016 Feng Shu
+;;           2014-2017 Feng Shu
 
 ;; Author: Ye Wenbin <wenbinye@163.com>, Feng Shu <tumashu@163.com>
 ;; URL: https://github.com/tumashu/chinese-pyim
