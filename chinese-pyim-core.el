@@ -123,12 +123,11 @@ plist 来表示，比如：
      :prefer-trigger-chars "v")
     (wubi
      :document "五笔输入法。"
-     :class simple
+     :class wubi
      :first-chars "abcdefghijklmnopqrstuvwxyz"
      :rest-chars "abcdefghijklmnopqrstuvwxyz"
      :code-prefix "." ;五笔词库中所有的 code 都以 "." 开头，防止和拼音词库冲突。
-     :auto-select t ;只有一个候选词时，是否自动选择这个候选词。
-     :auto-select-minimum-input 4 ;自动选择候选词时要求的最小输入字符数量
+     :code-maximum-length 4 ;五笔词库中，code 的最大长度（不计算 code-prefix）
      :prefer-trigger-chars nil)
     (pyim-shuangpin
      :document "与 Chinese-pyim 配合良好的双拼输入法方案，源自小鹤双拼方案。"
@@ -304,7 +303,8 @@ Chinese-pyim 内建的功能有：
 3. `pinyin-chars'        逐一获取一个拼音对应的多个汉字。
 4. `pinyin-shortcode'    获取简拼对应的词条，
     如果输入 \"ni-hao\" ，那么同时搜索 code 为 \"n-h\" 的词条。
-5. `pinyin-znabc'        类似智能ABC的词语获取方式(源于 emacs-eim)."
+5. `pinyin-znabc'        类似智能ABC的词语获取方式(源于 emacs-eim).
+6. `wubi-words'          专门用于处理五笔输入的 backend."
   :group 'chinese-pyim)
 
 (defcustom pyim-isearch-enable-pinyin-search nil
@@ -1505,13 +1505,11 @@ Return the input string."
     (pyim-spinyin-find-fuzzy
      (pyim-permutate-list (nreverse results)))))
 
-(defun pyim-code-split:simple (code &optional -)
+(defun pyim-code-split:wubi (code &optional -)
   "这个函数只是对 code 做了一点简单的包装，实际并不真正的
-*分解* code, 比如：
+*分解* code, 用于五笔, 比如：
 
-  \"aaaa\" -> ((\"aaaa\"))
-
-这个函数主要用于五笔等 code 规则相对简单固定的输入法。"
+  \"aaaa\" -> ((\"aaaa\"))"
   (list (list code)))
 
 (defun pyim-spinyin-find-fuzzy (spinyin-list)
@@ -1642,14 +1640,12 @@ Return the input string."
                     spinyin)
                    "-")))))
 
-(defun pyim-scode-join:simple (scode scheme-name &optional as-search-key shou-zi-mu)
-  "把一个 `scode' (splited code) 合并为一个 code 字符串。
+(defun pyim-scode-join:wubi (scode scheme-name &optional as-search-key shou-zi-mu)
+  "把一个 `scode' (splited code) 合并为一个 code 字符串, 用于五笔。
 比如：
 
     (\"aaaa\") --> \"aaaa\"   用于在 dagger 中显示。
-               `-> \".aaaa\"  用于搜索词库。
-
-这个函数主要用于五笔等 code 规则比较简单的输入法。"
+               `-> \".aaaa\"  用于搜索词库。"
   (when scheme-name
     (let ((code-prefix (pyim-scheme-get-option scheme-name :code-prefix)))
       (if as-search-key
@@ -1667,7 +1663,8 @@ Return the input string."
   (let* (personal-words
          common-words
          pinyin-shortcode-words pinyin-znabc-words
-         pinyin-chars)
+         pinyin-chars
+         wubi-words)
 
     (dolist (scode scode-list)
       (setq personal-words
@@ -1678,7 +1675,10 @@ Return the input string."
                     (car (pyim-choices-get:dcache-common scode scheme-name))))
       (setq pinyin-chars
             (append pinyin-chars
-                    (car (pyim-choices-get:pinyin-chars scode scheme-name)))))
+                    (car (pyim-choices-get:pinyin-chars scode scheme-name))))
+      (setq wubi-words
+            (append wubi-words
+                    (car (pyim-choices-get:wubi-words scode scheme-name)))))
 
     ;; Pinyin shouzimu similar words
     (let ((words (pyim-choices-get:pinyin-shortcode (car scode-list) scheme-name)))
@@ -1703,7 +1703,8 @@ Return the input string."
              ,@common-words
              ,@pinyin-shortcode-words
              ,@pinyin-znabc-words
-             ,@pinyin-chars)))))
+             ,@pinyin-chars
+             ,@wubi-words)))))
 
 (defun pyim-choices-get:pinyin-znabc (spinyin scheme-name)
   ;; 将输入的拼音按照声母和韵母打散，得到尽可能多的拼音组合，
@@ -1731,6 +1732,39 @@ Return the input string."
       (when (member class '(quanpin shuangpin))
         (list (pyim-dcache-get (concat (caar spinyin) (cdar spinyin)))
               nil)))))
+
+(defun pyim-choices-get:wubi-words (scode scheme-name)
+  (when (member 'wubi-words pyim-backends)
+    (let ((class (pyim-scheme-get-option scheme-name :class)))
+      (when (member class '(wubi))
+        (let ((code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
+              (max (pyim-scheme-get-option scheme-name :code-maximum-length))
+              (code (pyim-scode-join:wubi scode 'wubi))
+              output)
+          (while code
+            (if (< (length code) max)
+                (progn
+                  (push code output)
+                  (setq code nil))
+              (push (substring code 0 max) output)
+              (setq code (substring code max))))
+          (let ((output1 (car output))
+                (output2 (reverse (cdr output)))
+                str)
+            (when output2
+              (setq str (mapconcat
+                         #'(lambda (code)
+                             (car (pyim-dcache-get (concat code-prefix code))))
+                         output2 "")))
+            (list
+             (remove "" (or (mapcar #'(lambda (x)
+                                        (concat str x))
+                                    (pyim-dcache-get
+                                     (concat code-prefix output1)
+                                     (list pyim-dcache-code2word
+                                           pyim-dcache-shortcode2word)))
+                            (list str)))
+             nil)))))))
 
 (defun pyim-choices-get:dcache-personal (scode scheme-name)
   (when (member 'dcache-personal pyim-backends)
@@ -1827,7 +1861,6 @@ Return the input string."
                      (setq pyim-current-pos 1)
                      (pyim-dagger-refresh)
                      (pyim-page-refresh)
-                     (pyim-page-auto-select-word scheme-name)
                      t)))
       (setq pyim-current-choices
             (list (list (format "%s" (replace-regexp-in-string
@@ -2089,10 +2122,7 @@ Return the input string."
                          choice) "")
              page-info)
     ;; Show page.
-    (when (and (if (pyim-scheme-get-option pyim-default-scheme :auto-select)
-                   (>= (length (car pyim-current-choices)) 2)
-                 t)
-               (null unread-command-events)
+    (when (and (null unread-command-events)
                (null unread-post-input-method-events))
       (if (eq (selected-window) (minibuffer-window))
           ;; Show the guidance in the next line of the currrent
@@ -2252,15 +2282,6 @@ tooltip 选词框中显示。
 
 ;; *** 选择备选词
 ;; #+BEGIN_SRC emacs-lisp
-(defun pyim-page-auto-select-word (scheme-name)
-  "当只有一个词条时，依据 `scheme-name' 的设置，自动选择当前词条，
-这个函数主要用于五笔输入法。"
-  (when (and (= 1 (length (car pyim-current-choices)))
-             (pyim-scheme-get-option scheme-name :auto-select)
-             (>= (length pyim-entered-code)
-                 (pyim-scheme-get-option scheme-name :auto-select-minimum-input)))
-    (call-interactively 'pyim-page-select-word)))
-
 (defun pyim-page-select-word ()
   "从选词框中选择当前词条。"
   (interactive)
