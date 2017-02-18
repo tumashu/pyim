@@ -1647,7 +1647,8 @@ Return the input string."
     (\"aaaa\") --> \"aaaa\"   用于在 dagger 中显示。
                `-> \".aaaa\"  用于搜索词库。"
   (when scheme-name
-    (let ((code-prefix (pyim-scheme-get-option scheme-name :code-prefix)))
+    (let ((code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
+          (n (pyim-scheme-get-option scheme-name :code-maximum-length)))
       (if as-search-key
           (concat (or code-prefix "") (car scode))
         (car scode)))))
@@ -1733,38 +1734,44 @@ Return the input string."
         (list (pyim-dcache-get (concat (caar spinyin) (cdar spinyin)))
               nil)))))
 
+(defun pyim-split-string-by-number (str n &optional reverse)
+  (let (output)
+    (while str
+      (if (< (length str) n)
+          (progn
+            (push str output)
+            (setq str nil))
+        (push (substring str 0 n) output)
+        (setq str (substring str n))))
+    (if reverse
+        output
+      (nreverse output))))
+
 (defun pyim-choices-get:wubi-words (scode scheme-name)
   (when (member 'wubi-words pyim-backends)
     (let ((class (pyim-scheme-get-option scheme-name :class)))
       (when (member class '(wubi))
-        (let ((code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
-              (max (pyim-scheme-get-option scheme-name :code-maximum-length))
-              (code (pyim-scode-join:wubi scode 'wubi))
-              output)
-          (while code
-            (if (< (length code) max)
-                (progn
-                  (push code output)
-                  (setq code nil))
-              (push (substring code 0 max) output)
-              (setq code (substring code max))))
-          (let ((output1 (car output))
-                (output2 (reverse (cdr output)))
-                str)
-            (when output2
-              (setq str (mapconcat
-                         #'(lambda (code)
-                             (car (pyim-dcache-get (concat code-prefix code))))
-                         output2 "")))
-            (list
-             (remove "" (or (mapcar #'(lambda (x)
-                                        (concat str x))
-                                    (pyim-dcache-get
-                                     (concat code-prefix output1)
-                                     (list pyim-dcache-code2word
-                                           pyim-dcache-shortcode2word)))
-                            (list str)))
-             nil)))))))
+        (let* ((code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
+               (code (pyim-scode-join:wubi scode 'wubi))
+               (n (pyim-scheme-get-option scheme-name :code-maximum-length))
+               (output (pyim-split-string-by-number code n t))
+               (output1 (car output))
+               (output2 (reverse (cdr output)))
+               str)
+          (when output2
+            (setq str (mapconcat
+                       #'(lambda (code)
+                           (car (pyim-dcache-get (concat code-prefix code))))
+                       output2 "")))
+          (list
+           (remove "" (or (mapcar #'(lambda (x)
+                                      (concat str x))
+                                  (pyim-dcache-get
+                                   (concat code-prefix output1)
+                                   (list pyim-dcache-code2word
+                                         pyim-dcache-shortcode2word)))
+                          (list str)))
+           nil))))))
 
 (defun pyim-choices-get:dcache-personal (scode scheme-name)
   (when (member 'dcache-personal pyim-backends)
