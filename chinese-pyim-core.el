@@ -2093,6 +2093,18 @@ Return the input string."
           whole
         (pyim-page-end t)))))
 
+(defun pyim-page-format-key-string (code)
+  "这个函数用于生成 page 中显示的 code。"
+  (let* ((scheme-name pyim-default-scheme)
+         (class (pyim-scheme-get-option scheme-name :class))
+         (code-maximum-length (pyim-scheme-get-option scheme-name :code-maximum-length)))
+    (cond
+     ((memq class '(wubi))
+      (mapconcat #'identity
+                 (pyim-split-string-by-number code code-maximum-length)
+                 " "))
+     (t (replace-regexp-in-string "-" " " code)))))
+
 (defun pyim-page-refresh (&optional hightlight-current)
   "按当前位置，生成候选词条"
   (let* ((end (pyim-page-end))
@@ -2107,7 +2119,7 @@ Return the input string."
          (pos (- (min pyim-current-pos (length choices)) start))
          (page-info (make-hash-table))
          (i 0))
-    (puthash :key (replace-regexp-in-string "-" " " pyim-entered-code)
+    (puthash :key (pyim-page-format-key-string pyim-entered-code)
              page-info)
     (puthash :current-page (pyim-page-current-page) page-info)
     (puthash :total-page (pyim-page-total-page) page-info)
