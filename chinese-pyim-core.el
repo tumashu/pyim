@@ -968,6 +968,7 @@ If you don't like this funciton, set the variable to nil")
 
 BUG：无法有效的处理多音字。"
   (when (and (> (length word) 0)
+             (< (length word) 11) ;十个汉字以上的词条，加到个人词库里面用处不大，忽略。
              (not (pyim-string-match-p "\\CC" word)))
     (let* ((pinyins (pyim-hanzi2pinyin word nil "-" t nil t))) ;使用了多音字校正
       ;; 保存对应词条的词频
