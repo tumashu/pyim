@@ -295,7 +295,7 @@ Chinese-pyim 内建的功能有：
   :group 'chinese-pyim)
 
 (defcustom pyim-backends
-  '(dcache-personal dcache-common pinyin-chars pinyin-shortcode pinyin-znabc)
+  '(dcache-personal dcache-common pinyin-chars pinyin-shortcode pinyin-znabc wubi-words)
   "pyim 词语获取 backends ，当前支持：
 
 1. `dcache-personal'     从 `pyim-dcache-icode2word' 中获取词条。
