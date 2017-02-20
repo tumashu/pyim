@@ -115,7 +115,9 @@
 BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，结果会包含多余的连接符：
 比如： '你=好' --> 'ni-=-hao'"
   (if (not (pyim-string-match-p "\\cc" string))
-      string
+      (if return-list
+          (list string)
+        string)
     (let (string-list pinyins-list pinyins-list-permutated pinyins-list-adjusted)
 
       ;; 将汉字字符串转换为字符list，英文原样输出。
