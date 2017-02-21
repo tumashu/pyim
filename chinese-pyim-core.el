@@ -178,7 +178,7 @@ plist 来表示，比如：
     (microsoft-shuangpin
      :document "微软双拼方案。"
      :class shuangpin
-     :first-chars "abcdefghijklmnpqrstuvwxyz"
+     :first-chars "abcdefghijklmnopqrstuvwxyz"
      :rest-chars "abcdefghijklmnopqrstuvwxyz;"
      :prefer-trigger-chars nil
      :keymaps
