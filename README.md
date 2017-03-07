@@ -266,7 +266,7 @@ Chinese-pyim 支持五笔输入模式，用户可以通过变量 \`pyim-default-
 
 最简单的方式是从 melpa 中安装 chinese-pyim-wbdict 包，然后根据它的 [README](https://github.com/tumashu/chinese-pyim-wbdict) 来配置。
 
-注意：为了简化代码和提高输入法响应速度，pyim 直接将拼音词库和五笔词库合并到同一个dcache 文件中，所以 chinese-pyim **强制规定** 在词库中， 五笔编码 **必须** 都以 `.` 开头，比如 `.aaaa` ,这样可以避免出现不必要的混乱。
+注意：为了简化代码和提高输入法响应速度，pyim 直接将拼音词库和五笔词库合并到同一个dcache 文件中，所以 chinese-pyim **强制规定** 在词库中， 五笔编码 **必须** 都以 `.` 开头，比如 `.aaaa` ，这样可以避免出现不必要的混乱。
 
 用户可以使用命令：\`pyim-search-word-code' 来查询当前选择词条的五笔编码。
 
