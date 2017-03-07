@@ -96,7 +96,7 @@ Chinese-pyim 的目标是： **尽最大的努力成为一个好用的 emacs 中
 ## 安装
 
 1.  配置 melpa 源，参考：<http://melpa.org/#/getting-started>
-2.  M-x package-install RET chinese-pyim RET
+2.  `M-x package-install RET chinese-pyim RET`
 3.  在 emacs 配置文件中（比如: ~/.emacs）添加如下代码：
 
         (require 'chinese-pyim)
