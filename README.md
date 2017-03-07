@@ -52,7 +52,7 @@
 
 ## 简介
 
-Chinese-pyim 是 emacs 环境下的一个中文输入法，最初它只支持全拼输入，所以当时 "Chinese-pyim" 代表 "Chinese Pinyin Input Method" 的意思，后来根据同学的提议， 添加了五笔的支持，再叫 “拼音输入法” 就不太合适了，所以你现在可以将它理解 为 “PengYou input method”： 平时像朋友一样帮助你，偶尔也像朋友一样犯二 。。。
+Chinese-pyim 是 emacs 环境下的一个中文输入法，最初它只支持全拼输入，所以当时 "Chinese-pyim" 代表 "Chinese Pinyin Input Method" 的意思，后来根据同学的提议， 添加了五笔的支持，再叫 “拼音输入法” 就不太合适了，所以你现在可以将 “pyim” 理解 为 “PengYou input method”： 平时像朋友一样帮助你，偶尔也像朋友一样犯二 。。。
 
 
 <a id="org299b8eb"></a>
@@ -75,7 +75,7 @@ emacs-eim 是 emacs 环境下的一个中文输入法框架， 支持拼音，�
 
 ## 目标
 
-Chinese-pyim 的目标是： **尽最大的努力成为一个好用的 emacs 中文输入法** ， 具体可表现为三个方面：
+Chinese-pyim 的目标是： **尽最大的努力成为一个好用的 emacs 中文输入法** ，具体可表现为三个方面：
 
 1.  Fallback: 当外部输入法不能使用时，比如在 console 或者 cygwin 环境 下，尽最大可能让 emacs 用户不必为输入中文而烦恼。
 2.  Integration: 尽最大可能减少输入法切换频率，让中文输入不影响 emacs 的体验。
@@ -178,7 +178,7 @@ Chinese-pyim 当前的默认的拼音词库是 chinese-pyim-basedict, 这个词�
 
 <https://github.com/tumashu/chinese-pyim-greatdict>
 
-Chinese-pyim-greatdict 包对应的词库由 [WenLiang Xiao](https://github.com/xiaowl) 同学开发制作， 词条有 300 万条，词库文件大约 80M, 是一个 **大而全** 的词库， 用户可以通过 Melpa 来安装它：
+Chinese-pyim-greatdict 包对应的词库由 [WenLiang Xiao](https://github.com/xiaowl) 同学开发制作，词条有 300 万条，词库文件大约 80M, 是一个 **大而全** 的词库， 用户可以通过 Melpa 来安装它：
 
 1.  配置melpa源，参考：<http://melpa.org/#/getting-started>
 2.  M-x package-install RET chinese-pyim-greatdict RET
@@ -189,10 +189,10 @@ Chinese-pyim-greatdict 包对应的词库由 [WenLiang Xiao](https://github.com/
 
 但值得注意的是：
 
-1.  如果机器性能不好，安装 chinese-pyim-greatdict 会导致 chinese-pyim 启动 非常缓慢，请仔细考虑。
-2.  这个词库使用 gzip 压缩，非 Linux 用户需要安装 [gzip](http://www.gzip.org/) 程序， 并配置好系统 PATH 。
+1.  如果机器性能不好，安装 chinese-pyim-greatdict 会导致 chinese-pyim 启动非常缓慢，请仔细考虑。
+2.  这个词库使用 gzip 压缩，非 Linux 用户需要安装 [gzip](http://www.gzip.org/) 程序，并配置好系统 PATH 。
 
-如果 chinese-pyim-greatdict 不能满足需求，用户可以使用其他方式为 Chinese-pyim 添加拼音词库， 具体方式请参考 [1.10.5](#org7c745e8) 小结。
+如果 chinese-pyim-greatdict 不能满足需求，用户可以使用其他方式为 Chinese-pyim 添加拼音词库，具体方式请参考 [1.10.5](#org7c745e8) 小结。
 
 
 <a id="orgecb252b"></a>
@@ -266,7 +266,7 @@ Chinese-pyim 支持五笔输入模式，用户可以通过变量 \`pyim-default-
 
 最简单的方式是从 melpa 中安装 chinese-pyim-wbdict 包，然后根据它的 [README](https://github.com/tumashu/chinese-pyim-wbdict) 来配置。
 
-注意：为了简化代码和提高输入法响应速度，pyim 直接将拼音词库和五笔 词库合并到同一个dcache 文件中，所以 chinese-pyim **强制规定** 在词库中， 五笔编码 **必须** 都以 '.' 开头，比如 '.aaaa' ,这样可以避免出现不必要 的混乱。
+注意：为了简化代码和提高输入法响应速度，pyim 直接将拼音词库和五笔词库合并到同一个dcache 文件中，所以 chinese-pyim **强制规定** 在词库中， 五笔编码 **必须** 都以 `.` 开头，比如 `.aaaa` ,这样可以避免出现不必要的混乱。
 
 用户可以使用命令：\`pyim-search-word-code' 来查询当前选择词条的五笔编码。
 
@@ -296,7 +296,7 @@ GTK 选词框的字体设置可以参考：[GTK resources](https://www.gnu.org/s
 
 ### 调整 tooltip 选词框的显示样式
 
-Chinese-pyim 的 tooltip 选词框默认使用 **双行显示** 的样式，在一些特 殊的情况下（比如：popup 显示的菜单错位），用户可以使用 **单行显示** 的样式：
+Chinese-pyim 的 tooltip 选词框默认使用 **双行显示** 的样式，在一些特殊的情况下（比如：popup 显示的菜单错位），用户可以使用 **单行显示** 的样式：
 
     (setq pyim-page-style 'one-line)
 
@@ -319,7 +319,7 @@ Chinese-pyim **内置** 了多种词条获取的方式：
 1.  \`dcache-personal' 从 \`pyim-dcache-icode2word' 中获取词条。
 2.  \`dcache-common' 从 \`pyim-dcache-code2word' 中获取词条。
 3.  \`pinyin-chars' 逐一获取一个拼音对应的多个汉字。
-4.  \`pinyin-shortcode' 获取一个简拼对应的词条， 如果输入 \\"ni-hao\\" ，那么同时搜索 code 为 \\"n-h\\" 的词条。
+4.  \`pinyin-shortcode' 获取一个简拼对应的词条，如果输入 \\"ni-hao\\" ，那么同时搜索 code 为 \\"n-h\\" 的词条。
 5.  \`pinyin-znabc' 类似智能ABC的词语获取方式(源于 emacs-eim)."
 
 用户可以通过下面的代码来调整 backends 设置，比如：
@@ -336,17 +336,17 @@ Chinese-pyim **内置** 了多种词条获取的方式：
 ### 切换全角标点与半角标点
 
 1.  第一种方法：使用命令 \`pyim-punctuation-toggle'，全局切换。
-2.  第二种方法：使用命令 \`pyim-punctuation-translate-at-point' 只切换光 标处标点的样式。
-3.  第三种方法：设置变量 \`pyim-translate-trigger-char' ，输入变量设定的 字符会切换光标处标点的样式。
+2.  第二种方法：使用命令 \`pyim-punctuation-translate-at-point' 只切换光标处标点的样式。
+3.  第三种方法：设置变量 \`pyim-translate-trigger-char' ，在当前输入法是 chinese-pyim 的情况下，输入变量设定的字符会切换光标处标点的样式。
 
 
 <a id="orga2020c7"></a>
 
 ### 手动加词和删词
 
-1.  \`pyim-create-word-at-point:"N"char' 这是一组命令，从光标前提取N个汉 字字符组成字符串，并将其加入个人词库。
-2.  \`pyim-translate-trigger-char' 以默认设置为例：在“我爱吃红烧肉”后输 入“5v” 可以将“爱吃红烧肉”这个词条保存到用户个人词库。
-3.  \`pyim-create-word-from-selection', 选择一个词条，运行这个命令后，就 可以将这个词条添加到个人词库。
+1.  \`pyim-create-word-at-point:"N"char' 这是一组命令，从光标前提取N个汉字字符组成字符串，并将其加入个人词库。
+2.  \`pyim-translate-trigger-char' 默认设置为：在当前输入法是 chinese-pyim 的情况下，当光标前面为中文字符串时，输入 \<num\>v 可以用于保存自定义词条。例：在“我爱吃红烧肉”后输入“5v” 可以将“爱吃红烧肉”这个词条保存到用户个人词库。详细功能可以使用 `C-h v pyim-translate-trigger-char RET` 查看变量介绍。
+3.  \`pyim-create-word-from-selection' 选择一个词条，运行这个命令后，就可以将这个词条添加到个人词库。
 4.  \`pyim-delete-word' 从个人词库中删除当前高亮选择的词条。
 
 
@@ -441,14 +441,14 @@ Chinese-pyim 开发使用 lentic 文学编程模式，代码文档隐藏在comme
 
 ### 将光标处的拼音或者五笔字符串转换为中文 (与 vimim 的 “点石成金” 功能类似)
 
-    (global-set-key (kbd "M-i") 'pyim-convert-code-at-point)
+    (global-set-key (kbd "M-j") 'pyim-convert-code-at-point)
 
 
 <a id="org7c745e8"></a>
 
 ### 如何添加自定义拼音词库
 
-Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面几种方式，获取 质量较好的拼音词库：
+Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面几种方式，获取质量较好的拼音词库：
 
 1.  第一种方式 (懒人推荐使用)
 
@@ -456,11 +456,11 @@ Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面几�
 
     <http://tumashu.github.io/chinese-pyim-bigdict/pyim-bigdict.pyim.gz>
 
-    下载上述词库后，运行 \`pyim-dicts-manager' ，按照命令提示，将下载得到的词库 文件信息添加到 \`pyim-dicts' 中，最后运行命令 \`pyim-restart' 或者重启 emacs，这个词库使用 \`utf-8-unix' 编码。
+    下载上述词库后，运行 \`pyim-dicts-manager' ，按照命令提示，将下载得到的词库文件信息添加到 \`pyim-dicts' 中，最后运行命令 \`pyim-restart' 或者重启 emacs，这个词库使用 \`utf-8-unix' 编码。
 
 2.  第二种方式 (Windows 用户推荐使用)
 
-    使用词库转换工具将其他输入法的词库转化为Chinese-pyim使用的词库：这里只介绍windows平 台下的一个词库转换软件：
+    使用词库转换工具将其他输入法的词库转化为Chinese-pyim使用的词库：这里只介绍windows平台下的一个词库转换软件：
 
     1.  软件名称： imewlconverter
     2.  中文名称： 深蓝词库转换
@@ -503,7 +503,7 @@ Chinese-pyim 默认没有携带任何拼音词库，用户可以使用下面几�
 
 注意事项:
 
-1.  只有 :file 是 **必须** 设置的。
+1.  只有 `:file` 是 **必须** 设置的。
 2.  必须使用词库文件的绝对路径。
 3.  词库文件的编码必须为 utf-8-unix，否则会出现乱码。
 
@@ -574,7 +574,7 @@ chinese-pyim 安装后，可以通过下面的设置开启拼音搜索功能：
 
     (setq pyim-isearch-enable-pinyin-search t)
 
-值得注意的是：这个功能有一些限制：搜索字符串中只能出现 “a-z” 和 “’”，如果有 其他字符（比如 regexp 操作符），则自动关闭拼音搜索功能。
+值得注意的是：这个功能有一些限制：搜索字符串中只能出现 `a-z` 和 `’`，如果有 其他字符（比如 regexp 操作符），则自动关闭拼音搜索功能。
 
 如果用户开启了拼音搜索功能，可以使用下面的方式 **强制关闭** isearch 搜索框中文输入 （即使在 Chinese-pyim 激活的时候）。
 
