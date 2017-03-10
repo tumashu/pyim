@@ -30,7 +30,6 @@
 ;;; Code:
 
 ;; * 代码                                                                 :code:
-;; #+BEGIN_SRC emacs-lisp
 (require 'chinese-pyim)
 
 (defun pyim-benchmark ()
@@ -82,11 +81,9 @@
     (message "=================================================")
     (message "")))
 
-;; #+END_SRC
 
 ;; * Footer
 
-;; #+BEGIN_SRC emacs-lisp
 (provide 'chinese-pyim-benchmark)
 
 ;; Local Variables:
@@ -94,4 +91,3 @@
 ;; End:
 
 ;;; chinese-pyim-benchmark.el ends here
-;; #+END_SRC

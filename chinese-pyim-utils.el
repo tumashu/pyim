@@ -32,7 +32,6 @@
 
 ;;; Code:
 ;; * 代码                                                                 :code:
-;; #+BEGIN_SRC emacs-lisp
 (require 'cl-lib)
 (require 'chinese-pyim-pymap)
 (require 'chinese-pyim-core)
@@ -282,11 +281,8 @@
   (goto-char (point-min))
   (message "分词完成！"))
 
-;; #+END_SRC
 
 ;; * Footer
-;; #+BEGIN_SRC emacs-lisp
 (provide 'chinese-pyim-utils)
 
 ;;; chinese-pyim-utils.el ends here
-;; #+END_SRC

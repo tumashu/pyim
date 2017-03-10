@@ -32,7 +32,6 @@
 ;;; Code:
 
 ;; * 代码                                                                 :code:
-;; #+BEGIN_SRC emacs-lisp
 (require 'chinese-pyim)
 (require 'org-webpage)
 (require 'owp-web-server)
@@ -54,17 +53,15 @@
    :source-browse-url ("GitHub" "https://github.com/tumashu/chinese-pyim")
    :personal-avatar "/media/img/horse.jpg"
    :personal-duoshuo-shortname "tumashu-website"
-   :preparation-function owp/lentic-preparation-function
-   :org-export-function owp/lentic-org-export-function
-   :lentic-doc-sources ("chinese-pyim-.*\\.el$")
-   :lentic-readme-sources ("chinese-pyim.el")
-   :lentic-index-sources ("chinese-pyim.el")
+   :preparation-function owp/el2org-preparation-function
+   :org-export-function owp/el2org-org-export-function
+   :el2org-doc-sources ("chinese-pyim-.*\\.el$")
+   :el2org-readme-sources ("chinese-pyim.el")
+   :el2org-index-sources ("chinese-pyim.el")
    :web-server-port 9876))
-;; #+END_SRC
 
 ;; * Footer
 
-;; #+BEGIN_SRC emacs-lisp
 (provide 'chinese-pyim-devtools)
 
 ;; Local Variables:
@@ -72,4 +69,3 @@
 ;; End:
 
 ;;; chinese-pyim-devtools.el ends here
-;; #+END_SRC

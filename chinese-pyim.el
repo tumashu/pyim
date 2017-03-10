@@ -531,17 +531,13 @@
 
 ;;; Code:
 ;; * 代码                                                                 :code:
-;; #+BEGIN_SRC emacs-lisp
 (require 'chinese-pyim-pymap)
 (require 'chinese-pyim-core)
 (require 'chinese-pyim-dictools)
 (require 'chinese-pyim-utils)
 (require 'chinese-pyim-probe)
-;; #+END_SRC
 
 ;; * Footer
-;; #+BEGIN_SRC emacs-lisp
 (provide 'chinese-pyim)
 
 ;;; chinese-pyim.el ends here
-;; #+END_SRC

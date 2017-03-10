@@ -38,7 +38,6 @@
 
 ;; * 核心代码                                                           :code:
 ;; ** require + defcustom + defvar
-;; #+BEGIN_SRC emacs-lisp
 (require 'cl-lib)
 (require 'help-mode)
 (require 'pos-tip)
@@ -491,10 +490,8 @@ If you don't like this funciton, set the variable to nil")
     (define-key map "\C-c" 'pyim-quit-clear)
     map)
   "Keymap")
-;; #+END_SRC
 
 ;; ** 将变量转换为 local 变量
-;; #+BEGIN_SRC emacs-lisp
 (defvar pyim-local-variable-list
   '(pyim-entered-code
     pyim-dagger-str
@@ -524,16 +521,13 @@ If you don't like this funciton, set the variable to nil")
 (dolist (var pyim-local-variable-list)
   (make-variable-buffer-local var)
   (put var 'permanent-local t))
-;; #+END_SRC
 ;; ** 输入法启动和重启
 ;; Chinese-pyim 使用 emacs 官方自带的输入法框架来启动输入法和重启输入法。
 ;; 所以我们首先需要使用 emacs 自带的命令 `register-input-method' 注册一个
 ;; 输入法。
 
-;; #+BEGIN_SRC emacs-lisp
-;;; 注册输入法
+;; 注册输入法
 (register-input-method "chinese-pyim" "euc-cn" 'pyim-start pyim-title)
-;; #+END_SRC
 
 ;; 真正启动 Chinese-pyim 的命令是 `pyim-start' ，这个命令做如下工作：
 ;; 1. 重置 `pyim-local-variable-list' 中所有的 local 变量。
@@ -552,7 +546,6 @@ If you don't like this funciton, set the variable to nil")
 ;; `pyim-restart' 用于重启 Chinese-pyim，其过程和 `pyim-start' 类似，
 ;; 只是在输入法重启之前，询问用户，是否保存个人词频信息。
 
-;; #+BEGIN_SRC emacs-lisp
 (defun pyim-start (name &optional active-func restart save-personal-dcache refresh-common-dcache)
   (interactive)
   (mapc 'kill-local-variable pyim-local-variable-list)
@@ -604,7 +597,6 @@ If you don't like this funciton, set the variable to nil")
   "重启 Chinese-pyim，用于编程环境。"
   (pyim-start "Chinese-pyim" nil t
               save-personal-dcache refresh-common-dcache))
-;; #+END_SRC
 ;; ** 处理词库文件
 ;; *** 自定义词库
 ;; **** 词库文件格式
@@ -624,7 +616,6 @@ If you don't like this funciton, set the variable to nil")
 ;; 1. `:name' 用户给词库设定的名称（可选项）。
 ;; 2. `:file' 词库文件的绝对路径。
 
-;; #+BEGIN_SRC emacs-lisp
 (defun pyim-dcache-update:code2word (&optional force)
   "读取 `pyim-dicts' 和 `pyim-extra-dicts' 里面的词库文件，生成对应的词库缓冲文件。
 然后加载词库缓存。"
@@ -900,13 +891,11 @@ If you don't like this funciton, set the variable to nil")
   (pyim-dcache-save-variable 'pyim-dcache-icode2word)
   (pyim-dcache-save-variable 'pyim-dcache-iword2count)
   t)
-;; #+END_SRC
 
 ;; *** 从词库中搜索中文词条
 ;; 当词库文件加载完成后， Chinese-pyim 就可以从词库缓存中搜索某个
 ;; code 对应的中文词条了，这个工作由函数 `pyim-dcache-get' 完成。
 
-;; #+BEGIN_SRC emacs-lisp
 (defun pyim-dcache-get (code &optional dcache-list)
   (let ((dcache-list (or (if (listp dcache-list)
                              dcache-list
@@ -942,10 +931,8 @@ If you don't like this funciton, set the variable to nil")
                      x))
                pinyin-list "-")))))
 
-;; #+END_SRC
 
 ;; *** 保存词条，删除词条以及调整词条位置
-;; #+BEGIN_SRC emacs-lisp
 (defmacro pyim-dcache-put (cache code &rest body)
   (declare (indent 0))
   (let ((key (make-symbol "key"))
@@ -1033,10 +1020,8 @@ BUG：无法有效的处理多音字。"
   "将光标前4个中文字符组成的字符串加入个人词库。"
   (interactive)
   (pyim-create-word-at-point 4))
-;; #+END_SRC
 
 ;; **** 删词功能
-;; #+BEGIN_SRC emacs-lisp
 (defun pyim-create-word-from-selection ()
   "Add the selected text as a Chinese word into the personal dictionary."
   (interactive)
@@ -1093,7 +1078,6 @@ BUG：无法有效的处理多音字。"
         (pyim-dcache-put
           pyim-dcache-icode2word pinyin
           (remove word orig-value))))))
-;; #+END_SRC
 
 ;; ** 生成 `pyim-entered-code' 并插入 `pyim-dagger-str'
 ;; *** 生成拼音字符串 `pyim-entered-code'
@@ -1137,7 +1121,6 @@ BUG：无法有效的处理多音字。"
 
 ;; 最后，emacs 低层函数 read-event 将这个 list 插入 *待输入buffer* 。
 
-;; #+BEGIN_SRC emacs-lisp
 (defun pyim-input-method (key-or-string)
   (if (or buffer-read-only
           overriding-terminal-local-map
@@ -1276,7 +1259,6 @@ Return the input string."
   (when (and (eq pyim-page-tooltip 'pos-tip)
              (pyim-tooltip-pos-tip-usable-p))
     (pos-tip-hide)))
-;; #+END_SRC
 
 ;; ** 处理拼音 code 字符串 `pyim-entered-code'
 ;; *** 拼音字符串 -> 待选词列表
@@ -1383,7 +1365,6 @@ Return the input string."
 ;; 最后： `pyim-code-user-divide-pos' 和 `pyim-code-restore-user-divide' 用来处理隔
 ;; 音符，比如： xi'an
 
-;; #+BEGIN_SRC emacs-lisp
 ;; 将汉字的拼音分成声母和其它
 (defun pyim-pinyin-get-sm (py)
   "从一个拼音字符串中提出第一个声母。"
@@ -1443,7 +1424,7 @@ Return the input string."
           (cons sm "")
         (cons (cons (car sm) (car ym)) (cdr ym))))))
 
-;;; 处理输入的拼音
+;; 处理输入的拼音
 (defun pyim-scheme-get (scheme-name)
   "获取名称为 `scheme-name' 的输入法方案。"
   (assoc scheme-name pyim-schemes))
@@ -1654,10 +1635,8 @@ Return the input string."
           (concat (or code-prefix "") (car scode))
         (car scode)))))
 
-;; #+END_SRC
 
 ;; **** 获得词语拼音并进一步查询得到备选词列表
-;; #+BEGIN_SRC emacs-lisp
 (defun pyim-choices-get (scode-list scheme-name)
   "根据 `scode-list', 得到可能的词组和汉字。"
   ;; scode-list 可以包含多个 scode, 从而得到多个子候选词列表，如何将多个 *子候选词列表* 合理的合并，
@@ -1842,7 +1821,6 @@ Return the input string."
   (if (string< "" (car py))
       (car py)
     (cdr py)))
-;; #+END_SRC
 
 ;; *** 核心函数：拼音字符串处理函数
 ;; `pyim-handle-entered-code' 这个函数是一个重要的 *核心函数* ，其大致工作流程为：
@@ -1850,7 +1828,6 @@ Return the input string."
 ;;    `pyim-current-choices' 和 当前选择的词条 `pyim-entered-code'
 ;; 2. 显示备选词条和选择备选词等待用户选择。
 
-;; #+BEGIN_SRC emacs-lisp
 (defun pyim-handle-entered-code ()
   (let ((scheme-name pyim-default-scheme)
         (str pyim-entered-code))
@@ -1877,7 +1854,6 @@ Return the input string."
       (pyim-dagger-refresh)
       (pyim-page-refresh))))
 
-;; #+END_SRC
 
 ;; ** 处理当前需要插入 buffer 的 dagger 字符串： `pyim-dagger-str'
 ;; Chinese-pyim 使用变量 `pyim-dagger-str' 保存 *需要在 buffer 光标处插
@@ -1916,7 +1892,6 @@ Return the input string."
 ;; 真正在 *待输入buffer* 插入 `pyim-dagger-str' 字符串的函数是
 ;; `read-event'，具体见 `pyim-input-method' 相关说明。
 
-;; #+BEGIN_SRC emacs-lisp
 (defun pyim-dagger-setup-overlay ()
   (let ((pos (point)))
     (if (overlayp pyim-dagger-overlay)
@@ -1969,7 +1944,6 @@ Return the input string."
   (if (overlay-start pyim-dagger-overlay)
       (delete-region (overlay-start pyim-dagger-overlay)
                      (overlay-end pyim-dagger-overlay))))
-;; #+END_SRC
 
 ;; ** 显示和选择备选词条
 ;; *** 构建词条菜单字符串
@@ -2048,8 +2022,7 @@ Return the input string."
 ;;    保 `pyim-current-pos' 的取值为下一页第一个词条的位置。
 ;; 3. 最后调用 `pyim-page-refresh' 来重新刷新页面。
 
-;; #+BEGIN_SRC emacs-lisp
-;;;  page format
+;;  page format
 (defun pyim-subseq (list from &optional to)
   (if (null to) (nthcdr from list)
     (butlast (nthcdr from list) (- (length list) to))))
@@ -2298,10 +2271,8 @@ tooltip 选词框中显示。
            emacs-basic-display
            (not (display-graphic-p))
            (not (fboundp 'x-show-tip)))))
-;; #+END_SRC
 
 ;; *** 选择备选词
-;; #+BEGIN_SRC emacs-lisp
 (defun pyim-page-select-word ()
   "从选词框中选择当前词条。"
   (interactive)
@@ -2353,7 +2324,6 @@ tooltip 选词框中显示。
           (pyim-page-select-word)))
     (pyim-dagger-append (char-to-string last-command-event))
     (pyim-terminate-translation)))
-;; #+END_SRC
 
 ;; ** 处理标点符号
 ;; 常用的标点符号数量不多，所以 Chinese-pyim 没有使用文件而是使用一个变量
@@ -2361,7 +2331,6 @@ tooltip 选词框中显示。
 
 ;; Chinese-pyim 在运行过程中调用函数 `pyim-translate' 进行标点符号格式的转换。
 
-;; #+BEGIN_SRC emacs-lisp
 (defun pyim-translate-get-trigger-char ()
   "检查 `pyim-translate-trigger-char' 是否为一个合理的 trigger char 。
 
@@ -2505,7 +2474,6 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
               (buffer-string)))
       (insert new-string))))
 
-;; #+END_SRC
 
 ;; 当用户使用 org-mode 以及 markdown 等轻量级标记语言撰写文档时，常常需要输入数字列表，比如：
 
@@ -2529,8 +2497,7 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
 ;; 如果当前输入模式是中文输入模式，那么，输入标点的样式用户可以使用 `pyim-punctuation-toggle'
 ;; 手动控制，具体请参考 `pyim-punctuation-full-width-p'。
 
-;; #+BEGIN_SRC emacs-lisp
-;;; 切换中英文标点符号
+;; 切换中英文标点符号
 (defun pyim-punctuation-full-width-p ()
   "判断是否需要切换到全角标点输入模式"
   (cl-case (car pyim-punctuation-translate-p)
@@ -2552,7 +2519,6 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
      (yes "开启全角标点输入模式。")
      (no "开启半角标点输入模式。")
      (auto "开启全半角标点自动转换模式。"))))
-;; #+END_SRC
 
 ;; 每次运行 `pyim-punctuation-toggle' 命令，都会调整变量 `pyim-punctuation-translate-p'
 ;; 的取值，`pyim-translate' 根据 `pyim-punctuation-full-width-p' 函数的返回值，来决定
@@ -2565,7 +2531,6 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
 ;; 用户也可以使用命令 `pyim-punctuation-translate-at-point' 来切换 *光标前* 标点符号的样式。
 
 
-;; #+BEGIN_SRC emacs-lisp
 (defun pyim-punctuation-translate-at-point ()
   "切换光标处标点的样式（全角 or 半角）。"
   (interactive)
@@ -2615,7 +2580,6 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
                   (push punct result)
                 (push (car puncts) result))))))))
     (insert (mapconcat #'identity (reverse result) ""))))
-;; #+END_SRC
 
 ;; 使用上述命令切换光标前标点符号的样式时，我们使用函数 `pyim-punctuation-return-proper-punct'
 ;; 来处理成对的全角标点符号， 比如：
@@ -2644,7 +2608,6 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
 ;; 那么下一次输入的标点就是（’）。
 
 
-;; #+BEGIN_SRC emacs-lisp
 ;; 处理标点符号
 (defun pyim-punctuation-return-proper-punct (punc-list &optional before)
   "返回合适的标点符号，`punc-list'为标点符号列表，其格式类似：
@@ -2664,7 +2627,6 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
           (car punc)
         (nth 1 punc)))))
 
-;; #+END_SRC
 
 ;; 函数 `pyim-punctuation-return-proper-punct' 内部，我们使用变量 `pyim-punctuation-pair-status'
 ;; 来记录“成对”中文标点符号的状态。
@@ -2707,7 +2669,6 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
 
 ;; ** 与拼音输入相关的用户命令
 ;; *** 删除拼音字符串最后一个字符
-;; #+BEGIN_SRC emacs-lisp
 (defun pyim-delete-last-char ()
   (interactive)
   (if (> (length pyim-entered-code) 1)
@@ -2716,10 +2677,8 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
         (pyim-handle-entered-code))
     (setq pyim-dagger-str "")
     (pyim-terminate-translation)))
-;; #+END_SRC
 
 ;; *** 删除拼音字符串最后一个拼音
-;; #+BEGIN_SRC emacs-lisp
 (defun pyim-backward-kill-py ()
   (interactive)
   (if (string-match "['-][^'-]+$" pyim-entered-code)
@@ -2729,10 +2688,8 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
     (setq pyim-entered-code "")
     (setq pyim-dagger-str "")
     (pyim-terminate-translation)))
-;; #+END_SRC
 
 ;; *** 将光标前的 code 字符串转换为中文
-;; #+BEGIN_SRC emacs-lisp
 (defun pyim-convert-code-at-point ()
   (interactive)
   (unless (equal input-method-function 'pyim-input-method)
@@ -2755,42 +2712,32 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
         (delete-char (- 0 length))
         (insert (mapconcat #'char-to-string
                            (pyim-input-method code) ""))))))
-;; #+END_SRC
 
 ;; *** 取消当前输入
-;; #+BEGIN_SRC emacs-lisp
 (defun pyim-quit-clear ()
   (interactive)
   (setq pyim-dagger-str "")
   (pyim-terminate-translation))
-;; #+END_SRC
 ;; *** 字母上屏
-;; #+BEGIN_SRC emacs-lisp
 (defun pyim-quit-no-clear ()
   (interactive)
   (setq pyim-dagger-str
         (replace-regexp-in-string "-" "" pyim-entered-code))
   (pyim-terminate-translation))
-;; #+END_SRC
 
 ;; *** Chinese-pyim 取消激活
-;; #+BEGIN_SRC emacs-lisp
 (defun pyim-inactivate ()
   (interactive)
   (mapc 'kill-local-variable pyim-local-variable-list))
-;; #+END_SRC
 
 ;; *** 切换中英文输入模式
-;; #+BEGIN_SRC emacs-lisp
 (defun pyim-toggle-input-ascii ()
   "Chinese-pyim 切换中英文输入模式。同时调整标点符号样式。"
   (interactive)
   (setq pyim-input-ascii
         (not pyim-input-ascii)))
-;; #+END_SRC
 
 ;; *** 为 isearch 添加拼音搜索功能
-;; #+BEGIN_SRC emacs-lisp
 (defun pyim-isearch-build-search-regexp (pystr)
   "这个函数用于 isearch 中文 *拼音* 搜索，
 根据 str 构建一个 regexp, 比如：
@@ -2872,12 +2819,9 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
     (isearch-search-fun-default)))
 
 (setq isearch-search-fun-function 'pyim-isearch-pinyin-search-function)
-;; #+END_SRC
 
 
 ;; * Footer
-;; #+BEGIN_SRC emacs-lisp
 (provide 'chinese-pyim-core)
 
 ;;; chinese-pyim-core.el ends here
-;; #+END_SRC

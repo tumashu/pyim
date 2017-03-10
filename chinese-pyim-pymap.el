@@ -42,7 +42,6 @@
 ;;; Code:
 
 ;; * 代码                                                                 :code:
-;; #+BEGIN_SRC emacs-lisp
 (defvar pyim-pinyin-pymap
   '(("a" "阿啊呵腌嗄锕吖")
     ("ai" "爱哀挨碍埃癌艾唉矮哎皑蔼隘暧霭捱嗳瑷嫒锿嗌砹")
@@ -493,7 +492,6 @@
           (gethash pinyin pyim-pinyin2cchar-cache1))
       (gethash pinyin pyim-pinyin2cchar-cache3))))
 
-;; #+END_SRC
 
 ;; ** 查询某个汉字的拼音
 ;;   :PROPERTIES:
@@ -520,7 +518,6 @@
 ;; #+END_EXAMPLE
 
 
-;; #+BEGIN_SRC emacs-lisp
 (defun pyim-cchar2pinyin-get (char-or-str)
   "Get the code of the character CHAR"
   (pyim-cchar2pinyin-cache-create)
@@ -545,11 +542,8 @@ in package `chinese-pyim-pymap'"
             (if cache
                 (puthash key (append (list py) cache) pyim-cchar2pinyin-cache)
               (puthash key (list py) pyim-cchar2pinyin-cache))))))))
-;; #+END_SRC
 
 ;; * Footer
-;; #+BEGIN_SRC emacs-lisp
 (provide 'chinese-pyim-pymap)
 
 ;;; chinese-pyim-pymap.el ends here
-;; #+END_SRC

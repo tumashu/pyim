@@ -51,7 +51,6 @@
 ;;; Code:
 ;; * 代码                                                                 :code:
 ;; ** 根据环境自动切换到英文输入模式
-;; #+BEGIN_SRC emacs-lisp
 (defun pyim-probe-program-mode ()
   "激活这个 Chinese-pyim 探针函数后，只能在字符串和 comment 中输入中文。
 注：仅仅影响 `prog-mode' 衍生的 mode 。
@@ -125,10 +124,8 @@
   "判断是否是evil的normal模式，如果是则返回true.
 这个函数用于：`pyim-english-input-switch-functions'."
   (evil-normal-state-p))
-;; #+END_SRC
 
 ;; ** 根据环境自动切换到半角标点输入模式
-;; #+BEGIN_SRC emacs-lisp
 (defun pyim-probe-punctuation-line-beginning (char)
   "激活这个 Chinese-pyim 探针函数后，行首输入标点时，强制输入半角标点。
 
@@ -147,11 +144,8 @@
         (puncts (mapcar 'car pyim-punctuation-dict)))
     (and (member str-before-1 puncts)
          (member (char-to-string char) puncts))))
-;; #+END_SRC
 
 ;; * Footer
-;; #+BEGIN_SRC emacs-lisp
 (provide 'chinese-pyim-probe)
 
 ;;; chinese-pyim-probe.el ends here
-;; #+END_SRC

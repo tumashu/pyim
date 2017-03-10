@@ -35,11 +35,9 @@
 
 ;; * 代码                                                                 :code:
 ;; ** Require
-;; #+BEGIN_SRC emacs-lisp
 (require 'cl-lib)
 (require 'chinese-pyim-pymap)
 (require 'chinese-pyim-core)
-;; #+END_SRC
 
 ;; ** 汉字到拼音的转换工具
 ;; `pyim-hanzi2pinyin' 和 `pyim-hanzi2pinyin-simple' 可以将一个中文字符串转换为拼音字符串
@@ -49,28 +47,31 @@
 ;; 这个函数来制作词库。而 `pyim-hanzi2pinyin-simple' 不考虑多音字，可以用于添加拼音索引。
 
 ;; 例如：
-;; #+BEGIN_SRC emacs-lisp
+;; #+BEGIN_EXAMPLE
 ;; (list (pyim-hanzi2pinyin "银行")
 ;;       (pyim-hanzi2pinyin "银行" t)
 ;;       (pyim-hanzi2pinyin "银行" nil "-")
 ;;       (pyim-hanzi2pinyin "银行" nil "-" t)
 ;;       (pyim-hanzi2pinyin "银行" t "-" t))
-;; #+END_SRC
+;; #+END_EXAMPLE
 
-;; #+RESULTS:
-;; : ("yinhang yinxing" "yh yx" "yin-hang yin-xing" ("yin-hang" "yin-xing") ("y-h" "y-x"))
+;; RESULTS:
+;; #+BEGIN_EXAMPLE
+;; ("yinhang yinxing" "yh yx" "yin-hang yin-xing" ("yin-hang" "yin-xing") ("y-h" "y-x"))
+;; #+END_EXAMPLE
 
-;; #+BEGIN_SRC emacs-lisp
+;; #+BEGIN_EXAMPLE
 ;; (list (pyim-hanzi2pinyin-simple "行长")
 ;;       (pyim-hanzi2pinyin-simple "行长" t)
 ;;       (pyim-hanzi2pinyin-simple "行长" nil "-")
 ;;       (pyim-hanzi2pinyin-simple "行长" nil "-" t)
 ;;       (pyim-hanzi2pinyin-simple "行长" t "-" t))
-;; #+END_SRC
+;; #+END_EXAMPLE
 
-;; #+RESULTS:
-;; : ("hangchang" "hc" "hang-chang" ("hang-chang") ("h-c"))
-
+;; RESULTS:
+;; #+BEGIN_EXAMPLE
+;; ("hangchang" "hc" "hang-chang" ("hang-chang") ("h-c"))
+;; #+END_EXAMPLE
 
 ;; `pyim-hanzi2pinyin' 函数使用 “排列组合” 函数 `pyim-permutate-list' 来处理多音字，
 ;; 这个函数所做工作类似：
@@ -99,7 +100,6 @@
 ;; #+END_EXAMPLE
 
 
-;; #+BEGIN_SRC emacs-lisp
 ;;;###autoload
 (defun pyim-hanzi2pinyin (string &optional shou-zi-mu separator
                                  return-list ignore-duo-yin-zi adjuct-duo-yin-zi)
@@ -229,7 +229,6 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
 (defun pyim-hanzi2pinyin-simple (string &optional shou-zi-mu separator return-list)
   "简化版的 `pyim-hanzi2pinyin', 不处理多音字。"
   (pyim-hanzi2pinyin string shou-zi-mu separator return-list t))
-;; #+END_SRC
 
 ;; ** Chinese-pyim 词库管理工具
 ;; 为 Chinese-pyim 添加一个简单的词库管理工具 `pyim-dicts-manager' ，可以方便的执行下列命令：
@@ -239,7 +238,6 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
 ;; 4. 保存词库设置。
 ;; 5. 重启输入法。
 
-;; #+BEGIN_SRC emacs-lisp
 (defvar pyim-dm-buffer "*pyim-dict-manager*")
 
 (defun pyim-dm-refresh ()
@@ -434,11 +432,8 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
                (equal (expand-file-name file)
                       (expand-file-name dict-file))))
            pyim-dicts))
-;; #+END_SRC
 
 ;; * Footer
-;; #+BEGIN_SRC emacs-lisp
 (provide 'chinese-pyim-dictools)
 
 ;;; chinese-pyim-dictools.el ends here
-;; #+END_SRC
