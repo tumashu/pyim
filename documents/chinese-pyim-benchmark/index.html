@@ -34,13 +34,13 @@
 <h2>&#30446;&#24405;</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgfde27ec">1. 说明文档&#xa0;&#xa0;&#xa0;<span class="tag"><span class="doc">doc</span></span></a></li>
-<li><a href="#org5153e4d">2. 代码&#xa0;&#xa0;&#xa0;<span class="tag"><span class="code">code</span></span></a></li>
+<li><a href="#org16c5405">1. 说明文档&#xa0;&#xa0;&#xa0;<span class="tag"><span class="doc">doc</span></span></a></li>
+<li><a href="#org3d63c8a">2. 代码&#xa0;&#xa0;&#xa0;<span class="tag"><span class="code">code</span></span></a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgfde27ec" class="outline-2">
-<h2 id="orgfde27ec"><span class="section-number-2">1</span>说明文档&#xa0;&#xa0;&#xa0;<span class="tag"><span class="doc">doc</span></span></h2>
+<div id="outline-container-org16c5405" class="outline-2">
+<h2 id="org16c5405"><span class="section-number-2">1</span>说明文档&#xa0;&#xa0;&#xa0;<span class="tag"><span class="doc">doc</span></span></h2>
 <div class="outline-text-2" id="text-1">
 <p>
 这个文件包含了一些调试 Chinese-pyim 性能的工具
@@ -50,13 +50,16 @@
 
 
 
-<div id="outline-container-org5153e4d" class="outline-2">
-<h2 id="org5153e4d"><span class="section-number-2">2</span>代码&#xa0;&#xa0;&#xa0;<span class="tag"><span class="code">code</span></span></h2>
+<div id="outline-container-org3d63c8a" class="outline-2">
+<h2 id="org3d63c8a"><span class="section-number-2">2</span>代码&#xa0;&#xa0;&#xa0;<span class="tag"><span class="code">code</span></span></h2>
 <div class="outline-text-2" id="text-2">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">require</span> '<span style="color: #96CBFE;">chinese-pyim</span>)
+</pre>
+</div>
 
-(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-benchmark</span> ()
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-benchmark</span> ()
   (<span style="color: #4c83ff;">interactive</span>)
   (<span style="color: #4c83ff;">let</span> ((pylist (car (pyim-code-split:quanpin <span style="color: #61CE3C;">"ni-hao"</span> 'quanpin)))
         (time 1000))
@@ -113,8 +116,8 @@
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2017-02-06</span>
-        <span title="last modification date" class="post-info">2017-02-06</span>
+        <span title="post date" class="post-info">2017-03-10</span>
+        <span title="last modification date" class="post-info">2017-03-10</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>

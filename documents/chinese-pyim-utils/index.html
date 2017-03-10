@@ -34,13 +34,13 @@
 <h2>&#30446;&#24405;</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org49184a6">1. 说明文档&#xa0;&#xa0;&#xa0;<span class="tag"><span class="doc">doc</span></span></a></li>
-<li><a href="#org8562a96">2. 代码&#xa0;&#xa0;&#xa0;<span class="tag"><span class="code">code</span></span></a></li>
+<li><a href="#org3200f37">1. 说明文档&#xa0;&#xa0;&#xa0;<span class="tag"><span class="doc">doc</span></span></a></li>
+<li><a href="#org7edb0cd">2. 代码&#xa0;&#xa0;&#xa0;<span class="tag"><span class="code">code</span></span></a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org49184a6" class="outline-2">
-<h2 id="org49184a6"><span class="section-number-2">1</span>说明文档&#xa0;&#xa0;&#xa0;<span class="tag"><span class="doc">doc</span></span></h2>
+<div id="outline-container-org3200f37" class="outline-2">
+<h2 id="org3200f37"><span class="section-number-2">1</span>说明文档&#xa0;&#xa0;&#xa0;<span class="tag"><span class="doc">doc</span></span></h2>
 <div class="outline-text-2" id="text-1">
 <p>
 这个文件包含一些有用工具，这些工具都依赖 Chinese-pyim 的内部特性。
@@ -53,16 +53,25 @@
 </div>
 
 
-<div id="outline-container-org8562a96" class="outline-2">
-<h2 id="org8562a96"><span class="section-number-2">2</span>代码&#xa0;&#xa0;&#xa0;<span class="tag"><span class="code">code</span></span></h2>
+<div id="outline-container-org7edb0cd" class="outline-2">
+<h2 id="org7edb0cd"><span class="section-number-2">2</span>代码&#xa0;&#xa0;&#xa0;<span class="tag"><span class="code">code</span></span></h2>
 <div class="outline-text-2" id="text-2">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">require</span> '<span style="color: #96CBFE;">cl-lib</span>)
-(<span style="color: #4c83ff;">require</span> '<span style="color: #96CBFE;">chinese-pyim-pymap</span>)
-(<span style="color: #4c83ff;">require</span> '<span style="color: #96CBFE;">chinese-pyim-core</span>)
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">require</span> '<span style="color: #96CBFE;">chinese-pyim-pymap</span>)
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">require</span> '<span style="color: #96CBFE;">chinese-pyim-core</span>)
+</pre>
+</div>
 
 
-(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-forward-word</span> (<span style="color: #afd8af;">&amp;optional</span> arg)
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-forward-word</span> (<span style="color: #afd8af;">&amp;optional</span> arg)
   <span style="color: #FBDE2D;">"&#21521;&#21069;&#31227;&#21160; `</span><span style="color: #96CBFE;">arg</span><span style="color: #FBDE2D;">' &#33521;&#25991;&#25110;&#32773;&#20013;&#25991;&#35789;&#65292;&#21521;&#21069;&#31227;&#21160;&#26102;&#22522;&#20110; *&#26368;&#38271;* &#30340;&#35789;&#31227;&#21160;&#12290;"</span>
   (<span style="color: #4c83ff;">interactive</span> <span style="color: #61CE3C;">"P"</span>)
   (<span style="color: #4c83ff;">or</span> arg (<span style="color: #4c83ff;">setq</span> arg 1))
@@ -75,8 +84,11 @@
                                        words))))
            (max-length (max (<span style="color: #4c83ff;">or</span> max-length 1) 1)))
       (forward-char max-length))))
+</pre>
+</div>
 
-(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-backward-word</span> (<span style="color: #afd8af;">&amp;optional</span> arg)
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-backward-word</span> (<span style="color: #afd8af;">&amp;optional</span> arg)
   <span style="color: #FBDE2D;">"&#21521;&#21518;&#31227;&#21160; `</span><span style="color: #96CBFE;">arg</span><span style="color: #FBDE2D;">' &#20010;&#33521;&#25991;&#25110;&#32773;&#20013;&#25991;&#35789;&#65292;&#21521;&#21518;&#31227;&#21160;&#26102;&#22522;&#20110; *&#26368;&#38271;* &#30340;&#35789;&#31227;&#21160;&#12290;"</span>
   (<span style="color: #4c83ff;">interactive</span> <span style="color: #61CE3C;">"P"</span>)
   (<span style="color: #4c83ff;">or</span> arg (<span style="color: #4c83ff;">setq</span> arg 1))
@@ -89,12 +101,21 @@
                                        words))))
            (max-length (max (<span style="color: #4c83ff;">or</span> max-length 1) 1)))
       (backward-char max-length))))
+</pre>
+</div>
 
-(<span style="color: #4c83ff;">defalias</span> '<span style="color: #ff1493;">pyim-get-words-list-at-point</span> 'pyim-cwords-at-point)
-(make-obsolete 'pyim-get-words-list-at-point 'pyim-cwords-at-point
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defalias</span> '<span style="color: #ff1493;">pyim-get-words-list-at-point</span> 'pyim-cwords-at-point)
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(make-obsolete 'pyim-get-words-list-at-point 'pyim-cwords-at-point
                <span style="color: #61CE3C;">"Chinese-pyim 2.0"</span>)
+</pre>
+</div>
 
-(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-cwords-at-point</span> (<span style="color: #afd8af;">&amp;optional</span> end-of-point)
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-cwords-at-point</span> (<span style="color: #afd8af;">&amp;optional</span> end-of-point)
   <span style="color: #FBDE2D;">"&#33719;&#21462;&#20809;&#26631;&#24403;&#21069;&#30340;&#35789;&#26465;&#21015;&#34920;&#65292;&#24403; `</span><span style="color: #96CBFE;">end-of-point</span><span style="color: #FBDE2D;">' &#35774;&#32622;&#20026; t &#26102;&#65292;&#33719;&#21462;&#20809;&#26631;&#21518;&#30340;&#35789;&#26465;&#21015;&#34920;&#12290;</span>
 <span style="color: #FBDE2D;">&#35789;&#26465;&#21015;&#34920;&#30340;&#27599;&#19968;&#20010;&#20803;&#32032;&#37117;&#26159;&#21015;&#34920;&#65292;&#36825;&#20123;&#21015;&#34920;&#30340;&#31532;&#19968;&#20010;&#20803;&#32032;&#20026;&#35789;&#26465;&#65292;&#31532;&#20108;&#20010;&#20803;&#32032;&#20026;&#20809;&#26631;&#22788;&#21040;&#35789;&#26465;</span>
 <span style="color: #FBDE2D;">&#22836;&#37096;&#30340;&#36317;&#31163;&#65292;&#31532;&#19977;&#20010;&#20803;&#32032;&#20026;&#20809;&#26631;&#22788;&#21040;&#35789;&#26465;&#23614;&#37096;&#30340;&#36317;&#31163;&#12290;</span>
@@ -167,8 +188,11 @@
      (str (list (list str
                       (- current-pos str-beginning-pos)
                       (- str-end-pos current-pos)))))))
+</pre>
+</div>
 
-(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-cstring-split-to-list</span> (chinese-string <span style="color: #afd8af;">&amp;optional</span> max-word-length)
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-cstring-split-to-list</span> (chinese-string <span style="color: #afd8af;">&amp;optional</span> max-word-length)
   <span style="color: #FBDE2D;">"&#19968;&#20010;&#22522;&#20110; Chinese-pyim &#30340;&#20013;&#25991;&#20998;&#35789;&#20989;&#25968;&#12290;&#36825;&#20010;&#20989;&#25968;&#21487;&#20197;&#23558;&#20013;&#25991;&#23383;&#31526;</span>
 <span style="color: #FBDE2D;">&#20018; `</span><span style="color: #96CBFE;">chinese-string</span><span style="color: #FBDE2D;">' &#20998;&#35789;&#65292;&#24471;&#21040;&#19968;&#20010;&#35789;&#26465; alist&#65292;&#36825;&#20010; alist &#30340;&#20803;&#32032;</span>
 <span style="color: #FBDE2D;">&#37117;&#26159;&#21015;&#34920;&#65292;&#20854;&#20013;&#31532;&#19968;&#20010;&#20803;&#32032;&#20026;&#20998;&#35789;&#24471;&#21040;&#30340;&#35789;&#26465;&#65292;&#31532;&#20108;&#20010;&#20803;&#32032;&#20026;&#35789;&#26465;&#30456;&#23545;&#20110;</span>
@@ -226,14 +250,21 @@
                 (<span style="color: #4c83ff;">when</span> (equal word (car string-list))
                   (<span style="color: #4c83ff;">push</span> string-list result)))))))
       result)))
+</pre>
+</div>
 
-<span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">(let ((str "&#21307;&#29983;&#38543;&#26102;&#37117;&#26377;&#21487;&#33021;&#34987;&#24739;&#32773;&#21450;&#20854;&#23478;&#23646;&#21453;&#21676;&#19968;&#21475;"))</span>
-<span style="color: #8B8989; font-style: italic;">;;   </span><span style="color: #8B8989; font-style: italic;">(benchmark 1 '(pyim-cstring-split-to-list str)))</span>
+<p>
+(let ((str "医生随时都有可能被患者及其家属反咬一口"))
+  (benchmark 1 '(pyim-cstring-split-to-list str)))
+</p>
 
-<span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">(let ((str "&#21307;&#29983;&#38543;&#26102;&#37117;&#26377;&#21487;&#33021;&#34987;&#24739;&#32773;&#21450;&#20854;&#23478;&#23646;&#21453;&#21676;&#19968;&#21475;"))</span>
-<span style="color: #8B8989; font-style: italic;">;;   </span><span style="color: #8B8989; font-style: italic;">(pyim-cstring-split-to-list str))</span>
+<p>
+(let ((str "医生随时都有可能被患者及其家属反咬一口"))
+  (pyim-cstring-split-to-list str))
+</p>
 
-(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-cstring-split-to-string</span> (string <span style="color: #afd8af;">&amp;optional</span> prefer-short-word
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-cstring-split-to-string</span> (string <span style="color: #afd8af;">&amp;optional</span> prefer-short-word
                                          separator max-word-length)
   <span style="color: #FBDE2D;">"&#23558;&#19968;&#20010;&#20013;&#25991;&#23383;&#31526;&#20018;&#20998;&#35789;&#65292;&#24182;&#19988;&#22312;&#20998;&#35789;&#30340;&#20301;&#32622;&#25554;&#20837;&#31354;&#26684;&#25110;&#32773;&#33258;&#23450;&#20041;&#20998;&#38548;&#31526; `</span><span style="color: #96CBFE;">separator</span><span style="color: #FBDE2D;">'&#65292;</span>
 <span style="color: #FBDE2D;">&#36739;&#38271;&#30340;&#35789;&#26465;&#20248;&#20808;&#20351;&#29992;&#65292;&#22914;&#26524; `</span><span style="color: #96CBFE;">prefer-short-word</span><span style="color: #FBDE2D;">' &#35774;&#32622;&#20026; t&#65292;&#21017;&#20248;&#20808;&#20351;&#29992;&#36739;&#30701;&#30340;&#35789;&#26465;&#12290;</span>
@@ -253,8 +284,11 @@
                 str prefer-short-word separator max-word-length)
              (concat <span style="color: #61CE3C;">" "</span> str <span style="color: #61CE3C;">" "</span>))))
      string-list <span style="color: #61CE3C;">""</span>)))
+</pre>
+</div>
 
-(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-cstring-split-to-string-1</span> (chinese-string <span style="color: #afd8af;">&amp;optional</span> prefer-short-word
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-cstring-split-to-string-1</span> (chinese-string <span style="color: #afd8af;">&amp;optional</span> prefer-short-word
                                                    separator max-word-length)
   <span style="color: #FBDE2D;">"`</span><span style="color: #96CBFE;">pyim-cstring-split-to-string</span><span style="color: #FBDE2D;">' &#20869;&#37096;&#20989;&#25968;&#12290;"</span>
   (<span style="color: #4c83ff;">let</span> ((str-length (length chinese-string))
@@ -289,8 +323,11 @@
       (<span style="color: #4c83ff;">push</span> (substring chinese-string i (1+ i))  result))
     (<span style="color: #4c83ff;">setq</span> result (nreverse result))
     (mapconcat #'identity result <span style="color: #61CE3C;">""</span>)))
+</pre>
+</div>
 
-(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-cstring-split-buffer</span> ()
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-cstring-split-buffer</span> ()
   <span style="color: #FBDE2D;">"&#23558;&#19968;&#20010; buffer &#20013;&#30340;&#20013;&#25991;&#25991;&#31456;&#65292;&#36827;&#34892;&#20998;&#35789;&#25805;&#20316;&#12290;"</span>
   (<span style="color: #4c83ff;">interactive</span>)
   (message <span style="color: #61CE3C;">"&#20998;&#35789;&#24320;&#22987;&#65281;"</span>)
@@ -314,8 +351,8 @@
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2017-02-06</span>
-        <span title="last modification date" class="post-info">2017-02-06</span>
+        <span title="post date" class="post-info">2017-03-10</span>
+        <span title="last modification date" class="post-info">2017-03-10</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>
