@@ -371,6 +371,10 @@
 
 ;; ** Tips
 
+;; *** 如何将个人词条导出到一个文件
+
+;; 使用命令：pyim-personal-dcache-export
+
 ;; *** Chinese-pyim 出现错误时，如何开启 debug 模式
 
 ;; #+BEGIN_EXAMPLE

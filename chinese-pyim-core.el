@@ -892,6 +892,18 @@ If you don't like this funciton, set the variable to nil")
   (pyim-dcache-save-variable 'pyim-dcache-iword2count)
   t)
 
+(defun pyim-personal-dcache-export ()
+  "将 pyim-dcache-icode2word 导出为 pyim 词库文件。"
+  (interactive)
+  (let ((file (read-file-name "将个人缓存中的词条导出到文件：")))
+    (with-temp-buffer
+      (insert ";;; -*- coding: utf-8-unix -*-\n")
+      (maphash
+       #'(lambda (key value)
+           (insert (concat key " " (mapconcat #'identity value " ") "\n")))
+       pyim-dcache-icode2word)
+      (write-file file))))
+
 ;; *** 从词库中搜索中文词条
 ;; 当词库文件加载完成后， Chinese-pyim 就可以从词库缓存中搜索某个
 ;; code 对应的中文词条了，这个工作由函数 `pyim-dcache-get' 完成。
