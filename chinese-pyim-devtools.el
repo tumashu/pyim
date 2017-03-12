@@ -35,7 +35,7 @@
 (require 'chinese-pyim)
 (require 'org-webpage)
 (require 'owp-web-server)
-(require 'owp-lentic)
+(require 'owp-el2org)
 
 (defvar pyim-website-repository-directory
   "~/project/emacs-packages/chinese-pyim/")
