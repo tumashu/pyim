@@ -120,6 +120,25 @@
         (not (or (pyim-string-match-p "\\cc" str-before-1)
                  (> (length pyim-entered-code) 0)))))))
 
+(defun pyim-probe-auto-english ()
+  "激活这个 Chinese-pyim 探针函数后，使用下面的规则自动切换中英文输入：
+
+1. 当前字符为英文字符（不包括空格）时，输入下一个字符为英文字符
+2. 当前字符为中文字符或输入字符为行首字符时，输入的字符为中文字符
+3. 以单个空格为界，自动切换中文和英文字符
+      即，形如 `我使用 emacs 编辑此函数' 的句子全程自动切换中英输入法
+
+这个函数用于：`pyim-english-input-switch-functions' 。"
+  (let ((str-before-1 (pyim-char-before-to-string 0))
+        (str-before-2 (pyim-char-before-to-string 1)))
+    (unless (string= (buffer-name) " *temp*")
+      (if (> (point) (save-excursion (back-to-indentation)
+                                     (point)))
+          (or (if (pyim-string-match-p " " str-before-1)
+                  (pyim-string-match-p "\\cc" str-before-2)
+                (and (not (pyim-string-match-p "\\cc" str-before-1))
+                     (= (length pyim-entered-code) 0))))))))
+
 (defun pyim-probe-evil-normal-mode ()
   "判断是否是evil的normal模式，如果是则返回true.
 这个函数用于：`pyim-english-input-switch-functions'."
