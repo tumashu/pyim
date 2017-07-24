@@ -1,10 +1,10 @@
-;;; pyim-probe.el --- Auto-Switch-to-English-Input probes for Chinese-pyim
+;;; pyim-probe.el --- Auto-Switch-to-English-Input probes for pyim
 
 ;; * Header
 ;; Copyright 2015-2017 Feng Shu
 
 ;; Author: Feng Shu <tumashu@163.com>
-;; URL: https://github.com/tumashu/chinese-pyim
+;; URL: https://github.com/tumashu/pyim
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by

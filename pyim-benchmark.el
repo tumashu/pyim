@@ -4,7 +4,7 @@
 ;; Copyright 2015-2017 Feng Shu
 
 ;; Author: Feng Shu <tumashu@163.com>
-;; URL: https://github.com/tumashu/chinese-pyim
+;; URL: https://github.com/tumashu/pyim
 ;; Version: 1.5.2
 ;; Keywords: convenience, Chinese, pinyin, input-method
 
@@ -30,7 +30,7 @@
 ;;; Code:
 
 ;; * 代码                                                                 :code:
-(require 'chinese-pyim)
+(require 'pyim)
 
 (defun pyim-benchmark ()
   (interactive)

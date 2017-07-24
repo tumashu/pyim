@@ -4,7 +4,7 @@
 ;; Copyright 2015-2017 Feng Shu
 
 ;; Author: Feng Shu <tumashu@163.com>
-;; URL: https://github.com/tumashu/chinese-pyim
+;; URL: https://github.com/tumashu/pyim
 ;; Version: 1.5.2
 ;; Keywords: convenience, Chinese, pinyin, input-method
 
@@ -275,8 +275,8 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
 1. 使用 `C-h v pyim-dicts' 了解 pyim 词库文件格式。
 2. 了解如何导入其它输入法的词库。
    1. 使用 package 管理器查看 pyim 包的简介
-   2. 阅读 chinese-pyim.el 文件 Commentary
-   3. 查看 pyim 在线 README：https://github.com/tumashu/chinese-pyim\n")
+   2. 阅读 pyim.el 文件 Commentary
+   3. 查看 pyim 在线 README：https://github.com/tumashu/pyim\n")
         (dolist (dict dicts-list)
           (let ((disable (plist-get dict :disable))
                 (file (plist-get dict :file)))

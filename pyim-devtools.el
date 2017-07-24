@@ -4,7 +4,7 @@
 ;; Copyright 2015-2017 Feng Shu
 
 ;; Author: Feng Shu <tumashu@163.com>
-;; URL: https://github.com/tumashu/chinese-pyim
+;; URL: https://github.com/tumashu/pyim
 ;; Version: 1.5.2
 ;; Keywords: convenience, Chinese, pinyin, input-method
 
@@ -32,32 +32,32 @@
 ;;; Code:
 
 ;; * 代码                                                                 :code:
-(require 'chinese-pyim)
+(require 'pyim)
 (require 'org-webpage)
 (require 'owp-web-server)
 (require 'owp-el2org)
 
 (defvar pyim-website-repository-directory
-  "~/project/emacs-packages/chinese-pyim/")
+  "~/project/emacs-packages/pyim/")
 
 (owp/add-project-config
  '("pyim"
    :repository-directory (:eval pyim-website-repository-directory)
-   :remote (git "https://github.com/tumashu/chinese-pyim.git" "gh-pages")
-   :site-domain "https://tumashu.github.io/chinese-pyim"
-   :site-main-title "Chinese-pyim"
+   :remote (git "https://github.com/tumashu/pyim.git" "gh-pages")
+   :site-domain "https://tumashu.github.io/pyim"
+   :site-main-title "pyim"
    :site-sub-title "(一个 emacs 环境下的中文拼音输入法)"
    :default-category "documents"
    :theme (worg killjs)
    :force-absolute-url t
-   :source-browse-url ("GitHub" "https://github.com/tumashu/chinese-pyim")
+   :source-browse-url ("GitHub" "https://github.com/tumashu/pyim")
    :personal-avatar "/media/img/horse.jpg"
    :personal-duoshuo-shortname "tumashu-website"
    :preparation-function owp/el2org-preparation-function
    :org-export-function owp/el2org-org-export-function
    :el2org-doc-sources ("pyim-.*\\.el$")
-   :el2org-readme-sources ("chinese-pyim.el")
-   :el2org-index-sources ("chinese-pyim.el")
+   :el2org-readme-sources ("pyim.el")
+   :el2org-index-sources ("pyim.el")
    :web-server-port 9876))
 
 ;; * Footer

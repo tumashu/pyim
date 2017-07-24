@@ -4,7 +4,7 @@
 ;; Copyright 2015-2017 Feng Shu
 
 ;; Author: Feng Shu <tumashu@163.com>
-;; URL: https://github.com/tumashu/chinese-pyim
+;; URL: https://github.com/tumashu/pyim
 ;; Version: 1.5.2
 ;; Keywords: convenience, Chinese, pinyin, input-method, complete
 
@@ -67,7 +67,7 @@
 
 (defalias 'pyim-get-words-list-at-point 'pyim-cwords-at-point)
 (make-obsolete 'pyim-get-words-list-at-point 'pyim-cwords-at-point
-               "Chinese-pyim 2.0")
+               "pyim 2.0")
 
 (defun pyim-cwords-at-point (&optional end-of-point)
   "获取光标当前的词条列表，当 `end-of-point' 设置为 t 时，获取光标后的词条列表。
