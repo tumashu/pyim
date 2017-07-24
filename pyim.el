@@ -43,7 +43,7 @@
 (require 'pos-tip)
 (require 'popup)
 (require 'async)
-(require 'chinese-pyim-pymap)
+(require 'pyim-pymap)
 
 (defgroup chinese-pyim nil
   "Chinese pinyin input method"
