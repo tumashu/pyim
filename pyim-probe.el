@@ -1,4 +1,4 @@
-;;; chinese-pyim-probe.el --- Auto-Switch-to-English-Input probes for Chinese-pyim
+;;; pyim-probe.el --- Auto-Switch-to-English-Input probes for Chinese-pyim
 
 ;; * Header
 ;; Copyright 2015-2017 Feng Shu
@@ -165,6 +165,6 @@
          (member (char-to-string char) puncts))))
 
 ;; * Footer
-(provide 'chinese-pyim-probe)
+(provide 'pyim-probe)
 
-;;; chinese-pyim-probe.el ends here
+;;; pyim-probe.el ends here

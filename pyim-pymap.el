@@ -1,4 +1,4 @@
-;;; chinese-pyim-pymap.el --- Pinyin map used by chinese-pyim
+;;; pyim-pymap.el --- Pinyin map used by chinese-pyim
 
 ;; * Header
 
@@ -529,7 +529,7 @@
 
 (defun pyim-cchar2pinyin-cache-create (&optional force)
   "Build pinyin cchar to pinyin hashtable from `pyim-pinyin-pymap'
-in package `chinese-pyim-pymap'"
+in package `pyim-pymap'"
   (when (or force (not pyim-cchar2pinyin-cache))
     (setq pyim-cchar2pinyin-cache
           (make-hash-table :size 50000 :test #'equal))
@@ -544,6 +544,6 @@ in package `chinese-pyim-pymap'"
               (puthash key (list py) pyim-cchar2pinyin-cache))))))))
 
 ;; * Footer
-(provide 'chinese-pyim-pymap)
+(provide 'pyim-pymap)
 
-;;; chinese-pyim-pymap.el ends here
+;;; pyim-pymap.el ends here

@@ -1,4 +1,4 @@
-;;; chinese-pyim-utils.el --- Useful tools which are based chinese-pyim
+;;; pyim-utils.el --- Useful tools which are based chinese-pyim
 
 ;; * Header
 ;; Copyright 2015-2017 Feng Shu
@@ -27,14 +27,14 @@
 ;; 这个文件包含一些有用工具，这些工具都依赖 Chinese-pyim 的内部特性。
 
 ;; #+BEGIN_EXAMPLE
-;; (require 'chinese-pyim-utils)
+;; (require 'pyim-utils)
 ;; #+END_EXAMPLE
 
 ;;; Code:
 ;; * 代码                                                                 :code:
 (require 'cl-lib)
-(require 'chinese-pyim-pymap)
-(require 'chinese-pyim-core)
+(require 'pyim-pymap)
+(require 'pyim)
 
 
 (defun pyim-forward-word (&optional arg)
@@ -283,6 +283,6 @@
 
 
 ;; * Footer
-(provide 'chinese-pyim-utils)
+(provide 'pyim-utils)
 
-;;; chinese-pyim-utils.el ends here
+;;; pyim-utils.el ends here

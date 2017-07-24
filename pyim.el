@@ -1,4 +1,4 @@
-;;; chinese-pyim-core.el --- The core of Chinese pinyin input method
+;;; pyim.el --- The core of Chinese pinyin input method
 
 ;; * Header
 ;; Copyright 2006 Ye Wenbin
@@ -638,7 +638,7 @@ If you don't like this funciton, set the variable to nil")
           ,(async-inject-variables "^load-path$")
           ,(async-inject-variables "^exec-path$")
           ,(async-inject-variables "^pyim-.+?directory$")
-          (require 'chinese-pyim-core)
+          (require 'pyim)
           (let ((dcache (pyim-dcache-generate-dcache-file ',dict-files ,code2word-file)))
             (pyim-dcache-generate-word2code-dcache-file dcache ,word2code-file))
           (pyim-dcache-save-value-to-file ',dicts-md5 ,code2word-md5-file))
@@ -655,7 +655,7 @@ If you don't like this funciton, set the variable to nil")
         ,(async-inject-variables "^load-path$")
         ,(async-inject-variables "^exec-path$")
         ,(async-inject-variables "^pyim-.+?directory$")
-        (require 'chinese-pyim-core)
+        (require 'pyim)
         (pyim-dcache-set-variable 'pyim-dcache-icode2word)
         (pyim-dcache-set-variable 'pyim-dcache-iword2count)
         (setq pyim-dcache-ishortcode2word
@@ -692,7 +692,7 @@ If you don't like this funciton, set the variable to nil")
         ,(async-inject-variables "^load-path$")
         ,(async-inject-variables "^exec-path$")
         ,(async-inject-variables "^pyim-.+?directory$")
-        (require 'chinese-pyim-core)
+        (require 'pyim)
         (pyim-dcache-set-variable 'pyim-dcache-icode2word)
         (pyim-dcache-set-variable 'pyim-dcache-iword2count)
         (maphash
@@ -715,7 +715,7 @@ If you don't like this funciton, set the variable to nil")
         ,(async-inject-variables "^load-path$")
         ,(async-inject-variables "^exec-path$")
         ,(async-inject-variables "^pyim-.+?directory$")
-        (require 'chinese-pyim-core)
+        (require 'pyim)
         (pyim-dcache-set-variable 'pyim-dcache-code2word)
         (pyim-dcache-set-variable 'pyim-dcache-iword2count)
         (setq pyim-dcache-shortcode2word
@@ -2834,6 +2834,6 @@ Chinese-pyim 的 translate-trigger-char 要占用一个键位，为了防止用�
 
 
 ;; * Footer
-(provide 'chinese-pyim-core)
+(provide 'pyim)
 
-;;; chinese-pyim-core.el ends here
+;;; pyim.el ends here

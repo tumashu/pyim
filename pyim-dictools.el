@@ -1,4 +1,4 @@
-;;; chinese-pyim-dictools.el --- Tools for Chinese-pyim pinyin dict
+;;; pyim-dictools.el --- Tools for Chinese-pyim pinyin dict
 
 ;; * Header
 ;; Copyright 2015-2017 Feng Shu
@@ -36,8 +36,8 @@
 ;; * 代码                                                                 :code:
 ;; ** Require
 (require 'cl-lib)
-(require 'chinese-pyim-pymap)
-(require 'chinese-pyim-core)
+(require 'pyim-pymap)
+(require 'pyim)
 
 ;; ** 汉字到拼音的转换工具
 ;; `pyim-hanzi2pinyin' 和 `pyim-hanzi2pinyin-simple' 可以将一个中文字符串转换为拼音字符串
@@ -263,12 +263,12 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
 1. 当词库词条超过100万时 (词库文件>20M)，Chinese-pyim 选词频率大大降低。
 2. 当词库词条超过100万时，Chinese-pyim 中文输入体验可以达到搜狗输入法的 80%。
 
-想快速体验 Chinese-pyim 输入法的用户, 可以使用 chinese-pyim-basedict：
+想快速体验 Chinese-pyim 输入法的用户, 可以使用 pyim-basedict：
 
-     (require 'chinese-pyim-basedict)
-     (chinese-pyim-basedict-enable)
+     (require 'pyim-basedict)
+     (pyim-basedict-enable)
 
-如果用户的计算机性能比较好，建议从 Melpa 安装 chinese-pyim-greatdict 包,
+如果用户的计算机性能比较好，建议从 Melpa 安装 pyim-greatdict 包,
 这个词库包有 300 多万词条，是一个 *大而全* 的词库。
 
 喜欢折腾的用户可以从下面几个途径获得 Chinese-pyim 更详细的信息。
@@ -434,6 +434,6 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
            pyim-dicts))
 
 ;; * Footer
-(provide 'chinese-pyim-dictools)
+(provide 'pyim-dictools)
 
-;;; chinese-pyim-dictools.el ends here
+;;; pyim-dictools.el ends here

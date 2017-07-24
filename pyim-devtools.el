@@ -1,4 +1,4 @@
-;;; chinese-pyim-devtools.el --- Tools for Chinese-pyim developers
+;;; pyim-devtools.el --- Tools for Chinese-pyim developers
 
 ;; * Header
 ;; Copyright 2015-2017 Feng Shu
@@ -55,17 +55,17 @@
    :personal-duoshuo-shortname "tumashu-website"
    :preparation-function owp/el2org-preparation-function
    :org-export-function owp/el2org-org-export-function
-   :el2org-doc-sources ("chinese-pyim-.*\\.el$")
+   :el2org-doc-sources ("pyim-.*\\.el$")
    :el2org-readme-sources ("chinese-pyim.el")
    :el2org-index-sources ("chinese-pyim.el")
    :web-server-port 9876))
 
 ;; * Footer
 
-(provide 'chinese-pyim-devtools)
+(provide 'pyim-devtools)
 
 ;; Local Variables:
 ;; no-byte-compile: t
 ;; End:
 
-;;; chinese-pyim-devtools.el ends here
+;;; pyim-devtools.el ends here

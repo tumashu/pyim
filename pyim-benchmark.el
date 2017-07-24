@@ -1,4 +1,4 @@
-;;; chinese-pyim-benchmark.el --- benchmark tools for Chinese-pyim
+;;; pyim-benchmark.el --- benchmark tools for Chinese-pyim
 
 ;; * Header
 ;; Copyright 2015-2017 Feng Shu
@@ -84,10 +84,10 @@
 
 ;; * Footer
 
-(provide 'chinese-pyim-benchmark)
+(provide 'pyim-benchmark)
 
 ;; Local Variables:
 ;; no-byte-compile: t
 ;; End:
 
-;;; chinese-pyim-benchmark.el ends here
+;;; pyim-benchmark.el ends here

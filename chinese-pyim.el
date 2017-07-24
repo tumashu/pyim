@@ -535,11 +535,11 @@
 
 ;;; Code:
 ;; * 代码                                                                 :code:
-(require 'chinese-pyim-pymap)
-(require 'chinese-pyim-core)
-(require 'chinese-pyim-dictools)
-(require 'chinese-pyim-utils)
-(require 'chinese-pyim-probe)
+(require 'pyim-pymap)
+(require 'pyim)
+(require 'pyim-dictools)
+(require 'pyim-utils)
+(require 'pyim-probe)
 
 ;; * Footer
 (provide 'chinese-pyim)
