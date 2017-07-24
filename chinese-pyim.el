@@ -1,4 +1,4 @@
-;;; chinese-pyim.el --- Please install pyim package instead.
+;;; chinese-pyim.el --- Please install 'pyim' package instead.
 
 ;; * Header
 ;; Copyright 2015-2017 Feng Shu
