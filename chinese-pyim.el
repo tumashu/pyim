@@ -28,11 +28,27 @@
 
 ;;; Code:
 ;; * 代码                                                                 :code:
-(require 'pyim-pymap)
 (require 'pyim)
-(require 'pyim-dictools)
-(require 'pyim-utils)
-(require 'pyim-probe)
+
+(message "
+
+------------------------------------------------------------------
+|                Chinese-pyim 重要更新                           |
+|                                                                |
+| 由于 chinese-pyim 已经重命名为 pyim:                           |
+|                                                                |
+|    #+BEGIN_EXAMPLE                                             |
+|    (require 'pyim)                                             |
+|    (require 'pyim-basedict)                                    |
+|    (pyim-basedict-enable)                                      |
+|    #+END_EXAMPLE                                               |
+|                                                                |
+|                                                                |
+| 给大家带来的不便我深表歉意，感谢大家的支持和理解。             |
+------------------------------------------------------------------
+
+")
+
 
 ;; * Footer
 (provide 'chinese-pyim)
