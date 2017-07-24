@@ -1,4 +1,4 @@
-;;; pyim-devtools.el --- Tools for Chinese-pyim developers
+;;; pyim-devtools.el --- Tools for pyim developers
 
 ;; * Header
 ;; Copyright 2015-2017 Feng Shu
@@ -25,9 +25,9 @@
 ;;; Commentary:
 
 ;; * 说明文档                                                              :doc:
-;; 这个文件包含了与 Chinese-pyim 开发相关的配置或者工具，比如：
+;; 这个文件包含了与 pyim 开发相关的配置或者工具，比如：
 
-;; 1. org-webpage config for chinese-pyim
+;; 1. org-webpage config for pyim
 
 ;;; Code:
 
@@ -41,7 +41,7 @@
   "~/project/emacs-packages/chinese-pyim/")
 
 (owp/add-project-config
- '("chinese-pyim"
+ '("pyim"
    :repository-directory (:eval pyim-website-repository-directory)
    :remote (git "https://github.com/tumashu/chinese-pyim.git" "gh-pages")
    :site-domain "https://tumashu.github.io/chinese-pyim"

@@ -1,4 +1,4 @@
-;;; pyim-pymap.el --- Pinyin map used by chinese-pyim
+;;; pyim-pymap.el --- Pinyin map used by pyim
 
 ;; * Header
 
@@ -497,7 +497,7 @@
 ;;   :PROPERTIES:
 ;;   :CUSTOM_ID: make-char-table
 ;;   :END:
-;; Chinese-pyim 在特定的时候需要读取一个汉字的拼音，这个工作由下面函数完成：
+;; pyim 在特定的时候需要读取一个汉字的拼音，这个工作由下面函数完成：
 
 ;; 函数 `pyim-cchar2pinyin-get' 从 `pyim-cchar2pinyin-cache' 查询得到一个汉字字符的拼音， 例如：
 ;; #+BEGIN_EXAMPLE

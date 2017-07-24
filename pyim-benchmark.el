@@ -1,4 +1,4 @@
-;;; pyim-benchmark.el --- benchmark tools for Chinese-pyim
+;;; pyim-benchmark.el --- benchmark tools for pyim
 
 ;; * Header
 ;; Copyright 2015-2017 Feng Shu
@@ -25,7 +25,7 @@
 ;;; Commentary:
 
 ;; * 说明文档                                                              :doc:
-;; 这个文件包含了一些调试 Chinese-pyim 性能的工具
+;; 这个文件包含了一些调试 pyim 性能的工具
 
 ;;; Code:
 

@@ -41,7 +41,7 @@
 ;;                 pyim-probe-program-mode))
 ;; #+END_EXAMPLE
 
-;; 只要上述 *函数列表* 中，任意一个函数返回值为 t, Chinese-pyim 就自动切换到
+;; 只要上述 *函数列表* 中，任意一个函数返回值为 t, pyim 就自动切换到
 ;; 英文输入模式。
 
 ;; *** 根据环境自动切换到半角标点输入模式
@@ -52,7 +52,7 @@
 ;; * 代码                                                                 :code:
 ;; ** 根据环境自动切换到英文输入模式
 (defun pyim-probe-program-mode ()
-  "激活这个 Chinese-pyim 探针函数后，只能在字符串和 comment 中输入中文。
+  "激活这个 pyim 探针函数后，只能在字符串和 comment 中输入中文。
 注：仅仅影响 `prog-mode' 衍生的 mode 。
 
 用于：`pyim-english-input-switch-functions' 。"
@@ -66,7 +66,7 @@
            (nth 3 ppss))))))
 
 (defun pyim-probe-org-speed-commands ()
-  "激活这个 Chinese-pyim 探针函数后，可以解决 org-speed-commands 与 Chinese-pyim 冲突问题。
+  "激活这个 pyim 探针函数后，可以解决 org-speed-commands 与 pyim 冲突问题。
 
 用于：`pyim-english-input-switch-functions' 。"
   (and (string= major-mode "org-mode")
@@ -75,7 +75,7 @@
        org-use-speed-commands))
 
 (defun pyim-probe-isearch-mode ()
-  "激活这个 Chinese-pyim 探针函数后，使用 isearch 搜索时，禁用中文输入，强制英文输入。
+  "激活这个 pyim 探针函数后，使用 isearch 搜索时，禁用中文输入，强制英文输入。
 
 用于：`pyim-english-input-switch-functions' 。"
   (and pyim-isearch-enable-pinyin-search
@@ -87,7 +87,7 @@
                 (buffer-list))))
 
 (defun pyim-probe-org-structure-template ()
-  "激活这个 Chinese-pyim 探针函数后，输入 org-structure-template 时，不会开启中文输入。
+  "激活这个 pyim 探针函数后，输入 org-structure-template 时，不会开启中文输入。
 
 用于：`pyim-english-input-switch-functions' 。"
   (when (eq major-mode 'org-mode)
@@ -96,7 +96,7 @@
            (string-match "^[ \t]*<\\([a-zA-Z]*\\)$" line-string)))))
 
 (defun pyim-probe-dynamic-english ()
-  "激活这个 Chinese-pyim 探针函数后，使用下面的规则动态切换中英文输入：
+  "激活这个 pyim 探针函数后，使用下面的规则动态切换中英文输入：
 
 1. 当前字符为中文字符时，输入下一个字符时默认开启中文输入
 2. 当前字符为其他字符时，输入下一个字符时默认开启英文输入
@@ -121,7 +121,7 @@
                  (> (length pyim-entered-code) 0)))))))
 
 (defun pyim-probe-auto-english ()
-  "激活这个 Chinese-pyim 探针函数后，使用下面的规则自动切换中英文输入：
+  "激活这个 pyim 探针函数后，使用下面的规则自动切换中英文输入：
 
 1. 当前字符为英文字符（不包括空格）时，输入下一个字符为英文字符
 2. 当前字符为中文字符或输入字符为行首字符时，输入的字符为中文字符
@@ -146,7 +146,7 @@
 
 ;; ** 根据环境自动切换到半角标点输入模式
 (defun pyim-probe-punctuation-line-beginning (char)
-  "激活这个 Chinese-pyim 探针函数后，行首输入标点时，强制输入半角标点。
+  "激活这个 pyim 探针函数后，行首输入标点时，强制输入半角标点。
 
 用于：`pyim-punctuation-half-width-functions' 。"
   (let ((line-string (buffer-substring (point-at-bol) (point))))
@@ -156,7 +156,7 @@
            (string-match "^[ \t]*$" line-string)))))
 
 (defun pyim-probe-punctuation-after-punctuation (char)
-  "激活这个 Chinese-pyim 探针函数后，半角标点后再输入一个标点符号时，强制输入半角标点。
+  "激活这个 pyim 探针函数后，半角标点后再输入一个标点符号时，强制输入半角标点。
 
 用于：`pyim-punctuation-half-width-functions' 。"
   (let ((str-before-1 (pyim-char-before-to-string 0))

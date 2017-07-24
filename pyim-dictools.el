@@ -1,4 +1,4 @@
-;;; pyim-dictools.el --- Tools for Chinese-pyim pinyin dict
+;;; pyim-dictools.el --- Tools for pyim pinyin dict
 
 ;; * Header
 ;; Copyright 2015-2017 Feng Shu
@@ -43,7 +43,7 @@
 ;; `pyim-hanzi2pinyin' 和 `pyim-hanzi2pinyin-simple' 可以将一个中文字符串转换为拼音字符串
 ;; 或者拼音列表，也可以将一个中文字符串转换为拼音首字母字符串或者首字母列表。
 
-;; 在转换的过程中，`pyim-hanzi2pinyin' 考虑多音字，所以适用于制作词库，Chinese-pyim 使用
+;; 在转换的过程中，`pyim-hanzi2pinyin' 考虑多音字，所以适用于制作词库，pyim 使用
 ;; 这个函数来制作词库。而 `pyim-hanzi2pinyin-simple' 不考虑多音字，可以用于添加拼音索引。
 
 ;; 例如：
@@ -107,9 +107,9 @@
 首字母字符串。当 `return-list' 设置为 t 时，返回一个拼音列表，这个列表包含词条的一个
 或者多个拼音（词条包含多音字时）；如果 `ignore-duo-yin-zi' 设置为t, 遇到多音字时，
 只使用第一个拼音，其它拼音忽略；当 `adjuct-duo-yin-zi' 设置为t时，pyim-hanzi2pinyin
-会使用 Chinese-pyim 已安装的词库来校正多音字，但这个功能有一定的限制:
+会使用 pyim 已安装的词库来校正多音字，但这个功能有一定的限制:
 
-1. Chinese-pyim 普通词库中不存在的词条不能较正
+1. pyim 普通词库中不存在的词条不能较正
 2. 多音字校正速度比较慢，实时转换会产生卡顿。
 
 BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，结果会包含多余的连接符：
@@ -157,7 +157,7 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
       ;; 比如：(("Hello") ("yin") ("hang" "xing")) -> (("Hello" "yin" "hang") ("Hello" "yin" "xing"))
       (setq pinyins-list-permutated (pyim-permutate-list2 pinyins-list))
 
-      ;; 使用 Chinese-pyim 的安装的词库来校正多音字。
+      ;; 使用 pyim 的安装的词库来校正多音字。
       (when adjuct-duo-yin-zi
         ;; 确保 pyim 词库加载
         (pyim-dcache-init-variables)
@@ -166,7 +166,7 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
                  (words-from-dicts
                   ;; pyim-buffer-list 中第一个 buffer 对应的是个人词库文件
                   ;; 个人词库文件中的词条，极有可能存在 *多音字污染*。
-                  ;; 这是由 Chinese-pyim 保存词条的机制决定的。
+                  ;; 这是由 pyim 保存词条的机制决定的。
                   (pyim-dcache-get py-str pyim-dcache-code2word)))
             (when (member string words-from-dicts)
               (push pinyin-list pinyins-list-adjusted))))
@@ -230,8 +230,8 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
   "简化版的 `pyim-hanzi2pinyin', 不处理多音字。"
   (pyim-hanzi2pinyin string shou-zi-mu separator return-list t))
 
-;; ** Chinese-pyim 词库管理工具
-;; 为 Chinese-pyim 添加一个简单的词库管理工具 `pyim-dicts-manager' ，可以方便的执行下列命令：
+;; ** pyim 词库管理工具
+;; 为 pyim 添加一个简单的词库管理工具 `pyim-dicts-manager' ，可以方便的执行下列命令：
 ;; 1. 添加词库。
 ;; 2. 删除词库。
 ;; 3. 向上和向下移动词库。
@@ -258,12 +258,12 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
                                   "----------------------------------------------------------------------\n")
                           'face face-attr))
       (if (not pyim-dicts)
-          (insert "拼音词库是 Chinese-pyim 使用顺手与否的关键。根据经验估计：
+          (insert "拼音词库是 pyim 使用顺手与否的关键。根据经验估计：
 
-1. 当词库词条超过100万时 (词库文件>20M)，Chinese-pyim 选词频率大大降低。
-2. 当词库词条超过100万时，Chinese-pyim 中文输入体验可以达到搜狗输入法的 80%。
+1. 当词库词条超过100万时 (词库文件>20M)，pyim 选词频率大大降低。
+2. 当词库词条超过100万时，pyim 中文输入体验可以达到搜狗输入法的 80%。
 
-想快速体验 Chinese-pyim 输入法的用户, 可以使用 pyim-basedict：
+想快速体验 pyim 输入法的用户, 可以使用 pyim-basedict：
 
      (require 'pyim-basedict)
      (pyim-basedict-enable)
@@ -271,12 +271,12 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
 如果用户的计算机性能比较好，建议从 Melpa 安装 pyim-greatdict 包,
 这个词库包有 300 多万词条，是一个 *大而全* 的词库。
 
-喜欢折腾的用户可以从下面几个途径获得 Chinese-pyim 更详细的信息。
-1. 使用 `C-h v pyim-dicts' 了解 `Chinese-pyim' 词库文件格式。
+喜欢折腾的用户可以从下面几个途径获得 pyim 更详细的信息。
+1. 使用 `C-h v pyim-dicts' 了解 pyim 词库文件格式。
 2. 了解如何导入其它输入法的词库。
-   1. 使用 package 管理器查看 Chinese-pyim 包的简介
+   1. 使用 package 管理器查看 pyim 包的简介
    2. 阅读 chinese-pyim.el 文件 Commentary
-   3. 查看 Chinese-pyim 在线 README：https://github.com/tumashu/chinese-pyim\n")
+   3. 查看 pyim 在线 README：https://github.com/tumashu/chinese-pyim\n")
         (dolist (dict dicts-list)
           (let ((disable (plist-get dict :disable))
                 (file (plist-get dict :file)))
@@ -356,7 +356,7 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
   (interactive)
   ;; 将`pyim-dict'的设置保存到emacs配置文件中。
   (customize-save-variable 'pyim-dicts pyim-dicts)
-  (message "将 Chinese-pyim 词库配置信息保存到 ~/.emacs 文件。"))
+  (message "将 pyim 词库配置信息保存到 ~/.emacs 文件。"))
 
 (defun pyim-dm-add-dict ()
   "为 `pyim-dicts' 添加词库信息。"
@@ -366,7 +366,7 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
           dict name file coding first-used dict-type)
       (setq name (read-from-minibuffer "请输入词库名称： "))
       (setq file (read-file-name "请选择词库文件： " "~/"))
-      (setq first-used  (yes-or-no-p "是否让 Chinese-pyim 优先使用词库？ "))
+      (setq first-used  (yes-or-no-p "是否让 pyim 优先使用词库？ "))
       (setq dict `(:name ,name :file ,file))
       (if first-used
           (add-to-list 'pyim-dicts dict)
@@ -376,7 +376,7 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
       (forward-line (- line 1)))))
 
 (define-derived-mode pyim-dm-mode special-mode "pyim-dicts-manager"
-  "Major mode for managing Chinese-pyim dicts"
+  "Major mode for managing pyim dicts"
   (read-only-mode)
   (define-key pyim-dm-mode-map (kbd "D") 'pyim-dm-delete-dict)
   (define-key pyim-dm-mode-map (kbd "g") 'pyim-dm-refresh)
@@ -389,7 +389,7 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
 
 ;;;###autoload
 (defun pyim-dicts-manager ()
-  "Chinese-pyim 词库管理器。"
+  "pyim 词库管理器。"
   (interactive)
   (let ((buffer (get-buffer-create pyim-dm-buffer)))
     (pyim-dm-refresh)
@@ -413,7 +413,7 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
     (setq result (reverse result))
     (setq pyim-extra-dicts
           (if replace result `(,@result ,new-dict)))
-    (message "Add Chinese-pyim dict %S to `pyim-extra-dicts'。" (plist-get new-dict :name))
+    (message "Add pyim dict %S to `pyim-extra-dicts'。" (plist-get new-dict :name))
     t))
 
 (defun pyim-dict-name-available-p (dict-name)

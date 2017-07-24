@@ -1,4 +1,4 @@
-;;; pyim-utils.el --- Useful tools which are based chinese-pyim
+;;; pyim-utils.el --- Useful tools which are based pyim
 
 ;; * Header
 ;; Copyright 2015-2017 Feng Shu
@@ -24,7 +24,7 @@
 
 ;;; Commentary:
 ;; * 说明文档                                                              :doc:
-;; 这个文件包含一些有用工具，这些工具都依赖 Chinese-pyim 的内部特性。
+;; 这个文件包含一些有用工具，这些工具都依赖 pyim 的内部特性。
 
 ;; #+BEGIN_EXAMPLE
 ;; (require 'pyim-utils)
@@ -144,7 +144,7 @@
                       (- str-end-pos current-pos)))))))
 
 (defun pyim-cstring-split-to-list (chinese-string &optional max-word-length)
-  "一个基于 Chinese-pyim 的中文分词函数。这个函数可以将中文字符
+  "一个基于 pyim 的中文分词函数。这个函数可以将中文字符
 串 `chinese-string' 分词，得到一个词条 alist，这个 alist 的元素
 都是列表，其中第一个元素为分词得到的词条，第二个元素为词条相对于
 字符串中的起始位置，第三个元素为结束位置。分词时，默认词条不超过
@@ -152,8 +152,8 @@
 这个值设置越大，分词速度越慢。
 
 注意事项：
-1. 这个工具使用暴力匹配模式来分词，*不能检测出* Chinese-pyim 词库
-   中不存在的中文词条。
+1. 这个工具使用暴力匹配模式来分词，*不能检测出* pyim 词库中不存在
+   的中文词条。
 2. 这个函数的分词速度比较慢，仅仅适用于中文短句的分词，不适用于
    文章分词。根据评估，20个汉字组成的字符串需要大约0.3s， 40个
    汉字消耗1s，随着字符串长度的增大消耗的时间呈几何倍数增加。"
@@ -184,7 +184,7 @@
          (t (append (get-possible-words-internal my-list number)
                     (get-possible-words (cdr my-list) (1+ number)))))))
 
-    ;; 如果 Chinese-pyim 词库没有加载，加载 Chinese-pyim 词库，
+    ;; 如果 pyim 词库没有加载，加载 pyim 词库，
     ;; 确保 pyim-dcache-get 可以正常运行。
     (pyim-dcache-init-variables)
 
