@@ -33,18 +33,16 @@
 (message "
 
 ------------------------------------------------------------------
-|                Chinese-pyim 重要更新                           |
+|                   Chinese-pyim 重要更新                        |
 |                                                                |
-| 由于 chinese-pyim 已经重命名为 pyim:                           |
+|  chinese-pyim 已经重命名为 pyim, 请同学们安装 pyim 并按照      |
+|  下面的例子修改自己的配置，然后删除 chinese-pyim 包。          |
 |                                                                |
-|    #+BEGIN_EXAMPLE                                             |
 |    (require 'pyim)                                             |
 |    (require 'pyim-basedict)                                    |
 |    (pyim-basedict-enable)                                      |
-|    #+END_EXAMPLE                                               |
 |                                                                |
-|                                                                |
-| 给大家带来的不便我深表歉意，感谢大家的支持和理解。             |
+|  给大家带来的不便我深表歉意，感谢大家的支持和理解。            |
 ------------------------------------------------------------------
 
 ")
