@@ -32,6 +32,9 @@
 ;; * 代码                                                                 :code:
 (require 'pyim)
 
+;; For compatible
+(register-input-method "chinese-pyim" "euc-cn" 'pyim-start pyim-title)
+
 (message "
 
 ------------------------------------------------------------------
@@ -43,6 +46,7 @@
 |    (require 'pyim)                                             |
 |    (require 'pyim-basedict)                                    |
 |    (pyim-basedict-enable)                                      |
+|    (setq default-input-method \"pyim\")                        |
 |                                                                |
 |  给大家带来的不便我深表歉意，感谢大家的支持和理解。            |
 ------------------------------------------------------------------
