@@ -7,7 +7,7 @@
 ;; Author: Ye Wenbin <wenbinye@163.com>, Feng Shu <tumashu@163.com>
 ;; URL: https://github.com/tumashu/pyim
 ;; Version: 1.5.2
-;; Package-Requires: ((cl-lib "0.5")(pos-tip "0.4")(popup "0.1")(async "1.6")(pyim-basedict "0.1"))
+;; Package-Requires: ((emacs "24.3")(cl-lib "0.5")(pos-tip "0.4")(popup "0.1")(async "1.6")(pyim-basedict "0.1"))
 ;; Keywords: convenience, Chinese, pinyin, input-method
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -942,8 +942,16 @@ pyim 称这个字符串为 \"dragger string\", 向 \"匕首\" 一样插入
   "Punctuation will not insert after this characters.
 If you don't like this funciton, set the variable to nil")
 
-;; Pyim 词库缓存文件，注意：变量名称中不能出现 ":" 等
-;; 不能作为文件名称的字符。
+(defvar pyim-pinyin2cchar-cache1 nil
+  "拼音查汉字功能需要的变量")
+(defvar pyim-pinyin2cchar-cache2 nil
+  "拼音查汉字功能需要的变量")
+(defvar pyim-pinyin2cchar-cache3 nil
+  "拼音查汉字功能需要的变量")
+(defvar pyim-cchar2pinyin-cache nil
+  "汉字转拼音功能需要的变量.")
+
+;; Pyim 词库缓存文件，注意：变量名称中不能出现 ":" 等，不能作为文件名称的字符。
 (defvar pyim-dcache-code2word nil)
 (defvar pyim-dcache-code2word-md5 nil)
 (defvar pyim-dcache-word2code nil)
@@ -1022,6 +1030,91 @@ If you don't like this funciton, set the variable to nil")
 (dolist (var pyim-local-variable-list)
   (make-variable-buffer-local var)
   (put var 'permanent-local t))
+
+;; ** "汉字 -> 拼音" 以及 "拼音 -> 汉字" 的转换函数
+(defun pyim-pinyin2cchar-cache-create (&optional force)
+  "构建 pinyin 到 chinese char 的缓存，用于加快搜索速度，这个函数
+将缓存保存到 `pyim-pinyin2cchar-cache' 变量中，
+如果 force 设置为 t, 强制更新索引。"
+  (when (or force (or (not pyim-pinyin2cchar-cache1)
+                      (not pyim-pinyin2cchar-cache2)))
+    (setq pyim-pinyin2cchar-cache1
+          (make-hash-table :size 50000 :test #'equal))
+    (setq pyim-pinyin2cchar-cache2
+          (make-hash-table :size 50000 :test #'equal))
+    (setq pyim-pinyin2cchar-cache3
+          (make-hash-table :size 50000 :test #'equal))
+    (dolist (x pyim-pymap)
+      (let* ((py (car x))
+             (cchars (cdr x))
+             (n (min (length py) 7)))
+        (puthash py cchars pyim-pinyin2cchar-cache1)
+        (puthash py (cdr (split-string (car cchars) ""))
+                 pyim-pinyin2cchar-cache2)
+        (dotimes (i n)
+          (let* ((key (substring py 0 (+ i 1)))
+                 (orig-value (gethash key pyim-pinyin2cchar-cache3)))
+            (puthash key (delete-dups `(,@orig-value ,@cchars))
+                     pyim-pinyin2cchar-cache3)))))))
+
+(defun pyim-pinyin2cchar-get (pinyin &optional equal-match return-list)
+  "获取拼音与 `pinyin' 想匹配的所有汉字，比如：
+
+“man” -> (\"忙茫盲芒氓莽蟒邙漭硭\" \"满慢漫曼蛮馒瞒蔓颟谩墁幔螨鞔鳗缦熳镘\")"
+  (pyim-pinyin2cchar-cache-create)
+  (when (and pinyin (stringp pinyin))
+    (if equal-match
+        (if return-list
+            (gethash pinyin pyim-pinyin2cchar-cache2)
+          (gethash pinyin pyim-pinyin2cchar-cache1))
+      (gethash pinyin pyim-pinyin2cchar-cache3))))
+
+;; *** 查询某个汉字的拼音
+;; pyim 在特定的时候需要读取一个汉字的拼音，这个工作由下面函数完成：
+
+;; 函数 `pyim-cchar2pinyin-get' 从 `pyim-cchar2pinyin-cache' 查询得到一个汉字字符的拼音， 例如：
+;; #+BEGIN_EXAMPLE
+;; (pyim-cchar2pinyin-get ?我)
+;; #+END_EXAMPLE
+
+;; 结果为:
+;; : ("wo")
+
+;; 我们用全局变量 `pyim-cchar2pinyin-cache' 来保存这个 *hash table* 。
+
+;; 这个例子中的语句用于调试上述三个函数。
+;; #+BEGIN_EXAMPLE
+;; (setq pyim-cchar2pinyin-cache nil)
+;; (pyim-cchar2pinyin-create-cache)
+;; (pyim-cchar2pinyin-get ?你)
+;; (pyim-cchar2pinyin-get "你")
+;; #+END_EXAMPLE
+
+(defun pyim-cchar2pinyin-get (char-or-str)
+  "Get the code of the character CHAR"
+  (pyim-cchar2pinyin-cache-create)
+  (let ((key (if (characterp char-or-str)
+                 (char-to-string char-or-str)
+               char-or-str)))
+    (when (= (length key) 1)
+      (gethash key pyim-cchar2pinyin-cache))))
+
+(defun pyim-cchar2pinyin-cache-create (&optional force)
+  "Build pinyin cchar to pinyin hashtable from `pyim-pymap'
+in package `pyim-pymap'"
+  (when (or force (not pyim-cchar2pinyin-cache))
+    (setq pyim-cchar2pinyin-cache
+          (make-hash-table :size 50000 :test #'equal))
+    (dolist (x pyim-pymap)
+      (let ((py (car x))
+            (cchar-list (string-to-list (car (cdr x)))))
+        (dolist (cchar cchar-list)
+          (let* ((key (char-to-string cchar))
+                 (cache (gethash key pyim-cchar2pinyin-cache)))
+            (if cache
+                (puthash key (append (list py) cache) pyim-cchar2pinyin-cache)
+              (puthash key (list py) pyim-cchar2pinyin-cache))))))))
+
 ;; ** 输入法启动和重启
 ;; pyim 使用 emacs 官方自带的输入法框架来启动输入法和重启输入法。
 ;; 所以我们首先需要使用 emacs 自带的命令 `register-input-method' 注册一个

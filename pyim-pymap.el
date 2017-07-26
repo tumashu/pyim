@@ -1,6 +1,8 @@
 ;;; pyim-pymap.el --- Pinyin map used by pyim
 
 ;; * Header
+;; Copyright 1999, Rui He, herui@cs.duke.edu
+;; Version: 0.32
 
 ;; The content of this file is generated from "pinyin.map" which is
 ;; included in a free package called CCE.  It is available at:
@@ -42,7 +44,7 @@
 ;;; Code:
 
 ;; * 代码                                                                 :code:
-(defvar pyim-pinyin-pymap
+(defvar pyim-pymap
   '(("a" "阿啊呵腌嗄锕吖")
     ("ai" "爱哀挨碍埃癌艾唉矮哎皑蔼隘暧霭捱嗳瑷嫒锿嗌砹")
     ("an" "安案按暗岸俺谙黯鞍氨庵桉鹌胺铵揞犴埯")
@@ -449,99 +451,6 @@
     ("zui" "最罪嘴醉咀觜蕞")
     ("zun" "尊遵樽鳟撙")
     ("zuo" "作做坐座左昨琢佐凿撮柞嘬怍胙唑笮阼祚酢")))
-
-(defvar pyim-pinyin2cchar-cache1 nil)
-(defvar pyim-pinyin2cchar-cache2 nil)
-(defvar pyim-pinyin2cchar-cache3 nil)
-(defvar pyim-cchar2pinyin-cache nil)
-
-(defun pyim-pinyin2cchar-cache-create (&optional force)
-  "构建 pinyin 到 chinese char 的缓存，用于加快搜索速度，这个函数
-将缓存保存到 `pyim-pinyin2cchar-cache' 变量中，
-如果 force 设置为 t, 强制更新索引。"
-  (when (or force (or (not pyim-pinyin2cchar-cache1)
-                      (not pyim-pinyin2cchar-cache2)))
-    (setq pyim-pinyin2cchar-cache1
-          (make-hash-table :size 50000 :test #'equal))
-    (setq pyim-pinyin2cchar-cache2
-          (make-hash-table :size 50000 :test #'equal))
-    (setq pyim-pinyin2cchar-cache3
-          (make-hash-table :size 50000 :test #'equal))
-    (dolist (x pyim-pinyin-pymap)
-      (let* ((py (car x))
-             (cchars (cdr x))
-             (n (min (length py) 7)))
-        (puthash py cchars pyim-pinyin2cchar-cache1)
-        (puthash py (cdr (split-string (car cchars) ""))
-                 pyim-pinyin2cchar-cache2)
-        (dotimes (i n)
-          (let* ((key (substring py 0 (+ i 1)))
-                 (orig-value (gethash key pyim-pinyin2cchar-cache3)))
-            (puthash key (delete-dups `(,@orig-value ,@cchars))
-                     pyim-pinyin2cchar-cache3)))))))
-
-(defun pyim-pinyin2cchar-get (pinyin &optional equal-match return-list)
-  "获取拼音与 `pinyin' 想匹配的所有汉字，比如：
-
-“man” -> (\"忙茫盲芒氓莽蟒邙漭硭\" \"满慢漫曼蛮馒瞒蔓颟谩墁幔螨鞔鳗缦熳镘\")"
-  (pyim-pinyin2cchar-cache-create)
-  (when (and pinyin (stringp pinyin))
-    (if equal-match
-        (if return-list
-            (gethash pinyin pyim-pinyin2cchar-cache2)
-          (gethash pinyin pyim-pinyin2cchar-cache1))
-      (gethash pinyin pyim-pinyin2cchar-cache3))))
-
-
-;; ** 查询某个汉字的拼音
-;;   :PROPERTIES:
-;;   :CUSTOM_ID: make-char-table
-;;   :END:
-;; pyim 在特定的时候需要读取一个汉字的拼音，这个工作由下面函数完成：
-
-;; 函数 `pyim-cchar2pinyin-get' 从 `pyim-cchar2pinyin-cache' 查询得到一个汉字字符的拼音， 例如：
-;; #+BEGIN_EXAMPLE
-;; (pyim-cchar2pinyin-get ?我)
-;; #+END_EXAMPLE
-
-;; 结果为:
-;; : ("wo")
-
-;; 我们用全局变量 `pyim-cchar2pinyin-cache' 来保存这个 *hash table* 。
-
-;; 这个例子中的语句用于调试上述三个函数。
-;; #+BEGIN_EXAMPLE
-;; (setq pyim-cchar2pinyin-cache nil)
-;; (pyim-cchar2pinyin-create-cache)
-;; (pyim-cchar2pinyin-get ?你)
-;; (pyim-cchar2pinyin-get "你")
-;; #+END_EXAMPLE
-
-
-(defun pyim-cchar2pinyin-get (char-or-str)
-  "Get the code of the character CHAR"
-  (pyim-cchar2pinyin-cache-create)
-  (let ((key (if (characterp char-or-str)
-                 (char-to-string char-or-str)
-               char-or-str)))
-    (when (= (length key) 1)
-      (gethash key pyim-cchar2pinyin-cache))))
-
-(defun pyim-cchar2pinyin-cache-create (&optional force)
-  "Build pinyin cchar to pinyin hashtable from `pyim-pinyin-pymap'
-in package `pyim-pymap'"
-  (when (or force (not pyim-cchar2pinyin-cache))
-    (setq pyim-cchar2pinyin-cache
-          (make-hash-table :size 50000 :test #'equal))
-    (dolist (x pyim-pinyin-pymap)
-      (let ((py (car x))
-            (cchar-list (string-to-list (car (cdr x)))))
-        (dolist (cchar cchar-list)
-          (let* ((key (char-to-string cchar))
-                 (cache (gethash key pyim-cchar2pinyin-cache)))
-            (if cache
-                (puthash key (append (list py) cache) pyim-cchar2pinyin-cache)
-              (puthash key (list py) pyim-cchar2pinyin-cache))))))))
 
 ;; * Footer
 (provide 'pyim-pymap)
