@@ -625,7 +625,7 @@ plist 来表示，比如：
      :prefer-trigger-chars "v")
     (wubi
      :document "五笔输入法。"
-     :class wubi
+     :class xingma
      :first-chars "abcdefghijklmnopqrstuvwxyz"
      :rest-chars "abcdefghijklmnopqrstuvwxyz"
      :code-prefix "." ;五笔词库中所有的 code 都以 "." 开头，防止和拼音词库冲突。
@@ -808,7 +808,7 @@ pyim 内建的功能有：
 4. `pinyin-shortcode'    获取简拼对应的词条，
     如果输入 \"ni-hao\" ，那么同时搜索 code 为 \"n-h\" 的词条。
 5. `pinyin-znabc'        类似智能ABC的词语获取方式(源于 emacs-eim).
-6. `wubi-words'          专门用于处理五笔输入的 backend."
+6. `xingma-words'        专门用于处理五笔等基于形码的输入法的 backend."
   :group 'pyim)
 
 (defcustom pyim-isearch-enable-pinyin-search nil
@@ -2128,9 +2128,9 @@ Return the input string."
     (pyim-spinyin-find-fuzzy
      (pyim-permutate-list (nreverse results)))))
 
-(defun pyim-code-split:wubi (code &optional -)
+(defun pyim-code-split:xingma (code &optional -)
   "这个函数只是对 code 做了一点简单的包装，实际并不真正的
-*分解* code, 用于五笔, 比如：
+*分解* code, 用于五笔等基于形码的输入法, 比如：
 
   \"aaaa\" -> ((\"aaaa\"))"
   (list (list code)))
@@ -2263,8 +2263,8 @@ Return the input string."
                     spinyin)
                    "-")))))
 
-(defun pyim-scode-join:wubi (scode scheme-name &optional as-search-key shou-zi-mu)
-  "把一个 `scode' (splited code) 合并为一个 code 字符串, 用于五笔。
+(defun pyim-scode-join:xingma (scode scheme-name &optional as-search-key shou-zi-mu)
+  "把一个 `scode' (splited code) 合并为一个 code 字符串, 用于五笔等基于形码的输入法。
 比如：
 
     (\"aaaa\") --> \"aaaa\"   用于在 dagger 中显示。
@@ -2286,7 +2286,7 @@ Return the input string."
          common-words
          pinyin-shortcode-words pinyin-znabc-words
          pinyin-chars
-         wubi-words)
+         xingma-words)
 
     (dolist (scode scode-list)
       (setq personal-words
@@ -2298,9 +2298,9 @@ Return the input string."
       (setq pinyin-chars
             (append pinyin-chars
                     (car (pyim-choices-get:pinyin-chars scode scheme-name))))
-      (setq wubi-words
-            (append wubi-words
-                    (car (pyim-choices-get:wubi-words scode scheme-name)))))
+      (setq xingma-words
+            (append xingma-words
+                    (car (pyim-choices-get:xingma-words scode scheme-name)))))
 
     ;; Pinyin shouzimu similar words
     (let ((words (pyim-choices-get:pinyin-shortcode (car scode-list) scheme-name)))
@@ -2326,7 +2326,7 @@ Return the input string."
              ,@pinyin-shortcode-words
              ,@pinyin-znabc-words
              ,@pinyin-chars
-             ,@wubi-words)))))
+             ,@xingma-words)))))
 
 (defun pyim-choices-get:pinyin-znabc (spinyin scheme-name)
   ;; 将输入的拼音按照声母和韵母打散，得到尽可能多的拼音组合，
@@ -2368,12 +2368,12 @@ Return the input string."
         output
       (nreverse output))))
 
-(defun pyim-choices-get:wubi-words (scode scheme-name)
-  (when (member 'wubi-words pyim-backends)
+(defun pyim-choices-get:xingma-words (scode scheme-name)
+  (when (member 'xingma-words pyim-backends)
     (let ((class (pyim-scheme-get-option scheme-name :class)))
-      (when (member class '(wubi))
+      (when (member class '(xingma))
         (let* ((code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
-               (code (pyim-scode-join:wubi scode 'wubi))
+               (code (pyim-scode-join:xingma scode scheme-name))
                (n (pyim-scheme-get-option scheme-name :code-maximum-length))
                (output (pyim-split-string-by-number code n t))
                (output1 (car output))
