@@ -797,7 +797,7 @@ pyim 内建的功能有：
   :group 'pyim)
 
 (defcustom pyim-backends
-  '(dcache-personal dcache-common pinyin-chars pinyin-shortcode pinyin-znabc wubi-words)
+  '(dcache-personal dcache-common pinyin-chars pinyin-shortcode pinyin-znabc xingma-words)
   "Pyim 词语获取 backends.
 
 当前支持:
@@ -2714,7 +2714,7 @@ Return the input string."
          (class (pyim-scheme-get-option scheme-name :class))
          (code-maximum-length (pyim-scheme-get-option scheme-name :code-maximum-length)))
     (cond
-     ((memq class '(wubi))
+     ((memq class '(xingma))
       (mapconcat #'identity
                  (pyim-split-string-by-number code code-maximum-length)
                  " "))
