@@ -4062,7 +4062,7 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
     (setq truncate-lines t)))
 
 (defun pyim-extra-dicts-add-dict (new-dict)
-  "添加 `new-dict' 到 `pyim-dicts', 其中 `new-dict' 的格式为：
+  "添加 `new-dict' 到 `pyim-extra-dicts', 其中 `new-dict' 的格式为：
 
    (:name \"XXX\" :file \"/path/to/XXX.pyim\")
 
