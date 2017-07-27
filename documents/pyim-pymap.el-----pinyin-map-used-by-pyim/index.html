@@ -1,50 +1,46 @@
 <!DOCTYPE html>
 <html lang="en-us">
   <head>
-    <title>chinese-pyim-pymap - Chinese-pyim</title>
+    <title>pyim-pymap.el --- Pinyin map used by pyim - pyim</title>
     <meta charset="utf-8" />
     <meta name="author" content="Feng Shu" />
-    <link rel="stylesheet" href="https://tumashu.github.io/chinese-pyim/media/css/main.css" type="text/css">
+    <link rel="stylesheet" href="https://tumashu.github.io/pyim/media/css/main.css" type="text/css">
   </head>
 <body class="container">
     <div>
       <header class="masthead">
-        <h1 class="masthead-title"><a href="https://tumashu.github.io/chinese-pyim/">Chinese-pyim</a> <span class="subtitle">(一个 emacs 环境下的中文拼音输入法)</span></h1>
+        <h1 class="masthead-title"><a href="https://tumashu.github.io/pyim/">pyim</a> <span class="subtitle">(一个 emacs 环境下的中文拼音输入法)</span></h1>
         <ul>
-          <li><a href="https://tumashu.github.io/chinese-pyim/documents/">Documents</a></li>
-          <li><a href="https://tumashu.github.io/chinese-pyim/snapshots/">Snapshots</a></li>
-          <li><a href="https://tumashu.github.io/chinese-pyim/tags/">Tags</a></li>
-          <li><a href="https://tumashu.github.io/chinese-pyim/about/">About</a></li>
-          <li><a href="https://github.com/tumashu/chinese-pyim">GitHub</a></li>
-          <li><a href="https://tumashu.github.io/chinese-pyim/rss.xml">RSS</a></li>
+          <li><a href="https://tumashu.github.io/pyim/documents/">Documents</a></li>
+          <li><a href="https://tumashu.github.io/pyim/snapshots/">Snapshots</a></li>
+          <li><a href="https://tumashu.github.io/pyim/tags/">Tags</a></li>
+          <li><a href="https://tumashu.github.io/pyim/about/">About</a></li>
+          <li><a href="https://github.com/tumashu/pyim">GitHub</a></li>
+          <li><a href="https://tumashu.github.io/pyim/rss.xml">RSS</a></li>
         </ul>
         <form method="get" id="searchform" action="http://www.google.com/search">
           <input type="text" class="field" name="q" id="s" placeholder="Search">
-          <input type="hidden" name="as_sitesearch" value="tumashu.github.io/chinese-pyim">
+          <input type="hidden" name="as_sitesearch" value="tumashu.github.io/pyim">
         </form>
-        <img class="avatar" src="https://tumashu.github.io/chinese-pyim/media/img/horse.jpg" />
+        <img class="avatar" src="https://tumashu.github.io/pyim/media/img/horse.jpg" />
       </header>
     </div>
 
 <div class="content-and-footer">
 <div>
 <div class="post">
-<h1 class="post-title">chinese-pyim-pymap</h1>
+<h1 class="post-title">pyim-pymap.el --- Pinyin map used by pyim</h1>
 <div id="table-of-contents">
 <h2>&#30446;&#24405;</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org87a8473">1. 说明文档&#xa0;&#xa0;&#xa0;<span class="tag"><span class="doc">doc</span></span></a></li>
-<li><a href="#org57ecc85">2. 代码&#xa0;&#xa0;&#xa0;<span class="tag"><span class="code">code</span></span></a>
-<ul>
-<li><a href="#make-char-table">2.1. 查询某个汉字的拼音</a></li>
-</ul>
-</li>
+<li><a href="#org0050fe3">1. 说明文档</a></li>
+<li><a href="#org709bf9a">2. 代码</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org87a8473" class="outline-2">
-<h2 id="org87a8473"><span class="section-number-2">1</span>说明文档&#xa0;&#xa0;&#xa0;<span class="tag"><span class="doc">doc</span></span></h2>
+<div id="outline-container-org0050fe3" class="outline-2">
+<h2 id="org0050fe3"><span class="section-number-2">1</span> 说明文档</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 这个文件包含了与 quail/PY.el 文件内容相似的 "拼音-汉字" 对照表，这个对照表用来实现拼音查询功能，即，查询某个汉字对应的拼音代码。
@@ -56,14 +52,11 @@
 </div>
 </div>
 
-
-
-
-<div id="outline-container-org57ecc85" class="outline-2">
-<h2 id="org57ecc85"><span class="section-number-2">2</span>代码&#xa0;&#xa0;&#xa0;<span class="tag"><span class="code">code</span></span></h2>
+<div id="outline-container-org709bf9a" class="outline-2">
+<h2 id="org709bf9a"><span class="section-number-2">2</span> 代码</h2>
 <div class="outline-text-2" id="text-2">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defvar</span> <span style="color: #ff69b4;">pyim-pinyin-pymap</span>
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defvar</span> <span style="color: #ff69b4;">pyim-pymap</span>
   '((<span style="color: #61CE3C;">"a"</span> <span style="color: #61CE3C;">"&#38463;&#21834;&#21621;&#33100;&#21956;&#38165;&#21526;"</span>)
     (<span style="color: #61CE3C;">"ai"</span> <span style="color: #61CE3C;">"&#29233;&#21696;&#25384;&#30861;&#22467;&#30284;&#33406;&#21769;&#30702;&#21710;&#30353;&#34108;&#38552;&#26279;&#38701;&#25457;&#22003;&#29815;&#23250;&#38207;&#21964;&#30777;"</span>)
     (<span style="color: #61CE3C;">"an"</span> <span style="color: #61CE3C;">"&#23433;&#26696;&#25353;&#26263;&#23736;&#20474;&#35865;&#40687;&#38797;&#27688;&#24245;&#26697;&#40524;&#33018;&#38133;&#25566;&#29364;&#22511;"</span>)
@@ -424,7 +417,7 @@
     (<span style="color: #61CE3C;">"yang"</span> <span style="color: #61CE3C;">"&#26679;&#27915;&#38451;&#22830;&#26472;&#20859;&#25196;&#20208;&#32650;&#30162;&#28478;&#27889;&#27687;&#40495;&#31207;&#27523;&#24665;&#30113;&#28874;&#20335;&#38789;&#24591;&#24457;&#28800;&#34520;"</span>)
     (<span style="color: #61CE3C;">"yao"</span> <span style="color: #61CE3C;">"&#35201;&#25671;&#33647;&#32768;&#36965;&#36992;&#33136;&#23002;&#21676;&#23591;&#35875;&#29814;&#31377;&#22829;&#32948;&#22934;&#21510;&#38053;&#20389;&#26483;&#31368;&#40542;&#26332;&#33280;&#38123;&#24186;&#29243;&#24493;&#32327;&#40144;&#29671;&#36730;&#23870;"</span>)
     (<span style="color: #61CE3C;">"ye"</span> <span style="color: #61CE3C;">"&#20063;&#19994;&#22812;&#29239;&#21494;&#37326;&#39029;&#28082;&#32822;&#21693;&#26355;&#25341;&#25590;&#22094;&#28904;&#20918;&#26928;&#25494;&#33099;&#35858;&#37050;&#38757;&#26196;&#38104;"</span>)
-    (<span style="color: #61CE3C;">"yi"</span> <span style="color: #61CE3C;">"&#19968;&#20197;&#24847;&#24050;&#20041;&#35758;&#21307;&#26131;&#34915;&#33402;&#20381;&#35793;&#31227;&#24322;&#30410;&#20134;&#20159;&#30097;&#36951;&#24518;&#23452;&#26885;&#20234;&#20202;&#35850;&#25233;&#32764;&#30691;&#24441;&#33406;&#20057;&#28322;&#27589;&#34503;&#35028;&#36920;&#23016;&#22839;&#36726;&#24609;&#34433;&#24328;&#20506;&#32716;&#39056;&#30123;&#32462;&#24413;&#21670;&#20314;&#22869;&#29088;&#36155;&#28458;&#35811;&#36836;&#24331;&#25087;&#21587;&#39551;&#21695;&#25558;&#26070;&#23673;&#30157;&#34191;&#22123;&#38226;&#21000;&#27778;&#33222;&#32546;&#37009;&#33008;&#29463;&#32703;&#38023;&#33315;&#21139;&#20193;&#37199;&#20350;&#22520;&#35794;&#22319;&#33617;&#22777;&#25401;&#23991;&#39284;&#21964;&#23748;&#24639;&#24722;&#38129;&#27449;&#27562;&#40671;&#33505;&#32900;&#38257;&#30231;&#30292;&#32714;&#34612;&#30489;&#32755;"</span>)
+    (<span style="color: #61CE3C;">"yi"</span> <span style="color: #61CE3C;">"&#19968;&#20197;&#24847;&#24050;&#20041;&#35758;&#21307;&#26131;&#34915;&#33402;&#20381;&#35793;&#31227;&#24322;&#30410;&#20134;&#20159;&#30097;&#36951;&#24518;&#23452;&#26885;&#20234;&#20202;&#35850;&#25233;&#32764;&#30691;&#24441;&#33406;&#20057;&#28322;&#27589;&#34503;&#35028;&#36920;&#23016;&#22839;&#36726;&#24609;&#34433;&#24328;&#20506;&#32716;&#39056;&#30123;&#32462;&#24413;&#21670;&#20314;&#22869;&#29088;&#36155;&#28458;&#35811;&#36836;&#24331;&#25087;&#21587;&#39551;&#21695;&#25558;&#26070;&#23673;&#30157;&#34191;&#22123;&#38226;&#21000;&#27778;&#33222;&#32546;&#37009;&#33008;&#29463;&#32703;&#38023;&#33315;&#21139;&#20193;&#37199;&#20350;&#22520;&#35794;&#22319;&#33617;&#22777;&#25401;&#23991;&#39284;&#21964;&#23748;&#24639;&#24722;&#38129;&#27449;&#27562;&#40671;&#33505;&#32900;&#38257;&#30231;&#30292;&#32714;&#34612;&#30489;&#32755;&#29169;"</span>)
     (<span style="color: #61CE3C;">"yin"</span> <span style="color: #61CE3C;">"&#22240;&#38899;&#24341;&#21360;&#38134;&#38544;&#39278;&#38452;&#23035;&#30270;&#21535;&#23493;&#27575;&#28139;&#33589;&#33643;&#23609;&#34451;&#22432;&#21905;&#28270;&#32996;&#37150;&#27684;&#38698;&#22331;&#38111;&#29434;&#21554;&#22820;&#22553;&#40840;&#27911;&#33562;&#31400;"</span>)
     (<span style="color: #61CE3C;">"ying"</span> <span style="color: #61CE3C;">"&#24212;&#33521;&#24433;&#33829;&#36814;&#30828;&#26144;&#36194;&#30408;&#39062;&#40560;&#23156;&#34631;&#27185;&#33721;&#33639;&#33210;&#33828;&#33830;&#33722;&#32578;&#28699;&#27001;&#32552;&#39053;&#23348;&#40550;&#29787;&#33556;&#22052;&#29838;&#33637;&#25732;&#37090;&#30271;&#34021;&#28386;&#28486;&#23221;"</span>)
     (<span style="color: #61CE3C;">"yo"</span> <span style="color: #61CE3C;">"&#21727;&#21815;"</span>)
@@ -472,136 +465,6 @@
     (<span style="color: #61CE3C;">"zuo"</span> <span style="color: #61CE3C;">"&#20316;&#20570;&#22352;&#24231;&#24038;&#26152;&#29730;&#20304;&#20991;&#25774;&#26590;&#22060;&#24589;&#32985;&#21777;&#31534;&#38460;&#31066;&#37218;"</span>)))
 </pre>
 </div>
-
-<div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defvar</span> <span style="color: #ff69b4;">pyim-pinyin2cchar-cache1</span> nil)
-</pre>
-</div>
-<div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defvar</span> <span style="color: #ff69b4;">pyim-pinyin2cchar-cache2</span> nil)
-</pre>
-</div>
-<div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defvar</span> <span style="color: #ff69b4;">pyim-pinyin2cchar-cache3</span> nil)
-</pre>
-</div>
-<div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defvar</span> <span style="color: #ff69b4;">pyim-cchar2pinyin-cache</span> nil)
-</pre>
-</div>
-
-<div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-pinyin2cchar-cache-create</span> (<span style="color: #afd8af;">&amp;optional</span> force)
-  <span style="color: #FBDE2D;">"&#26500;&#24314; pinyin &#21040; chinese char &#30340;&#32531;&#23384;&#65292;&#29992;&#20110;&#21152;&#24555;&#25628;&#32034;&#36895;&#24230;&#65292;&#36825;&#20010;&#20989;&#25968;</span>
-<span style="color: #FBDE2D;">&#23558;&#32531;&#23384;&#20445;&#23384;&#21040; `</span><span style="color: #96CBFE;">pyim-pinyin2cchar-cache</span><span style="color: #FBDE2D;">' &#21464;&#37327;&#20013;&#65292;</span>
-<span style="color: #FBDE2D;">&#22914;&#26524; force &#35774;&#32622;&#20026; t, &#24378;&#21046;&#26356;&#26032;&#32034;&#24341;&#12290;"</span>
-  (<span style="color: #4c83ff;">when</span> (<span style="color: #4c83ff;">or</span> force (<span style="color: #4c83ff;">or</span> (not pyim-pinyin2cchar-cache1)
-                      (not pyim-pinyin2cchar-cache2)))
-    (<span style="color: #4c83ff;">setq</span> pyim-pinyin2cchar-cache1
-          (make-hash-table <span style="color: #4c83ff;">:size</span> 50000 <span style="color: #4c83ff;">:test</span> #'equal))
-    (<span style="color: #4c83ff;">setq</span> pyim-pinyin2cchar-cache2
-          (make-hash-table <span style="color: #4c83ff;">:size</span> 50000 <span style="color: #4c83ff;">:test</span> #'equal))
-    (<span style="color: #4c83ff;">setq</span> pyim-pinyin2cchar-cache3
-          (make-hash-table <span style="color: #4c83ff;">:size</span> 50000 <span style="color: #4c83ff;">:test</span> #'equal))
-    (<span style="color: #4c83ff;">dolist</span> (x pyim-pinyin-pymap)
-      (<span style="color: #4c83ff;">let*</span> ((py (car x))
-             (cchars (cdr x))
-             (n (min (length py) 7)))
-        (puthash py cchars pyim-pinyin2cchar-cache1)
-        (puthash py (cdr (split-string (car cchars) <span style="color: #61CE3C;">""</span>))
-                 pyim-pinyin2cchar-cache2)
-        (<span style="color: #4c83ff;">dotimes</span> (i n)
-          (<span style="color: #4c83ff;">let*</span> ((key (substring py 0 (+ i 1)))
-                 (orig-value (gethash key pyim-pinyin2cchar-cache3)))
-            (puthash key (delete-dups `(,@orig-value ,@cchars))
-                     pyim-pinyin2cchar-cache3)))))))
-</pre>
-</div>
-
-<div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-pinyin2cchar-get</span> (pinyin <span style="color: #afd8af;">&amp;optional</span> equal-match return-list)
-  <span style="color: #FBDE2D;">"&#33719;&#21462;&#25340;&#38899;&#19982; `</span><span style="color: #96CBFE;">pinyin</span><span style="color: #FBDE2D;">' &#24819;&#21305;&#37197;&#30340;&#25152;&#26377;&#27721;&#23383;&#65292;&#27604;&#22914;&#65306;</span>
-
-<span style="color: #FBDE2D;">&#8220;man&#8221; -&gt; (\"&#24537;&#33579;&#30450;&#33426;&#27667;&#33725;&#34770;&#37017;&#28461;&#30829;\" \"&#28385;&#24930;&#28459;&#26364;&#34542;&#39314;&#30610;&#34067;&#39071;&#35881;&#22657;&#24148;&#34728;&#38804;&#40151;&#32550;&#29107;&#38232;\")"</span>
-  (pyim-pinyin2cchar-cache-create)
-  (<span style="color: #4c83ff;">when</span> (<span style="color: #4c83ff;">and</span> pinyin (stringp pinyin))
-    (<span style="color: #4c83ff;">if</span> equal-match
-        (<span style="color: #4c83ff;">if</span> return-list
-            (gethash pinyin pyim-pinyin2cchar-cache2)
-          (gethash pinyin pyim-pinyin2cchar-cache1))
-      (gethash pinyin pyim-pinyin2cchar-cache3))))
-</pre>
-</div>
-</div>
-
-
-<div id="outline-container-orgb8425b9" class="outline-3">
-<h3 id="make-char-table"><a id="orgb8425b9"></a><span class="section-number-3">2.1</span>查询某个汉字的拼音</h3>
-<div class="outline-text-3" id="text-make-char-table">
-<p>
-Chinese-pyim 在特定的时候需要读取一个汉字的拼音，这个工作由下面函数完成：
-</p>
-
-<p>
-函数 `pyim-cchar2pinyin-get' 从 `pyim-cchar2pinyin-cache' 查询得到一个汉字字符的拼音， 例如：
-</p>
-<pre class="example">
-(pyim-cchar2pinyin-get ?我)
-</pre>
-
-<p>
-结果为:
-</p>
-<pre class="example">
-("wo")
-</pre>
-
-<p>
-我们用全局变量 `pyim-cchar2pinyin-cache' 来保存这个<b>hash table</b>。
-</p>
-
-<p>
-这个例子中的语句用于调试上述三个函数。
-</p>
-<pre class="example">
-(setq pyim-cchar2pinyin-cache nil)
-(pyim-cchar2pinyin-create-cache)
-(pyim-cchar2pinyin-get ?你)
-(pyim-cchar2pinyin-get "你")
-</pre>
-
-
-<div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-cchar2pinyin-get</span> (char-or-str)
-  <span style="color: #FBDE2D;">"Get the code of the character CHAR"</span>
-  (pyim-cchar2pinyin-cache-create)
-  (<span style="color: #4c83ff;">let</span> ((key (<span style="color: #4c83ff;">if</span> (characterp char-or-str)
-                 (char-to-string char-or-str)
-               char-or-str)))
-    (<span style="color: #4c83ff;">when</span> (= (length key) 1)
-      (gethash key pyim-cchar2pinyin-cache))))
-</pre>
-</div>
-
-<div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-cchar2pinyin-cache-create</span> (<span style="color: #afd8af;">&amp;optional</span> force)
-  <span style="color: #FBDE2D;">"Build pinyin cchar to pinyin hashtable from `</span><span style="color: #96CBFE;">pyim-pinyin-pymap</span><span style="color: #FBDE2D;">'</span>
-<span style="color: #FBDE2D;">in package `</span><span style="color: #96CBFE;">chinese-pyim-pymap</span><span style="color: #FBDE2D;">'"</span>
-  (<span style="color: #4c83ff;">when</span> (<span style="color: #4c83ff;">or</span> force (not pyim-cchar2pinyin-cache))
-    (<span style="color: #4c83ff;">setq</span> pyim-cchar2pinyin-cache
-          (make-hash-table <span style="color: #4c83ff;">:size</span> 50000 <span style="color: #4c83ff;">:test</span> #'equal))
-    (<span style="color: #4c83ff;">dolist</span> (x pyim-pinyin-pymap)
-      (<span style="color: #4c83ff;">let</span> ((py (car x))
-            (cchar-list (string-to-list (car (cdr x)))))
-        (<span style="color: #4c83ff;">dolist</span> (cchar cchar-list)
-          (<span style="color: #4c83ff;">let*</span> ((key (char-to-string cchar))
-                 (cache (gethash key pyim-cchar2pinyin-cache)))
-            (<span style="color: #4c83ff;">if</span> cache
-                (puthash key (append (list py) cache) pyim-cchar2pinyin-cache)
-              (puthash key (list py) pyim-cchar2pinyin-cache))))))))
-</pre>
-</div>
-</div>
 </div>
 </div>
 
@@ -609,25 +472,26 @@ Chinese-pyim 在特定的时候需要读取一个汉字的拼音，这个工作�
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2017-03-10</span>
-        <span title="last modification date" class="post-info">2017-03-10</span>
+        <span title="post date" class="post-info">2017-07-27</span>
+        <span title="last modification date" class="post-info">2017-07-27</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>
       <section>
         <h1>Comments</h1>
-        <div class="ds-thread"></div>
+        <div class="ds-thread" data-thread-key="ed0a193930c410a9c54ddca50018949a"
+                               data-title="pyim-pymap.el --- Pinyin map used by pyim" data-url="https://tumashu.github.io/pyim/documents/pyim-pymap.el-----pinyin-map-used-by-pyim/"></div>
         <script type="text/javascript">
-          var duoshuoQuery = {short_name:'tumashu-website'};
-          (function() {
-          var ds = document.createElement('script');
-          ds.type = 'text/javascript';ds.async = true;
-          ds.src = 'http://static.duoshuo.com/embed.js';
-          ds.charset = 'UTF-8';
-          (document.getElementsByTagName('head')[0]
-          || document.getElementsByTagName('body')[0]).appendChild(ds);
-          })();
-        </script>
+        var duoshuoQuery = {short_name:"tumashu-website"};
+	    (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0]
+		|| document.getElementsByTagName('body')[0]).appendChild(ds);
+	    })();
+	    </script>
       </section>
       <div class="footer">
         <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.x(<a href="http://orgmode.org">Org mode</a> 9.x)</p>

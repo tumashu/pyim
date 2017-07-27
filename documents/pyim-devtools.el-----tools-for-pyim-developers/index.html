@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <title>pyim-devtools.el --- Tools for pyim developers - pyim</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Feng Shu" />
+    <link rel="stylesheet" href="https://tumashu.github.io/pyim/media/css/main.css" type="text/css">
+  </head>
+<body class="container">
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="https://tumashu.github.io/pyim/">pyim</a> <span class="subtitle">(一个 emacs 环境下的中文拼音输入法)</span></h1>
+        <ul>
+          <li><a href="https://tumashu.github.io/pyim/documents/">Documents</a></li>
+          <li><a href="https://tumashu.github.io/pyim/snapshots/">Snapshots</a></li>
+          <li><a href="https://tumashu.github.io/pyim/tags/">Tags</a></li>
+          <li><a href="https://tumashu.github.io/pyim/about/">About</a></li>
+          <li><a href="https://github.com/tumashu/pyim">GitHub</a></li>
+          <li><a href="https://tumashu.github.io/pyim/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="tumashu.github.io/pyim">
+        </form>
+        <img class="avatar" src="https://tumashu.github.io/pyim/media/img/horse.jpg" />
+      </header>
+    </div>
+
+<div class="content-and-footer">
+<div>
+<div class="post">
+<h1 class="post-title">pyim-devtools.el --- Tools for pyim developers</h1>
+<div id="table-of-contents">
+<h2>&#30446;&#24405;</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org782e137">1. 说明文档</a></li>
+<li><a href="#org3f92b21">2. 代码</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org782e137" class="outline-2">
+<h2 id="org782e137"><span class="section-number-2">1</span> 说明文档</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+这个文件包含了与 pyim 开发相关的配置或者工具，比如：
+</p>
+
+<ol class="org-ol">
+<li>org-webpage config for pyim</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org3f92b21" class="outline-2">
+<h2 id="org3f92b21"><span class="section-number-2">2</span> 代码</h2>
+<div class="outline-text-2" id="text-2">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">require</span> '<span style="color: #96CBFE;">pyim</span>)
+(<span style="color: #4c83ff;">require</span> '<span style="color: #96CBFE;">org-webpage</span>)
+(<span style="color: #4c83ff;">require</span> '<span style="color: #96CBFE;">owp-web-server</span>)
+(<span style="color: #4c83ff;">require</span> '<span style="color: #96CBFE;">owp-el2org</span>)
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defvar</span> <span style="color: #ff69b4;">pyim-website-repository-directory</span>
+  <span style="color: #61CE3C;">"~/project/emacs-packages/pyim/"</span>)
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(owp/add-project-config
+ '(<span style="color: #61CE3C;">"pyim"</span>
+   <span style="color: #4c83ff;">:repository-directory</span> (<span style="color: #4c83ff;">:eval</span> pyim-website-repository-directory)
+   <span style="color: #4c83ff;">:remote</span> (git <span style="color: #61CE3C;">"https://github.com/tumashu/pyim.git"</span> <span style="color: #61CE3C;">"gh-pages"</span>)
+   <span style="color: #4c83ff;">:site-domain</span> <span style="color: #61CE3C;">"https://tumashu.github.io/pyim"</span>
+   <span style="color: #4c83ff;">:site-main-title</span> <span style="color: #61CE3C;">"pyim"</span>
+   <span style="color: #4c83ff;">:site-sub-title</span> <span style="color: #61CE3C;">"(&#19968;&#20010; emacs &#29615;&#22659;&#19979;&#30340;&#20013;&#25991;&#25340;&#38899;&#36755;&#20837;&#27861;)"</span>
+   <span style="color: #4c83ff;">:default-category</span> <span style="color: #61CE3C;">"documents"</span>
+   <span style="color: #4c83ff;">:theme</span> (worg killjs)
+   <span style="color: #4c83ff;">:force-absolute-url</span> t
+   <span style="color: #4c83ff;">:source-browse-url</span> (<span style="color: #61CE3C;">"GitHub"</span> <span style="color: #61CE3C;">"https://github.com/tumashu/pyim"</span>)
+   <span style="color: #4c83ff;">:personal-avatar</span> <span style="color: #61CE3C;">"/media/img/horse.jpg"</span>
+   <span style="color: #4c83ff;">:personal-duoshuo-shortname</span> <span style="color: #61CE3C;">"tumashu-website"</span>
+   <span style="color: #4c83ff;">:preparation-function</span> owp/el2org-preparation-function
+   <span style="color: #4c83ff;">:org-export-function</span> owp/el2org-org-export-function
+   <span style="color: #4c83ff;">:el2org-doc-sources</span> (<span style="color: #61CE3C;">"pyim-.*\\.el$"</span>)
+   <span style="color: #4c83ff;">:el2org-readme-sources</span> (<span style="color: #61CE3C;">"pyim.el"</span>)
+   <span style="color: #4c83ff;">:el2org-index-sources</span> (<span style="color: #61CE3C;">"pyim.el"</span>)
+   <span style="color: #4c83ff;">:web-server-port</span> 9876))
+</pre>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2017-07-27</span>
+        <span title="last modification date" class="post-info">2017-07-27</span>
+        <span title="tags" class="post-info">N/A</span>
+        <span title="author" class="post-info">Feng Shu</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div class="ds-thread" data-thread-key="df35d3a8deab1ff5b2b09bfe9194ecde"
+                               data-title="pyim-devtools.el --- Tools for pyim developers" data-url="https://tumashu.github.io/pyim/documents/pyim-devtools.el-----tools-for-pyim-developers/"></div>
+        <script type="text/javascript">
+        var duoshuoQuery = {short_name:"tumashu-website"};
+	    (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0]
+		|| document.getElementsByTagName('body')[0]).appendChild(ds);
+	    })();
+	    </script>
+      </section>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.x(<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; <span id="footerYear"></span> <a href="mailto:tumashu &lt;at&gt; 163 &lt;dot&gt; com">Feng Shu</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/tumashu/org-webpage" target="_blank">org-webpage</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,75 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0">
   <channel>
-    <title>Chinese-pyim</title>
-    <link>https://tumashu.github.io/chinese-pyim</link>
+    <title>pyim</title>
+    <link>https://tumashu.github.io/pyim</link>
     <description>(一个 emacs 环境下的中文拼音输入法)</description>
-    <pubDate>五, 10 3月 2017 13:21:24 CST</pubDate>
-    <lastBuildDate>五, 10 3月 2017 13:21:24 CST</lastBuildDate>
+    <pubDate>四, 27 7月 2017 21:35:46 CST</pubDate>
+    <lastBuildDate>四, 27 7月 2017 21:35:46 CST</lastBuildDate>
     <docs>http://www.rssboard.org/rss-specification</docs>
     <generator>org-webpage static site generator (https://github.com/tumashu/org-webpage)</generator>
 <item>
-<title>chinese-pyim-dictools</title>
-<link>https://tumashu.github.io/chinese-pyim/documents/chinese-pyim-dictools/</link>
+<title>pyim-probe.el --- Auto-Switch-to-English-Input probes for pyim</title>
+<link>https://tumashu.github.io/pyim/documents/pyim-probe.el-----auto-switch-to-english-input-probes-for-pyim/</link>
 <description>No Description</description>
-<pubDate>2017-03-10</pubDate>
-<guid>https://tumashu.github.io/chinese-pyim/documents/chinese-pyim-dictools/</guid>
+<pubDate>2017-07-27</pubDate>
+<guid>https://tumashu.github.io/pyim/documents/pyim-probe.el-----auto-switch-to-english-input-probes-for-pyim/</guid>
 </item>
 <item>
-<title>chinese-pyim-core</title>
-<link>https://tumashu.github.io/chinese-pyim/documents/chinese-pyim-core/</link>
+<title>pyim-pymap.el --- Pinyin map used by pyim</title>
+<link>https://tumashu.github.io/pyim/documents/pyim-pymap.el-----pinyin-map-used-by-pyim/</link>
 <description>No Description</description>
-<pubDate>2017-03-10</pubDate>
-<guid>https://tumashu.github.io/chinese-pyim/documents/chinese-pyim-core/</guid>
+<pubDate>2017-07-27</pubDate>
+<guid>https://tumashu.github.io/pyim/documents/pyim-pymap.el-----pinyin-map-used-by-pyim/</guid>
 </item>
 <item>
-<title>chinese-pyim-utils</title>
-<link>https://tumashu.github.io/chinese-pyim/documents/chinese-pyim-utils/</link>
+<title>pyim-devtools.el --- Tools for pyim developers</title>
+<link>https://tumashu.github.io/pyim/documents/pyim-devtools.el-----tools-for-pyim-developers/</link>
 <description>No Description</description>
-<pubDate>2017-03-10</pubDate>
-<guid>https://tumashu.github.io/chinese-pyim/documents/chinese-pyim-utils/</guid>
+<pubDate>2017-07-27</pubDate>
+<guid>https://tumashu.github.io/pyim/documents/pyim-devtools.el-----tools-for-pyim-developers/</guid>
 </item>
 <item>
-<title>chinese-pyim-benchmark</title>
-<link>https://tumashu.github.io/chinese-pyim/documents/chinese-pyim-benchmark/</link>
+<title>pyim 截图展示</title>
+<link>https://tumashu.github.io/pyim/snapshots/截图展示/</link>
 <description>No Description</description>
-<pubDate>2017-03-10</pubDate>
-<guid>https://tumashu.github.io/chinese-pyim/documents/chinese-pyim-benchmark/</guid>
-</item>
-<item>
-<title>chinese-pyim-pymap</title>
-<link>https://tumashu.github.io/chinese-pyim/documents/chinese-pyim-pymap/</link>
-<description>No Description</description>
-<pubDate>2017-03-10</pubDate>
-<guid>https://tumashu.github.io/chinese-pyim/documents/chinese-pyim-pymap/</guid>
-</item>
-<item>
-<title>chinese-pyim-probe</title>
-<link>https://tumashu.github.io/chinese-pyim/documents/chinese-pyim-probe/</link>
-<description>No Description</description>
-<pubDate>2017-03-10</pubDate>
-<guid>https://tumashu.github.io/chinese-pyim/documents/chinese-pyim-probe/</guid>
-</item>
-<item>
-<title>chinese-pyim-devtools</title>
-<link>https://tumashu.github.io/chinese-pyim/documents/chinese-pyim-devtools/</link>
-<description>No Description</description>
-<pubDate>2017-03-10</pubDate>
-<guid>https://tumashu.github.io/chinese-pyim/documents/chinese-pyim-devtools/</guid>
-</item>
-<item>
-<title>chinese-pyim</title>
-<link>https://tumashu.github.io/chinese-pyim/documents/chinese-pyim/</link>
-<description>No Description</description>
-<pubDate>2017-03-10</pubDate>
-<guid>https://tumashu.github.io/chinese-pyim/documents/chinese-pyim/</guid>
-</item>
-<item>
-<title>Chinese-pyim 截图展示</title>
-<link>https://tumashu.github.io/chinese-pyim/snapshots/截图展示/</link>
-<description>No Description</description>
-<pubDate>2015-07-04</pubDate>
-<guid>https://tumashu.github.io/chinese-pyim/snapshots/截图展示/</guid>
+<pubDate>2017-07-25</pubDate>
+<guid>https://tumashu.github.io/pyim/snapshots/截图展示/</guid>
 </item>
 </channel>
 </rss>
