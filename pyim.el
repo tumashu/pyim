@@ -2084,11 +2084,10 @@ Return the input string."
 注意： 不同的输入法，scode 的结构也是不一样的。"
   (let ((class (pyim-scheme-get-option scheme-name :class)))
     (when class
-      (funcall (intern (concat "pyim-code-split-"
-                               (symbol-name class)))
+      (funcall (intern (format "pyim-code-split-%S-code" class))
                code scheme-name))))
 
-(defun pyim-code-split-quanpin (py &optional -)
+(defun pyim-code-split-quanpin-code (py &optional -)
   "把一个拼音字符串 `py' 分解成 spinyin-list (由声母和韵母组成的复杂列表），
 优先处理含有 ' 的位置。"
   (when (and py (string< "" py))
@@ -2105,7 +2104,7 @@ Return the input string."
                           (split-string py "'")))))))
 
 ;; "nihc" -> (((\"n\" . \"i\") (\"h\" . \"ao\")))
-(defun pyim-code-split-shuangpin (str &optional scheme-name)
+(defun pyim-code-split-shuangpin-code (str &optional scheme-name)
   "把一个双拼字符串分解成一个声母和韵母组成的复杂列表。"
   (let ((keymaps (pyim-scheme-get-option scheme-name :keymaps))
         (list (string-to-list (replace-regexp-in-string "-" "" str)))
@@ -2127,7 +2126,7 @@ Return the input string."
     (pyim-spinyin-find-fuzzy
      (pyim-permutate-list (nreverse results)))))
 
-(defun pyim-code-split-xingma (code &optional -)
+(defun pyim-code-split-xingma-code (code &optional -)
   "这个函数只是对 code 做了一点简单的包装，实际并不真正的
 *分解* code, 用于五笔等基于形码的输入法, 比如：
 
@@ -2217,11 +2216,10 @@ Return the input string."
 重新合并为 code 字符串，用于搜索。"
   (let ((class (pyim-scheme-get-option scheme-name :class)))
     (when class
-      (funcall (intern (concat "pyim-scode-join-"
-                               (symbol-name class)))
+      (funcall (intern (format "pyim-scode-join-%S-scode" class))
                scode scheme-name as-search-key shou-zi-mu))))
 
-(defun pyim-scode-join-quanpin (spinyin scheme-name &optional as-search-key shou-zi-mu)
+(defun pyim-scode-join-quanpin-scode (spinyin scheme-name &optional as-search-key shou-zi-mu)
   "把一个 `spinyin' (splited pinyin) 合并为一个全拼字符串，当 `shou-zi-mu'
 设置为 t 时，生成拼音首字母字符串，比如 p-y。"
   (mapconcat 'identity
@@ -2234,12 +2232,12 @@ Return the input string."
               spinyin)
              "-"))
 
-(defun pyim-scode-join-shuangpin (spinyin scheme-name &optional as-search-key shou-zi-mu)
+(defun pyim-scode-join-shuangpin-scode (spinyin scheme-name &optional as-search-key shou-zi-mu)
   "把一个 `spinyin' (splited pinyin) 合并为一个双拼字符串，当 `shou-zi-mu'
 设置为 t 时，生成双拼首字母字符串，比如 p-y。"
   (if as-search-key
       ;; 双拼使用全拼输入法的词库，所以搜索 dcache 用的 key 要使用全拼
-      (pyim-scode-join-quanpin spinyin scheme-name as-search-key shou-zi-mu)
+      (pyim-scode-join-quanpin-scode spinyin scheme-name as-search-key shou-zi-mu)
     (when scheme-name
       (let ((keymaps (pyim-scheme-get-option scheme-name :keymaps)))
         (mapconcat 'identity
@@ -2262,7 +2260,7 @@ Return the input string."
                     spinyin)
                    "-")))))
 
-(defun pyim-scode-join-xingma (scode scheme-name &optional as-search-key shou-zi-mu)
+(defun pyim-scode-join-xingma-scode (scode scheme-name &optional as-search-key shou-zi-mu)
   "把一个 `scode' (splited code) 合并为一个 code 字符串, 用于五笔等基于形码的输入法。
 比如：
 
@@ -2369,7 +2367,7 @@ Return the input string."
     (let ((class (pyim-scheme-get-option scheme-name :class)))
       (when (member class '(xingma))
         (let* ((code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
-               (code (pyim-scode-join-xingma scode scheme-name))
+               (code (pyim-scode-join-xingma-scode scode scheme-name))
                (n (pyim-scheme-get-option scheme-name :code-maximum-length))
                (output (pyim-split-string-by-number code n t))
                (output1 (car output))
