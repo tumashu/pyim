@@ -34,143 +34,144 @@
 <h2>&#30446;&#24405;</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgaf183d0">1. pyim 使用说明</a>
+<li><a href="#orgd6f6f5d">1. pyim 使用说明</a>
 <ul>
-<li><a href="#org32f56f5">1.1. 截图</a></li>
-<li><a href="#org6d05aae">1.2. 简介</a></li>
-<li><a href="#org484529b">1.3. 背景</a></li>
-<li><a href="#orgda82428">1.4. 目标</a></li>
-<li><a href="#orgedbb8f3">1.5. 特点</a></li>
-<li><a href="#org92f9c8a">1.6. 安装</a></li>
-<li><a href="#orgf6f720e">1.7. 配置</a>
+<li><a href="#org68ee5dd">1.1. 截图</a></li>
+<li><a href="#orgb618cfa">1.2. 简介</a></li>
+<li><a href="#orgd207cd1">1.3. 背景</a></li>
+<li><a href="#org791c3a4">1.4. 目标</a></li>
+<li><a href="#org2740d9c">1.5. 特点</a></li>
+<li><a href="#org0660d50">1.6. 安装</a></li>
+<li><a href="#org0c9af1b">1.7. 配置</a>
 <ul>
-<li><a href="#orgceee36a">1.7.1. 配置实例</a></li>
-<li><a href="#org7f5de55">1.7.2. 添加词库文件</a></li>
-<li><a href="#org1e6fb80">1.7.3. 激活 pyim</a></li>
+<li><a href="#orge83e61c">1.7.1. 配置实例</a></li>
+<li><a href="#orgbc313ee">1.7.2. 添加词库文件</a></li>
+<li><a href="#org2a0dd8d">1.7.3. 激活 pyim</a></li>
 </ul>
 </li>
-<li><a href="#org6321aa2">1.8. 使用</a>
+<li><a href="#org66f5084">1.8. 使用</a>
 <ul>
-<li><a href="#orgf5eb8a4">1.8.1. 常用快捷键</a></li>
-<li><a href="#orge96e324">1.8.2. 使用双拼模式</a></li>
-<li><a href="#org35041c6">1.8.3. 使用五笔输入</a></li>
-<li><a href="#org2d6e01b">1.8.4. 让选词框跟随光标</a></li>
-<li><a href="#org58f4267">1.8.5. 调整 tooltip 选词框的显示样式</a></li>
-<li><a href="#orgda95486">1.8.6. 设置模糊音</a></li>
-<li><a href="#org64a152b">1.8.7. 词条获取</a></li>
-<li><a href="#org7be6cfd">1.8.8. 切换全角标点与半角标点</a></li>
-<li><a href="#org69d9314">1.8.9. 手动加词和删词</a></li>
-<li><a href="#org0d68e75">1.8.10. pyim 高级功能</a>
+<li><a href="#orgf9e0d56">1.8.1. 常用快捷键</a></li>
+<li><a href="#org88c4f48">1.8.2. 使用双拼模式</a></li>
+<li><a href="#orgf7de25e">1.8.3. 使用五笔输入</a></li>
+<li><a href="#org4374118">1.8.4. 让选词框跟随光标</a></li>
+<li><a href="#org14f5d66">1.8.5. 调整 tooltip 选词框的显示样式</a></li>
+<li><a href="#orgc30cec8">1.8.6. 设置模糊音</a></li>
+<li><a href="#orgd0497a0">1.8.7. 词条获取</a></li>
+<li><a href="#orgb784032">1.8.8. 切换全角标点与半角标点</a></li>
+<li><a href="#orga97171e">1.8.9. 手动加词和删词</a></li>
+<li><a href="#org2193422">1.8.10. pyim 高级功能</a>
 <ul>
-<li><a href="#orge36fc1b">1.8.10.1. 根据环境自动切换到英文输入模式</a></li>
-<li><a href="#org30e777a">1.8.10.2. 根据环境自动切换到半角标点输入模式</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#org8dd85d8">1.9. 捐赠</a></li>
-<li><a href="#orga0e5b21">1.10. Tips</a>
-<ul>
-<li><a href="#org394e40c">1.10.1. 如何将个人词条导出到一个文件</a></li>
-<li><a href="#org97743fe">1.10.2. pyim 出现错误时，如何开启 debug 模式</a></li>
-<li><a href="#orga4d6c9b">1.10.3. 选词框弹出位置不合理或者选词框内容显示不全</a></li>
-<li><a href="#org13ff9e1">1.10.4. 如何查看 pyim 文档。</a></li>
-<li><a href="#org7f77a8e">1.10.5. 将光标处的拼音或者五笔字符串转换为中文 (与 vimim 的 “点石成金” 功能类似)</a></li>
-<li><a href="#orgc4e6d79">1.10.6. 如何添加自定义拼音词库</a>
-<ul>
-<li><a href="#org60ab0e8">1.10.6.1. 第一种方式 (懒人推荐使用)</a></li>
-<li><a href="#org8f3c9b7">1.10.6.2. 第二种方式 (Windows 用户推荐使用)</a></li>
-<li><a href="#org27cb69b">1.10.6.3. 第三种方式 (Linux &amp; Unix 用户推荐使用)</a></li>
-</ul>
-</li>
-<li><a href="#org5debb97">1.10.7. 如何手动安装和管理词库</a></li>
-<li><a href="#org7d20bdd">1.10.8. Emacs 启动时加载 pyim 词库</a></li>
-<li><a href="#orgcb72cdf">1.10.9. 将汉字字符串转换为拼音字符串</a></li>
-<li><a href="#org92e88e7">1.10.10. 中文分词</a></li>
-<li><a href="#orgef23425">1.10.11. 获取光标处的中文词条</a></li>
-<li><a href="#org6cf09ac">1.10.12. 让 `forward-word' 和 `back-backward’ 在中文环境下正常工作</a></li>
-<li><a href="#org0312503">1.10.13. 为 isearch 相关命令添加拼音搜索支持</a></li>
+<li><a href="#org342f738">1.8.10.1. 根据环境自动切换到英文输入模式</a></li>
+<li><a href="#orgfc6cad7">1.8.10.2. 根据环境自动切换到半角标点输入模式</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orgbbbf226">2. 核心代码</a>
+<li><a href="#orgaa6faae">1.9. 捐赠</a></li>
+<li><a href="#org30bf16f">1.10. Tips</a>
 <ul>
-<li><a href="#org4b9f7d4">2.1. require + defcustom + defvar</a></li>
-<li><a href="#org9ac1612">2.2. 将变量转换为 local 变量</a></li>
-<li><a href="#org1b4e516">2.3. "汉字 -&gt; 拼音" 以及 "拼音 -&gt; 汉字" 的转换函数</a>
+<li><a href="#org0c04daa">1.10.1. 如何将个人词条导出到一个文件</a></li>
+<li><a href="#org588e890">1.10.2. pyim 出现错误时，如何开启 debug 模式</a></li>
+<li><a href="#org24d4360">1.10.3. 选词框弹出位置不合理或者选词框内容显示不全</a></li>
+<li><a href="#org542d54d">1.10.4. 如何查看 pyim 文档。</a></li>
+<li><a href="#org7d4d1d8">1.10.5. 将光标处的拼音或者五笔字符串转换为中文 (与 vimim 的 “点石成金” 功能类似)</a></li>
+<li><a href="#org209849e">1.10.6. 如何添加自定义拼音词库</a>
 <ul>
-<li><a href="#orgde5f46c">2.3.1. 查询某个汉字的拼音</a></li>
+<li><a href="#orgcb173a3">1.10.6.1. 第一种方式 (懒人推荐使用)</a></li>
+<li><a href="#org28f3a40">1.10.6.2. 第二种方式 (Windows 用户推荐使用)</a></li>
+<li><a href="#orgf8bcde0">1.10.6.3. 第三种方式 (Linux &amp; Unix 用户推荐使用)</a></li>
 </ul>
 </li>
-<li><a href="#org1a91732">2.4. 输入法启动和重启</a></li>
-<li><a href="#orgc84d54d">2.5. 处理词库文件</a>
-<ul>
-<li><a href="#org9b92d13">2.5.1. 自定义词库</a>
-<ul>
-<li><a href="#org14ca639">2.5.1.1. 词库文件格式</a></li>
-</ul>
-</li>
-<li><a href="#org22714fc">2.5.2. 从词库中搜索中文词条</a></li>
-<li><a href="#org71b544f">2.5.3. 保存词条，删除词条以及调整词条位置</a>
-<ul>
-<li><a href="#org9a5b196">2.5.3.1. 删词功能</a></li>
+<li><a href="#org0d7e7f3">1.10.7. 如何手动安装和管理词库</a></li>
+<li><a href="#org9cb305e">1.10.8. Emacs 启动时加载 pyim 词库</a></li>
+<li><a href="#org573c43d">1.10.9. 将汉字字符串转换为拼音字符串</a></li>
+<li><a href="#org65a02c0">1.10.10. 中文分词</a></li>
+<li><a href="#org73e3b17">1.10.11. 获取光标处的中文词条</a></li>
+<li><a href="#orgef5fb91">1.10.12. 让 `forward-word' 和 `back-backward’ 在中文环境下正常工作</a></li>
+<li><a href="#org416a773">1.10.13. 为 isearch 相关命令添加拼音搜索支持</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org418b7bb">2.6. 生成 `pyim-entered-code' 并插入 `pyim-dagger-str'</a>
+<li><a href="#org14c1fa9">2. 核心代码</a>
 <ul>
-<li><a href="#org31ba8c6">2.6.1. 生成拼音字符串 `pyim-entered-code'</a></li>
-<li><a href="#org67ef9d4">2.6.2. 在待输入 buffer 中插入 `pyim-dagger-str'</a></li>
+<li><a href="#org0a7abf0">2.1. require + defcustom + defvar</a></li>
+<li><a href="#orgf04e83d">2.2. 将变量转换为 local 变量</a></li>
+<li><a href="#org35d89c1">2.3. "汉字 -&gt; 拼音" 以及 "拼音 -&gt; 汉字" 的转换函数</a>
+<ul>
+<li><a href="#orgdfabb79">2.3.1. 查询某个汉字的拼音</a></li>
 </ul>
 </li>
-<li><a href="#org7f62bb5">2.7. 处理拼音 code 字符串 `pyim-entered-code'</a>
+<li><a href="#org11721d1">2.4. 输入法启动和重启</a></li>
+<li><a href="#orgde5973f">2.5. 处理词库文件</a>
 <ul>
-<li><a href="#org7d32bfc">2.7.1. 拼音字符串 -&gt; 待选词列表</a>
+<li><a href="#org0a9a053">2.5.1. 自定义词库</a>
 <ul>
-<li><a href="#org449fe38">2.7.1.1. 分解拼音字符串</a></li>
-<li><a href="#org85c69c5">2.7.1.2. 获得词语拼音并进一步查询得到备选词列表</a></li>
+<li><a href="#org7a48917">2.5.1.1. 词库文件格式</a></li>
 </ul>
 </li>
-<li><a href="#orgdb35c1a">2.7.2. 核心函数：拼音字符串处理函数</a></li>
-</ul>
-</li>
-<li><a href="#org515946b">2.8. 处理当前需要插入 buffer 的 dagger 字符串： `pyim-dagger-str'</a></li>
-<li><a href="#orgd8e2ad5">2.9. 显示和选择备选词条</a>
+<li><a href="#org6b305af">2.5.2. 从词库中搜索中文词条</a></li>
+<li><a href="#org997847f">2.5.3. 保存词条，删除词条以及调整词条位置</a>
 <ul>
-<li><a href="#org1f12799">2.9.1. 构建词条菜单字符串</a></li>
-<li><a href="#orgcd2b097">2.9.2. 选择备选词</a></li>
+<li><a href="#org2980fba">2.5.3.1. 删词功能</a></li>
 </ul>
 </li>
-<li><a href="#orgb812aa2">2.10. 处理标点符号</a></li>
-<li><a href="#org83a322a">2.11. 处理特殊功能触发字符（单字符快捷键）</a></li>
-<li><a href="#org8eae2fe">2.12. 与拼音输入相关的用户命令</a>
+</ul>
+</li>
+<li><a href="#orgf2d81ec">2.6. 生成 `pyim-entered-code' 并插入 `pyim-dagger-str'</a>
 <ul>
-<li><a href="#orgebe8c61">2.12.1. 删除拼音字符串最后一个字符</a></li>
-<li><a href="#org7ae03db">2.12.2. 删除拼音字符串最后一个拼音</a></li>
-<li><a href="#org6be59a5">2.12.3. 将光标前的 code 字符串转换为中文</a></li>
-<li><a href="#org33f4c98">2.12.4. 取消当前输入</a></li>
-<li><a href="#org2bd8d02">2.12.5. 字母上屏</a></li>
-<li><a href="#orgb2f6320">2.12.6. pyim 取消激活</a></li>
-<li><a href="#org8727a29">2.12.7. 切换中英文输入模式</a></li>
-<li><a href="#org568969f">2.12.8. 为 isearch 添加拼音搜索功能</a></li>
+<li><a href="#org312e005">2.6.1. 生成拼音字符串 `pyim-entered-code'</a></li>
+<li><a href="#orga7aa296">2.6.2. 在待输入 buffer 中插入 `pyim-dagger-str'</a></li>
 </ul>
 </li>
-<li><a href="#orge79a457">2.13. 让 forward/backward 支持中文</a></li>
-<li><a href="#orgee0347f">2.14. 简单的中文分词功能</a></li>
-<li><a href="#orgd52a1ab">2.15. 汉字到拼音的转换工具</a></li>
-<li><a href="#org1639ec8">2.16. pyim 词库管理工具</a></li>
+<li><a href="#orgb0073a7">2.7. 处理拼音 code 字符串 `pyim-entered-code'</a>
+<ul>
+<li><a href="#org5aa4acf">2.7.1. 拼音字符串 -&gt; 待选词列表</a>
+<ul>
+<li><a href="#org70d3803">2.7.1.1. 分解拼音字符串</a></li>
+<li><a href="#org723f401">2.7.1.2. 获得词语拼音并进一步查询得到备选词列表</a></li>
+</ul>
+</li>
+<li><a href="#orgd701258">2.7.2. 核心函数：拼音字符串处理函数</a></li>
+</ul>
+</li>
+<li><a href="#org0db69be">2.8. 处理当前需要插入 buffer 的 dagger 字符串： `pyim-dagger-str'</a></li>
+<li><a href="#org547a932">2.9. 显示和选择备选词条</a>
+<ul>
+<li><a href="#org8711e5b">2.9.1. 构建词条菜单字符串</a></li>
+<li><a href="#orgb424b5c">2.9.2. 选择备选词</a></li>
+</ul>
+</li>
+<li><a href="#org01d6da1">2.10. 处理标点符号</a></li>
+<li><a href="#org8cd078b">2.11. 处理特殊功能触发字符（单字符快捷键）</a></li>
+<li><a href="#org48f0b5c">2.12. 与拼音输入相关的用户命令</a>
+<ul>
+<li><a href="#org192684e">2.12.1. 删除拼音字符串最后一个字符</a></li>
+<li><a href="#orgcb9a3a9">2.12.2. 删除拼音字符串最后一个拼音</a></li>
+<li><a href="#orgb1ec7ef">2.12.3. 将光标前的 code 字符串转换为中文</a></li>
+<li><a href="#org2770521">2.12.4. 取消当前输入</a></li>
+<li><a href="#org4804f55">2.12.5. 字母上屏</a></li>
+<li><a href="#orgf1c63fe">2.12.6. pyim 取消激活</a></li>
+<li><a href="#orga74f7a1">2.12.7. 切换中英文输入模式</a></li>
+<li><a href="#orgc10fb48">2.12.8. 为 isearch 添加拼音搜索功能</a></li>
+</ul>
+</li>
+<li><a href="#org4e1fea9">2.13. 让 forward/backward 支持中文</a></li>
+<li><a href="#org23aa8f1">2.14. 简单的中文分词功能</a></li>
+<li><a href="#orge820660">2.15. 汉字到拼音的转换工具</a></li>
+<li><a href="#org43c1f63">2.16. pyim 词库管理工具</a></li>
+<li><a href="#org9300094">2.17. pyim 探针程序</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgaf183d0" class="outline-2">
-<h2 id="orgaf183d0"><span class="section-number-2">1</span> pyim 使用说明</h2>
+<div id="outline-container-orgd6f6f5d" class="outline-2">
+<h2 id="orgd6f6f5d"><span class="section-number-2">1</span> pyim 使用说明</h2>
 <div class="outline-text-2" id="text-1">
-</div><div id="outline-container-org32f56f5" class="outline-3">
-<h3 id="org32f56f5"><span class="section-number-3">1.1</span> 截图</h3>
+</div><div id="outline-container-org68ee5dd" class="outline-3">
+<h3 id="org68ee5dd"><span class="section-number-3">1.1</span> 截图</h3>
 <div class="outline-text-3" id="text-1-1">
 
 <div class="figure">
@@ -180,8 +181,8 @@
 </div>
 </div>
 
-<div id="outline-container-org6d05aae" class="outline-3">
-<h3 id="org6d05aae"><span class="section-number-3">1.2</span> 简介</h3>
+<div id="outline-container-orgb618cfa" class="outline-3">
+<h3 id="orgb618cfa"><span class="section-number-3">1.2</span> 简介</h3>
 <div class="outline-text-3" id="text-1-2">
 <p>
 pyim 是 Emacs 环境下的一个中文输入法，最初它只支持全拼输入，所以当时
@@ -190,8 +191,8 @@ pyim 是 Emacs 环境下的一个中文输入法，最初它只支持全拼输�
 </div>
 </div>
 
-<div id="outline-container-org484529b" class="outline-3">
-<h3 id="org484529b"><span class="section-number-3">1.3</span> 背景</h3>
+<div id="outline-container-orgd207cd1" class="outline-3">
+<h3 id="orgd207cd1"><span class="section-number-3">1.3</span> 背景</h3>
 <div class="outline-text-3" id="text-1-3">
 <p>
 pyim 的代码源自 emacs-eim。
@@ -217,8 +218,8 @@ emacs-eim 是 Emacs 环境下的一个中文输入法框架， 支持拼音，�
 </div>
 </div>
 
-<div id="outline-container-orgda82428" class="outline-3">
-<h3 id="orgda82428"><span class="section-number-3">1.4</span> 目标</h3>
+<div id="outline-container-org791c3a4" class="outline-3">
+<h3 id="org791c3a4"><span class="section-number-3">1.4</span> 目标</h3>
 <div class="outline-text-3" id="text-1-4">
 <p>
 pyim 的目标是：<b>尽最大的努力成为一个好用的 Emacs 中文输入法</b>，具体可表现为三个方面：
@@ -233,8 +234,8 @@ pyim 的目标是：<b>尽最大的努力成为一个好用的 Emacs 中文输�
 </div>
 </div>
 
-<div id="outline-container-orgedbb8f3" class="outline-3">
-<h3 id="orgedbb8f3"><span class="section-number-3">1.5</span> 特点</h3>
+<div id="outline-container-org2740d9c" class="outline-3">
+<h3 id="org2740d9c"><span class="section-number-3">1.5</span> 特点</h3>
 <div class="outline-text-3" id="text-1-5">
 <ol class="org-ol">
 <li>pyim 支持全拼，双拼和五笔，其中对全拼的支持最好。</li>
@@ -244,8 +245,8 @@ pyim 的目标是：<b>尽最大的努力成为一个好用的 Emacs 中文输�
 </div>
 </div>
 
-<div id="outline-container-org92f9c8a" class="outline-3">
-<h3 id="org92f9c8a"><span class="section-number-3">1.6</span> 安装</h3>
+<div id="outline-container-org0660d50" class="outline-3">
+<h3 id="org0660d50"><span class="section-number-3">1.6</span> 安装</h3>
 <div class="outline-text-3" id="text-1-6">
 <ol class="org-ol">
 <li>配置 melpa 源，参考：<a href="http://melpa.org/#/getting-started">http://melpa.org/#/getting-started</a></li>
@@ -263,11 +264,11 @@ pyim 的目标是：<b>尽最大的努力成为一个好用的 Emacs 中文输�
 </div>
 </div>
 
-<div id="outline-container-orgf6f720e" class="outline-3">
-<h3 id="orgf6f720e"><span class="section-number-3">1.7</span> 配置</h3>
+<div id="outline-container-org0c9af1b" class="outline-3">
+<h3 id="org0c9af1b"><span class="section-number-3">1.7</span> 配置</h3>
 <div class="outline-text-3" id="text-1-7">
-</div><div id="outline-container-orgceee36a" class="outline-4">
-<h4 id="orgceee36a"><span class="section-number-4">1.7.1</span> 配置实例</h4>
+</div><div id="outline-container-orge83e61c" class="outline-4">
+<h4 id="orge83e61c"><span class="section-number-4">1.7.1</span> 配置实例</h4>
 <div class="outline-text-4" id="text-1-7-1">
 <p>
 对 pyim 感兴趣的同学，可以看看本人的 pyim 配置（总是适用于最新版的 pyim）:
@@ -326,8 +327,8 @@ pyim 的目标是：<b>尽最大的努力成为一个好用的 Emacs 中文输�
 </div>
 </div>
 
-<div id="outline-container-org7f5de55" class="outline-4">
-<h4 id="org7f5de55"><span class="section-number-4">1.7.2</span> 添加词库文件</h4>
+<div id="outline-container-orgbc313ee" class="outline-4">
+<h4 id="orgbc313ee"><span class="section-number-4">1.7.2</span> 添加词库文件</h4>
 <div class="outline-text-4" id="text-1-7-2">
 <p>
 pyim 当前的默认的拼音词库是 pyim-basedict, 这个词库的词条量
@@ -376,13 +377,13 @@ pyim-greatdict 包对应的词库由 <a href="https://github.com/xiaowl">WenLian
 </ol>
 
 <p>
-如果 pyim-greatdict 不能满足需求，用户可以使用其他方式为 pyim 添加拼音词库，具体方式请参考 <a href="#orgc4e6d79">1.10.6</a> 小结。
+如果 pyim-greatdict 不能满足需求，用户可以使用其他方式为 pyim 添加拼音词库，具体方式请参考 <a href="#org209849e">1.10.6</a> 小结。
 </p>
 </div>
 </div>
 
-<div id="outline-container-org1e6fb80" class="outline-4">
-<h4 id="org1e6fb80"><span class="section-number-4">1.7.3</span> 激活 pyim</h4>
+<div id="outline-container-org2a0dd8d" class="outline-4">
+<h4 id="org2a0dd8d"><span class="section-number-4">1.7.3</span> 激活 pyim</h4>
 <div class="outline-text-4" id="text-1-7-3">
 <pre class="example">
 (setq default-input-method "pyim")
@@ -392,11 +393,11 @@ pyim-greatdict 包对应的词库由 <a href="https://github.com/xiaowl">WenLian
 </div>
 </div>
 
-<div id="outline-container-org6321aa2" class="outline-3">
-<h3 id="org6321aa2"><span class="section-number-3">1.8</span> 使用</h3>
+<div id="outline-container-org66f5084" class="outline-3">
+<h3 id="org66f5084"><span class="section-number-3">1.8</span> 使用</h3>
 <div class="outline-text-3" id="text-1-8">
-</div><div id="outline-container-orgf5eb8a4" class="outline-4">
-<h4 id="orgf5eb8a4"><span class="section-number-4">1.8.1</span> 常用快捷键</h4>
+</div><div id="outline-container-orgf9e0d56" class="outline-4">
+<h4 id="orgf9e0d56"><span class="section-number-4">1.8.1</span> 常用快捷键</h4>
 <div class="outline-text-4" id="text-1-8-1">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -477,8 +478,8 @@ pyim-greatdict 包对应的词库由 <a href="https://github.com/xiaowl">WenLian
 </div>
 </div>
 
-<div id="outline-container-orge96e324" class="outline-4">
-<h4 id="orge96e324"><span class="section-number-4">1.8.2</span> 使用双拼模式</h4>
+<div id="outline-container-org88c4f48" class="outline-4">
+<h4 id="org88c4f48"><span class="section-number-4">1.8.2</span> 使用双拼模式</h4>
 <div class="outline-text-4" id="text-1-8-2">
 <p>
 pyim 支持双拼输入模式，用户可以通过变量 `pyim-default-scheme' 来设定：
@@ -499,8 +500,8 @@ pyim 支持双拼输入模式，用户可以通过变量 `pyim-default-scheme' �
 </div>
 </div>
 
-<div id="outline-container-org35041c6" class="outline-4">
-<h4 id="org35041c6"><span class="section-number-4">1.8.3</span> 使用五笔输入</h4>
+<div id="outline-container-orgf7de25e" class="outline-4">
+<h4 id="orgf7de25e"><span class="section-number-4">1.8.3</span> 使用五笔输入</h4>
 <div class="outline-text-4" id="text-1-8-3">
 <p>
 pyim 支持五笔输入模式，用户可以通过变量 `pyim-default-scheme' 来设定：
@@ -533,7 +534,7 @@ pyim 支持五笔输入模式，用户可以通过变量 `pyim-default-scheme' �
 </p>
 
 <p>
-注意：为了简化代码和提高输入法响应速度，pyim 直接将拼音词库和五笔词库合并到同一个dcache 文件中，所以 pyim <b>强制规定</b>在词库中，五笔编码<b>必须</b>都以 '.' 开头，比如 '.aaaa' ,这样可以避免出现不必要的混乱。
+注意：为了简化代码和提高输入法响应速度，pyim 直接将拼音词库和其它输入法词库（比如：五笔词库）合并到同一个 dcache 文件中，所以 pyim <b>强制规定</b>在词库中，五笔编码<b>必须</b>都以 '.' 开头，比如 '.aaaa' ,这样可以避免出现不必要的混乱。
 </p>
 
 <p>
@@ -542,8 +543,8 @@ pyim 支持五笔输入模式，用户可以通过变量 `pyim-default-scheme' �
 </div>
 </div>
 
-<div id="outline-container-org2d6e01b" class="outline-4">
-<h4 id="org2d6e01b"><span class="section-number-4">1.8.4</span> 让选词框跟随光标</h4>
+<div id="outline-container-org4374118" class="outline-4">
+<h4 id="org4374118"><span class="section-number-4">1.8.4</span> 让选词框跟随光标</h4>
 <div class="outline-text-4" id="text-1-8-4">
 <p>
 用户可以通过下面的设置让 pyim 在<b>光标处</b>显示一个选词框：
@@ -579,8 +580,8 @@ GTK 选词框的字体设置可以参考：<a href="https://www.gnu.org/software
 </div>
 </div>
 
-<div id="outline-container-org58f4267" class="outline-4">
-<h4 id="org58f4267"><span class="section-number-4">1.8.5</span> 调整 tooltip 选词框的显示样式</h4>
+<div id="outline-container-org14f5d66" class="outline-4">
+<h4 id="org14f5d66"><span class="section-number-4">1.8.5</span> 调整 tooltip 选词框的显示样式</h4>
 <div class="outline-text-4" id="text-1-8-5">
 <p>
 pyim 的 tooltip 选词框默认使用<b>双行显示</b>的样式，在一些特殊的情况下（比如：popup 显示的菜单错位），用户可以使用<b>单行显示</b>
@@ -592,13 +593,13 @@ pyim 的 tooltip 选词框默认使用<b>双行显示</b>的样式，在一些�
 </pre>
 
 <p>
-注：用户可以添加函数 pyim-page-style:style-name 来定义自己的选词框格式。
+注：用户可以添加函数 pyim-page-style-STYLENAME-style 来定义自己的选词框格式。
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgda95486" class="outline-4">
-<h4 id="orgda95486"><span class="section-number-4">1.8.6</span> 设置模糊音</h4>
+<div id="outline-container-orgc30cec8" class="outline-4">
+<h4 id="orgc30cec8"><span class="section-number-4">1.8.6</span> 设置模糊音</h4>
 <div class="outline-text-4" id="text-1-8-6">
 <p>
 可以通过设置 `pyim-fuzzy-pinyin-alist' 变量来自定义模糊音。
@@ -606,19 +607,19 @@ pyim 的 tooltip 选词框默认使用<b>双行显示</b>的样式，在一些�
 </div>
 </div>
 
-<div id="outline-container-org64a152b" class="outline-4">
-<h4 id="org64a152b"><span class="section-number-4">1.8.7</span> 词条获取</h4>
+<div id="outline-container-orgd0497a0" class="outline-4">
+<h4 id="orgd0497a0"><span class="section-number-4">1.8.7</span> 词条获取</h4>
 <div class="outline-text-4" id="text-1-8-7">
 <p>
 pyim <b>内置</b>了多种词条获取的方式：
 </p>
 
 <ol class="org-ol">
-<li>`dcache-personal'     从 `pyim-dcache-icode2word' 中获取词条。</li>
-<li>`dcache-common'       从 `pyim-dcache-code2word' 中获取词条。</li>
-<li>`pinyin-chars'        逐一获取一个拼音对应的多个汉字。</li>
-<li>`pinyin-shortcode'    获取一个简拼对应的词条，如果输入 \"ni-hao\" ，那么同时搜索 code 为 \"n-h\" 的词条。</li>
-<li>`pinyin-znabc'        类似智能ABC的词语获取方式(源于 emacs-eim)."</li>
+<li>`personal-dcache-words'  从 `pyim-dcache-icode2word' 中获取词条。</li>
+<li>`common-dcache-words'    从 `pyim-dcache-code2word' 中获取词条。</li>
+<li>`pinyin-chars'           逐一获取一个拼音对应的多个汉字。</li>
+<li>`jianpin-words'          获取一个简拼对应的词条，如果输入 \"ni-hao\" ，那么同时搜索 code 为 \"n-h\" 的词条。</li>
+<li>`znabc-words'            类似智能ABC的词语获取方式(源于 emacs-eim)."</li>
 </ol>
 
 <p>
@@ -626,7 +627,7 @@ pyim <b>内置</b>了多种词条获取的方式：
 </p>
 
 <pre class="example">
-(setq pyim-backends '(dcache-personal dcache-common pinyin-chars pinyin-shortcode pinyin-znabc))
+(setq pyim-backends '(personal-dcache-words common-dcache-words pinyin-chars jianpin-words znabc-words))
 </pre>
 
 <p>
@@ -634,13 +635,13 @@ pyim <b>内置</b>了多种词条获取的方式：
 </p>
 
 <pre class="example">
-(setq pyim-backends '(dcache-personal dcache-common pinyin-chars))
+(setq pyim-backends '(personal-dcache-words common-dcache-words pinyin-chars))
 </pre>
 </div>
 </div>
 
-<div id="outline-container-org7be6cfd" class="outline-4">
-<h4 id="org7be6cfd"><span class="section-number-4">1.8.8</span> 切换全角标点与半角标点</h4>
+<div id="outline-container-orgb784032" class="outline-4">
+<h4 id="orgb784032"><span class="section-number-4">1.8.8</span> 切换全角标点与半角标点</h4>
 <div class="outline-text-4" id="text-1-8-8">
 <ol class="org-ol">
 <li>第一种方法：使用命令 `pyim-punctuation-toggle'，全局切换。</li>
@@ -650,11 +651,11 @@ pyim <b>内置</b>了多种词条获取的方式：
 </div>
 </div>
 
-<div id="outline-container-org69d9314" class="outline-4">
-<h4 id="org69d9314"><span class="section-number-4">1.8.9</span> 手动加词和删词</h4>
+<div id="outline-container-orga97171e" class="outline-4">
+<h4 id="orga97171e"><span class="section-number-4">1.8.9</span> 手动加词和删词</h4>
 <div class="outline-text-4" id="text-1-8-9">
 <ol class="org-ol">
-<li>`pyim-create-word-at-point:"N"char' 这是一组命令，从光标前提取N个汉字字符组成字符串，并将其加入个人词库。</li>
+<li>`pyim-create-Ncchar-word-at-point 这是一组命令，从光标前提取N个汉字字符组成字符串，并将其加入个人词库。</li>
 <li>`pyim-translate-trigger-char' 以默认设置为例：在“我爱吃红烧肉”后输入“5v” 可以将“爱吃红烧肉”这个词条保存到用户个人词库。</li>
 <li>`pyim-create-word-from-selection', 选择一个词条，运行这个命令后，就可以将这个词条添加到个人词库。</li>
 <li>`pyim-delete-word' 从个人词库中删除当前高亮选择的词条。</li>
@@ -662,8 +663,8 @@ pyim <b>内置</b>了多种词条获取的方式：
 </div>
 </div>
 
-<div id="outline-container-org0d68e75" class="outline-4">
-<h4 id="org0d68e75"><span class="section-number-4">1.8.10</span> pyim 高级功能</h4>
+<div id="outline-container-org2193422" class="outline-4">
+<h4 id="org2193422"><span class="section-number-4">1.8.10</span> pyim 高级功能</h4>
 <div class="outline-text-4" id="text-1-8-10">
 <ol class="org-ol">
 <li>根据环境自动切换到英文输入模式，使用 pyim-english-input-switch-functions 配置。</li>
@@ -675,8 +676,8 @@ pyim <b>内置</b>了多种词条获取的方式：
 </p>
 </div>
 
-<div id="outline-container-orge36fc1b" class="outline-5">
-<h5 id="orge36fc1b"><span class="section-number-5">1.8.10.1</span> 根据环境自动切换到英文输入模式</h5>
+<div id="outline-container-org342f738" class="outline-5">
+<h5 id="org342f738"><span class="section-number-5">1.8.10.1</span> 根据环境自动切换到英文输入模式</h5>
 <div class="outline-text-5" id="text-1-8-10-1">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -753,8 +754,8 @@ pyim <b>内置</b>了多种词条获取的方式：
 </div>
 </div>
 
-<div id="outline-container-org30e777a" class="outline-5">
-<h5 id="org30e777a"><span class="section-number-5">1.8.10.2</span> 根据环境自动切换到半角标点输入模式</h5>
+<div id="outline-container-orgfc6cad7" class="outline-5">
+<h5 id="orgfc6cad7"><span class="section-number-5">1.8.10.2</span> 根据环境自动切换到半角标点输入模式</h5>
 <div class="outline-text-5" id="text-1-8-10-2">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -801,8 +802,8 @@ pyim <b>内置</b>了多种词条获取的方式：
 </div>
 </div>
 
-<div id="outline-container-org8dd85d8" class="outline-3">
-<h3 id="org8dd85d8"><span class="section-number-3">1.9</span> 捐赠</h3>
+<div id="outline-container-orgaa6faae" class="outline-3">
+<h3 id="orgaa6faae"><span class="section-number-3">1.9</span> 捐赠</h3>
 <div class="outline-text-3" id="text-1-9">
 <p>
 您可以通过小额捐赠的方式支持 pyim 的开发工作，具体方式：
@@ -824,11 +825,11 @@ pyim <b>内置</b>了多种词条获取的方式：
 </div>
 
 
-<div id="outline-container-orga0e5b21" class="outline-3">
-<h3 id="orga0e5b21"><span class="section-number-3">1.10</span> Tips</h3>
+<div id="outline-container-org30bf16f" class="outline-3">
+<h3 id="org30bf16f"><span class="section-number-3">1.10</span> Tips</h3>
 <div class="outline-text-3" id="text-1-10">
-</div><div id="outline-container-org394e40c" class="outline-4">
-<h4 id="org394e40c"><span class="section-number-4">1.10.1</span> 如何将个人词条导出到一个文件</h4>
+</div><div id="outline-container-org0c04daa" class="outline-4">
+<h4 id="org0c04daa"><span class="section-number-4">1.10.1</span> 如何将个人词条导出到一个文件</h4>
 <div class="outline-text-4" id="text-1-10-1">
 <p>
 使用命令：pyim-personal-dcache-export
@@ -836,8 +837,8 @@ pyim <b>内置</b>了多种词条获取的方式：
 </div>
 </div>
 
-<div id="outline-container-org97743fe" class="outline-4">
-<h4 id="org97743fe"><span class="section-number-4">1.10.2</span> pyim 出现错误时，如何开启 debug 模式</h4>
+<div id="outline-container-org588e890" class="outline-4">
+<h4 id="org588e890"><span class="section-number-4">1.10.2</span> pyim 出现错误时，如何开启 debug 模式</h4>
 <div class="outline-text-4" id="text-1-10-2">
 <pre class="example">
 (setq debug-on-error t)
@@ -845,8 +846,8 @@ pyim <b>内置</b>了多种词条获取的方式：
 </div>
 </div>
 
-<div id="outline-container-orga4d6c9b" class="outline-4">
-<h4 id="orga4d6c9b"><span class="section-number-4">1.10.3</span> 选词框弹出位置不合理或者选词框内容显示不全</h4>
+<div id="outline-container-org24d4360" class="outline-4">
+<h4 id="org24d4360"><span class="section-number-4">1.10.3</span> 选词框弹出位置不合理或者选词框内容显示不全</h4>
 <div class="outline-text-4" id="text-1-10-3">
 <p>
 可以通过设置 `pyim-tooltip-width-adjustment' 变量来手动校正。
@@ -859,8 +860,8 @@ pyim <b>内置</b>了多种词条获取的方式：
 </div>
 </div>
 
-<div id="outline-container-org13ff9e1" class="outline-4">
-<h4 id="org13ff9e1"><span class="section-number-4">1.10.4</span> 如何查看 pyim 文档。</h4>
+<div id="outline-container-org542d54d" class="outline-4">
+<h4 id="org542d54d"><span class="section-number-4">1.10.4</span> 如何查看 pyim 文档。</h4>
 <div class="outline-text-4" id="text-1-10-4">
 <p>
 pyim 的文档隐藏在 comment 中，如果用户喜欢阅读 html 格式的文档，可以查看在线文档；
@@ -872,8 +873,8 @@ pyim 的文档隐藏在 comment 中，如果用户喜欢阅读 html 格式的文
 </div>
 </div>
 
-<div id="outline-container-org7f77a8e" class="outline-4">
-<h4 id="org7f77a8e"><span class="section-number-4">1.10.5</span> 将光标处的拼音或者五笔字符串转换为中文 (与 vimim 的 “点石成金” 功能类似)</h4>
+<div id="outline-container-org7d4d1d8" class="outline-4">
+<h4 id="org7d4d1d8"><span class="section-number-4">1.10.5</span> 将光标处的拼音或者五笔字符串转换为中文 (与 vimim 的 “点石成金” 功能类似)</h4>
 <div class="outline-text-4" id="text-1-10-5">
 <pre class="example">
 (global-set-key (kbd "M-i") 'pyim-convert-code-at-point)
@@ -881,16 +882,16 @@ pyim 的文档隐藏在 comment 中，如果用户喜欢阅读 html 格式的文
 </div>
 </div>
 
-<div id="outline-container-orgc4e6d79" class="outline-4">
-<h4 id="orgc4e6d79"><span class="section-number-4">1.10.6</span> 如何添加自定义拼音词库</h4>
+<div id="outline-container-org209849e" class="outline-4">
+<h4 id="org209849e"><span class="section-number-4">1.10.6</span> 如何添加自定义拼音词库</h4>
 <div class="outline-text-4" id="text-1-10-6">
 <p>
 pyim 默认没有携带任何拼音词库，用户可以使用下面几种方式，获取质量较好的拼音词库：
 </p>
 </div>
 
-<div id="outline-container-org60ab0e8" class="outline-5">
-<h5 id="org60ab0e8"><span class="section-number-5">1.10.6.1</span> 第一种方式 (懒人推荐使用)</h5>
+<div id="outline-container-orgcb173a3" class="outline-5">
+<h5 id="orgcb173a3"><span class="section-number-5">1.10.6.1</span> 第一种方式 (懒人推荐使用)</h5>
 <div class="outline-text-5" id="text-1-10-6-1">
 <p>
 获取其他 pyim 用户的拼音词库，比如，某个同学测试 pyim
@@ -908,8 +909,8 @@ emacs，这个词库使用 `utf-8-unix' 编码。
 </div>
 </div>
 
-<div id="outline-container-org8f3c9b7" class="outline-5">
-<h5 id="org8f3c9b7"><span class="section-number-5">1.10.6.2</span> 第二种方式 (Windows 用户推荐使用)</h5>
+<div id="outline-container-org28f3a40" class="outline-5">
+<h5 id="org28f3a40"><span class="section-number-5">1.10.6.2</span> 第二种方式 (Windows 用户推荐使用)</h5>
 <div class="outline-text-5" id="text-1-10-6-2">
 <p>
 使用词库转换工具将其他输入法的词库转化为pyim使用的词库：这里只介绍windows平台下的一个词库转换软件：
@@ -948,8 +949,8 @@ emacs，这个词库使用 `utf-8-unix' 编码。
 </div>
 </div>
 
-<div id="outline-container-org27cb69b" class="outline-5">
-<h5 id="org27cb69b"><span class="section-number-5">1.10.6.3</span> 第三种方式 (Linux &amp; Unix 用户推荐使用)</h5>
+<div id="outline-container-orgf8bcde0" class="outline-5">
+<h5 id="orgf8bcde0"><span class="section-number-5">1.10.6.3</span> 第三种方式 (Linux &amp; Unix 用户推荐使用)</h5>
 <div class="outline-text-5" id="text-1-10-6-3">
 <p>
 E-Neo 同学编写了一个词库转换工具: <a href="https://github.com/E-Neo/scel2pyim">scel2pyim</a> ,
@@ -965,8 +966,8 @@ E-Neo 同学编写了一个词库转换工具: <a href="https://github.com/E-Neo
 </div>
 </div>
 
-<div id="outline-container-org5debb97" class="outline-4">
-<h4 id="org5debb97"><span class="section-number-4">1.10.7</span> 如何手动安装和管理词库</h4>
+<div id="outline-container-org0d7e7f3" class="outline-4">
+<h4 id="org0d7e7f3"><span class="section-number-4">1.10.7</span> 如何手动安装和管理词库</h4>
 <div class="outline-text-4" id="text-1-10-7">
 <p>
 这里假设有两个词库文件：
@@ -998,8 +999,8 @@ E-Neo 同学编写了一个词库转换工具: <a href="https://github.com/E-Neo
 </div>
 </div>
 
-<div id="outline-container-org7d20bdd" class="outline-4">
-<h4 id="org7d20bdd"><span class="section-number-4">1.10.8</span> Emacs 启动时加载 pyim 词库</h4>
+<div id="outline-container-org9cb305e" class="outline-4">
+<h4 id="org9cb305e"><span class="section-number-4">1.10.8</span> Emacs 启动时加载 pyim 词库</h4>
 <div class="outline-text-4" id="text-1-10-8">
 <pre class="example">
 (add-hook 'emacs-startup-hook
@@ -1008,8 +1009,8 @@ E-Neo 同学编写了一个词库转换工具: <a href="https://github.com/E-Neo
 </div>
 </div>
 
-<div id="outline-container-orgcb72cdf" class="outline-4">
-<h4 id="orgcb72cdf"><span class="section-number-4">1.10.9</span> 将汉字字符串转换为拼音字符串</h4>
+<div id="outline-container-org573c43d" class="outline-4">
+<h4 id="org573c43d"><span class="section-number-4">1.10.9</span> 将汉字字符串转换为拼音字符串</h4>
 <div class="outline-text-4" id="text-1-10-9">
 <p>
 下面两个函数可以将中文字符串转换的拼音字符串或者列表，用于 emacs-lisp
@@ -1023,8 +1024,8 @@ E-Neo 同学编写了一个词库转换工具: <a href="https://github.com/E-Neo
 </div>
 </div>
 
-<div id="outline-container-org92e88e7" class="outline-4">
-<h4 id="org92e88e7"><span class="section-number-4">1.10.10</span> 中文分词</h4>
+<div id="outline-container-org65a02c0" class="outline-4">
+<h4 id="org65a02c0"><span class="section-number-4">1.10.10</span> 中文分词</h4>
 <div class="outline-text-4" id="text-1-10-10">
 <p>
 pyim 包含了一个简单的分词函数：`pyim-cstring-split-to-list', 可以将一个中文字符串分成一个词条列表，比如：
@@ -1052,8 +1053,8 @@ pyim 包含了一个简单的分词函数：`pyim-cstring-split-to-list', 可以
 </div>
 </div>
 
-<div id="outline-container-orgef23425" class="outline-4">
-<h4 id="orgef23425"><span class="section-number-4">1.10.11</span> 获取光标处的中文词条</h4>
+<div id="outline-container-org73e3b17" class="outline-4">
+<h4 id="org73e3b17"><span class="section-number-4">1.10.11</span> 获取光标处的中文词条</h4>
 <div class="outline-text-4" id="text-1-10-11">
 <p>
 pyim 包含了一个简单的命令：`pyim-cwords-at-point', 这个命令可以得到光标处的<b>英文</b>或者<b>中文</b>词条的 *列表*，这个命令依赖分词函数：
@@ -1062,8 +1063,8 @@ pyim 包含了一个简单的命令：`pyim-cwords-at-point', 这个命令可以
 </div>
 </div>
 
-<div id="outline-container-org6cf09ac" class="outline-4">
-<h4 id="org6cf09ac"><span class="section-number-4">1.10.12</span> 让 `forward-word' 和 `back-backward’ 在中文环境下正常工作</h4>
+<div id="outline-container-orgef5fb91" class="outline-4">
+<h4 id="orgef5fb91"><span class="section-number-4">1.10.12</span> 让 `forward-word' 和 `back-backward’ 在中文环境下正常工作</h4>
 <div class="outline-text-4" id="text-1-10-12">
 <p>
 中文词语没有强制用空格分词，所以 Emacs 内置的命令 `forward-word' 和 `backward-word'
@@ -1087,8 +1088,8 @@ pyim 包含了一个简单的命令：`pyim-cwords-at-point', 这个命令可以
 </div>
 </div>
 
-<div id="outline-container-org0312503" class="outline-4">
-<h4 id="org0312503"><span class="section-number-4">1.10.13</span> 为 isearch 相关命令添加拼音搜索支持</h4>
+<div id="outline-container-org416a773" class="outline-4">
+<h4 id="org416a773"><span class="section-number-4">1.10.13</span> 为 isearch 相关命令添加拼音搜索支持</h4>
 <div class="outline-text-4" id="text-1-10-13">
 <p>
 pyim 安装后，可以通过下面的设置开启拼音搜索功能：
@@ -1115,11 +1116,11 @@ pyim 安装后，可以通过下面的设置开启拼音搜索功能：
 </div>
 </div>
 
-<div id="outline-container-orgbbbf226" class="outline-2">
-<h2 id="orgbbbf226"><span class="section-number-2">2</span> 核心代码</h2>
+<div id="outline-container-org14c1fa9" class="outline-2">
+<h2 id="org14c1fa9"><span class="section-number-2">2</span> 核心代码</h2>
 <div class="outline-text-2" id="text-2">
-</div><div id="outline-container-org4b9f7d4" class="outline-3">
-<h3 id="org4b9f7d4"><span class="section-number-3">2.1</span> require + defcustom + defvar</h3>
+</div><div id="outline-container-org0a7abf0" class="outline-3">
+<h3 id="org0a7abf0"><span class="section-number-3">2.1</span> require + defcustom + defvar</h3>
 <div class="outline-text-3" id="text-2-1">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">require</span> '<span style="color: #96CBFE;">cl-lib</span>)
@@ -1128,7 +1129,6 @@ pyim 安装后，可以通过下面的设置开启拼音搜索功能：
 (<span style="color: #4c83ff;">require</span> '<span style="color: #96CBFE;">popup</span>)
 (<span style="color: #4c83ff;">require</span> '<span style="color: #96CBFE;">async</span>)
 (<span style="color: #4c83ff;">require</span> '<span style="color: #96CBFE;">pyim-pymap</span>)
-(<span style="color: #4c83ff;">require</span> '<span style="color: #96CBFE;">pyim-probe</span>)
 </pre>
 </div>
 
@@ -1234,6 +1234,14 @@ pyim 安装后，可以通过下面的设置开启拼音搜索功能：
      <span style="color: #4c83ff;">:rest-chars</span> <span style="color: #61CE3C;">"abcdefghijklmnopqrstuvwxyz"</span>
      <span style="color: #4c83ff;">:code-prefix</span> <span style="color: #61CE3C;">"."</span> <span style="color: #8B8989; font-style: italic;">;</span><span style="color: #8B8989; font-style: italic;">&#20116;&#31508;&#35789;&#24211;&#20013;&#25152;&#26377;&#30340; code &#37117;&#20197; "." &#24320;&#22836;&#65292;&#38450;&#27490;&#21644;&#25340;&#38899;&#35789;&#24211;&#20914;&#31361;&#12290;</span>
      <span style="color: #4c83ff;">:code-maximum-length</span> 4 <span style="color: #8B8989; font-style: italic;">;</span><span style="color: #8B8989; font-style: italic;">&#20116;&#31508;&#35789;&#24211;&#20013;&#65292;code &#30340;&#26368;&#22823;&#38271;&#24230;&#65288;&#19981;&#35745;&#31639; code-prefix&#65289;</span>
+     <span style="color: #4c83ff;">:prefer-trigger-chars</span> nil)
+    (cangjie
+     <span style="color: #4c83ff;">:document</span> <span style="color: #61CE3C;">"&#20489;&#38945;&#36755;&#20837;&#27861;&#12290;"</span>
+     <span style="color: #4c83ff;">:class</span> xingma
+     <span style="color: #4c83ff;">:first-chars</span> <span style="color: #61CE3C;">"abcdefghijklmnopqrstuvwxyz"</span>
+     <span style="color: #4c83ff;">:rest-chars</span> <span style="color: #61CE3C;">"abcdefghijklmnopqrstuvwxyz"</span>
+     <span style="color: #4c83ff;">:code-prefix</span> <span style="color: #61CE3C;">"@"</span> <span style="color: #8B8989; font-style: italic;">;</span><span style="color: #8B8989; font-style: italic;">&#20179;&#39049;&#36755;&#20837;&#27861;&#35789;&#24211;&#20013;&#25152;&#26377;&#30340; code &#37117;&#20197; "@" &#24320;&#22836;&#65292;&#38450;&#27490;&#35789;&#24211;&#20914;&#31361;&#12290;</span>
+     <span style="color: #4c83ff;">:code-maximum-length</span> 5 <span style="color: #8B8989; font-style: italic;">;</span><span style="color: #8B8989; font-style: italic;">&#20179;&#39049;&#35789;&#24211;&#20013;&#65292;code &#30340;&#26368;&#22823;&#38271;&#24230;&#65288;&#19981;&#35745;&#31639; code-prefix&#65289;</span>
      <span style="color: #4c83ff;">:prefer-trigger-chars</span> nil)
     (pyim-shuangpin
      <span style="color: #4c83ff;">:document</span> <span style="color: #61CE3C;">"&#19982; pyim &#37197;&#21512;&#33391;&#22909;&#30340;&#21452;&#25340;&#36755;&#20837;&#27861;&#26041;&#26696;&#65292;&#28304;&#33258;&#23567;&#40548;&#21452;&#25340;&#26041;&#26696;&#12290;"</span>
@@ -1410,18 +1418,18 @@ pyim 安装后，可以通过下面的设置开启拼音搜索功能：
 
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defcustom</span> <span style="color: #ff69b4;">pyim-backends</span>
-  '(dcache-personal dcache-common pinyin-chars pinyin-shortcode pinyin-znabc wubi-words)
+  '(personal-dcache-words common-dcache-words pinyin-chars jianpin-words znabc-words xingma-words)
   <span style="color: #FBDE2D;">"Pyim &#35789;&#35821;&#33719;&#21462; backends.</span>
 
 <span style="color: #FBDE2D;">&#24403;&#21069;&#25903;&#25345;:</span>
 
-<span style="color: #FBDE2D;">1. `</span><span style="color: #96CBFE;">dcache-personal</span><span style="color: #FBDE2D;">'     &#20174; `</span><span style="color: #96CBFE;">pyim-dcache-icode2word</span><span style="color: #FBDE2D;">' &#20013;&#33719;&#21462;&#35789;&#26465;&#12290;</span>
-<span style="color: #FBDE2D;">2. `</span><span style="color: #96CBFE;">dcache-common</span><span style="color: #FBDE2D;">'       &#20174; `</span><span style="color: #96CBFE;">pyim-dcache-code2word</span><span style="color: #FBDE2D;">' &#20013;&#33719;&#21462;&#35789;&#26465;&#12290;</span>
-<span style="color: #FBDE2D;">3. `</span><span style="color: #96CBFE;">pinyin-chars</span><span style="color: #FBDE2D;">'        &#36880;&#19968;&#33719;&#21462;&#19968;&#20010;&#25340;&#38899;&#23545;&#24212;&#30340;&#22810;&#20010;&#27721;&#23383;&#12290;</span>
-<span style="color: #FBDE2D;">4. `</span><span style="color: #96CBFE;">pinyin-shortcode</span><span style="color: #FBDE2D;">'    &#33719;&#21462;&#31616;&#25340;&#23545;&#24212;&#30340;&#35789;&#26465;&#65292;</span>
-<span style="color: #FBDE2D;">    &#22914;&#26524;&#36755;&#20837; \"ni-hao\" &#65292;&#37027;&#20040;&#21516;&#26102;&#25628;&#32034; code &#20026; \"n-h\" &#30340;&#35789;&#26465;&#12290;</span>
-<span style="color: #FBDE2D;">5. `</span><span style="color: #96CBFE;">pinyin-znabc</span><span style="color: #FBDE2D;">'        &#31867;&#20284;&#26234;&#33021;ABC&#30340;&#35789;&#35821;&#33719;&#21462;&#26041;&#24335;(&#28304;&#20110; emacs-eim).</span>
-<span style="color: #FBDE2D;">6. `</span><span style="color: #96CBFE;">xingma-words</span><span style="color: #FBDE2D;">'        &#19987;&#38376;&#29992;&#20110;&#22788;&#29702;&#20116;&#31508;&#31561;&#22522;&#20110;&#24418;&#30721;&#30340;&#36755;&#20837;&#27861;&#30340; backend."</span>
+<span style="color: #FBDE2D;">1. `</span><span style="color: #96CBFE;">personal-dcache-words</span><span style="color: #FBDE2D;">'  &#20174; `</span><span style="color: #96CBFE;">pyim-dcache-icode2word</span><span style="color: #FBDE2D;">' &#20013;&#33719;&#21462;&#35789;&#26465;&#12290;</span>
+<span style="color: #FBDE2D;">2. `</span><span style="color: #96CBFE;">common-dcache-words</span><span style="color: #FBDE2D;">'    &#20174; `</span><span style="color: #96CBFE;">pyim-dcache-code2word</span><span style="color: #FBDE2D;">' &#20013;&#33719;&#21462;&#35789;&#26465;&#12290;</span>
+<span style="color: #FBDE2D;">3. `</span><span style="color: #96CBFE;">pinyin-chars</span><span style="color: #FBDE2D;">'           &#36880;&#19968;&#33719;&#21462;&#19968;&#20010;&#25340;&#38899;&#23545;&#24212;&#30340;&#22810;&#20010;&#27721;&#23383;&#12290;</span>
+<span style="color: #FBDE2D;">4. `</span><span style="color: #96CBFE;">jianpin-words</span><span style="color: #FBDE2D;">'          &#33719;&#21462;&#31616;&#25340;&#23545;&#24212;&#30340;&#35789;&#26465;&#65292;&#22914;&#26524;&#36755;&#20837; \"ni-hao\",</span>
+<span style="color: #FBDE2D;">                            &#37027;&#20040;&#21516;&#26102;&#25628;&#32034; code &#20026; \"n-h\" &#30340;&#35789;&#26465;&#12290;</span>
+<span style="color: #FBDE2D;">5. `</span><span style="color: #96CBFE;">znabc-words</span><span style="color: #FBDE2D;">'            &#31867;&#20284;&#26234;&#33021;ABC&#30340;&#35789;&#35821;&#33719;&#21462;&#26041;&#24335;(&#28304;&#20110; emacs-eim).</span>
+<span style="color: #FBDE2D;">6. `</span><span style="color: #96CBFE;">xingma-words</span><span style="color: #FBDE2D;">'           &#19987;&#38376;&#29992;&#20110;&#22788;&#29702;&#20116;&#31508;&#31561;&#22522;&#20110;&#24418;&#30721;&#30340;&#36755;&#20837;&#27861;&#30340; backend."</span>
   <span style="color: #4c83ff;">:group</span> 'pyim)
 </pre>
 </div>
@@ -1677,13 +1685,13 @@ Pyim 词库缓存文件，注意：变量名称中不能出现 ":" 等，不能�
 </div>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defvar</span> <span style="color: #ff69b4;">pyim-dcache-update:shortcode2word</span> nil)
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defvar</span> <span style="color: #ff69b4;">pyim-dcache-update-shortcode2word-dcache</span> nil)
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defvar</span> <span style="color: #ff69b4;">pyim-dcache-update:icode2word</span> nil)
-(<span style="color: #4c83ff;">defvar</span> <span style="color: #ff69b4;">pyim-dcache-update:ishortcode2word</span> nil)
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defvar</span> <span style="color: #ff69b4;">pyim-dcache-update-icode2word-dcache</span> nil)
+(<span style="color: #4c83ff;">defvar</span> <span style="color: #ff69b4;">pyim-dcache-update-ishortcode2word-dcache</span> nil)
 </pre>
 </div>
 
@@ -1726,8 +1734,8 @@ Pyim 词库缓存文件，注意：变量名称中不能出现 ":" 等，不能�
 </div>
 </div>
 
-<div id="outline-container-org9ac1612" class="outline-3">
-<h3 id="org9ac1612"><span class="section-number-3">2.2</span> 将变量转换为 local 变量</h3>
+<div id="outline-container-orgf04e83d" class="outline-3">
+<h3 id="orgf04e83d"><span class="section-number-3">2.2</span> 将变量转换为 local 变量</h3>
 <div class="outline-text-3" id="text-2-2">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defvar</span> <span style="color: #ff69b4;">pyim-local-variable-list</span>
@@ -1767,8 +1775,8 @@ Pyim 词库缓存文件，注意：变量名称中不能出现 ":" 等，不能�
 </div>
 </div>
 
-<div id="outline-container-org1b4e516" class="outline-3">
-<h3 id="org1b4e516"><span class="section-number-3">2.3</span> "汉字 -&gt; 拼音" 以及 "拼音 -&gt; 汉字" 的转换函数</h3>
+<div id="outline-container-org35d89c1" class="outline-3">
+<h3 id="org35d89c1"><span class="section-number-3">2.3</span> "汉字 -&gt; 拼音" 以及 "拼音 -&gt; 汉字" 的转换函数</h3>
 <div class="outline-text-3" id="text-2-3">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-pinyin2cchar-cache-create</span> (<span style="color: #afd8af;">&amp;optional</span> force)
@@ -1820,8 +1828,8 @@ Pyim 词库缓存文件，注意：变量名称中不能出现 ":" 等，不能�
 </div>
 </div>
 
-<div id="outline-container-orgde5f46c" class="outline-4">
-<h4 id="orgde5f46c"><span class="section-number-4">2.3.1</span> 查询某个汉字的拼音</h4>
+<div id="outline-container-orgdfabb79" class="outline-4">
+<h4 id="orgdfabb79"><span class="section-number-4">2.3.1</span> 查询某个汉字的拼音</h4>
 <div class="outline-text-4" id="text-2-3-1">
 <p>
 pyim 在特定的时候需要读取一个汉字的拼音，这个工作由下面函数完成：
@@ -1891,8 +1899,8 @@ pyim 在特定的时候需要读取一个汉字的拼音，这个工作由下面
 </div>
 </div>
 
-<div id="outline-container-org1a91732" class="outline-3">
-<h3 id="org1a91732"><span class="section-number-3">2.4</span> 输入法启动和重启</h3>
+<div id="outline-container-org11721d1" class="outline-3">
+<h3 id="org11721d1"><span class="section-number-3">2.4</span> 输入法启动和重启</h3>
 <div class="outline-text-3" id="text-2-4">
 <p>
 pyim 使用 emacs 官方自带的输入法框架来启动输入法和重启输入法。所以我们首先需要使用 emacs 自带的命令 `register-input-method' 注册一个输入法。
@@ -1943,16 +1951,16 @@ pyim 使用 emacs 官方自带的输入法框架来启动输入法和重启输�
   <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#35774;&#32622;&#20110; dcache &#30456;&#20851;&#30340;&#20960;&#20010;&#21464;&#37327;&#12290;</span>
   (pyim-dcache-init-variables)
   <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20351;&#29992; pyim-dcache-iword2count &#20013;&#30340;&#20449;&#24687;&#23545; personal &#32531;&#23384;&#20013;&#30340;&#35789;&#39057;&#36827;&#34892;&#35843;&#25972;&#12290;</span>
-  (pyim-dcache-update:icode2word restart)
+  (pyim-dcache-update-icode2word-dcache restart)
   <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#21019;&#24314;&#31616;&#25340;&#32531;&#23384;&#65292; &#27604;&#22914; "ni-hao" -&gt; "n-h"</span>
-  (pyim-dcache-update:ishortcode2word restart)
+  (pyim-dcache-update-ishortcode2word-dcache restart)
   (pyim-cchar2pinyin-cache-create)
   (pyim-pinyin2cchar-cache-create)
   (run-hooks 'pyim-load-hook)
   <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#22914;&#26524; `</span><span style="color: #96CBFE; font-style: italic;">pyim-dicts</span><span style="color: #8B8989; font-style: italic;">' &#26377;&#21464;&#21270;&#65292;&#37325;&#26032;&#29983;&#25104; `</span><span style="color: #96CBFE; font-style: italic;">pyim-dcache-code2word</span><span style="color: #8B8989; font-style: italic;">' &#32531;&#23384;&#12290;</span>
-  (pyim-dcache-update:code2word refresh-common-dcache)
+  (pyim-dcache-update-code2word-dcache refresh-common-dcache)
   <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#36825;&#20010;&#21629;&#20196; *&#24403;&#21069;* &#20027;&#35201;&#29992;&#20110;&#20116;&#31508;&#36755;&#20837;&#27861;&#12290;</span>
-  (pyim-dcache-update:shortcode2word restart)
+  (pyim-dcache-update-shortcode2word-dcache restart)
   (<span style="color: #4c83ff;">unless</span> (member 'pyim-dcache-save-caches kill-emacs-hook)
     (add-to-list 'kill-emacs-hook 'pyim-dcache-save-caches))
   (<span style="color: #4c83ff;">setq</span> input-method-function 'pyim-input-method)
@@ -2002,14 +2010,14 @@ pyim 使用 emacs 官方自带的输入法框架来启动输入法和重启输�
 </div>
 </div>
 </div>
-<div id="outline-container-orgc84d54d" class="outline-3">
-<h3 id="orgc84d54d"><span class="section-number-3">2.5</span> 处理词库文件</h3>
+<div id="outline-container-orgde5973f" class="outline-3">
+<h3 id="orgde5973f"><span class="section-number-3">2.5</span> 处理词库文件</h3>
 <div class="outline-text-3" id="text-2-5">
-</div><div id="outline-container-org9b92d13" class="outline-4">
-<h4 id="org9b92d13"><span class="section-number-4">2.5.1</span> 自定义词库</h4>
+</div><div id="outline-container-org0a9a053" class="outline-4">
+<h4 id="org0a9a053"><span class="section-number-4">2.5.1</span> 自定义词库</h4>
 <div class="outline-text-4" id="text-2-5-1">
-</div><div id="outline-container-org14ca639" class="outline-5">
-<h5 id="org14ca639"><span class="section-number-5">2.5.1.1</span> 词库文件格式</h5>
+</div><div id="outline-container-org7a48917" class="outline-5">
+<h5 id="org7a48917"><span class="section-number-5">2.5.1.1</span> 词库文件格式</h5>
 <div class="outline-text-5" id="text-2-5-1-1">
 <p>
 pyim 使用的词库文件是简单的文本文件，编码<b>强制</b>为 'utf-8-unix,
@@ -2035,7 +2043,7 @@ ni-hao  你好 妮好 你豪
 </ol>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-dcache-update:code2word</span> (<span style="color: #afd8af;">&amp;optional</span> force)
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-dcache-update-code2word-dcache</span> (<span style="color: #afd8af;">&amp;optional</span> force)
   <span style="color: #FBDE2D;">"&#35835;&#21462;&#24182;&#21152;&#36733;&#35789;&#24211;.</span>
 <span style="color: #FBDE2D;">&#35835;&#21462; `</span><span style="color: #96CBFE;">pyim-dicts</span><span style="color: #FBDE2D;">' &#21644; `</span><span style="color: #96CBFE;">pyim-extra-dicts</span><span style="color: #FBDE2D;">' &#37324;&#38754;&#30340;&#35789;&#24211;&#25991;&#20214;&#65292;&#29983;&#25104;&#23545;&#24212;&#30340;</span>
 <span style="color: #FBDE2D;">&#35789;&#24211;&#32531;&#20914;&#25991;&#20214;&#65292;&#28982;&#21518;&#21152;&#36733;&#35789;&#24211;&#32531;&#23384;&#12290;</span>
@@ -2071,11 +2079,11 @@ ni-hao  你好 妮好 你豪
 </div>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-dcache-update:ishortcode2word</span> (<span style="color: #afd8af;">&amp;optional</span> force)
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-dcache-update-ishortcode2word-dcache</span> (<span style="color: #afd8af;">&amp;optional</span> force)
   <span style="color: #FBDE2D;">"&#35835;&#21462; &#8216;</span><span style="color: #96CBFE;">pyim-dcache-icode2word</span><span style="color: #FBDE2D;">&#8217; &#20013;&#30340;&#35789;&#24211;&#65292;&#21019;&#24314; *&#31616;&#25340;* &#32531;&#23384;&#65292;&#28982;&#21518;&#21152;&#36733;&#36825;&#20010;&#32531;&#23384;.</span>
 <span style="color: #FBDE2D;">&#22914;&#26524; FORCE &#20026;&#30495;&#65292;&#24378;&#21046;&#21152;&#36733;&#32531;&#23384;&#12290;"</span>
   (<span style="color: #4c83ff;">interactive</span>)
-  (<span style="color: #4c83ff;">when</span> (<span style="color: #4c83ff;">or</span> force (not pyim-dcache-update:ishortcode2word))
+  (<span style="color: #4c83ff;">when</span> (<span style="color: #4c83ff;">or</span> force (not pyim-dcache-update-ishortcode2word-dcache))
     (async-start
      `(<span style="color: #4c83ff;">lambda</span> ()
         ,(async-inject-variables <span style="color: #61CE3C;">"^load-path$"</span>)
@@ -2111,12 +2119,12 @@ ni-hao  你好 妮好 你豪
 </div>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-dcache-update:icode2word</span> (<span style="color: #afd8af;">&amp;optional</span> force)
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-dcache-update-icode2word-dcache</span> (<span style="color: #afd8af;">&amp;optional</span> force)
   <span style="color: #FBDE2D;">"&#23545; personal &#32531;&#23384;&#20013;&#30340;&#35789;&#26465;&#36827;&#34892;&#25490;&#24207;&#65292;&#21152;&#36733;&#25490;&#24207;&#21518;&#30340;&#32467;&#26524;.</span>
 <span style="color: #FBDE2D;">&#22312;&#36825;&#20010;&#36807;&#31243;&#20013;&#20351;&#29992;&#20102; pyim-dcache-icode2count &#20013;&#35760;&#24405;&#30340;&#35789;&#39057;&#20449;&#24687;&#12290;</span>
 <span style="color: #FBDE2D;">&#22914;&#26524; FORCE &#20026;&#30495;&#65292;&#24378;&#21046;&#25490;&#24207;&#12290;"</span>
   (<span style="color: #4c83ff;">interactive</span>)
-  (<span style="color: #4c83ff;">when</span> (<span style="color: #4c83ff;">or</span> force (not pyim-dcache-update:icode2word))
+  (<span style="color: #4c83ff;">when</span> (<span style="color: #4c83ff;">or</span> force (not pyim-dcache-update-icode2word-dcache))
     (async-start
      `(<span style="color: #4c83ff;">lambda</span> ()
         ,(async-inject-variables <span style="color: #61CE3C;">"^load-path$"</span>)
@@ -2133,17 +2141,17 @@ ni-hao  你好 妮好 你豪
         (pyim-dcache-save-variable 'pyim-dcache-icode2word)
         nil)
      `(<span style="color: #4c83ff;">lambda</span> (result)
-        (<span style="color: #4c83ff;">setq</span> pyim-dcache-update:icode2word t)
+        (<span style="color: #4c83ff;">setq</span> pyim-dcache-update-icode2word-dcache t)
         (pyim-dcache-set-variable 'pyim-dcache-icode2word t)))))
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-dcache-update:shortcode2word</span> (<span style="color: #afd8af;">&amp;optional</span> force)
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-dcache-update-shortcode2word-dcache</span> (<span style="color: #afd8af;">&amp;optional</span> force)
   <span style="color: #FBDE2D;">"&#20351;&#29992; &#8216;</span><span style="color: #96CBFE;">pyim-dcache-code2word</span><span style="color: #FBDE2D;">&#8217; &#20013;&#30340;&#35789;&#26465;&#65292;&#21019;&#24314; &#31616;&#20889;code &#35789;&#24211;&#32531;&#23384;&#24182;&#21152;&#36733;.</span>
 <span style="color: #FBDE2D;">&#22914;&#26524; FORCE &#20026;&#30495;&#65292;&#24378;&#21046;&#36816;&#34892;&#12290;"</span>
   (<span style="color: #4c83ff;">interactive</span>)
-  (<span style="color: #4c83ff;">when</span> (<span style="color: #4c83ff;">or</span> force (not pyim-dcache-update:shortcode2word))
+  (<span style="color: #4c83ff;">when</span> (<span style="color: #4c83ff;">or</span> force (not pyim-dcache-update-shortcode2word-dcache))
     (async-start
      `(<span style="color: #4c83ff;">lambda</span> ()
         ,(async-inject-variables <span style="color: #61CE3C;">"^load-path$"</span>)
@@ -2179,7 +2187,7 @@ ni-hao  你好 妮好 你豪
         (pyim-dcache-save-variable 'pyim-dcache-shortcode2word)
         nil)
      `(<span style="color: #4c83ff;">lambda</span> (result)
-        (<span style="color: #4c83ff;">setq</span> pyim-dcache-update:shortcode2word t)
+        (<span style="color: #4c83ff;">setq</span> pyim-dcache-update-shortcode2word-dcache t)
         (pyim-dcache-set-variable 'pyim-dcache-shortcode2word t)))))
 </pre>
 </div>
@@ -2390,8 +2398,8 @@ ni-hao  你好 妮好 你豪
 </div>
 </div>
 
-<div id="outline-container-org22714fc" class="outline-4">
-<h4 id="org22714fc"><span class="section-number-4">2.5.2</span> 从词库中搜索中文词条</h4>
+<div id="outline-container-org6b305af" class="outline-4">
+<h4 id="org6b305af"><span class="section-number-4">2.5.2</span> 从词库中搜索中文词条</h4>
 <div class="outline-text-4" id="text-2-5-2">
 <p>
 当词库文件加载完成后， pyim 就可以从词库缓存中搜索某个
@@ -2445,8 +2453,8 @@ code 对应的中文词条了，这个工作由函数 `pyim-dcache-get' 完成�
 </div>
 
 
-<div id="outline-container-org71b544f" class="outline-4">
-<h4 id="org71b544f"><span class="section-number-4">2.5.3</span> 保存词条，删除词条以及调整词条位置</h4>
+<div id="outline-container-org997847f" class="outline-4">
+<h4 id="org997847f"><span class="section-number-4">2.5.3</span> 保存词条，删除词条以及调整词条位置</h4>
 <div class="outline-text-4" id="text-2-5-3">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defmacro</span> <span style="color: #ff1493;">pyim-dcache-put</span> (cache code <span style="color: #afd8af;">&amp;rest</span> body)
@@ -2537,7 +2545,7 @@ code 对应的中文词条了，这个工作由函数 `pyim-dcache-get' 完成�
 </div>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-create-word-at-point:2char</span> ()
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-create-2cchar-word-at-point</span> ()
   <span style="color: #FBDE2D;">"&#23558;&#20809;&#26631;&#21069;2&#20010;&#20013;&#25991;&#23383;&#31526;&#32452;&#25104;&#30340;&#23383;&#31526;&#20018;&#21152;&#20837;&#20010;&#20154;&#35789;&#24211;&#12290;"</span>
   (<span style="color: #4c83ff;">interactive</span>)
   (pyim-create-word-at-point 2))
@@ -2545,7 +2553,7 @@ code 对应的中文词条了，这个工作由函数 `pyim-dcache-get' 完成�
 </div>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-create-word-at-point:3char</span> ()
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-create-3cchar-word-at-point</span> ()
   <span style="color: #FBDE2D;">"&#23558;&#20809;&#26631;&#21069;3&#20010;&#20013;&#25991;&#23383;&#31526;&#32452;&#25104;&#30340;&#23383;&#31526;&#20018;&#21152;&#20837;&#20010;&#20154;&#35789;&#24211;&#12290;"</span>
   (<span style="color: #4c83ff;">interactive</span>)
   (pyim-create-word-at-point 3))
@@ -2553,7 +2561,7 @@ code 对应的中文词条了，这个工作由函数 `pyim-dcache-get' 完成�
 </div>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-create-word-at-point:4char</span> ()
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-create-4cchar-word-at-point</span> ()
   <span style="color: #FBDE2D;">"&#23558;&#20809;&#26631;&#21069;4&#20010;&#20013;&#25991;&#23383;&#31526;&#32452;&#25104;&#30340;&#23383;&#31526;&#20018;&#21152;&#20837;&#20010;&#20154;&#35789;&#24211;&#12290;"</span>
   (<span style="color: #4c83ff;">interactive</span>)
   (pyim-create-word-at-point 4))
@@ -2561,8 +2569,8 @@ code 对应的中文词条了，这个工作由函数 `pyim-dcache-get' 完成�
 </div>
 </div>
 
-<div id="outline-container-org9a5b196" class="outline-5">
-<h5 id="org9a5b196"><span class="section-number-5">2.5.3.1</span> 删词功能</h5>
+<div id="outline-container-org2980fba" class="outline-5">
+<h5 id="org2980fba"><span class="section-number-5">2.5.3.1</span> 删词功能</h5>
 <div class="outline-text-5" id="text-2-5-3-1">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-create-word-from-selection</span> ()
@@ -2637,11 +2645,11 @@ code 对应的中文词条了，这个工作由函数 `pyim-dcache-get' 完成�
 </div>
 </div>
 
-<div id="outline-container-org418b7bb" class="outline-3">
-<h3 id="org418b7bb"><span class="section-number-3">2.6</span> 生成 `pyim-entered-code' 并插入 `pyim-dagger-str'</h3>
+<div id="outline-container-orgf2d81ec" class="outline-3">
+<h3 id="orgf2d81ec"><span class="section-number-3">2.6</span> 生成 `pyim-entered-code' 并插入 `pyim-dagger-str'</h3>
 <div class="outline-text-3" id="text-2-6">
-</div><div id="outline-container-org31ba8c6" class="outline-4">
-<h4 id="org31ba8c6"><span class="section-number-4">2.6.1</span> 生成拼音字符串 `pyim-entered-code'</h4>
+</div><div id="outline-container-org312e005" class="outline-4">
+<h4 id="org312e005"><span class="section-number-4">2.6.1</span> 生成拼音字符串 `pyim-entered-code'</h4>
 <div class="outline-text-4" id="text-2-6-1">
 <p>
 pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
@@ -2687,8 +2695,8 @@ pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
 </div>
 </div>
 
-<div id="outline-container-org67ef9d4" class="outline-4">
-<h4 id="org67ef9d4"><span class="section-number-4">2.6.2</span> 在待输入 buffer 中插入 `pyim-dagger-str'</h4>
+<div id="outline-container-orga7aa296" class="outline-4">
+<h4 id="orga7aa296"><span class="section-number-4">2.6.2</span> 在待输入 buffer 中插入 `pyim-dagger-str'</h4>
 <div class="outline-text-4" id="text-2-6-2">
 <p>
 `pyim-self-insert-command' 会调用 `pyim-handle-entered-code' 来处理
@@ -2868,11 +2876,11 @@ event list。
 </div>
 </div>
 
-<div id="outline-container-org7f62bb5" class="outline-3">
-<h3 id="org7f62bb5"><span class="section-number-3">2.7</span> 处理拼音 code 字符串 `pyim-entered-code'</h3>
+<div id="outline-container-orgb0073a7" class="outline-3">
+<h3 id="orgb0073a7"><span class="section-number-3">2.7</span> 处理拼音 code 字符串 `pyim-entered-code'</h3>
 <div class="outline-text-3" id="text-2-7">
-</div><div id="outline-container-org7d32bfc" class="outline-4">
-<h4 id="org7d32bfc"><span class="section-number-4">2.7.1</span> 拼音字符串 -&gt; 待选词列表</h4>
+</div><div id="outline-container-org5aa4acf" class="outline-4">
+<h4 id="org5aa4acf"><span class="section-number-4">2.7.1</span> 拼音字符串 -&gt; 待选词列表</h4>
 <div class="outline-text-4" id="text-2-7-1">
 <p>
 从一个拼音字符串获取其待选词列表，大致可以分成3个步骤：
@@ -2897,8 +2905,8 @@ woaimeinv -&gt; (("w" . "o") ("" . "ai") ("m" . "ei") ("n" . "v"))
 <li>递归的查询上述多个词语拼音，将得到的结果合并为待选词列表。</li>
 </ol>
 </div>
-<div id="outline-container-org449fe38" class="outline-5">
-<h5 id="org449fe38"><span class="section-number-5">2.7.1.1</span> 分解拼音字符串</h5>
+<div id="outline-container-org70d3803" class="outline-5">
+<h5 id="org70d3803"><span class="section-number-5">2.7.1.1</span> 分解拼音字符串</h5>
 <div class="outline-text-5" id="text-2-7-1-1">
 <p>
 拼音字符串操作主要做两方面的工作：
@@ -3146,14 +3154,13 @@ code 字符串用于搜索词条。
 <span style="color: #FBDE2D;">&#27880;&#24847;&#65306; &#19981;&#21516;&#30340;&#36755;&#20837;&#27861;&#65292;scode &#30340;&#32467;&#26500;&#20063;&#26159;&#19981;&#19968;&#26679;&#30340;&#12290;"</span>
   (<span style="color: #4c83ff;">let</span> ((class (pyim-scheme-get-option scheme-name <span style="color: #4c83ff;">:class</span>)))
     (<span style="color: #4c83ff;">when</span> class
-      (funcall (intern (concat <span style="color: #61CE3C;">"pyim-code-split:"</span>
-                               (symbol-name class)))
+      (funcall (intern (format <span style="color: #61CE3C;">"pyim-code-split-%S-code"</span> class))
                code scheme-name))))
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-code-split:quanpin</span> (py <span style="color: #afd8af;">&amp;optional</span> -)
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-code-split-quanpin-code</span> (py <span style="color: #afd8af;">&amp;optional</span> -)
   <span style="color: #FBDE2D;">"&#25226;&#19968;&#20010;&#25340;&#38899;&#23383;&#31526;&#20018; `</span><span style="color: #96CBFE;">py</span><span style="color: #FBDE2D;">' &#20998;&#35299;&#25104; spinyin-list (&#30001;&#22768;&#27597;&#21644;&#38901;&#27597;&#32452;&#25104;&#30340;&#22797;&#26434;&#21015;&#34920;&#65289;&#65292;</span>
 <span style="color: #FBDE2D;">&#20248;&#20808;&#22788;&#29702;&#21547;&#26377; ' &#30340;&#20301;&#32622;&#12290;"</span>
   (<span style="color: #4c83ff;">when</span> (<span style="color: #4c83ff;">and</span> py (string&lt; <span style="color: #61CE3C;">""</span> py))
@@ -3175,7 +3182,7 @@ code 字符串用于搜索词条。
 "nihc" -&gt; (((\"n\" . \"i\") (\"h\" . \"ao\")))
 </p>
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-code-split:shuangpin</span> (str <span style="color: #afd8af;">&amp;optional</span> scheme-name)
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-code-split-shuangpin-code</span> (str <span style="color: #afd8af;">&amp;optional</span> scheme-name)
   <span style="color: #FBDE2D;">"&#25226;&#19968;&#20010;&#21452;&#25340;&#23383;&#31526;&#20018;&#20998;&#35299;&#25104;&#19968;&#20010;&#22768;&#27597;&#21644;&#38901;&#27597;&#32452;&#25104;&#30340;&#22797;&#26434;&#21015;&#34920;&#12290;"</span>
   (<span style="color: #4c83ff;">let</span> ((keymaps (pyim-scheme-get-option scheme-name <span style="color: #4c83ff;">:keymaps</span>))
         (list (string-to-list (replace-regexp-in-string <span style="color: #61CE3C;">"-"</span> <span style="color: #61CE3C;">""</span> str)))
@@ -3200,7 +3207,7 @@ code 字符串用于搜索词条。
 </div>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-code-split:xingma</span> (code <span style="color: #afd8af;">&amp;optional</span> -)
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-code-split-xingma-code</span> (code <span style="color: #afd8af;">&amp;optional</span> -)
   <span style="color: #FBDE2D;">"&#36825;&#20010;&#20989;&#25968;&#21482;&#26159;&#23545; code &#20570;&#20102;&#19968;&#28857;&#31616;&#21333;&#30340;&#21253;&#35013;&#65292;&#23454;&#38469;&#24182;&#19981;&#30495;&#27491;&#30340;</span>
 <span style="color: #FBDE2D;">*&#20998;&#35299;* code, &#29992;&#20110;&#20116;&#31508;&#31561;&#22522;&#20110;&#24418;&#30721;&#30340;&#36755;&#20837;&#27861;, &#27604;&#22914;&#65306;</span>
 
@@ -3254,13 +3261,13 @@ code 字符串用于搜索词条。
   (<span style="color: #4c83ff;">let</span> ((class (pyim-scheme-get-option scheme-name <span style="color: #4c83ff;">:class</span>)))
     (<span style="color: #4c83ff;">cond</span>
      ((member class '(quanpin shuangpin))
-      (pyim-scode-validp:spinyin scode))
+      (pyim-scode-spinyin-validp scode))
      (t t))))
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-scode-validp:spinyin</span> (spinyin)
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-scode-spinyin-validp</span> (spinyin)
   <span style="color: #FBDE2D;">"&#26816;&#26597; `</span><span style="color: #96CBFE;">spinyin</span><span style="color: #FBDE2D;">' &#26159;&#21542;&#22768;&#27597;&#20026;&#31354;&#19988;&#38901;&#27597;&#21448;&#19981;&#27491;&#30830;&#12290;"</span>
   (<span style="color: #4c83ff;">let</span> ((valid t) py)
     (<span style="color: #4c83ff;">while</span> (<span style="color: #4c83ff;">progn</span>
@@ -3311,14 +3318,13 @@ code 字符串用于搜索词条。
 <span style="color: #FBDE2D;">&#37325;&#26032;&#21512;&#24182;&#20026; code &#23383;&#31526;&#20018;&#65292;&#29992;&#20110;&#25628;&#32034;&#12290;"</span>
   (<span style="color: #4c83ff;">let</span> ((class (pyim-scheme-get-option scheme-name <span style="color: #4c83ff;">:class</span>)))
     (<span style="color: #4c83ff;">when</span> class
-      (funcall (intern (concat <span style="color: #61CE3C;">"pyim-scode-join:"</span>
-                               (symbol-name class)))
+      (funcall (intern (format <span style="color: #61CE3C;">"pyim-scode-join-%S-scode"</span> class))
                scode scheme-name as-search-key shou-zi-mu))))
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-scode-join:quanpin</span> (spinyin scheme-name <span style="color: #afd8af;">&amp;optional</span> as-search-key shou-zi-mu)
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-scode-join-quanpin-scode</span> (spinyin scheme-name <span style="color: #afd8af;">&amp;optional</span> as-search-key shou-zi-mu)
   <span style="color: #FBDE2D;">"&#25226;&#19968;&#20010; `</span><span style="color: #96CBFE;">spinyin</span><span style="color: #FBDE2D;">' (splited pinyin) &#21512;&#24182;&#20026;&#19968;&#20010;&#20840;&#25340;&#23383;&#31526;&#20018;&#65292;&#24403; `</span><span style="color: #96CBFE;">shou-zi-mu</span><span style="color: #FBDE2D;">'</span>
 <span style="color: #FBDE2D;">&#35774;&#32622;&#20026; t &#26102;&#65292;&#29983;&#25104;&#25340;&#38899;&#39318;&#23383;&#27597;&#23383;&#31526;&#20018;&#65292;&#27604;&#22914; p-y&#12290;"</span>
   (mapconcat 'identity
@@ -3334,12 +3340,12 @@ code 字符串用于搜索词条。
 </div>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-scode-join:shuangpin</span> (spinyin scheme-name <span style="color: #afd8af;">&amp;optional</span> as-search-key shou-zi-mu)
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-scode-join-shuangpin-scode</span> (spinyin scheme-name <span style="color: #afd8af;">&amp;optional</span> as-search-key shou-zi-mu)
   <span style="color: #FBDE2D;">"&#25226;&#19968;&#20010; `</span><span style="color: #96CBFE;">spinyin</span><span style="color: #FBDE2D;">' (splited pinyin) &#21512;&#24182;&#20026;&#19968;&#20010;&#21452;&#25340;&#23383;&#31526;&#20018;&#65292;&#24403; `</span><span style="color: #96CBFE;">shou-zi-mu</span><span style="color: #FBDE2D;">'</span>
 <span style="color: #FBDE2D;">&#35774;&#32622;&#20026; t &#26102;&#65292;&#29983;&#25104;&#21452;&#25340;&#39318;&#23383;&#27597;&#23383;&#31526;&#20018;&#65292;&#27604;&#22914; p-y&#12290;"</span>
   (<span style="color: #4c83ff;">if</span> as-search-key
       <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#21452;&#25340;&#20351;&#29992;&#20840;&#25340;&#36755;&#20837;&#27861;&#30340;&#35789;&#24211;&#65292;&#25152;&#20197;&#25628;&#32034; dcache &#29992;&#30340; key &#35201;&#20351;&#29992;&#20840;&#25340;</span>
-      (pyim-scode-join:quanpin spinyin scheme-name as-search-key shou-zi-mu)
+      (pyim-scode-join-quanpin-scode spinyin scheme-name as-search-key shou-zi-mu)
     (<span style="color: #4c83ff;">when</span> scheme-name
       (<span style="color: #4c83ff;">let</span> ((keymaps (pyim-scheme-get-option scheme-name <span style="color: #4c83ff;">:keymaps</span>)))
         (mapconcat 'identity
@@ -3365,7 +3371,7 @@ code 字符串用于搜索词条。
 </div>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-scode-join:xingma</span> (scode scheme-name <span style="color: #afd8af;">&amp;optional</span> as-search-key shou-zi-mu)
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-scode-join-xingma-scode</span> (scode scheme-name <span style="color: #afd8af;">&amp;optional</span> as-search-key shou-zi-mu)
   <span style="color: #FBDE2D;">"&#25226;&#19968;&#20010; `</span><span style="color: #96CBFE;">scode</span><span style="color: #FBDE2D;">' (splited code) &#21512;&#24182;&#20026;&#19968;&#20010; code &#23383;&#31526;&#20018;, &#29992;&#20110;&#20116;&#31508;&#31561;&#22522;&#20110;&#24418;&#30721;&#30340;&#36755;&#20837;&#27861;&#12290;</span>
 <span style="color: #FBDE2D;">&#27604;&#22914;&#65306;</span>
 
@@ -3383,8 +3389,8 @@ code 字符串用于搜索词条。
 </div>
 
 
-<div id="outline-container-org85c69c5" class="outline-5">
-<h5 id="org85c69c5"><span class="section-number-5">2.7.1.2</span> 获得词语拼音并进一步查询得到备选词列表</h5>
+<div id="outline-container-org723f401" class="outline-5">
+<h5 id="org723f401"><span class="section-number-5">2.7.1.2</span> 获得词语拼音并进一步查询得到备选词列表</h5>
 <div class="outline-text-5" id="text-2-7-1-2">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-choices-get</span> (scode-list scheme-name)
@@ -3392,58 +3398,55 @@ code 字符串用于搜索词条。
   <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">scode-list &#21487;&#20197;&#21253;&#21547;&#22810;&#20010; scode, &#20174;&#32780;&#24471;&#21040;&#22810;&#20010;&#23376;&#20505;&#36873;&#35789;&#21015;&#34920;&#65292;&#22914;&#20309;&#23558;&#22810;&#20010; *&#23376;&#20505;&#36873;&#35789;&#21015;&#34920;* &#21512;&#29702;&#30340;&#21512;&#24182;&#65292;</span>
   <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#26159;&#19968;&#20010;&#27604;&#36739;&#40635;&#28902;&#30340;&#20107;&#24773;&#30340;&#20107;&#24773;&#12290; &#27880;&#65306;&#36825;&#20010;&#22320;&#26041;&#38656;&#35201;&#36827;&#19968;&#27493;&#24471;&#25913;&#36827;&#12290;</span>
   (<span style="color: #4c83ff;">let*</span> (personal-words
-         common-words
-         pinyin-shortcode-words pinyin-znabc-words
-         pinyin-chars
-         xingma-words)
+         common-words jianpin-words znabc-words pinyin-chars xingma-words)
 
     (<span style="color: #4c83ff;">dolist</span> (scode scode-list)
       (<span style="color: #4c83ff;">setq</span> personal-words
             (append personal-words
-                    (car (pyim-choices-get:dcache-personal scode scheme-name))))
+                    (car (pyim-choices-get-personal-dcache-words scode scheme-name))))
       (<span style="color: #4c83ff;">setq</span> common-words
             (append common-words
-                    (car (pyim-choices-get:dcache-common scode scheme-name))))
+                    (car (pyim-choices-get-common-dcache-words scode scheme-name))))
       (<span style="color: #4c83ff;">setq</span> pinyin-chars
             (append pinyin-chars
-                    (car (pyim-choices-get:pinyin-chars scode scheme-name))))
+                    (car (pyim-choices-get-pinyin-chars scode scheme-name))))
       (<span style="color: #4c83ff;">setq</span> xingma-words
             (append xingma-words
-                    (car (pyim-choices-get:xingma-words scode scheme-name)))))
+                    (car (pyim-choices-get-xingma-words scode scheme-name)))))
 
     <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">Pinyin shouzimu similar words</span>
-    (<span style="color: #4c83ff;">let</span> ((words (pyim-choices-get:pinyin-shortcode (car scode-list) scheme-name)))
-      (<span style="color: #4c83ff;">setq</span> pinyin-shortcode-words (car (cdr words))))
+    (<span style="color: #4c83ff;">let</span> ((words (pyim-choices-get-jianpin-words (car scode-list) scheme-name)))
+      (<span style="color: #4c83ff;">setq</span> jianpin-words (car (cdr words))))
 
     <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">Pinyin znabc-style similar words</span>
-    (<span style="color: #4c83ff;">let</span> ((words (pyim-choices-get:pinyin-znabc (car scode-list) scheme-name)))
-      (<span style="color: #4c83ff;">setq</span> pinyin-znabc-words (car (cdr words))))
+    (<span style="color: #4c83ff;">let</span> ((words (pyim-choices-get-znabc-words (car scode-list) scheme-name)))
+      (<span style="color: #4c83ff;">setq</span> znabc-words (car (cdr words))))
 
     <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">Debug</span>
     (<span style="color: #4c83ff;">when</span> pyim-debug
       (princ (list <span style="color: #4c83ff;">:scode-list</span> scode-list
                    <span style="color: #4c83ff;">:personal-words</span> personal-words
                    <span style="color: #4c83ff;">:common-words</span> common-words
-                   <span style="color: #4c83ff;">:pinyin-shortcode-words</span> pinyin-shortcode-words
-                   <span style="color: #4c83ff;">:pinyin-znabc-words</span> pinyin-znabc-words
+                   <span style="color: #4c83ff;">:jianpin-words</span> jianpin-words
+                   <span style="color: #4c83ff;">:znabc-words</span> znabc-words
                    <span style="color: #4c83ff;">:pinyin-chars</span> pinyin-chars)))
 
     (delete-dups
      (delq nil
            `(,@personal-words
              ,@common-words
-             ,@pinyin-shortcode-words
-             ,@pinyin-znabc-words
+             ,@jianpin-words
+             ,@znabc-words
              ,@pinyin-chars
              ,@xingma-words)))))
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-choices-get:pinyin-znabc</span> (spinyin scheme-name)
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-choices-get-znabc-words</span> (spinyin scheme-name)
   <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#23558;&#36755;&#20837;&#30340;&#25340;&#38899;&#25353;&#29031;&#22768;&#27597;&#21644;&#38901;&#27597;&#25171;&#25955;&#65292;&#24471;&#21040;&#23613;&#21487;&#33021;&#22810;&#30340;&#25340;&#38899;&#32452;&#21512;&#65292;</span>
   <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#26597;&#35810;&#36825;&#20123;&#25340;&#38899;&#32452;&#21512;&#65292;&#24471;&#21040;&#30340;&#35789;&#26465;&#20570;&#20026;&#32852;&#24819;&#35789;&#12290;</span>
-  (<span style="color: #4c83ff;">when</span> (member 'pinyin-znabc pyim-backends)
+  (<span style="color: #4c83ff;">when</span> (member 'znabc-words pyim-backends)
     (<span style="color: #4c83ff;">let</span> ((class (pyim-scheme-get-option scheme-name <span style="color: #4c83ff;">:class</span>)))
       (<span style="color: #4c83ff;">when</span> (member class '(quanpin shuangpin))
         (list nil (pyim-possible-words
@@ -3452,11 +3455,11 @@ code 字符串用于搜索词条。
 </div>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-choices-get:pinyin-shortcode</span> (spinyin scheme-name)
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-choices-get-jianpin-words</span> (spinyin scheme-name)
   <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#22914;&#26524;&#36755;&#20837; "ni-hao" &#65292;&#25628;&#32034; code &#20026; "n-h" &#30340;&#35789;&#26465;&#20570;&#20026;&#32852;&#24819;&#35789;&#12290;</span>
   <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#25628;&#32034;&#39318;&#23383;&#27597;&#24471;&#21040;&#30340;&#32852;&#24819;&#35789;&#22826;&#22810;&#65292;&#36825;&#37324;&#38480;&#21046;&#32852;&#24819;&#35789;&#35201;&#22823;&#20110;&#20004;&#20010;&#27721;&#23383;&#24182;&#19988;&#21482;&#25628;&#32034;</span>
   <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#20010;&#20154;&#25991;&#20214;&#12290;</span>
-  (<span style="color: #4c83ff;">when</span> (member 'pinyin-shortcode pyim-backends)
+  (<span style="color: #4c83ff;">when</span> (member 'jianpin-words pyim-backends)
     (<span style="color: #4c83ff;">let</span> ((class (pyim-scheme-get-option scheme-name <span style="color: #4c83ff;">:class</span>)))
       (<span style="color: #4c83ff;">when</span> (<span style="color: #4c83ff;">and</span> (&gt; (length spinyin) 1)
                  (member class '(quanpin shuangpin)))
@@ -3466,7 +3469,7 @@ code 字符串用于搜索词条。
 </div>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-choices-get:pinyin-chars</span> (spinyin scheme-name)
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-choices-get-pinyin-chars</span> (spinyin scheme-name)
   (<span style="color: #4c83ff;">when</span> (member 'pinyin-chars pyim-backends)
     (<span style="color: #4c83ff;">let</span> ((class (pyim-scheme-get-option scheme-name <span style="color: #4c83ff;">:class</span>)))
       (<span style="color: #4c83ff;">when</span> (member class '(quanpin shuangpin))
@@ -3492,12 +3495,12 @@ code 字符串用于搜索词条。
 </div>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-choices-get:xingma-words</span> (scode scheme-name)
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-choices-get-xingma-words</span> (scode scheme-name)
   (<span style="color: #4c83ff;">when</span> (member 'xingma-words pyim-backends)
     (<span style="color: #4c83ff;">let</span> ((class (pyim-scheme-get-option scheme-name <span style="color: #4c83ff;">:class</span>)))
       (<span style="color: #4c83ff;">when</span> (member class '(xingma))
         (<span style="color: #4c83ff;">let*</span> ((code-prefix (pyim-scheme-get-option scheme-name <span style="color: #4c83ff;">:code-prefix</span>))
-               (code (pyim-scode-join:xingma scode scheme-name))
+               (code (pyim-scode-join-xingma-scode scode scheme-name))
                (n (pyim-scheme-get-option scheme-name <span style="color: #4c83ff;">:code-maximum-length</span>))
                (output (pyim-split-string-by-number code n t))
                (output1 (car output))
@@ -3521,8 +3524,8 @@ code 字符串用于搜索词条。
 </div>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-choices-get:dcache-personal</span> (scode scheme-name)
-  (<span style="color: #4c83ff;">when</span> (member 'dcache-personal pyim-backends)
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-choices-get-personal-dcache-words</span> (scode scheme-name)
+  (<span style="color: #4c83ff;">when</span> (member 'personal-dcache-words pyim-backends)
     (<span style="color: #4c83ff;">let</span> ((code (pyim-scode-join scode scheme-name t)))
       (list (pyim-dcache-get code (list pyim-dcache-icode2word
                                         pyim-dcache-ishortcode2word))
@@ -3531,8 +3534,8 @@ code 字符串用于搜索词条。
 </div>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-choices-get:dcache-common</span> (scode scheme-name)
-  (<span style="color: #4c83ff;">when</span> (member 'dcache-common pyim-backends)
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-choices-get-common-dcache-words</span> (scode scheme-name)
+  (<span style="color: #4c83ff;">when</span> (member 'common-dcache-words pyim-backends)
     (<span style="color: #4c83ff;">let</span> ((code (pyim-scode-join scode scheme-name t)))
       (list (pyim-dcache-get code (list pyim-dcache-code2word
                                         pyim-dcache-shortcode2word))
@@ -3610,8 +3613,8 @@ code 字符串用于搜索词条。
 </div>
 </div>
 
-<div id="outline-container-orgdb35c1a" class="outline-4">
-<h4 id="orgdb35c1a"><span class="section-number-4">2.7.2</span> 核心函数：拼音字符串处理函数</h4>
+<div id="outline-container-orgd701258" class="outline-4">
+<h4 id="orgd701258"><span class="section-number-4">2.7.2</span> 核心函数：拼音字符串处理函数</h4>
 <div class="outline-text-4" id="text-2-7-2">
 <p>
 `pyim-handle-entered-code' 这个函数是一个重要的<b>核心函数</b>，其大致工作流程为：
@@ -3655,8 +3658,8 @@ code 字符串用于搜索词条。
 </div>
 
 
-<div id="outline-container-org515946b" class="outline-3">
-<h3 id="org515946b"><span class="section-number-3">2.8</span> 处理当前需要插入 buffer 的 dagger 字符串： `pyim-dagger-str'</h3>
+<div id="outline-container-org0db69be" class="outline-3">
+<h3 id="org0db69be"><span class="section-number-3">2.8</span> 处理当前需要插入 buffer 的 dagger 字符串： `pyim-dagger-str'</h3>
 <div class="outline-text-3" id="text-2-8">
 <p>
 pyim 使用变量 `pyim-dagger-str' 保存<b>需要在 buffer 光标处插入的字符串</b>。
@@ -3778,11 +3781,11 @@ pyim 会使用 emacs overlay 机制在<b>待输入buffer</b> 光标处高亮显�
 </div>
 </div>
 
-<div id="outline-container-orgd8e2ad5" class="outline-3">
-<h3 id="orgd8e2ad5"><span class="section-number-3">2.9</span> 显示和选择备选词条</h3>
+<div id="outline-container-org547a932" class="outline-3">
+<h3 id="org547a932"><span class="section-number-3">2.9</span> 显示和选择备选词条</h3>
 <div class="outline-text-3" id="text-2-9">
-</div><div id="outline-container-org1f12799" class="outline-4">
-<h4 id="org1f12799"><span class="section-number-4">2.9.1</span> 构建词条菜单字符串</h4>
+</div><div id="outline-container-org8711e5b" class="outline-4">
+<h4 id="org8711e5b"><span class="section-number-4">2.9.1</span> 构建词条菜单字符串</h4>
 <div class="outline-text-4" id="text-2-9-1">
 <p>
 pyim 内建两种方式显示选词框：
@@ -4052,7 +4055,7 @@ page format
          (class (pyim-scheme-get-option scheme-name <span style="color: #4c83ff;">:class</span>))
          (code-maximum-length (pyim-scheme-get-option scheme-name <span style="color: #4c83ff;">:code-maximum-length</span>)))
     (<span style="color: #4c83ff;">cond</span>
-     ((memq class '(wubi))
+     ((memq class '(xingma))
       (mapconcat #'identity
                  (pyim-split-string-by-number code code-maximum-length)
                  <span style="color: #61CE3C;">" "</span>))
@@ -4110,12 +4113,12 @@ page format
         (<span style="color: #4c83ff;">let</span> ((message-log-max nil))
           (<span style="color: #4c83ff;">if</span> pyim-page-tooltip
               (pyim-tooltip-show
-               (<span style="color: #4c83ff;">let</span> ((func (intern (format <span style="color: #61CE3C;">"pyim-page-style:%S"</span> pyim-page-style))))
+               (<span style="color: #4c83ff;">let</span> ((func (intern (format <span style="color: #61CE3C;">"pyim-page-style-%S-style"</span> pyim-page-style))))
                  (<span style="color: #4c83ff;">if</span> (functionp func)
                      (funcall func page-info)
-                   (pyim-page-style:two-lines page-info)))
+                   (pyim-page-style-two-lines-style page-info)))
                (overlay-start pyim-dagger-overlay))
-            (message <span style="color: #61CE3C;">"%s"</span> (pyim-page-style:minibuffer page-info))))))))
+            (message <span style="color: #61CE3C;">"%s"</span> (pyim-page-style-minibuffer-style page-info))))))))
 </pre>
 </div>
 
@@ -4163,7 +4166,7 @@ page format
 </div>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-page-style:two-lines</span> (page-info)
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-page-style-two-lines-style</span> (page-info)
   <span style="color: #FBDE2D;">"&#23558; page-info &#26684;&#24335;&#21270;&#20026;&#31867;&#20284;&#19979;&#38754;&#26684;&#24335;&#30340;&#23383;&#31526;&#20018;&#65292;&#36825;&#20010;&#23383;&#31526;&#20018;&#23558;&#22312;</span>
 <span style="color: #FBDE2D;">tooltip &#36873;&#35789;&#26694;&#20013;&#26174;&#31034;&#12290;</span>
 
@@ -4180,7 +4183,7 @@ page format
 </div>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-page-style:one-line</span> (page-info)
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-page-style-one-line-style</span> (page-info)
   <span style="color: #FBDE2D;">"&#23558; page-info &#26684;&#24335;&#21270;&#20026;&#31867;&#20284;&#19979;&#38754;&#26684;&#24335;&#30340;&#23383;&#31526;&#20018;&#65292;&#36825;&#20010;&#23383;&#31526;&#20018;&#23558;&#22312;</span>
 <span style="color: #FBDE2D;">tooltip &#36873;&#35789;&#26694;&#20013;&#26174;&#31034;&#12290;</span>
 
@@ -4198,7 +4201,7 @@ page format
 </div>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-page-style:vertical</span> (page-info)
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-page-style-vertical-style</span> (page-info)
   <span style="color: #FBDE2D;">"&#23558; page-info &#26684;&#24335;&#21270;&#20026;&#31867;&#20284;&#19979;&#38754;&#26684;&#24335;&#30340;&#23383;&#31526;&#20018;&#65292;&#36825;&#20010;&#23383;&#31526;&#20018;&#23558;&#22312;</span>
 <span style="color: #FBDE2D;">tooltip &#36873;&#35789;&#26694;&#20013;&#26174;&#31034;&#12290;</span>
 
@@ -4220,7 +4223,7 @@ page format
 </div>
 
 <div class="org-src-container">
-<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-page-style:minibuffer</span> (page-info)
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-page-style-minibuffer-style</span> (page-info)
   <span style="color: #FBDE2D;">"&#23558; page-info &#26684;&#24335;&#21270;&#20026;&#31867;&#20284;&#19979;&#38754;&#26684;&#24335;&#30340;&#23383;&#31526;&#20018;&#65292;&#36825;&#20010;&#23383;&#31526;&#20018;</span>
 <span style="color: #FBDE2D;">&#23558;&#22312; minibuffer &#20013;&#26174;&#31034;&#12290;</span>
 
@@ -4291,8 +4294,8 @@ page format
 </div>
 </div>
 
-<div id="outline-container-orgcd2b097" class="outline-4">
-<h4 id="orgcd2b097"><span class="section-number-4">2.9.2</span> 选择备选词</h4>
+<div id="outline-container-orgb424b5c" class="outline-4">
+<h4 id="orgb424b5c"><span class="section-number-4">2.9.2</span> 选择备选词</h4>
 <div class="outline-text-4" id="text-2-9-2">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-page-select-word</span> ()
@@ -4355,8 +4358,8 @@ page format
 </div>
 </div>
 
-<div id="outline-container-orgb812aa2" class="outline-3">
-<h3 id="orgb812aa2"><span class="section-number-3">2.10</span> 处理标点符号</h3>
+<div id="outline-container-org01d6da1" class="outline-3">
+<h3 id="org01d6da1"><span class="section-number-3">2.10</span> 处理标点符号</h3>
 <div class="outline-text-3" id="text-2-10">
 <p>
 常用的标点符号数量不多，所以 pyim 没有使用文件而是使用一个变量
@@ -4728,8 +4731,8 @@ pyim 在运行过程中调用函数 `pyim-translate' 进行标点符号格式的
 </div>
 </div>
 
-<div id="outline-container-org83a322a" class="outline-3">
-<h3 id="org83a322a"><span class="section-number-3">2.11</span> 处理特殊功能触发字符（单字符快捷键）</h3>
+<div id="outline-container-org8cd078b" class="outline-3">
+<h3 id="org8cd078b"><span class="section-number-3">2.11</span> 处理特殊功能触发字符（单字符快捷键）</h3>
 <div class="outline-text-3" id="text-2-11">
 <p>
 输入中文的时候，我们需要快速频繁的执行一些特定的命令，最直接的方法就是将上述命令绑定到一个容易按的快捷键上，但遗憾的是 emacs 大多数容易按的快捷键都<b>名花有主</b>了，甚至找一个 “Ctrl＋单字符”的快捷键都不太容易，特殊功能触发字符，可以帮助我们实现“单字符”快捷键，类似 org-mode 的 speed key。
@@ -4780,11 +4783,11 @@ pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。当待输
 </div>
 
 
-<div id="outline-container-org8eae2fe" class="outline-3">
-<h3 id="org8eae2fe"><span class="section-number-3">2.12</span> 与拼音输入相关的用户命令</h3>
+<div id="outline-container-org48f0b5c" class="outline-3">
+<h3 id="org48f0b5c"><span class="section-number-3">2.12</span> 与拼音输入相关的用户命令</h3>
 <div class="outline-text-3" id="text-2-12">
-</div><div id="outline-container-orgebe8c61" class="outline-4">
-<h4 id="orgebe8c61"><span class="section-number-4">2.12.1</span> 删除拼音字符串最后一个字符</h4>
+</div><div id="outline-container-org192684e" class="outline-4">
+<h4 id="org192684e"><span class="section-number-4">2.12.1</span> 删除拼音字符串最后一个字符</h4>
 <div class="outline-text-4" id="text-2-12-1">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-delete-last-char</span> ()
@@ -4800,8 +4803,8 @@ pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。当待输
 </div>
 </div>
 
-<div id="outline-container-org7ae03db" class="outline-4">
-<h4 id="org7ae03db"><span class="section-number-4">2.12.2</span> 删除拼音字符串最后一个拼音</h4>
+<div id="outline-container-orgcb9a3a9" class="outline-4">
+<h4 id="orgcb9a3a9"><span class="section-number-4">2.12.2</span> 删除拼音字符串最后一个拼音</h4>
 <div class="outline-text-4" id="text-2-12-2">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-backward-kill-py</span> ()
@@ -4818,8 +4821,8 @@ pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。当待输
 </div>
 </div>
 
-<div id="outline-container-org6be59a5" class="outline-4">
-<h4 id="org6be59a5"><span class="section-number-4">2.12.3</span> 将光标前的 code 字符串转换为中文</h4>
+<div id="outline-container-orgb1ec7ef" class="outline-4">
+<h4 id="orgb1ec7ef"><span class="section-number-4">2.12.3</span> 将光标前的 code 字符串转换为中文</h4>
 <div class="outline-text-4" id="text-2-12-3">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-convert-code-at-point</span> ()
@@ -4849,8 +4852,8 @@ pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。当待输
 </div>
 </div>
 
-<div id="outline-container-org33f4c98" class="outline-4">
-<h4 id="org33f4c98"><span class="section-number-4">2.12.4</span> 取消当前输入</h4>
+<div id="outline-container-org2770521" class="outline-4">
+<h4 id="org2770521"><span class="section-number-4">2.12.4</span> 取消当前输入</h4>
 <div class="outline-text-4" id="text-2-12-4">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-quit-clear</span> ()
@@ -4861,8 +4864,8 @@ pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。当待输
 </div>
 </div>
 </div>
-<div id="outline-container-org2bd8d02" class="outline-4">
-<h4 id="org2bd8d02"><span class="section-number-4">2.12.5</span> 字母上屏</h4>
+<div id="outline-container-org4804f55" class="outline-4">
+<h4 id="org4804f55"><span class="section-number-4">2.12.5</span> 字母上屏</h4>
 <div class="outline-text-4" id="text-2-12-5">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-quit-no-clear</span> ()
@@ -4875,8 +4878,8 @@ pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。当待输
 </div>
 </div>
 
-<div id="outline-container-orgb2f6320" class="outline-4">
-<h4 id="orgb2f6320"><span class="section-number-4">2.12.6</span> pyim 取消激活</h4>
+<div id="outline-container-orgf1c63fe" class="outline-4">
+<h4 id="orgf1c63fe"><span class="section-number-4">2.12.6</span> pyim 取消激活</h4>
 <div class="outline-text-4" id="text-2-12-6">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-inactivate</span> ()
@@ -4887,8 +4890,8 @@ pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。当待输
 </div>
 </div>
 
-<div id="outline-container-org8727a29" class="outline-4">
-<h4 id="org8727a29"><span class="section-number-4">2.12.7</span> 切换中英文输入模式</h4>
+<div id="outline-container-orga74f7a1" class="outline-4">
+<h4 id="orga74f7a1"><span class="section-number-4">2.12.7</span> 切换中英文输入模式</h4>
 <div class="outline-text-4" id="text-2-12-7">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-toggle-input-ascii</span> ()
@@ -4901,8 +4904,8 @@ pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。当待输
 </div>
 </div>
 
-<div id="outline-container-org568969f" class="outline-4">
-<h4 id="org568969f"><span class="section-number-4">2.12.8</span> 为 isearch 添加拼音搜索功能</h4>
+<div id="outline-container-orgc10fb48" class="outline-4">
+<h4 id="orgc10fb48"><span class="section-number-4">2.12.8</span> 为 isearch 添加拼音搜索功能</h4>
 <div class="outline-text-4" id="text-2-12-8">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-isearch-build-search-regexp</span> (pystr)
@@ -5001,8 +5004,8 @@ pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。当待输
 </div>
 </div>
 
-<div id="outline-container-orge79a457" class="outline-3">
-<h3 id="orge79a457"><span class="section-number-3">2.13</span> 让 forward/backward 支持中文</h3>
+<div id="outline-container-org4e1fea9" class="outline-3">
+<h3 id="org4e1fea9"><span class="section-number-3">2.13</span> 让 forward/backward 支持中文</h3>
 <div class="outline-text-3" id="text-2-13">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-forward-word</span> (<span style="color: #afd8af;">&amp;optional</span> arg)
@@ -5117,8 +5120,8 @@ pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。当待输
 </div>
 </div>
 
-<div id="outline-container-orgee0347f" class="outline-3">
-<h3 id="orgee0347f"><span class="section-number-3">2.14</span> 简单的中文分词功能</h3>
+<div id="outline-container-org23aa8f1" class="outline-3">
+<h3 id="org23aa8f1"><span class="section-number-3">2.14</span> 简单的中文分词功能</h3>
 <div class="outline-text-3" id="text-2-14">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-cstring-split-to-list</span> (chinese-string <span style="color: #afd8af;">&amp;optional</span> max-word-length)
@@ -5276,8 +5279,8 @@ pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。当待输
 </div>
 </div>
 
-<div id="outline-container-orgd52a1ab" class="outline-3">
-<h3 id="orgd52a1ab"><span class="section-number-3">2.15</span> 汉字到拼音的转换工具</h3>
+<div id="outline-container-orge820660" class="outline-3">
+<h3 id="orge820660"><span class="section-number-3">2.15</span> 汉字到拼音的转换工具</h3>
 <div class="outline-text-3" id="text-2-15">
 <p>
 `pyim-hanzi2pinyin' 和 `pyim-hanzi2pinyin-simple' 可以将一个中文字符串转换为拼音字符串或者拼音列表，也可以将一个中文字符串转换为拼音首字母字符串或者首字母列表。
@@ -5493,8 +5496,8 @@ OUTPUT:
 </div>
 </div>
 
-<div id="outline-container-org1639ec8" class="outline-3">
-<h3 id="org1639ec8"><span class="section-number-3">2.16</span> pyim 词库管理工具</h3>
+<div id="outline-container-org43c1f63" class="outline-3">
+<h3 id="org43c1f63"><span class="section-number-3">2.16</span> pyim 词库管理工具</h3>
 <div class="outline-text-3" id="text-2-16">
 <p>
 为 pyim 添加一个简单的词库管理工具 `pyim-dicts-manager' ，可以方便的执行下列命令：
@@ -5697,7 +5700,7 @@ OUTPUT:
 
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-extra-dicts-add-dict</span> (new-dict)
-  <span style="color: #FBDE2D;">"&#28155;&#21152; `</span><span style="color: #96CBFE;">new-dict</span><span style="color: #FBDE2D;">' &#21040; `</span><span style="color: #96CBFE;">pyim-dicts</span><span style="color: #FBDE2D;">', &#20854;&#20013; `</span><span style="color: #96CBFE;">new-dict</span><span style="color: #FBDE2D;">' &#30340;&#26684;&#24335;&#20026;&#65306;</span>
+  <span style="color: #FBDE2D;">"&#28155;&#21152; `</span><span style="color: #96CBFE;">new-dict</span><span style="color: #FBDE2D;">' &#21040; `</span><span style="color: #96CBFE;">pyim-extra-dicts</span><span style="color: #FBDE2D;">', &#20854;&#20013; `</span><span style="color: #96CBFE;">new-dict</span><span style="color: #FBDE2D;">' &#30340;&#26684;&#24335;&#20026;&#65306;</span>
 
 <span style="color: #FBDE2D;">   (:name \"XXX\" :file \"/path/to/XXX.pyim\")</span>
 
@@ -5741,14 +5744,24 @@ OUTPUT:
 </div>
 </div>
 </div>
+
+<div id="outline-container-org9300094" class="outline-3">
+<h3 id="org9300094"><span class="section-number-3">2.17</span> pyim 探针程序</h3>
+<div class="outline-text-3" id="text-2-17">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">require</span> '<span style="color: #96CBFE;">pyim-probe</span>)
+</pre>
+</div>
+</div>
+</div>
 </div>
 
 </div>
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2017-07-27</span>
-        <span title="last modification date" class="post-info">2017-07-27</span>
+        <span title="post date" class="post-info">2017-07-29</span>
+        <span title="last modification date" class="post-info">2017-07-29</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>

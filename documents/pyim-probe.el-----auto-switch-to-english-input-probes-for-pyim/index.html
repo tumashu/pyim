@@ -34,31 +34,31 @@
 <h2>&#30446;&#24405;</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgfbad056">1. 使用说明</a>
+<li><a href="#org197ff84">1. 使用说明</a>
 <ul>
-<li><a href="#org78adae1">1.1. 简介</a></li>
-<li><a href="#org730e56c">1.2. 设置</a>
+<li><a href="#orgec97497">1.1. 简介</a></li>
+<li><a href="#org1e45257">1.2. 设置</a>
 <ul>
-<li><a href="#org764d49b">1.2.1. 根据环境自动切换到英文输入模式</a></li>
-<li><a href="#org1945556">1.2.2. 根据环境自动切换到半角标点输入模式</a></li>
+<li><a href="#orgb2f9bad">1.2.1. 根据环境自动切换到英文输入模式</a></li>
+<li><a href="#org81614a2">1.2.2. 根据环境自动切换到半角标点输入模式</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org6310fb4">2. 代码</a>
+<li><a href="#org530da84">2. 代码</a>
 <ul>
-<li><a href="#orge6c38fb">2.1. 根据环境自动切换到英文输入模式</a></li>
-<li><a href="#orgd03dafd">2.2. 根据环境自动切换到半角标点输入模式</a></li>
+<li><a href="#org20348bc">2.1. 根据环境自动切换到英文输入模式</a></li>
+<li><a href="#org79a651c">2.2. 根据环境自动切换到半角标点输入模式</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgfbad056" class="outline-2">
-<h2 id="orgfbad056"><span class="section-number-2">1</span> 使用说明</h2>
+<div id="outline-container-org197ff84" class="outline-2">
+<h2 id="org197ff84"><span class="section-number-2">1</span> 使用说明</h2>
 <div class="outline-text-2" id="text-1">
-</div><div id="outline-container-org78adae1" class="outline-3">
-<h3 id="org78adae1"><span class="section-number-3">1.1</span> 简介</h3>
+</div><div id="outline-container-orgec97497" class="outline-3">
+<h3 id="orgec97497"><span class="section-number-3">1.1</span> 简介</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 这个文件包含了许多探针函数，用于实现两个功能：
@@ -71,11 +71,11 @@
 </div>
 </div>
 
-<div id="outline-container-org730e56c" class="outline-3">
-<h3 id="org730e56c"><span class="section-number-3">1.2</span> 设置</h3>
+<div id="outline-container-org1e45257" class="outline-3">
+<h3 id="org1e45257"><span class="section-number-3">1.2</span> 设置</h3>
 <div class="outline-text-3" id="text-1-2">
-</div><div id="outline-container-org764d49b" class="outline-4">
-<h4 id="org764d49b"><span class="section-number-4">1.2.1</span> 根据环境自动切换到英文输入模式</h4>
+</div><div id="outline-container-orgb2f9bad" class="outline-4">
+<h4 id="orgb2f9bad"><span class="section-number-4">1.2.1</span> 根据环境自动切换到英文输入模式</h4>
 <div class="outline-text-4" id="text-1-2-1">
 <p>
 用户将探针函数添加到 `pyim-english-input-switch-functions' 后, 就可以激活这个探针函数，比如：
@@ -94,8 +94,8 @@
 </div>
 </div>
 
-<div id="outline-container-org1945556" class="outline-4">
-<h4 id="org1945556"><span class="section-number-4">1.2.2</span> 根据环境自动切换到半角标点输入模式</h4>
+<div id="outline-container-org81614a2" class="outline-4">
+<h4 id="org81614a2"><span class="section-number-4">1.2.2</span> 根据环境自动切换到半角标点输入模式</h4>
 <div class="outline-text-4" id="text-1-2-2">
 <p>
 用户将探针函数添加到 `pyim-punctuation-half-width-functions' 后, 就可以激活这个探针函数。
@@ -104,11 +104,11 @@
 </div>
 </div>
 </div>
-<div id="outline-container-org6310fb4" class="outline-2">
-<h2 id="org6310fb4"><span class="section-number-2">2</span> 代码</h2>
+<div id="outline-container-org530da84" class="outline-2">
+<h2 id="org530da84"><span class="section-number-2">2</span> 代码</h2>
 <div class="outline-text-2" id="text-2">
-</div><div id="outline-container-orge6c38fb" class="outline-3">
-<h3 id="orge6c38fb"><span class="section-number-3">2.1</span> 根据环境自动切换到英文输入模式</h3>
+</div><div id="outline-container-org20348bc" class="outline-3">
+<h3 id="org20348bc"><span class="section-number-3">2.1</span> 根据环境自动切换到英文输入模式</h3>
 <div class="outline-text-3" id="text-2-1">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-probe-program-mode</span> ()
@@ -226,8 +226,8 @@
 </div>
 </div>
 
-<div id="outline-container-orgd03dafd" class="outline-3">
-<h3 id="orgd03dafd"><span class="section-number-3">2.2</span> 根据环境自动切换到半角标点输入模式</h3>
+<div id="outline-container-org79a651c" class="outline-3">
+<h3 id="org79a651c"><span class="section-number-3">2.2</span> 根据环境自动切换到半角标点输入模式</h3>
 <div class="outline-text-3" id="text-2-2">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-probe-punctuation-line-beginning</span> (char)
@@ -261,8 +261,8 @@
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2017-07-27</span>
-        <span title="last modification date" class="post-info">2017-07-27</span>
+        <span title="post date" class="post-info">2017-07-29</span>
+        <span title="last modification date" class="post-info">2017-07-29</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>
