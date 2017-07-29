@@ -971,10 +971,10 @@ If you don't like this funciton, set the variable to nil")
 (defvar pyim-dcache-iword2count nil)
 (defvar pyim-dcache-ishortcode2word nil)
 
-(defvar pyim-dcache-update-shortcode2word nil)
+(defvar pyim-dcache-update-shortcode2word-dcache nil)
 
-(defvar pyim-dcache-update-icode2word nil)
-(defvar pyim-dcache-update-ishortcode2word nil)
+(defvar pyim-dcache-update-icode2word-dcache nil)
+(defvar pyim-dcache-update-ishortcode2word-dcache nil)
 
 (defvar pyim-mode-map
   (let ((map (make-sparse-keymap))
@@ -1168,16 +1168,16 @@ TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCAC
   ;; 设置于 dcache 相关的几个变量。
   (pyim-dcache-init-variables)
   ;; 使用 pyim-dcache-iword2count 中的信息对 personal 缓存中的词频进行调整。
-  (pyim-dcache-update-icode2word restart)
+  (pyim-dcache-update-icode2word-dcache restart)
   ;; 创建简拼缓存， 比如 "ni-hao" -> "n-h"
-  (pyim-dcache-update-ishortcode2word restart)
+  (pyim-dcache-update-ishortcode2word-dcache restart)
   (pyim-cchar2pinyin-cache-create)
   (pyim-pinyin2cchar-cache-create)
   (run-hooks 'pyim-load-hook)
   ;; 如果 `pyim-dicts' 有变化，重新生成 `pyim-dcache-code2word' 缓存。
-  (pyim-dcache-update-code2word refresh-common-dcache)
+  (pyim-dcache-update-code2word-dcache refresh-common-dcache)
   ;; 这个命令 *当前* 主要用于五笔输入法。
-  (pyim-dcache-update-shortcode2word restart)
+  (pyim-dcache-update-shortcode2word-dcache restart)
   (unless (member 'pyim-dcache-save-caches kill-emacs-hook)
     (add-to-list 'kill-emacs-hook 'pyim-dcache-save-caches))
   (setq input-method-function 'pyim-input-method)
@@ -1233,7 +1233,7 @@ TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCAC
 ;; 1. `:name' 用户给词库设定的名称（可选项）。
 ;; 2. `:file' 词库文件的绝对路径。
 
-(defun pyim-dcache-update-code2word (&optional force)
+(defun pyim-dcache-update-code2word-dcache (&optional force)
   "读取并加载词库.
 读取 `pyim-dicts' 和 `pyim-extra-dicts' 里面的词库文件，生成对应的
 词库缓冲文件，然后加载词库缓存。
@@ -1266,11 +1266,11 @@ TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCAC
           (pyim-dcache-set-variable 'pyim-dcache-code2word t)
           (pyim-dcache-set-variable 'pyim-dcache-word2code t))))))
 
-(defun pyim-dcache-update-ishortcode2word (&optional force)
+(defun pyim-dcache-update-ishortcode2word-dcache (&optional force)
   "读取 ‘pyim-dcache-icode2word’ 中的词库，创建 *简拼* 缓存，然后加载这个缓存.
 如果 FORCE 为真，强制加载缓存。"
   (interactive)
-  (when (or force (not pyim-dcache-update-ishortcode2word))
+  (when (or force (not pyim-dcache-update-ishortcode2word-dcache))
     (async-start
      `(lambda ()
         ,(async-inject-variables "^load-path$")
@@ -1303,12 +1303,12 @@ TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCAC
         (setq pyim-dcache-create-abbrev-dcache-p t)
         (pyim-dcache-set-variable 'pyim-dcache-ishortcode2word t)))))
 
-(defun pyim-dcache-update-icode2word (&optional force)
+(defun pyim-dcache-update-icode2word-dcache (&optional force)
   "对 personal 缓存中的词条进行排序，加载排序后的结果.
 在这个过程中使用了 pyim-dcache-icode2count 中记录的词频信息。
 如果 FORCE 为真，强制排序。"
   (interactive)
-  (when (or force (not pyim-dcache-update-icode2word))
+  (when (or force (not pyim-dcache-update-icode2word-dcache))
     (async-start
      `(lambda ()
         ,(async-inject-variables "^load-path$")
@@ -1325,14 +1325,14 @@ TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCAC
         (pyim-dcache-save-variable 'pyim-dcache-icode2word)
         nil)
      `(lambda (result)
-        (setq pyim-dcache-update-icode2word t)
+        (setq pyim-dcache-update-icode2word-dcache t)
         (pyim-dcache-set-variable 'pyim-dcache-icode2word t)))))
 
-(defun pyim-dcache-update-shortcode2word (&optional force)
+(defun pyim-dcache-update-shortcode2word-dcache (&optional force)
   "使用 ‘pyim-dcache-code2word’ 中的词条，创建 简写code 词库缓存并加载.
 如果 FORCE 为真，强制运行。"
   (interactive)
-  (when (or force (not pyim-dcache-update-shortcode2word))
+  (when (or force (not pyim-dcache-update-shortcode2word-dcache))
     (async-start
      `(lambda ()
         ,(async-inject-variables "^load-path$")
@@ -1368,7 +1368,7 @@ TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCAC
         (pyim-dcache-save-variable 'pyim-dcache-shortcode2word)
         nil)
      `(lambda (result)
-        (setq pyim-dcache-update-shortcode2word t)
+        (setq pyim-dcache-update-shortcode2word-dcache t)
         (pyim-dcache-set-variable 'pyim-dcache-shortcode2word t)))))
 
 (defun pyim-dcache-return-shortcode (code)
