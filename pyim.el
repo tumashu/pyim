@@ -6,7 +6,7 @@
 
 ;; Author: Ye Wenbin <wenbinye@163.com>, Feng Shu <tumashu@163.com>
 ;; URL: https://github.com/tumashu/pyim
-;; Version: 1.5.2
+;; Version: 1.6.0
 ;; Package-Requires: ((emacs "24.3")(cl-lib "0.5")(pos-tip "0.4")(popup "0.1")(async "1.6")(pyim-basedict "0.1"))
 ;; Keywords: convenience, Chinese, pinyin, input-method
 
