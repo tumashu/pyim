@@ -1,62 +1,62 @@
-- [pyim 使用说明](#orge17e1c3)
-  - [截图](#org9823a61)
-  - [简介](#orgb76ddb9)
-  - [背景](#org3c4f2a2)
-  - [目标](#orgfedebd6)
-  - [特点](#org375e315)
-  - [安装](#org0e58536)
-  - [配置](#org5b2af84)
-    - [配置实例](#orgd5aba45)
-    - [添加词库文件](#orgfb1c6e4)
-    - [激活 pyim](#org371ca8b)
-  - [使用](#org0eab20d)
-    - [常用快捷键](#orgd1bc3b3)
-    - [使用双拼模式](#orgc8d9915)
-    - [使用五笔输入](#org9227819)
-    - [让选词框跟随光标](#org824b508)
-    - [调整 tooltip 选词框的显示样式](#orgc34098e)
-    - [设置模糊音](#org13e8916)
-    - [词条获取](#org535843c)
-    - [切换全角标点与半角标点](#orgb7608a2)
-    - [手动加词和删词](#orgcde3e47)
-    - [pyim 高级功能](#org6f59fea)
-  - [捐赠](#org2fe579e)
-  - [Tips](#org8b98c27)
-    - [如何将个人词条导出到一个文件](#org1310006)
-    - [pyim 出现错误时，如何开启 debug 模式](#org107d8cf)
-    - [选词框弹出位置不合理或者选词框内容显示不全](#orgc4bf5aa)
-    - [如何查看 pyim 文档。](#org0153f3c)
-    - [将光标处的拼音或者五笔字符串转换为中文 (与 vimim 的 “点石成金” 功能类似)](#orgf79e63b)
-    - [如何添加自定义拼音词库](#org6279c79)
-    - [如何手动安装和管理词库](#orgf614287)
-    - [Emacs 启动时加载 pyim 词库](#org98fbfc8)
-    - [将汉字字符串转换为拼音字符串](#orgfd18a0a)
-    - [中文分词](#org2ba73c9)
-    - [获取光标处的中文词条](#orgc45a989)
-    - [让 \`forward-word' 和 \`back-backward’ 在中文环境下正常工作](#orgabb7121)
-    - [为 isearch 相关命令添加拼音搜索支持](#orgeaa77b0)
+- [pyim 使用说明](#org6972f44)
+  - [截图](#orgb0315f4)
+  - [简介](#org03f8c1d)
+  - [背景](#orga6087f5)
+  - [目标](#org5991454)
+  - [特点](#org381eee1)
+  - [安装](#orga0000fb)
+  - [配置](#orgc605736)
+    - [配置实例](#org862f257)
+    - [添加词库文件](#orgb5cbadc)
+    - [激活 pyim](#org44e11be)
+  - [使用](#org961b285)
+    - [常用快捷键](#org4b56410)
+    - [使用双拼模式](#org7b059cf)
+    - [使用五笔输入](#orgeb2e978)
+    - [让选词框跟随光标](#org5b4b5d1)
+    - [调整 tooltip 选词框的显示样式](#orgc6fb3b4)
+    - [设置模糊音](#orgd3398b8)
+    - [词条获取](#org43d00a9)
+    - [切换全角标点与半角标点](#org80219de)
+    - [手动加词和删词](#org9241a8c)
+    - [pyim 高级功能](#orgd454b59)
+  - [捐赠](#orgf2a2daa)
+  - [Tips](#org9429a46)
+    - [如何将个人词条导出到一个文件](#orge90a338)
+    - [pyim 出现错误时，如何开启 debug 模式](#org3f24d30)
+    - [选词框弹出位置不合理或者选词框内容显示不全](#org2a8ee35)
+    - [如何查看 pyim 文档。](#orgbc43d41)
+    - [将光标处的拼音或者五笔字符串转换为中文 (与 vimim 的 “点石成金” 功能类似)](#org931141a)
+    - [如何添加自定义拼音词库](#orgcbd3de2)
+    - [如何手动安装和管理词库](#orgf7596ed)
+    - [Emacs 启动时加载 pyim 词库](#orgd84c1ab)
+    - [将汉字字符串转换为拼音字符串](#orgd6bb184)
+    - [中文分词](#org3a37b29)
+    - [获取光标处的中文词条](#orgdcd8717)
+    - [让 \`forward-word' 和 \`back-backward’ 在中文环境下正常工作](#org088cc2e)
+    - [为 isearch 相关命令添加拼音搜索支持](#orgc8986a6)
 
 
-<a id="orge17e1c3"></a>
+<a id="org6972f44"></a>
 
 # pyim 使用说明
 
 
-<a id="org9823a61"></a>
+<a id="orgb0315f4"></a>
 
 ## 截图
 
 ![img](./snapshots/pyim-linux-x-with-toolkit.png)
 
 
-<a id="orgb76ddb9"></a>
+<a id="org03f8c1d"></a>
 
 ## 简介
 
 pyim 是 Emacs 环境下的一个中文输入法，最初它只支持全拼输入，所以当时 "pyim" 代表 "Chinese Pinyin Input Method" 的意思，后来根据同学的提议， 添加了五笔的支持，再叫 “拼音输入法” 就不太合适了，所以你现在可以将它理解 为 “PengYou input method”： 平时像朋友一样帮助你，偶尔也像朋友一样犯二 。。。
 
 
-<a id="org3c4f2a2"></a>
+<a id="orga6087f5"></a>
 
 ## 背景
 
@@ -72,7 +72,7 @@ emacs-eim 是 Emacs 环境下的一个中文输入法框架， 支持拼音，�
 于是我 fork 了 emacs-eim 输入法的部分代码, 创建了一个项目：pyim。
 
 
-<a id="orgfedebd6"></a>
+<a id="org5991454"></a>
 
 ## 目标
 
@@ -83,7 +83,7 @@ pyim 的目标是： **尽最大的努力成为一个好用的 Emacs 中文输�
 3.  Exchange: 尽最大可能简化 pyim 使用其他优秀输入法的词库 的难度和复杂度。
 
 
-<a id="org375e315"></a>
+<a id="org381eee1"></a>
 
 ## 特点
 
@@ -92,7 +92,7 @@ pyim 的目标是： **尽最大的努力成为一个好用的 Emacs 中文输�
 3.  pyim 使用文本词库格式，方便处理。
 
 
-<a id="org0e58536"></a>
+<a id="orga0000fb"></a>
 
 ## 安装
 
@@ -106,12 +106,12 @@ pyim 的目标是： **尽最大的努力成为一个好用的 Emacs 中文输�
         (setq default-input-method "pyim")
 
 
-<a id="org5b2af84"></a>
+<a id="orgc605736"></a>
 
 ## 配置
 
 
-<a id="orgd5aba45"></a>
+<a id="org862f257"></a>
 
 ### 配置实例
 
@@ -167,7 +167,7 @@ pyim 的目标是： **尽最大的努力成为一个好用的 Emacs 中文输�
        ("C-;" . pyim-delete-word-from-personal-buffer)))
 
 
-<a id="orgfb1c6e4"></a>
+<a id="orgb5cbadc"></a>
 
 ### 添加词库文件
 
@@ -194,10 +194,10 @@ pyim-greatdict 包对应的词库由 [WenLiang Xiao](https://github.com/xiaowl) 
 1.  如果机器性能不好，安装 pyim-greatdict 会导致 pyim 启动 非常缓慢，请仔细考虑。
 2.  这个词库使用 gzip 压缩，非 Linux 用户需要安装 [gzip](http://www.gzip.org/) 程序， 并配置好系统 PATH 。
 
-如果 pyim-greatdict 不能满足需求，用户可以使用其他方式为 pyim 添加拼音词库， 具体方式请参考 [1.10.6](#org6279c79) 小结。
+如果 pyim-greatdict 不能满足需求，用户可以使用其他方式为 pyim 添加拼音词库， 具体方式请参考 [1.10.6](#orgcbd3de2) 小结。
 
 
-<a id="org371ca8b"></a>
+<a id="org44e11be"></a>
 
 ### 激活 pyim
 
@@ -205,12 +205,12 @@ pyim-greatdict 包对应的词库由 [WenLiang Xiao](https://github.com/xiaowl) 
     (global-set-key (kbd "C-\\") 'toggle-input-method)
 
 
-<a id="org0eab20d"></a>
+<a id="org961b285"></a>
 
 ## 使用
 
 
-<a id="orgd1bc3b3"></a>
+<a id="org4b56410"></a>
 
 ### 常用快捷键
 
@@ -230,7 +230,7 @@ pyim-greatdict 包对应的词库由 [WenLiang Xiao](https://github.com/xiaowl) 
 | M-DEL 或  M-BACKSPACE | 删除最后一个拼音 |
 
 
-<a id="orgc8d9915"></a>
+<a id="org7b059cf"></a>
 
 ### 使用双拼模式
 
@@ -245,7 +245,7 @@ pyim 支持双拼输入模式，用户可以通过变量 \`pyim-default-scheme' 
 3.  用户可能需要重新设置 \`pyim-translate-trigger-char'。
 
 
-<a id="org9227819"></a>
+<a id="orgeb2e978"></a>
 
 ### 使用五笔输入
 
@@ -268,12 +268,12 @@ pyim 支持五笔输入模式，用户可以通过变量 \`pyim-default-scheme' 
 
 最简单的方式是从 melpa 中安装 pyim-wbdict 包，然后根据它的 [README](https://github.com/tumashu/pyim-wbdict) 来配置。
 
-注意：为了简化代码和提高输入法响应速度，pyim 直接将拼音词库和五笔 词库合并到同一个dcache 文件中，所以 pyim **强制规定** 在词库中， 五笔编码 **必须** 都以 '.' 开头，比如 '.aaaa' ,这样可以避免出现不必要 的混乱。
+注意：为了简化代码和提高输入法响应速度，pyim 直接将拼音词库和其它输入法 词库（比如：五笔词库）合并到同一个 dcache 文件中，所以 pyim **强制规定** 在词库中， 五笔编码 **必须** 都以 '.' 开头，比如 '.aaaa' ,这样可以避免出现不必要 的混乱。
 
 用户可以使用命令：\`pyim-search-word-code' 来查询当前选择词条的五笔编码。
 
 
-<a id="org824b508"></a>
+<a id="org5b4b5d1"></a>
 
 ### 让选词框跟随光标
 
@@ -294,7 +294,7 @@ pyim 支持五笔输入模式，用户可以通过变量 \`pyim-default-scheme' 
 GTK 选词框的字体设置可以参考：[GTK resources](https://www.gnu.org/software/emacs/manual/html_node/emacs/GTK-resources.html#GTK-resources) 。
 
 
-<a id="orgc34098e"></a>
+<a id="orgc6fb3b4"></a>
 
 ### 调整 tooltip 选词框的显示样式
 
@@ -305,14 +305,14 @@ pyim 的 tooltip 选词框默认使用 **双行显示** 的样式，在一些特
 注：用户可以添加函数 pyim-page-style-STYLENAME-style 来定义自己的选词框格式。
 
 
-<a id="org13e8916"></a>
+<a id="orgd3398b8"></a>
 
 ### 设置模糊音
 
 可以通过设置 \`pyim-fuzzy-pinyin-alist' 变量来自定义模糊音。
 
 
-<a id="org535843c"></a>
+<a id="org43d00a9"></a>
 
 ### 词条获取
 
@@ -333,7 +333,7 @@ pyim **内置** 了多种词条获取的方式：
     (setq pyim-backends '(personal-dcache-words common-dcache-words pinyin-chars))
 
 
-<a id="orgb7608a2"></a>
+<a id="org80219de"></a>
 
 ### 切换全角标点与半角标点
 
@@ -342,7 +342,7 @@ pyim **内置** 了多种词条获取的方式：
 3.  第三种方法：设置变量 \`pyim-translate-trigger-char' ，输入变量设定的 字符会切换光标处标点的样式。
 
 
-<a id="orgcde3e47"></a>
+<a id="org9241a8c"></a>
 
 ### 手动加词和删词
 
@@ -352,7 +352,7 @@ pyim **内置** 了多种词条获取的方式：
 4.  \`pyim-delete-word' 从个人词库中删除当前高亮选择的词条。
 
 
-<a id="org6f59fea"></a>
+<a id="orgd454b59"></a>
 
 ### pyim 高级功能
 
@@ -396,7 +396,7 @@ pyim **内置** 了多种词条获取的方式：
     注：上述函数列表中，任意一个函数的返回值为 t 时，pyim 切换到半角标点输入模式。
 
 
-<a id="org2fe579e"></a>
+<a id="orgf2a2daa"></a>
 
 ## 捐赠
 
@@ -408,26 +408,26 @@ pyim **内置** 了多种词条获取的方式：
     ![img](snapshots/QR-code-for-author.jpg)
 
 
-<a id="org8b98c27"></a>
+<a id="org9429a46"></a>
 
 ## Tips
 
 
-<a id="org1310006"></a>
+<a id="orge90a338"></a>
 
 ### 如何将个人词条导出到一个文件
 
 使用命令：pyim-personal-dcache-export
 
 
-<a id="org107d8cf"></a>
+<a id="org3f24d30"></a>
 
 ### pyim 出现错误时，如何开启 debug 模式
 
     (setq debug-on-error t)
 
 
-<a id="orgc4bf5aa"></a>
+<a id="org2a8ee35"></a>
 
 ### 选词框弹出位置不合理或者选词框内容显示不全
 
@@ -437,7 +437,7 @@ pyim **内置** 了多种词条获取的方式：
 2.  选词框弹出位置不合理：减小变量值
 
 
-<a id="org0153f3c"></a>
+<a id="orgbc43d41"></a>
 
 ### 如何查看 pyim 文档。
 
@@ -446,14 +446,14 @@ pyim 的文档隐藏在 comment 中，如果用户喜欢阅读 html 格式的文
 <http://tumashu.github.io/pyim/>
 
 
-<a id="orgf79e63b"></a>
+<a id="org931141a"></a>
 
 ### 将光标处的拼音或者五笔字符串转换为中文 (与 vimim 的 “点石成金” 功能类似)
 
     (global-set-key (kbd "M-i") 'pyim-convert-code-at-point)
 
 
-<a id="org6279c79"></a>
+<a id="orgcbd3de2"></a>
 
 ### 如何添加自定义拼音词库
 
@@ -495,7 +495,7 @@ pyim 默认没有携带任何拼音词库，用户可以使用下面几种方式
     3.  编写语言： C语言
 
 
-<a id="orgf614287"></a>
+<a id="orgf7596ed"></a>
 
 ### 如何手动安装和管理词库
 
@@ -517,7 +517,7 @@ pyim 默认没有携带任何拼音词库，用户可以使用下面几种方式
 3.  词库文件的编码必须为 utf-8-unix，否则会出现乱码。
 
 
-<a id="org98fbfc8"></a>
+<a id="orgd84c1ab"></a>
 
 ### Emacs 启动时加载 pyim 词库
 
@@ -525,7 +525,7 @@ pyim 默认没有携带任何拼音词库，用户可以使用下面几种方式
               #'(lambda () (pyim-restart-1 t)))
 
 
-<a id="orgfd18a0a"></a>
+<a id="orgd6bb184"></a>
 
 ### 将汉字字符串转换为拼音字符串
 
@@ -535,7 +535,7 @@ pyim 默认没有携带任何拼音词库，用户可以使用下面几种方式
 2.  \`pyim-hanzi2pinyin-simple' （不考虑多音字）
 
 
-<a id="org2ba73c9"></a>
+<a id="org3a37b29"></a>
 
 ### 中文分词
 
@@ -553,14 +553,14 @@ pyim 包含了一个简单的分词函数：\`pyim-cstring-split-to-list', 可�
 注意，上述两个分词函数使用暴力匹配模式来分词，所以， **不能检测出** pyim 词库中不存在的中文词条。
 
 
-<a id="orgc45a989"></a>
+<a id="orgdcd8717"></a>
 
 ### 获取光标处的中文词条
 
 pyim 包含了一个简单的命令：\`pyim-cwords-at-point', 这个命令 可以得到光标处的 **英文** 或者 **中文** 词条的 \*列表\*，这个命令依赖分词函数： \`pyim-cstring-split-to-list'。
 
 
-<a id="orgabb7121"></a>
+<a id="org088cc2e"></a>
 
 ### 让 \`forward-word' 和 \`back-backward’ 在中文环境下正常工作
 
@@ -575,7 +575,7 @@ pyim 包含了一个简单的命令：\`pyim-cwords-at-point', 这个命令 可�
     (global-set-key (kbd "M-b") 'pyim-backward-word)
 
 
-<a id="orgeaa77b0"></a>
+<a id="orgc8986a6"></a>
 
 ### 为 isearch 相关命令添加拼音搜索支持
 
