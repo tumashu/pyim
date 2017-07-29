@@ -304,7 +304,7 @@
 
 ;; *** 手动加词和删词
 
-;; 1. `pyim-create-word-at-point:"N"char' 这是一组命令，从光标前提取N个汉
+;; 1. `pyim-create-Ncchar-word-at-point 这是一组命令，从光标前提取N个汉
 ;;    字字符组成字符串，并将其加入个人词库。
 ;; 2. `pyim-translate-trigger-char' 以默认设置为例：在“我爱吃红烧肉”后输
 ;;    入“5v” 可以将“爱吃红烧肉”这个词条保存到用户个人词库。
@@ -1646,17 +1646,17 @@ BUG：无法有效的处理多音字。"
       (unless silent
         (message "将词条: \"%s\" 加入 personal 缓冲。" string)))))
 
-(defun pyim-create-word-at-point:2char ()
+(defun pyim-create-2cchar-word-at-point ()
   "将光标前2个中文字符组成的字符串加入个人词库。"
   (interactive)
   (pyim-create-word-at-point 2))
 
-(defun pyim-create-word-at-point:3char ()
+(defun pyim-create-3cchar-word-at-point ()
   "将光标前3个中文字符组成的字符串加入个人词库。"
   (interactive)
   (pyim-create-word-at-point 3))
 
-(defun pyim-create-word-at-point:4char ()
+(defun pyim-create-4cchar-word-at-point ()
   "将光标前4个中文字符组成的字符串加入个人词库。"
   (interactive)
   (pyim-create-word-at-point 4))
