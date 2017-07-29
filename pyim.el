@@ -630,6 +630,14 @@ plist 来表示，比如：
      :code-prefix "." ;五笔词库中所有的 code 都以 "." 开头，防止和拼音词库冲突。
      :code-maximum-length 4 ;五笔词库中，code 的最大长度（不计算 code-prefix）
      :prefer-trigger-chars nil)
+    (cangjie
+     :document "倉頡输入法。"
+     :class xingma
+     :first-chars "abcdefghijklmnopqrstuvwxyz"
+     :rest-chars "abcdefghijklmnopqrstuvwxyz"
+     :code-prefix "@" ;仓颉输入法词库中所有的 code 都以 "@" 开头，防止词库冲突。
+     :code-maximum-length 5 ;仓颉词库中，code 的最大长度（不计算 code-prefix）
+     :prefer-trigger-chars nil)
     (pyim-shuangpin
      :document "与 pyim 配合良好的双拼输入法方案，源自小鹤双拼方案。"
      :class shuangpin
