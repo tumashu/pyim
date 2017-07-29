@@ -545,7 +545,6 @@
 (require 'popup)
 (require 'async)
 (require 'pyim-pymap)
-(require 'pyim-probe)
 
 (defgroup pyim nil
   "Chinese pinyin input method"
@@ -4097,6 +4096,8 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
                       (expand-file-name dict-file))))
            pyim-dicts))
 
+;; ** pyim 探针程序
+(require 'pyim-probe)
 
 ;; * Footer
 (provide 'pyim)
