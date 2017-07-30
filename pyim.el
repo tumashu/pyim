@@ -1,4 +1,4 @@
-;;; pyim.el --- A Chinese input method which support quanpin, shuangpin and wubi.
+;;; pyim.el --- A Chinese input method which support quanpin, shuangpin, wubi and cangjie.
 
 ;; * Header
 ;; Copyright 2006 Ye Wenbin
@@ -62,7 +62,7 @@
 ;;    的难度和复杂度。
 
 ;; ** 特点
-;; 1. pyim 支持全拼，双拼和五笔，其中对全拼的支持最好。
+;; 1. pyim 支持全拼，双拼，五笔和仓颉，其中对全拼的支持最好。
 ;; 2. pyim 通过添加词库的方式优化输入法。
 ;; 3. pyim 使用文本词库格式，方便处理。
 
@@ -230,12 +230,34 @@
 ;; 最简单的方式是从 melpa 中安装 pyim-wbdict 包，然后根据它的
 ;; [[https://github.com/tumashu/pyim-wbdict][README]] 来配置。
 
-;; 注意：为了简化代码和提高输入法响应速度，pyim 直接将拼音词库和其它输入法
-;; 词库（比如：五笔词库）合并到同一个 dcache 文件中，所以 pyim *强制规定* 在词库中，
-;; 五笔编码 *必须* 都以 '.' 开头，比如 '.aaaa' ,这样可以避免出现不必要
-;; 的混乱。
+;; *** 使用仓颉输入法
+;; pyim 支持仓颉输入法，用户可以通过变量 `pyim-default-scheme' 来设定：
 
-;; 用户可以使用命令：`pyim-search-word-code' 来查询当前选择词条的五笔编码。
+;; #+BEGIN_EXAMPLE
+;; (setq pyim-default-scheme 'cangjie)
+;; #+END_EXAMPLE
+
+;; 在使用仓颉输入法之前，请用 pyim-dicts-manager 添加一个仓颉词库，词库的格式类似：
+
+;; #+BEGIN_EXAMPLE
+;;; -*- coding: utf-8-unix -*-
+;; @a 日
+;; @a 曰
+;; @aa 昌
+;; @aa 昍
+;; @aaa 晶
+;; @aaa 晿
+;; @aaah 曑
+;; #+END_EXAMPLE
+
+;; 最简单的方式是从 melpa 中安装 pyim-cangjie5dict 包，然后根据它的
+;; [[https://github.com/erstern/pyim-cangjie5dict][README]] 来配置。
+
+;; 用户可以使用命令：`pyim-search-word-code' 来查询当前选择词条的仓颉编码
+
+;; 注意： 仓颉输入法有五个字符的编码，这些编码对应的汉字都不太常用，为了
+;; 让用户少敲空格，pyim 内置的仓颉输入法模式 *只能* 输入四个字符编码的汉字，
+;; 5个字符编码对应的汉字不能直接输入， *只能* 通过选词框按 "1","2" 来选择。
 
 ;; *** 让选词框跟随光标
 ;; 用户可以通过下面的设置让 pyim 在 *光标处* 显示一个选词框：
@@ -637,7 +659,7 @@ plist 来表示，比如：
      :first-chars "abcdefghijklmnopqrstuvwxyz"
      :rest-chars "abcdefghijklmnopqrstuvwxyz"
      :code-prefix "@" ;仓颉输入法词库中所有的 code 都以 "@" 开头，防止词库冲突。
-     :code-split-length 5 ;默认将用户输入切成 4 个字符长的 code 列表（不计算 code-prefix）
+     :code-split-length 4 ;默认将用户输入切成 4 个字符长的 code 列表（不计算 code-prefix）
      :code-maximum-length 5 ;仓颉词库中，code 的最大长度（不计算 code-prefix）
      :prefer-trigger-chars nil)
     (pyim-shuangpin
