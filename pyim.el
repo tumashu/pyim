@@ -628,6 +628,7 @@ plist 来表示，比如：
      :first-chars "abcdefghijklmnopqrstuvwxyz"
      :rest-chars "abcdefghijklmnopqrstuvwxyz"
      :code-prefix "." ;五笔词库中所有的 code 都以 "." 开头，防止和拼音词库冲突。
+     :code-split-length 4 ;默认将用户输入切成 4 个字符长的 code 列表（不计算 code-prefix）
      :code-maximum-length 4 ;五笔词库中，code 的最大长度（不计算 code-prefix）
      :prefer-trigger-chars nil)
     (cangjie
@@ -636,6 +637,7 @@ plist 来表示，比如：
      :first-chars "abcdefghijklmnopqrstuvwxyz"
      :rest-chars "abcdefghijklmnopqrstuvwxyz"
      :code-prefix "@" ;仓颉输入法词库中所有的 code 都以 "@" 开头，防止词库冲突。
+     :code-split-length 5 ;默认将用户输入切成 4 个字符长的 code 列表（不计算 code-prefix）
      :code-maximum-length 5 ;仓颉词库中，code 的最大长度（不计算 code-prefix）
      :prefer-trigger-chars nil)
     (pyim-shuangpin
@@ -2276,7 +2278,7 @@ Return the input string."
                `-> \".aaaa\"  用于搜索词库。"
   (when scheme-name
     (let ((code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
-          (n (pyim-scheme-get-option scheme-name :code-maximum-length)))
+          (n (pyim-scheme-get-option scheme-name :code-split-length)))
       (if as-search-key
           (concat (or code-prefix "") (car scode))
         (car scode)))))
@@ -2376,7 +2378,7 @@ Return the input string."
       (when (member class '(xingma))
         (let* ((code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
                (code (pyim-scode-join-xingma-scode scode scheme-name))
-               (n (pyim-scheme-get-option scheme-name :code-maximum-length))
+               (n (pyim-scheme-get-option scheme-name :code-split-length))
                (output (pyim-split-string-by-number code n t))
                (output1 (car output))
                (output2 (reverse (cdr output)))
@@ -2684,7 +2686,7 @@ Return the input string."
            choice)))
     (if (stringp output)
         (car (split-string output ":"))
-     output)))
+      output)))
 
 (defun pyim-page-current-page ()
   (1+ (/ (1- pyim-current-pos) pyim-page-length)))
@@ -2714,7 +2716,7 @@ Return the input string."
   "这个函数用于生成 page 中显示的 code。"
   (let* ((scheme-name pyim-default-scheme)
          (class (pyim-scheme-get-option scheme-name :class))
-         (code-maximum-length (pyim-scheme-get-option scheme-name :code-maximum-length)))
+         (code-maximum-length (pyim-scheme-get-option scheme-name :code-split-length)))
     (cond
      ((memq class '(xingma))
       (mapconcat #'identity
