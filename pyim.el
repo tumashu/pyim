@@ -290,28 +290,6 @@
 ;; *** 设置模糊音
 ;; 可以通过设置 `pyim-fuzzy-pinyin-alist' 变量来自定义模糊音。
 
-;; *** 词条获取
-;; pyim *内置* 了多种词条获取的方式：
-
-;; 1. `personal-dcache-words'  从 `pyim-dcache-icode2word' 中获取词条。
-;; 2. `common-dcache-words'    从 `pyim-dcache-code2word' 中获取词条。
-;; 3. `pinyin-chars'           逐一获取一个拼音对应的多个汉字。
-;; 4. `jianpin-words'          获取一个简拼对应的词条，
-;;     如果输入 \"ni-hao\" ，那么同时搜索 code 为 \"n-h\" 的词条。
-;; 5. `znabc-words'            类似智能ABC的词语获取方式(源于 emacs-eim)."
-
-;; 用户可以通过下面的代码来调整 backends 设置，比如：
-
-;; #+BEGIN_EXAMPLE
-;; (setq pyim-backends '(personal-dcache-words common-dcache-words pinyin-chars jianpin-words znabc-words))
-;; #+END_EXAMPLE
-
-;; 一些 backends 可能会导致输入法卡顿，用户可以通过下面的方式关闭：
-
-;; #+BEGIN_EXAMPLE
-;; (setq pyim-backends '(personal-dcache-words common-dcache-words pinyin-chars))
-;; #+END_EXAMPLE
-
 ;; *** 切换全角标点与半角标点
 
 ;; 1. 第一种方法：使用命令 `pyim-punctuation-toggle'，全局切换。
@@ -823,21 +801,6 @@ pyim 内建的功能有：
   "设定糢糊音."
   :group 'pyim)
 
-(defcustom pyim-backends
-  '(personal-dcache-words common-dcache-words pinyin-chars jianpin-words znabc-words xingma-words)
-  "Pyim 词语获取 backends.
-
-当前支持:
-
-1. `personal-dcache-words'  从 `pyim-dcache-icode2word' 中获取词条。
-2. `common-dcache-words'    从 `pyim-dcache-code2word' 中获取词条。
-3. `pinyin-chars'           逐一获取一个拼音对应的多个汉字。
-4. `jianpin-words'          获取简拼对应的词条，如果输入 \"ni-hao\",
-                            那么同时搜索 code 为 \"n-h\" 的词条。
-5. `znabc-words'            类似智能ABC的词语获取方式(源于 emacs-eim).
-6. `xingma-words'           专门用于处理五笔等基于形码的输入法的 backend."
-  :group 'pyim)
-
 (defcustom pyim-isearch-enable-pinyin-search nil
   "设置是否开启 isearch 中文拼音搜索功能."
   :group 'pyim
@@ -918,6 +881,20 @@ pyim 内建的有三种选词框格式：
 (defvar pyim-debug nil)
 (defvar pyim-title "灵通" "Pyim 在 mode-line 中显示的名称.")
 (defvar pyim-extra-dicts nil "与 `pyim-dicts' 类似, 用于和 elpa 格式的词库包集成。.")
+
+(defvar pyim-backends
+  '(personal-dcache-words common-dcache-words pinyin-chars jianpin-words znabc-words xingma-words)
+  "Pyim 词语获取 backends.
+
+当前支持:
+
+1. `personal-dcache-words'  从 `pyim-dcache-icode2word' 中获取词条。
+2. `common-dcache-words'    从 `pyim-dcache-code2word' 中获取词条。
+3. `pinyin-chars'           逐一获取一个拼音对应的多个汉字。
+4. `jianpin-words'          获取简拼对应的词条，如果输入 \"ni-hao\",
+                            那么同时搜索 code 为 \"n-h\" 的词条。
+5. `znabc-words'            类似智能ABC的词语获取方式(源于 emacs-eim).
+6. `xingma-words'           专门用于处理五笔等基于形码的输入法的 backend.")
 
 (defvar pyim-pinyin-shen-mu
   '("b" "p" "m" "f" "d" "t" "n" "l" "g" "k" "h"
