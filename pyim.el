@@ -3377,11 +3377,13 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
         (not pyim-input-ascii)))
 
 ;; *** 为 isearch 添加拼音搜索功能
-(defun pyim-isearch-build-search-regexp (pystr)
-  "这个函数用于 isearch 中文 *拼音* 搜索，
-根据 str 构建一个 regexp, 比如：
+(define-obsolete-function-alias
+  'pyim-isearch-build-search-regexp 'pyim-cregexp-build)
 
-\"nihao\" -> \"[你呢...][好号...] \\| nihao\""
+(defun pyim-cregexp-build (pystr)
+  "根据 str 构建一个中文 regexp, 用于 \"拼音搜索汉字\".
+比如：
+   \"nihao\" -> \"[你呢...][好号...] \\| nihao\""
   (let* ((scheme-name pyim-default-scheme)
          (class (pyim-scheme-get-option scheme-name :class)))
     ;; 确保 pyim 词库加载
@@ -3397,7 +3399,7 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
              (regexp-list
               (mapcar
                #'(lambda (spinyin)
-                   (pyim-spinyin-build-cregexp spinyin))
+                   (pyim-cregexp-build-from-spinyin spinyin))
                spinyin-list))
              (regexp
               (when regexp-list
@@ -3410,10 +3412,13 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
                 pystr)))
         regexp))))
 
-(defun pyim-spinyin-build-cregexp (spinyin &optional match-beginning
-                                           first-equal all-equal)
-  "这个函数生成一个 regexp ，用这个 regexp 可以搜索到
-拼音匹配 `spinyin' 的中文字符串。"
+(define-obsolete-function-alias
+  'pyim-spinyin-build-cregexp 'pyim-cregexp-build-from-spinyin)
+
+(defun pyim-cregexp-build-from-spinyin (spinyin &optional match-beginning
+                                                first-equal all-equal)
+  "从 SPINYIN 创建一个中文 regexp.
+用这个中文 regexp 可以搜索到拼音匹配 SPINYIN 的中文字符串。"
   (let* ((spinyin (mapcar
                    #'(lambda (x)
                        (concat (car x) (cdr x)))
@@ -3453,7 +3458,7 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
            (funcall (if ,isearch-forward
                         're-search-forward
                       're-search-backward)
-                    (pyim-isearch-build-search-regexp string) bound noerror count)))
+                    (pyim-cregexp-build string) bound noerror count)))
     ;; Return default function
     (isearch-search-fun-default)))
 
