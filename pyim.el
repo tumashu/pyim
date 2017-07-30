@@ -255,11 +255,6 @@
 
 ;; 用户可以使用命令：`pyim-search-word-code' 来查询当前选择词条的仓颉编码
 
-;; 注意： 仓颉输入法有五个字符的编码，这些编码对应的汉字都不太常用，为了
-;; 让用户少敲空格，pyim 内置的仓颉输入法模式只能输入四个字符编码的汉字，
-;; 5个字符编码对应的汉字一般不能直接输入， *只能* 通过选词框按 "1","2" 等
-;; 数字键来选择。
-
 ;; *** 让选词框跟随光标
 ;; 用户可以通过下面的设置让 pyim 在 *光标处* 显示一个选词框：
 
@@ -660,7 +655,7 @@ plist 来表示，比如：
      :first-chars "abcdefghijklmnopqrstuvwxyz"
      :rest-chars "abcdefghijklmnopqrstuvwxyz"
      :code-prefix "@" ;仓颉输入法词库中所有的 code 都以 "@" 开头，防止词库冲突。
-     :code-split-length 4 ;默认将用户输入切成 4 个字符长的 code 列表（不计算 code-prefix）
+     :code-split-length 5 ;默认将用户输入切成 5 个字符长的 code 列表（不计算 code-prefix）
      :code-maximum-length 5 ;仓颉词库中，code 的最大长度（不计算 code-prefix）
      :prefer-trigger-chars nil)
     (pyim-shuangpin
