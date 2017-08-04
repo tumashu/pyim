@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en-us">
   <head>
-    <title>pyim-probe.el --- Auto-Switch-to-English-Input probes for pyim - pyim</title>
+    <title>Auto-Switch-to-English-Input probes for pyim - pyim</title>
     <meta charset="utf-8" />
     <meta name="author" content="Feng Shu" />
     <link rel="stylesheet" href="https://tumashu.github.io/pyim/media/css/main.css" type="text/css">
@@ -29,36 +29,36 @@
 <div class="content-and-footer">
 <div>
 <div class="post">
-<h1 class="post-title">pyim-probe.el --- Auto-Switch-to-English-Input probes for pyim</h1>
+<h1 class="post-title">Auto-Switch-to-English-Input probes for pyim</h1>
 <div id="table-of-contents">
 <h2>&#30446;&#24405;</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org197ff84">1. 使用说明</a>
+<li><a href="#org46c5a4e">1. 使用说明</a>
 <ul>
-<li><a href="#orgec97497">1.1. 简介</a></li>
-<li><a href="#org1e45257">1.2. 设置</a>
+<li><a href="#org31a77cb">1.1. 简介</a></li>
+<li><a href="#org98361d6">1.2. 设置</a>
 <ul>
-<li><a href="#orgb2f9bad">1.2.1. 根据环境自动切换到英文输入模式</a></li>
-<li><a href="#org81614a2">1.2.2. 根据环境自动切换到半角标点输入模式</a></li>
+<li><a href="#orgb98d050">1.2.1. 根据环境自动切换到英文输入模式</a></li>
+<li><a href="#org915640b">1.2.2. 根据环境自动切换到半角标点输入模式</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org530da84">2. 代码</a>
+<li><a href="#orgedd14ee">2. 代码</a>
 <ul>
-<li><a href="#org20348bc">2.1. 根据环境自动切换到英文输入模式</a></li>
-<li><a href="#org79a651c">2.2. 根据环境自动切换到半角标点输入模式</a></li>
+<li><a href="#org7ec8ae3">2.1. 根据环境自动切换到英文输入模式</a></li>
+<li><a href="#org7c3c99b">2.2. 根据环境自动切换到半角标点输入模式</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org197ff84" class="outline-2">
-<h2 id="org197ff84"><span class="section-number-2">1</span> 使用说明</h2>
+<div id="outline-container-org46c5a4e" class="outline-2">
+<h2 id="org46c5a4e"><span class="section-number-2">1</span> 使用说明</h2>
 <div class="outline-text-2" id="text-1">
-</div><div id="outline-container-orgec97497" class="outline-3">
-<h3 id="orgec97497"><span class="section-number-3">1.1</span> 简介</h3>
+</div><div id="outline-container-org31a77cb" class="outline-3">
+<h3 id="org31a77cb"><span class="section-number-3">1.1</span> 简介</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 这个文件包含了许多探针函数，用于实现两个功能：
@@ -71,11 +71,11 @@
 </div>
 </div>
 
-<div id="outline-container-org1e45257" class="outline-3">
-<h3 id="org1e45257"><span class="section-number-3">1.2</span> 设置</h3>
+<div id="outline-container-org98361d6" class="outline-3">
+<h3 id="org98361d6"><span class="section-number-3">1.2</span> 设置</h3>
 <div class="outline-text-3" id="text-1-2">
-</div><div id="outline-container-orgb2f9bad" class="outline-4">
-<h4 id="orgb2f9bad"><span class="section-number-4">1.2.1</span> 根据环境自动切换到英文输入模式</h4>
+</div><div id="outline-container-orgb98d050" class="outline-4">
+<h4 id="orgb98d050"><span class="section-number-4">1.2.1</span> 根据环境自动切换到英文输入模式</h4>
 <div class="outline-text-4" id="text-1-2-1">
 <p>
 用户将探针函数添加到 `pyim-english-input-switch-functions' 后, 就可以激活这个探针函数，比如：
@@ -94,8 +94,8 @@
 </div>
 </div>
 
-<div id="outline-container-org81614a2" class="outline-4">
-<h4 id="org81614a2"><span class="section-number-4">1.2.2</span> 根据环境自动切换到半角标点输入模式</h4>
+<div id="outline-container-org915640b" class="outline-4">
+<h4 id="org915640b"><span class="section-number-4">1.2.2</span> 根据环境自动切换到半角标点输入模式</h4>
 <div class="outline-text-4" id="text-1-2-2">
 <p>
 用户将探针函数添加到 `pyim-punctuation-half-width-functions' 后, 就可以激活这个探针函数。
@@ -104,11 +104,11 @@
 </div>
 </div>
 </div>
-<div id="outline-container-org530da84" class="outline-2">
-<h2 id="org530da84"><span class="section-number-2">2</span> 代码</h2>
+<div id="outline-container-orgedd14ee" class="outline-2">
+<h2 id="orgedd14ee"><span class="section-number-2">2</span> 代码</h2>
 <div class="outline-text-2" id="text-2">
-</div><div id="outline-container-org20348bc" class="outline-3">
-<h3 id="org20348bc"><span class="section-number-3">2.1</span> 根据环境自动切换到英文输入模式</h3>
+</div><div id="outline-container-org7ec8ae3" class="outline-3">
+<h3 id="org7ec8ae3"><span class="section-number-3">2.1</span> 根据环境自动切换到英文输入模式</h3>
 <div class="outline-text-3" id="text-2-1">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-probe-program-mode</span> ()
@@ -226,8 +226,8 @@
 </div>
 </div>
 
-<div id="outline-container-org79a651c" class="outline-3">
-<h3 id="org79a651c"><span class="section-number-3">2.2</span> 根据环境自动切换到半角标点输入模式</h3>
+<div id="outline-container-org7c3c99b" class="outline-3">
+<h3 id="org7c3c99b"><span class="section-number-3">2.2</span> 根据环境自动切换到半角标点输入模式</h3>
 <div class="outline-text-3" id="text-2-2">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-probe-punctuation-line-beginning</span> (char)
@@ -261,15 +261,15 @@
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2017-07-29</span>
-        <span title="last modification date" class="post-info">2017-07-29</span>
+        <span title="post date" class="post-info">2017-08-05</span>
+        <span title="last modification date" class="post-info">2017-08-05</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>
       <section>
         <h1>Comments</h1>
-        <div class="ds-thread" data-thread-key="c90170f7865f04bab2f38fbe13d5144d"
-                               data-title="pyim-probe.el --- Auto-Switch-to-English-Input probes for pyim" data-url="https://tumashu.github.io/pyim/documents/pyim-probe.el-----auto-switch-to-english-input-probes-for-pyim/"></div>
+        <div class="ds-thread" data-thread-key="33759b52f82de93a8163424aaaea9ce6"
+                               data-title="Auto-Switch-to-English-Input probes for pyim" data-url="https://tumashu.github.io/pyim/documents/auto-switch-to-english-input-probes-for-pyim/"></div>
         <script type="text/javascript">
         var duoshuoQuery = {short_name:"tumashu-website"};
 	    (function() {
@@ -287,7 +287,7 @@
         <p>
           Copyright &copy; <span id="footerYear"></span> <a href="mailto:tumashu &lt;at&gt; 163 &lt;dot&gt; com">Feng Shu</a>
           &nbsp;&nbsp;-&nbsp;&nbsp;
-          Powered by <a href="https://github.com/tumashu/org-webpage" target="_blank">org-webpage</a>
+          Powered by <a href="https://github.com/tumashu/org2web" target="_blank">org2web</a>
           <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
         </p>
       </div>
