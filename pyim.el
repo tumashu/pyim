@@ -371,7 +371,7 @@
 
 ;; *** 如何将个人词条导出到一个文件
 
-;; 使用命令：pyim-personal-dcache-export
+;; 使用命令：pyim-dcache-export-personal-dcache
 
 ;; *** pyim 出现错误时，如何开启 debug 模式
 
@@ -1525,7 +1525,10 @@ DCACHE 是一个 code -> words 的 hashtable.
   (pyim-dcache-save-variable 'pyim-dcache-iword2count)
   t)
 
-(defun pyim-personal-dcache-export ()
+(define-obsolete-function-alias
+  'pyim-personal-dcache-export 'pyim-dcache-export-personal-dcache)
+
+(defun pyim-dcache-export-personal-dcache ()
   "将 ‘pyim-dcache-icode2word’ 导出为 pyim 词库文件."
   (interactive)
   (let ((file (read-file-name "将个人缓存中的词条导出到文件：")))
