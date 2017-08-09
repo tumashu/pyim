@@ -32,15 +32,12 @@
 ;;; Code:
 
 ;; * 代码                                                                 :code:
-(require 'pyim)
-(require 'org-webpage)
-(require 'owp-web-server)
-(require 'owp-el2org)
+(require 'org2web)
 
 (defvar pyim-website-repository-directory
   "~/project/emacs-packages/pyim/")
 
-(owp/add-project-config
+(org2web-add-project
  '("pyim"
    :repository-directory (:eval pyim-website-repository-directory)
    :remote (git "https://github.com/tumashu/pyim.git" "gh-pages")
@@ -53,8 +50,8 @@
    :source-browse-url ("GitHub" "https://github.com/tumashu/pyim")
    :personal-avatar "/media/img/horse.jpg"
    :personal-duoshuo-shortname "tumashu-website"
-   :preparation-function owp/el2org-preparation-function
-   :org-export-function owp/el2org-org-export-function
+   :preparation-function org2web-el2org-preparation-function
+   :org-export-function org2web-el2org-org-export-function
    :el2org-doc-sources ("pyim.*\\.el$")
    :el2org-readme-sources ("pyim.el")
    :el2org-index-sources ("pyim.el")
