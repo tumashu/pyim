@@ -3774,11 +3774,11 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
 
 ;;;###autoload
 (defun pyim-hanzi2pinyin (string &optional shou-zi-mu separator
-                                 return-list ignore-duo-yin-zi adjuct-duo-yin-zi)
+                                 return-list ignore-duo-yin-zi adjust-duo-yin-zi)
   "将汉字字符串转换为对应的拼音字符串, 如果 `shou-zi-mu' 设置为t,转换仅得到拼音
 首字母字符串。当 `return-list' 设置为 t 时，返回一个拼音列表，这个列表包含词条的一个
 或者多个拼音（词条包含多音字时）；如果 `ignore-duo-yin-zi' 设置为t, 遇到多音字时，
-只使用第一个拼音，其它拼音忽略；当 `adjuct-duo-yin-zi' 设置为t时，pyim-hanzi2pinyin
+只使用第一个拼音，其它拼音忽略；当 `adjust-duo-yin-zi' 设置为t时，pyim-hanzi2pinyin
 会使用 pyim 已安装的词库来校正多音字，但这个功能有一定的限制:
 
 1. pyim 普通词库中不存在的词条不能较正
@@ -3830,7 +3830,7 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
       (setq pinyins-list-permutated (pyim-permutate-list2 pinyins-list))
 
       ;; 使用 pyim 的安装的词库来校正多音字。
-      (when adjuct-duo-yin-zi
+      (when adjust-duo-yin-zi
         ;; 确保 pyim 词库加载
         (pyim-dcache-init-variables)
         (dolist (pinyin-list pinyins-list-permutated)
