@@ -140,33 +140,7 @@
 ;; 1. libpinyin 项目的内置词库
 ;; 2. pyim 用户贡献的个人词库
 
-;; 注意： 这个词库只能确保 pyim 可以正常工作，如果用户想让
-;; pyim 更加顺手，需要添加附加的词库，一个比较好的选择是安装
-;; pyim-greatdict:
-
-;;   https://github.com/tumashu/pyim-greatdict
-
-;; pyim-greatdict 包对应的词库由 [[https://github.com/xiaowl][WenLiang Xiao]] 同学开发制作，
-;; 词条有 300 万条，词库文件大约 80M, 是一个 *大而全* 的词库，
-;; 用户可以通过 Melpa 来安装它：
-
-;; 1. 配置melpa源，参考：http://melpa.org/#/getting-started
-;; 2. M-x package-install RET pyim-greatdict RET
-;; 3. 在emacs配置文件中（比如: ~/.emacs）添加如下代码：
-
-;;    #+BEGIN_EXAMPLE
-;;    (require 'pyim-greatdict)
-;;    (pyim-greatdict-enable)
-;;    #+END_EXAMPLE
-
-;; 但值得注意的是：
-
-;; 1. 如果机器性能不好，安装 pyim-greatdict 会导致 pyim 启动
-;;    非常缓慢，请仔细考虑。
-;; 2. 这个词库使用 gzip 压缩，非 Linux 用户需要安装 [[http://www.gzip.org/][gzip]] 程序，
-;;    并配置好系统 PATH 。
-
-;; 如果 pyim-greatdict 不能满足需求，用户可以使用其他方式为 pyim 添加拼音词库，
+;; 如果 pyim-basedict 不能满足需求，用户可以使用其他方式为 pyim 添加拼音词库，
 ;; 具体方式请参考 [[如何添加自定义拼音词库]] 小结。
 
 ;; *** 激活 pyim
@@ -3939,9 +3913,6 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
 
      (require 'pyim-basedict)
      (pyim-basedict-enable)
-
-如果用户的计算机性能比较好，建议从 Melpa 安装 pyim-greatdict 包,
-这个词库包有 300 多万词条，是一个 *大而全* 的词库。
 
 喜欢折腾的用户可以从下面几个途径获得 pyim 更详细的信息。
 1. 使用 `C-h v pyim-dicts' 了解 pyim 词库文件格式。
