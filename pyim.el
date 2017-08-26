@@ -268,6 +268,13 @@
 ;; *** 切换全角标点与半角标点
 
 ;; 1. 第一种方法：使用命令 `pyim-punctuation-toggle'，全局切换。
+;;    这个命令主要用来设置变量： `pyim-punctuation-translate-p', 用户也可以
+;;    手动设置这个变量， 比如：
+;;    #+BEGIN_EXAMPLE
+;;    (setq pyim-punctuation-translate-p '(yes no auto))   ;使用全角标点。
+;;    (setq pyim-punctuation-translate-p '(no yes auto))   ;使用半角标点。
+;;    (setq pyim-punctuation-translate-p '(auto yes no))   ;中文使用全角标点，英文使用半角标点。
+;;    #+END_EXAMPLE
 ;; 2. 第二种方法：使用命令 `pyim-punctuation-translate-at-point' 只切换光
 ;;    标处标点的样式。
 ;; 3. 第三种方法：设置变量 `pyim-translate-trigger-char' ，输入变量设定的
