@@ -78,7 +78,7 @@
   "激活这个 pyim 探针函数后，使用 isearch 搜索时，禁用中文输入，强制英文输入。
 
 用于：`pyim-english-input-switch-functions' 。"
-  (and pyim-isearch-enable-pinyin-search
+  (and pyim-isearch-enable-p
        ;; isearch 启动的时候，会设置一个 buffer variable: `isearch-mode'
        ;; 检测所有 buffer 中 `isearch-mode' 的取值，如果任何一个
        ;; 取值为 t, 就说明 isearch 已经启动。
