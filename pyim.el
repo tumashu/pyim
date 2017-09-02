@@ -117,7 +117,7 @@
 ;;                   pyim-probe-punctuation-after-punctuation))
 
 ;;   ;; 开启拼音搜索功能
-;;   (pyim-isearch-enable)
+;;   (pyim-isearch-mode 1)
 
 ;;   ;; 使用 pupup-el 来绘制选词框
 ;;   (setq pyim-page-tooltip 'popup)
@@ -304,7 +304,7 @@
 ;; |-----------------------------------+-----------------------------------------------------------------------------------|
 ;; | pyim-probe-org-speed-commands     | 解决 org-speed-commands 与 pyim 冲突问题                                          |
 ;; | pyim-probe-isearch-mode           | 使用 isearch 搜索时，强制开启英文输入模式                                         |
-;; |                                   | 注意：想要使用这个功能，pyim-isearch-enable 必须激活                              |
+;; |                                   | 注意：想要使用这个功能，pyim-isearch-mode 必须激活                                |
 ;; |-----------------------------------+-----------------------------------------------------------------------------------|
 ;; | pyim-probe-org-structure-template | 使用 org-structure-template 时，关闭中文输入模式                                  |
 ;; |-----------------------------------+-----------------------------------------------------------------------------------|
@@ -499,7 +499,7 @@
 ;; pyim 安装后，可以通过下面的设置开启拼音搜索功能：
 
 ;; #+BEGIN_EXAMPLE
-;; (pyim-isearch-enable)
+;; (pyim-isearch-mode 1)
 ;; #+END_EXAMPLE
 
 ;; 值得注意的是：这个功能有一些限制：搜索字符串中只能出现 “a-z” 和 “’”，如果有
@@ -957,8 +957,6 @@ If you don't like this funciton, set the variable to nil")
 
 (defvar pyim-dcache-update-icode2word-dcache nil)
 (defvar pyim-dcache-update-ishortcode2word-dcache nil)
-
-(defvar pyim-isearch-enable-p nil)
 
 (defvar pyim-mode-map
   (let ((map (make-sparse-keymap))
@@ -3429,32 +3427,30 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
       (concat (if match-beginning "^" "")
               regexp))))
 
-(defun pyim-isearch--search-function ()
+(defun pyim-isearch-search-fun ()
   "这个函数为 isearch 相关命令添加中文拼音搜索功能，
-用于 `isearch-search-fun-function' 。"
-  `(lambda (string &optional bound noerror count)
-     (if (pyim-string-match-p "[^a-z]+" string)
-         (funcall (isearch-search-fun-default) string bound noerror count)
-       (funcall (if ,isearch-forward
-                    're-search-forward
-                  're-search-backward)
-                (pyim-cregexp-build string) bound noerror count))))
+做为 `isearch-search-fun' 函数的 advice 使用。"
+  (funcall
+   (lambda ()
+     `(lambda (string &optional bound noerror count)
+        (if (pyim-string-match-p "[^a-z]+" string)
+            (funcall (isearch-search-fun-default) string bound noerror count)
+          (funcall (if ,isearch-forward
+                       're-search-forward
+                     're-search-backward)
+                   (pyim-cregexp-build string) bound noerror count))))))
 
 ;;;###autoload
-(defun pyim-isearch-enable ()
-  "激活拼音搜索中文功能。"
-  (interactive)
-  (setq pyim-isearch-enable-p t)
-  (setq isearch-search-fun-function #'pyim-isearch--search-function)
-  (message "PYIM: 这个命令会强制覆盖 isearch 选项： `isearch-search-fun-function' ,
-如果需要禁用，请删除 emacs 配置中所有的 `pyim-isearch-enable' 语句，然后重启 emacs."))
-
-(defun pyim-isearch-disable ()
-  "取消拼音搜索中文功能。"
-  (interactive)
-  (setq pyim-isearch-enable-p nil)
-  (setq isearch-search-fun-function #'isearch-search-fun-default)
-  (message "PYIM: 命令 `pyim-isearch-enable' 产生的效果无法彻底清除，需要重启 emacs."))
+(define-minor-mode pyim-isearch-mode
+  "pyim isearch mode."
+  :global t
+  :group 'pyim
+  :lighter " pyim-isearch"
+  (if pyim-isearch-mode
+      (progn
+        (advice-add 'isearch-search-fun :override #'pyim-isearch-search-fun)
+        (message "PYIM: `pyim-isearch-mode' 已经激活，激活后，一些 isearch 扩展包有可能失效。"))
+    (advice-remove 'isearch-search-fun #'pyim-isearch-search-fun)))
 
 ;; ** 让 forward/backward 支持中文
 (defun pyim-forward-word (&optional arg)
