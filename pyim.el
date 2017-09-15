@@ -4069,7 +4069,7 @@ BUG: 当 `string' 中包含其它标点符号，并且设置 `separator' 时，�
     (setq result (reverse result))
     (setq pyim-extra-dicts
           (if replace result `(,@result ,new-dict)))
-    (message "Add pyim dict %S to `pyim-extra-dicts'。" (plist-get new-dict :name))
+    (message "Add pyim dict %S to `pyim-extra-dicts'." (plist-get new-dict :name))
     t))
 
 (defun pyim-dict-name-available-p (dict-name)
