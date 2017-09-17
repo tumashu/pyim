@@ -2868,8 +2868,7 @@ tooltip 选词框中显示。
                                        position nil 15
                                        (round (* (pos-tip-tooltip-width length (frame-char-width frame))
                                                  pyim-page-tooltip-width-adjustment))
-                                       (pos-tip-tooltip-height 2 (frame-char-height frame) frame)
-                                       nil nil 35))
+                                       nil nil nil 35))
           ((eq tooltip 'minibuffer)
            (let ((max-mini-window-height (+ pyim-page-length 2)))
              (message string)))
