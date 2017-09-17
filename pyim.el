@@ -833,7 +833,7 @@ pyim 内建的有三种选词框格式：
 
 1. one-line  单行选词框
 2. two-lines 双行选词框
-3. vertial   垂直选词框"
+3. vertical  垂直选词框"
   :group 'pyim
   :type 'symbol)
 
