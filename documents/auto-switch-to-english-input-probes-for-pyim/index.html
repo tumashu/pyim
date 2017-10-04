@@ -34,31 +34,32 @@
 <h2>&#30446;&#24405;</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org437b16d">1. 使用说明</a>
+<li><a href="#orgeedc880">1. 使用说明</a>
 <ul>
-<li><a href="#orge0eeb17">1.1. 简介</a></li>
-<li><a href="#org0423e72">1.2. 设置</a>
+<li><a href="#org25dc68e">1.1. 简介</a></li>
+<li><a href="#org17193dc">1.2. 设置</a>
 <ul>
-<li><a href="#org8620d0b">1.2.1. 根据环境自动切换到英文输入模式</a></li>
-<li><a href="#org08640dc">1.2.2. 根据环境自动切换到半角标点输入模式</a></li>
+<li><a href="#org4c723c1">1.2.1. 根据环境自动切换到英文输入模式</a></li>
+<li><a href="#orgf09d4d2">1.2.2. 根据环境自动切换到半角标点输入模式</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org230cc99">2. 代码</a>
+<li><a href="#org8830a49">2. 代码</a>
 <ul>
-<li><a href="#orgf174331">2.1. 根据环境自动切换到英文输入模式</a></li>
-<li><a href="#org44d182b">2.2. 根据环境自动切换到半角标点输入模式</a></li>
+<li><a href="#org382d840">2.1. 根据环境自动切换到英文输入模式</a></li>
+<li><a href="#orga2073f5">2.2. 根据环境自动切换到半角标点输入模式</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org437b16d" class="outline-2">
-<h2 id="org437b16d"><span class="section-number-2">1</span> 使用说明</h2>
+<div id="outline-container-orgeedc880" class="outline-2">
+<h2 id="orgeedc880"><span class="section-number-2">1</span> 使用说明</h2>
 <div class="outline-text-2" id="text-1">
-</div><div id="outline-container-orge0eeb17" class="outline-3">
-<h3 id="orge0eeb17"><span class="section-number-3">1.1</span> 简介</h3>
+</div>
+<div id="outline-container-org25dc68e" class="outline-3">
+<h3 id="org25dc68e"><span class="section-number-3">1.1</span> 简介</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 这个文件包含了许多探针函数，用于实现两个功能：
@@ -71,11 +72,12 @@
 </div>
 </div>
 
-<div id="outline-container-org0423e72" class="outline-3">
-<h3 id="org0423e72"><span class="section-number-3">1.2</span> 设置</h3>
+<div id="outline-container-org17193dc" class="outline-3">
+<h3 id="org17193dc"><span class="section-number-3">1.2</span> 设置</h3>
 <div class="outline-text-3" id="text-1-2">
-</div><div id="outline-container-org8620d0b" class="outline-4">
-<h4 id="org8620d0b"><span class="section-number-4">1.2.1</span> 根据环境自动切换到英文输入模式</h4>
+</div>
+<div id="outline-container-org4c723c1" class="outline-4">
+<h4 id="org4c723c1"><span class="section-number-4">1.2.1</span> 根据环境自动切换到英文输入模式</h4>
 <div class="outline-text-4" id="text-1-2-1">
 <p>
 用户将探针函数添加到 `pyim-english-input-switch-functions' 后, 就可以激活这个探针函数，比如：
@@ -94,8 +96,8 @@
 </div>
 </div>
 
-<div id="outline-container-org08640dc" class="outline-4">
-<h4 id="org08640dc"><span class="section-number-4">1.2.2</span> 根据环境自动切换到半角标点输入模式</h4>
+<div id="outline-container-orgf09d4d2" class="outline-4">
+<h4 id="orgf09d4d2"><span class="section-number-4">1.2.2</span> 根据环境自动切换到半角标点输入模式</h4>
 <div class="outline-text-4" id="text-1-2-2">
 <p>
 用户将探针函数添加到 `pyim-punctuation-half-width-functions' 后, 就可以激活这个探针函数。
@@ -104,11 +106,12 @@
 </div>
 </div>
 </div>
-<div id="outline-container-org230cc99" class="outline-2">
-<h2 id="org230cc99"><span class="section-number-2">2</span> 代码</h2>
+<div id="outline-container-org8830a49" class="outline-2">
+<h2 id="org8830a49"><span class="section-number-2">2</span> 代码</h2>
 <div class="outline-text-2" id="text-2">
-</div><div id="outline-container-orgf174331" class="outline-3">
-<h3 id="orgf174331"><span class="section-number-3">2.1</span> 根据环境自动切换到英文输入模式</h3>
+</div>
+<div id="outline-container-org382d840" class="outline-3">
+<h3 id="org382d840"><span class="section-number-3">2.1</span> 根据环境自动切换到英文输入模式</h3>
 <div class="outline-text-3" id="text-2-1">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-probe-program-mode</span> ()
@@ -144,7 +147,7 @@
   <span style="color: #FBDE2D;">"&#28608;&#27963;&#36825;&#20010; pyim &#25506;&#38024;&#20989;&#25968;&#21518;&#65292;&#20351;&#29992; isearch &#25628;&#32034;&#26102;&#65292;&#31105;&#29992;&#20013;&#25991;&#36755;&#20837;&#65292;&#24378;&#21046;&#33521;&#25991;&#36755;&#20837;&#12290;</span>
 
 <span style="color: #FBDE2D;">&#29992;&#20110;&#65306;`</span><span style="color: #96CBFE;">pyim-english-input-switch-functions</span><span style="color: #FBDE2D;">' &#12290;"</span>
-  (<span style="color: #4c83ff;">and</span> pyim-isearch-enable-pinyin-search
+  (<span style="color: #4c83ff;">and</span> pyim-isearch-mode
        <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">isearch &#21551;&#21160;&#30340;&#26102;&#20505;&#65292;&#20250;&#35774;&#32622;&#19968;&#20010; buffer variable: `</span><span style="color: #96CBFE; font-style: italic;">isearch-mode</span><span style="color: #8B8989; font-style: italic;">'</span>
        <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#26816;&#27979;&#25152;&#26377; buffer &#20013; `</span><span style="color: #96CBFE; font-style: italic;">isearch-mode</span><span style="color: #8B8989; font-style: italic;">' &#30340;&#21462;&#20540;&#65292;&#22914;&#26524;&#20219;&#20309;&#19968;&#20010;</span>
        <span style="color: #8B8989; font-style: italic;">;; </span><span style="color: #8B8989; font-style: italic;">&#21462;&#20540;&#20026; t, &#23601;&#35828;&#26126; isearch &#24050;&#32463;&#21551;&#21160;&#12290;</span>
@@ -226,8 +229,8 @@
 </div>
 </div>
 
-<div id="outline-container-org44d182b" class="outline-3">
-<h3 id="org44d182b"><span class="section-number-3">2.2</span> 根据环境自动切换到半角标点输入模式</h3>
+<div id="outline-container-orga2073f5" class="outline-3">
+<h3 id="orga2073f5"><span class="section-number-3">2.2</span> 根据环境自动切换到半角标点输入模式</h3>
 <div class="outline-text-3" id="text-2-2">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #4c83ff;">defun</span> <span style="color: #ff1493;">pyim-probe-punctuation-line-beginning</span> (char)
@@ -261,8 +264,8 @@
 </div>
     <div>
       <div class="post-meta">
-        <span title="post date" class="post-info">2017-08-09</span>
-        <span title="last modification date" class="post-info">2017-08-05</span>
+        <span title="post date" class="post-info">2017-10-04</span>
+        <span title="last modification date" class="post-info">2017-10-04</span>
         <span title="tags" class="post-info">N/A</span>
         <span title="author" class="post-info">Feng Shu</span>
       </div>

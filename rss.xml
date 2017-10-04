@@ -4,44 +4,37 @@
     <title>pyim</title>
     <link>https://tumashu.github.io/pyim</link>
     <description>(一个 emacs 环境下的中文拼音输入法)</description>
-    <pubDate>三, 09 8月 2017 19:46:15 CST</pubDate>
-    <lastBuildDate>三, 09 8月 2017 19:46:15 CST</lastBuildDate>
+    <pubDate>三, 04 10月 2017 08:19:09 CST</pubDate>
+    <lastBuildDate>三, 04 10月 2017 08:19:09 CST</lastBuildDate>
     <docs>http://www.rssboard.org/rss-specification</docs>
     <generator>org2web static site generator (https://github.com/tumashu/org2web)</generator>
 <item>
 <title>A Chinese input method which support quanpin, shuangpin, wubi and cangjie.</title>
 <link>https://tumashu.github.io/pyim/documents/a-chinese-input-method-which-support-quanpin,-shuangpin,-wubi-and-cangjie./</link>
 <description>No Description</description>
-<pubDate>2017-08-09</pubDate>
+<pubDate>2017-10-04</pubDate>
 <guid>https://tumashu.github.io/pyim/documents/a-chinese-input-method-which-support-quanpin,-shuangpin,-wubi-and-cangjie./</guid>
-</item>
-<item>
-<title>Tools for pyim developers</title>
-<link>https://tumashu.github.io/pyim/documents/tools-for-pyim-developers/</link>
-<description>No Description</description>
-<pubDate>2017-08-09</pubDate>
-<guid>https://tumashu.github.io/pyim/documents/tools-for-pyim-developers/</guid>
 </item>
 <item>
 <title>Auto-Switch-to-English-Input probes for pyim</title>
 <link>https://tumashu.github.io/pyim/documents/auto-switch-to-english-input-probes-for-pyim/</link>
 <description>No Description</description>
-<pubDate>2017-08-05</pubDate>
+<pubDate>2017-10-04</pubDate>
 <guid>https://tumashu.github.io/pyim/documents/auto-switch-to-english-input-probes-for-pyim/</guid>
 </item>
 <item>
 <title>Pinyin map used by pyim</title>
 <link>https://tumashu.github.io/pyim/documents/pinyin-map-used-by-pyim/</link>
 <description>No Description</description>
-<pubDate>2017-08-05</pubDate>
+<pubDate>2017-10-04</pubDate>
 <guid>https://tumashu.github.io/pyim/documents/pinyin-map-used-by-pyim/</guid>
 </item>
 <item>
-<title>Please install &#39;pyim&#39; package instead.</title>
-<link>https://tumashu.github.io/pyim/documents/please-install-&#39;pyim&#39;-package-instead./</link>
+<title>Tools for pyim developers</title>
+<link>https://tumashu.github.io/pyim/documents/tools-for-pyim-developers/</link>
 <description>No Description</description>
-<pubDate>2017-08-05</pubDate>
-<guid>https://tumashu.github.io/pyim/documents/please-install-&#39;pyim&#39;-package-instead./</guid>
+<pubDate>2017-10-04</pubDate>
+<guid>https://tumashu.github.io/pyim/documents/tools-for-pyim-developers/</guid>
 </item>
 <item>
 <title>pyim 截图展示</title>
