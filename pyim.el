@@ -1304,7 +1304,6 @@ TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCAC
                           pyim-dcache-ishortcode2word))
              pyim-dcache-ishortcode2word)
             (pyim-dcache-save-variable 'pyim-dcache-ishortcode2word)
-            (pyim-dcache-set-variable 'pyim-dcache-ishortcode2word t)
             (setq pyim-dcache-create-abbrev-dcache-p t)))
       (async-start
        `(lambda ()
@@ -1353,7 +1352,6 @@ TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCAC
                           pyim-dcache-icode2word))
              pyim-dcache-icode2word)
             (pyim-dcache-save-variable 'pyim-dcache-icode2word)
-            (pyim-dcache-set-variable 'pyim-dcache-icode2word t)
             (setq pyim-dcache-update-icode2word-dcache t)))
       (async-start
        `(lambda ()
@@ -1400,7 +1398,6 @@ TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCAC
                           pyim-dcache-shortcode2word))
              pyim-dcache-shortcode2word)
             (pyim-dcache-save-variable 'pyim-dcache-shortcode2word)
-            (pyim-dcache-set-variable 'pyim-dcache-shortcode2word t)
             (setq pyim-dcache-update-shortcode2word-dcache t)))
       (async-start
        `(lambda ()
