@@ -961,6 +961,19 @@ If you don't like this funciton, set the variable to nil")
 (defvar pyim-dcache-update-icode2word-dcache nil)
 (defvar pyim-dcache-update-ishortcode2word-dcache nil)
 
+(defvar pyim-dcache-auto-update t
+  "是否自动创建和更新词库对应的 dcache 文件.
+
+这个变量默认设置为 t, 如果有词库文件添加到 pyim-dicts 或者
+pyim-extra-dicts 时，pyim 会自动生成相关的 dcache 文件。
+
+一般不建议将这个变量设置为 nil，除非有以下情况：
+
+1. 用户的词库已经非常稳定，并且想通过禁用这个功能来降低
+   pyim 对资源的消耗。
+2. 自动更新功能无法正常工作，用户通过手工从其他机器上拷贝
+   dcache 文件的方法让 pyim 正常工作。")
+
 (defvar pyim-mode-map
   (let ((map (make-sparse-keymap))
         (i ?\ ))
@@ -1152,17 +1165,23 @@ TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCAC
     (pyim-dcache-save-caches))
   ;; 设置于 dcache 相关的几个变量。
   (pyim-dcache-init-variables)
-  ;; 使用 pyim-dcache-iword2count 中的信息对 personal 缓存中的词频进行调整。
-  (pyim-dcache-update-icode2word-dcache restart)
-  ;; 创建简拼缓存， 比如 "ni-hao" -> "n-h"
-  (pyim-dcache-update-ishortcode2word-dcache restart)
+
+  (when pyim-dcache-auto-update
+    ;; 使用 pyim-dcache-iword2count 中的信息对 personal 缓存中的词频进行调整。
+    (pyim-dcache-update-icode2word-dcache restart)
+    ;; 创建简拼缓存， 比如 "ni-hao" -> "n-h"
+    (pyim-dcache-update-ishortcode2word-dcache restart))
+
   (pyim-cchar2pinyin-cache-create)
   (pyim-pinyin2cchar-cache-create)
   (run-hooks 'pyim-load-hook)
-  ;; 如果 `pyim-dicts' 有变化，重新生成 `pyim-dcache-code2word' 缓存。
-  (pyim-dcache-update-code2word-dcache refresh-common-dcache)
-  ;; 这个命令 *当前* 主要用于五笔输入法。
-  (pyim-dcache-update-shortcode2word-dcache restart)
+
+  (when pyim-dcache-auto-update
+    ;; 如果 `pyim-dicts' 有变化，重新生成 `pyim-dcache-code2word' 缓存。
+    (pyim-dcache-update-code2word-dcache refresh-common-dcache)
+    ;; 这个命令 *当前* 主要用于五笔输入法。
+    (pyim-dcache-update-shortcode2word-dcache restart))
+
   (unless (member 'pyim-dcache-save-caches kill-emacs-hook)
     (add-to-list 'kill-emacs-hook 'pyim-dcache-save-caches))
   (setq input-method-function 'pyim-input-method)
