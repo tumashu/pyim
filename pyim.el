@@ -974,6 +974,13 @@ pyim-extra-dicts 时，pyim 会自动生成相关的 dcache 文件。
 2. 自动更新功能无法正常工作，用户通过手工从其他机器上拷贝
    dcache 文件的方法让 pyim 正常工作。")
 
+(defvar pyim-dcache-prefer-emacs-thread t
+  "是否优先使用 emacs thread 功能来生成 dcache.
+
+如果这个变量设置为 t, 那么当 emacs thread 功能可以使用时，
+pyim 优先使用 emacs thread 功能来生成 dcache, 如果设置为 nil,
+pyim 总是使用 emacs-async 包来生成 dcache.")
+
 (defvar pyim-mode-map
   (let ((map (make-sparse-keymap))
         (i ?\ ))
@@ -1237,6 +1244,11 @@ TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCAC
 ;; 1. `:name' 用户给词库设定的名称（可选项）。
 ;; 2. `:file' 词库文件的绝对路径。
 
+(defun pyim-dcache-use-emacs-thread-p ()
+  "判断是否使用 emacs thread 功能来生成 thread."
+  (and pyim-dcache-prefer-emacs-thread
+       (>= emacs-major-version 26)))
+
 (defun pyim-dcache-update-code2word-dcache (&optional force)
   "读取并加载词库.
 读取 `pyim-dicts' 和 `pyim-extra-dicts' 里面的词库文件，生成对应的
@@ -1257,7 +1269,7 @@ TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCAC
          (word2code-file (pyim-dcache-get-path 'pyim-dcache-word2code))
          (code2word-md5-file (pyim-dcache-get-path 'pyim-dcache-code2word-md5)))
     (when (or force (not (equal dicts-md5 (pyim-dcache-get-value-from-file code2word-md5-file))))
-      (if (>= emacs-major-version 26)
+      (if (pyim-dcache-use-emacs-thread-p)
           (make-thread
            `(lambda ()
               (let ((dcache (pyim-dcache-generate-dcache-file ',dict-files ,code2word-file)))
@@ -1283,7 +1295,7 @@ TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCAC
 如果 FORCE 为真，强制加载缓存。"
   (interactive)
   (when (or force (not pyim-dcache-update-ishortcode2word-dcache))
-    (if (>= emacs-major-version 26)
+    (if (pyim-dcache-use-emacs-thread-p)
         (make-thread
          `(lambda ()
             (maphash
@@ -1343,7 +1355,7 @@ TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCAC
 如果 FORCE 为真，强制排序。"
   (interactive)
   (when (or force (not pyim-dcache-update-icode2word-dcache))
-    (if (>= emacs-major-version 26)
+    (if (pyim-dcache-use-emacs-thread-p)
         (make-thread
          `(lambda ()
             (maphash
@@ -1377,7 +1389,7 @@ TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCAC
 如果 FORCE 为真，强制运行。"
   (interactive)
   (when (or force (not pyim-dcache-update-shortcode2word-dcache))
-    (if (>= emacs-major-version 26)
+    (if (pyim-dcache-use-emacs-thread-p)
         (make-thread
          `(lambda ()
             (maphash
