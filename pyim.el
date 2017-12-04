@@ -237,7 +237,11 @@
 ;;    #+BEGIN_EXAMPLE
 ;;    (setq pyim-page-tooltip 'popup)
 ;;    #+END_EXAMPLE
-;; 2. 使用 pos-tip 包来绘制选词框（emacs tooltip 机制）
+;; 2. 使用 child-frame 来绘制选词框（emacs-version >= 26）
+;;    #+BEGIN_EXAMPLE
+;;    (setq pyim-page-tooltip 'child-frame)
+;;    #+END_EXAMPLE
+;; 3. 使用 pos-tip 包来绘制选词框（emacs tooltip 机制）
 ;;    #+BEGIN_EXAMPLE
 ;;    (setq pyim-page-tooltip 'pos-tip)
 ;;    #+END_EXAMPLE
@@ -980,6 +984,9 @@ pyim-extra-dicts 时，pyim 会自动生成相关的 dcache 文件。
 如果这个变量设置为 t, 那么当 emacs thread 功能可以使用时，
 pyim 优先使用 emacs thread 功能来生成 dcache, 如果设置为 nil,
 pyim 总是使用 emacs-async 包来生成 dcache.")
+
+(defvar pyim-tooltip-child-frame nil
+  "这个变量用来保存做为 page tooltip 的 child-frame.")
 
 (defvar pyim-mode-map
   (let ((map (make-sparse-keymap))
@@ -1978,9 +1985,14 @@ Return the input string."
   (setq pyim-translating nil)
   (pyim-dagger-delete-string)
   (setq pyim-current-choices nil)
+
   (when (and (eq pyim-page-tooltip 'pos-tip)
              (pyim-tooltip-pos-tip-usable-p))
-    (pos-tip-hide)))
+    (pos-tip-hide))
+
+  (when (and (eq pyim-page-tooltip 'child-frame)
+             (frame-live-p pyim-tooltip-child-frame))
+    (set-frame-parameter pyim-tooltip-child-frame 'visibility nil)))
 
 ;; ** 处理拼音 code 字符串 `pyim-entered-code'
 ;; *** 拼音字符串 -> 待选词列表
@@ -2963,6 +2975,9 @@ tooltip 选词框中显示。
                                        (round (* (pos-tip-tooltip-width length (frame-char-width frame))
                                                  pyim-page-tooltip-width-adjustment))
                                        nil nil nil 35))
+          ((and (eq tooltip 'child-frame)
+                (>= emacs-major-version 26))
+           (pyim-tooltip-show-with-child-frame string position))
           ((eq tooltip 'minibuffer)
            (let ((max-mini-window-height (+ pyim-page-length 2)))
              (message string)))
@@ -2987,6 +3002,54 @@ tooltip 选词框中显示。
            emacs-basic-display
            (not (display-graphic-p))
            (not (fboundp 'x-show-tip)))))
+
+(defun pyim-tooltip-show-with-child-frame (string position)
+  "在 POSITION 处使用 child-frame 显示 STRING."
+  (let* ((buffer (get-buffer-create " pyim-tooltip-child-frame-buffer"))
+         (string-width-height (pos-tip-string-width-height string))
+         (string-width (car string-width-height))
+         (string-height (cdr string-width-height))
+         (x-y (pos-tip-compute-pixel-position position))
+         (x (car x-y))
+         (y (cdr x-y)))
+    (unless (frame-live-p pyim-tooltip-child-frame)
+      (setq pyim-tooltip-child-frame
+            (let ((after-make-frame-functions nil))
+              (make-frame
+               `((parent-frame . ,(window-frame))
+                 (min-width  . t)
+                 (min-height . t)
+                 (border-width . 0)
+                 (internal-border-width . 0)
+                 (vertical-scroll-bars . nil)
+                 (horizontal-scroll-bars . nil)
+                 (left-fringe . 10)
+                 (right-fringe . 0)
+                 (menu-bar-lines . 0)
+                 (tool-bar-lines . 0)
+                 (unsplittable . t)
+                 (no-other-frame . t)
+                 (undecorated . t)
+                 (visibility . nil)
+                 (cursor-type . nil)
+                 (minibuffer . nil)
+                 (width . 50)
+                 (height . 0)))))
+      (let ((window (frame-root-window pyim-tooltip-child-frame)))
+        (set-window-parameter window 'mode-line-format 'none)
+        (set-window-buffer window buffer)))
+
+    (set-frame-parameter pyim-tooltip-child-frame 'parent-frame (window-frame))
+    (set-frame-parameter pyim-tooltip-child-frame 'top (+ y 10))
+    (set-frame-parameter pyim-tooltip-child-frame 'left (+ x 10))
+    (set-frame-parameter pyim-tooltip-child-frame 'width (+ string-width 1))
+    (set-frame-parameter pyim-tooltip-child-frame 'height (+ string-height 1))
+    (set-frame-parameter pyim-tooltip-child-frame 'visibility t)
+
+    (with-current-buffer buffer
+      (erase-buffer)
+      (insert string)
+      (redisplay))))
 
 ;; *** 选择备选词
 (defun pyim-page-select-word ()
