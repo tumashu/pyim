@@ -3038,14 +3038,19 @@ tooltip 选词框中显示。
                  (height . 0)))))
       (let ((window (frame-root-window pyim-tooltip-child-frame)))
         (set-window-parameter window 'mode-line-format 'none)
+        (set-window-parameter window 'header-line-format 'none)
         (set-window-buffer window buffer)))
 
-    (set-frame-parameter pyim-tooltip-child-frame 'parent-frame (window-frame))
-    (set-frame-parameter pyim-tooltip-child-frame 'top (+ y 10))
-    (set-frame-parameter pyim-tooltip-child-frame 'left (+ x 10))
-    (set-frame-parameter pyim-tooltip-child-frame 'width (+ string-width 1))
-    (set-frame-parameter pyim-tooltip-child-frame 'height (+ string-height 1))
-    (set-frame-parameter pyim-tooltip-child-frame 'visibility t)
+    (dolist (x `((parent-frame . ,(window-frame))
+                 (visibility   . t)
+                 (top    .  ,(+ y 10))
+                 (left   .  ,(+ x 10))
+                 (width  .  ,(+ string-width 1))
+                 (height .  ,(+ string-height 1))))
+      (let ((parameter (car x))
+            (value (cdr x)))
+        (set-frame-parameter
+         pyim-tooltip-child-frame parameter value)))
 
     (with-current-buffer buffer
       (erase-buffer)
