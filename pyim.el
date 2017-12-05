@@ -988,6 +988,13 @@ pyim 总是使用 emacs-async 包来生成 dcache.")
 (defvar pyim-tooltip-child-frame nil
   "这个变量用来保存做为 page tooltip 的 child-frame.")
 
+(defvar pyim-tooltip-child-frame-parameters nil
+  "一个 alist, 用来保存 child-frame 的 frame 参数.
+
+当用户使用 child-frame 做为 page tooltip 时，可以
+通过这个变量来调整 child-frame 的参数，比如：
+设置字体大小，颜色背景等。")
+
 (defvar pyim-mode-map
   (let ((map (make-sparse-keymap))
         (i ?\ ))
@@ -3016,7 +3023,8 @@ tooltip 选词框中显示。
       (setq pyim-tooltip-child-frame
             (let ((after-make-frame-functions nil))
               (make-frame
-               `((parent-frame . ,(window-frame))
+               `(,@pyim-tooltip-child-frame-parameters
+                 (parent-frame . ,(window-frame))
                  (no-accept-focus . t)
                  (min-width  . t)
                  (min-height . t)
