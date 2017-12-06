@@ -3019,9 +3019,14 @@ tooltip 选词框中显示。
   (let* ((frame (window-frame))
          (buffer (get-buffer-create " *pyim-child-frame-buffer*"))
          (string-width-height (pos-tip-string-width-height string))
-         (string-width (car string-width-height))
-         (string-height (cdr string-width-height))
-         (x-and-y (pos-tip-compute-pixel-position position)))
+         (width (max (+ (car string-width-height) 1)
+                     ;; 设置 child-frame 的最小宽度，防止选词框不停的抖动。
+                     (cond ((memq pyim-page-style '(two-lines one-line))
+                            (* pyim-page-length 8))
+                           ((eq pyim-page-style 'vertical)
+                            25))))
+         (height (+ (cdr string-width-height) 1))
+         x-and-y)
 
     ;; 1. 当 child-frame 不存在时，创建 child-frame.
     ;; 2. 当切换到其他 frame 时，需要更新以前生成的 child-frame
@@ -3064,15 +3069,16 @@ tooltip 选词框中显示。
         (set-window-parameter window 'header-line-format 'none)
         (set-window-buffer window buffer)))
 
-    (dolist (alist `((visibility   . t)
-                     (top    .  ,(+ (cdr x-and-y) 10))
-                     (left   .  ,(+ (car x-and-y) 10))
-                     (width  .  ,(+ string-width 1))
-                     (height .  ,(+ string-height 1))))
-      (let ((parameter (car alist))
-            (value (cdr alist)))
-        (set-frame-parameter
-         pyim-tooltip-child-frame parameter value)))
+    (let ((child-frame pyim-tooltip-child-frame))
+      (set-frame-parameter child-frame 'width width)
+      (set-frame-parameter child-frame 'height height)
+      (setq x-and-y (pos-tip-compute-pixel-position
+                     position nil
+                     (frame-pixel-width child-frame)
+                     (frame-pixel-height child-frame)))
+      (set-frame-parameter child-frame 'top (+ (cdr x-and-y) 1))
+      (set-frame-parameter child-frame 'left (car x-and-y))
+      (set-frame-parameter child-frame 'visibility t))
 
     (with-current-buffer buffer
       (erase-buffer)
