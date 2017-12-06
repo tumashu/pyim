@@ -3080,7 +3080,8 @@ tooltip 选词框中显示。
       (setq x-and-y (pos-tip-compute-pixel-position
                      position nil
                      (frame-pixel-width child-frame)
-                     (frame-pixel-height child-frame)))
+                     (frame-pixel-height child-frame)
+                     'relative))
       (set-frame-parameter child-frame 'top (+ (cdr x-and-y) 1))
       (set-frame-parameter child-frame 'left (car x-and-y))
       (set-frame-parameter child-frame 'visibility t))
