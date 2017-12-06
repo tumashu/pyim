@@ -2974,7 +2974,7 @@ tooltip 选词框中显示。
   "在 POSITION 处使用 child-frame 显示 STRING."
   (let* ((frame (window-frame))
          (buffer (get-buffer-create " *pyim-child-frame-buffer*"))
-         (string-width-height (pos-tip-string-width-height string))
+         (string-width-height (pyim-tooltip-string-width-height string))
          (width (max (+ (car string-width-height) 1)
                      ;; 设置 child-frame 的最小宽度，防止选词框不停的抖动。
                      (cond ((memq pyim-page-style '(two-lines one-line))
@@ -3045,6 +3045,28 @@ tooltip 选词框中显示。
       (erase-buffer)
       (insert string)
       (redisplay))))
+
+(defun pyim-tooltip-string-width-height (string)
+  "Count columns and rows of STRING. Return a cons cell like (WIDTH . HEIGHT).
+The last empty line of STRING is ignored.
+
+Example:
+
+\(pyim-tooltip-string-width-height \"abc\\nあいう\\n123\")
+;; => (6 . 3)
+
+This function is shameless steal from pos-tip."
+  (with-temp-buffer
+    (insert string)
+    (goto-char (point-min))
+    (end-of-line)
+    (let ((width (current-column))
+	      (height (if (eq (char-before (point-max)) ?\n) 0 1)))
+      (while (< (point) (point-max))
+	    (end-of-line 2)
+	    (setq width (max (current-column) width)
+	          height (1+ height)))
+      (cons width height))))
 
 (defun pyim-tooltip-compute-pixel-position (&optional pos window
                                                       pixel-width
