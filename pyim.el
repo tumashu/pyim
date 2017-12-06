@@ -811,9 +811,9 @@ pyim 输入半角标点，函数列表中每个函数都有一个参数：char �
 (defcustom pyim-page-tooltip 'popup
   "如何绘制 pyim 选词框.
 
-1. 当这个变量取值为 t 或者 'popup 时，使用 popup-el 包来绘制选词框；
-2. 当取值为 child-frame 时，使用一个 child-frame 来做为选词框；
-3. 当取值为 minibuffer 或者 nil 时，使用 minibuffer 做为选词框；"
+1. 当这个变量取值为 child-frame 时，使用一个 child-frame 来做为选词框；
+2. 当这个变量取值为 minibuffer 时，使用 minibuffer 做为选词框；
+3. 当这个变量取值为 popup 时，使用 popup-el 包来绘制选词框；"
   :group 'pyim)
 
 (defcustom pyim-page-style 'two-lines
