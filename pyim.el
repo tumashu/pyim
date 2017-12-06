@@ -3639,10 +3639,20 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
                                                 first-equal all-equal)
   "从 SPINYIN 创建一个中文 regexp.
 用这个中文 regexp 可以搜索到拼音匹配 SPINYIN 的中文字符串。"
-  (let* ((spinyin (mapcar
-                   #'(lambda (x)
-                       (concat (car x) (cdr x)))
-                   spinyin))
+  (let* ((spinyin
+          (let (list)
+            (dolist (x spinyin)
+              (if (and (member (car x) '("zh" "ch" "sh"))
+                       (equal (cdr x) ""))
+                  ;; 使用拼音首字母搜索中文时，如果遇到
+                  ;; zh,ch,sh, pyim 就无法正确处理了，这里做了
+                  ;; 一下 hack, 确保首字母搜索可以正确使用，
+                  ;; 但无法搜索拼音以 zh ch sh 开头的汉字了。
+                  (progn
+                    (push (substring (car x) 0 1) list)
+                    (push (substring (car x) 1 2) list))
+                (push (concat (car x) (cdr x)) list)))
+            (nreverse list)))
          (cchar-list
           (let ((n 0) results)
             (dolist (py spinyin)
