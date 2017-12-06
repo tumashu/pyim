@@ -995,6 +995,9 @@ pyim 总是使用 emacs-async 包来生成 dcache.")
 通过这个变量来调整 child-frame 的参数，比如：
 设置字体大小，颜色背景等。")
 
+(defvar pyim-tooltip-current-frame nil
+  "用来记录 pyim 运行时所在的 frame.")
+
 (defvar pyim-mode-map
   (let ((map (make-sparse-keymap))
         (i ?\ ))
@@ -3013,18 +3016,28 @@ tooltip 选词框中显示。
 
 (defun pyim-tooltip-show-with-child-frame (string position)
   "在 POSITION 处使用 child-frame 显示 STRING."
-  (let* ((buffer (get-buffer-create " *pyim-child-frame-buffer*"))
+  (let* ((frame (window-frame))
+         (buffer (get-buffer-create " *pyim-child-frame-buffer*"))
          (string-width-height (pos-tip-string-width-height string))
          (string-width (car string-width-height))
          (string-height (cdr string-width-height))
          (x-and-y (pos-tip-compute-pixel-position position)))
 
-    (unless (frame-live-p pyim-tooltip-child-frame)
+    ;; 1. 当 child-frame 不存在时，创建 child-frame.
+    ;; 2. 当切换到其他 frame 时，需要更新以前生成的 child-frame
+    ;;    的 parent-frame 参数，但有同学发现：在 MacOS 环境下，
+    ;;    parent-frame 参数无法用 set-frame-parameter 重新设置，
+    ;;    所以，在这里需要重新生成 child-frame.
+    (unless (and (eq frame pyim-tooltip-current-frame)
+                 (frame-live-p pyim-tooltip-child-frame))
+      (when (frame-live-p pyim-tooltip-child-frame)
+        (delete-frame pyim-tooltip-child-frame))
+      (setq pyim-tooltip-current-frame frame)
       (setq pyim-tooltip-child-frame
             (let ((after-make-frame-functions nil))
               (make-frame
                `(,@pyim-tooltip-child-frame-parameters
-                 (parent-frame . ,(window-frame))
+                 (parent-frame . ,frame)
                  (no-accept-focus . t)
                  (min-width  . t)
                  (min-height . t)
@@ -3051,8 +3064,7 @@ tooltip 选词框中显示。
         (set-window-parameter window 'header-line-format 'none)
         (set-window-buffer window buffer)))
 
-    (dolist (alist `((parent-frame . ,(window-frame))
-                     (visibility   . t)
+    (dolist (alist `((visibility   . t)
                      (top    .  ,(+ (cdr x-and-y) 10))
                      (left   .  ,(+ (car x-and-y) 10))
                      (width  .  ,(+ string-width 1))
