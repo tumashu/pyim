@@ -3025,7 +3025,12 @@ tooltip 选词框中显示。
                             (* pyim-page-length 8))
                            ((eq pyim-page-style 'vertical)
                             25))))
-         (height (+ (cdr string-width-height) 1))
+         (height (max (+ (cdr string-width-height) 1)
+                     ;; 设置 child-frame 的最小高度，防止选词框不停的抖动。
+                     (cond ((memq pyim-page-style '(two-lines one-line))
+                            2)
+                           ((eq pyim-page-style 'vertical)
+                            (+ pyim-page-length 2)))))
          x-and-y)
 
     ;; 1. 当 child-frame 不存在时，创建 child-frame.
