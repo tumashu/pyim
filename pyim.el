@@ -7,7 +7,7 @@
 ;; Author: Ye Wenbin <wenbinye@163.com>, Feng Shu <tumashu@163.com>
 ;; URL: https://github.com/tumashu/pyim
 ;; Version: 1.6.0
-;; Package-Requires: ((emacs "24.3")(cl-lib "0.5")(pos-tip "0.4")(popup "0.1")(async "1.6")(pyim-basedict "0.1"))
+;; Package-Requires: ((emacs "24.3")(cl-lib "0.5")(popup "0.1")(async "1.6")(pyim-basedict "0.1"))
 ;; Keywords: convenience, Chinese, pinyin, input-method
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -241,19 +241,6 @@
 ;;    #+BEGIN_EXAMPLE
 ;;    (setq pyim-page-tooltip 'child-frame)
 ;;    #+END_EXAMPLE
-;; 3. 使用 pos-tip 包来绘制选词框（emacs tooltip 机制）
-;;    #+BEGIN_EXAMPLE
-;;    (setq pyim-page-tooltip 'pos-tip)
-;;    #+END_EXAMPLE
-
-;; 注：Linux 平台下，emacs 可以使用 GTK 来绘制选词框：
-
-;; #+BEGIN_EXAMPLE
-;; (setq pyim-page-tooltip 'pos-tip)
-;; (setq x-gtk-use-system-tooltips t)
-;; #+END_EXAMPLE
-
-;; GTK 选词框的字体设置可以参考：[[https://www.gnu.org/software/emacs/manual/html_node/emacs/GTK-resources.html#GTK-resources][GTK resources]] 。
 
 ;; *** 调整 tooltip 选词框的显示样式
 ;; pyim 的 tooltip 选词框默认使用 *双行显示* 的样式，在一些特
@@ -526,7 +513,6 @@
 ;; ** require + defcustom + defvar
 (require 'cl-lib)
 (require 'help-mode)
-(require 'pos-tip)
 (require 'popup)
 (require 'async)
 (require 'pyim-pymap)
@@ -826,7 +812,7 @@ pyim 输入半角标点，函数列表中每个函数都有一个参数：char �
   "如何绘制 pyim 选词框.
 
 1. 当这个变量取值为 t 或者 'popup 时，使用 popup-el 包来绘制选词框；
-2. 当取值为 pos-tip 时，使用 pos-tip 包来绘制选词框；
+2. 当取值为 child-frame 时，使用一个 child-frame 来做为选词框；
 3. 当取值为 minibuffer 或者 nil 时，使用 minibuffer 做为选词框；"
   :group 'pyim)
 
@@ -850,16 +836,6 @@ pyim 内建的有三种选词框格式：
   "选词框中已选词条的 face
 
 注意：当使用 minibuffer 为选词框时，这个选项才有用处。"
-  :group 'pyim)
-
-(defcustom pyim-page-tooltip-width-adjustment 1.2
-  "校正 tooltip 选词框宽度的数值，表示校正后的宽度是未校正前宽度的倍数.
-
-由于字体设置等原因，pos-tip 选词框实际宽度会比 *预期宽度* 偏大或者偏小，
-这时，有可能会出现选词框词条显示不全或者选词框弹出位置不合理等问题。用户可以通过
-增大或者减小这个变量来改变 tooltip 选词框的宽度，取值大概在 0.5 ~ 2.0 范围之内。
-
-注：这个选项只适用于 `pyim-page-tooltip' 取值为 'pos-tip 的时候。"
   :group 'pyim)
 
 (defvar pyim-debug nil)
@@ -1996,10 +1972,6 @@ Return the input string."
   (pyim-dagger-delete-string)
   (setq pyim-current-choices nil)
 
-  (when (and (eq pyim-page-tooltip 'pos-tip)
-             (pyim-tooltip-pos-tip-usable-p))
-    (pos-tip-hide))
-
   (when (and (eq pyim-page-tooltip 'child-frame)
              (frame-live-p pyim-tooltip-child-frame))
     (set-frame-parameter pyim-tooltip-child-frame 'visibility nil)))
@@ -2967,24 +2939,15 @@ tooltip 选词框中显示。
           (gethash :words page-info)))
 
 (defun pyim-tooltip-show (string position)
-  "在 `position' 位置，使用 pos-tip 或者 popup 显示字符串 `string' 。"
+  "在 `position' 位置，使用 child-frame 或者 popup 显示字符串 `string' 。"
   (let ((frame (window-frame (selected-window)))
         (length (* pyim-page-length 10))
-        (tooltip pyim-page-tooltip)
-        (pos-tip-usable-p (pyim-tooltip-pos-tip-usable-p)))
+        (tooltip pyim-page-tooltip))
     (cond ((or (eq tooltip t)
                (eq tooltip 'popup)
-               (and (eq tooltip 'pos-tip)
-                    (not pos-tip-usable-p)))
+               ;; pos-tip is not support by pyim, fallback to use popup.
+               (eq tooltip 'pos-tip))
            (popup-tip string :point position :margin 1))
-          ((and pos-tip-usable-p
-                (eq tooltip 'pos-tip))
-           (pos-tip-show-no-propertize string
-                                       nil
-                                       position nil 15
-                                       (round (* (pos-tip-tooltip-width length (frame-char-width frame))
-                                                 pyim-page-tooltip-width-adjustment))
-                                       nil nil nil 35))
           ((and (eq tooltip 'child-frame)
                 (>= emacs-major-version 26)
                 (display-graphic-p))
@@ -3007,13 +2970,6 @@ tooltip 选词框中显示。
       (setq quit-flag nil
             unread-command-events '(7)))))
 
-(defun pyim-tooltip-pos-tip-usable-p ()
-  "测试当前环境下 pos-tip 是否可用。"
-  (not (or noninteractive
-           emacs-basic-display
-           (not (display-graphic-p))
-           (not (fboundp 'x-show-tip)))))
-
 (defun pyim-tooltip-show-with-child-frame (string position)
   "在 POSITION 处使用 child-frame 显示 STRING."
   (let* ((frame (window-frame))
@@ -3026,11 +2982,11 @@ tooltip 选词框中显示。
                            ((eq pyim-page-style 'vertical)
                             25))))
          (height (max (+ (cdr string-width-height) 1)
-                     ;; 设置 child-frame 的最小高度，防止选词框不停的抖动。
-                     (cond ((memq pyim-page-style '(two-lines one-line))
-                            2)
-                           ((eq pyim-page-style 'vertical)
-                            (+ pyim-page-length 2)))))
+                      ;; 设置 child-frame 的最小高度，防止选词框不停的抖动。
+                      (cond ((memq pyim-page-style '(two-lines one-line))
+                             2)
+                            ((eq pyim-page-style 'vertical)
+                             (+ pyim-page-length 2)))))
          x-and-y)
 
     ;; 1. 当 child-frame 不存在时，创建 child-frame.
