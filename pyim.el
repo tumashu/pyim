@@ -2945,7 +2945,9 @@ tooltip 选词框中显示。
         (tooltip pyim-page-tooltip))
     (cond ((and (eq tooltip 'child-frame)
                 (>= emacs-major-version 26)
-                (display-graphic-p))
+                (not (or noninteractive
+                         emacs-basic-display
+                         (not (display-graphic-p)))))
            (pyim-tooltip-show-with-child-frame string position))
           ((eq tooltip 'minibuffer)
            (let ((max-mini-window-height (+ pyim-page-length 2)))
