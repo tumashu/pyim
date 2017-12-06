@@ -3072,9 +3072,7 @@ This function is shameless steal from pos-tip."
                                                       pixel-width
                                                       pixel-height
                                                       dx dy)
-  "This function is shameless steal from `pos-tip-compute-pixel-position'.
-
-Return pixel position of POS in WINDOW, which indicates relative
+  "Return pixel position of POS in WINDOW, which indicates relative
 coordinates of bottom left corner of the object, its returned value is
 like (X . Y)
 
@@ -3090,7 +3088,9 @@ DX specifies horizontal offset in pixel.
 
 DY specifies vertical offset in pixel. This makes the calculations done
 without considering the height of object at POS, so the object might be
-hidden by the tooltip."
+hidden by the tooltip.
+
+This function is shameless steal from pos-tip."
   (let* ((frame (window-frame (or window (selected-window))))
          (posn (posn-at-point (or pos (window-point window)) window))
          (line (cdr (posn-actual-col-row posn)))
