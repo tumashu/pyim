@@ -1309,7 +1309,7 @@ TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCAC
                           pyim-dcache-ishortcode2word))
              pyim-dcache-ishortcode2word)
             (pyim-dcache-save-variable 'pyim-dcache-ishortcode2word)
-            (setq pyim-dcache-create-abbrev-dcache-p t)))
+            (setq pyim-dcache-update-ishortcode2word-dcache t)))
       (async-start
        `(lambda ()
           ,(async-inject-variables "^load-path$")
@@ -1339,7 +1339,7 @@ TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCAC
            pyim-dcache-ishortcode2word)
           (pyim-dcache-save-variable 'pyim-dcache-ishortcode2word))
        `(lambda (result)
-          (setq pyim-dcache-create-abbrev-dcache-p t)
+          (setq pyim-dcache-update-ishortcode2word-dcache t)
           (pyim-dcache-set-variable 'pyim-dcache-ishortcode2word t))))))
 
 (defun pyim-dcache-update-icode2word-dcache (&optional force)
