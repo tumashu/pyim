@@ -2971,19 +2971,12 @@ tooltip 选词框中显示。
   "在 POSITION 处使用 child-frame 显示 STRING."
   (let* ((frame (window-frame))
          (buffer (get-buffer-create " *pyim-child-frame-buffer*"))
-         (string-width-height (pyim-tooltip-string-width-height string))
-         (width (max (+ (car string-width-height) 1)
-                     ;; 设置 child-frame 的最小宽度，防止选词框不停的抖动。
-                     (cond ((memq pyim-page-style '(two-lines one-line))
-                            (* pyim-page-length 8))
-                           ((eq pyim-page-style 'vertical)
-                            25))))
-         (height (max (+ (cdr string-width-height) 1)
-                      ;; 设置 child-frame 的最小高度，防止选词框不停的抖动。
-                      (cond ((memq pyim-page-style '(two-lines one-line))
-                             2)
-                            ((eq pyim-page-style 'vertical)
-                             (+ pyim-page-length 2)))))
+         (min-size
+          ;; 设置 child-frame 的最小尺寸，防止选词框不停的抖动。
+          (cond ((memq pyim-page-style '(two-lines one-line))
+                 (cons (* pyim-page-length 8) 2))
+                ((eq pyim-page-style 'vertical)
+                 (cons 25 (+ pyim-page-length 2)))))
          x-and-y)
 
     ;; 1. 当 child-frame 不存在时，创建 child-frame.
@@ -3020,7 +3013,7 @@ tooltip 选词框中显示。
                  (cursor-type . nil)
                  (minibuffer . nil)
                  (width . 50)
-                 (height . 2)
+                 (height . 1)
                  (no-special-glyphs . t)))))
       (let ((window (frame-root-window pyim-tooltip-child-frame)))
         (set-window-parameter window 'mode-line-format 'none)
@@ -3028,42 +3021,18 @@ tooltip 选词框中显示。
         (set-window-buffer window buffer)))
 
     (let ((child-frame pyim-tooltip-child-frame))
-      (set-frame-parameter child-frame 'width width)
-      (set-frame-parameter child-frame 'height height)
+      (with-current-buffer buffer
+        (erase-buffer)
+        (insert string))
+      (fit-frame-to-buffer
+       child-frame nil (cdr min-size) nil (car min-size))
       (setq x-and-y (pyim-tooltip-compute-pixel-position
                      position nil
                      (frame-pixel-width child-frame)
                      (frame-pixel-height child-frame)))
       (set-frame-parameter child-frame 'top (+ (cdr x-and-y) 1))
       (set-frame-parameter child-frame 'left (car x-and-y))
-      (set-frame-parameter child-frame 'visibility t))
-
-    (with-current-buffer buffer
-      (erase-buffer)
-      (insert string)
-      (redisplay))))
-
-(defun pyim-tooltip-string-width-height (string)
-  "Count columns and rows of STRING. Return a cons cell like (WIDTH . HEIGHT).
-The last empty line of STRING is ignored.
-
-Example:
-
-\(pyim-tooltip-string-width-height \"abc\\nあいう\\n123\")
-;; => (6 . 3)
-
-This function is shameless steal from pos-tip."
-  (with-temp-buffer
-    (insert string)
-    (goto-char (point-min))
-    (end-of-line)
-    (let ((width (current-column))
-	      (height (if (eq (char-before (point-max)) ?\n) 0 1)))
-      (while (< (point) (point-max))
-	    (end-of-line 2)
-	    (setq width (max (current-column) width)
-	          height (1+ height)))
-      (cons width height))))
+      (set-frame-parameter child-frame 'visibility t))))
 
 (defun pyim-tooltip-compute-pixel-position (&optional pos window
                                                       pixel-width
