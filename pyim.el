@@ -2974,9 +2974,9 @@ tooltip 选词框中显示。
          (min-size
           ;; 设置 child-frame 的最小尺寸，防止选词框不停的抖动。
           (cond ((memq pyim-page-style '(two-lines one-line))
-                 (cons (* pyim-page-length 8) 2))
+                 (cons 2 (* pyim-page-length 8)))
                 ((eq pyim-page-style 'vertical)
-                 (cons 25 (+ pyim-page-length 2)))))
+                 (cons (+ pyim-page-length 2) 25))))
          x-and-y)
 
     ;; 1. 当 child-frame 不存在时，创建 child-frame.
@@ -3020,18 +3020,18 @@ tooltip 选词框中显示。
         (set-window-parameter window 'header-line-format 'none)
         (set-window-buffer window buffer)))
 
+    (with-current-buffer buffer
+      (erase-buffer)
+      (insert string))
+
     (let ((child-frame pyim-tooltip-child-frame))
-      (with-current-buffer buffer
-        (erase-buffer)
-        (insert string))
       (fit-frame-to-buffer
-       child-frame nil (cdr min-size) nil (car min-size))
+       child-frame nil (car min-size) nil (cdr min-size))
       (setq x-and-y (pyim-tooltip-compute-pixel-position
                      position nil
                      (frame-pixel-width child-frame)
                      (frame-pixel-height child-frame)))
-      (set-frame-parameter child-frame 'top (+ (cdr x-and-y) 1))
-      (set-frame-parameter child-frame 'left (car x-and-y))
+      (set-frame-position child-frame (car x-and-y) (+ (cdr x-and-y) 1))
       (set-frame-parameter child-frame 'visibility t))))
 
 (defun pyim-tooltip-compute-pixel-position (&optional pos window
