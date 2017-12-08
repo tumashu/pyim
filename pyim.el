@@ -2944,6 +2944,9 @@ tooltip 选词框中显示。
         (length (* pyim-page-length 10))
         (tooltip pyim-page-tooltip))
     (cond ((and (eq tooltip 'child-frame)
+                ;; child-frame 在 MacOS 上运行不太稳定，
+                ;; 而且我也没有机子来调试它，只能禁用了。
+                (not (eq system-type 'darwin))
                 (>= emacs-major-version 26)
                 (not (or noninteractive
                          emacs-basic-display
