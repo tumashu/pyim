@@ -2978,10 +2978,12 @@ tooltip 选词框中显示。
          (buffer (get-buffer-create " *pyim-child-frame-buffer*"))
          (min-size
           ;; 设置 child-frame 的最小尺寸，防止选词框不停的抖动。
-          (cond ((memq pyim-page-style '(two-lines one-line))
+          (cond ((eq pyim-page-style 'two-lines)
                  (cons 2 (* pyim-page-length 8)))
+                ((eq pyim-page-style 'one-line)
+                 (cons 1 (* pyim-page-length 10)))
                 ((eq pyim-page-style 'vertical)
-                 (cons (+ pyim-page-length 2) 25))))
+                 (cons (+ pyim-page-length 1) 25))))
          x-and-y)
 
     ;; 1. 当 child-frame 不存在时，创建 child-frame.
