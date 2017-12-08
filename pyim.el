@@ -2972,7 +2972,9 @@ tooltip 选词框中显示。
 
 (defun pyim-tooltip-show-with-child-frame (string position)
   "在 POSITION 处使用 child-frame 显示 STRING."
-  (let* ((frame (window-frame))
+  (let* ((window-min-height 1)
+         (window-min-width 1)
+         (frame (window-frame))
          (buffer (get-buffer-create " *pyim-child-frame-buffer*"))
          (min-size
           ;; 设置 child-frame 的最小尺寸，防止选词框不停的抖动。
