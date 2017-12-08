@@ -1974,7 +1974,7 @@ Return the input string."
 
   (when (and (eq pyim-page-tooltip 'child-frame)
              (frame-live-p pyim-tooltip-child-frame))
-    (set-frame-parameter pyim-tooltip-child-frame 'visibility nil)))
+    (make-frame-invisible pyim-tooltip-child-frame)))
 
 ;; ** 处理拼音 code 字符串 `pyim-entered-code'
 ;; *** 拼音字符串 -> 待选词列表
@@ -3032,7 +3032,7 @@ tooltip 选词框中显示。
                      (frame-pixel-width child-frame)
                      (frame-pixel-height child-frame)))
       (set-frame-position child-frame (car x-and-y) (+ (cdr x-and-y) 1))
-      (set-frame-parameter child-frame 'visibility t))))
+      (make-frame-visible child-frame))))
 
 (defun pyim-tooltip-compute-pixel-position (&optional pos window
                                                       pixel-width
