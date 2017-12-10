@@ -3041,10 +3041,8 @@ tooltip 选词框中显示。
       (set-frame-position child-frame (car x-and-y) (+ (cdr x-and-y) 1))
       (make-frame-visible child-frame))))
 
-(defun pyim-tooltip-compute-pixel-position (&optional pos window
-                                                      pixel-width
-                                                      pixel-height
-                                                      dx dy)
+(defun pyim-tooltip-compute-pixel-position
+    (&optional pos window pixel-width pixel-height dx dy)
   "Return pixel position of POS in WINDOW, which indicates relative
 coordinates of bottom left corner of the object, its returned value is
 like (X . Y)
