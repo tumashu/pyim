@@ -3022,12 +3022,12 @@ tooltip 选词框中显示。
                  (width . 50)
                  (height . 1)
                  (no-special-glyphs . t)))))
-      (let ((window (frame-root-window pyim-tooltip-child-frame)))
-        (set-window-parameter window 'mode-line-format 'none)
-        (set-window-parameter window 'header-line-format 'none)
-        (set-window-buffer window buffer)))
+      (set-window-buffer
+       (frame-root-window pyim-tooltip-child-frame) buffer))
 
     (with-current-buffer buffer
+      (setq mode-line-format nil
+            header-line-format nil)
       (erase-buffer)
       (insert string))
 
