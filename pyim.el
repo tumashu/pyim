@@ -2968,6 +2968,7 @@ tooltip 选词框中显示。
   "在 POSITION 处使用 child-frame 显示 STRING."
   (let* ((window-min-height 1)
          (window-min-width 1)
+         (frame-resize-pixelwise t)
          (frame (window-frame))
          (buffer (get-buffer-create " *pyim-child-frame-buffer*"))
          (min-size
