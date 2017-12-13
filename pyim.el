@@ -3030,76 +3030,43 @@ tooltip 选词框中显示。
       (fit-frame-to-buffer
        child-frame nil (car min-size) nil (cdr min-size))
       (setq x-and-y (pyim-tooltip-compute-pixel-position
-                     position nil
+                     position
                      (frame-pixel-width child-frame)
                      (frame-pixel-height child-frame)))
       (set-frame-position child-frame (car x-and-y) (+ (cdr x-and-y) 1))
       (make-frame-visible child-frame))))
 
-(defun pyim-tooltip-compute-pixel-position
-    (&optional pos window pixel-width pixel-height dx dy)
+(defun pyim-tooltip-compute-pixel-position (pos pixel-width pixel-height)
   "Return pixel position of POS in WINDOW, which indicates relative
 coordinates of bottom left corner of the object, its returned value is
 like (X . Y)
-
-Omitting POS and WINDOW means use current position and selected window,
-respectively.
 
 If PIXEL-WIDTH and PIXEL-HEIGHT are given, this function regard these
 values as the size of a small window located around the POS, for example:
 tooltip. These values are used to adjust the small window's location and
 let it not disappear by sticking out of the display.
 
-DX specifies horizontal offset in pixel.
-
-DY specifies vertical offset in pixel. This makes the calculations done
-without considering the height of object at POS, so the object might be
-hidden by the tooltip.
-
 This function is shameless steal from pos-tip."
-  (let* ((frame (window-frame (or window (selected-window))))
-         (posn (posn-at-point (or pos (window-point window)) window))
-         (line (cdr (posn-actual-col-row posn)))
-         (line-height (and line
-			               (or (window-line-height line window)
-			                   (and (redisplay t)
-				                    (window-line-height line window)))))
-         (x-y (or (posn-x-y posn)
-		          (let ((geom (pos-visible-in-window-p
-			                   (or pos (window-point window)) window t)))
-		            (and geom (cons (car geom) (cadr geom))))
-		          '(0 . 0)))
-         (x (+ (car (window-inside-pixel-edges window))
-	           (car x-y)
-	           (or dx 0)))
-         (y0 (+ (cadr (window-pixel-edges window))
-		        (or (nth 2 line-height) (cdr x-y))))
-         (y (+ y0
-	           (or dy
-		           (car line-height)
-		           (with-current-buffer (window-buffer window)
-		             (cond
-		              ;; `posn-object-width-height' returns an incorrect value
-		              ;; when the header line is displayed (Emacs bug #4426).
-		              ((and posn
-			                (null header-line-format))
-		               (cdr (posn-object-width-height posn)))
-		              ((and (bound-and-true-p text-scale-mode)
-			                (not (zerop (with-no-warnings
-					                      text-scale-mode-amount))))
-		               (round (* (frame-char-height frame)
-				                 (with-no-warnings
-				                   (expt text-scale-mode-step
-					                     text-scale-mode-amount)))))
-		              (t (frame-char-height frame)))))))
+  (let* ((window (selected-window))
+         (frame (window-frame window))
          (xmax (frame-pixel-width frame))
 	     (ymax (frame-pixel-height frame))
-         (upperside-p (> (+ y (or pixel-height 0))
-				         ymax)))
+         (posn (posn-at-point pos window))
+         (line (cdr (posn-actual-col-row posn)))
+         (line-height
+		  (or (window-line-height line window)
+			  (and (redisplay t)
+				   (window-line-height line window))))
+         (x-y (or (posn-x-y posn) '(0 . 0)))
+         (x (+ (car (window-inside-pixel-edges window))
+	           (car x-y)))
+         (y0 (+ (cadr (window-pixel-edges window))
+		        (or (nth 2 line-height) (cdr x-y))))
+         (y (+ y0 (car line-height))))
     (cons (max 0 (min x (- xmax (or pixel-width 0))))
-	      (max 0 (if upperside-p
-		             (- (if dy ymax y0) (or pixel-height 0))
-		           y)))))
+	      (max 0 (if (> (+ y (or pixel-height 0)) ymax)
+		             (- y0 (or pixel-height 0))
+                   y)))))
 
 ;; *** 选择备选词
 (defun pyim-page-select-word ()
