@@ -2940,7 +2940,7 @@ tooltip 选词框中显示。
     (cond ((and (eq tooltip 'child-frame)
                 ;; child-frame 在 MacOS 上运行不太稳定，
                 ;; 而且我也没有机子来调试它，只能禁用了。
-                (not (eq system-type 'darwin))
+                ;; (not (eq system-type 'darwin))
                 (>= emacs-major-version 26)
                 (not (or noninteractive
                          emacs-basic-display
@@ -3027,14 +3027,14 @@ tooltip 选词框中显示。
       (insert string))
 
     (let ((child-frame pyim-tooltip-child-frame))
+      (make-frame-visible child-frame)
       (fit-frame-to-buffer
        child-frame nil (car min-size) nil (cdr min-size))
       (setq x-and-y (pyim-tooltip-compute-pixel-position
                      position
                      (frame-pixel-width child-frame)
                      (frame-pixel-height child-frame)))
-      (set-frame-position child-frame (car x-and-y) (+ (cdr x-and-y) 1))
-      (make-frame-visible child-frame))))
+      (set-frame-position child-frame (car x-and-y) (+ (cdr x-and-y) 1)))))
 
 (defun pyim-tooltip-compute-pixel-position (pos pixel-width pixel-height)
   "Return pixel position of POS in WINDOW, which indicates relative
