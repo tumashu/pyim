@@ -2823,13 +2823,14 @@ Return the input string."
     (when (and (null unread-command-events)
                (null unread-post-input-method-events))
       (if (eq (selected-window) (minibuffer-window))
-          ;; Show the guidance in the next line of the currrent
-          ;; minibuffer.
+          ;; 在 minibuffer 中输入中文时，使用当前输入的
+          ;; 下一行来显示候选词。
           (pyim-minibuffer-message
-           (format "  [%s]\n%s"
+           (format "\n[%s: %s] "
                    current-input-method-title
                    (gethash :words page-info)))
-        ;; Show the guidance in echo area without logging.
+        ;; 在普通 buffer 中输入中文时，使用 `pyim-page-tooltip'
+        ;; 指定的方式来显示候选词。
         (let ((message-log-max nil))
           (if pyim-page-tooltip
               (pyim-tooltip-show
@@ -2839,6 +2840,22 @@ Return the input string."
                    (pyim-page-style-two-lines-style page-info)))
                (overlay-start pyim-dagger-overlay))
             (message "%s" (pyim-page-style-minibuffer-style page-info))))))))
+
+(defun pyim-minibuffer-message (string)
+  "当在 minibuffer 中使用 pyim 输入中文时，需要将
+minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
+这个函数就是作这个工作。"
+  (message nil)
+  (let ((inhibit-quit t)
+        point-1)
+    (save-excursion
+      (insert string)
+      (setq point-1 (point)))
+    (sit-for 1000000)
+    (delete-region (point) point-1)
+    (when quit-flag
+      (setq quit-flag nil
+            unread-command-events '(7)))))
 
 (defun pyim-page-next-page (arg)
   (interactive "p")
@@ -2950,19 +2967,6 @@ tooltip 选词框中显示。
            (let ((max-mini-window-height (+ pyim-page-length 2)))
              (message string)))
           (t (popup-tip string :point position :margin 1)))))
-
-(defun pyim-minibuffer-message (string)
-  (message nil)
-  (let ((point-max (point-max))
-        (inhibit-quit t))
-    (save-excursion
-      (goto-char point-max)
-      (insert string))
-    (sit-for 1000000)
-    (delete-region point-max (point-max))
-    (when quit-flag
-      (setq quit-flag nil
-            unread-command-events '(7)))))
 
 (defun pyim-tooltip-show-with-child-frame (string position)
   "在 POSITION 处使用 child-frame 显示 STRING."
