@@ -3021,12 +3021,15 @@ tooltip 选词框中显示。
                  (width . 50)
                  (height . 1)
                  (no-special-glyphs . t)))))
-      (set-window-buffer
-       (frame-root-window pyim-tooltip-child-frame) buffer))
+      (let ((window (frame-root-window pyim-tooltip-child-frame)))
+        ;; 不知道什么原因，通过变量 mode-line-format 和 header-line-format
+        ;; 去掉的 mode-line 和 header-line, 在鼠标点击后，会再次出现
+        ;; 所以这里我用下面的方式去掉 mode-line 和 header-line
+        (set-window-parameter window 'mode-line-format 'none)
+        (set-window-parameter window 'header-line-format 'none)
+        (set-window-buffer window buffer)))
 
     (with-current-buffer buffer
-      (setq mode-line-format nil
-            header-line-format nil)
       (erase-buffer)
       (insert string))
 
