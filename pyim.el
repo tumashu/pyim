@@ -3078,21 +3078,19 @@ position not disappear by sticking out of the display."
          ;; 我在这里使用如下方式获取 y-bottom：临时使用 `vertical-motion'
          ;; 函数将光标向下移动一行到下一行的行首，然后得到其对应的 y-top
          ;; 坐标，这个坐标就可以当作我们所需要的 y-buttom.
-         ;;
-         ;; 这个方法在 buffer 的最后一行会失效，所以在 buffer 最后一行，我
-         ;; 们使用 "y-bottom = y-top + default-line-height" 来获得 y-bottom,
-         ;; 虽然不太精确，但相对比较简单，最后一行也不会出现太大的问题。
          (posn-next-line-beginning
           (posn-at-point (save-excursion
                            (goto-char pos)
-                           (vertical-motion 1)
-                           (point))
+                           (if (= (line-end-position) (point-max))
+                               ;; FIXME: we should add an extra blank line
+                               ;; when we have no next line to move
+                               (progn (goto-char (point-max))
+                                      (insert "\n")
+                                      (point))
+                             (vertical-motion 1)
+                             (point)))
                          window))
-         (y-buttom
-          (let ((value (or (cdr (posn-x-y posn-next-line-beginning)) 0)))
-            (if (= value y-top)
-                (+ y-top (default-line-height))
-              value))))
+         (y-buttom (or (cdr (posn-x-y posn-next-line-beginning)) 0)))
     (cons (max 0 (min x (- xmax (or tooltip-width 0))))
           (max 0 (if (> (+ y-buttom (or tooltip-height 0)) ymax)
                      (- y-top (or tooltip-height 0))
