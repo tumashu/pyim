@@ -3030,6 +3030,11 @@ tooltip 选词框中显示。
       (erase-buffer)
       (insert string))
 
+    ;; FIXME: 使用 pyim 的时候，将光标移开，因为如果不小心
+    ;; 用鼠标点了 child-frame，pyim 就会出现奇怪的反应，
+    ;; 暂时还没发现怎么处理这个问题。
+    (set-mouse-position frame 0 0)
+
     (let ((child-frame pyim-tooltip-child-frame))
       (make-frame-visible child-frame)
       (fit-frame-to-buffer
