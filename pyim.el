@@ -3040,37 +3040,46 @@ tooltip 选词框中显示。
                      (frame-pixel-height child-frame)))
       (set-frame-position child-frame (car x-and-y) (+ (cdr x-and-y) 1)))))
 
-(defun pyim-tooltip-compute-pixel-position (pos pixel-width pixel-height)
-  "Return pixel position of POS in WINDOW, which indicates relative
-coordinates of bottom left corner of the object, its returned value is
-like (X . Y)
+(defun pyim-tooltip-compute-pixel-position (pos tooltip-width tooltip-height)
+  "Return bottom-left-corner pixel position of POS in WINDOW.
+its returned value is like (X . Y)
 
-If PIXEL-WIDTH and PIXEL-HEIGHT are given, this function regard these
-values as the size of a small window located around the POS, for example:
-tooltip. These values are used to adjust the small window's location and
-let it not disappear by sticking out of the display.
-
-This function is shameless steal from pos-tip."
+If TOOLTIP-WIDTH and TOOLTIP-HEIGHT are given, this function will use
+two values to adjust its output position, make sure the *tooltip* at
+position not disappear by sticking out of the display."
   (let* ((window (selected-window))
          (frame (window-frame window))
          (xmax (frame-pixel-width frame))
 	     (ymax (frame-pixel-height frame))
-         (posn (posn-at-point pos window))
-         (line (cdr (posn-actual-col-row posn)))
-         (line-height
-		  (or (window-line-height line window)
-			  (and (redisplay t)
-				   (window-line-height line window))))
-         (x-y (or (posn-x-y posn) '(0 . 0)))
+         ;; 得到 POS 处的字符的左上角对应的坐标
+         (posn-top-left (posn-at-point pos window))
          (x (+ (car (window-inside-pixel-edges window))
-	           (car x-y)))
-         (y0 (+ (cadr (window-pixel-edges window))
-		        (or (nth 2 line-height) (cdr x-y))))
-         (y (+ y0 (car line-height))))
-    (cons (max 0 (min x (- xmax (or pixel-width 0))))
-	      (max 0 (if (> (+ y (or pixel-height 0)) ymax)
-		             (- y0 (or pixel-height 0))
-                   y)))))
+	           (or (car (posn-x-y posn-top-left)) 0)))
+         (y-top (+ (cadr (window-pixel-edges window))
+		           (or (cdr (posn-x-y posn-top-left)) 0)))
+         ;; 我们不能使用 y-top 的信息来直接放置 tooltip, 因为 tooltip
+         ;; 会遮挡当前行的内容，所以我们需要获取 POS 处左下角的
+         ;; 坐标，这里使用的获取方式是： 坐标 x 不变，使用函数
+         ;; `vertical-motion' 向下移动一行到下一行的行首，得到的 y 坐标
+         ;; 做为 y-buttom.
+         (posn-next-line-beginning
+          (posn-at-point (save-excursion
+                           (goto-char pos)
+                           (vertical-motion 1)
+                           (point))
+                         window))
+         (y-buttom
+          (let ((value (or (cdr (posn-x-y posn-next-line-beginning)) 0)))
+            (if (= value y-top)
+                ;; FIXME: 当到了 buffer 最后一行的时候，我们就不能使用 "向下移动一行"
+                ;; 的方式来获取 y-buttom 了，这里简单的返回： y-top + 默认行高,
+                ;; 这种处理方式也许不太精确，但相对来说比较简单。
+                (+ y-top (default-line-height))
+              value))))
+    (cons (max 0 (min x (- xmax (or tooltip-width 0))))
+	      (max 0 (if (> (+ y-buttom (or tooltip-height 0)) ymax)
+		             (- y-top (or tooltip-height 0))
+                   y-buttom)))))
 
 ;; *** 选择备选词
 (defun pyim-page-select-word ()
