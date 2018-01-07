@@ -3050,7 +3050,7 @@ position not disappear by sticking out of the display."
   (let* ((window (selected-window))
          (frame (window-frame window))
          (xmax (frame-pixel-width frame))
-	     (ymax (frame-pixel-height frame))
+         (ymax (frame-pixel-height frame))
          ;; 得到 POS 处的字符的左上角对应的坐标
          (posn-top-left (posn-at-point pos window))
          (x (+ (car (window-inside-pixel-edges window))
