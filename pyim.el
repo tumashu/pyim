@@ -3058,10 +3058,22 @@ position not disappear by sticking out of the display."
          (y-top (+ (cadr (window-pixel-edges window))
                    (or (cdr (posn-x-y posn-top-left)) 0)))
          ;; 我们不能使用 y-top 的信息来直接放置 tooltip, 因为 tooltip
-         ;; 会遮挡当前行的内容，所以我们需要获取 POS 处左下角的
-         ;; 坐标，这里使用的获取方式是： 坐标 x 不变，使用函数
-         ;; `vertical-motion' 向下移动一行到下一行的行首，得到的 y 坐标
-         ;; 做为 y-buttom.
+         ;; 会遮挡当前行的内容，所以我们需要获取 POS 处左下角的坐标 y-bottom
+         ;;
+         ;; 最简单的获取方式是让 "y-bottom = y-top + default-line-height"，
+         ;; 这个方式在大多数情况下都没有问题，但如果当前行使用的字号
+         ;; 不是默认字号，那么这样获得的 y-bottom 就不太合适，特别是遇到
+         ;; 当前行是大字号的时候，比如：许多 org headline 都使用特大的字号。
+         ;; 当前行是小字号的时候，也存在这个问题，但由于不会出现遮挡问题，
+         ;; 所以问题反而不太严重。
+         ;;
+         ;; 我在这里使用如下方式获取 y-bottom：临时使用 `vertical-motion'
+         ;; 函数将光标向下移动一行到下一行的行首，然后得到其对应的 y-top
+         ;; 坐标，这个坐标就可以当作我们所需要的 y-buttom.
+         ;;
+         ;; 这个方法在 buffer 的最后一行会失效，所以在 buffer 最后一行，我
+         ;; 们使用 "y-bottom = y-top + default-line-height" 来获得 y-bottom,
+         ;; 虽然不太精确，但相对比较简单，最后一行也不会出现太大的问题。
          (posn-next-line-beginning
           (posn-at-point (save-excursion
                            (goto-char pos)
@@ -3071,9 +3083,6 @@ position not disappear by sticking out of the display."
          (y-buttom
           (let ((value (or (cdr (posn-x-y posn-next-line-beginning)) 0)))
             (if (= value y-top)
-                ;; FIXME: 当到了 buffer 最后一行的时候，我们就不能使用 "向下移动一行"
-                ;; 的方式来获取 y-buttom 了，这里简单的返回： y-top + 默认行高,
-                ;; 这种处理方式也许不太精确，但相对来说比较简单。
                 (+ y-top (default-line-height))
               value))))
     (cons (max 0 (min x (- xmax (or tooltip-width 0))))
