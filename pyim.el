@@ -3001,7 +3001,6 @@ tooltip 选词框中显示。
                `(,@pyim-tooltip-child-frame-parameters
                  (parent-frame . ,frame)
                  (no-accept-focus . t)
-                 (no-focus-on-map . t)
                  (min-width  . t)
                  (min-height . t)
                  (border-width . 0)
