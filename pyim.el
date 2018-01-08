@@ -3059,11 +3059,13 @@ position not disappear by sticking out of the display."
          (frame (window-frame window))
          (xmax (frame-pixel-width frame))
          (ymax (frame-pixel-height frame))
+         (header-line-height (window-header-line-height window))
          ;; 得到 POS 处的字符的左上角对应的坐标
          (posn-top-left (posn-at-point pos window))
          (x (+ (car (window-inside-pixel-edges window))
                (or (car (posn-x-y posn-top-left)) 0)))
          (y-top (+ (cadr (window-pixel-edges window))
+                   header-line-height
                    (or (cdr (posn-x-y posn-top-left)) 0)))
          ;; 我们不能使用 y-top 的信息来直接放置 tooltip, 因为 tooltip
          ;; 会遮挡当前行的内容，所以我们需要获取 POS 处左下角的坐标 y-bottom
@@ -3095,6 +3097,7 @@ position not disappear by sticking out of the display."
               (vertical-motion 1)
               (posn-at-point (point) window))))
          (y-buttom (+ (cadr (window-pixel-edges window))
+                      header-line-height
                       (or (cdr (posn-x-y posn-next-line-beginning)) 0))))
     (cons (max 0 (min x (- xmax (or tooltip-width 0))))
           (max 0 (if (> (+ y-buttom (or tooltip-height 0)) ymax)
