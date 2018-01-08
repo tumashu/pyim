@@ -3079,17 +3079,21 @@ position not disappear by sticking out of the display."
          ;; 函数将光标向下移动一行到下一行的行首，然后得到其对应的 y-top
          ;; 坐标，这个坐标就可以当作我们所需要的 y-buttom.
          (posn-next-line-beginning
-          (posn-at-point (save-excursion
-                           (goto-char pos)
-                           (if (= (line-end-position) (point-max))
-                               ;; FIXME: we should add an extra blank line
-                               ;; when we have no next line to move
-                               (progn (goto-char (point-max))
-                                      (insert "\n")
-                                      (point))
-                             (vertical-motion 1)
-                             (point)))
-                         window))
+          (save-excursion
+            (goto-char pos)
+            (if (= (line-end-position) (point-max))
+                ;; FIXME: 当光标在 buffer 的最后一行的时候，
+                ;; 我们的方法就无法使用了，所以我们强制在最后
+                ;; 一行添加一个空行，获取 posn 后再将这个空行
+                ;; 删除，这个方法有点 hack.
+                (let (posn)
+                  (goto-char (point-max))
+                  (insert "\n")
+                  (setq posn (posn-at-point (point) window))
+                  (delete-char -1)
+                  posn)
+              (vertical-motion 1)
+              (posn-at-point (point) window))))
          (y-buttom (or (cdr (posn-x-y posn-next-line-beginning)) 0)))
     (cons (max 0 (min x (- xmax (or tooltip-width 0))))
           (max 0 (if (> (+ y-buttom (or tooltip-height 0)) ymax)
