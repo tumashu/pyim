@@ -515,8 +515,9 @@
   "Chinese pinyin input method"
   :group 'leim)
 
-(defcustom pyim-dcache-directory (locate-user-emacs-file "pyim/dcache")
+(defcustom pyim-dcache-directory (locate-user-emacs-file "pyim/dcache/")
   "一个目录，用于保存 pyim 词库对应的 cache 文件."
+  :type 'directory
   :group 'pyim)
 
 (defcustom pyim-dicts nil
