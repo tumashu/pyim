@@ -3020,7 +3020,10 @@ tooltip 选词框中显示。
                  (minibuffer . nil)
                  (width . 50)
                  (height . 1)
-                 (no-special-glyphs . t)))))
+                 (no-special-glyphs . t)
+                 ;; 使用 desktop.el 的时候，不保存
+                 ;; `pyim-tooltip-child-frame' 对应的 frame.
+                 (desktop-dont-save . t)))))
       (let ((window (frame-root-window pyim-tooltip-child-frame)))
         ;; 不知道什么原因，通过变量 mode-line-format 和 header-line-format
         ;; 去掉的 mode-line 和 header-line, 在鼠标点击后，会再次出现
