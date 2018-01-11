@@ -3067,38 +3067,19 @@ position not disappear by sticking out of the display."
          (y-top (+ (cadr (window-pixel-edges window))
                    header-line-height
                    (or (cdr (posn-x-y posn-top-left)) 0)))
-         ;; 我们不能使用 y-top 的信息来直接放置 tooltip, 因为 tooltip
-         ;; 会遮挡当前行的内容，所以我们需要获取 POS 处左下角的坐标 y-bottom
-         ;;
-         ;; 最简单的获取方式是让 "y-bottom = y-top + default-line-height"，
-         ;; 这个方式在大多数情况下都没有问题，但如果当前行使用的字号
-         ;; 不是默认字号，那么这样获得的 y-bottom 就不太合适，特别是遇到
-         ;; 当前行是大字号的时候，比如：许多 org headline 都使用特大的字号。
-         ;; 当前行是小字号的时候，也存在这个问题，但由于不会出现遮挡问题，
-         ;; 所以问题反而不太严重。
-         ;;
-         ;; 我在这里使用如下方式获取 y-bottom：临时使用 `vertical-motion'
-         ;; 函数将光标向下移动一行到下一行的行首，然后得到其对应的 y-top
-         ;; 坐标，这个坐标就可以当作我们所需要的 y-buttom.
-         (posn-next-line-beginning
-          (save-excursion
-            (goto-char pos)
-            (if (= (line-end-position) (point-max))
-                ;; FIXME: 当光标在 buffer 的最后一行的时候，
-                ;; 我们的方法就无法使用了，所以我们强制在最后
-                ;; 一行添加一个空行，获取 posn 后再将这个空行
-                ;; 删除，这个方法有点 hack.
-                (let (posn)
-                  (goto-char (point-max))
-                  (insert "\n")
-                  (setq posn (posn-at-point (point) window))
-                  (delete-char -1)
-                  posn)
-              (vertical-motion 1)
-              (posn-at-point (point) window))))
-         (y-buttom (+ (cadr (window-pixel-edges window))
-                      header-line-height
-                      (or (cdr (posn-x-y posn-next-line-beginning)) 0))))
+         ;; 获取光标处字体的高度
+         (font-height
+          (if (= pos 1)
+              ;; 如果 buffer 中只有一个字符，那么就使用默认行高
+              ;; 因为这时候 font-at 无法运行。
+              (default-line-height)
+            (aref (font-info
+                   (font-at
+                    ;; 如果 POS 在 buffer 结尾处 ，就使用 POS 前一个
+                    ;; 字符处的字体高度，因为 font-at 无法在 EOB 处运行。
+                    (if (and (= pos (point-max))) (- pos 1) pos)))
+                  3)))
+         (y-buttom (+ y-top font-height)))
     (cons (max 0 (min x (- xmax (or tooltip-width 0))))
           (max 0 (if (> (+ y-buttom (or tooltip-height 0)) ymax)
                      (- y-top (or tooltip-height 0))
