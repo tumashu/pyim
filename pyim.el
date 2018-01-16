@@ -2823,7 +2823,7 @@ Return the input string."
           ;; 在 minibuffer 中输入中文时，使用当前输入的
           ;; 下一行来显示候选词。
           (pyim-minibuffer-message
-           (format "\n{ %s}" (pyim-page-style-minibuffer-style page-info)))
+           (format "\n{%s}" (pyim-page-style-minibuffer-style page-info)))
         ;; 在普通 buffer 中输入中文时，使用 `pyim-page-tooltip'
         ;; 指定的方式来显示候选词。
         (let ((message-log-max nil))
@@ -2942,7 +2942,9 @@ tooltip 选词框中显示。
           (gethash :key page-info)
           (gethash :current-page page-info)
           (gethash :total-page page-info)
-          (gethash :words page-info)))
+          (replace-regexp-in-string
+           " +$" ""
+           (gethash :words page-info))))
 
 (defun pyim-tooltip-show (string position)
   "在 `position' 位置，使用 child-frame 或者 popup 显示字符串 `string' 。"
