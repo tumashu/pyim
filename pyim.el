@@ -2823,9 +2823,7 @@ Return the input string."
           ;; 在 minibuffer 中输入中文时，使用当前输入的
           ;; 下一行来显示候选词。
           (pyim-minibuffer-message
-           (format "\n[%s: %s] "
-                   current-input-method-title
-                   (gethash :words page-info)))
+           (format "\n{ %s}" (pyim-page-style-minibuffer-style page-info)))
         ;; 在普通 buffer 中输入中文时，使用 `pyim-page-tooltip'
         ;; 指定的方式来显示候选词。
         (let ((message-log-max nil))
