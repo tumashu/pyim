@@ -120,7 +120,8 @@
 ;;   ;; 开启拼音搜索功能
 ;;   (pyim-isearch-mode 1)
 
-;;   ;; 使用 pupup-el 来绘制选词框
+;;   ;; 使用 pupup-el 来绘制选词框, 如果用 emacs26, 建议设置
+;;   ;; 为 'child-frame, 速度很快并且菜单不会变形。
 ;;   (setq pyim-page-tooltip 'popup)
 
 ;;   ;; 选词框显示5个候选词
