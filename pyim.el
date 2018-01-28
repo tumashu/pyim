@@ -85,6 +85,7 @@
 ;; #+BEGIN_EXAMPLE
 ;; (use-package pyim
 ;;   :ensure nil
+;;   :demand t
 ;;   :config
 ;;   ;; 激活 basedict 拼音词库
 ;;   (use-package pyim-basedict
