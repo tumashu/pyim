@@ -827,7 +827,13 @@ pyim 内建的有三种选词框格式：
   :group 'pyim
   :type 'hook)
 
-(defface pyim-page-selected-word-face '((t (:background "gray40")))
+(defface pyim-page
+  '((t (:background "khaki1" :foreground "black")))
+  "Face used for the pyim page."
+  :group 'pyim)
+
+(defface pyim-page-selection
+  '((t (:inherit pyim-page :background "gray")))
   "选词框中已选词条的 face
 
 注意：当使用 minibuffer 为选词框时，这个选项才有用处。"
@@ -2804,8 +2810,10 @@ Return the input string."
                              ;; 高亮当前选择的词条，用于 `pyim-page-next-word'
                              (if (and hightlight-current
                                       (= i pos))
-                                 (format "%d[%s]" i
-                                         (propertize str 'face 'pyim-page-selected-word-face))
+                                 (format "%d%s" i
+                                         (propertize
+                                          (format "[%s]" str)
+                                          'face 'pyim-page-selection))
                                (format "%d.%s " i str))))
                          choice) "")
              page-info)
@@ -2949,7 +2957,9 @@ tooltip 选词框中显示。
                          (not (display-graphic-p)))))
            (posframe-show pyim-tooltip-posframe-buffer
                           string
-                          :position position))
+                          :position position
+                          :background-color (face-attribute 'pyim-page :background)
+                          :foreground-color (face-attribute 'pyim-page :foreground)))
           ((eq tooltip 'minibuffer)
            (let ((max-mini-window-height (+ pyim-page-length 2)))
              (message string)))
