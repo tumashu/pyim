@@ -828,12 +828,12 @@ pyim 内建的有三种选词框格式：
   :type 'hook)
 
 (defface pyim-page
-  '((t (:background "khaki1" :foreground "black")))
+  '((t (:inherit default :background "#333333" :foreground "#dcdccc")))
   "Face used for the pyim page."
   :group 'pyim)
 
 (defface pyim-page-selection
-  '((t (:inherit pyim-page :background "gray")))
+  '((t (:background "gray44")))
   "选词框中已选词条的 face
 
 注意：当使用 minibuffer 为选词框时，这个选项才有用处。"
@@ -2958,6 +2958,7 @@ tooltip 选词框中显示。
            (posframe-show pyim-tooltip-posframe-buffer
                           string
                           :position position
+                          :min-width (* pyim-page-length 7)
                           :background-color (face-attribute 'pyim-page :background)
                           :foreground-color (face-attribute 'pyim-page :foreground)))
           ((eq tooltip 'minibuffer)
