@@ -7,7 +7,7 @@
 ;; Author: Ye Wenbin <wenbinye@163.com>, Feng Shu <tumashu@163.com>
 ;; URL: https://github.com/tumashu/pyim
 ;; Version: 1.6.0
-;; Package-Requires: ((emacs "24.3")(cl-lib "0.5")(popup "0.1")(async "1.6")(pyim-basedict "0.1"))
+;; Package-Requires: ((emacs "24.4")(popup "0.1")(posframe "0.1")(async "1.6")(pyim-basedict "0.1"))
 ;; Keywords: convenience, Chinese, pinyin, input-method
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -121,7 +121,7 @@
 ;;   (pyim-isearch-mode 1)
 
 ;;   ;; 使用 pupup-el 来绘制选词框, 如果用 emacs26, 建议设置
-;;   ;; 为 'child-frame, 速度很快并且菜单不会变形。
+;;   ;; 为 'posframe, 速度很快并且菜单不会变形。
 ;;   (setq pyim-page-tooltip 'popup)
 
 ;;   ;; 选词框显示5个候选词
@@ -239,9 +239,9 @@
 ;;    #+BEGIN_EXAMPLE
 ;;    (setq pyim-page-tooltip 'popup)
 ;;    #+END_EXAMPLE
-;; 2. 使用 child-frame 来绘制选词框（emacs-version >= 26）
+;; 2. 使用 posframe 或者 child-frame 来绘制选词框（emacs-version >= 26）
 ;;    #+BEGIN_EXAMPLE
-;;    (setq pyim-page-tooltip 'child-frame)
+;;    (setq pyim-page-tooltip 'posframe)
 ;;    #+END_EXAMPLE
 
 ;; *** 调整 tooltip 选词框的显示样式
@@ -510,6 +510,7 @@
 (require 'cl-lib)
 (require 'help-mode)
 (require 'popup)
+(require 'posframe)
 (require 'async)
 (require 'pyim-pymap)
 
@@ -804,7 +805,7 @@ pyim 输入半角标点，函数列表中每个函数都有一个参数：char �
 (defcustom pyim-page-tooltip 'popup
   "如何绘制 pyim 选词框.
 
-1. 当这个变量取值为 child-frame 时，使用一个 child-frame 来做为选词框；
+1. 当这个变量取值为 posframe 时，使用一个 posframe 包来绘制选词框；
 2. 当这个变量取值为 minibuffer 时，使用 minibuffer 做为选词框；
 3. 当这个变量取值为 popup 时，使用 popup-el 包来绘制选词框；"
   :group 'pyim)
@@ -954,18 +955,8 @@ pyim-extra-dicts 时，pyim 会自动生成相关的 dcache 文件。
 pyim 优先使用 emacs thread 功能来生成 dcache, 如果设置为 nil,
 pyim 总是使用 emacs-async 包来生成 dcache.")
 
-(defvar pyim-tooltip-child-frame nil
-  "这个变量用来保存做为 page tooltip 的 child-frame.")
-
-(defvar pyim-tooltip-child-frame-parameters nil
-  "一个 alist, 用来保存 child-frame 的 frame 参数.
-
-当用户使用 child-frame 做为 page tooltip 时，可以
-通过这个变量来调整 child-frame 的参数，比如：
-设置字体大小，颜色背景等。")
-
-(defvar pyim-tooltip-current-frame nil
-  "用来记录 pyim 运行时所在的 frame.")
+(defvar pyim-tooltip-posframe-buffer " *pyim-tooltip-posframe-buffer*"
+  "这个变量用来保存做为 page tooltip 的 posframe 的 buffer.")
 
 (defvar pyim-mode-map
   (let ((map (make-sparse-keymap))
@@ -1966,9 +1957,9 @@ Return the input string."
   (pyim-dagger-delete-string)
   (setq pyim-current-choices nil)
 
-  (when (and (eq pyim-page-tooltip 'child-frame)
-             (frame-live-p pyim-tooltip-child-frame))
-    (make-frame-invisible pyim-tooltip-child-frame)))
+  (when (and (eq pyim-page-tooltip 'posframe)
+             (frame-live-p pyim-tooltip-posframe))
+    (posframe-hide pyim-tooltip-posframe-buffer)))
 
 ;; ** 处理拼音 code 字符串 `pyim-entered-code'
 ;; *** 拼音字符串 -> 待选词列表
@@ -2948,143 +2939,22 @@ tooltip 选词框中显示。
           (gethash :total-page page-info)))
 
 (defun pyim-tooltip-show (string position)
-  "在 `position' 位置，使用 child-frame 或者 popup 显示字符串 `string' 。"
+  "在 `position' 位置，使用 posframe 或者 popup 显示字符串 `string' 。"
   (let ((frame (window-frame (selected-window)))
         (length (* pyim-page-length 10))
         (tooltip pyim-page-tooltip))
-    (cond ((and (eq tooltip 'child-frame)
-                ;; child-frame 在 MacOS 上运行不太稳定，
-                ;; 而且我也没有机子来调试它，只能禁用了。
-                ;; (not (eq system-type 'darwin))
+    (cond ((and (memq tooltip '(posframe child-frame))
                 (>= emacs-major-version 26)
                 (not (or noninteractive
                          emacs-basic-display
                          (not (display-graphic-p)))))
-           (pyim-tooltip-show-with-child-frame string position))
+           (posframe-show pyim-tooltip-posframe-buffer
+                          string
+                          :positon position))
           ((eq tooltip 'minibuffer)
            (let ((max-mini-window-height (+ pyim-page-length 2)))
              (message string)))
           (t (popup-tip string :point position :margin 1)))))
-
-(defun pyim-tooltip-show-with-child-frame (string position)
-  "在 POSITION 处使用 child-frame 显示 STRING."
-  (let* ((window-min-height 1)
-         (window-min-width 1)
-         (frame-resize-pixelwise t)
-         (frame (window-frame))
-         (buffer (get-buffer-create " *pyim-child-frame-buffer*"))
-         (min-size
-          ;; 设置 child-frame 的最小尺寸，防止选词框不停的抖动。
-          (cond ((eq pyim-page-style 'two-lines)
-                 (cons 2 (* pyim-page-length 8)))
-                ((eq pyim-page-style 'one-line)
-                 (cons 1 (* pyim-page-length 10)))
-                ((eq pyim-page-style 'vertical)
-                 (cons (+ pyim-page-length 1) 25))))
-         x-and-y)
-
-    ;; 1. 当 child-frame 不存在时，创建 child-frame.
-    ;; 2. 当切换到其他 frame 时，需要更新以前生成的 child-frame
-    ;;    的 parent-frame 参数，但有同学发现：在 MacOS 环境下，
-    ;;    parent-frame 参数无法用 set-frame-parameter 重新设置，
-    ;;    所以，在这里需要重新生成 child-frame.
-    (unless (and (eq frame pyim-tooltip-current-frame)
-                 (frame-live-p pyim-tooltip-child-frame))
-      (when (frame-live-p pyim-tooltip-child-frame)
-        (delete-frame pyim-tooltip-child-frame))
-      (setq pyim-tooltip-current-frame frame)
-      (setq pyim-tooltip-child-frame
-            (let ((after-make-frame-functions nil))
-              (make-frame
-               `(,@pyim-tooltip-child-frame-parameters
-                 (parent-frame . ,frame)
-                 (no-accept-focus . t)
-                 (min-width  . t)
-                 (min-height . t)
-                 (border-width . 0)
-                 (internal-border-width . 0)
-                 (vertical-scroll-bars . nil)
-                 (horizontal-scroll-bars . nil)
-                 (left-fringe . 10)
-                 (right-fringe . 0)
-                 (menu-bar-lines . 0)
-                 (tool-bar-lines . 0)
-                 (line-spacing . 0)
-                 (unsplittable . t)
-                 (no-other-frame . t)
-                 (undecorated . t)
-                 (visibility . nil)
-                 (cursor-type . nil)
-                 (minibuffer . nil)
-                 (width . 50)
-                 (height . 1)
-                 (no-special-glyphs . t)
-                 ;; 使用 desktop.el 的时候，不保存
-                 ;; `pyim-tooltip-child-frame' 对应的 frame.
-                 (desktop-dont-save . t)))))
-      (let ((window (frame-root-window pyim-tooltip-child-frame)))
-        ;; 不知道什么原因，通过变量 mode-line-format 和 header-line-format
-        ;; 去掉的 mode-line 和 header-line, 在鼠标点击后，会再次出现
-        ;; 所以这里我用下面的方式去掉 mode-line 和 header-line
-        (set-window-parameter window 'mode-line-format 'none)
-        (set-window-parameter window 'header-line-format 'none)
-        (set-window-buffer window buffer)))
-
-    (with-current-buffer buffer
-      (erase-buffer)
-      (insert string))
-
-    ;; FIXME: 使用 pyim 的时候，将光标移开，因为如果不小心
-    ;; 用鼠标点了 child-frame，pyim 就会出现奇怪的反应，
-    ;; 暂时还没发现怎么处理这个问题。
-    (set-mouse-position frame 0 0)
-
-    (let ((child-frame pyim-tooltip-child-frame))
-      (make-frame-visible child-frame)
-      (fit-frame-to-buffer
-       child-frame nil (car min-size) nil (cdr min-size))
-      (setq x-and-y (pyim-tooltip-compute-pixel-position
-                     position
-                     (frame-pixel-width child-frame)
-                     (frame-pixel-height child-frame)))
-      (set-frame-position child-frame (car x-and-y) (+ (cdr x-and-y) 1)))))
-
-(defun pyim-tooltip-compute-pixel-position (pos tooltip-width tooltip-height)
-  "Return bottom-left-corner pixel position of POS in WINDOW.
-its returned value is like (X . Y)
-
-If TOOLTIP-WIDTH and TOOLTIP-HEIGHT are given, this function will use
-two values to adjust its output position, make sure the *tooltip* at
-position not disappear by sticking out of the display."
-  (let* ((window (selected-window))
-         (frame (window-frame window))
-         (xmax (frame-pixel-width frame))
-         (ymax (frame-pixel-height frame))
-         (header-line-height (window-header-line-height window))
-         ;; 得到 POS 处的字符的左上角对应的坐标
-         (posn-top-left (posn-at-point pos window))
-         (x (+ (car (window-inside-pixel-edges window))
-               (or (car (posn-x-y posn-top-left)) 0)))
-         (y-top (+ (cadr (window-pixel-edges window))
-                   header-line-height
-                   (or (cdr (posn-x-y posn-top-left)) 0)))
-         ;; 获取光标处字体的高度
-         (font-height
-          (if (= pos 1)
-              ;; 如果 buffer 中只有一个字符，那么就使用默认行高
-              ;; 因为这时候 font-at 无法运行。
-              (default-line-height)
-            (aref (font-info
-                   (font-at
-                    ;; 如果 POS 在 buffer 结尾处 ，就使用 POS 前一个
-                    ;; 字符处的字体高度，因为 font-at 无法在 EOB 处运行。
-                    (if (and (= pos (point-max))) (- pos 1) pos)))
-                  3)))
-         (y-buttom (+ y-top font-height)))
-    (cons (max 0 (min x (- xmax (or tooltip-width 0))))
-          (max 0 (if (> (+ y-buttom (or tooltip-height 0)) ymax)
-                     (- y-top (or tooltip-height 0))
-                   y-buttom)))))
 
 ;; *** 选择备选词
 (defun pyim-page-select-word ()
