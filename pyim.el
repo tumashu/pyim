@@ -1,4 +1,4 @@
-;;; pyim.el --- A Chinese input method which support quanpin, shuangpin, wubi and cangjie.
+;;; pyim.el --- A Chinese input method support quanpin, shuangpin, wubi and cangjie.
 
 ;; * Header
 ;; Copyright 2006 Ye Wenbin
@@ -7,7 +7,8 @@
 ;; Author: Ye Wenbin <wenbinye@163.com>, Feng Shu <tumashu@163.com>
 ;; URL: https://github.com/tumashu/pyim
 ;; Version: 1.6.0
-;; Package-Requires: ((emacs "24.4")(popup "0.1")(posframe "0.1")(async "1.6")(pyim-basedict "0.1"))
+;; Package-Requires: ((emacs "24.4")(popup "0.1")(posframe "0.1"))
+;; Package-Requires: ((async "1.6")(pyim-basedict "0.1"))
 ;; Keywords: convenience, Chinese, pinyin, input-method
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -239,7 +240,7 @@
 ;;    #+BEGIN_EXAMPLE
 ;;    (setq pyim-page-tooltip 'popup)
 ;;    #+END_EXAMPLE
-;; 2. 使用 posframe 或者 child-frame 来绘制选词框（emacs-version >= 26）
+;; 2. 使用 posframe 来绘制选词框（emacs-version >= 26）
 ;;    #+BEGIN_EXAMPLE
 ;;    (setq pyim-page-tooltip 'posframe)
 ;;    #+END_EXAMPLE
@@ -805,7 +806,7 @@ pyim 输入半角标点，函数列表中每个函数都有一个参数：char �
 (defcustom pyim-page-tooltip 'popup
   "如何绘制 pyim 选词框.
 
-1. 当这个变量取值为 posframe 时，使用一个 posframe 包来绘制选词框；
+1. 当这个变量取值为 posframe 时，使用 posframe 包来绘制选词框；
 2. 当这个变量取值为 minibuffer 时，使用 minibuffer 做为选词框；
 3. 当这个变量取值为 popup 时，使用 popup-el 包来绘制选词框；"
   :group 'pyim)
@@ -1956,9 +1957,7 @@ Return the input string."
   (setq pyim-translating nil)
   (pyim-dagger-delete-string)
   (setq pyim-current-choices nil)
-
-  (when (and (eq pyim-page-tooltip 'posframe)
-             (frame-live-p pyim-tooltip-posframe))
+  (when (memq pyim-page-tooltip '(posframe child-frame))
     (posframe-hide pyim-tooltip-posframe-buffer)))
 
 ;; ** 处理拼音 code 字符串 `pyim-entered-code'
@@ -2950,7 +2949,7 @@ tooltip 选词框中显示。
                          (not (display-graphic-p)))))
            (posframe-show pyim-tooltip-posframe-buffer
                           string
-                          :positon position))
+                          :position position))
           ((eq tooltip 'minibuffer)
            (let ((max-mini-window-height (+ pyim-page-length 2)))
              (message string)))
@@ -3519,6 +3518,7 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
   "pyim isearch mode."
   :global t
   :group 'pyim
+  :require 'pyim
   :lighter " pyim-isearch"
   (if pyim-isearch-mode
       (progn
