@@ -827,34 +827,10 @@ pyim 内建的有三种选词框格式：
   :group 'pyim
   :type 'hook)
 
-(defface pyim-page
-  '((t (:background "khaki1" :foreground "black")))
-  "Face used for the pyim page."
-  :group 'pyim)
+(defface pyim-page-selected-word-face '((t (:background "gray40")))
+  "选词框中已选词条的 face
 
-(defface pyim-page-words
-  '((t (:inherit pyim-page)))
-  "Face used for the non-selected words of pyim page."
-  :group 'pyim)
-
-(defface pyim-page-key
-  '((t (:inherit pyim-page)))
-  "Face used for the pyim page key."
-  :group 'pyim)
-
-(defface pyim-page-total-page
-  '((t (:inherit pyim-page)))
-  "Face used for the total-page number in pyim page."
-  :group 'pyim)
-
-(defface pyim-page-current-page
-  '((t (:inherit pyim-page)))
-  "Face used for the current-page number of pyim page."
-  :group 'pyim)
-
-(defface pyim-page-selected-words
-  '((t (:inherit pyim-page :background "gray" :foreground "black")))
-  "Face used for the selected word in the pyim page."
+注意：当使用 minibuffer 为选词框时，这个选项才有用处。"
   :group 'pyim)
 
 (defvar pyim-debug nil)
@@ -2812,21 +2788,10 @@ Return the input string."
          (pos (- (min pyim-current-pos (length choices)) start))
          (page-info (make-hash-table))
          (i 0))
-    (puthash :key
-             (propertize
-              (pyim-page-format-key-string pyim-entered-code)
-              'face 'pyim-page-key)
+    (puthash :key (pyim-page-format-key-string pyim-entered-code)
              page-info)
-    (puthash :current-page
-             (propertize
-              (format "%s" (pyim-page-current-page))
-              'face 'pyim-page-current-page)
-             page-info)
-    (puthash :total-page
-             (propertize
-              (format "%s" (pyim-page-total-page))
-              'face 'pyim-page-total-page)
-             page-info)
+    (puthash :current-page (pyim-page-current-page) page-info)
+    (puthash :total-page (pyim-page-total-page) page-info)
     (puthash :words
              (mapconcat 'identity
                         (mapcar
@@ -2839,11 +2804,9 @@ Return the input string."
                              ;; 高亮当前选择的词条，用于 `pyim-page-next-word'
                              (if (and hightlight-current
                                       (= i pos))
-                                 (format "%d%s" i
-                                         (propertize
-                                          (format "[%s]" str)
-                                          'face 'pyim-page-selected-words))
-                               (propertize (format "%d.%s " i str) 'face 'pyim-page-words))))
+                                 (format "%d[%s]" i
+                                         (propertize str 'face 'pyim-page-selected-word-face))
+                               (format "%d.%s " i str))))
                          choice) "")
              page-info)
     ;; Show page.
@@ -2857,8 +2820,7 @@ Return the input string."
         ;; 在普通 buffer 中输入中文时，使用 `pyim-page-tooltip'
         ;; 指定的方式来显示候选词。
         (let ((message-log-max nil))
-          (if (and pyim-page-tooltip
-                   (not (eq pyim-page-tooltip 'minibuffer)))
+          (if pyim-page-tooltip
               (pyim-tooltip-show
                (let ((func (intern (format "pyim-page-style-%S-style" pyim-page-style))))
                  (if (functionp func)
@@ -2922,7 +2884,7 @@ tooltip 选词框中显示。
 | ni hao [1/9]               |
 | 1.你好 2.你号 ...          |
 +----------------------------+"
-  (format (propertize "=> %s [%s/%s]: \n%s" 'face 'pyim-page)
+  (format "=> %s [%s/%s]: \n%s"
           (gethash :key page-info)
           (gethash :current-page page-info)
           (gethash :total-page page-info)
@@ -2935,7 +2897,7 @@ tooltip 选词框中显示。
 +-----------------------------------+
 | [ni hao]: 1.你好 2.你号 ... (1/9) |
 +-----------------------------------+"
-  (format (propertize "[%s]: %s(%s/%s)" 'face 'pyim-page)
+  (format "[%s]: %s(%s/%s)"
           (replace-regexp-in-string
            " +" ""
            (gethash :key page-info))
@@ -2952,7 +2914,7 @@ tooltip 选词框中显示。
 | 1.你好       |
 | 2.你号 ...   |
 +--------------+"
-  (format (propertize "=> %s [%s/%s]: \n%s" 'face 'pyim-page)
+  (format "=> %s [%s/%s]: \n%s"
           (gethash :key page-info)
           (gethash :current-page page-info)
           (gethash :total-page page-info)
@@ -2969,12 +2931,11 @@ tooltip 选词框中显示。
 +------------------------------------+
 | [ni hao]: 1.你好 2.你号 ...  (1/9) |
 +------------------------------------+"
-  (substring-no-properties
-   (format "[%s]: %s(%s/%s)"
-           (gethash :key page-info)
-           (gethash :words page-info)
-           (gethash :current-page page-info)
-           (gethash :total-page page-info))))
+  (format "[%s]: %s(%s/%s)"
+          (gethash :key page-info)
+          (gethash :words page-info)
+          (gethash :current-page page-info)
+          (gethash :total-page page-info)))
 
 (defun pyim-tooltip-show (string position)
   "在 `position' 位置，使用 posframe 或者 popup 显示字符串 `string' 。"
@@ -2988,8 +2949,7 @@ tooltip 选词框中显示。
                          (not (display-graphic-p)))))
            (posframe-show pyim-tooltip-posframe-buffer
                           string
-                          :position position
-                          :background-color (face-attribute 'pyim-page :background)))
+                          :position position))
           ((eq tooltip 'minibuffer)
            (let ((max-mini-window-height (+ pyim-page-length 2)))
              (message string)))
