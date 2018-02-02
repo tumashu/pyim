@@ -2956,7 +2956,7 @@ tooltip 选词框中显示。
                          emacs-basic-display
                          (not (display-graphic-p)))))
            (posframe-show pyim-tooltip-posframe-buffer
-                          string
+                          :string string
                           :position position
                           :min-width (* pyim-page-length 7)
                           :background-color (face-attribute 'pyim-page :background)
