@@ -7,7 +7,7 @@
 ;; Author: Ye Wenbin <wenbinye@163.com>, Feng Shu <tumashu@163.com>
 ;; URL: https://github.com/tumashu/pyim
 ;; Version: 1.6.0
-;; Package-Requires: ((emacs "24.4")(popup "0.1")(posframe "0.1"))
+;; Package-Requires: ((emacs "24.4")(popup "0.1"))
 ;; Package-Requires: ((async "1.6")(pyim-basedict "0.1"))
 ;; Keywords: convenience, Chinese, pinyin, input-method
 
@@ -122,7 +122,8 @@
 ;;   (pyim-isearch-mode 1)
 
 ;;   ;; 使用 pupup-el 来绘制选词框, 如果用 emacs26, 建议设置
-;;   ;; 为 'posframe, 速度很快并且菜单不会变形。
+;;   ;; 为 'posframe, 速度很快并且菜单不会变形，不过需要用户
+;;   ;; 手动安装 posframe 包。
 ;;   (setq pyim-page-tooltip 'popup)
 
 ;;   ;; 选词框显示5个候选词
@@ -240,10 +241,11 @@
 ;;    #+BEGIN_EXAMPLE
 ;;    (setq pyim-page-tooltip 'popup)
 ;;    #+END_EXAMPLE
-;; 2. 使用 posframe 来绘制选词框（emacs-version >= 26）
+;; 2. 使用 posframe 来绘制选词框
 ;;    #+BEGIN_EXAMPLE
 ;;    (setq pyim-page-tooltip 'posframe)
 ;;    #+END_EXAMPLE
+;;    注意：pyim 不会自动安装 posframe, 用户需要手动安装这个包，
 
 ;; *** 调整 tooltip 选词框的显示样式
 ;; pyim 的 tooltip 选词框默认使用 *双行显示* 的样式，在一些特
@@ -511,7 +513,7 @@
 (require 'cl-lib)
 (require 'help-mode)
 (require 'popup)
-(require 'posframe)
+(require 'posframe nil t)
 (require 'async)
 (require 'pyim-pymap)
 
