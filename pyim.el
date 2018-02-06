@@ -894,6 +894,10 @@ pyim 内建的有三种选词框格式：
 (defvar pyim-entered-code ""
   "用户已经输入的 code，由用户输入的字符连接而成.")
 
+(defvar pyim-magic-convert-cache nil
+  "用来临时保存 `pyim-magic-convert' 的结果.
+从而加快同一个字符串第二次的转换速度。")
+
 (defvar pyim-dagger-str ""
   "光标处带下划线字符串.
 输入法运行的时候，会在光标处会插入一个带下划线字符串，这个字符串
@@ -1875,7 +1879,11 @@ BUG：无法有效的处理多音字。"
 (defun pyim-magic-convert (str)
   "用于处理 `pyim-magic-convert' 的函数。"
   (if (functionp pyim-magic-converter)
-      (funcall pyim-magic-converter str)
+      (or (cdr (assoc str pyim-magic-convert-cache))
+          (let ((result (funcall pyim-magic-converter str)))
+            (setq pyim-magic-convert-cache
+                  `((,str . ,result)))
+            result))
     str))
 
 (defun pyim-start-translation (key-or-string)
