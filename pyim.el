@@ -1184,6 +1184,9 @@ TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCAC
   (when (eq (selected-window) (minibuffer-window))
     (add-hook 'minibuffer-exit-hook 'pyim-exit-from-minibuffer))
   (run-hooks 'pyim-active-hook)
+  (when (and (memq pyim-page-tooltip '(posframe child-frame))
+             (not (pyim-tooltip-posframe-valid-p)))
+    (message "PYIM: posframe 包没有安装，请手工安装这个包。"))
   (when restart
     (message "pyim 重启完成。"))
   nil)
@@ -1964,7 +1967,8 @@ Return the input string."
   (setq pyim-translating nil)
   (pyim-dagger-delete-string)
   (setq pyim-current-choices nil)
-  (when (memq pyim-page-tooltip '(posframe child-frame))
+  (when (and (memq pyim-page-tooltip '(posframe child-frame))
+             (pyim-tooltip-posframe-valid-p))
     (posframe-hide pyim-tooltip-posframe-buffer)))
 
 ;; ** 处理拼音 code 字符串 `pyim-entered-code'
@@ -2952,10 +2956,7 @@ tooltip 选词框中显示。
         (length (* pyim-page-length 10))
         (tooltip pyim-page-tooltip))
     (cond ((and (memq tooltip '(posframe child-frame))
-                (>= emacs-major-version 26)
-                (not (or noninteractive
-                         emacs-basic-display
-                         (not (display-graphic-p)))))
+                (pyim-tooltip-posframe-valid-p))
            (posframe-show pyim-tooltip-posframe-buffer
                           :string string
                           :position position
@@ -2966,6 +2967,14 @@ tooltip 选词框中显示。
            (let ((max-mini-window-height (+ pyim-page-length 2)))
              (message string)))
           (t (popup-tip string :point position :margin 1)))))
+
+(defun pyim-tooltip-posframe-valid-p ()
+  "Test posframe's status."
+  (and (>= emacs-major-version 26)
+       (featurep 'posframe)
+       (not (or noninteractive
+                emacs-basic-display
+                (not (display-graphic-p))))))
 
 ;; *** 选择备选词
 (defun pyim-page-select-word ()
