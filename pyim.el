@@ -260,6 +260,20 @@
 ;; *** 设置模糊音
 ;; 可以通过设置 `pyim-fuzzy-pinyin-alist' 变量来自定义模糊音。
 
+;; *** 使用魔术转换器
+;; 用户可以将待选词条作 “特殊处理” 后再 “上屏”，比如 “简体转繁体” 或者
+;; “输入中文，上屏英文” 之类的。
+
+;; 用户需要设置 `pyim-magic-converter', 比如：下面这个例子实现，
+;; 输入 “二呆”，“一个超级帅的小伙子” 上屏 :-)
+;; #+BEGIN_EXAMPLE
+;; (defun my-converter (string)
+;;   (if (equal string "二呆")
+;;       "“一个超级帅的小伙子”"
+;;     string))
+;; (setq pyim-magic-converter #'my-converter)
+;; #+END_EXAMPLE
+
 ;; *** 切换全角标点与半角标点
 
 ;; 1. 第一种方法：使用命令 `pyim-punctuation-toggle'，全局切换。
@@ -827,6 +841,11 @@ pyim 内建的有三种选词框格式：
   "Pyim 选词完成时运行的 hook."
   :group 'pyim
   :type 'hook)
+
+(defcustom pyim-magic-converter nil
+  "将 “待选词条” 在 “上屏” 之前自动转换为其他字符串.
+这个功能可以实现“简转繁”，“输入中文得到英文”之类的功能。"
+  :group 'pyim)
 
 (defface pyim-page
   '((t (:inherit default :background "#333333" :foreground "#dcdccc")))
@@ -1843,7 +1862,8 @@ BUG：无法有效的处理多音字。"
     (pyim-dagger-setup-overlay)
     (with-silent-modifications
       (unwind-protect
-          (let ((input-string (pyim-start-translation key-or-string)))
+          (let ((input-string (pyim-magic-convert
+                               (pyim-start-translation key-or-string))))
             ;; (message "input-string: %s" input-string)
             (when (and (stringp input-string)
                        (> (length input-string) 0))
@@ -1851,6 +1871,12 @@ BUG：无法有效的处理多音字。"
                   (list (aref input-string 0))
                 (mapcar 'identity input-string))))
         (pyim-dagger-delete-overlay)))))
+
+(defun pyim-magic-convert (str)
+  "用于处理 `pyim-magic-convert' 的函数。"
+  (if (functionp pyim-magic-converter)
+      (funcall pyim-magic-converter str)
+    str))
 
 (defun pyim-start-translation (key-or-string)
   "Start translation of the typed character KEY by pyim.
@@ -2640,7 +2666,7 @@ Return the input string."
     ;; Delete old dagger string.
     (pyim-dagger-delete-string)
     ;; Insert new dagger string.
-    (insert pyim-dagger-str)
+    (insert (pyim-magic-convert pyim-dagger-str))
     ;; Hightlight new dagger string.
     (move-overlay pyim-dagger-overlay
                   (overlay-start pyim-dagger-overlay) (point))))
