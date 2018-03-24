@@ -106,7 +106,12 @@
    (global-set-key (kbd \"M-i\") 'pyim-convert-code-at-point)
 
 这个函数用于：`pyim-english-input-switch-functions' 。"
-  (let ((str-before-1 (pyim-char-before-to-string 0)))
+  (let* ((offset 0)
+         (non-digit-str-before-1 (pyim-char-before-to-string offset)))
+    (while (and non-digit-str-before-1
+                (cl-search non-digit-str-before-1 "0123456789"))
+      (incf offset)
+      (setq non-digit-str-before-1 (pyim-char-before-to-string offset)))
     (unless (string= (buffer-name) " *temp*") ; Make sure this probe can work with exim of exwm.
       (if (<= (point) (save-excursion (back-to-indentation)
                                       (point)))
@@ -117,7 +122,7 @@
                       (if (re-search-backward "[^[:space:]\n]" nil t)
                           (char-to-string (char-after (point))))))
                    (> (length pyim-entered-code) 0)))
-        (not (or (pyim-string-match-p "\\cc" str-before-1)
+        (not (or (pyim-string-match-p "\\cc" non-digit-str-before-1)
                  (> (length pyim-entered-code) 0)))))))
 
 (defun pyim-probe-auto-english ()
