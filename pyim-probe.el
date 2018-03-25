@@ -110,7 +110,7 @@
          (non-digit-str-before-1 (pyim-char-before-to-string offset)))
     (while (and non-digit-str-before-1
                 (cl-search non-digit-str-before-1 "0123456789"))
-      (incf offset)
+      (cl-incf offset)
       (setq non-digit-str-before-1 (pyim-char-before-to-string offset)))
     (unless (string= (buffer-name) " *temp*") ; Make sure this probe can work with exim of exwm.
       (if (<= (point) (save-excursion (back-to-indentation)
