@@ -98,15 +98,20 @@
 (defun pyim-probe-dynamic-english ()
   "激活这个 pyim 探针函数后，使用下面的规则动态切换中英文输入：
 
-1. 当前字符为中文字符时，输入下一个字符时默认开启中文输入
-2. 当前字符为其他字符时，输入下一个字符时默认开启英文输入
+1. 从光标往前找第一个非数字的字符，为中文字符时，输入下一个字符时默认开启中文输入
+2. 从光标往前找第一个非数字的字符，为其他字符时，输入下一个字符时默认开启英文输入
 3. 使用 `pyim-convert-code-at-point' 可以将光标前的 code 字符串转换为中文，
    所以用户需要给 `pyim-convert-code-at-point' 绑定一个快捷键，比如：
 
    (global-set-key (kbd \"M-i\") 'pyim-convert-code-at-point)
 
 这个函数用于：`pyim-english-input-switch-functions' 。"
-  (let ((str-before-1 (pyim-char-before-to-string 0)))
+  (let* ((offset 0)
+         (non-digit-str-before-1 (pyim-char-before-to-string offset)))
+    (while (and non-digit-str-before-1
+                (cl-search non-digit-str-before-1 "0123456789"))
+      (cl-incf offset)
+      (setq non-digit-str-before-1 (pyim-char-before-to-string offset)))
     (unless (string= (buffer-name) " *temp*") ; Make sure this probe can work with exim of exwm.
       (if (<= (point) (save-excursion (back-to-indentation)
                                       (point)))
@@ -117,7 +122,7 @@
                       (if (re-search-backward "[^[:space:]\n]" nil t)
                           (char-to-string (char-after (point))))))
                    (> (length pyim-entered-code) 0)))
-        (not (or (pyim-string-match-p "\\cc" str-before-1)
+        (not (or (pyim-string-match-p "\\cc" non-digit-str-before-1)
                  (> (length pyim-entered-code) 0)))))))
 
 (defun pyim-probe-auto-english ()
