@@ -3440,7 +3440,7 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
                       (region-beginning) (region-end))
                    (buffer-substring (point) (line-beginning-position))))
          code length)
-    (if (pyim-string-match-p "[[:punct:]]" (pyim-char-before-to-string 0))
+    (if (pyim-string-match-p "[[:punct:]：－]" (pyim-char-before-to-string 0))
         ;; 当光标前的一个字符是标点符号时，半角/全角切换。
         (call-interactively 'pyim-punctuation-translate-at-point)
       (and (string-match "[a-z'-]+ *$" string)
