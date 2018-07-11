@@ -3429,6 +3429,7 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
     (pyim-terminate-translation)))
 
 ;; *** 将光标前的 code 字符串转换为中文
+;;;###autoload
 (defun pyim-convert-code-at-point ()
   (interactive)
   (unless (equal input-method-function 'pyim-input-method)
