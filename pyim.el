@@ -189,7 +189,6 @@
 ;; #+BEGIN_EXAMPLE
 ;; (require 'liberime)
 ;; (rime-start "$rime_shared_data_dir" "$user_data_dir")
-;; (setq pyim-default-scheme 'rime)
 ;; #+END_EXAMPLE
 
 ;; *** 使用五笔输入
@@ -610,12 +609,6 @@ plist 来表示，比如：
   '((quanpin
      :document "全拼输入法方案（不可删除）。"
      :class quanpin
-     :first-chars "abcdefghjklmnopqrstwxyz"
-     :rest-chars "vmpfwckzyjqdltxuognbhsrei'-a"
-     :prefer-trigger-chars "v")
-    (rime
-     :document "rime 后端支持。"
-     :class rime
      :first-chars "abcdefghjklmnopqrstwxyz"
      :rest-chars "vmpfwckzyjqdltxuognbhsrei'-a"
      :prefer-trigger-chars "v")
@@ -2263,13 +2256,6 @@ Return the input string."
   \"aaaa\" -> ((\"aaaa\"))"
   (list (list code)))
 
-(defun pyim-code-split-rime-code (code &optional -)
-  "这个函数只是对 code 做了一点简单的包装，实际并不真正的
-*分解* code, 用于支持 rime 后端, 比如：
-
-  \"aaaa\" -> ((\"aaaa\"))"
-  (list (list code)))
-
 (defun pyim-spinyin-find-fuzzy (spinyin-list)
   "用于处理模糊音的函数。"
   (let (fuzzy-spinyin-list result1 result2)
@@ -2410,11 +2396,6 @@ Return the input string."
           (concat (or code-prefix "") (car scode))
         (car scode)))))
 
-(defun pyim-scode-join-rime-scode (scode scheme-name &optional _as-search-key _shou-zi-mu)
-  "把一个 `scode' (splited code) 合并为一个 code 字符串, 用于支持 rime 后端."
-  (when scheme-name
-    (car scode)))
-
 ;; **** 获得词语拼音并进一步查询得到备选词列表
 (defun pyim-choices-get (scode-list scheme-name)
   "根据 `scode-list', 得到可能的词组和汉字。"
@@ -2461,11 +2442,11 @@ Return the input string."
     (delete-dups
      (delq nil
            `(,@personal-words
+             ,@rime-words
              ,@common-words
              ,@jianpin-words
              ,@znabc-words
              ,@pinyin-chars
-             ,@rime-words
              ,@xingma-words)))))
 
 (defun pyim-choices-get-znabc-words (spinyin scheme-name)
@@ -2537,10 +2518,12 @@ Return the input string."
 (defun pyim-choices-get-rime-words (scode scheme-name)
   (when (member 'rime-words pyim-backends)
     (let ((class (pyim-scheme-get-option scheme-name :class)))
-      (when (member class '(rime))
+      (when (member class '(quanpin))
         (list
          (if (functionp 'rime-search)
-             (rime-search (pyim-scode-join scode scheme-name t))
+             (rime-search
+              (replace-regexp-in-string
+               "-" "" (pyim-scode-join scode scheme-name t)))
            nil)
          nil)))))
 
