@@ -182,6 +182,16 @@
 ;; 2. 用户可以使用变量 `pyim-schemes' 添加自定义双拼方案。
 ;; 3. 用户可能需要重新设置 `pyim-translate-trigger-char'。
 
+;; *** 让 pyim 使用 rime (实验特性)
+;; pyim 可以通过 [[https://gitlab.com/liberime/liberime][liberime]] 包来和
+;; rime 配合使用。
+
+;; #+BEGIN_EXAMPLE
+;; (require 'liberime)
+;; (rime-start "$rime_shared_data_dir" "$user_data_dir")
+;; (setq pyim-default-scheme 'rime)
+;; #+END_EXAMPLE
+
 ;; *** 使用五笔输入
 ;; pyim 支持五笔输入模式，用户可以通过变量 `pyim-default-scheme' 来设定：
 
@@ -603,6 +613,12 @@ plist 来表示，比如：
      :first-chars "abcdefghjklmnopqrstwxyz"
      :rest-chars "vmpfwckzyjqdltxuognbhsrei'-a"
      :prefer-trigger-chars "v")
+    (rime
+     :document "rime 后端支持。"
+     :class rime
+     :first-chars "abcdefghjklmnopqrstwxyz"
+     :rest-chars "vmpfwckzyjqdltxuognbhsrei'-a"
+     :prefer-trigger-chars "v")
     (wubi
      :document "五笔输入法。"
      :class xingma
@@ -864,18 +880,25 @@ pyim 内建的有三种选词框格式：
 (defvar pyim-extra-dicts nil "与 `pyim-dicts' 类似, 用于和 elpa 格式的词库包集成。.")
 
 (defvar pyim-backends
-  '(personal-dcache-words common-dcache-words pinyin-chars jianpin-words znabc-words xingma-words)
+  '(rime-words
+    personal-dcache-words
+    common-dcache-words
+    pinyin-chars
+    jianpin-words
+    znabc-words
+    xingma-words)
   "Pyim 词语获取 backends.
 
 当前支持:
 
-1. `personal-dcache-words'  从 `pyim-dcache-icode2word' 中获取词条。
-2. `common-dcache-words'    从 `pyim-dcache-code2word' 中获取词条。
-3. `pinyin-chars'           逐一获取一个拼音对应的多个汉字。
-4. `jianpin-words'          获取简拼对应的词条，如果输入 \"ni-hao\",
+1. `rime-words'             用于 rime 支持。
+2. `personal-dcache-words'  从 `pyim-dcache-icode2word' 中获取词条。
+3. `common-dcache-words'    从 `pyim-dcache-code2word' 中获取词条。
+4. `pinyin-chars'           逐一获取一个拼音对应的多个汉字。
+5. `jianpin-words'          获取简拼对应的词条，如果输入 \"ni-hao\",
                             那么同时搜索 code 为 \"n-h\" 的词条。
-5. `znabc-words'            类似智能ABC的词语获取方式(源于 emacs-eim).
-6. `xingma-words'           专门用于处理五笔等基于形码的输入法的 backend.")
+6. `znabc-words'            类似智能ABC的词语获取方式(源于 emacs-eim).
+7. `xingma-words'           专门用于处理五笔等基于形码的输入法的 backend.")
 
 (defvar pyim-pinyin-shen-mu
   '("b" "p" "m" "f" "d" "t" "n" "l" "g" "k" "h"
@@ -2240,6 +2263,13 @@ Return the input string."
   \"aaaa\" -> ((\"aaaa\"))"
   (list (list code)))
 
+(defun pyim-code-split-rime-code (code &optional -)
+  "这个函数只是对 code 做了一点简单的包装，实际并不真正的
+*分解* code, 用于支持 rime 后端, 比如：
+
+  \"aaaa\" -> ((\"aaaa\"))"
+  (list (list code)))
+
 (defun pyim-spinyin-find-fuzzy (spinyin-list)
   "用于处理模糊音的函数。"
   (let (fuzzy-spinyin-list result1 result2)
@@ -2380,6 +2410,10 @@ Return the input string."
           (concat (or code-prefix "") (car scode))
         (car scode)))))
 
+(defun pyim-scode-join-rime-scode (scode scheme-name &optional _as-search-key _shou-zi-mu)
+  "把一个 `scode' (splited code) 合并为一个 code 字符串, 用于支持 rime 后端."
+  (when scheme-name
+    (car scode)))
 
 ;; **** 获得词语拼音并进一步查询得到备选词列表
 (defun pyim-choices-get (scode-list scheme-name)
@@ -2387,7 +2421,7 @@ Return the input string."
   ;; scode-list 可以包含多个 scode, 从而得到多个子候选词列表，如何将多个 *子候选词列表* 合理的合并，
   ;; 是一个比较麻烦的事情的事情。 注：这个地方需要进一步得改进。
   (let* (personal-words
-         common-words jianpin-words znabc-words pinyin-chars xingma-words)
+         rime-words common-words jianpin-words znabc-words pinyin-chars xingma-words)
 
     (dolist (scode scode-list)
       (setq personal-words
@@ -2399,6 +2433,9 @@ Return the input string."
       (setq pinyin-chars
             (append pinyin-chars
                     (car (pyim-choices-get-pinyin-chars scode scheme-name))))
+      (setq rime-words
+            (append rime-words
+                    (car (pyim-choices-get-rime-words scode scheme-name))))
       (setq xingma-words
             (append xingma-words
                     (car (pyim-choices-get-xingma-words scode scheme-name)))))
@@ -2414,6 +2451,7 @@ Return the input string."
     ;; Debug
     (when pyim-debug
       (princ (list :scode-list scode-list
+                   :rime-words rime-words
                    :personal-words personal-words
                    :common-words common-words
                    :jianpin-words jianpin-words
@@ -2427,6 +2465,7 @@ Return the input string."
              ,@jianpin-words
              ,@znabc-words
              ,@pinyin-chars
+             ,@rime-words
              ,@xingma-words)))))
 
 (defun pyim-choices-get-znabc-words (spinyin scheme-name)
@@ -2494,6 +2533,16 @@ Return the input string."
                                          pyim-dcache-shortcode2word)))
                           (list str)))
            nil))))))
+
+(defun pyim-choices-get-rime-words (scode scheme-name)
+  (when (member 'rime-words pyim-backends)
+    (let ((class (pyim-scheme-get-option scheme-name :class)))
+      (when (member class '(rime))
+        (list
+         (if (functionp 'rime-search)
+             (rime-search (pyim-scode-join scode scheme-name t))
+           nil)
+         nil)))))
 
 (defun pyim-choices-get-personal-dcache-words (scode scheme-name)
   (when (member 'personal-dcache-words pyim-backends)
