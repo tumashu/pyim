@@ -183,9 +183,9 @@
 ;; 3. 用户可能需要重新设置 `pyim-translate-trigger-char'。
 
 ;; *** 让 pyim 使用 liberime (实验特性)
-;; pyim 可以和 [[https://gitlab.com/libeliberime/libeliberime][libeliberime]]
-;; 包配合使用，只要 pyim 用户激活 liberime, pyim 就会自动使用它来获取词条。
-;; 激活方式请参考其 [[https://gitlab.com/liberime/liberime/blob/master/README.org][README]] .
+;; pyim 可以使用 [[https://gitlab.com/libeliberime/libeliberime][libeliberime]]
+;; 包来提高整句输入能力，用户只要激活 liberime, pyim 就会自动使用它来获取词条，
+;; 激活方式请参考其 [[https://gitlab.com/liberime/liberime/blob/master/README.org][README]] 。
 
 ;; *** 使用五笔输入
 ;; pyim 支持五笔输入模式，用户可以通过变量 `pyim-default-scheme' 来设定：
