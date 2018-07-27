@@ -184,9 +184,13 @@
 
 ;; *** 让 pyim 使用 liberime (实验特性)
 ;; pyim 可以使用 [[https://gitlab.com/liberime/liberime][liberime]]
-;; 包来提高整句输入能力，用户只要激活 liberime, pyim 就会自动使用它。
+;; 包来提高整句输入能力，用户激活 liberime 后设置：
 
-;; liberime 激活方式请参考：[[https://gitlab.com/liberime/liberime/blob/master/README.org]] 。
+;; #+BEGIN_EXAMPLE
+;; (setq pyim-default-scheme 'liberime)
+;; #+END_EXAMPLE
+
+;; 注：liberime 激活方式请参考：[[https://gitlab.com/liberime/liberime/blob/master/README.org]] 。
 
 ;; *** 使用五笔输入
 ;; pyim 支持五笔输入模式，用户可以通过变量 `pyim-default-scheme' 来设定：
@@ -609,6 +613,12 @@ plist 来表示，比如：
      :first-chars "abcdefghjklmnopqrstwxyz"
      :rest-chars "vmpfwckzyjqdltxuognbhsrei'-a"
      :prefer-trigger-chars "v")
+    (liberime
+     :document "liberime 支持。"
+     :class liberime
+     :first-chars "abcdefghjklmnopqrstwxyz"
+     :rest-chars "vmpfwckzyjqdltxuognbhsrei'-a"
+     :prefer-trigger-chars "v")
     (wubi
      :document "五笔输入法。"
      :class xingma
@@ -1007,6 +1017,9 @@ pyim 总是使用 emacs-async 包来生成 dcache.")
 (defvar pyim-liberime-limit 50
   "当 pyim 使用 `liberime-search' 来获取词条时，这个变量用来限制
 `liberime-search' 返回词条的数量。")
+
+(defvar pyim-liberime-search-cache nil
+  "用于记录最近一次 liberime-search 的结果。")
 
 (defvar pyim-mode-map
   (let ((map (make-sparse-keymap))
@@ -2257,6 +2270,13 @@ Return the input string."
   \"aaaa\" -> ((\"aaaa\"))"
   (list (list code)))
 
+(defun pyim-code-split-liberime-code (code &optional -)
+  "这个函数只是对 code 做了一点简单的包装，实际并不真正的
+*分解* code, 用于支持 lierime, 比如：
+
+  \"aaaa\" -> ((\"aaaa\"))"
+  (list (list code)))
+
 (defun pyim-spinyin-find-fuzzy (spinyin-list)
   "用于处理模糊音的函数。"
   (let (fuzzy-spinyin-list result1 result2)
@@ -2397,6 +2417,11 @@ Return the input string."
           (concat (or code-prefix "") (car scode))
         (car scode)))))
 
+(defun pyim-scode-join-liberime-scode (scode scheme-name &optional _as-search-key _shou-zi-mu)
+  "把一个 `scode' (splited code) 合并为一个 code 字符串, 用于支持 liberime."
+  (when scheme-name
+    (car scode)))
+
 ;; **** 获得词语拼音并进一步查询得到备选词列表
 (defun pyim-choices-get (scode-list scheme-name)
   "根据 `scode-list', 得到可能的词组和汉字。"
@@ -2442,8 +2467,8 @@ Return the input string."
 
     (delete-dups
      (delq nil
-           `(,@personal-words
-             ,@liberime-words
+           `(,@liberime-words
+             ,@personal-words
              ,@common-words
              ,@jianpin-words
              ,@znabc-words
@@ -2519,15 +2544,15 @@ Return the input string."
 (defun pyim-choices-get-liberime-words (scode scheme-name)
   (when (member 'liberime-words pyim-backends)
     (let ((class (pyim-scheme-get-option scheme-name :class)))
-      (when (member class '(quanpin shuangpin))
-        (list
-         (if (functionp 'liberime-search)
-             (liberime-search
-              (replace-regexp-in-string
-               "-" "" (pyim-scode-join scode scheme-name t))
-              pyim-liberime-limit)
-           nil)
-         nil)))))
+      (when (member class '(liberime))
+        (let ((output (if (functionp 'liberime-search)
+                          (liberime-search
+                           (replace-regexp-in-string
+                            "-" "" (pyim-scode-join scode scheme-name t))
+                           pyim-liberime-limit)
+                        nil)))
+          (setq pyim-liberime-search-cache output)
+          (list (mapcar #'car output) nil))))))
 
 (defun pyim-choices-get-personal-dcache-words (scode scheme-name)
   (when (member 'personal-dcache-words pyim-backends)
@@ -3047,7 +3072,17 @@ tooltip 选词框中显示。
                 (not (display-graphic-p))))))
 
 ;; *** 选择备选词
+
 (defun pyim-page-select-word ()
+  "从选词框中选择当前词条。"
+  (interactive)
+  (let* ((scheme-name pyim-default-scheme)
+         (class (pyim-scheme-get-option scheme-name :class)))
+    (if (member class '(liberime))
+        (call-interactively #'pyim-page-select-word-2)
+      (call-interactively #'pyim-page-select-word-1))))
+
+(defun pyim-page-select-word-1 ()
   "从选词框中选择当前词条。"
   (interactive)
   (if (null (car pyim-current-choices))  ; 如果没有选项，输入空格
@@ -3073,6 +3108,29 @@ tooltip 选词框中显示。
                             #'(lambda (scode)
                                 (nthcdr pyim-code-position scode))
                             pyim-scode-list)))
+        (setq pyim-current-choices (list (pyim-choices-get scode-list pyim-default-scheme))
+              pyim-current-pos 1)
+        (pyim-dagger-refresh)
+        (pyim-page-refresh)))))
+
+(defun pyim-page-select-word-2 ()
+  "从选词框中选择当前词条。"
+  (interactive)
+  (if (null (car pyim-current-choices))  ; 如果没有选项，输入空格
+      (progn
+        (setq pyim-dagger-str (pyim-translate last-command-event))
+        (pyim-terminate-translation))
+    (let* ((str (pyim-choice (nth (1- pyim-current-pos) (car pyim-current-choices))))
+           (rest (cdr (assoc str pyim-liberime-search-cache)))
+           scode-list)
+      (setq pyim-code-position (+ pyim-code-position (length str)))
+      (if (not rest)
+          (progn
+            (pyim-terminate-translation)
+            ;; pyim 使用这个 hook 来处理联想词。
+            (run-hooks 'pyim-page-select-finish-hook))
+        (setq scode-list
+              (delete-dups (pyim-code-split-liberime-code rest)))
         (setq pyim-current-choices (list (pyim-choices-get scode-list pyim-default-scheme))
               pyim-current-pos 1)
         (pyim-dagger-refresh)
