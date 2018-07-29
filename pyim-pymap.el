@@ -48,7 +48,10 @@
 ;;              (pinyin (nth 1 items)))
 ;;         (when (and pinyin word)
 ;;           (puthash pinyin
-;;                    (concat word (gethash pinyin hashtable))
+;;                    (concat word
+;;                            (replace-regexp-in-string
+;;                             word ""
+;;                             (or (gethash pinyin hashtable) "")))
 ;;                    hashtable)))
 ;;       (forward-line 1))
 ;;     (maphash
