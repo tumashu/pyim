@@ -673,6 +673,51 @@ plist 来表示，比如：
       ("ag" "ng")
       ("ao" "o")
       ("au" "ou")))
+     (ziranma-shuangpin
+     :document "自然码双拼方案。"
+     :class shuangpin
+     :first-chars "abcdefghijklmnopqrstuvwxyz"
+     :rest-chars "abcdefghijklmnopqrstuvwxyz"
+     :prefer-trigger-chars nil
+     :keymaps
+     (("a" "a" "a")
+      ("b" "b" "ou")
+      ("c" "c" "iao")
+      ("d" "d" "uang" "iang")
+      ("e" "e" "e")
+      ("f" "f" "en")
+      ("g" "g" "eng")
+      ("h" "h" "ang")
+      ("i" "ch" "i")
+      ("j" "j" "an")
+      ("k" "k" "ao")
+      ("l" "l" "ai")
+      ("m" "m" "ian")
+      ("n" "n" "in")
+      ("o" "o" "uo" "o")
+      ("p" "p" "un")
+      ("q" "q" "iu")
+      ("r" "r" "uan" "er")
+      ("s" "s" "iong" "ong")
+      ("t" "t" "ue" "ve")
+      ("u" "sh" "u")
+      ("v" "zh" "v" "ui")
+      ("w" "w" "ia" "ua")
+      ("x" "x" "ie")
+      ("y" "y" "uai" "ing")
+      ("z" "z" "ei")
+      ("aa" "a")
+      ("an" "an")
+      ("ai" "ai")
+      ("ao" "ao")
+      ("ah" "ang")
+      ("ee" "e")
+      ("ei" "ei")
+      ("en" "en")
+      ("er" "er")
+      ("eg" "eng")
+      ("oo" "o")
+      ("ou" "ou")))
     (microsoft-shuangpin
      :document "微软双拼方案。"
      :class shuangpin
