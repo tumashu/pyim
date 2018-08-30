@@ -3524,7 +3524,11 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
         ;; 当光标前的一个字符是标点符号时，半角/全角切换。
         (call-interactively 'pyim-punctuation-translate-at-point)
       (and (string-match "[a-z'-]+ *$" string)
-           (setq code (match-string 0 string))
+           (setq code
+                 ;; 一些语言使用 '' 来标记字符串，特殊处理。
+                 (replace-regexp-in-string
+                  "^[-']" ""
+                  (match-string 0 string)))
            (setq length (length code))
            (setq code (replace-regexp-in-string " +" "" code)))
       (when (and length (> length 0))
