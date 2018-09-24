@@ -903,6 +903,12 @@ pyim 内建的有三种选词框格式：
 这个功能可以实现“简转繁”，“输入中文得到英文”之类的功能。"
   :group 'pyim)
 
+(defcustom pyim-posframe-border-width 5
+  "posframe的内间距。
+只有当用户使用 posframe 来显示候选词时才有效。"
+  :group 'pyim
+  :type 'integer)
+
 (defface pyim-page
   '((t (:inherit default :background "#333333" :foreground "#dcdccc")))
   "Face used for the pyim page."
@@ -3082,7 +3088,8 @@ tooltip 选词框中显示。
                           :position position
                           :min-width (* pyim-page-length 7)
                           :background-color (face-attribute 'pyim-page :background)
-                          :foreground-color (face-attribute 'pyim-page :foreground)))
+                          :foreground-color (face-attribute 'pyim-page :foreground)
+                          :internal-border-width pyim-posframe-border-width))
           ((eq tooltip 'minibuffer)
            (let ((max-mini-window-height (+ pyim-page-length 2)))
              (message string)))
