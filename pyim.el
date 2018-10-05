@@ -149,8 +149,8 @@
 ;; *** 常用快捷键
 ;; | 输入法快捷键          | 功能                       |
 ;; |-----------------------+----------------------------|
-;; | C-n 或 M-n 或 +       | 向下翻页                   |
-;; | C-p 或 M-p 或 -       | 向上翻页                   |
+;; | C-n 或 M-n 或 + 或 .      | 向下翻页                   |
+;; | C-p 或 M-p 或 - 或 ,      | 向上翻页                   |
 ;; | C-f                   | 选择下一个备选词           |
 ;; | C-b                   | 选择上一个备选词           |
 ;; | SPC                   | 确定输入                   |
@@ -1082,6 +1082,8 @@ pyim 总是使用 emacs-async 包来生成 dcache.")
     (define-key map "\C-b" 'pyim-page-previous-word)
     (define-key map "=" 'pyim-page-next-page)
     (define-key map "-" 'pyim-page-previous-page)
+    (define-key map "." 'pyim-page-next-page)
+    (define-key map "," 'pyim-page-previous-page)
     (define-key map "\M-n" 'pyim-page-next-page)
     (define-key map "\M-p" 'pyim-page-previous-page)
     (define-key map "\C-m" 'pyim-quit-no-clear)
