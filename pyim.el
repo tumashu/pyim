@@ -1685,14 +1685,22 @@ DCACHE 是一个 code -> words 的 hashtable.
 (defun pyim-dcache-export-personal-dcache (file &optional confirm)
   "将 ‘pyim-dcache-icode2word’ 导出为 pyim 词库文件.
 
-如果 FILE 为 nil, 提示用户指定导出文件位置, 如果 CONFIRM 为 non-nil，文件存在时将会提示用户是否覆盖，默认为覆盖模式"
+如果 FILE 为 nil, 提示用户指定导出文件位置, 如果 CONFIRM 为 non-nil，
+文件存在时将会提示用户是否覆盖，默认为覆盖模式"
   (interactive "F将个人缓存中的词条导出到文件：")
+  (pyim-dcache-export pyim-dcache-icode2word file confirm))
+
+(defun pyim-dcache-export (dcache file &optional confirm)
+  "将一个 pyim DCACHE 导出为文件 FILE.
+
+如果 CONFIRM 为 non-nil，文件存在时将会提示用户是否覆盖，
+默认为覆盖模式"
   (with-temp-buffer
     (insert ";;; -*- coding: utf-8-unix -*-\n")
     (maphash
      #'(lambda (key value)
          (insert (concat key " " (mapconcat #'identity value " ") "\n")))
-     pyim-dcache-icode2word)
+     dcache)
     (write-file file confirm)))
 
 ;; *** 从词库中搜索中文词条
