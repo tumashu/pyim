@@ -1717,8 +1717,23 @@ DCACHE 是一个 code -> words 的 hashtable.
 如果 FILE 为 nil, 提示用户指定导出文件位置, 如果 CONFIRM 为 non-nil，
 文件存在时将会提示用户是否覆盖，默认为覆盖模式"
   (interactive "F将词条相关信息导出到文件: ")
-  (pyim-dcache-export pyim-dcache-iword2count file confirm))
-
+  (with-temp-buffer
+    (insert ";;; -*- coding: utf-8-unix -*-\n")
+    (maphash
+     #'(lambda (key value)
+         (insert (format "%s %s\n" key value)))
+     pyim-dcache-iword2count)
+    ;; 在默认情况下，`pyim-dcache-icode2word' 中存在的词条，
+    ;; `pyim-dcache-iword2count' 中也一定存在，但如果用户
+    ;; 使用了特殊的方式给 `pyim-dcache-icode2word' 中添加了
+    ;; 词条，那么就需要将这些词条也导出，且设置词频为 0
+    (maphash
+     #'(lambda (_ words)
+         (dolist (word words)
+           (unless (gethash word pyim-dcache-iword2count)
+             (insert (format "%s %s\n" word 0)))))
+     pyim-dcache-icode2word)
+    (write-file file confirm)))
 
 (defun pyim-import (file &optional merge-method)
   "从 FILE 中导入词条以及词条对应的词频信息。
