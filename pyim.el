@@ -1695,7 +1695,7 @@ DCACHE 是一个 code -> words 的 hashtable.
 
 如果 FILE 为 nil, 提示用户指定导出文件位置, 如果 CONFIRM 为 non-nil，
 文件存在时将会提示用户是否覆盖，默认为覆盖模式"
-  (interactive "F将个人缓存中的词条导出到文件：")
+  (interactive "F将词频信息导出到文件：")
   (pyim-dcache-export pyim-dcache-iword2count file confirm))
 
 (defun pyim-dcache-export (dcache file &optional confirm)
@@ -1714,6 +1714,32 @@ DCACHE 是一个 code -> words 的 hashtable.
                            value))))
      dcache)
     (write-file file confirm)))
+
+(defun pyim-dcache-import-wordcount-file (file &optional merge-method)
+  "将词频文件中的词频信息导入 `pyim-dcache-iword2count' 中。
+
+MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表
+词条在 `pyim-dcache-iword2count' 中的词频和待导入文件中的词频，
+函数返回值做为合并后的词频使用，默认方式是：取两个词频的最大值。"
+  (interactive "F导入词频文件:")
+  (with-temp-buffer
+    (let ((coding-system-for-read 'utf-8-unix))
+      (insert-file-contents file))
+    (goto-char (point-min))
+    (forward-line 1)
+    (while (not (eobp))
+      (let* ((word (pyim-code-at-point))
+             (content (pyim-line-content)))
+        (pyim-create-or-rearrange-word
+         word nil
+         (lambda (x)
+           (funcall (or merge-method #'max)
+                    (or x 0)
+                    (string-to-number (car content))))))
+      (forward-line 1)))
+  ;; 更新相关的 dcache
+  (pyim-dcache-update-icode2word-dcache t)
+  (pyim-dcache-update-ishortcode2word-dcache t))
 
 ;; *** 从词库中搜索中文词条
 ;; 当词库文件加载完成后， pyim 就可以从词库缓存中搜索某个
@@ -1769,12 +1795,15 @@ DCACHE 是一个 code -> words 的 hashtable.
        (unless (equal orig-value ,new-value)
          (puthash ,key ,new-value ,table)))))
 
-(defun pyim-create-or-rearrange-word (word &optional rearrange-word)
+(defun pyim-create-or-rearrange-word (word &optional rearrange-word wordcount-handler)
   "将中文词条 `word' 添加拼音后，保存到 `pyim-dcache-icode2word' 中，
 词条 `word' 会追加到已有词条的后面。
 
 `pyim-create-or-rearrange-word' 会调用 `pyim-hanzi2pinyin' 来获取中文词条
 的拼音 code。
+
+WORDCOUNT-HANDLER 是一个函数，参数代表当前 WORD 对应的词频，
+返回值是 WORD 的新词频，这个功能用于： `pyim-dcache-import-wordcount-file'
 
 BUG：无法有效的处理多音字。"
   (when (and (> (length word) 0)
@@ -1785,7 +1814,9 @@ BUG：无法有效的处理多音字。"
       (when (> (length word) 0)
         (pyim-dcache-put
           pyim-dcache-iword2count word
-          (+ (or orig-value 0) 1)))
+          (if (functionp wordcount-handler)
+              (funcall wordcount-handler orig-value)
+            (+ (or orig-value 0) 1))))
       ;; 添加词条到个人缓存
       (dolist (py pinyins)
         (unless (pyim-string-match-p "[^ a-z-]" py)
