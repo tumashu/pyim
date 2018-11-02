@@ -358,9 +358,10 @@
 
 ;; ** Tips
 
-;; *** 如何将个人词条导出到一个文件
+;; *** 如何将个人词条相关信息导入和导出？
 
-;; 使用命令：pyim-dcache-export-personal-dcache
+;; 1. 导入使用命令： pyim-import
+;; 2. 导出使用命令： pyim-export
 
 ;; *** pyim 出现错误时，如何开启 debug 模式
 
@@ -1686,17 +1687,12 @@ DCACHE 是一个 code -> words 的 hashtable.
   "将 ‘pyim-dcache-icode2word’ 导出为 pyim 词库文件.
 
 如果 FILE 为 nil, 提示用户指定导出文件位置, 如果 CONFIRM 为 non-nil，
-文件存在时将会提示用户是否覆盖，默认为覆盖模式"
+文件存在时将会提示用户是否覆盖，默认为覆盖模式。
+
+注： 这个函数的用途是制作 pyim 词库，个人词条导入导出建议使用：
+`pyim-import' 和 `pyim-export' ."
   (interactive "F将个人缓存中的词条导出到文件：")
   (pyim-dcache-export pyim-dcache-icode2word file confirm))
-
-(defun pyim-dcache-export-wordcount-dcache (file &optional confirm)
-  "将 ‘pyim-dcache-iword2count’ 导出为文件.
-
-如果 FILE 为 nil, 提示用户指定导出文件位置, 如果 CONFIRM 为 non-nil，
-文件存在时将会提示用户是否覆盖，默认为覆盖模式"
-  (interactive "F将词频信息导出到文件：")
-  (pyim-dcache-export pyim-dcache-iword2count file confirm))
 
 (defun pyim-dcache-export (dcache file &optional confirm)
   "将一个 pyim DCACHE 导出为文件 FILE.
@@ -1715,13 +1711,22 @@ DCACHE 是一个 code -> words 的 hashtable.
      dcache)
     (write-file file confirm)))
 
-(defun pyim-dcache-import-wordcount-file (file &optional merge-method)
-  "将词频文件中的词频信息导入 `pyim-dcache-iword2count' 中。
+(defun pyim-export (file &optional confirm)
+  "将个人词条以及词条对应的词频信息导出到文件 FILE.
+
+如果 FILE 为 nil, 提示用户指定导出文件位置, 如果 CONFIRM 为 non-nil，
+文件存在时将会提示用户是否覆盖，默认为覆盖模式"
+  (interactive "F将词条相关信息导出到文件: ")
+  (pyim-dcache-export pyim-dcache-iword2count file confirm))
+
+
+(defun pyim-import (file &optional merge-method)
+  "从 FILE 中导入词条以及词条对应的词频信息。
 
 MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表
 词条在 `pyim-dcache-iword2count' 中的词频和待导入文件中的词频，
 函数返回值做为合并后的词频使用，默认方式是：取两个词频的最大值。"
-  (interactive "F导入词频文件:")
+  (interactive "F导入词条相关信息文件: ")
   (with-temp-buffer
     (let ((coding-system-for-read 'utf-8-unix))
       (insert-file-contents file))
@@ -1739,7 +1744,8 @@ MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表
       (forward-line 1)))
   ;; 更新相关的 dcache
   (pyim-dcache-update-icode2word-dcache t)
-  (pyim-dcache-update-ishortcode2word-dcache t))
+  (pyim-dcache-update-ishortcode2word-dcache t)
+  (message "pyim: 词条相关信息导入完成！"))
 
 ;; *** 从词库中搜索中文词条
 ;; 当词库文件加载完成后， pyim 就可以从词库缓存中搜索某个
