@@ -666,7 +666,7 @@ plist 来表示，比如：
       ("ag" "ng")
       ("ao" "o")
       ("au" "ou")))
-     (ziranma-shuangpin
+    (ziranma-shuangpin
      :document "自然码双拼方案。"
      :class shuangpin
      :first-chars "abcdefghijklmnopqrstuvwxyz"
@@ -2394,23 +2394,23 @@ Return the input string."
   "Find all fuzzy pinyins, for example:
 
 (\"f\" . \"en\") -> ((\"f\" . \"en\") (\"f\" . \"eng\"))"
-  (cl-labels ((find-list (str list)
-                         (let (result)
-                           (dolist (x list)
-                             (when (member str x)
-                               (setq list nil)
-                               (setq result
-                                     (delete-dups
-                                      `(,str ,@(cl-copy-list x))))))
-                           (or result (list str)))))
-    (let* ((fuzzy-alist pyim-fuzzy-pinyin-alist)
-           (sm-list (find-list (car pycons) fuzzy-alist))
-           (ym-list (find-list (cdr pycons) fuzzy-alist))
-           result)
-      (dolist (a sm-list)
-        (dolist (b ym-list)
-          (push (cons a b) result)))
-      (reverse result))))
+       (cl-labels ((find-list (str list)
+                              (let (result)
+                                (dolist (x list)
+                                  (when (member str x)
+                                    (setq list nil)
+                                    (setq result
+                                          (delete-dups
+                                           `(,str ,@(cl-copy-list x))))))
+                                (or result (list str)))))
+         (let* ((fuzzy-alist pyim-fuzzy-pinyin-alist)
+                (sm-list (find-list (car pycons) fuzzy-alist))
+                (ym-list (find-list (cdr pycons) fuzzy-alist))
+                result)
+           (dolist (a sm-list)
+             (dolist (b ym-list)
+               (push (cons a b) result)))
+           (reverse result))))
 
 (defun pyim-scode-validp (scode scheme-name)
   "检测一个 scode 是否正确。"
