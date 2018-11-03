@@ -2417,7 +2417,11 @@ Return the input string."
   (let ((class (pyim-scheme-get-option scheme-name :class)))
     (cond
      ((member class '(quanpin shuangpin))
-      (pyim-scode-spinyin-validp scode))
+      (or (pyim-scode-spinyin-validp scode)
+          ;; 一些同学使用下面三个字母前缀来定义特殊
+          ;; 词条，所以下面三个字符开头的也算合法。
+          (member (substring (cdr (car scode)) 0 1)
+                  '("i" "u" "v"))))
      (t t))))
 
 (defun pyim-scode-spinyin-validp (spinyin)
