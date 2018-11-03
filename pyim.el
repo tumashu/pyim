@@ -1986,7 +1986,7 @@ FILE 的格式为：
         (pyim-dcache-put
           pyim-dcache-icode2word pinyin
           (remove word orig-value))))
-    (remhash word pyim-dcache-icode2count)))
+    (remhash word pyim-dcache-iword2count)))
 
 ;; ** 生成 `pyim-entered-code' 并插入 `pyim-dagger-str'
 ;; *** 生成拼音字符串 `pyim-entered-code'
