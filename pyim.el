@@ -1949,7 +1949,9 @@ FILE 的格式为：
     (goto-char (point-min))
     (forward-line 1)
     (while (not (eobp))
-      (pyim-delete-word-1 (pyim-code-at-point))
+      (let ((word (car (pyim-dline-parse))))
+        (when (and word (not (pyim-string-match-p "\\CC" word)))
+          (pyim-delete-word-1 word)))
       (forward-line 1)))
   (message "pyim: 批量删词完成！"))
 
