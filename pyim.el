@@ -1935,7 +1935,8 @@ BUG：无法有效的处理多音字。"
 (defun pyim-delete-words-in-file (file)
   "从个人词库缓存中批量删除 FILE 文件中列出的词条.
 
-FILE 的格式为：
+FILE 的格式与 `pyim-export' 生成的文件格式相同，
+另外这个命令也可以识别没有词频的行，比如：
 
    ;;; -*- coding: utf-8-unix -*-
    词条1
