@@ -599,7 +599,7 @@ plist 来表示，比如：
   '((quanpin
      :document "全拼输入法方案（不可删除）。"
      :class quanpin
-     :first-chars "abcdefghjklmnopqrstwxyz"
+     :first-chars "abcdefghijklmnopqrstuwxyz"
      :rest-chars "vmpfwckzyjqdltxuognbhsrei'-a"
      :prefer-trigger-chars "v")
     (wubi
