@@ -1922,6 +1922,27 @@ BUG：无法有效的处理多音字。"
             (message "%S -> %S " string code)
           (message "没有找到 %S 对应的编码。" string))))))
 
+(defun pyim-delete-words-in-file (file)
+  "从个人词库缓存中批量删除 FILE 文件中列出的词条.
+
+FILE 的格式为：
+
+   ;;; -*- coding: utf-8-unix -*-
+   词条1
+   词条2
+
+"
+  (interactive "F记录待删词条的文件: ")
+  (with-temp-buffer
+    (let ((coding-system-for-read 'utf-8-unix))
+      (insert-file-contents file))
+    (goto-char (point-min))
+    (forward-line 1)
+    (while (not (eobp))
+      (pyim-delete-word-1 (pyim-code-at-point))
+      (forward-line 1)))
+  (message "pyim: 批量删词完成！"))
+
 (defun pyim-delete-word ()
   "将高亮选择的词条从 `pyim-dcache-icode2word' 中删除。"
   (interactive)
