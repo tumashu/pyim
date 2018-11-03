@@ -1623,11 +1623,12 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
         (goto-char (point-min))
         (forward-line 1)
         (while (not (eobp))
-          (let ((code (pyim-code-at-point))
-                (content (pyim-line-content)))
+          (let ((content (pyim-dline-parse))
+                (code (car content))
+                (words (cdr content)))
             (when (and code content)
               (puthash code
-                       (delete-dups `(,@content ,@(gethash code hashtable)))
+                       (delete-dups `(,@words ,@(gethash code hashtable)))
                        hashtable)))
           (forward-line 1))))
     (pyim-dcache-save-value-to-file hashtable dcache-file)
@@ -1652,21 +1653,29 @@ DCACHE 是一个 code -> words 的 hashtable.
        dcache)
       (pyim-dcache-save-value-to-file hashtable file))))
 
-(defun pyim-code-at-point ()
-  "Get code in the current line."
-  (save-excursion
-    (beginning-of-line)
-    (if (re-search-forward "[ \t:]" (line-end-position) t)
-        (buffer-substring-no-properties (line-beginning-position) (1- (point))))))
+(defun pyim-code-at-point (&optional seperaters)
+  "Get code in the current line.
+
+注：这个函数已经不在使用"
+  (car (pyim-dline-parse seperaters)))
 
 (defun pyim-line-content (&optional seperaters)
-  "用 SEPERATERS 分解当前行，所有参数传递给 ‘split-string’ 函数."
+  "用 SEPERATERS 分解当前行，所有参数传递给 ‘split-string’ 函数.
+
+注：这个函数已经不在使用"
+  (cdr (pyim-dline-parse seperaters)))
+
+(defun pyim-dline-parse (&optional seperaters)
+  "解析词库文件当前行的信息，SEPERATERS 为词库使用的分隔符。"
   (let* ((begin (line-beginning-position))
          (end (line-end-position))
-         (items (cdr (split-string
-                      (buffer-substring-no-properties begin end)
-                      seperaters))))
+         (items (split-string
+                 (buffer-substring-no-properties begin end)
+                 seperaters)))
     items))
+
+(make-obsolete 'pyim-code-at-point "Please Use (car (pyim-dline-parse)) instead.")
+(make-obsolete 'pyim-line-content "Please Use (cdr (pyim-dline-parse)) instead.")
 
 (defun pyim-dcache-save-caches ()
   "保存 dcache.
@@ -1748,14 +1757,15 @@ MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表
     (goto-char (point-min))
     (forward-line 1)
     (while (not (eobp))
-      (let* ((word (pyim-code-at-point))
-             (content (pyim-line-content)))
+      (let* ((content (pyim-dline-parse))
+             (word (car content))
+             (count (car (cdr content))))
         (pyim-create-or-rearrange-word
          word nil
          (lambda (x)
            (funcall (or merge-method #'max)
                     (or x 0)
-                    (string-to-number (or (car content) 0))))))
+                    (string-to-number (or content 0))))))
       (forward-line 1)))
   ;; 更新相关的 dcache
   (pyim-dcache-update-icode2word-dcache t)
