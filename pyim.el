@@ -1952,7 +1952,8 @@ BUG：无法有效的处理多音字。"
       (unless (pyim-string-match-p "[^ a-z-]" pinyin)
         (pyim-dcache-put
           pyim-dcache-icode2word pinyin
-          (remove word orig-value))))))
+          (remove word orig-value))))
+    (remhash word pyim-dcache-icode2count)))
 
 ;; ** 生成 `pyim-entered-code' 并插入 `pyim-dagger-str'
 ;; *** 生成拼音字符串 `pyim-entered-code'
