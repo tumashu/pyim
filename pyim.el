@@ -1755,7 +1755,7 @@ MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表
          (lambda (x)
            (funcall (or merge-method #'max)
                     (or x 0)
-                    (string-to-number (car content))))))
+                    (string-to-number (or (car content) 0))))))
       (forward-line 1)))
   ;; 更新相关的 dcache
   (pyim-dcache-update-icode2word-dcache t)
