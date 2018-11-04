@@ -1754,13 +1754,14 @@ MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表
     (while (not (eobp))
       (let* ((content (pyim-dline-parse))
              (word (car content))
-             (count (car (cdr content))))
+             (count (string-to-number
+                     (or (car (cdr content)) "0"))))
         (pyim-create-or-rearrange-word
          word nil
          (lambda (x)
            (funcall (or merge-method #'max)
                     (or x 0)
-                    (string-to-number (or content 0))))))
+                    count))))
       (forward-line 1)))
   ;; 更新相关的 dcache
   (pyim-dcache-update-icode2word-dcache t)
