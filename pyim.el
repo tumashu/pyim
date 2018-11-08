@@ -1773,8 +1773,6 @@ MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表
   ;; 更新相关的 dcache
   (pyim-dcache-update-icode2word-dcache t)
   (pyim-dcache-update-ishortcode2word-dcache t)
-  ;; 再次保存
-  (pyim-dcache-save-caches)
   (message "pyim: 词条相关信息导入完成！"))
 
 ;; *** 从词库中搜索中文词条
