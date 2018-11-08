@@ -1763,9 +1763,18 @@ MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表
                     (or x 0)
                     count))))
       (forward-line 1)))
+  ;; 保存一下 pyim-dcache-icode2word 和 pyim-dcache-iword2count
+  ;; 两个缓存，因为使用 async 机制更新 dcache 时，需要从 dcache 文件
+  ;; 中读取变量值, 然后再对 pyim-dcache-icode2word 排序，如果没
+  ;; 有这一步骤，导入的词条就会被覆盖，使用 emacs-thread 机制来更新 dcache
+  ;; 不存在此问题。
+  (unless pyim-dcache-prefer-emacs-thread
+    (pyim-dcache-save-caches))
   ;; 更新相关的 dcache
   (pyim-dcache-update-icode2word-dcache t)
   (pyim-dcache-update-ishortcode2word-dcache t)
+  ;; 再次保存
+  (pyim-dcache-save-caches)
   (message "pyim: 词条相关信息导入完成！"))
 
 ;; *** 从词库中搜索中文词条
