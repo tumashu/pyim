@@ -1618,9 +1618,9 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
         (goto-char (point-min))
         (forward-line 1)
         (while (not (eobp))
-          (let ((content (pyim-dline-parse))
-                (code (car content))
-                (words (cdr content)))
+          (let* ((content (pyim-dline-parse))
+                 (code (car content))
+                 (words (cdr content)))
             (when (and code words)
               (puthash code
                        (delete-dups `(,@words ,@(gethash code hashtable)))
