@@ -1842,8 +1842,10 @@ MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表
 `pyim-create-word' 会调用 `pyim-hanzi2pinyin' 来获取中文词条
 的拼音 code。
 
-WORDCOUNT-HANDLER 是一个函数，参数代表当前 WORD 对应的词频，
-返回值是 WORD 的新词频，这个功能用于： `pyim-dcache-import-wordcount-file'
+WORDCOUNT-HANDLER 可以是一个数字，代表将此数字设置为 WORD 的新词频，
+WORDCOUNT-HANDLER 也可以是一个函数，其返回值将设置为 WORD 的新词频，
+而这个函数的参数则表示 WORD 当前词频，这个功能用于：`pyim-import',
+如果 WORDCOUNT-HANDLER 设置为其他, 则表示让 WORD 当前词频加1.
 
 BUG：无法有效的处理多音字。"
   (when (and (> (length word) 0)
@@ -1856,9 +1858,12 @@ BUG：无法有效的处理多音字。"
       (when (> (length word) 0)
         (pyim-dcache-put
           pyim-dcache-iword2count word
-          (if (functionp wordcount-handler)
-              (funcall wordcount-handler orig-value)
-            (+ (or orig-value 0) 1))))
+          (cond
+           ((functionp wordcount-handler)
+            (funcall wordcount-handler orig-value))
+           ((numberp wordcount-handler)
+            wordcount-handler)
+           (t (+ (or orig-value 0) 1)))))
       ;; 添加词条到个人缓存
       (dolist (py pinyins)
         (unless (pyim-string-match-p "[^ a-z-]" py)
