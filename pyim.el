@@ -1760,7 +1760,7 @@ MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表
              (word (car content))
              (count (string-to-number
                      (or (car (cdr content)) "0"))))
-        (pyim-create-or-rearrange-word
+        (pyim-create-word
          word nil
          (lambda (x)
            (funcall (or merge-method #'max)
@@ -1833,11 +1833,13 @@ MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表
        (unless (equal orig-value ,new-value)
          (puthash ,key ,new-value ,table)))))
 
-(defun pyim-create-or-rearrange-word (word &optional rearrange-word wordcount-handler)
-  "将中文词条 `word' 添加拼音后，保存到 `pyim-dcache-icode2word' 中，
-词条 `word' 会追加到已有词条的后面。
+(defun pyim-create-word (word &optional prepend wordcount-handler)
+  "将中文词条 WORD 添加拼音后，保存到 `pyim-dcache-icode2word' 中。
 
-`pyim-create-or-rearrange-word' 会调用 `pyim-hanzi2pinyin' 来获取中文词条
+词条 WORD 默认会追加到已有词条的后面，如果 PREPEND 设置为 t,
+词条就会放到已有词条的最前面。
+
+`pyim-create-word' 会调用 `pyim-hanzi2pinyin' 来获取中文词条
 的拼音 code。
 
 WORDCOUNT-HANDLER 是一个函数，参数代表当前 WORD 对应的词频，
@@ -1862,9 +1864,11 @@ BUG：无法有效的处理多音字。"
         (unless (pyim-string-match-p "[^ a-z-]" py)
           (pyim-dcache-put
             pyim-dcache-icode2word py
-            (if rearrange-word
+            (if prepend
                 (pyim-list-merge word orig-value)
               (pyim-list-merge orig-value word))))))))
+
+(define-obsolete-function-alias 'pyim-create-or-rearrange-word 'pyim-create-word)
 
 (defun pyim-list-merge (a b)
   "Join list A and B to a new list, then delete dups."
@@ -1896,7 +1900,7 @@ BUG：无法有效的处理多音字。"
 当 `silent' 设置为 t 是，不显示提醒信息。"
   (let* ((string (pyim-cstring-at-point (or number 2))))
     (when string
-      (pyim-create-or-rearrange-word string)
+      (pyim-create-word string)
       (unless silent
         (message "将词条: \"%s\" 加入 personal 缓冲。" string)))))
 
@@ -1925,7 +1929,7 @@ BUG：无法有效的处理多音字。"
           (error "词条太长")
         (if (not (string-match-p "^\\cc+\\'" string))
             (error "不是纯中文字符串")
-          (pyim-create-or-rearrange-word string)
+          (pyim-create-word string)
           (message "将词条: %S 插入 personal file。" string))))))
 
 (defun pyim-search-word-code ()
@@ -3234,7 +3238,7 @@ tooltip 选词框中显示。
         (pyim-terminate-translation))
     (let ((str (pyim-choice (nth (1- pyim-current-pos) (car pyim-current-choices))))
           scode-list)
-      (pyim-create-or-rearrange-word str t)
+      (pyim-create-word str t)
       (setq pyim-code-position (+ pyim-code-position (length str)))
       (if (>= pyim-code-position (length (car pyim-scode-list)))
                                         ; 如果是最后一个，检查
@@ -3242,7 +3246,7 @@ tooltip 选词框中显示。
                                         ; 建这个词
           (progn
             (if (not (member pyim-dagger-str (car pyim-current-choices)))
-                (pyim-create-or-rearrange-word pyim-dagger-str))
+                (pyim-create-word pyim-dagger-str))
             (pyim-terminate-translation)
             ;; pyim 使用这个 hook 来处理联想词。
             (run-hooks 'pyim-page-select-finish-hook))
