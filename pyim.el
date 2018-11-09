@@ -973,6 +973,9 @@ pyim 称这个字符串为 \"dragger string\", 向 \"匕首\" 一样插入
    1. pos 上次选择的位置
    2. completion 下一个可能的字母（如果 pyim-do-completion 为 t）")
 
+(defvar pyim-last-created-word nil
+  "记录最近一次创建的词条， 用于实现快捷删词功能： `pyim-delete-last-word' .")
+
 (defvar pyim-translating nil "记录是否在转换状态.")
 
 (defvar pyim-dagger-overlay nil "用于保存 dagger 的 overlay.")
@@ -1099,6 +1102,7 @@ pyim 总是使用 emacs-async 包来生成 dcache.")
     pyim-punctuation-half-width-functions
     pyim-translating
     pyim-dagger-overlay
+    pyim-last-created-word
 
     pyim-load-hook
     pyim-active-hook
@@ -1843,6 +1847,8 @@ BUG：无法有效的处理多音字。"
   (when (and (> (length word) 0)
              (< (length word) 11) ;十个汉字以上的词条，加到个人词库里面用处不大，忽略。
              (not (pyim-string-match-p "\\CC" word)))
+    ;; 记录最近创建的词条，用于快速删词功能。
+    (setq pyim-last-created-word word)
     (let* ((pinyins (pyim-hanzi2pinyin word nil "-" t nil t))) ;使用了多音字校正
       ;; 保存对应词条的词频
       (when (> (length word) 0)
@@ -1958,6 +1964,13 @@ FILE 的格式与 `pyim-export' 生成的文件格式相同，
           (pyim-delete-word-1 word)))
       (forward-line 1)))
   (message "pyim: 批量删词完成！"))
+
+(defun pyim-delete-last-word ()
+  "从 `pyim-dcache-icode2word' 中删除最新创建的词条。"
+  (interactive)
+  (when pyim-last-created-word
+    (pyim-delete-word-1 pyim-last-created-word)
+    (message "pyim: 从个人词库中删除词条 “%s” !" pyim-last-created-word)))
 
 (defun pyim-delete-word ()
   "将高亮选择的词条从 `pyim-dcache-icode2word' 中删除。"
