@@ -149,8 +149,8 @@
 ;; *** 常用快捷键
 ;; | 输入法快捷键          | 功能                       |
 ;; |-----------------------+----------------------------|
-;; | C-n 或 M-n 或 + 或 .      | 向下翻页                   |
-;; | C-p 或 M-p 或 - 或 ,      | 向上翻页                   |
+;; | C-n 或 M-n 或 + 或 .  | 向下翻页                   |
+;; | C-p 或 M-p 或 - 或 ,  | 向上翻页                   |
 ;; | C-f                   | 选择下一个备选词           |
 ;; | C-b                   | 选择上一个备选词           |
 ;; | SPC                   | 确定输入                   |
@@ -174,11 +174,16 @@
 ;; 2. 用户可以使用变量 `pyim-schemes' 添加自定义双拼方案。
 ;; 3. 用户可能需要重新设置 `pyim-translate-trigger-char'。
 
-;; *** 让 pyim 使用 liberime (实验特性)
-;; pyim 可以使用 [[https://gitlab.com/liberime/liberime][liberime]]
-;; 包来提高整句输入能力，用户只要激活 liberime, pyim 就会自动使用它。
+;; *** 让 pyim 支持 rime 输入法
 
-;; liberime 激活方式请参考：[[https://gitlab.com/liberime/liberime/blob/master/README.org]] 。
+;; pyim 使用 emacs 动态模块：[[https://gitlab.com/liberime/liberime][liberime]]
+;; 来支持 rime, 设置方式：
+
+;; 1. 激活 liberime, 激活方式参考：[[https://gitlab.com/liberime/liberime/blob/master/README.org]] 。
+;; 2. 设置 scheme:
+;;    #+BEGIN_EXAMPLE
+;;    (setq pyim-default-scheme 'rime)
+;;    #+END_EXAMPLE
 
 ;; *** 使用五笔输入
 ;; pyim 支持五笔输入模式，用户可以通过变量 `pyim-default-scheme' 来设定：
@@ -602,6 +607,12 @@ plist 来表示，比如：
      :first-chars "abcdefghijklmnopqrstuwxyz"
      :rest-chars "vmpfwckzyjqdltxuognbhsrei'-a"
      :prefer-trigger-chars "v")
+    (rime
+     :document "rime 输入法。"
+     :class rime
+     :first-chars "abcdefghijklmnopqrstuvwxyz"
+     :rest-chars "abcdefghijklmnopqrstuvwxyz'-a"
+     :prefer-trigger-chars nil)
     (wubi
      :document "五笔输入法。"
      :class xingma
@@ -914,25 +925,25 @@ pyim 内建的有三种选词框格式：
 (defvar pyim-extra-dicts nil "与 `pyim-dicts' 类似, 用于和 elpa 格式的词库包集成。.")
 
 (defvar pyim-backends
-  '(liberime-words
-    personal-dcache-words
+  '(personal-dcache-words
     common-dcache-words
     pinyin-chars
     jianpin-words
     znabc-words
-    xingma-words)
+    xingma-words
+    rime-words)
   "Pyim 词语获取 backends.
 
 当前支持:
 
-1. `liberime-words'         用于 liberime 支持。
-2. `personal-dcache-words'  从 `pyim-dcache-icode2word' 中获取词条。
-3. `common-dcache-words'    从 `pyim-dcache-code2word' 中获取词条。
-4. `pinyin-chars'           逐一获取一个拼音对应的多个汉字。
-5. `jianpin-words'          获取简拼对应的词条，如果输入 \"ni-hao\",
+1. `personal-dcache-words'  从 `pyim-dcache-icode2word' 中获取词条。
+2. `common-dcache-words'    从 `pyim-dcache-code2word' 中获取词条。
+3. `pinyin-chars'           逐一获取一个拼音对应的多个汉字。
+4. `jianpin-words'          获取简拼对应的词条，如果输入 \"ni-hao\",
                             那么同时搜索 code 为 \"n-h\" 的词条。
-6. `znabc-words'            类似智能ABC的词语获取方式(源于 emacs-eim).
-7. `xingma-words'           专门用于处理五笔等基于形码的输入法的 backend.")
+5. `znabc-words'            类似智能ABC的词语获取方式(源于 emacs-eim).
+6. `xingma-words'           专门用于处理五笔等基于形码的输入法的 backend.
+7. `rime-words'             专门用于处理rime输入法的 backend.")
 
 (defvar pyim-pinyin-shen-mu
   '("b" "p" "m" "f" "d" "t" "n" "l" "g" "k" "h"
@@ -1051,7 +1062,7 @@ pyim 总是使用 emacs-async 包来生成 dcache.")
 (defvar pyim-tooltip-posframe-buffer " *pyim-tooltip-posframe-buffer*"
   "这个变量用来保存做为 page tooltip 的 posframe 的 buffer.")
 
-(defvar pyim-liberime-limit 50
+(defvar pyim-rime-limit 50
   "当 pyim 使用 `liberime-search' 来获取词条时，这个变量用来限制
 `liberime-search' 返回词条的数量。")
 
@@ -2439,6 +2450,11 @@ Return the input string."
   \"aaaa\" -> ((\"aaaa\"))"
   (list (list code)))
 
+(defun pyim-code-split-rime-code (code &optional -)
+  "这个函数只是对 code 做了一点简单的包装，实际并不真正的
+*分解* code, 用于 rime 输入法."
+  (list (list code)))
+
 (defun pyim-spinyin-find-fuzzy (spinyin-list)
   "用于处理模糊音的函数。"
   (let (fuzzy-spinyin-list result1 result2)
@@ -2583,13 +2599,18 @@ Return the input string."
           (concat (or code-prefix "") (car scode))
         (car scode)))))
 
+(defun pyim-scode-join-rime-scode (scode scheme-name &optional _as-search-key _shou-zi-mu)
+  "把一个 `scode' (splited code) 合并为一个 code 字符串, 用于 rime 输入法。"
+  (when scheme-name
+    (car scode)))
+
 ;; **** 获得词语拼音并进一步查询得到备选词列表
 (defun pyim-choices-get (scode-list scheme-name)
   "根据 `scode-list', 得到可能的词组和汉字。"
   ;; scode-list 可以包含多个 scode, 从而得到多个子候选词列表，如何将多个 *子候选词列表* 合理的合并，
   ;; 是一个比较麻烦的事情的事情。 注：这个地方需要进一步得改进。
   (let* (personal-words
-         liberime-words common-words jianpin-words znabc-words pinyin-chars xingma-words)
+         rime-words common-words jianpin-words znabc-words pinyin-chars xingma-words)
 
     (dolist (scode scode-list)
       (setq personal-words
@@ -2601,9 +2622,9 @@ Return the input string."
       (setq pinyin-chars
             (append pinyin-chars
                     (car (pyim-choices-get-pinyin-chars scode scheme-name))))
-      (setq liberime-words
-            (append liberime-words
-                    (car (pyim-choices-get-liberime-words scode scheme-name))))
+      (setq rime-words
+            (append rime-words
+                    (car (pyim-choices-get-rime-words scode scheme-name))))
       (setq xingma-words
             (append xingma-words
                     (car (pyim-choices-get-xingma-words scode scheme-name)))))
@@ -2619,7 +2640,7 @@ Return the input string."
     ;; Debug
     (when pyim-debug
       (princ (list :scode-list scode-list
-                   :liberime-words liberime-words
+                   :rime-words rime-words
                    :personal-words personal-words
                    :common-words common-words
                    :jianpin-words jianpin-words
@@ -2629,7 +2650,7 @@ Return the input string."
     (delete-dups
      (delq nil
            `(,@personal-words
-             ,@liberime-words
+             ,@rime-words
              ,@common-words
              ,@jianpin-words
              ,@znabc-words
@@ -2702,16 +2723,16 @@ Return the input string."
                           (list str)))
            nil))))))
 
-(defun pyim-choices-get-liberime-words (scode scheme-name)
-  (when (member 'liberime-words pyim-backends)
+(defun pyim-choices-get-rime-words (scode scheme-name)
+  (when (member 'rime-words pyim-backends)
     (let ((class (pyim-scheme-get-option scheme-name :class)))
-      (when (member class '(quanpin shuangpin))
+      (when (member class '(rime))
         (list
          (if (functionp 'liberime-search)
              (liberime-search
               (replace-regexp-in-string
                "-" "" (pyim-scode-join scode scheme-name t))
-              pyim-liberime-limit)
+              pyim-rime-limit)
            nil)
          nil)))))
 
