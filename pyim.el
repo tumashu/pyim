@@ -3060,21 +3060,16 @@ Return the input string."
   (let* ((scheme-name pyim-default-scheme)
          (class (pyim-scheme-get-option scheme-name :class))
          (code-maximum-length (pyim-scheme-get-option scheme-name :code-split-length)))
-    (cond
-     ((memq class '(rime))
-      (pyim-rime-get-preedit))
-     ((memq class '(xingma))
-      (mapconcat #'identity
-                 (pyim-split-string-by-number code code-maximum-length)
-                 " "))
-     (t (replace-regexp-in-string "-" " " code)))))
-
-(defun pyim-rime-get-preedit ()
-  "获取 rime 输入法的 preedit 字符串。"
-  (let* ((context (liberime-get-context))
-         (composition (alist-get 'composition context))
-         (preedit (or (alist-get 'preedit composition) "")))
-    (or preedit "")))
+    (cond ((memq class '(rime))
+           (let* ((context (liberime-get-context))
+                  (composition (alist-get 'composition context))
+                  (preedit (alist-get 'preedit composition)))
+             (or preedit "")))
+          ((memq class '(xingma))
+           (mapconcat #'identity
+                      (pyim-split-string-by-number code code-maximum-length)
+                      " "))
+          (t (replace-regexp-in-string "-" " " code)))))
 
 (defun pyim-page-refresh (&optional hightlight-current)
   "按当前位置，生成候选词条"
@@ -3312,33 +3307,24 @@ tooltip 选词框中显示。
     ;; pyim 告诉 liberime 选择其他的词条
     (liberime-select-candidate (- pyim-current-pos 1))
     (let* ((str (pyim-choice (nth (1- pyim-current-pos) (car pyim-current-choices))))
-           (preedit (pyim-rime-get-preedit))
+           (context (liberime-get-context))
            scode-list)
       (pyim-create-word str t)
       (setq pyim-code-position (+ pyim-code-position (length str)))
-      ;; liberime 返回的 preedit 如果不包含中文，说明不需要继续选择了。
-      ;; 需要处理的问题：
-      ;; 1. 默认 liberime 得到的 context 是分页的，一页只包含5个词，
-      ;;    pyim 需要 liberime 不分页，或者一页包含 pyim-rime-limit 个词。
-      ;; 2. 使用 preedit 来做判断适合拼音输入法，但对于其他类型的输入法来说，
-      ;;    可能不太适合。
-      (if (not (string-match-p "\\cc" preedit))
+      (if (not context)
           (progn
             (if (not (member pyim-dagger-str (car pyim-current-choices)))
                 (pyim-create-word pyim-dagger-str))
             (pyim-terminate-translation)
             ;; pyim 使用这个 hook 来处理联想词。
             (run-hooks 'pyim-page-select-finish-hook))
-        (setq scode-list
-              (pyim-code-split
-               (replace-regexp-in-string
-                " " ""
-                (replace-regexp-in-string
-                 "\\cc" ""
-                 preedit))
-               pyim-default-scheme))
-        (setq pyim-current-choices (list (pyim-choices-get scode-list pyim-default-scheme))
-              pyim-current-pos 1)
+        ;; BUG: 默认 liberime 得到的 candidate 是分页的，一页只包含5个词条，
+        ;; pyim 需要 liberime 不分页，或者一页包含尽可能多个词。
+        (setq pyim-current-choices
+              (let* ((menu (alist-get 'menu context))
+                     (candidates (alist-get 'candidates menu)))
+                (list candidates)))
+        (setq pyim-current-pos 1)
         (pyim-dagger-refresh)
         (pyim-page-refresh)))))
 
