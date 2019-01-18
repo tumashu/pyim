@@ -1165,7 +1165,7 @@ pyim 总是使用 emacs-async 包来生成 dcache.")
             (puthash key (delete-dups `(,@orig-value ,@cchars))
                      pyim-pinyin2cchar-cache3)))))))
 
-(defun pyim-pinyin2cchar-get (pinyin &optional equal-match return-list)
+(defun pyim-pinyin2cchar-get (pinyin &optional equal-match return-list include-seperator)
   "获取拼音与 PINYIN 想匹配的所有汉字.
 比如：
 
@@ -1174,14 +1174,24 @@ pyim 总是使用 emacs-async 包来生成 dcache.")
 如果 EQUAL-MATCH 是 non-nil, 获取和 PINYIN 完全匹配的汉字。
 如果 RETURN-LIST 是 non-nil, 返回一个由单个汉字字符串组成的列表。
 
-  (\"满\" \"慢\" \"漫\"  ...)"
+  (\"满\" \"慢\" \"漫\"  ...)
+
+如果 INCLUDE-SEPERATOR 是 non-nil, 返回的列表包含一个 ‘|’ 号，pyim 用这个分隔符
+来区分 3500 个常用汉字和生僻字。"
   (pyim-pinyin2cchar-cache-create)
   (when (and pinyin (stringp pinyin))
-    (if equal-match
-        (if return-list
-            (gethash pinyin pyim-pinyin2cchar-cache2)
-          (gethash pinyin pyim-pinyin2cchar-cache1))
-      (gethash pinyin pyim-pinyin2cchar-cache3))))
+    (let ((output
+           (if equal-match
+               (if return-list
+                   (gethash pinyin pyim-pinyin2cchar-cache2)
+                 (gethash pinyin pyim-pinyin2cchar-cache1))
+             (gethash pinyin pyim-pinyin2cchar-cache3))))
+      (if include-seperator
+          output
+        (delq ""
+              (mapcar (lambda (x)
+                        (replace-regexp-in-string "|" "" x))
+                      (or output '())))))))
 
 ;; *** 查询某个汉字的拼音
 ;; pyim 在特定的时候需要读取一个汉字的拼音，这个工作由下面函数完成：
@@ -3832,12 +3842,18 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
           (let ((n 0) results)
             (dolist (py spinyin)
               (push
-               (mapconcat #'identity
-                          (pyim-pinyin2cchar-get
-                           py
-                           (or all-equal
-                               (and first-equal
-                                    (= n 0)))) "")
+               (mapconcat
+                ;; 只取常用字，不常用的汉字忽略，防止生成的
+                ;; regexp 太长而无法搜索
+                (lambda (x)
+                  (car (split-string x "|")))
+                (pyim-pinyin2cchar-get
+                 py
+                 (or all-equal
+                     (and first-equal
+                          (= n 0)))
+                 nil
+                 t) "")
                results)
               (setq n (+ 1 n)))
             (nreverse results)))
