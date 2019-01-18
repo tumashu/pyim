@@ -733,6 +733,11 @@ plist 来表示，比如：
      :first-chars "abcdefghijklmnopqrstuvwxyz"
      :rest-chars "abcdefghijklmnopqrstuvwxyz;"
      :prefer-trigger-chars nil
+     :code-regexp-function ; 这个函数会被 pyim-convert-code-at-point 调用，
+     (lambda ()            ; 用来得到一个 regexp, 用于提取光标处 code.
+       (and (equal (pyim-char-before-to-string 0) ";")
+            (string-match-p "[a-z]" (pyim-char-before-to-string 1))
+            "[a-z'-;]+ *$"))
      :keymaps
      (("a" "a" "a")
       ("b" "b" "ou")
@@ -3734,32 +3739,28 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
                      (buffer-substring-no-properties
                       (region-beginning) (region-end))
                    (buffer-substring (point) (line-beginning-position))))
+         ;; :code-regexp-function 保存的函数会被 pyim-convert-code-at-point 调用，
+         ;; 用来得到一个 regexp, 用于提取光标处 code.
+         (regexp-func (pyim-scheme-get-option pyim-default-scheme :code-regexp-function))
+         (regexp (or (and (functionp regexp-func) (funcall regexp-func))
+                     (and (not (pyim-string-match-p "[[:punct:]：－]" (pyim-char-before-to-string 0)))
+                          "[a-z'-]+ *$")))
          code length)
-    (if (or (not (pyim-string-match-p "[[:punct:]：－]" (pyim-char-before-to-string 0)))
-            (and (equal pyim-default-scheme 'microsoft-shuangpin)
-                 (equal (pyim-char-before-to-string 0) ";")
-                 (string-match "[a-z]" (pyim-char-before-to-string 1))))
-        ;; 不是标点符号，或者是微软双拼方案下的 `[a-z];' (`;' 表示 `ing')
-        (progn
-          (and (string-match
-                (if (equal pyim-default-scheme 'microsoft-shuangpin)
-                    "[a-z'-;]+ *$"
-                  "[a-z'-]+ *$")
-                string)
-               (setq code
-                     ;; 一些语言使用 '' 来标记字符串，特殊处理。
-                     (replace-regexp-in-string
-                      "^[-']" ""
-                      (match-string 0 string)))
-               (setq length (length code))
-               (setq code (replace-regexp-in-string " +" "" code)))
-          (when (and length (> length 0))
-            (delete-char (- 0 length))
-            (insert (mapconcat #'char-to-string
-                               (pyim-input-method code) ""))))
-
-      ;; 当光标前的一个字符是标点符号时，半角/全角切换。
-      (call-interactively 'pyim-punctuation-translate-at-point))))
+    (if (not regexp)
+        ;; 当光标前的一个字符是标点符号时，半角/全角切换。
+        (call-interactively 'pyim-punctuation-translate-at-point)
+      (and (string-match regexp string)
+           (setq code
+                 ;; 一些语言使用 '' 来标记字符串，特殊处理。
+                 (replace-regexp-in-string
+                  "^[-']" ""
+                  (match-string 0 string)))
+           (setq length (length code))
+           (setq code (replace-regexp-in-string " +" "" code)))
+      (when (and length (> length 0))
+        (delete-char (- 0 length))
+        (insert (mapconcat #'char-to-string
+                           (pyim-input-method code) ""))))))
 
 ;; *** 取消当前输入
 (defun pyim-quit-clear ()
