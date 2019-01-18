@@ -3874,7 +3874,7 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
   (funcall
    (lambda ()
      `(lambda (string &optional bound noerror count)
-        (if (pyim-string-match-p "[^a-z]+" string)
+        (if (pyim-string-match-p "[^a-z']+" string)
             (funcall (isearch-search-fun-default) string bound noerror count)
           (funcall (if ,isearch-forward
                        're-search-forward
