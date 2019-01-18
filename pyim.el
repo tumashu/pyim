@@ -3741,7 +3741,11 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
                  (string-match "[a-z]" (pyim-char-before-to-string 1))))
         ;; 不是标点符号，或者是微软双拼方案下的 `[a-z];' (`;' 表示 `ing')
         (progn
-          (and (string-match (if (equal pyim-default-scheme 'microsoft-shuangpin) "[a-z'-;]+ *$" "[a-z'-]+ *$") string)
+          (and (string-match
+                (if (equal pyim-default-scheme 'microsoft-shuangpin)
+                    "[a-z'-;]+ *$"
+                  "[a-z'-]+ *$")
+                string)
                (setq code
                      ;; 一些语言使用 '' 来标记字符串，特殊处理。
                      (replace-regexp-in-string
