@@ -3742,9 +3742,12 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
          ;; :code-regexp-function 保存的函数会被 pyim-convert-code-at-point 调用，
          ;; 用来得到一个 regexp, 用于提取光标处 code.
          (regexp-func (pyim-scheme-get-option pyim-default-scheme :code-regexp-function))
-         (regexp (or (and (functionp regexp-func) (funcall regexp-func))
-                     (and (not (pyim-string-match-p "[[:punct:]：－]" (pyim-char-before-to-string 0)))
-                          "[a-z'-]+ *$")))
+         (regexp (and (functionp regexp-func) (funcall regexp-func)))
+         ;; 如果一个输入法没有设置 :code-regexp-function, 那么 fallback 方式处理。
+         (regexp-fallback
+          (and (not (pyim-string-match-p "[[:punct:]：－]" (pyim-char-before-to-string 0)))
+               "[a-z'-]+ *$"))
+         (regexp (or regexp regexp-fallback))
          code length)
     (if (not regexp)
         ;; 当光标前的一个字符是标点符号时，半角/全角切换。
