@@ -189,6 +189,11 @@
 ;;      (liberime-select-schema "luna_pinyin_simp")
 ;;      (setq pyim-default-scheme 'rime))
 ;;    #+END_EXAMPLE
+;; 3. 使用 rime 全拼输入法的用户，也可以使用 rime-quanpin scheme,
+;;    这个 scheme 是专门针对 rime 全拼输入法定制的，支持全拼v快捷键。
+;;    #+BEGIN_EXAMPLE
+;;    (setq pyim-default-scheme 'rime-quanpin)
+;;    #+END_EXAMPLE
 
 ;; *** 使用五笔输入
 ;; pyim 支持五笔输入模式，用户可以通过变量 `pyim-default-scheme' 来设定：
@@ -613,11 +618,25 @@ plist 来表示，比如：
      :rest-chars "vmpfwckzyjqdltxuognbhsrei'-a"
      :prefer-trigger-chars "v")
     (rime
-     :document "rime 输入法。"
+     :document
+     "rime 输入法。
+
+这个 scheme 适用于 librime 支持的所有输入法，通用性较好，但无法支
+持 trigger-chars, 所以类似 pyim 全拼支持的v快捷键将无法使用。"
      :class rime
      :first-chars "abcdefghijklmnopqrstuvwxyz"
      :rest-chars "abcdefghijklmnopqrstuvwxyz'-a"
      :prefer-trigger-chars nil)
+    (rime-quanpin
+     :document
+     "rime 全拼输入法。
+
+这个 scheme 专门用于 librime 全拼输入法，同时支持 trigger-chars,
+也就是v快捷键，使用 rime 全拼的朋友建议使用这个 scheme。"
+     :class rime
+     :first-chars "abcdefghjklmnopqrstwxyz"
+     :rest-chars "vmpfwckzyjqdltxuognbhsrei'-a"
+     :prefer-trigger-chars "v")
     (wubi
      :document "五笔输入法。"
      :class xingma
