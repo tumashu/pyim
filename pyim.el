@@ -2777,10 +2777,12 @@ Return the input string."
 
 (defun pyim-choices-get-personal-dcache-words (scode scheme-name)
   (when (member 'personal-dcache-words pyim-backends)
-    (let ((code (pyim-scode-join scode scheme-name t)))
-      (list (pyim-dcache-get code (list pyim-dcache-icode2word
-                                        pyim-dcache-ishortcode2word))
-            nil))))
+    (let ((class (pyim-scheme-get-option scheme-name :class))
+          (code (pyim-scode-join scode scheme-name t)))
+      (when (member class '(quanpin shuangpin))
+        (list (pyim-dcache-get code (list pyim-dcache-icode2word
+                                          pyim-dcache-ishortcode2word))
+              nil)))))
 
 (defun pyim-choices-get-common-dcache-words (scode scheme-name)
   (when (member 'common-dcache-words pyim-backends)
