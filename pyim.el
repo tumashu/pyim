@@ -1058,9 +1058,7 @@ pyim-extra-dicts 时，pyim 会自动生成相关的 dcache 文件。
 2. 自动更新功能无法正常工作，用户通过手工从其他机器上拷贝
    dcache 文件的方法让 pyim 正常工作。")
 
-(defvar pyim-dcache-prefer-emacs-thread
-  (and (>= emacs-major-version 26)
-       (not (eq system-type 'darwin)))
+(defvar pyim-dcache-prefer-emacs-thread nil
   "是否优先使用 emacs thread 功能来生成 dcache.
 
 如果这个变量设置为 t, 那么当 emacs thread 功能可以使用时，
