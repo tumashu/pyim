@@ -953,27 +953,6 @@ pyim 内建的有三种选词框格式：
 (defvar pyim-title "灵通" "Pyim 在 mode-line 中显示的名称.")
 (defvar pyim-extra-dicts nil "与 `pyim-dicts' 类似, 用于和 elpa 格式的词库包集成。.")
 
-(defvar pyim-backends
-  '(personal-dcache-words
-    common-dcache-words
-    pinyin-chars
-    jianpin-words
-    znabc-words
-    xingma-words
-    rime-words)
-  "Pyim 词语获取 backends.
-
-当前支持:
-
-1. `personal-dcache-words'  从 `pyim-dcache-icode2word' 中获取词条。
-2. `common-dcache-words'    从 `pyim-dcache-code2word' 中获取词条。
-3. `pinyin-chars'           逐一获取一个拼音对应的多个汉字。
-4. `jianpin-words'          获取简拼对应的词条，如果输入 \"ni-hao\",
-                            那么同时搜索 code 为 \"n-h\" 的词条。
-5. `znabc-words'            类似智能ABC的词语获取方式(源于 emacs-eim).
-6. `xingma-words'           专门用于处理五笔等基于形码的输入法的 backend.
-7. `rime-words'             专门用于处理rime输入法的 backend.")
-
 (defvar pyim-pinyin-shen-mu
   '("b" "p" "m" "f" "d" "t" "n" "l" "g" "k" "h"
     "j" "q" "x" "z" "c" "s" "zh" "ch" "sh" "r" "y" "w"))
@@ -2645,41 +2624,88 @@ Return the input string."
 
 ;; **** 获得词语拼音并进一步查询得到备选词列表
 (defun pyim-choices-get (scode-list scheme-name)
-  "根据 `scode-list', 得到可能的词组和汉字。"
-  ;; scode-list 可以包含多个 scode, 从而得到多个子候选词列表，如何将多个 *子候选词列表* 合理的合并，
-  ;; 是一个比较麻烦的事情的事情。 注：这个地方需要进一步得改进。
-  (let* (personal-words
-         rime-words common-words jianpin-words znabc-words pinyin-chars xingma-words)
+  "按照 `scheme-name' 对应的输入法方案， 从 `scode-list' 得到候选词条。"
+  (let ((class (pyim-scheme-get-option scheme-name :class)))
+    (when class
+      (funcall (intern (format "pyim-choices-get:%S" class))
+               scode-list scheme-name))))
 
+(defun pyim-choices-get:xingma (scode-list scheme-name)
+  "候选词获取，用于五笔仓颉等形码输入法。"
+  (let (result)
     (dolist (scode scode-list)
+      (let* ((code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
+             (code (pyim-scode-join scode scheme-name))
+             (n (pyim-scheme-get-option scheme-name :code-split-length))
+             (output (pyim-split-string-by-number code n t))
+             (output1 (car output))
+             (output2 (reverse (cdr output)))
+             output3 str)
+        (when output2
+          (setq str (mapconcat
+                     #'(lambda (code)
+                         (car (pyim-dcache-get (concat code-prefix code))))
+                     output2 "")))
+        (setq output3
+              (remove "" (or (mapcar #'(lambda (x)
+                                         (concat str x))
+                                     (pyim-dcache-get
+                                      (concat code-prefix output1)
+                                      (list pyim-dcache-code2word
+                                            pyim-dcache-shortcode2word)))
+                             (list str))))
+        (setq result (append result output3))))
+    (when (car result)
+      result)))
+
+(defun pyim-choices-get:rime (scode-list scheme-name)
+  "候选词获取，用于 rime 输入法。"
+  (if (functionp 'liberime-search)
+      (liberime-search
+       (replace-regexp-in-string
+        "-" "" (pyim-scode-join (car scode-list) scheme-name t))
+       pyim-rime-limit)
+    nil))
+
+(defun pyim-choices-get:quanpin (spinyin-list scheme-name)
+  "候选词获取，用于全拼输入法。"
+  (let* (;; 如果输入 "ni-hao" ，搜索 code 为 "n-h" 的词条做为联想词。
+         ;; 搜索首字母得到的联想词太多，这里限制联想词要大于两个汉字并且只搜索
+         ;; 个人文件。
+         (jianpin-words
+          (when (> (length (car spinyin-list)) 1)
+            (pyim-dcache-get
+             (pyim-scode-join (car spinyin-list) scheme-name t t)
+             pyim-dcache-ishortcode2word)))
+         ;; 将输入的拼音按照声母和韵母打散，得到尽可能多的拼音组合，
+         ;; 查询这些拼音组合，得到的词条做为联想词。
+         (znabc-words
+          (pyim-possible-words
+           (pyim-possible-words-py (car spinyin-list))))
+         pinyin-chars
+         personal-words
+         common-words)
+
+    (dolist (spinyin spinyin-list)
       (setq personal-words
             (append personal-words
-                    (car (pyim-choices-get-personal-dcache-words scode scheme-name))))
+                    (pyim-dcache-get
+                     (pyim-scode-join spinyin scheme-name t)
+                     (list pyim-dcache-icode2word
+                           pyim-dcache-ishortcode2word))))
       (setq common-words
             (append common-words
-                    (car (pyim-choices-get-common-dcache-words scode scheme-name))))
+                    (pyim-dcache-get
+                     (pyim-scode-join spinyin scheme-name t)
+                     (list pyim-dcache-code2word
+                           pyim-dcache-shortcode2word))))
       (setq pinyin-chars
             (append pinyin-chars
-                    (car (pyim-choices-get-pinyin-chars scode scheme-name))))
-      (setq rime-words
-            (append rime-words
-                    (car (pyim-choices-get-rime-words scode scheme-name))))
-      (setq xingma-words
-            (append xingma-words
-                    (car (pyim-choices-get-xingma-words scode scheme-name)))))
-
-    ;; Pinyin shouzimu similar words
-    (let ((words (pyim-choices-get-jianpin-words (car scode-list) scheme-name)))
-      (setq jianpin-words (car (cdr words))))
-
-    ;; Pinyin znabc-style similar words
-    (let ((words (pyim-choices-get-znabc-words (car scode-list) scheme-name)))
-      (setq znabc-words (car (cdr words))))
+                    (pyim-dcache-get (concat (caar spinyin) (cdar spinyin))))))
 
     ;; Debug
     (when pyim-debug
-      (princ (list :scode-list scode-list
-                   :rime-words rime-words
+      (princ (list :spinyin-list spinyin-list
                    :personal-words personal-words
                    :common-words common-words
                    :jianpin-words jianpin-words
@@ -2689,39 +2715,14 @@ Return the input string."
     (delete-dups
      (delq nil
            `(,@personal-words
-             ,@rime-words
              ,@common-words
              ,@jianpin-words
              ,@znabc-words
-             ,@pinyin-chars
-             ,@xingma-words)))))
+             ,@pinyin-chars)))))
 
-(defun pyim-choices-get-znabc-words (spinyin scheme-name)
-  ;; 将输入的拼音按照声母和韵母打散，得到尽可能多的拼音组合，
-  ;; 查询这些拼音组合，得到的词条做为联想词。
-  (when (member 'znabc-words pyim-backends)
-    (let ((class (pyim-scheme-get-option scheme-name :class)))
-      (when (member class '(quanpin shuangpin))
-        (list nil (pyim-possible-words
-                   (pyim-possible-words-py spinyin)))))))
-
-(defun pyim-choices-get-jianpin-words (spinyin scheme-name)
-  ;; 如果输入 "ni-hao" ，搜索 code 为 "n-h" 的词条做为联想词。
-  ;; 搜索首字母得到的联想词太多，这里限制联想词要大于两个汉字并且只搜索
-  ;; 个人文件。
-  (when (member 'jianpin-words pyim-backends)
-    (let ((class (pyim-scheme-get-option scheme-name :class)))
-      (when (and (> (length spinyin) 1)
-                 (member class '(quanpin shuangpin)))
-        (let ((pyabbrev (pyim-scode-join spinyin scheme-name t t)))
-          (list nil (pyim-dcache-get pyabbrev pyim-dcache-ishortcode2word)))))))
-
-(defun pyim-choices-get-pinyin-chars (spinyin scheme-name)
-  (when (member 'pinyin-chars pyim-backends)
-    (let ((class (pyim-scheme-get-option scheme-name :class)))
-      (when (member class '(quanpin shuangpin))
-        (list (pyim-dcache-get (concat (caar spinyin) (cdar spinyin)))
-              nil)))))
+(defun pyim-choices-get:shuangpin (scode-list scheme-name)
+  "候选词获取，用于双拼输入法。"
+  (funcall pyim-choices-get:quanpin scode-list scheme-name))
 
 (defun pyim-split-string-by-number (str n &optional reverse)
   (let (output)
@@ -2735,61 +2736,6 @@ Return the input string."
     (if reverse
         output
       (nreverse output))))
-
-(defun pyim-choices-get-xingma-words (scode scheme-name)
-  (when (member 'xingma-words pyim-backends)
-    (let ((class (pyim-scheme-get-option scheme-name :class)))
-      (when (member class '(xingma))
-        (let* ((code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
-               (code (pyim-scode-join:xingma scode scheme-name))
-               (n (pyim-scheme-get-option scheme-name :code-split-length))
-               (output (pyim-split-string-by-number code n t))
-               (output1 (car output))
-               (output2 (reverse (cdr output)))
-               str)
-          (when output2
-            (setq str (mapconcat
-                       #'(lambda (code)
-                           (car (pyim-dcache-get (concat code-prefix code))))
-                       output2 "")))
-          (list
-           (remove "" (or (mapcar #'(lambda (x)
-                                      (concat str x))
-                                  (pyim-dcache-get
-                                   (concat code-prefix output1)
-                                   (list pyim-dcache-code2word
-                                         pyim-dcache-shortcode2word)))
-                          (list str)))
-           nil))))))
-
-(defun pyim-choices-get-rime-words (scode scheme-name)
-  (when (member 'rime-words pyim-backends)
-    (let ((class (pyim-scheme-get-option scheme-name :class)))
-      (when (member class '(rime))
-        (list
-         (if (functionp 'liberime-search)
-             (liberime-search
-              (replace-regexp-in-string
-               "-" "" (pyim-scode-join scode scheme-name t))
-              pyim-rime-limit)
-           nil)
-         nil)))))
-
-(defun pyim-choices-get-personal-dcache-words (scode scheme-name)
-  (when (member 'personal-dcache-words pyim-backends)
-    (let ((class (pyim-scheme-get-option scheme-name :class))
-          (code (pyim-scode-join scode scheme-name t)))
-      (when (member class '(quanpin shuangpin))
-        (list (pyim-dcache-get code (list pyim-dcache-icode2word
-                                          pyim-dcache-ishortcode2word))
-              nil)))))
-
-(defun pyim-choices-get-common-dcache-words (scode scheme-name)
-  (when (member 'common-dcache-words pyim-backends)
-    (let ((code (pyim-scode-join scode scheme-name t)))
-      (list (pyim-dcache-get code (list pyim-dcache-code2word
-                                        pyim-dcache-shortcode2word))
-            nil))))
 
 (defun pyim-flatten-list (my-list)
   (cond
