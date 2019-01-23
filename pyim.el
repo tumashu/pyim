@@ -1002,8 +1002,9 @@ pyim 称这个字符串为 \"dragger string\", 向 \"匕首\" 一样插入
 (defvar pyim-code-position nil)
 (defvar pyim-imobj-list nil
   "Imobj 组成的 list.
-pyim 会将用户输入的字符组成的字符串分解为一个或者多个 imobj （splited code）,
-这个变量用于保存分解得到的结果。")
+
+pyim 会从用户输入的字符组成的字符串创建一个或者多个 imobj 
+组成的列表。这个变量用于保存这个列表。")
 
 (defvar pyim-current-pos nil "当前选择的词条在 ‘pyim-current-choices’ 中的位置.")
 
@@ -2255,7 +2256,8 @@ Return the input string."
 ;; 2. 韵母表：`pyim-pinyin-yun-mu'
 ;; 3. 有效韵母表： `pyim-pinyin-valid-yun-mu'
 
-;; pyim 使用函数 `pyim-imobj-create' 将用户输入的字符串分解为一个由声母和韵母组成的拼音列表，比如：
+;; pyim 使用函数 `pyim-imobj-create' 从用户输入的字符串创建一个 imobj
+;; 这个 imobj 包含声母和韵母的相关信息，比如：
 
 ;; #+BEGIN_EXAMPLE
 ;; (pyim-imobj-create "woaimeinv" 'quanpin)
@@ -2300,7 +2302,7 @@ Return the input string."
 ;; 结果为:
 ;; : ("o" . "aimeinv")
 
-;; 当用户输入一个错误的拼音时，`pyim-imobj-create' 会产生一个声母为空而韵母又不正确的拼音列表 ，比如：
+;; 当用户输入一个错误的拼音时，`pyim-imobj-create' 创建的 imobj 就不合法 ，比如：
 
 ;; #+BEGIN_EXAMPLE
 ;; (pyim-imobj-create "ua" 'quanpin)
@@ -2310,6 +2312,7 @@ Return the input string."
 ;; : ((("" . "ua")))
 
 ;; 这种错误可以使用函数 `pyim-imobj-validp' 来检测。
+
 ;; #+BEGIN_EXAMPLE
 ;; (list (pyim-imobj-validp (car (pyim-imobj-create "ua" 'quanpin)) 'quanpin)
 ;;       (pyim-imobj-validp (car (pyim-imobj-create "a" 'quanpin)) 'quanpin)
@@ -2320,11 +2323,11 @@ Return the input string."
 ;; 结果为:
 ;; : (nil t t t)
 
-;; pyim 使用函数 `pyim-imobj-join' 将一个 imobj (splited code) 合并
-;; 为一个 code 字符串，构建得到的字符串用于搜索词条。
+;; pyim 使用函数 `pyim-code-create' 从一个 imobj 创建一个 code，
+;; code 是一个字符串，用于从词库中搜索相关词条。
 
 ;; #+BEGIN_EXAMPLE
-;; (pyim-imobj-join '(("w" . "o") ("" . "ai") ("m" . "ei") ("n" . "v")) 'quanpin)
+;; (pyim-code-create '(("w" . "o") ("" . "ai") ("m" . "ei") ("n" . "v")) 'quanpin)
 ;; #+END_EXAMPLE
 
 ;; 结果为:
@@ -2404,8 +2407,8 @@ Return the input string."
       (plist-get (cdr scheme) option))))
 
 (defun pyim-imobj-create (entered &optional scheme-name)
-  "按照 `scheme-name' 对应的输入法方案，把一个字符串分解为一个由 imobj
-组成的列表，类似：
+  "按照 `scheme-name' 对应的输入法方案，从 ENTERED 字符串中创建一个
+或者多个 imobj 组成的列表，类似：
 
 1. pinyin:  (((\"n\" . \"i\") (\"h\" . \"ao\")))
 
@@ -2416,8 +2419,6 @@ Return the input string."
                entered scheme-name))))
 
 (defun pyim-imobj-create:quanpin (entered &optional -)
-  "把一个字符串 `entered' 分解成 spinyin-list (由声母和韵母组成的复杂列表），
-优先处理含有 ' 的位置。"
   (when (and entered (string< "" entered))
     (pyim-spinyin-find-fuzzy
      (list (apply 'append
@@ -2433,7 +2434,6 @@ Return the input string."
 
 ;; "nihc" -> (((\"n\" . \"i\") (\"h\" . \"ao\")))
 (defun pyim-imobj-create:shuangpin (entered &optional scheme-name)
-  "把一个双拼字符串分解成一个声母和韵母组成的复杂列表。"
   (let ((keymaps (pyim-scheme-get-option scheme-name :keymaps))
         (list (string-to-list (replace-regexp-in-string "-" "" entered)))
         results)
@@ -2455,15 +2455,9 @@ Return the input string."
      (pyim-permutate-list (nreverse results)))))
 
 (defun pyim-imobj-create:xingma (entered &optional -)
-  "这个函数只是对 ENTERED 做了一点简单的包装，实际并不真正的
-*分解*, 用于五笔等基于形码的输入法, 比如：
-
-  \"aaaa\" -> ((\"aaaa\"))"
   (list (list entered)))
 
 (defun pyim-imobj-create:rime (entered &optional -)
-  "这个函数只是对 ENTERED 做了一点简单的包装，实际并不真正的
-*分解*, 用于 rime 输入法."
   (list (list entered)))
 
 (defun pyim-spinyin-find-fuzzy (spinyin-list)
@@ -2500,26 +2494,27 @@ Return the input string."
            (reverse result))))
 
 (defun pyim-imobj-validp (imobj scheme-name)
-  "检测一个 imobj 是否有效。"
+  "检测一个 IMOBJ 是否是一个有效 IMOBJ."
   (let ((class (pyim-scheme-get-option scheme-name :class)))
     (cond
      ((member class '(quanpin shuangpin))
-      (or (pyim-imobj-spinyin-validp imobj)
+      (or (pyim-imobj-validp:quanpin imobj)
           ;; 一些同学使用下面三个字母前缀来定义特殊
           ;; 词条，所以下面三个字符开头的也算合法。
           (member (substring (cdr (car imobj)) 0 1)
                   '("i" "u" "v"))))
      (t t))))
 
-(defun pyim-imobj-spinyin-validp (spinyin)
-  "检查 `spinyin' 是否声母为空且韵母又不正确。"
+(defun pyim-imobj-validp:quanpin (imobj)
+  "检查 IMOBJ 是否有效，用于全拼。
+主要检查是否是声母为空且韵母又不正确。"
   (let ((valid t) py)
     (while (progn
-             (setq py (car spinyin))
+             (setq py (car imobj))
              (if (and (not (string< "" (car py)))
                       (not (member (cdr py) pyim-pinyin-valid-yun-mu)))
                  (setq valid nil)
-               (setq spinyin (cdr spinyin)))))
+               (setq imobj (cdr imobj)))))
     valid))
 
 (defun pyim-entered-user-divide-pos (entered)
@@ -2548,17 +2543,18 @@ Return the input string."
     (if cur (setq entered (concat entered "'")))  ; the last char is `''
     entered))
 
-(defun pyim-imobj-join (imobj scheme-name &optional as-search-key shou-zi-mu)
-  "按照 `scheme' 对应的输入法方案，将一个 imobj (splited code)
-重新合并为 code 字符串，用于搜索。"
+(defun pyim-code-create (imobj scheme-name &optional as-search-key shou-zi-mu)
+  "按照 `scheme' 对应的输入法方案，从一个 imobj 创建一个用于搜索
+code 字符串."
   (let ((class (pyim-scheme-get-option scheme-name :class)))
     (when class
-      (funcall (intern (format "pyim-imobj-join:%S" class))
+      (funcall (intern (format "pyim-code-create:%S" class))
                imobj scheme-name as-search-key shou-zi-mu))))
 
-(defun pyim-imobj-join:quanpin (spinyin scheme-name &optional as-search-key shou-zi-mu)
-  "把一个 `spinyin' (splited pinyin) 合并为一个全拼字符串，当 `shou-zi-mu'
-设置为 t 时，生成拼音首字母字符串，比如 p-y。"
+(defun pyim-code-create:quanpin (imobj scheme-name &optional as-search-key shou-zi-mu)
+  "创建 code 的函数，用于全拼。
+
+当 `shou-zi-mu' 设置为 t 时，生成拼音首字母字符串，比如 p-y。"
   (mapconcat 'identity
              (mapcar
               #'(lambda (w)
@@ -2566,15 +2562,15 @@ Return the input string."
                     (if shou-zi-mu
                         (substring py 0 1)
                       py)))
-              spinyin)
+              imobj)
              "-"))
 
-(defun pyim-imobj-join:shuangpin (spinyin scheme-name &optional as-search-key shou-zi-mu)
-  "把一个 `spinyin' (splited pinyin) 合并为一个双拼字符串，当 `shou-zi-mu'
-设置为 t 时，生成双拼首字母字符串，比如 p-y。"
+(defun pyim-code-create:shuangpin (spinyin scheme-name &optional as-search-key shou-zi-mu)
+  "创建 code 字符串的函数，用于双拼。
+当 `shou-zi-mu' 设置为 t 时，生成双拼首字母字符串，比如 p-y。"
   (if as-search-key
       ;; 双拼使用全拼输入法的词库，所以搜索 dcache 用的 key 要使用全拼
-      (pyim-imobj-join:quanpin spinyin scheme-name as-search-key shou-zi-mu)
+      (pyim-code-create:quanpin spinyin scheme-name as-search-key shou-zi-mu)
     (when scheme-name
       (let ((keymaps (pyim-scheme-get-option scheme-name :keymaps)))
         (mapconcat 'identity
@@ -2597,8 +2593,8 @@ Return the input string."
                     spinyin)
                    "-")))))
 
-(defun pyim-imobj-join:xingma (imobj scheme-name &optional as-search-key shou-zi-mu)
-  "把一个 `imobj' (splited code) 合并为一个 code 字符串, 用于五笔等基于形码的输入法。
+(defun pyim-code-create:xingma (imobj scheme-name &optional as-search-key shou-zi-mu)
+  "创建 code 字符串的函数，用于五笔等基于形码的输入法。
 比如：
 
     (\"aaaa\") --> \"aaaa\"   用于在 dagger 中显示。
@@ -2610,8 +2606,8 @@ Return the input string."
           (concat (or code-prefix "") (car imobj))
         (car imobj)))))
 
-(defun pyim-imobj-join:rime (imobj scheme-name &optional _as-search-key _shou-zi-mu)
-  "把一个 `imobj' (splited code) 合并为一个 code 字符串, 用于 rime 输入法。"
+(defun pyim-code-create:rime (imobj scheme-name &optional _as-search-key _shou-zi-mu)
+  "创建 code 字符串的函数, 用于 rime 输入法。"
   (when scheme-name
     (car imobj)))
 
@@ -2628,7 +2624,7 @@ Return the input string."
   (let (result)
     (dolist (imobj imobj-list)
       (let* ((code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
-             (code (pyim-imobj-join imobj scheme-name))
+             (code (pyim-code-create imobj scheme-name))
              (n (pyim-scheme-get-option scheme-name :code-split-length))
              (output (pyim-split-string-by-number code n t))
              (output1 (car output))
@@ -2656,7 +2652,7 @@ Return the input string."
   (if (functionp 'liberime-search)
       (liberime-search
        (replace-regexp-in-string
-        "-" "" (pyim-imobj-join (car imobj-list) scheme-name t))
+        "-" "" (pyim-code-create (car imobj-list) scheme-name t))
        pyim-rime-limit)
     nil))
 
@@ -2668,7 +2664,7 @@ Return the input string."
          (jianpin-words
           (when (> (length (car spinyin-list)) 1)
             (pyim-dcache-get
-             (pyim-imobj-join (car spinyin-list) scheme-name t t)
+             (pyim-code-create (car spinyin-list) scheme-name t t)
              pyim-dcache-ishortcode2word)))
          ;; 将输入的拼音按照声母和韵母打散，得到尽可能多的拼音组合，
          ;; 查询这些拼音组合，得到的词条做为联想词。
@@ -2683,13 +2679,13 @@ Return the input string."
       (setq personal-words
             (append personal-words
                     (pyim-dcache-get
-                     (pyim-imobj-join spinyin scheme-name t)
+                     (pyim-code-create spinyin scheme-name t)
                      (list pyim-dcache-icode2word
                            pyim-dcache-ishortcode2word))))
       (setq common-words
             (append common-words
                     (pyim-dcache-get
-                     (pyim-imobj-join spinyin scheme-name t)
+                     (pyim-code-create spinyin scheme-name t)
                      (list pyim-dcache-code2word
                            pyim-dcache-shortcode2word))))
       (setq pinyin-chars
@@ -2749,25 +2745,25 @@ Return the input string."
         (setq words (append words (pyim-dcache-get word)))))
     words))
 
-(defun pyim-possible-words-py (spinyin)
+(defun pyim-possible-words-py (imobj)
   "所有可能的词组拼音。从第一个字开始，每个字断开形成一个拼音。如果是
 完整拼音，则给出完整的拼音，如果是给出声母，则为一个 CONS CELL，CAR 是
 拼音，CDR 是拼音列表。例如：
 
- (setq foo-spinyin (pyim-imobj-create \"pin-yin-sh-r\" 'quanpin))
+ (setq foo-imobj (pyim-imobj-create \"pin-yin-sh-r\" 'quanpin))
   => ((\"p\" . \"in\") (\"y\" . \"in\") (\"sh\" . \"\") (\"r\" . \"\"))
 
- (pyim-possible-words-py foo-spinyin)
+ (pyim-possible-words-py foo-imobj)
   => (\"pin-yin\" (\"p-y-sh\" (\"p\" . \"in\") (\"y\" . \"in\") (\"sh\" . \"\")) (\"p-y-sh-r\" (\"p\" . \"in\") (\"y\" . \"in\") (\"sh\" . \"\") (\"r\" . \"\")))
  "
   (let (pys fullpy smpy wordlist (full t))
-    (if (string< "" (cdar spinyin))
-        (setq fullpy (concat (caar spinyin) (cdar spinyin))
-              smpy (pyim-essential-py (car spinyin)))
-      (setq smpy (caar spinyin)
+    (if (string< "" (cdar imobj))
+        (setq fullpy (concat (caar imobj) (cdar imobj))
+              smpy (pyim-essential-py (car imobj)))
+      (setq smpy (caar imobj)
             full nil))
-    (setq wordlist (list (car spinyin)))
-    (dolist (py (cdr spinyin))
+    (setq wordlist (list (car imobj)))
+    (dolist (py (cdr imobj))
       (setq wordlist (append wordlist (list py)))
       (if (and full (string< "" (cdr py)))
           (setq fullpy (concat fullpy "-" (car py) (cdr py))
@@ -3120,7 +3116,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
            (replace-regexp-in-string
             "[-']+" (or separator " ")
             (pyim-entered-restore-user-divide
-             (pyim-imobj-join (car pyim-imobj-list) scheme-name)
+             (pyim-code-create (car pyim-imobj-list) scheme-name)
              (pyim-entered-user-divide-pos entered))))
           (t entered))))
 
