@@ -2612,14 +2612,14 @@ code 字符串."
     (car imobj)))
 
 ;; **** 获得词语拼音并进一步查询得到备选词列表
-(defun pyim-choices-get (imobj-list scheme-name)
+(defun pyim-candidates-get (imobj-list scheme-name)
   "按照 `scheme-name' 对应的输入法方案， 从 `imobj-list' 得到候选词条。"
   (let ((class (pyim-scheme-get-option scheme-name :class)))
     (when class
-      (funcall (intern (format "pyim-choices-get:%S" class))
+      (funcall (intern (format "pyim-candidates-get:%S" class))
                imobj-list scheme-name))))
 
-(defun pyim-choices-get:xingma (imobj-list scheme-name)
+(defun pyim-candidates-get:xingma (imobj-list scheme-name)
   "候选词获取，用于五笔仓颉等形码输入法。"
   (let (result)
     (dolist (imobj imobj-list)
@@ -2647,7 +2647,7 @@ code 字符串."
     (when (car result)
       result)))
 
-(defun pyim-choices-get:rime (imobj-list scheme-name)
+(defun pyim-candidates-get:rime (imobj-list scheme-name)
   "候选词获取，用于 rime 输入法。"
   (if (functionp 'liberime-search)
       (liberime-search
@@ -2656,7 +2656,7 @@ code 字符串."
        pyim-rime-limit)
     nil))
 
-(defun pyim-choices-get:quanpin (spinyin-list scheme-name)
+(defun pyim-candidates-get:quanpin (spinyin-list scheme-name)
   "候选词获取，用于全拼输入法。"
   (let* (;; 如果输入 "ni-hao" ，搜索 code 为 "n-h" 的词条做为联想词。
          ;; 搜索首字母得到的联想词太多，这里限制联想词要大于两个汉字并且只搜索
@@ -2709,9 +2709,9 @@ code 字符串."
              ,@znabc-words
              ,@pinyin-chars)))))
 
-(defun pyim-choices-get:shuangpin (imobj-list scheme-name)
+(defun pyim-candidates-get:shuangpin (imobj-list scheme-name)
   "候选词获取，用于双拼输入法。"
-  (funcall pyim-choices-get:quanpin imobj-list scheme-name))
+  (funcall pyim-candidates-get:quanpin imobj-list scheme-name))
 
 (defun pyim-split-string-by-number (str n &optional reverse)
   (let (output)
@@ -2796,7 +2796,7 @@ code 字符串."
                   (car pyim-imobj-list) scheme-name)
                  (progn
                    (setq pyim-current-choices
-                         (list (delete-dups (pyim-choices-get pyim-imobj-list scheme-name))))
+                         (list (delete-dups (pyim-candidates-get pyim-imobj-list scheme-name))))
                    (when (car pyim-current-choices)
                      (setq pyim-current-pos 1)
                      (pyim-dagger-refresh)
@@ -3260,7 +3260,7 @@ tooltip 选词框中显示。
                               #'(lambda (imobj)
                                   (nthcdr pyim-code-position imobj))
                               pyim-imobj-list)))
-          (setq pyim-current-choices (list (pyim-choices-get imobj-list pyim-default-scheme))
+          (setq pyim-current-choices (list (pyim-candidates-get imobj-list pyim-default-scheme))
                 pyim-current-pos 1)
           (pyim-dagger-refresh)
           (pyim-page-refresh))))))
