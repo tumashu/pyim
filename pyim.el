@@ -1672,18 +1672,6 @@ DCACHE 是一个 code -> words 的 hashtable.
        dcache)
       (pyim-dcache-save-value-to-file hashtable file))))
 
-(defun pyim-code-at-point (&optional seperaters)
-  "Get code in the current line.
-
-注：这个函数已经不在使用"
-  (car (pyim-dline-parse seperaters)))
-
-(defun pyim-line-content (&optional seperaters)
-  "用 SEPERATERS 分解当前行，所有参数传递给 ‘split-string’ 函数.
-
-注：这个函数已经不在使用"
-  (cdr (pyim-dline-parse seperaters)))
-
 (defun pyim-dline-parse (&optional seperaters)
   "解析词库文件当前行的信息，SEPERATERS 为词库使用的分隔符。"
   (let* ((begin (line-beginning-position))
@@ -1692,9 +1680,6 @@ DCACHE 是一个 code -> words 的 hashtable.
                  (buffer-substring-no-properties begin end)
                  seperaters)))
     items))
-
-(make-obsolete 'pyim-code-at-point "Please Use (car (pyim-dline-parse)) instead.")
-(make-obsolete 'pyim-line-content "Please Use (cdr (pyim-dline-parse)) instead.")
 
 (defun pyim-dcache-save-caches ()
   "保存 dcache.
@@ -1707,9 +1692,6 @@ DCACHE 是一个 code -> words 的 hashtable.
   (pyim-dcache-save-variable 'pyim-dcache-icode2word)
   (pyim-dcache-save-variable 'pyim-dcache-iword2count)
   t)
-
-(define-obsolete-function-alias
-  'pyim-personal-dcache-export 'pyim-dcache-export-personal-dcache)
 
 (defun pyim-dcache-export-personal-dcache (file &optional confirm)
   "将 ‘pyim-dcache-icode2word’ 导出为 pyim 词库文件.
@@ -1892,8 +1874,6 @@ BUG：无法有效的处理多音字。"
             (if prepend
                 (pyim-list-merge word orig-value)
               (pyim-list-merge orig-value word))))))))
-
-(define-obsolete-function-alias 'pyim-create-or-rearrange-word 'pyim-create-word)
 
 (defun pyim-list-merge (a b)
   "Join list A and B to a new list, then delete dups."
@@ -3736,9 +3716,6 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
         (not pyim-input-ascii)))
 
 ;; *** 为 isearch 添加拼音搜索功能
-(define-obsolete-function-alias
-  'pyim-isearch-build-search-regexp 'pyim-cregexp-build)
-
 (defun pyim-cregexp-build (pystr)
   "根据 str 构建一个中文 regexp, 用于 \"拼音搜索汉字\".
 比如：
@@ -3775,9 +3752,6 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
                   (concat pystr "\\|" regexp)
                 pystr)))
         regexp))))
-
-(define-obsolete-function-alias
-  'pyim-spinyin-build-cregexp 'pyim-cregexp-build-from-spinyin)
 
 (defun pyim-cregexp-build-from-spinyin (spinyin &optional match-beginning
                                                 first-equal all-equal)
