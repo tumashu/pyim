@@ -984,13 +984,8 @@ pyim 称这个字符串为 \"dragger string\", 向 \"匕首\" 一样插入
 (defvar pyim-input-ascii nil  "是否开启 pyim 英文输入模式.")
 (defvar pyim-force-input-chinese nil "是否强制开启中文输入模式.")
 
-(defvar pyim-current-choices nil
-  "所有可选的词条，是一个list.
-1. CAR 部份是可选的词条，一般是一个字符串列表。
-   也可以含有list。但是包含的list第一个元素必须是将要插入的字符串。
-2. CDR 部分是一个 Association list。通常含有这样的内容：
-   1. pos 上次选择的位置
-   2. completion 下一个可能的字母（如果 pyim-do-completion 为 t）")
+(defvar pyim-candidates nil
+  "所有可选的词条，是一个list.")
 
 (defvar pyim-last-created-word nil
   "记录最近一次创建的词条， 用于实现快捷删词功能： `pyim-delete-last-word' .")
@@ -1006,7 +1001,7 @@ pyim 称这个字符串为 \"dragger string\", 向 \"匕首\" 一样插入
 pyim 会从用户输入的字符组成的字符串创建一个或者多个 imobj 
 组成的列表。这个变量用于保存这个列表。")
 
-(defvar pyim-current-pos nil "当前选择的词条在 ‘pyim-current-choices’ 中的位置.")
+(defvar pyim-current-pos nil "当前选择的词条在 ‘pyim-candidates’ 中的位置.")
 
 (defvar pyim-load-hook nil)
 (defvar pyim-active-hook nil)
@@ -1113,7 +1108,7 @@ pyim 总是使用 emacs-async 包来生成 dcache.")
 (defvar pyim-local-variable-list
   '(pyim-entered
     pyim-dagger
-    pyim-current-choices
+    pyim-candidates
     pyim-current-pos
     pyim-input-ascii
     pyim-english-input-switch-functions
@@ -2226,7 +2221,7 @@ Return the input string."
   "Terminate the translation of the current key."
   (setq pyim-translating nil)
   (pyim-dagger-delete-string)
-  (setq pyim-current-choices nil)
+  (setq pyim-candidates nil)
   (when (and (memq pyim-page-tooltip '(posframe child-frame))
              (pyim-tooltip-posframe-valid-p))
     (posframe-hide pyim-tooltip-posframe-buffer)))
@@ -2784,7 +2779,7 @@ code 字符串."
 ;; *** 核心函数：拼音字符串处理函数
 ;; `pyim-entered-handler' 这个函数是一个重要的 *核心函数* ，其大致工作流程为：
 ;; 1. 查询拼音字符串 `pyim-entered' 得到： 待选词列表
-;;    `pyim-current-choices' 和 当前选择的词条 `pyim-entered'
+;;    `pyim-candidates' 和 当前选择的词条 `pyim-entered'
 ;; 2. 显示备选词条和选择备选词等待用户选择。
 
 (defun pyim-entered-handler ()
@@ -2795,14 +2790,14 @@ code 字符串."
     (unless (and (pyim-imobj-validp
                   (car pyim-imobj-list) scheme-name)
                  (progn
-                   (setq pyim-current-choices
+                   (setq pyim-candidates
                          (list (delete-dups (pyim-candidates-get pyim-imobj-list scheme-name))))
-                   (when (car pyim-current-choices)
+                   (when (car pyim-candidates)
                      (setq pyim-current-pos 1)
                      (pyim-dagger-refresh)
                      (pyim-page-refresh)
                      t)))
-      (setq pyim-current-choices
+      (setq pyim-candidates
             (list (list pyim-entered)))
       (setq pyim-current-pos 1)
       (pyim-dagger-refresh)
@@ -2866,7 +2861,7 @@ code 字符串."
   "更新 `pyim-dagger' 的值。"
   (let* ((end (pyim-page-end))
          (start (1- (pyim-page-start)))
-         (choices (car pyim-current-choices))
+         (choices (car pyim-candidates))
          (choice (pyim-subseq choices start end))
          (pos (1- (min pyim-current-pos (length choices)))))
     (setq pyim-dagger
@@ -2905,8 +2900,8 @@ code 字符串."
 ;; "1. 你好 2. 倪皓 3. 你 4.泥 ..."
 ;; #+END_EXAMPLE
 
-;; pyim 使用 `pyim-current-choices' 来保存 *待选词列表* ，我们以
-;; "nihao" 对应的 `pyim-current-choices' 的值为例，来说明选词框相关的操作
+;; pyim 使用 `pyim-candidates' 来保存 *待选词列表* ，我们以
+;; "nihao" 对应的 `pyim-candidates' 的值为例，来说明选词框相关的操作
 ;; 函数。
 
 ;; #+BEGIN_EXAMPLE
@@ -2947,7 +2942,7 @@ code 字符串."
 ;; 3. 函数 `pyim-page-start' 返回 B 所在的位置。
 ;; 4. 函数 `pyim-page-end' 返回 E 所在的位置。
 ;; 5. 函数 `pyim-page-refresh' 用于刷新显示 page
-;;    它会从 `pyim-current-choices' 中提取一个 sublist:
+;;    它会从 `pyim-candidates' 中提取一个 sublist:
 ;;    #+BEGIN_EXAMPLE
 ;;    ("薿" "旎" "睨" "铌" "昵" "匿" "倪" "霓" "暱")
 ;;    #+END_EXAMPLE
@@ -2992,17 +2987,17 @@ code 字符串."
   (1+ (/ (1- pyim-current-pos) pyim-page-length)))
 
 (defun pyim-page-total-page ()
-  (1+ (/ (1- (length (car pyim-current-choices))) pyim-page-length)))
+  (1+ (/ (1- (length (car pyim-candidates))) pyim-page-length)))
 
 (defun pyim-page-start ()
   "计算当前所在页的第一个词条的位置"
-  (let ((pos (min (length (car pyim-current-choices)) pyim-current-pos)))
+  (let ((pos (min (length (car pyim-candidates)) pyim-current-pos)))
     (1+ (- pos (pyim-mod pos pyim-page-length)))))
 
 (defun pyim-page-end (&optional finish)
-  "计算当前所在页的最后一个词条的位置，如果 pyim-current-choices 用
+  "计算当前所在页的最后一个词条的位置，如果 pyim-candidates 用
 完，则检查是否有补全。如果 FINISH 为 non-nil，说明，补全已经用完了"
-  (let* ((whole (length (car pyim-current-choices)))
+  (let* ((whole (length (car pyim-candidates)))
          (len pyim-page-length)
          (pos pyim-current-pos)
          (last (+ (- pos (pyim-mod pos len)) len)))
@@ -3016,7 +3011,7 @@ code 字符串."
   "按当前位置，生成候选词条"
   (let* ((end (pyim-page-end))
          (start (1- (pyim-page-start)))
-         (choices (car pyim-current-choices))
+         (choices (car pyim-candidates))
          (choice
           (mapcar #'(lambda (x)
                       (if (stringp x)
@@ -3235,13 +3230,13 @@ tooltip 选词框中显示。
 (defun pyim-page-select-word ()
   "从选词框中选择当前词条。"
   (interactive)
-  (if (null (car pyim-current-choices))  ; 如果没有选项，输入空格
+  (if (null (car pyim-candidates))  ; 如果没有选项，输入空格
       (progn
         (setq pyim-dagger (pyim-translate last-command-event))
         (pyim-terminate-translation))
     (if (equal 'rime (pyim-scheme-get-option pyim-default-scheme :class))
         (call-interactively #'pyim-page-select-rime-word)
-      (let ((str (pyim-choice (nth (1- pyim-current-pos) (car pyim-current-choices))))
+      (let ((str (pyim-choice (nth (1- pyim-current-pos) (car pyim-candidates))))
             imobj-list)
         (pyim-create-word str t)
         (setq pyim-code-position (+ pyim-code-position (length str)))
@@ -3250,7 +3245,7 @@ tooltip 选词框中显示。
                                         ; 是不是在文件中，没有的话，创
                                         ; 建这个词
             (progn
-              (if (not (member pyim-dagger (car pyim-current-choices)))
+              (if (not (member pyim-dagger (car pyim-candidates)))
                   (pyim-create-word pyim-dagger))
               (pyim-terminate-translation)
               ;; pyim 使用这个 hook 来处理联想词。
@@ -3260,7 +3255,7 @@ tooltip 选词框中显示。
                               #'(lambda (imobj)
                                   (nthcdr pyim-code-position imobj))
                               pyim-imobj-list)))
-          (setq pyim-current-choices (list (pyim-candidates-get imobj-list pyim-default-scheme))
+          (setq pyim-candidates (list (pyim-candidates-get imobj-list pyim-default-scheme))
                 pyim-current-pos 1)
           (pyim-dagger-refresh)
           (pyim-page-refresh))))))
@@ -3268,27 +3263,27 @@ tooltip 选词框中显示。
 (defun pyim-page-select-rime-word ()
   "从选词框中选择当前词条， 专门用于 rime 输入法支持。"
   (interactive)
-  (if (null (car pyim-current-choices))  ; 如果没有选项，输入空格
+  (if (null (car pyim-candidates))  ; 如果没有选项，输入空格
       (progn
         (setq pyim-dagger (pyim-translate last-command-event))
         (pyim-terminate-translation))
     ;; pyim 告诉 liberime 选择其他的词条
     (liberime-select-candidate (- pyim-current-pos 1))
-    (let* ((str (pyim-choice (nth (1- pyim-current-pos) (car pyim-current-choices))))
+    (let* ((str (pyim-choice (nth (1- pyim-current-pos) (car pyim-candidates))))
            (context (liberime-get-context))
            imobj-list)
       (pyim-create-word str t)
       (setq pyim-code-position (+ pyim-code-position (length str)))
       (if (not context)
           (progn
-            (if (not (member pyim-dagger (car pyim-current-choices)))
+            (if (not (member pyim-dagger (car pyim-candidates)))
                 (pyim-create-word pyim-dagger))
             (pyim-terminate-translation)
             ;; pyim 使用这个 hook 来处理联想词。
             (run-hooks 'pyim-page-select-finish-hook))
         ;; BUG: 默认 liberime 得到的 candidate 是分页的，一页只包含5个词条，
         ;; pyim 需要 liberime 不分页，或者一页包含尽可能多个词。
-        (setq pyim-current-choices
+        (setq pyim-candidates
               (let* ((menu (alist-get 'menu context))
                      (candidates (alist-get 'candidates menu)))
                 (list candidates)))
@@ -3299,7 +3294,7 @@ tooltip 选词框中显示。
 (defun pyim-page-select-word-by-number (&optional n)
   "使用数字编号来选择对应的词条。"
   (interactive)
-  (if (car pyim-current-choices)
+  (if (car pyim-candidates)
       (let ((index (if (numberp n)
                        (- n 1)
                      (- last-command-event ?1)))
@@ -3312,7 +3307,7 @@ tooltip 选词框中显示。
                                    pyim-code-position)
                         (pyim-choice
                          (nth (1- pyim-current-pos)
-                              (car pyim-current-choices)))))
+                              (car pyim-candidates)))))
           (pyim-page-select-word)))
     (pyim-dagger-append (char-to-string last-command-event))
     (pyim-terminate-translation)))
