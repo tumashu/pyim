@@ -3018,28 +3018,6 @@ Return the input string."
           whole
         (pyim-page-end t)))))
 
-(defun pyim-page-format-preedit (code)
-  "这个函数用于生成 page 中显示的 preedit。"
-  (let* ((scheme-name pyim-default-scheme)
-         (class (pyim-scheme-get-option scheme-name :class))
-         (code-maximum-length (pyim-scheme-get-option scheme-name :code-split-length)))
-    (cond ((memq class '(rime))
-           (let* ((context (liberime-get-context))
-                  (composition (alist-get 'composition context))
-                  (preedit (alist-get 'preedit composition)))
-             (or preedit "")))
-          ((memq class '(xingma))
-           (mapconcat #'identity
-                      (pyim-split-string-by-number code code-maximum-length)
-                      " "))
-          ((memq class '(quanpin shuangpin))
-           (replace-regexp-in-string
-            "[-']+" " "
-            (pyim-code-restore-user-divide
-             (pyim-scode-join (car pyim-scode-list) scheme-name)
-             (pyim-code-user-divide-pos code))))
-          (t code))))
-
 (defun pyim-page-refresh (&optional hightlight-current)
   "按当前位置，生成候选词条"
   (let* ((end (pyim-page-end))
@@ -3054,29 +3032,11 @@ Return the input string."
          (pos (- (min pyim-current-pos (length choices)) start))
          (page-info (make-hash-table))
          (i 0))
-    (puthash :preedit (pyim-page-format-preedit pyim-entered-code)
-             page-info)
+    (puthash :code pyim-entered-code page-info)
     (puthash :current-page (pyim-page-current-page) page-info)
     (puthash :total-page (pyim-page-total-page) page-info)
-    (puthash :words
-             (mapconcat 'identity
-                        (mapcar
-                         (lambda (c)
-                           (setq i (1+ i))
-                           (let (str)
-                             (setq str (if (consp c)
-                                           (concat (car c) (cdr c))
-                                         c))
-                             ;; 高亮当前选择的词条，用于 `pyim-page-next-word'
-                             (if (and hightlight-current
-                                      (= i pos))
-                                 (format "%d%s" i
-                                         (propertize
-                                          (format "[%s]" str)
-                                          'face 'pyim-page-selection))
-                               (format "%d.%s " i str))))
-                         choice) "")
-             page-info)
+    (puthash :words choice page-info)
+    (puthash :position pos page-info)
     ;; Show page.
     (when (and (null unread-command-events)
                (null unread-post-input-method-events))
@@ -3090,7 +3050,7 @@ Return the input string."
         (let ((message-log-max nil))
           (if pyim-page-tooltip
               (pyim-tooltip-show
-               (let ((func (intern (format "pyim-page-style-%S-style" pyim-page-style))))
+               (let ((func (intern (format "pyim-page-style:%S" pyim-page-style))))
                  (if (functionp func)
                      (funcall func page-info)
                    (pyim-page-style-two-lines-style page-info)))
@@ -3144,7 +3104,49 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
   (interactive "p")
   (pyim-page-next-word (- arg)))
 
-(defun pyim-page-style-two-lines-style (page-info)
+(defun pyim-page-format-preedit (code &optional separator)
+  "这个函数用于格式化 page 中显示的 preedit。"
+  (let* ((scheme-name pyim-default-scheme)
+         (class (pyim-scheme-get-option scheme-name :class))
+         (code-maximum-length (pyim-scheme-get-option scheme-name :code-split-length)))
+    (cond ((memq class '(rime))
+           (let* ((context (liberime-get-context))
+                  (composition (alist-get 'composition context))
+                  (preedit (alist-get 'preedit composition)))
+             (or preedit "")))
+          ((memq class '(xingma))
+           (mapconcat #'identity
+                      (pyim-split-string-by-number code code-maximum-length)
+                      " "))
+          ((memq class '(quanpin shuangpin))
+           (replace-regexp-in-string
+            "[-']+" (or separator " ")
+            (pyim-code-restore-user-divide
+             (pyim-scode-join (car pyim-scode-list) scheme-name)
+             (pyim-code-user-divide-pos code))))
+          (t code))))
+
+(defun pyim-page-format-menu (words position &optional separator)
+  "这个函数用于格式化 page 中显示的词条菜单。"
+  (mapconcat 'identity
+             (mapcar
+              (lambda (c)
+                (setq i (1+ i))
+                (let (str)
+                  (setq str (if (consp c)
+                                (concat (car c) (cdr c))
+                              c))
+                  ;; 高亮当前选择的词条，用于 `pyim-page-next-word'
+                  (if (and hightlight-current
+                           (= i position))
+                      (format "%d%s" i
+                              (propertize
+                               (format "[%s]" str)
+                               'face 'pyim-page-selection))
+                    (format "%d.%s " i str))))
+              words) (or separator "")))
+
+(defun pyim-page-style:two-lines (page-info)
   "将 page-info 格式化为类似下面格式的字符串，这个字符串将在
 tooltip 选词框中显示。
 
@@ -3153,12 +3155,14 @@ tooltip 选词框中显示。
 | 1.你好 2.你号 ...          |
 +----------------------------+"
   (format "=> %s [%s/%s]: \n%s"
-          (gethash :preedit page-info)
+          (pyim-page-format-preedit (gethash :code page-info))
           (gethash :current-page page-info)
           (gethash :total-page page-info)
-          (gethash :words page-info)))
+          (pyim-page-format-menu
+           (gethash :words page-info)
+           (gethash :position page-info))))
 
-(defun pyim-page-style-one-line-style (page-info)
+(defun pyim-page-style:one-line (page-info)
   "将 page-info 格式化为类似下面格式的字符串，这个字符串将在
 tooltip 选词框中显示。
 
@@ -3166,14 +3170,14 @@ tooltip 选词框中显示。
 | [ni hao]: 1.你好 2.你号 ... (1/9) |
 +-----------------------------------+"
   (format "[%s]: %s(%s/%s)"
-          (replace-regexp-in-string
-           " +" ""
-           (gethash :preedit page-info))
-          (gethash :words page-info)
+          (pyim-page-format-preedit (gethash :code page-info) "")
+          (pyim-page-format-menu
+           (gethash :words page-info)
+           (gethash :position page-info))
           (gethash :current-page page-info)
           (gethash :total-page page-info)))
 
-(defun pyim-page-style-vertical-style (page-info)
+(defun pyim-page-style:vertical (page-info)
   "将 page-info 格式化为类似下面格式的字符串，这个字符串将在
 tooltip 选词框中显示。
 
@@ -3183,16 +3187,15 @@ tooltip 选词框中显示。
 | 2.你号 ...   |
 +--------------+"
   (format "=> %s [%s/%s]: \n%s"
-          (gethash :preedit page-info)
+          (pyim-page-format-preedit (gethash :code page-info))
           (gethash :current-page page-info)
           (gethash :total-page page-info)
-          (replace-regexp-in-string
-           "]" "]\n"
-           (replace-regexp-in-string
-            " +" "\n"
-            (gethash :words page-info)))))
+          (pyim-page-format-menu
+           (gethash :words page-info)
+           (gethash :position page-info)
+           "\n")))
 
-(defun pyim-page-style-minibuffer-style (page-info)
+(defun pyim-page-style:minibuffer (page-info)
   "将 page-info 格式化为类似下面格式的字符串，这个字符串
 将在 minibuffer 中显示。
 
@@ -3200,8 +3203,10 @@ tooltip 选词框中显示。
 | [ni hao]: 1.你好 2.你号 ...  (1/9) |
 +------------------------------------+"
   (format "[%s]: %s(%s/%s)"
-          (gethash :preedit page-info)
-          (gethash :words page-info)
+          (pyim-page-format-preedit (gethash :code page-info))
+          (pyim-page-format-menu
+           (gethash :words page-info)
+           (gethash :position page-info))
           (gethash :current-page page-info)
           (gethash :total-page page-info)))
 
