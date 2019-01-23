@@ -2840,12 +2840,11 @@ code 字符串."
   "更新 `pyim-dagger' 的值。"
   (let* ((end (pyim-page-end))
          (start (1- (pyim-page-start)))
-         (choices pyim-candidates)
-         (choice (pyim-subseq choices start end))
-         (pos (1- (min pyim-current-pos (length choices)))))
+         (candidates pyim-candidates)
+         (pos (1- (min pyim-current-pos (length candidates)))))
     (setq pyim-dagger
           (concat (substring pyim-dagger 0 pyim-code-position)
-                  (pyim-choice (nth pos choices))))
+                  (pyim-candidate (nth pos candidates))))
     (unless enable-multibyte-characters
       (setq pyim-entered nil
             pyim-dagger nil)
@@ -2927,7 +2926,7 @@ code 字符串."
 ;;    #+END_EXAMPLE
 ;;    这个 sublist 的起点为  `pyim-page-start' 的返回值，终点为
 ;;    `pyim-page-end' 的返回值。然后使用这个 sublist 来构建类似下面的字符
-;;    串，并保存到一个 hashtable 的 :words 关键字对应的位置，这个 hastable
+;;    串，并保存到一个 hashtable 的 :candidates 关键字对应的位置，这个 hastable
 ;;    最终会做为参数传递给 `pyim-page-style' 相关的函数，用于生成 page。
 ;;    #+BEGIN_EXAMPLE
 ;;    "1. 薿 2.旎 3.睨 4.铌 5.昵 6.匿 7.倪 8.霓 9.暱"
@@ -2953,11 +2952,11 @@ code 字符串."
         y
       base)))
 
-(defun pyim-choice (choice)
+(defun pyim-candidate (candidate)
   (let ((output
-         (if (consp choice)
-             (car choice)
-           choice)))
+         (if (consp candidate)
+             (car candidate)
+           candidate)))
     (if (stringp output)
         (car (split-string output ":"))
       output)))
@@ -2990,20 +2989,20 @@ code 字符串."
   "按当前位置，生成候选词条"
   (let* ((end (pyim-page-end))
          (start (1- (pyim-page-start)))
-         (choices pyim-candidates)
-         (choice
+         (candidates pyim-candidates)
+         (candidate-showed
           (mapcar #'(lambda (x)
                       (if (stringp x)
                           (replace-regexp-in-string ":" "" x)
                         x))
-                  (pyim-subseq choices start end)))
-         (pos (- (min pyim-current-pos (length choices)) start))
+                  (pyim-subseq candidates start end)))
+         (pos (- (min pyim-current-pos (length candidates)) start))
          (page-info (make-hash-table))
          (i 0))
     (puthash :entered pyim-entered page-info)
     (puthash :current-page (pyim-page-current-page) page-info)
     (puthash :total-page (pyim-page-total-page) page-info)
-    (puthash :words choice page-info)
+    (puthash :candidates candidate-showed page-info)
     (puthash :position pos page-info)
     ;; Show page.
     (when (and (null unread-command-events)
@@ -3127,7 +3126,7 @@ tooltip 选词框中显示。
           (gethash :current-page page-info)
           (gethash :total-page page-info)
           (pyim-page-format-menu
-           (gethash :words page-info)
+           (gethash :candidates page-info)
            (gethash :position page-info))))
 
 (defun pyim-page-style:one-line (page-info)
@@ -3140,7 +3139,7 @@ tooltip 选词框中显示。
   (format "[%s]: %s(%s/%s)"
           (pyim-page-format-preedit (gethash :entered page-info) "")
           (pyim-page-format-menu
-           (gethash :words page-info)
+           (gethash :candidates page-info)
            (gethash :position page-info))
           (gethash :current-page page-info)
           (gethash :total-page page-info)))
@@ -3159,7 +3158,7 @@ tooltip 选词框中显示。
           (gethash :current-page page-info)
           (gethash :total-page page-info)
           (pyim-page-format-menu
-           (gethash :words page-info)
+           (gethash :candidates page-info)
            (gethash :position page-info)
            "\n")))
 
@@ -3173,7 +3172,7 @@ tooltip 选词框中显示。
   (format "[%s]: %s(%s/%s)"
           (pyim-page-format-preedit (gethash :entered page-info))
           (pyim-page-format-menu
-           (gethash :words page-info)
+           (gethash :candidates page-info)
            (gethash :position page-info))
           (gethash :current-page page-info)
           (gethash :total-page page-info)))
@@ -3215,7 +3214,7 @@ tooltip 选词框中显示。
         (pyim-terminate-translation))
     (if (equal 'rime (pyim-scheme-get-option pyim-default-scheme :class))
         (call-interactively #'pyim-page-select-rime-word)
-      (let ((str (pyim-choice (nth (1- pyim-current-pos) pyim-candidates)))
+      (let ((str (pyim-candidate (nth (1- pyim-current-pos) pyim-candidates)))
             imobj-list)
         (pyim-create-word str t)
         (setq pyim-code-position (+ pyim-code-position (length str)))
@@ -3248,7 +3247,7 @@ tooltip 选词框中显示。
         (pyim-terminate-translation))
     ;; pyim 告诉 liberime 选择其他的词条
     (liberime-select-candidate (- pyim-current-pos 1))
-    (let* ((str (pyim-choice (nth (1- pyim-current-pos) pyim-candidates)))
+    (let* ((str (pyim-candidate (nth (1- pyim-current-pos) pyim-candidates)))
            (context (liberime-get-context))
            imobj-list)
       (pyim-create-word str t)
@@ -3284,7 +3283,7 @@ tooltip 选词框中显示。
           (setq pyim-dagger
                 (concat (substring pyim-dagger 0
                                    pyim-code-position)
-                        (pyim-choice
+                        (pyim-candidate
                          (nth (1- pyim-current-pos)
                               pyim-candidates))))
           (pyim-page-select-word)))
