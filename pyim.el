@@ -2252,7 +2252,7 @@ Return the input string."
 ;; 3. 有效韵母表： `pyim-pinyin-valid-yun-mu'
 
 ;; pyim 使用函数 `pyim-imobj-list-create' 从用户输入的字符串创建一个 imobj
-;; 这个 imobj 包含声母和韵母的相关信息，比如：
+;; 或者多个 imobj 组成的 list，每个 imobj 都包含声母和韵母的相关信息，比如：
 
 ;; #+BEGIN_EXAMPLE
 ;; (pyim-imobj-list-create "woaimeinv" 'quanpin)
@@ -2791,14 +2791,13 @@ code 字符串."
                   (car pyim-imobj-list) scheme-name)
                  (progn
                    (setq pyim-candidates
-                         (list (delete-dups (pyim-candidates-get pyim-imobj-list scheme-name))))
-                   (when (car pyim-candidates)
+                         (delete-dups (pyim-candidates-get pyim-imobj-list scheme-name)))
+                   (when pyim-candidates
                      (setq pyim-current-pos 1)
                      (pyim-dagger-refresh)
                      (pyim-page-refresh)
                      t)))
-      (setq pyim-candidates
-            (list (list pyim-entered)))
+      (setq pyim-candidates (list pyim-entered))
       (setq pyim-current-pos 1)
       (pyim-dagger-refresh)
       (pyim-page-refresh))))
@@ -2861,7 +2860,7 @@ code 字符串."
   "更新 `pyim-dagger' 的值。"
   (let* ((end (pyim-page-end))
          (start (1- (pyim-page-start)))
-         (choices (car pyim-candidates))
+         (choices pyim-candidates)
          (choice (pyim-subseq choices start end))
          (pos (1- (min pyim-current-pos (length choices)))))
     (setq pyim-dagger
@@ -2987,17 +2986,17 @@ code 字符串."
   (1+ (/ (1- pyim-current-pos) pyim-page-length)))
 
 (defun pyim-page-total-page ()
-  (1+ (/ (1- (length (car pyim-candidates))) pyim-page-length)))
+  (1+ (/ (1- (length pyim-candidates)) pyim-page-length)))
 
 (defun pyim-page-start ()
   "计算当前所在页的第一个词条的位置"
-  (let ((pos (min (length (car pyim-candidates)) pyim-current-pos)))
+  (let ((pos (min (length pyim-candidates) pyim-current-pos)))
     (1+ (- pos (pyim-mod pos pyim-page-length)))))
 
 (defun pyim-page-end (&optional finish)
   "计算当前所在页的最后一个词条的位置，如果 pyim-candidates 用
 完，则检查是否有补全。如果 FINISH 为 non-nil，说明，补全已经用完了"
-  (let* ((whole (length (car pyim-candidates)))
+  (let* ((whole (length pyim-candidates))
          (len pyim-page-length)
          (pos pyim-current-pos)
          (last (+ (- pos (pyim-mod pos len)) len)))
@@ -3011,7 +3010,7 @@ code 字符串."
   "按当前位置，生成候选词条"
   (let* ((end (pyim-page-end))
          (start (1- (pyim-page-start)))
-         (choices (car pyim-candidates))
+         (choices pyim-candidates)
          (choice
           (mapcar #'(lambda (x)
                       (if (stringp x)
@@ -3230,13 +3229,13 @@ tooltip 选词框中显示。
 (defun pyim-page-select-word ()
   "从选词框中选择当前词条。"
   (interactive)
-  (if (null (car pyim-candidates))  ; 如果没有选项，输入空格
+  (if (null pyim-candidates)  ; 如果没有选项，输入空格
       (progn
         (setq pyim-dagger (pyim-translate last-command-event))
         (pyim-terminate-translation))
     (if (equal 'rime (pyim-scheme-get-option pyim-default-scheme :class))
         (call-interactively #'pyim-page-select-rime-word)
-      (let ((str (pyim-choice (nth (1- pyim-current-pos) (car pyim-candidates))))
+      (let ((str (pyim-choice (nth (1- pyim-current-pos) pyim-candidates)))
             imobj-list)
         (pyim-create-word str t)
         (setq pyim-code-position (+ pyim-code-position (length str)))
@@ -3245,7 +3244,7 @@ tooltip 选词框中显示。
                                         ; 是不是在文件中，没有的话，创
                                         ; 建这个词
             (progn
-              (if (not (member pyim-dagger (car pyim-candidates)))
+              (if (not (member pyim-dagger pyim-candidates))
                   (pyim-create-word pyim-dagger))
               (pyim-terminate-translation)
               ;; pyim 使用这个 hook 来处理联想词。
@@ -3255,7 +3254,7 @@ tooltip 选词框中显示。
                               #'(lambda (imobj)
                                   (nthcdr pyim-code-position imobj))
                               pyim-imobj-list)))
-          (setq pyim-candidates (list (pyim-candidates-get imobj-list pyim-default-scheme))
+          (setq pyim-candidates (pyim-candidates-get imobj-list pyim-default-scheme)
                 pyim-current-pos 1)
           (pyim-dagger-refresh)
           (pyim-page-refresh))))))
@@ -3263,20 +3262,20 @@ tooltip 选词框中显示。
 (defun pyim-page-select-rime-word ()
   "从选词框中选择当前词条， 专门用于 rime 输入法支持。"
   (interactive)
-  (if (null (car pyim-candidates))  ; 如果没有选项，输入空格
+  (if (null pyim-candidates)  ; 如果没有选项，输入空格
       (progn
         (setq pyim-dagger (pyim-translate last-command-event))
         (pyim-terminate-translation))
     ;; pyim 告诉 liberime 选择其他的词条
     (liberime-select-candidate (- pyim-current-pos 1))
-    (let* ((str (pyim-choice (nth (1- pyim-current-pos) (car pyim-candidates))))
+    (let* ((str (pyim-choice (nth (1- pyim-current-pos) pyim-candidates)))
            (context (liberime-get-context))
            imobj-list)
       (pyim-create-word str t)
       (setq pyim-code-position (+ pyim-code-position (length str)))
       (if (not context)
           (progn
-            (if (not (member pyim-dagger (car pyim-candidates)))
+            (if (not (member pyim-dagger pyim-candidates))
                 (pyim-create-word pyim-dagger))
             (pyim-terminate-translation)
             ;; pyim 使用这个 hook 来处理联想词。
@@ -3286,7 +3285,7 @@ tooltip 选词框中显示。
         (setq pyim-candidates
               (let* ((menu (alist-get 'menu context))
                      (candidates (alist-get 'candidates menu)))
-                (list candidates)))
+                candidates))
         (setq pyim-current-pos 1)
         (pyim-dagger-refresh)
         (pyim-page-refresh)))))
@@ -3294,7 +3293,7 @@ tooltip 选词框中显示。
 (defun pyim-page-select-word-by-number (&optional n)
   "使用数字编号来选择对应的词条。"
   (interactive)
-  (if (car pyim-candidates)
+  (if pyim-candidates
       (let ((index (if (numberp n)
                        (- n 1)
                      (- last-command-event ?1)))
@@ -3307,7 +3306,7 @@ tooltip 选词框中显示。
                                    pyim-code-position)
                         (pyim-choice
                          (nth (1- pyim-current-pos)
-                              (car pyim-candidates)))))
+                              pyim-candidates))))
           (pyim-page-select-word)))
     (pyim-dagger-append (char-to-string last-command-event))
     (pyim-terminate-translation)))
