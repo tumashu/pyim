@@ -2801,10 +2801,6 @@ Return the input string."
     (unless (and (pyim-scode-validp
                   (car pyim-scode-list) scheme-name)
                  (progn
-                   (setq pyim-entered-code
-                         (pyim-code-restore-user-divide
-                          (pyim-scode-join (car pyim-scode-list) scheme-name)
-                          (pyim-code-user-divide-pos str)))
                    (setq pyim-current-choices
                          (list (delete-dups (pyim-choices-get pyim-scode-list scheme-name))))
                    (when (car pyim-current-choices)
@@ -2813,8 +2809,7 @@ Return the input string."
                      (pyim-page-refresh)
                      t)))
       (setq pyim-current-choices
-            (list (list (format "%s" (replace-regexp-in-string
-                                      "-" " " pyim-entered-code)))))
+            (list (list pyim-entered-code)))
       (setq pyim-current-pos 1)
       (pyim-dagger-refresh)
       (pyim-page-refresh))))
@@ -2879,19 +2874,10 @@ Return the input string."
          (start (1- (pyim-page-start)))
          (choices (car pyim-current-choices))
          (choice (pyim-subseq choices start end))
-         (pos (1- (min pyim-current-pos (length choices))))
-         rest)
+         (pos (1- (min pyim-current-pos (length choices)))))
     (setq pyim-dagger-str
-          (concat (substring pyim-dagger-str 0
-                             pyim-code-position)
+          (concat (substring pyim-dagger-str 0 pyim-code-position)
                   (pyim-choice (nth pos choices))))
-    (setq rest (mapconcat
-                #'(lambda (py)
-                    (concat (car py) (cdr py)))
-                (nthcdr (length pyim-dagger-str) (car pyim-scode-list))
-                "'"))
-    (if (string< "" rest)
-        (setq pyim-dagger-str (concat pyim-dagger-str rest)))
     (unless enable-multibyte-characters
       (setq pyim-entered-code nil
             pyim-dagger-str nil)
@@ -3046,7 +3032,13 @@ Return the input string."
            (mapconcat #'identity
                       (pyim-split-string-by-number code code-maximum-length)
                       " "))
-          (t (replace-regexp-in-string "-" " " code)))))
+          ((memq class '(quanpin shuangpin))
+           (replace-regexp-in-string
+            "[-']+" " "
+            (pyim-code-restore-user-divide
+             (pyim-scode-join (car pyim-scode-list) scheme-name)
+             (pyim-code-user-divide-pos code))))
+          (t code))))
 
 (defun pyim-page-refresh (&optional hightlight-current)
   "按当前位置，生成候选词条"
@@ -3735,8 +3727,7 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
 ;; *** 字母上屏
 (defun pyim-quit-no-clear ()
   (interactive)
-  (setq pyim-dagger-str
-        (replace-regexp-in-string "-" "" pyim-entered-code))
+  (setq pyim-dagger-str pyim-entered-code)
   (pyim-terminate-translation))
 
 ;; *** pyim 取消激活
