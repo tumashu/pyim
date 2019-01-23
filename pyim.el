@@ -981,6 +981,8 @@ pyim 内建的有三种选词框格式：
 pyim 称这个字符串为 \"dragger\" 字符串, 向 \"匕首\" 一样插入
 当前 buffer 的光标处。")
 
+(defvar pyim-dagger-overlay nil "用于保存 dagger 的 overlay.")
+
 (defvar pyim-input-ascii nil  "是否开启 pyim 英文输入模式.")
 (defvar pyim-force-input-chinese nil "是否强制开启中文输入模式.")
 
@@ -992,13 +994,11 @@ pyim 称这个字符串为 \"dragger\" 字符串, 向 \"匕首\" 一样插入
 
 (defvar pyim-translating nil "记录是否在转换状态.")
 
-(defvar pyim-dagger-overlay nil "用于保存 dagger 的 overlay.")
-
 (defvar pyim-code-position nil)
 (defvar pyim-imobj-list nil
   "Imobj 组成的 list.
 
-pyim 会从用户输入的字符组成的字符串创建一个或者多个 imobj 
+pyim 会从用户输入的字符组成的字符串创建一个或者多个 imobj
 组成的列表。这个变量用于保存这个列表。")
 
 (defvar pyim-current-pos nil "当前选择的词条在 ‘pyim-candidates’ 中的位置.")
