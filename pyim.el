@@ -1121,9 +1121,6 @@ pyim 总是使用 emacs-async 包来生成 dcache.")
     pyim-dagger-overlay
     pyim-last-created-word
 
-    pyim-load-hook
-    pyim-active-hook
-
     input-method-function
     inactivate-current-input-method-function
     describe-current-input-method-function
