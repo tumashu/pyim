@@ -2846,11 +2846,11 @@ code 字符串."
   "更新 `pyim-dagger' 的值。"
   (let* ((end (pyim-page-end))
          (start (1- (pyim-page-start)))
-         (candidates pyim-candidate-list)
-         (pos (1- (min pyim-candidate-position (length candidates)))))
+         (candidate-list pyim-candidate-list)
+         (pos (1- (min pyim-candidate-position (length candidate-list)))))
     (setq pyim-dagger
           (concat (substring pyim-dagger 0 pyim-code-position)
-                  (pyim-candidate-parse (nth pos candidates))))
+                  (pyim-candidate-parse (nth pos candidate-list))))
     (unless enable-multibyte-characters
       (setq pyim-entered nil
             pyim-dagger nil)
@@ -2932,7 +2932,7 @@ code 字符串."
 ;;    #+END_EXAMPLE
 ;;    这个 sublist 的起点为  `pyim-page-start' 的返回值，终点为
 ;;    `pyim-page-end' 的返回值。然后使用这个 sublist 来构建类似下面的字符
-;;    串，并保存到一个 hashtable 的 :candidates 关键字对应的位置，这个 hastable
+;;    串，并保存到一个 hashtable 的 :candidate-list 关键字对应的位置，这个 hastable
 ;;    最终会做为参数传递给 `pyim-page-style' 相关的函数，用于生成 page。
 ;;    #+BEGIN_EXAMPLE
 ;;    "1. 薿 2.旎 3.睨 4.铌 5.昵 6.匿 7.倪 8.霓 9.暱"
@@ -2995,20 +2995,20 @@ code 字符串."
   "按当前位置，生成候选词条"
   (let* ((end (pyim-page-end))
          (start (1- (pyim-page-start)))
-         (candidates pyim-candidate-list)
+         (candidate-list pyim-candidate-list)
          (candidate-showed
           (mapcar #'(lambda (x)
                       (if (stringp x)
                           (replace-regexp-in-string ":" "" x)
                         x))
-                  (pyim-subseq candidates start end)))
-         (pos (- (min pyim-candidate-position (length candidates)) start))
+                  (pyim-subseq candidate-list start end)))
+         (pos (- (min pyim-candidate-position (length candidate-list)) start))
          (page-info (make-hash-table))
          (i 0))
     (puthash :entered pyim-entered page-info)
     (puthash :current-page (pyim-page-current-page) page-info)
     (puthash :total-page (pyim-page-total-page) page-info)
-    (puthash :candidates candidate-showed page-info)
+    (puthash :candidate-list candidate-showed page-info)
     (puthash :position pos page-info)
     ;; Show page.
     (when (and (null unread-command-events)
@@ -3132,7 +3132,7 @@ tooltip 选词框中显示。
           (gethash :current-page page-info)
           (gethash :total-page page-info)
           (pyim-page-format-menu
-           (gethash :candidates page-info)
+           (gethash :candidate-list page-info)
            (gethash :position page-info))))
 
 (defun pyim-page-style:one-line (page-info)
@@ -3145,7 +3145,7 @@ tooltip 选词框中显示。
   (format "[%s]: %s(%s/%s)"
           (pyim-page-format-preedit (gethash :entered page-info) "")
           (pyim-page-format-menu
-           (gethash :candidates page-info)
+           (gethash :candidate-list page-info)
            (gethash :position page-info))
           (gethash :current-page page-info)
           (gethash :total-page page-info)))
@@ -3164,7 +3164,7 @@ tooltip 选词框中显示。
           (gethash :current-page page-info)
           (gethash :total-page page-info)
           (pyim-page-format-menu
-           (gethash :candidates page-info)
+           (gethash :candidate-list page-info)
            (gethash :position page-info)
            "\n")))
 
@@ -3178,7 +3178,7 @@ tooltip 选词框中显示。
   (format "[%s]: %s(%s/%s)"
           (pyim-page-format-preedit (gethash :entered page-info))
           (pyim-page-format-menu
-           (gethash :candidates page-info)
+           (gethash :candidate-list page-info)
            (gethash :position page-info))
           (gethash :current-page page-info)
           (gethash :total-page page-info)))
@@ -3269,8 +3269,8 @@ tooltip 选词框中显示。
         ;; pyim 需要 liberime 不分页，或者一页包含尽可能多个词。
         (setq pyim-candidate-list
               (let* ((menu (alist-get 'menu context))
-                     (candidates (alist-get 'candidates menu)))
-                candidates))
+                     (candidate-list (alist-get 'candidate-list menu)))
+                candidate-list))
         (setq pyim-candidate-position 1)
         (pyim-dagger-refresh)
         (pyim-page-refresh)))))
