@@ -2850,7 +2850,7 @@ code 字符串."
          (pos (1- (min pyim-candidate-position (length candidates)))))
     (setq pyim-dagger
           (concat (substring pyim-dagger 0 pyim-code-position)
-                  (pyim-candidate (nth pos candidates))))
+                  (pyim-candidate-parse (nth pos candidates))))
     (unless enable-multibyte-characters
       (setq pyim-entered nil
             pyim-dagger nil)
@@ -2958,7 +2958,7 @@ code 字符串."
         y
       base)))
 
-(defun pyim-candidate (candidate)
+(defun pyim-candidate-parse (candidate)
   (let ((output
          (if (consp candidate)
              (car candidate)
@@ -3220,7 +3220,7 @@ tooltip 选词框中显示。
         (pyim-terminate-translation))
     (if (equal 'rime (pyim-scheme-get-option pyim-default-scheme :class))
         (call-interactively #'pyim-page-select-rime-word)
-      (let ((str (pyim-candidate (nth (1- pyim-candidate-position) pyim-candidate-list)))
+      (let ((str (pyim-candidate-parse (nth (1- pyim-candidate-position) pyim-candidate-list)))
             imobj-list)
         (pyim-create-word str t)
         (setq pyim-code-position (+ pyim-code-position (length str)))
@@ -3253,7 +3253,7 @@ tooltip 选词框中显示。
         (pyim-terminate-translation))
     ;; pyim 告诉 liberime 选择其他的词条
     (liberime-select-candidate (- pyim-candidate-position 1))
-    (let* ((str (pyim-candidate (nth (1- pyim-candidate-position) pyim-candidate-list)))
+    (let* ((str (pyim-candidate-parse (nth (1- pyim-candidate-position) pyim-candidate-list)))
            (context (liberime-get-context))
            imobj-list)
       (pyim-create-word str t)
