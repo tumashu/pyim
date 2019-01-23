@@ -2637,45 +2637,45 @@ code 字符串."
        pyim-rime-limit)
     nil))
 
-(defun pyim-candidate-list-create:quanpin (spinyin-list scheme-name)
+(defun pyim-candidate-list-create:quanpin (imobj-list scheme-name)
   "候选词获取，用于全拼输入法。"
   (let* (;; 如果输入 "ni-hao" ，搜索 code 为 "n-h" 的词条做为联想词。
          ;; 搜索首字母得到的联想词太多，这里限制联想词要大于两个汉字并且只搜索
          ;; 个人文件。
          (jianpin-words
-          (when (> (length (car spinyin-list)) 1)
+          (when (> (length (car imobj-list)) 1)
             (pyim-dcache-get
-             (pyim-code-create (car spinyin-list) scheme-name t t)
+             (pyim-code-create (car imobj-list) scheme-name t t)
              pyim-dcache-ishortcode2word)))
          ;; 将输入的拼音按照声母和韵母打散，得到尽可能多的拼音组合，
          ;; 查询这些拼音组合，得到的词条做为联想词。
          (znabc-words
           (pyim-possible-words
-           (pyim-possible-words-py (car spinyin-list))))
+           (pyim-possible-words-py (car imobj-list))))
          pinyin-chars
          personal-words
          common-words)
 
-    (dolist (spinyin spinyin-list)
+    (dolist (imobj imobj-list)
       (setq personal-words
             (append personal-words
                     (pyim-dcache-get
-                     (pyim-code-create spinyin scheme-name t)
+                     (pyim-code-create imobj scheme-name t)
                      (list pyim-dcache-icode2word
                            pyim-dcache-ishortcode2word))))
       (setq common-words
             (append common-words
                     (pyim-dcache-get
-                     (pyim-code-create spinyin scheme-name t)
+                     (pyim-code-create imobj scheme-name t)
                      (list pyim-dcache-code2word
                            pyim-dcache-shortcode2word))))
       (setq pinyin-chars
             (append pinyin-chars
-                    (pyim-dcache-get (concat (caar spinyin) (cdar spinyin))))))
+                    (pyim-dcache-get (concat (caar imobj) (cdar imobj))))))
 
     ;; Debug
     (when pyim-debug
-      (princ (list :spinyin-list spinyin-list
+      (princ (list :imobj-list imobj-list
                    :personal-words personal-words
                    :common-words common-words
                    :jianpin-words jianpin-words
@@ -3734,7 +3734,7 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
       (setq scheme-name 'quanpin))
     (if (or (pyim-string-match-p "[^a-z']+" pystr))
         pystr
-      (let* ((spinyin-list
+      (let* ((imobj-list
               ;; 如果一个字符串以'结尾,就按照拼音首字母字符串处理。
               (if (pyim-string-match-p "'$" pystr)
                   (list (mapcar #'(lambda (x)
@@ -3744,9 +3744,9 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
                 (pyim-imobj-list-create pystr scheme-name)))
              (regexp-list
               (mapcar
-               #'(lambda (spinyin)
-                   (pyim-cregexp-build-from-spinyin spinyin))
-               spinyin-list))
+               #'(lambda (imobj)
+                   (pyim-cregexp-build:quanpin imobj))
+               imobj-list))
              (regexp
               (when regexp-list
                 (mapconcat #'identity
@@ -3758,17 +3758,16 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
                 pystr)))
         regexp))))
 
-(defun pyim-cregexp-build-from-spinyin (spinyin &optional match-beginning
-                                                first-equal all-equal)
-  "从 SPINYIN 创建一个中文 regexp.
-用这个中文 regexp 可以搜索到拼音匹配 SPINYIN 的中文字符串。"
-  (let* ((spinyin
+(defun pyim-cregexp-build:quanpin (imobj &optional match-beginning
+                                         first-equal all-equal)
+  "从 IMOBJ 创建一个搜索中文的 regexp."
+  (let* ((imobj
           (mapcar #'(lambda (x)
                       (concat (car x) (cdr x)))
-                  spinyin))
+                  imobj))
          (cchar-list
           (let ((n 0) results)
-            (dolist (py spinyin)
+            (dolist (py imobj)
               (let* ((equal-match
                       (or all-equal
                           (and first-equal (= n 0))))
