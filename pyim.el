@@ -2546,12 +2546,12 @@ code 字符串."
               imobj)
              "-"))
 
-(defun pyim-code-create:shuangpin (spinyin scheme-name &optional as-search-key shou-zi-mu)
+(defun pyim-code-create:shuangpin (imobj scheme-name &optional as-search-key shou-zi-mu)
   "创建 code 字符串的函数，用于双拼。
 当 `shou-zi-mu' 设置为 t 时，生成双拼首字母字符串，比如 p-y。"
   (if as-search-key
       ;; 双拼使用全拼输入法的词库，所以搜索 dcache 用的 key 要使用全拼
-      (pyim-code-create:quanpin spinyin scheme-name as-search-key shou-zi-mu)
+      (pyim-code-create:quanpin imobj scheme-name as-search-key shou-zi-mu)
     (when scheme-name
       (let ((keymaps (pyim-scheme-get-option scheme-name :keymaps)))
         (mapconcat 'identity
@@ -2571,7 +2571,7 @@ code 字符串."
                                            (when (or (equal ym (nth 2 x))
                                                      (equal ym (nth 3 x)))
                                              (car x))) keymaps))))))
-                    spinyin)
+                    imobj)
                    "-")))))
 
 (defun pyim-code-create:xingma (imobj scheme-name &optional as-search-key shou-zi-mu)
