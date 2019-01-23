@@ -981,6 +981,8 @@ pyim 内建的有三种选词框格式：
 pyim 称这个字符串为 \"dragger\" 字符串, 向 \"匕首\" 一样插入
 当前 buffer 的光标处。")
 
+(defvar pyim-dagger-last "")
+
 (defvar pyim-dagger-overlay nil
   "用于保存 dagger 的 overlay.")
 
@@ -1002,7 +1004,6 @@ pyim 称这个字符串为 \"dragger\" 字符串, 向 \"匕首\" 一样插入
 (defvar pyim-translating nil
   "记录是否在转换状态.")
 
-(defvar pyim-code-position nil)
 (defvar pyim-imobj-list nil
   "Imobj 组成的 list.
 
@@ -1114,6 +1115,7 @@ pyim 总是使用 emacs-async 包来生成 dcache.")
 (defvar pyim-local-variable-list
   '(pyim-entered
     pyim-dagger
+    pyim-dagger-last
     pyim-candidate-list
     pyim-candidate-position
     pyim-input-ascii
@@ -1131,8 +1133,7 @@ pyim 总是使用 emacs-async 包来生成 dcache.")
     pyim-punctuation-pair-status
     pyim-punctuation-escape-list
 
-    pyim-imobj-list
-    pyim-code-position)
+    pyim-imobj-list)
   "A list of buffer local variable.")
 
 (dolist (var pyim-local-variable-list)
@@ -2119,6 +2120,7 @@ Return the input string."
           (setq str (substring key-or-string 0 -1)))
 
         (setq pyim-dagger ""
+              pyim-dagger-last ""
               pyim-entered (or str "")
               pyim-translating t)
 
@@ -2771,8 +2773,7 @@ code 字符串."
 (defun pyim-entered-handler ()
   (let ((scheme-name pyim-default-scheme)
         (str pyim-entered))
-    (setq pyim-imobj-list (pyim-imobj-list-create str scheme-name)
-          pyim-code-position 0)
+    (setq pyim-imobj-list (pyim-imobj-list-create str scheme-name))
     (unless (and (pyim-imobj-validp
                   (car pyim-imobj-list) scheme-name)
                  (progn
@@ -2849,7 +2850,7 @@ code 字符串."
          (candidate-list pyim-candidate-list)
          (pos (1- (min pyim-candidate-position (length candidate-list)))))
     (setq pyim-dagger
-          (concat (substring pyim-dagger 0 pyim-code-position)
+          (concat pyim-dagger-last
                   (pyim-candidate-parse (nth pos candidate-list))))
     (unless enable-multibyte-characters
       (setq pyim-entered nil
@@ -3223,8 +3224,8 @@ tooltip 选词框中显示。
       (let ((str (pyim-candidate-parse (nth (1- pyim-candidate-position) pyim-candidate-list)))
             imobj-list)
         (pyim-create-word str t)
-        (setq pyim-code-position (+ pyim-code-position (length str)))
-        (if (>= pyim-code-position (length (car pyim-imobj-list)))
+        (setq pyim-dagger-last (concat pyim-dagger-last str))
+        (if (>= (length pyim-dagger) (length (car pyim-imobj-list)))
                                         ; 如果是最后一个，检查
                                         ; 是不是在文件中，没有的话，创
                                         ; 建这个词
@@ -3237,7 +3238,7 @@ tooltip 选词框中显示。
           (setq imobj-list
                 (delete-dups (mapcar
                               #'(lambda (imobj)
-                                  (nthcdr pyim-code-position imobj))
+                                  (nthcdr (length pyim-dagger) imobj))
                               pyim-imobj-list)))
           (setq pyim-candidate-list (pyim-candidate-list-create imobj-list pyim-default-scheme)
                 pyim-candidate-position 1)
@@ -3257,7 +3258,6 @@ tooltip 选词框中显示。
            (context (liberime-get-context))
            imobj-list)
       (pyim-create-word str t)
-      (setq pyim-code-position (+ pyim-code-position (length str)))
       (if (not context)
           (progn
             (if (not (member pyim-dagger pyim-candidate-list))
@@ -3287,8 +3287,7 @@ tooltip 选词框中显示。
             (pyim-page-refresh)
           (setq pyim-candidate-position (+ pyim-candidate-position index))
           (setq pyim-dagger
-                (concat (substring pyim-dagger 0
-                                   pyim-code-position)
+                (concat pyim-dagger-last
                         (pyim-candidate-parse
                          (nth (1- pyim-candidate-position)
                               pyim-candidate-list))))
