@@ -2798,23 +2798,18 @@ code 字符串."
 ;; 1. 英文字符串：pyim 没有找到相应的候选词时（比如：用户输入错
 ;;    误的拼音），`pyim-dagger' 的值与 `pyim-entered' 大致相同。
 ;;    相关代码很简单，分散在 `pyim-entered-handler' 等函数。
-;; 2. 汉字或者拼音和汉字的混合：当 pyim 找到相应的候选词条时，
-;;    `pyim-dagger' 的值可以是完全的中文词条，比如：
+;; 2. 汉字字符串：当 pyim 找到相应的候选词条时，
+;;    `pyim-dagger' 的值是完全的中文词条，比如：
 ;;    #+BEGIN_EXAMPLE
 ;;    你好
 ;;    #+END_EXAMPLE
-;;    或者中文词条＋拼音的混合新式，比如：
-;;    #+BEGIN_EXAMPLE
-;;    你好bj
-;;    #+END_EXAMPLE
-;;    这部份代码相对复杂，使用 `pyim-update-current-key' 专门处理。
 
 ;; pyim 会使用 emacs overlay 机制在 *待输入buffer* 光标处高亮显示
 ;; `pyim-dagger'，让用户快速了解当前输入的字符串，具体方式是：
 ;; 1. 在 `pyim-input-method' 中调用 `pyim-dagger-setup-overlay' 创建 overlay ，并
 ;;    使用变量 `pyim-dagger-overlay' 保存，创建时将 overlay 的 face 属性设置为
 ;;    `pyim-dagger-face' ，用户可以使用这个变量来自定义 face。
-;; 2. 使用函数 `pyim-dagger-show' 高亮显示 `pyim-dagger'
+;; 2. 使用函数 `pyim-dagger-refresh' 高亮显示 `pyim-dagger'
 ;;    1. 清除光标处原来的字符串。
 ;;    2. 插入 `pyim-dagger'
 ;;    3. 使用 `move-overlay' 函数调整变量 `pyim-dagger-overlay' 中保存的 overlay，
