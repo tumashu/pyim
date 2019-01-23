@@ -2251,11 +2251,11 @@ Return the input string."
 ;; 2. 韵母表：`pyim-pinyin-yun-mu'
 ;; 3. 有效韵母表： `pyim-pinyin-valid-yun-mu'
 
-;; pyim 使用函数 `pyim-imobj-create' 从用户输入的字符串创建一个 imobj
+;; pyim 使用函数 `pyim-imobj-list-create' 从用户输入的字符串创建一个 imobj
 ;; 这个 imobj 包含声母和韵母的相关信息，比如：
 
 ;; #+BEGIN_EXAMPLE
-;; (pyim-imobj-create "woaimeinv" 'quanpin)
+;; (pyim-imobj-list-create "woaimeinv" 'quanpin)
 ;; #+END_EXAMPLE
 
 ;; 结果为:
@@ -2297,10 +2297,10 @@ Return the input string."
 ;; 结果为:
 ;; : ("o" . "aimeinv")
 
-;; 当用户输入一个错误的拼音时，`pyim-imobj-create' 创建的 imobj 就不合法 ，比如：
+;; 当用户输入一个错误的拼音时，`pyim-imobj-list-create' 创建的 imobj 就不合法 ，比如：
 
 ;; #+BEGIN_EXAMPLE
-;; (pyim-imobj-create "ua" 'quanpin)
+;; (pyim-imobj-list-create "ua" 'quanpin)
 ;; #+END_EXAMPLE
 
 ;; 结果为:
@@ -2309,10 +2309,10 @@ Return the input string."
 ;; 这种错误可以使用函数 `pyim-imobj-validp' 来检测。
 
 ;; #+BEGIN_EXAMPLE
-;; (list (pyim-imobj-validp (car (pyim-imobj-create "ua" 'quanpin)) 'quanpin)
-;;       (pyim-imobj-validp (car (pyim-imobj-create "a" 'quanpin)) 'quanpin)
-;;       (pyim-imobj-validp (car (pyim-imobj-create "wa" 'quanpin)) 'quanpin)
-;;       (pyim-imobj-validp (car (pyim-imobj-create "wua" 'quanpin)) 'quanpin))
+;; (list (pyim-imobj-validp (car (pyim-imobj-list-create "ua" 'quanpin)) 'quanpin)
+;;       (pyim-imobj-validp (car (pyim-imobj-list-create "a" 'quanpin)) 'quanpin)
+;;       (pyim-imobj-validp (car (pyim-imobj-list-create "wa" 'quanpin)) 'quanpin)
+;;       (pyim-imobj-validp (car (pyim-imobj-list-create "wua" 'quanpin)) 'quanpin))
 ;; #+END_EXAMPLE
 
 ;; 结果为:
@@ -2401,7 +2401,7 @@ Return the input string."
     (when scheme
       (plist-get (cdr scheme) option))))
 
-(defun pyim-imobj-create (entered &optional scheme-name)
+(defun pyim-imobj-list-create (entered &optional scheme-name)
   "按照 `scheme-name' 对应的输入法方案，从 ENTERED 字符串中创建一个
 或者多个 imobj 组成的列表，类似：
 
@@ -2410,10 +2410,10 @@ Return the input string."
 注意： 不同的输入法，imobj 的结构也是不一样的。"
   (let ((class (pyim-scheme-get-option scheme-name :class)))
     (when class
-      (funcall (intern (format "pyim-imobj-create:%S" class))
+      (funcall (intern (format "pyim-imobj-list-create:%S" class))
                entered scheme-name))))
 
-(defun pyim-imobj-create:quanpin (entered &optional -)
+(defun pyim-imobj-list-create:quanpin (entered &optional -)
   (when (and entered (string< "" entered))
     (pyim-spinyin-find-fuzzy
      (list (apply 'append
@@ -2428,7 +2428,7 @@ Return the input string."
                           (split-string entered "'")))))))
 
 ;; "nihc" -> (((\"n\" . \"i\") (\"h\" . \"ao\")))
-(defun pyim-imobj-create:shuangpin (entered &optional scheme-name)
+(defun pyim-imobj-list-create:shuangpin (entered &optional scheme-name)
   (let ((keymaps (pyim-scheme-get-option scheme-name :keymaps))
         (list (string-to-list (replace-regexp-in-string "-" "" entered)))
         results)
@@ -2449,10 +2449,10 @@ Return the input string."
     (pyim-spinyin-find-fuzzy
      (pyim-permutate-list (nreverse results)))))
 
-(defun pyim-imobj-create:xingma (entered &optional -)
+(defun pyim-imobj-list-create:xingma (entered &optional -)
   (list (list entered)))
 
-(defun pyim-imobj-create:rime (entered &optional -)
+(defun pyim-imobj-list-create:rime (entered &optional -)
   (list (list entered)))
 
 (defun pyim-spinyin-find-fuzzy (spinyin-list)
@@ -2745,7 +2745,7 @@ code 字符串."
 完整拼音，则给出完整的拼音，如果是给出声母，则为一个 CONS CELL，CAR 是
 拼音，CDR 是拼音列表。例如：
 
- (setq foo-imobj (pyim-imobj-create \"pin-yin-sh-r\" 'quanpin))
+ (setq foo-imobj (pyim-imobj-list-create \"pin-yin-sh-r\" 'quanpin))
   => ((\"p\" . \"in\") (\"y\" . \"in\") (\"sh\" . \"\") (\"r\" . \"\"))
 
  (pyim-possible-words-py foo-imobj)
@@ -2785,7 +2785,7 @@ code 字符串."
 (defun pyim-entered-handler ()
   (let ((scheme-name pyim-default-scheme)
         (str pyim-entered))
-    (setq pyim-imobj-list (pyim-imobj-create str scheme-name)
+    (setq pyim-imobj-list (pyim-imobj-list-create str scheme-name)
           pyim-code-position 0)
     (unless (and (pyim-imobj-validp
                   (car pyim-imobj-list) scheme-name)
@@ -3760,7 +3760,7 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
                                     (list (char-to-string x)))
                                 (string-to-list pystr)))
                 ;; Slowly operating, need to improve.
-                (pyim-imobj-create pystr scheme-name)))
+                (pyim-imobj-list-create pystr scheme-name)))
              (regexp-list
               (mapcar
                #'(lambda (spinyin)
