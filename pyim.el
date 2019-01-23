@@ -967,8 +967,8 @@ pyim 内建的有三种选词框格式：
   '("a" "o" "e" "ai" "ei" "ui" "ao" "ou" "er" "an" "en"
     "ang" "eng"))
 
-(defvar pyim-entered-code ""
-  "用户已经输入的 code，由用户输入的字符连接而成.")
+(defvar pyim-entered ""
+  "用户已经输入的字符，连接而成的字符串.")
 
 (defvar pyim-magic-convert-cache nil
   "用来临时保存 `pyim-magic-convert' 的结果.
@@ -977,7 +977,7 @@ pyim 内建的有三种选词框格式：
 (defvar pyim-dagger-str ""
   "光标处带下划线字符串.
 输入法运行的时候，会在光标处会插入一个带下划线字符串，这个字符串
-提示用户当前选择的词条或者当前输入的 code 等许多有用的信息。
+提示用户当前选择的词条或者当前输入的字符串等许多有用的信息。
 pyim 称这个字符串为 \"dragger string\", 向 \"匕首\" 一样插入
 当前 buffer 的光标处。")
 
@@ -1002,7 +1002,7 @@ pyim 称这个字符串为 \"dragger string\", 向 \"匕首\" 一样插入
 (defvar pyim-code-position nil)
 (defvar pyim-scode-list nil
   "Scode 组成的 list.
-pyim 会将一个 code 分解为一个或者多个 scode （splited code）,
+pyim 会将用户输入的字符组成的字符串分解为一个或者多个 scode （splited code）,
 这个变量用于保存分解得到的结果。")
 
 (defvar pyim-current-pos nil "当前选择的词条在 ‘pyim-current-choices’ 中的位置.")
@@ -1110,7 +1110,7 @@ pyim 总是使用 emacs-async 包来生成 dcache.")
 
 ;; ** 将变量转换为 local 变量
 (defvar pyim-local-variable-list
-  '(pyim-entered-code
+  '(pyim-entered
     pyim-dagger-str
     pyim-current-choices
     pyim-current-pos
@@ -2038,8 +2038,8 @@ FILE 的格式与 `pyim-export' 生成的文件格式相同，
           (remove word orig-value))))
     (remhash word pyim-dcache-iword2count)))
 
-;; ** 生成 `pyim-entered-code' 并插入 `pyim-dagger-str'
-;; *** 生成拼音字符串 `pyim-entered-code'
+;; ** 生成 `pyim-entered' 并插入 `pyim-dagger-str'
+;; *** 生成 `pyim-entered'
 ;; pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
 ;; `input-method-function' 设置为 `pyim-input-method' ，这个变量
 ;; 会影响 `read-event' 的行为。
@@ -2057,7 +2057,7 @@ FILE 的格式与 `pyim-export' 生成的文件格式相同，
 ;;    `pyim-start-translation' 会调用这个函数。
 
 ;; `pyim-self-insert-command' 这个函数的核心工作就是将用户输入的字符，组
-;; 合成 code 字符串并保存到变量 `pyim-entered-code' 中。
+;; 合成一个字符串并保存到变量 `pyim-entered' 中。
 
 ;; 中英文输入模式切换功能也是在 'pyim-self-insert-command' 中实现。
 
@@ -2071,8 +2071,8 @@ FILE 的格式与 `pyim-export' 生成的文件格式相同，
 ;;    4. Reading One Event
 
 ;; *** 在待输入 buffer 中插入 `pyim-dagger-str'
-;; `pyim-self-insert-command' 会调用 `pyim-handle-entered-code' 来处理
-;; `pyim-entered-code'，并相应的得到对应的 `pyim-dagger-str'，然后，
+;; `pyim-self-insert-command' 会调用 `pyim-handle-entered' 来处理
+;; `pyim-entered'，并相应的得到对应的 `pyim-dagger-str'，然后，
 ;; `pyim-start-translation' 返回 `pyim-dagger-str' 的取值。
 
 ;; 在 `pyim-input-method' 函数内部，`pyim-start-translation' 返回值分解为
@@ -2137,7 +2137,7 @@ Return the input string."
           (setq str (substring key-or-string 0 -1)))
 
         (setq pyim-dagger-str ""
-              pyim-entered-code (or str "")
+              pyim-entered (or str "")
               pyim-translating t)
 
         (when key
@@ -2200,7 +2200,7 @@ Return the input string."
     (and (or pyim-force-input-chinese
              (and (not pyim-input-ascii)
                   (not (pyim-auto-switch-english-input-p))))
-         (if (pyim-string-emptyp pyim-entered-code)
+         (if (pyim-string-emptyp pyim-entered)
              (member last-command-event
                      (mapcar 'identity first-chars))
            (member last-command-event
@@ -2215,9 +2215,9 @@ Return the input string."
   (interactive "*")
   ;; (message "%s" (current-buffer))
   (if (pyim-input-chinese-p)
-      (progn (setq pyim-entered-code
-                   (concat pyim-entered-code (char-to-string last-command-event)))
-             (pyim-handle-entered-code))
+      (progn (setq pyim-entered
+                   (concat pyim-entered (char-to-string last-command-event)))
+             (pyim-handle-entered))
     (pyim-dagger-append (pyim-translate last-command-event))
     (pyim-terminate-translation)))
 
@@ -2230,10 +2230,10 @@ Return the input string."
              (pyim-tooltip-posframe-valid-p))
     (posframe-hide pyim-tooltip-posframe-buffer)))
 
-;; ** 处理拼音 code 字符串 `pyim-entered-code'
-;; *** 拼音字符串 -> 待选词列表
-;; 从一个拼音字符串获取其待选词列表，大致可以分成3个步骤：
-;; 1. 分解这个拼音字符串，得到一个拼音列表。
+;; ** 处理 `pyim-entered' (没有任何分隔符的拼音字符串)
+;; *** 用户输入的字符串 -> 待选词列表
+;; 从一个用户输入的字符串（没有任何分隔符的拼音字符串）获取其待选词列表，大致可以分成3个步骤：
+;; 1. 分解字符串，得到一个拼音列表。
 ;;    #+BEGIN_EXAMPLE
 ;;    woaimeinv -> (("w" . "o") ("" . "ai") ("m" . "ei") ("n" . "v"))
 ;;    #+END_EXAMPLE
@@ -2246,20 +2246,19 @@ Return the input string."
 ;;        )
 ;;    #+END_EXAMPLE
 ;; 3. 递归的查询上述多个词语拼音，将得到的结果合并为待选词列表。
-;; **** 分解拼音字符串
-;; 拼音字符串操作主要做两方面的工作：
-;; 1. 将拼音字符串分解为拼音列表。
-;; 2. 将拼音列表合并成拼音字符串。
+;; **** 分解用户输入的字符串
+;; 1. 将用户输入的字符串分解为拼音列表。
+;; 2. 将拼音列表合并成适合搜索的，并且带明确分割符的拼音字符串。
 
 ;; 在这之前，pyim 定义了三个变量：
 ;; 1. 声母表： `pyim-pinyin-shen-mu'
 ;; 2. 韵母表：`pyim-pinyin-yun-mu'
 ;; 3. 有效韵母表： `pyim-pinyin-valid-yun-mu'
 
-;; pyim 使用函数 `pyim-code-split' 将拼音字符串分解为一个由声母和韵母组成的拼音列表，比如：
+;; pyim 使用函数 `pyim-entered-split' 将用户输入的字符串分解为一个由声母和韵母组成的拼音列表，比如：
 
 ;; #+BEGIN_EXAMPLE
-;; (pyim-code-split "woaimeinv" 'quanpin)
+;; (pyim-entered-split "woaimeinv" 'quanpin)
 ;; #+END_EXAMPLE
 
 ;; 结果为:
@@ -2301,10 +2300,10 @@ Return the input string."
 ;; 结果为:
 ;; : ("o" . "aimeinv")
 
-;; 当用户输入一个错误的拼音时，`pyim-code-split' 会产生一个声母为空而韵母又不正确的拼音列表 ，比如：
+;; 当用户输入一个错误的拼音时，`pyim-entered-split' 会产生一个声母为空而韵母又不正确的拼音列表 ，比如：
 
 ;; #+BEGIN_EXAMPLE
-;; (pyim-code-split "ua" 'quanpin)
+;; (pyim-entered-split "ua" 'quanpin)
 ;; #+END_EXAMPLE
 
 ;; 结果为:
@@ -2312,18 +2311,17 @@ Return the input string."
 
 ;; 这种错误可以使用函数 `pyim-scode-validp' 来检测。
 ;; #+BEGIN_EXAMPLE
-;; (list (pyim-scode-validp (car (pyim-code-split "ua" 'quanpin)) 'quanpin)
-;;       (pyim-scode-validp (car (pyim-code-split "a" 'quanpin)) 'quanpin)
-;;       (pyim-scode-validp (car (pyim-code-split "wa" 'quanpin)) 'quanpin)
-;;       (pyim-scode-validp (car (pyim-code-split "wua" 'quanpin)) 'quanpin))
+;; (list (pyim-scode-validp (car (pyim-entered-split "ua" 'quanpin)) 'quanpin)
+;;       (pyim-scode-validp (car (pyim-entered-split "a" 'quanpin)) 'quanpin)
+;;       (pyim-scode-validp (car (pyim-entered-split "wa" 'quanpin)) 'quanpin)
+;;       (pyim-scode-validp (car (pyim-entered-split "wua" 'quanpin)) 'quanpin))
 ;; #+END_EXAMPLE
 
 ;; 结果为:
 ;; : (nil t t t)
 
 ;; pyim 使用函数 `pyim-scode-join' 将一个 scode (splited code) 合并
-;; 为一个 code 字符串，这个可以认为是 `pyim-code-split' 的反向操作。构建得到的
-;; code 字符串用于搜索词条。
+;; 为一个 code 字符串，构建得到的字符串用于搜索词条。
 
 ;; #+BEGIN_EXAMPLE
 ;; (pyim-scode-join '(("w" . "o") ("" . "ai") ("m" . "ei") ("n" . "v")) 'quanpin)
@@ -2332,7 +2330,7 @@ Return the input string."
 ;; 结果为:
 ;; : "wo-ai-mei-nv"
 
-;; 最后： `pyim-code-user-divide-pos' 和 `pyim-code-restore-user-divide' 用来处理隔
+;; 最后： `pyim-entered-user-divide-pos' 和 `pyim-entered-restore-user-divide' 用来处理隔
 ;; 音符，比如： xi'an
 
 ;; 将汉字的拼音分成声母和其它
@@ -2405,8 +2403,8 @@ Return the input string."
     (when scheme
       (plist-get (cdr scheme) option))))
 
-(defun pyim-code-split (code &optional scheme-name)
-  "按照 `scheme-name' 对应的输入法方案，把一个 code 字符串分解为一个由 scode
+(defun pyim-entered-split (entered &optional scheme-name)
+  "按照 `scheme-name' 对应的输入法方案，把一个字符串分解为一个由 scode
 组成的列表，类似：
 
 1. pinyin:  (((\"n\" . \"i\") (\"h\" . \"ao\")))
@@ -2414,13 +2412,13 @@ Return the input string."
 注意： 不同的输入法，scode 的结构也是不一样的。"
   (let ((class (pyim-scheme-get-option scheme-name :class)))
     (when class
-      (funcall (intern (format "pyim-code-split:%S" class))
-               code scheme-name))))
+      (funcall (intern (format "pyim-entered-split:%S" class))
+               entered scheme-name))))
 
-(defun pyim-code-split:quanpin (py &optional -)
-  "把一个拼音字符串 `py' 分解成 spinyin-list (由声母和韵母组成的复杂列表），
+(defun pyim-entered-split:quanpin (entered &optional -)
+  "把一个字符串 `entered' 分解成 spinyin-list (由声母和韵母组成的复杂列表），
 优先处理含有 ' 的位置。"
-  (when (and py (string< "" py))
+  (when (and entered (string< "" entered))
     (pyim-spinyin-find-fuzzy
      (list (apply 'append
                   (mapcar #'(lambda (p)
@@ -2431,13 +2429,13 @@ Return the input string."
                                          (setq spinyin (append spinyin (list (car chpy))))
                                          (setq p (cdr chpy))))
                                 spinyin))
-                          (split-string py "'")))))))
+                          (split-string entered "'")))))))
 
 ;; "nihc" -> (((\"n\" . \"i\") (\"h\" . \"ao\")))
-(defun pyim-code-split:shuangpin (str &optional scheme-name)
+(defun pyim-entered-split:shuangpin (entered &optional scheme-name)
   "把一个双拼字符串分解成一个声母和韵母组成的复杂列表。"
   (let ((keymaps (pyim-scheme-get-option scheme-name :keymaps))
-        (list (string-to-list (replace-regexp-in-string "-" "" str)))
+        (list (string-to-list (replace-regexp-in-string "-" "" entered)))
         results)
     (while list
       (let* ((sp-sm (pop list))
@@ -2456,17 +2454,17 @@ Return the input string."
     (pyim-spinyin-find-fuzzy
      (pyim-permutate-list (nreverse results)))))
 
-(defun pyim-code-split:xingma (code &optional -)
-  "这个函数只是对 code 做了一点简单的包装，实际并不真正的
-*分解* code, 用于五笔等基于形码的输入法, 比如：
+(defun pyim-entered-split:xingma (entered &optional -)
+  "这个函数只是对 ENTERED 做了一点简单的包装，实际并不真正的
+*分解*, 用于五笔等基于形码的输入法, 比如：
 
   \"aaaa\" -> ((\"aaaa\"))"
-  (list (list code)))
+  (list (list entered)))
 
-(defun pyim-code-split:rime (code &optional -)
-  "这个函数只是对 code 做了一点简单的包装，实际并不真正的
-*分解* code, 用于 rime 输入法."
-  (list (list code)))
+(defun pyim-entered-split:rime (entered &optional -)
+  "这个函数只是对 ENTERED 做了一点简单的包装，实际并不真正的
+*分解*, 用于 rime 输入法."
+  (list (list entered)))
 
 (defun pyim-spinyin-find-fuzzy (spinyin-list)
   "用于处理模糊音的函数。"
@@ -2502,7 +2500,7 @@ Return the input string."
            (reverse result))))
 
 (defun pyim-scode-validp (scode scheme-name)
-  "检测一个 scode 是否正确。"
+  "检测一个 scode 是否有效。"
   (let ((class (pyim-scheme-get-option scheme-name :class)))
     (cond
      ((member class '(quanpin shuangpin))
@@ -2524,31 +2522,31 @@ Return the input string."
                (setq spinyin (cdr spinyin)))))
     valid))
 
-(defun pyim-code-user-divide-pos (code)
-  "检测 `code' 中用户分割的位置，也就是'的位置，主要用于拼音输入法。"
-  (setq code (replace-regexp-in-string "-" "" code))
+(defun pyim-entered-user-divide-pos (entered)
+  "检测 `entered' 中用户分割的位置，也就是'的位置，主要用于拼音输入法。"
+  (setq entered (replace-regexp-in-string "-" "" entered))
   (let (poslist (start 0))
-    (while (string-match "'" code start)
+    (while (string-match "'" entered start)
       (setq start (match-end 0))
       (setq poslist (append poslist (list (match-beginning 0)))))
     poslist))
 
-(defun pyim-code-restore-user-divide (code pos)
-  "按检测出的用户分解的位置，重新设置 code，主要用于拼音输入法。"
+(defun pyim-entered-restore-user-divide (entered pos)
+  "按检测出的用户分解的位置，重新设置 entered，主要用于拼音输入法。"
   (let ((i 0) (shift 0) cur)
     (setq cur (car pos)
           pos (cdr pos))
-    (while (and cur (< i (length code)))
-      (if (= (aref code i) ?-)
+    (while (and cur (< i (length entered)))
+      (if (= (aref entered i) ?-)
           (if (= i (+ cur shift))
               (progn
-                (aset code i ?')
+                (aset entered i ?')
                 (setq cur (car pos)
                       pos (cdr pos)))
             (setq shift (1+ shift))))
       (setq i (1+ i)))
-    (if cur (setq code (concat code "'")))  ; the last char is `''
-    code))
+    (if cur (setq entered (concat entered "'")))  ; the last char is `''
+    entered))
 
 (defun pyim-scode-join (scode scheme-name &optional as-search-key shou-zi-mu)
   "按照 `scheme' 对应的输入法方案，将一个 scode (splited code)
@@ -2756,7 +2754,7 @@ Return the input string."
 完整拼音，则给出完整的拼音，如果是给出声母，则为一个 CONS CELL，CAR 是
 拼音，CDR 是拼音列表。例如：
 
- (setq foo-spinyin (pyim-code-split \"pin-yin-sh-r\" 'quanpin))
+ (setq foo-spinyin (pyim-entered-split \"pin-yin-sh-r\" 'quanpin))
   => ((\"p\" . \"in\") (\"y\" . \"in\") (\"sh\" . \"\") (\"r\" . \"\"))
 
  (pyim-possible-words-py foo-spinyin)
@@ -2788,15 +2786,15 @@ Return the input string."
     (cdr py)))
 
 ;; *** 核心函数：拼音字符串处理函数
-;; `pyim-handle-entered-code' 这个函数是一个重要的 *核心函数* ，其大致工作流程为：
-;; 1. 查询拼音字符串 `pyim-entered-code' 得到： 待选词列表
-;;    `pyim-current-choices' 和 当前选择的词条 `pyim-entered-code'
+;; `pyim-handle-entered' 这个函数是一个重要的 *核心函数* ，其大致工作流程为：
+;; 1. 查询拼音字符串 `pyim-entered' 得到： 待选词列表
+;;    `pyim-current-choices' 和 当前选择的词条 `pyim-entered'
 ;; 2. 显示备选词条和选择备选词等待用户选择。
 
-(defun pyim-handle-entered-code ()
+(defun pyim-handle-entered ()
   (let ((scheme-name pyim-default-scheme)
-        (str pyim-entered-code))
-    (setq pyim-scode-list (pyim-code-split str scheme-name)
+        (str pyim-entered))
+    (setq pyim-scode-list (pyim-entered-split str scheme-name)
           pyim-code-position 0)
     (unless (and (pyim-scode-validp
                   (car pyim-scode-list) scheme-name)
@@ -2809,7 +2807,7 @@ Return the input string."
                      (pyim-page-refresh)
                      t)))
       (setq pyim-current-choices
-            (list (list pyim-entered-code)))
+            (list (list pyim-entered)))
       (setq pyim-current-pos 1)
       (pyim-dagger-refresh)
       (pyim-page-refresh))))
@@ -2821,8 +2819,8 @@ Return the input string."
 
 ;; 处理 `pyim-dagger-str' 的代码分散在多个函数中，可以按照下面的方式分类：
 ;; 1. 英文字符串：pyim 没有找到相应的候选词时（比如：用户输入错
-;;    误的拼音），`pyim-dagger-str' 的值与 `pyim-entered-code' 大致相同。
-;;    相关代码很简单，分散在 `pyim-handle-entered-code' 或者
+;;    误的拼音），`pyim-dagger-str' 的值与 `pyim-entered' 大致相同。
+;;    相关代码很简单，分散在 `pyim-handle-entered' 或者
 ;;    `pyim-dagger-append' 等相关函数。
 ;; 2. 汉字或者拼音和汉字的混合：当 pyim 找到相应的候选词条时，
 ;;    `pyim-dagger-str' 的值可以是完全的中文词条，比如：
@@ -2879,7 +2877,7 @@ Return the input string."
           (concat (substring pyim-dagger-str 0 pyim-code-position)
                   (pyim-choice (nth pos choices))))
     (unless enable-multibyte-characters
-      (setq pyim-entered-code nil
+      (setq pyim-entered nil
             pyim-dagger-str nil)
       (error "Can't input characters in current unibyte buffer"))
     ;; Delete old dagger string.
@@ -3032,7 +3030,7 @@ Return the input string."
          (pos (- (min pyim-current-pos (length choices)) start))
          (page-info (make-hash-table))
          (i 0))
-    (puthash :code pyim-entered-code page-info)
+    (puthash :entered pyim-entered page-info)
     (puthash :current-page (pyim-page-current-page) page-info)
     (puthash :total-page (pyim-page-total-page) page-info)
     (puthash :words choice page-info)
@@ -3075,7 +3073,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
 
 (defun pyim-page-next-page (arg)
   (interactive "p")
-  (if (= (length pyim-entered-code) 0)
+  (if (= (length pyim-entered) 0)
       (progn
         (pyim-dagger-append (pyim-translate last-command-event))
         (pyim-terminate-translation))
@@ -3091,7 +3089,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
 
 (defun pyim-page-next-word (arg)
   (interactive "p")
-  (if (= (length pyim-entered-code) 0)
+  (if (= (length pyim-entered) 0)
       (progn
         (pyim-dagger-append (pyim-translate last-command-event))
         (pyim-terminate-translation))
@@ -3104,7 +3102,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
   (interactive "p")
   (pyim-page-next-word (- arg)))
 
-(defun pyim-page-format-preedit (code &optional separator)
+(defun pyim-page-format-preedit (entered &optional separator)
   "这个函数用于格式化 page 中显示的 preedit。"
   (let* ((scheme-name pyim-default-scheme)
          (class (pyim-scheme-get-option scheme-name :class))
@@ -3116,15 +3114,15 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
              (or preedit "")))
           ((memq class '(xingma))
            (mapconcat #'identity
-                      (pyim-split-string-by-number code code-maximum-length)
+                      (pyim-split-string-by-number entered code-maximum-length)
                       " "))
           ((memq class '(quanpin shuangpin))
            (replace-regexp-in-string
             "[-']+" (or separator " ")
-            (pyim-code-restore-user-divide
+            (pyim-entered-restore-user-divide
              (pyim-scode-join (car pyim-scode-list) scheme-name)
-             (pyim-code-user-divide-pos code))))
-          (t code))))
+             (pyim-entered-user-divide-pos entered))))
+          (t entered))))
 
 (defun pyim-page-format-menu (words position &optional separator)
   "这个函数用于格式化 page 中显示的词条菜单。"
@@ -3155,7 +3153,7 @@ tooltip 选词框中显示。
 | 1.你好 2.你号 ...          |
 +----------------------------+"
   (format "=> %s [%s/%s]: \n%s"
-          (pyim-page-format-preedit (gethash :code page-info))
+          (pyim-page-format-preedit (gethash :entered page-info))
           (gethash :current-page page-info)
           (gethash :total-page page-info)
           (pyim-page-format-menu
@@ -3170,7 +3168,7 @@ tooltip 选词框中显示。
 | [ni hao]: 1.你好 2.你号 ... (1/9) |
 +-----------------------------------+"
   (format "[%s]: %s(%s/%s)"
-          (pyim-page-format-preedit (gethash :code page-info) "")
+          (pyim-page-format-preedit (gethash :entered page-info) "")
           (pyim-page-format-menu
            (gethash :words page-info)
            (gethash :position page-info))
@@ -3187,7 +3185,7 @@ tooltip 选词框中显示。
 | 2.你号 ...   |
 +--------------+"
   (format "=> %s [%s/%s]: \n%s"
-          (pyim-page-format-preedit (gethash :code page-info))
+          (pyim-page-format-preedit (gethash :entered page-info))
           (gethash :current-page page-info)
           (gethash :total-page page-info)
           (pyim-page-format-menu
@@ -3203,7 +3201,7 @@ tooltip 选词框中显示。
 | [ni hao]: 1.你好 2.你号 ...  (1/9) |
 +------------------------------------+"
   (format "[%s]: %s(%s/%s)"
-          (pyim-page-format-preedit (gethash :code page-info))
+          (pyim-page-format-preedit (gethash :entered page-info))
           (pyim-page-format-menu
            (gethash :words page-info)
            (gethash :position page-info))
@@ -3668,25 +3666,25 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
 ;; *** 删除拼音字符串最后一个字符
 (defun pyim-delete-last-char ()
   (interactive)
-  (if (> (length pyim-entered-code) 1)
+  (if (> (length pyim-entered) 1)
       (progn
-        (setq pyim-entered-code (substring pyim-entered-code 0 -1))
-        (pyim-handle-entered-code))
+        (setq pyim-entered (substring pyim-entered 0 -1))
+        (pyim-handle-entered))
     (setq pyim-dagger-str "")
     (pyim-terminate-translation)))
 
 ;; *** 删除拼音字符串最后一个拼音
 (defun pyim-backward-kill-py ()
   (interactive)
-  (if (string-match "['-][^'-]+$" pyim-entered-code)
-      (progn (setq pyim-entered-code
-                   (replace-match "" nil nil pyim-entered-code))
-             (pyim-handle-entered-code))
-    (setq pyim-entered-code "")
+  (if (string-match "['-][^'-]+$" pyim-entered)
+      (progn (setq pyim-entered
+                   (replace-match "" nil nil pyim-entered))
+             (pyim-handle-entered))
+    (setq pyim-entered "")
     (setq pyim-dagger-str "")
     (pyim-terminate-translation)))
 
-;; *** 将光标前的 code 字符串转换为中文
+;; *** 将光标前的用户输入的字符串转换为中文
 ;;;###autoload
 (defun pyim-convert-code-at-point ()
   (interactive)
@@ -3732,7 +3730,7 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
 ;; *** 字母上屏
 (defun pyim-quit-no-clear ()
   (interactive)
-  (setq pyim-dagger-str pyim-entered-code)
+  (setq pyim-dagger-str pyim-entered)
   (pyim-terminate-translation))
 
 ;; *** pyim 取消激活
@@ -3771,7 +3769,7 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
                                     (list (char-to-string x)))
                                 (string-to-list pystr)))
                 ;; Slowly operating, need to improve.
-                (pyim-code-split pystr scheme-name)))
+                (pyim-entered-split pystr scheme-name)))
              (regexp-list
               (mapcar
                #'(lambda (spinyin)
