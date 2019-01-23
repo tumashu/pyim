@@ -2255,10 +2255,10 @@ Return the input string."
 ;; 2. 韵母表：`pyim-pinyin-yun-mu'
 ;; 3. 有效韵母表： `pyim-pinyin-valid-yun-mu'
 
-;; pyim 使用函数 `pyim-entered-split' 将用户输入的字符串分解为一个由声母和韵母组成的拼音列表，比如：
+;; pyim 使用函数 `pyim-imobj-create' 将用户输入的字符串分解为一个由声母和韵母组成的拼音列表，比如：
 
 ;; #+BEGIN_EXAMPLE
-;; (pyim-entered-split "woaimeinv" 'quanpin)
+;; (pyim-imobj-create "woaimeinv" 'quanpin)
 ;; #+END_EXAMPLE
 
 ;; 结果为:
@@ -2300,10 +2300,10 @@ Return the input string."
 ;; 结果为:
 ;; : ("o" . "aimeinv")
 
-;; 当用户输入一个错误的拼音时，`pyim-entered-split' 会产生一个声母为空而韵母又不正确的拼音列表 ，比如：
+;; 当用户输入一个错误的拼音时，`pyim-imobj-create' 会产生一个声母为空而韵母又不正确的拼音列表 ，比如：
 
 ;; #+BEGIN_EXAMPLE
-;; (pyim-entered-split "ua" 'quanpin)
+;; (pyim-imobj-create "ua" 'quanpin)
 ;; #+END_EXAMPLE
 
 ;; 结果为:
@@ -2311,10 +2311,10 @@ Return the input string."
 
 ;; 这种错误可以使用函数 `pyim-imobj-validp' 来检测。
 ;; #+BEGIN_EXAMPLE
-;; (list (pyim-imobj-validp (car (pyim-entered-split "ua" 'quanpin)) 'quanpin)
-;;       (pyim-imobj-validp (car (pyim-entered-split "a" 'quanpin)) 'quanpin)
-;;       (pyim-imobj-validp (car (pyim-entered-split "wa" 'quanpin)) 'quanpin)
-;;       (pyim-imobj-validp (car (pyim-entered-split "wua" 'quanpin)) 'quanpin))
+;; (list (pyim-imobj-validp (car (pyim-imobj-create "ua" 'quanpin)) 'quanpin)
+;;       (pyim-imobj-validp (car (pyim-imobj-create "a" 'quanpin)) 'quanpin)
+;;       (pyim-imobj-validp (car (pyim-imobj-create "wa" 'quanpin)) 'quanpin)
+;;       (pyim-imobj-validp (car (pyim-imobj-create "wua" 'quanpin)) 'quanpin))
 ;; #+END_EXAMPLE
 
 ;; 结果为:
@@ -2403,7 +2403,7 @@ Return the input string."
     (when scheme
       (plist-get (cdr scheme) option))))
 
-(defun pyim-entered-split (entered &optional scheme-name)
+(defun pyim-imobj-create (entered &optional scheme-name)
   "按照 `scheme-name' 对应的输入法方案，把一个字符串分解为一个由 imobj
 组成的列表，类似：
 
@@ -2412,10 +2412,10 @@ Return the input string."
 注意： 不同的输入法，imobj 的结构也是不一样的。"
   (let ((class (pyim-scheme-get-option scheme-name :class)))
     (when class
-      (funcall (intern (format "pyim-entered-split:%S" class))
+      (funcall (intern (format "pyim-imobj-create:%S" class))
                entered scheme-name))))
 
-(defun pyim-entered-split:quanpin (entered &optional -)
+(defun pyim-imobj-create:quanpin (entered &optional -)
   "把一个字符串 `entered' 分解成 spinyin-list (由声母和韵母组成的复杂列表），
 优先处理含有 ' 的位置。"
   (when (and entered (string< "" entered))
@@ -2432,7 +2432,7 @@ Return the input string."
                           (split-string entered "'")))))))
 
 ;; "nihc" -> (((\"n\" . \"i\") (\"h\" . \"ao\")))
-(defun pyim-entered-split:shuangpin (entered &optional scheme-name)
+(defun pyim-imobj-create:shuangpin (entered &optional scheme-name)
   "把一个双拼字符串分解成一个声母和韵母组成的复杂列表。"
   (let ((keymaps (pyim-scheme-get-option scheme-name :keymaps))
         (list (string-to-list (replace-regexp-in-string "-" "" entered)))
@@ -2454,14 +2454,14 @@ Return the input string."
     (pyim-spinyin-find-fuzzy
      (pyim-permutate-list (nreverse results)))))
 
-(defun pyim-entered-split:xingma (entered &optional -)
+(defun pyim-imobj-create:xingma (entered &optional -)
   "这个函数只是对 ENTERED 做了一点简单的包装，实际并不真正的
 *分解*, 用于五笔等基于形码的输入法, 比如：
 
   \"aaaa\" -> ((\"aaaa\"))"
   (list (list entered)))
 
-(defun pyim-entered-split:rime (entered &optional -)
+(defun pyim-imobj-create:rime (entered &optional -)
   "这个函数只是对 ENTERED 做了一点简单的包装，实际并不真正的
 *分解*, 用于 rime 输入法."
   (list (list entered)))
@@ -2754,7 +2754,7 @@ Return the input string."
 完整拼音，则给出完整的拼音，如果是给出声母，则为一个 CONS CELL，CAR 是
 拼音，CDR 是拼音列表。例如：
 
- (setq foo-spinyin (pyim-entered-split \"pin-yin-sh-r\" 'quanpin))
+ (setq foo-spinyin (pyim-imobj-create \"pin-yin-sh-r\" 'quanpin))
   => ((\"p\" . \"in\") (\"y\" . \"in\") (\"sh\" . \"\") (\"r\" . \"\"))
 
  (pyim-possible-words-py foo-spinyin)
@@ -2794,7 +2794,7 @@ Return the input string."
 (defun pyim-handle-entered ()
   (let ((scheme-name pyim-default-scheme)
         (str pyim-entered))
-    (setq pyim-imobj-list (pyim-entered-split str scheme-name)
+    (setq pyim-imobj-list (pyim-imobj-create str scheme-name)
           pyim-code-position 0)
     (unless (and (pyim-imobj-validp
                   (car pyim-imobj-list) scheme-name)
@@ -3769,7 +3769,7 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
                                     (list (char-to-string x)))
                                 (string-to-list pystr)))
                 ;; Slowly operating, need to improve.
-                (pyim-entered-split pystr scheme-name)))
+                (pyim-imobj-create pystr scheme-name)))
              (regexp-list
               (mapcar
                #'(lambda (spinyin)
