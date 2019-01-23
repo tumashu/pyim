@@ -2202,7 +2202,7 @@ Return the input string."
       (progn (setq pyim-entered
                    (concat pyim-entered (char-to-string last-command-event)))
              (pyim-entered-handler))
-    (pyim-dagger-append (pyim-translate last-command-event))
+    (setq pyim-dagger (concat pyim-dagger (pyim-translate last-command-event)))
     (pyim-terminate-translation)))
 
 (defun pyim-terminate-translation ()
@@ -2797,8 +2797,7 @@ code 字符串."
 ;; 处理 `pyim-dagger' 的代码分散在多个函数中，可以按照下面的方式分类：
 ;; 1. 英文字符串：pyim 没有找到相应的候选词时（比如：用户输入错
 ;;    误的拼音），`pyim-dagger' 的值与 `pyim-entered' 大致相同。
-;;    相关代码很简单，分散在 `pyim-entered-handler' 或者
-;;    `pyim-dagger-append' 等相关函数。
+;;    相关代码很简单，分散在 `pyim-entered-handler' 等函数。
 ;; 2. 汉字或者拼音和汉字的混合：当 pyim 找到相应的候选词条时，
 ;;    `pyim-dagger' 的值可以是完全的中文词条，比如：
 ;;    #+BEGIN_EXAMPLE
@@ -2838,10 +2837,6 @@ code 字符串."
 (defun pyim-dagger-delete-overlay ()
   (if (and (overlayp pyim-dagger-overlay) (overlay-start pyim-dagger-overlay))
       (delete-overlay pyim-dagger-overlay)))
-
-(defun pyim-dagger-append (str)
-  "Append STR to `pyim-dagger'"
-  (setq pyim-dagger (concat pyim-dagger str)))
 
 (defun pyim-dagger-refresh ()
   "更新 `pyim-dagger' 的值。"
@@ -3051,7 +3046,8 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
   (interactive "p")
   (if (= (length pyim-entered) 0)
       (progn
-        (pyim-dagger-append (pyim-translate last-command-event))
+        (setq pyim-dagger
+              (concat pyim-dagger (pyim-translate last-command-event)))
         (pyim-terminate-translation))
     (let ((new (+ pyim-candidate-position (* pyim-page-length arg) 1)))
       (setq pyim-candidate-position (if (> new 0) new 1)
@@ -3067,7 +3063,9 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
   (interactive "p")
   (if (= (length pyim-entered) 0)
       (progn
-        (pyim-dagger-append (pyim-translate last-command-event))
+        (setq pyim-dagger
+              (concat pyim-dagger
+                      (pyim-translate last-command-event)))
         (pyim-terminate-translation))
     (let ((new (+ pyim-candidate-position arg)))
       (setq pyim-candidate-position (if (> new 0) new 1))
@@ -3292,7 +3290,7 @@ tooltip 选词框中显示。
                          (nth (1- pyim-candidate-position)
                               pyim-candidate-list))))
           (pyim-page-select-word)))
-    (pyim-dagger-append (char-to-string last-command-event))
+    (setq pyim-dagger (concat pyim-dagger (char-to-string last-command-event)))
     (pyim-terminate-translation)))
 
 ;; ** 处理标点符号
