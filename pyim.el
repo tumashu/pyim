@@ -3289,7 +3289,7 @@ tooltip 选词框中显示。
           (setq pyim-dagger
                 (concat (substring pyim-dagger 0
                                    pyim-code-position)
-                        (pyim-candidate
+                        (pyim-candidate-parse
                          (nth (1- pyim-candidate-position)
                               pyim-candidate-list))))
           (pyim-page-select-word)))
