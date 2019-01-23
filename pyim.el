@@ -2072,7 +2072,7 @@ FILE 的格式与 `pyim-export' 生成的文件格式相同，
 ;;    4. Reading One Event
 
 ;; *** 在待输入 buffer 中插入 `pyim-dagger'
-;; `pyim-self-insert-command' 会调用 `pyim-handle-entered' 来处理
+;; `pyim-self-insert-command' 会调用 `pyim-entered-handler' 来处理
 ;; `pyim-entered'，并相应的得到对应的 `pyim-dagger'，然后，
 ;; `pyim-start-translation' 返回 `pyim-dagger' 的取值。
 
@@ -2218,7 +2218,7 @@ Return the input string."
   (if (pyim-input-chinese-p)
       (progn (setq pyim-entered
                    (concat pyim-entered (char-to-string last-command-event)))
-             (pyim-handle-entered))
+             (pyim-entered-handler))
     (pyim-dagger-append (pyim-translate last-command-event))
     (pyim-terminate-translation)))
 
@@ -2782,12 +2782,12 @@ code 字符串."
     (cdr py)))
 
 ;; *** 核心函数：拼音字符串处理函数
-;; `pyim-handle-entered' 这个函数是一个重要的 *核心函数* ，其大致工作流程为：
+;; `pyim-entered-handler' 这个函数是一个重要的 *核心函数* ，其大致工作流程为：
 ;; 1. 查询拼音字符串 `pyim-entered' 得到： 待选词列表
 ;;    `pyim-current-choices' 和 当前选择的词条 `pyim-entered'
 ;; 2. 显示备选词条和选择备选词等待用户选择。
 
-(defun pyim-handle-entered ()
+(defun pyim-entered-handler ()
   (let ((scheme-name pyim-default-scheme)
         (str pyim-entered))
     (setq pyim-imobj-list (pyim-imobj-create str scheme-name)
@@ -2816,7 +2816,7 @@ code 字符串."
 ;; 处理 `pyim-dagger' 的代码分散在多个函数中，可以按照下面的方式分类：
 ;; 1. 英文字符串：pyim 没有找到相应的候选词时（比如：用户输入错
 ;;    误的拼音），`pyim-dagger' 的值与 `pyim-entered' 大致相同。
-;;    相关代码很简单，分散在 `pyim-handle-entered' 或者
+;;    相关代码很简单，分散在 `pyim-entered-handler' 或者
 ;;    `pyim-dagger-append' 等相关函数。
 ;; 2. 汉字或者拼音和汉字的混合：当 pyim 找到相应的候选词条时，
 ;;    `pyim-dagger' 的值可以是完全的中文词条，比如：
@@ -3665,7 +3665,7 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
   (if (> (length pyim-entered) 1)
       (progn
         (setq pyim-entered (substring pyim-entered 0 -1))
-        (pyim-handle-entered))
+        (pyim-entered-handler))
     (setq pyim-dagger "")
     (pyim-terminate-translation)))
 
@@ -3675,7 +3675,7 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
   (if (string-match "['-][^'-]+$" pyim-entered)
       (progn (setq pyim-entered
                    (replace-match "" nil nil pyim-entered))
-             (pyim-handle-entered))
+             (pyim-entered-handler))
     (setq pyim-entered "")
     (setq pyim-dagger "")
     (pyim-terminate-translation)))
