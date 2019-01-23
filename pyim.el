@@ -3018,8 +3018,8 @@ Return the input string."
           whole
         (pyim-page-end t)))))
 
-(defun pyim-page-format-key-string (code)
-  "这个函数用于生成 page 中显示的 code。"
+(defun pyim-page-format-preedit (code)
+  "这个函数用于生成 page 中显示的 preedit。"
   (let* ((scheme-name pyim-default-scheme)
          (class (pyim-scheme-get-option scheme-name :class))
          (code-maximum-length (pyim-scheme-get-option scheme-name :code-split-length)))
@@ -3054,7 +3054,7 @@ Return the input string."
          (pos (- (min pyim-current-pos (length choices)) start))
          (page-info (make-hash-table))
          (i 0))
-    (puthash :key (pyim-page-format-key-string pyim-entered-code)
+    (puthash :preedit (pyim-page-format-preedit pyim-entered-code)
              page-info)
     (puthash :current-page (pyim-page-current-page) page-info)
     (puthash :total-page (pyim-page-total-page) page-info)
@@ -3153,7 +3153,7 @@ tooltip 选词框中显示。
 | 1.你好 2.你号 ...          |
 +----------------------------+"
   (format "=> %s [%s/%s]: \n%s"
-          (gethash :key page-info)
+          (gethash :preedit page-info)
           (gethash :current-page page-info)
           (gethash :total-page page-info)
           (gethash :words page-info)))
@@ -3168,7 +3168,7 @@ tooltip 选词框中显示。
   (format "[%s]: %s(%s/%s)"
           (replace-regexp-in-string
            " +" ""
-           (gethash :key page-info))
+           (gethash :preedit page-info))
           (gethash :words page-info)
           (gethash :current-page page-info)
           (gethash :total-page page-info)))
@@ -3183,7 +3183,7 @@ tooltip 选词框中显示。
 | 2.你号 ...   |
 +--------------+"
   (format "=> %s [%s/%s]: \n%s"
-          (gethash :key page-info)
+          (gethash :preedit page-info)
           (gethash :current-page page-info)
           (gethash :total-page page-info)
           (replace-regexp-in-string
@@ -3200,7 +3200,7 @@ tooltip 选词框中显示。
 | [ni hao]: 1.你好 2.你号 ...  (1/9) |
 +------------------------------------+"
   (format "[%s]: %s(%s/%s)"
-          (gethash :key page-info)
+          (gethash :preedit page-info)
           (gethash :words page-info)
           (gethash :current-page page-info)
           (gethash :total-page page-info)))
