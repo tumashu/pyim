@@ -2054,7 +2054,7 @@ FILE 的格式与 `pyim-export' 生成的文件格式相同，
 ;;    4. Reading One Event
 
 ;; *** 在待输入 buffer 中插入 `pyim-dagger'
-;; `pyim-self-insert-command' 会调用 `pyim-entered-handler' 来处理
+;; `pyim-self-insert-command' 会调用 `pyim-entered-handle' 来处理
 ;; `pyim-entered'，并相应的得到对应的 `pyim-dagger'，然后，
 ;; `pyim-start-translation' 返回 `pyim-dagger' 的取值。
 
@@ -2123,7 +2123,7 @@ Return the input string."
               pyim-dagger-last ""
               pyim-translating t)
 
-        (pyim-entered-handler (or str ""))
+        (pyim-entered-handle (or str ""))
 
         (when key
           (setq unread-command-events
@@ -2200,7 +2200,7 @@ Return the input string."
   (interactive "*")
   ;; (message "%s" (current-buffer))
   (if (pyim-input-chinese-p)
-      (pyim-entered-handler
+      (pyim-entered-handle
        (concat pyim-entered
                (char-to-string last-command-event)))
     (setq pyim-dagger (concat pyim-dagger (pyim-translate last-command-event)))
@@ -2766,12 +2766,12 @@ code 字符串."
     (cdr py)))
 
 ;; *** 核心函数：拼音字符串处理函数
-;; `pyim-entered-handler' 这个函数是一个重要的 *核心函数* ，其大致工作流程为：
+;; `pyim-entered-handle' 这个函数是一个重要的 *核心函数* ，其大致工作流程为：
 ;; 1. 查询拼音字符串 `pyim-entered' 得到： 待选词列表
 ;;    `pyim-candidate-list' 和 当前选择的词条 `pyim-entered'
 ;; 2. 显示备选词条和选择备选词等待用户选择。
 
-(defun pyim-entered-handler (entered)
+(defun pyim-entered-handle (entered)
   (setq pyim-entered entered)
   (when (and entered
              (stringp entered)
@@ -2801,7 +2801,7 @@ code 字符串."
 ;; 处理 `pyim-dagger' 的代码分散在多个函数中，可以按照下面的方式分类：
 ;; 1. 英文字符串：pyim 没有找到相应的候选词时（比如：用户输入错
 ;;    误的拼音），`pyim-dagger' 的值与 `pyim-entered' 大致相同。
-;;    相关代码很简单，分散在 `pyim-entered-handler' 等函数。
+;;    相关代码很简单，分散在 `pyim-entered-handle' 等函数。
 ;; 2. 汉字字符串：当 pyim 找到相应的候选词条时，
 ;;    `pyim-dagger' 的值是完全的中文词条，比如：
 ;;    #+BEGIN_EXAMPLE
@@ -2847,7 +2847,7 @@ code 字符串."
           (concat pyim-dagger-last
                   (pyim-candidate-parse (nth pos candidate-list))))
     (unless enable-multibyte-characters
-      (pyim-entered-handler "")
+      (pyim-entered-handle "")
       (setq pyim-dagger nil)
       (error "Can't input characters in current unibyte buffer"))
     ;; Delete old dagger string.
@@ -3634,7 +3634,7 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
 (defun pyim-delete-last-char ()
   (interactive)
   (if (> (length pyim-entered) 1)
-      (pyim-entered-handler
+      (pyim-entered-handle
        (substring pyim-entered 0 -1))
     (setq pyim-dagger "")
     (pyim-terminate-translation)))
@@ -3643,9 +3643,9 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
 (defun pyim-backward-kill-py ()
   (interactive)
   (if (string-match "['-][^'-]+$" pyim-entered)
-      (pyim-entered-handler
+      (pyim-entered-handle
        (replace-match "" nil nil pyim-entered))
-    (pyim-entered-handler "")
+    (pyim-entered-handle "")
     (setq pyim-dagger "")
     (pyim-terminate-translation)))
 
