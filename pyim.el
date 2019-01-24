@@ -3225,7 +3225,7 @@ tooltip 选词框中显示。
         (pyim-dagger-handle 'last-command-event)
         (pyim-terminate-translation))
     (if (equal 'rime (pyim-scheme-get-option pyim-default-scheme :class))
-        (call-interactively #'pyim-page-select-rime-word)
+        (call-interactively #'pyim-page-select-word:rime)
       (let ((str (pyim-candidate-parse (nth (1- pyim-candidate-position) pyim-candidate-list)))
             imobj-list)
         (setq pyim-dagger-last (concat pyim-dagger-last str))
@@ -3240,14 +3240,14 @@ tooltip 选词框中显示。
                     pyim-candidate-position 1)
               (pyim-dagger-handle 'candidate)
               (pyim-page-handle))
-          (unless (member pyim-dagger pyim-candidate-list)
+          (unless (member pyim-dagger-last pyim-candidate-list)
             (pyim-create-word pyim-dagger-last))
           (pyim-dagger-handle pyim-dagger-last)
           (pyim-terminate-translation)
           ;; pyim 使用这个 hook 来处理联想词。
           (run-hooks 'pyim-page-select-finish-hook))))))
 
-(defun pyim-page-select-rime-word ()
+(defun pyim-page-select-word:rime ()
   "从选词框中选择当前词条， 专门用于 rime 输入法支持。"
   (interactive)
   (if (null pyim-candidate-list)  ; 如果没有选项，输入空格
@@ -3263,7 +3263,7 @@ tooltip 选词框中显示。
       (setq pyim-dagger-last (concat pyim-dagger-last str))
       (if (not context)
           (progn
-            (unless (member pyim-dagger pyim-candidate-list)
+            (unless (member pyim-dagger-last pyim-candidate-list)
               (pyim-create-word pyim-dagger-last))
             (pyim-dagger-handle pyim-dagger-last)
             (pyim-terminate-translation)
