@@ -2892,7 +2892,7 @@ code 字符串."
 ;; pyim 内建两种方式显示选词框：
 
 ;; 1. 使用 `pyim-minibuffer-message' 函数在 minibuffer 中显示选词框。
-;; 2. 使用 `pyim-tooltip-show' 函数在光标处创建一个 tooltip 来显示选词框。
+;; 2. 使用 `pyim-page-tooltip-show' 函数在光标处创建一个 tooltip 来显示选词框。
 
 ;; 两种方式的基本原理相同：通过 *待选词列表* 构建为一个字符串，然后显示这个字符串。
 ;; 用户可以根据这个字符串的提示，来执行相应的动作，比如按空格确认当前选择的词条或
@@ -3040,7 +3040,7 @@ code 字符串."
         ;; 指定的方式来显示候选词。
         (let ((message-log-max nil))
           (if pyim-page-tooltip
-              (pyim-tooltip-show
+              (pyim-page-tooltip-show
                (let ((func (intern (format "pyim-page-style:%S" pyim-page-style))))
                  (if (functionp func)
                      (funcall func page-info)
@@ -3201,7 +3201,7 @@ tooltip 选词框中显示。
           (gethash :current-page page-info)
           (gethash :total-page page-info)))
 
-(defun pyim-tooltip-show (string position)
+(defun pyim-page-tooltip-show (string position)
   "在 `position' 位置，使用 posframe 或者 popup 显示字符串 `string' 。"
   (let ((frame (window-frame (selected-window)))
         (length (* pyim-page-length 10))
