@@ -974,14 +974,26 @@ pyim 内建的有三种选词框格式：
   "用来临时保存 `pyim-magic-convert' 的结果.
 从而加快同一个字符串第二次的转换速度。")
 
+(defvar pyim-selected ""
+  "用于选择的词条组成的字符串。
+
+用户使用 `pyim-page-select-word' 或者
+`pyim-page-select-word-by-number' 两个命令明确选择的词条组成的字
+符串，与 `pyim-dagger' 有所区别。" )
+
 (defvar pyim-dagger ""
   "光标处带下划线字符串.
+
 输入法运行的时候，会在光标处会插入一个带下划线字符串，这个字符串
 提示用户当前选择的词条或者当前输入的字符串等许多有用的信息。
 pyim 称这个字符串为 \"dragger\" 字符串, 向 \"匕首\" 一样插入
-当前 buffer 的光标处。")
+当前 buffer 的光标处。
 
-(defvar pyim-dagger-last "")
+`pyim-dagger' 和 `pyim-selected' 有所不同， `pyim-selected' 字符
+串代表用户明确选择的词条，它是 `pyim-dagger' 字符串构建的基础，在
+大多数情况下, `pyim-dagger' 可以理解为：
+
+    pyim-dagger = pyim-selected + candidate-preview")
 
 (defvar pyim-dagger-overlay nil
   "用于保存 dagger 的 overlay.")
@@ -1115,7 +1127,7 @@ pyim 总是使用 emacs-async 包来生成 dcache.")
 (defvar pyim-local-variable-list
   '(pyim-entered
     pyim-dagger
-    pyim-dagger-last
+    pyim-selected
     pyim-candidate-list
     pyim-candidate-position
     pyim-input-ascii
@@ -2119,7 +2131,7 @@ Return the input string."
           (setq key (string-to-char (substring key-or-string -1)))
           (setq str (substring key-or-string 0 -1)))
 
-        (setq pyim-dagger-last ""
+        (setq pyim-selected ""
               pyim-translating t)
 
         (pyim-dagger-handle "")
@@ -2846,7 +2858,7 @@ code 字符串."
                (concat
                 (if (null pyim-candidate-list)
                     ""
-                  pyim-dagger-last)
+                  pyim-selected)
                 (pyim-translate last-command-event))))
         ((eq dagger 'candidate)
          (let* ((end (pyim-page-end))
@@ -2854,7 +2866,7 @@ code 字符串."
                 (candidate-list pyim-candidate-list)
                 (pos (1- (min pyim-candidate-position (length candidate-list)))))
            (setq pyim-dagger
-                 (concat pyim-dagger-last
+                 (concat pyim-selected
                          (pyim-candidate-parse (nth pos candidate-list))))
            (unless enable-multibyte-characters
              (pyim-entered-handle "")
@@ -3228,21 +3240,21 @@ tooltip 选词框中显示。
         (call-interactively #'pyim-page-select-word:rime)
       (let ((str (pyim-candidate-parse (nth (1- pyim-candidate-position) pyim-candidate-list)))
             imobj-list)
-        (setq pyim-dagger-last (concat pyim-dagger-last str))
-        (if (< (length pyim-dagger-last) (length (car pyim-imobj-list)))
+        (setq pyim-selected (concat pyim-selected str))
+        (if (< (length pyim-selected) (length (car pyim-imobj-list)))
             (progn
               (setq imobj-list
                     (delete-dups (mapcar
                                   #'(lambda (imobj)
-                                      (nthcdr (length pyim-dagger-last) imobj))
+                                      (nthcdr (length pyim-selected) imobj))
                                   pyim-imobj-list)))
               (setq pyim-candidate-list (pyim-candidate-list-create imobj-list pyim-default-scheme)
                     pyim-candidate-position 1)
               (pyim-dagger-handle 'candidate)
               (pyim-page-handle))
-          (unless (member pyim-dagger-last pyim-candidate-list)
-            (pyim-create-word pyim-dagger-last))
-          (pyim-dagger-handle pyim-dagger-last)
+          (unless (member pyim-selected pyim-candidate-list)
+            (pyim-create-word pyim-selected))
+          (pyim-dagger-handle pyim-selected)
           (pyim-terminate-translation)
           ;; pyim 使用这个 hook 来处理联想词。
           (run-hooks 'pyim-page-select-finish-hook))))))
@@ -3260,12 +3272,12 @@ tooltip 选词框中显示。
            (context (liberime-get-context))
            imobj-list)
       (pyim-create-word str t)
-      (setq pyim-dagger-last (concat pyim-dagger-last str))
+      (setq pyim-selected (concat pyim-selected str))
       (if (not context)
           (progn
-            (unless (member pyim-dagger-last pyim-candidate-list)
-              (pyim-create-word pyim-dagger-last))
-            (pyim-dagger-handle pyim-dagger-last)
+            (unless (member pyim-selected pyim-candidate-list)
+              (pyim-create-word pyim-selected))
+            (pyim-dagger-handle pyim-selected)
             (pyim-terminate-translation)
             ;; pyim 使用这个 hook 来处理联想词。
             (run-hooks 'pyim-page-select-finish-hook))
