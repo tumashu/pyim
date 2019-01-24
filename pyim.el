@@ -3241,7 +3241,7 @@ tooltip 选词框中显示。
               (pyim-dagger-handle 'candidate)
               (pyim-page-handle))
           (unless (member pyim-dagger pyim-candidate-list)
-            (pyim-create-word pyim-dagger))
+            (pyim-create-word pyim-dagger-last))
           (pyim-dagger-handle pyim-dagger-last)
           (pyim-terminate-translation)
           ;; pyim 使用这个 hook 来处理联想词。
@@ -3260,10 +3260,12 @@ tooltip 选词框中显示。
            (context (liberime-get-context))
            imobj-list)
       (pyim-create-word str t)
+      (setq pyim-dagger-last (concat pyim-dagger-last str))
       (if (not context)
           (progn
-            (if (not (member pyim-dagger pyim-candidate-list))
-                (pyim-create-word pyim-dagger))
+            (unless (member pyim-dagger pyim-candidate-list)
+              (pyim-create-word pyim-dagger-last))
+            (pyim-dagger-handle pyim-dagger-last)
             (pyim-terminate-translation)
             ;; pyim 使用这个 hook 来处理联想词。
             (run-hooks 'pyim-page-select-finish-hook))
@@ -3271,7 +3273,7 @@ tooltip 选词框中显示。
         ;; pyim 需要 liberime 不分页，或者一页包含尽可能多个词。
         (setq pyim-candidate-list
               (let* ((menu (alist-get 'menu context))
-                     (candidate-list (alist-get 'candidate-list menu)))
+                     (candidate-list (alist-get 'candidates menu)))
                 candidate-list))
         (setq pyim-candidate-position 1)
         (pyim-dagger-handle 'candidate)
