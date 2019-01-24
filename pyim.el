@@ -1126,15 +1126,15 @@ pyim 总是使用 emacs-async 包来生成 dcache.")
 ;; ** 将变量转换为 local 变量
 (defvar pyim-local-variable-list
   '(pyim-entered
-    pyim-dagger
     pyim-selected
+    pyim-dagger
+    pyim-dagger-overlay
     pyim-candidate-list
     pyim-candidate-position
     pyim-input-ascii
     pyim-english-input-switch-functions
     pyim-punctuation-half-width-functions
     pyim-translating
-    pyim-dagger-overlay
     pyim-last-created-word
 
     input-method-function
