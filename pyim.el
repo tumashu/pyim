@@ -3748,7 +3748,7 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
         (not pyim-input-ascii)))
 
 ;; *** 为 isearch 添加拼音搜索功能
-(defun pyim-cregexp-build (pystr)
+(defun pyim-cregexp-build (string)
   "根据 str 构建一个中文 regexp, 用于 \"拼音搜索汉字\".
 比如：
    \"nihao\" -> \"[你呢...][好号...] \\| nihao\""
@@ -3759,16 +3759,16 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
     ;; pyim 暂时只支持全拼和双拼搜索
     (when (not (member class '(quanpin shuangpin)))
       (setq scheme-name 'quanpin))
-    (if (or (pyim-string-match-p "[^a-z']+" pystr))
-        pystr
+    (if (or (pyim-string-match-p "[^a-z']+" string))
+        string
       (let* ((imobjs
               ;; 如果一个字符串以'结尾,就按照拼音首字母字符串处理。
-              (if (pyim-string-match-p "'$" pystr)
+              (if (pyim-string-match-p "'$" string)
                   (list (mapcar #'(lambda (x)
                                     (list (char-to-string x)))
-                                (string-to-list pystr)))
+                                (string-to-list string)))
                 ;; Slowly operating, need to improve.
-                (pyim-imobjs-create pystr scheme-name)))
+                (pyim-imobjs-create string scheme-name)))
              (regexp-list
               (mapcar
                #'(lambda (imobj)
@@ -3781,8 +3781,8 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
                            "\\|")))
              (regexp
               (if (> (length regexp) 0)
-                  (concat pystr "\\|" regexp)
-                pystr)))
+                  (concat string "\\|" regexp)
+                string)))
         regexp))))
 
 (defun pyim-cregexp-build:quanpin (imobj &optional match-beginning
