@@ -2121,8 +2121,9 @@ Return the input string."
 
         (setq pyim-dagger ""
               pyim-dagger-last ""
-              pyim-entered (or str "")
               pyim-translating t)
+
+        (pyim-entered-handler (or str ""))
 
         (when key
           (setq unread-command-events
@@ -2199,9 +2200,9 @@ Return the input string."
   (interactive "*")
   ;; (message "%s" (current-buffer))
   (if (pyim-input-chinese-p)
-      (progn (setq pyim-entered
-                   (concat pyim-entered (char-to-string last-command-event)))
-             (pyim-entered-handler))
+      (pyim-entered-handler
+       (concat pyim-entered
+               (char-to-string last-command-event)))
     (setq pyim-dagger (concat pyim-dagger (pyim-translate last-command-event)))
     (pyim-terminate-translation)))
 
@@ -2770,24 +2771,27 @@ code 字符串."
 ;;    `pyim-candidate-list' 和 当前选择的词条 `pyim-entered'
 ;; 2. 显示备选词条和选择备选词等待用户选择。
 
-(defun pyim-entered-handler ()
-  (let ((scheme-name pyim-default-scheme)
-        (str pyim-entered))
-    (setq pyim-imobj-list (pyim-imobj-list-create str scheme-name))
-    (unless (and (pyim-imobj-validp
-                  (car pyim-imobj-list) scheme-name)
-                 (progn
-                   (setq pyim-candidate-list
-                         (delete-dups (pyim-candidate-list-create pyim-imobj-list scheme-name)))
-                   (when pyim-candidate-list
-                     (setq pyim-candidate-position 1)
-                     (pyim-dagger-refresh)
-                     (pyim-page-refresh)
-                     t)))
-      (setq pyim-candidate-list (list pyim-entered))
-      (setq pyim-candidate-position 1)
-      (pyim-dagger-refresh)
-      (pyim-page-refresh))))
+(defun pyim-entered-handler (entered)
+  (setq pyim-entered entered)
+  (when (and entered
+             (stringp entered)
+             (> (length entered) 0))
+    (let ((scheme-name pyim-default-scheme))
+      (setq pyim-imobj-list (pyim-imobj-list-create entered scheme-name))
+      (unless (and (pyim-imobj-validp
+                    (car pyim-imobj-list) scheme-name)
+                   (progn
+                     (setq pyim-candidate-list
+                           (delete-dups (pyim-candidate-list-create pyim-imobj-list scheme-name)))
+                     (when pyim-candidate-list
+                       (setq pyim-candidate-position 1)
+                       (pyim-dagger-refresh)
+                       (pyim-page-refresh)
+                       t)))
+        (setq pyim-candidate-list (list pyim-entered))
+        (setq pyim-candidate-position 1)
+        (pyim-dagger-refresh)
+        (pyim-page-refresh)))))
 
 
 ;; ** 处理当前需要插入 buffer 的 dagger 字符串： `pyim-dagger'
@@ -2843,8 +2847,8 @@ code 字符串."
           (concat pyim-dagger-last
                   (pyim-candidate-parse (nth pos candidate-list))))
     (unless enable-multibyte-characters
-      (setq pyim-entered nil
-            pyim-dagger nil)
+      (pyim-entered-handler "")
+      (setq pyim-dagger nil)
       (error "Can't input characters in current unibyte buffer"))
     ;; Delete old dagger string.
     (pyim-dagger-delete-string)
@@ -3218,6 +3222,7 @@ tooltip 选词框中显示。
             imobj-list)
         (pyim-create-word str t)
         (setq pyim-dagger-last (concat pyim-dagger-last str))
+        (setq pyim-dagger pyim-dagger-last)
         (if (>= (length pyim-dagger) (length (car pyim-imobj-list)))
                                         ; 如果是最后一个，检查
                                         ; 是不是在文件中，没有的话，创
@@ -3279,11 +3284,6 @@ tooltip 选词框中显示。
         (if (> (+ index (pyim-page-start)) end)
             (pyim-page-refresh)
           (setq pyim-candidate-position (+ pyim-candidate-position index))
-          (setq pyim-dagger
-                (concat pyim-dagger-last
-                        (pyim-candidate-parse
-                         (nth (1- pyim-candidate-position)
-                              pyim-candidate-list))))
           (pyim-page-select-word)))
     (setq pyim-dagger (concat pyim-dagger (char-to-string last-command-event)))
     (pyim-terminate-translation)))
@@ -3634,9 +3634,8 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
 (defun pyim-delete-last-char ()
   (interactive)
   (if (> (length pyim-entered) 1)
-      (progn
-        (setq pyim-entered (substring pyim-entered 0 -1))
-        (pyim-entered-handler))
+      (pyim-entered-handler
+       (substring pyim-entered 0 -1))
     (setq pyim-dagger "")
     (pyim-terminate-translation)))
 
@@ -3644,10 +3643,9 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
 (defun pyim-backward-kill-py ()
   (interactive)
   (if (string-match "['-][^'-]+$" pyim-entered)
-      (progn (setq pyim-entered
-                   (replace-match "" nil nil pyim-entered))
-             (pyim-entered-handler))
-    (setq pyim-entered "")
+      (pyim-entered-handler
+       (replace-match "" nil nil pyim-entered))
+    (pyim-entered-handler "")
     (setq pyim-dagger "")
     (pyim-terminate-translation)))
 
