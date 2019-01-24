@@ -2861,13 +2861,23 @@ code 字符串."
                   pyim-selected)
                 (pyim-translate last-command-event))))
         ((eq dagger 'candidate)
-         (let* ((end (pyim-page-end))
+         (let* ((class (pyim-scheme-get-option pyim-default-scheme :class))
+                (end (pyim-page-end))
                 (start (1- (pyim-page-start)))
                 (candidates pyim-candidates)
-                (pos (1- (min pyim-candidate-position (length candidates)))))
+                (pos (1- (min pyim-candidate-position (length candidates))))
+                rest)
            (setq pyim-dagger
                  (concat pyim-selected
                          (pyim-candidate-parse (nth pos candidates))))
+           (when (memq class '(quanpin))
+             (setq rest (mapconcat
+                         #'(lambda (py)
+                             (concat (car py) (cdr py)))
+                         (nthcdr (length pyim-dagger) (car pyim-imobj-list))
+                         "'"))
+             (if (string< "" rest)
+                 (setq pyim-dagger (concat pyim-dagger rest))))
            (unless enable-multibyte-characters
              (pyim-entered-handle "")
              (pyim-dagger-handle "")
