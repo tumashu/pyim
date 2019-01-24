@@ -3228,28 +3228,24 @@ tooltip 选词框中显示。
         (call-interactively #'pyim-page-select-rime-word)
       (let ((str (pyim-candidate-parse (nth (1- pyim-candidate-position) pyim-candidate-list)))
             imobj-list)
-        (pyim-create-word str t)
         (setq pyim-dagger-last (concat pyim-dagger-last str))
-        (pyim-dagger-handle pyim-dagger-last)
-        (if (>= (length pyim-dagger) (length (car pyim-imobj-list)))
-                                        ; 如果是最后一个，检查
-                                        ; 是不是在文件中，没有的话，创
-                                        ; 建这个词
+        (if (< (length pyim-dagger-last) (length (car pyim-imobj-list)))
             (progn
-              (if (not (member pyim-dagger pyim-candidate-list))
-                  (pyim-create-word pyim-dagger))
-              (pyim-terminate-translation)
-              ;; pyim 使用这个 hook 来处理联想词。
-              (run-hooks 'pyim-page-select-finish-hook))
-          (setq imobj-list
-                (delete-dups (mapcar
-                              #'(lambda (imobj)
-                                  (nthcdr (length pyim-dagger) imobj))
-                              pyim-imobj-list)))
-          (setq pyim-candidate-list (pyim-candidate-list-create imobj-list pyim-default-scheme)
-                pyim-candidate-position 1)
-          (pyim-dagger-handle 'candidate)
-          (pyim-page-handle))))))
+              (setq imobj-list
+                    (delete-dups (mapcar
+                                  #'(lambda (imobj)
+                                      (nthcdr (length pyim-dagger-last) imobj))
+                                  pyim-imobj-list)))
+              (setq pyim-candidate-list (pyim-candidate-list-create imobj-list pyim-default-scheme)
+                    pyim-candidate-position 1)
+              (pyim-dagger-handle 'candidate)
+              (pyim-page-handle))
+          (unless (member pyim-dagger pyim-candidate-list)
+            (pyim-create-word pyim-dagger))
+          (pyim-dagger-handle pyim-dagger-last)
+          (pyim-terminate-translation)
+          ;; pyim 使用这个 hook 来处理联想词。
+          (run-hooks 'pyim-page-select-finish-hook))))))
 
 (defun pyim-page-select-rime-word ()
   "从选词框中选择当前词条， 专门用于 rime 输入法支持。"
