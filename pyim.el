@@ -3284,17 +3284,18 @@ tooltip 选词框中显示。
 (defun pyim-page-select-word-by-number (&optional n)
   "使用数字编号来选择对应的词条。"
   (interactive)
-  (if pyim-candidate-list
-      (let ((index (if (numberp n)
-                       (- n 1)
-                     (- last-command-event ?1)))
-            (end (pyim-page-end)))
-        (if (> (+ index (pyim-page-start)) end)
-            (pyim-page-handle)
-          (setq pyim-candidate-position (+ pyim-candidate-position index))
-          (pyim-page-select-word)))
-    (pyim-dagger-handle 'last-command-event)
-    (pyim-terminate-translation)))
+  (if (null pyim-candidate-list)
+      (progn
+        (pyim-dagger-handle 'last-command-event)
+        (pyim-terminate-translation))
+    (let ((index (if (numberp n)
+                     (- n 1)
+                   (- last-command-event ?1)))
+          (end (pyim-page-end)))
+      (if (> (+ index (pyim-page-start)) end)
+          (pyim-page-handle)
+        (setq pyim-candidate-position (+ pyim-candidate-position index))
+        (pyim-page-select-word)))))
 
 ;; ** 处理标点符号
 ;; 常用的标点符号数量不多，所以 pyim 没有使用文件而是使用一个变量
