@@ -1303,7 +1303,7 @@ TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCAC
     (add-hook 'minibuffer-exit-hook 'pyim-exit-from-minibuffer))
   (run-hooks 'pyim-active-hook)
   (when (and (memq pyim-page-tooltip '(posframe child-frame))
-             (not (pyim-tooltip-posframe-valid-p)))
+             (not (pyim-posframe-valid-p)))
     (message "PYIM: posframe 包没有安装，请手工安装这个包。"))
   (when restart
     (message "pyim 重启完成。"))
@@ -2207,7 +2207,7 @@ Return the input string."
   (pyim-preview-delete-string)
   (setq pyim-candidates nil)
   (when (and (memq pyim-page-tooltip '(posframe child-frame))
-             (pyim-tooltip-posframe-valid-p))
+             (pyim-posframe-valid-p))
     (posframe-hide pyim-page-tooltip-posframe-buffer)))
 
 ;; ** 处理 `pyim-entered' (没有任何分隔符的拼音字符串)
@@ -3170,7 +3170,7 @@ tooltip 选词框中显示。
         (length (* pyim-page-length 10))
         (tooltip pyim-page-tooltip))
     (cond ((and (memq tooltip '(posframe child-frame))
-                (pyim-tooltip-posframe-valid-p))
+                (pyim-posframe-valid-p))
            (posframe-show pyim-page-tooltip-posframe-buffer
                           :string string
                           :position position
@@ -3183,7 +3183,7 @@ tooltip 选词框中显示。
              (message string)))
           (t (popup-tip string :point position :margin 1)))))
 
-(defun pyim-tooltip-posframe-valid-p ()
+(defun pyim-posframe-valid-p ()
   "Test posframe's status."
   (and (>= emacs-major-version 26)
        (featurep 'posframe)
