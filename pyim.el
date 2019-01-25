@@ -2140,7 +2140,7 @@ Return the input string."
         (setq pyim-selected ""
               pyim-translating t)
 
-        (pyim-dagger-handle "")
+        (pyim-dagger-handle 'empty-dagger-value)
         (pyim-entered-handle (or str ""))
 
         (when key
@@ -2221,7 +2221,7 @@ Return the input string."
       (pyim-entered-handle
        (concat pyim-entered
                (char-to-string last-command-event)))
-    (pyim-dagger-handle 'last-command-event)
+    (pyim-dagger-handle 'no-need-to-select)
     (pyim-terminate-translation)))
 
 (defun pyim-terminate-translation ()
@@ -2806,12 +2806,12 @@ code 字符串."
                            (delete-dups (pyim-candidates-create pyim-imobjs scheme-name)))
                      (when pyim-candidates
                        (setq pyim-candidate-position 1)
-                       (pyim-dagger-handle 'candidate)
+                       (pyim-dagger-handle 'select-in-steps)
                        (pyim-page-handle)
                        t)))
         (setq pyim-candidates (list pyim-entered))
         (setq pyim-candidate-position 1)
-        (pyim-dagger-handle 'candidate)
+        (pyim-dagger-handle 'select-in-steps)
         (pyim-page-handle)))))
 
 
@@ -2820,13 +2820,12 @@ code 字符串."
 ;; 入的字符串* 。
 
 ;; 使用 `pyim-dagger-handle' 函数集中设置并处理 `pyim-dagger'.
-;; 1. 英文字符串：pyim 没有找到相应的候选词时（比如：用户输入错
-;;    误的拼音），`pyim-dagger' 的值与 `pyim-entered' 大致相同。
-;; 2. 汉字字符串：当 pyim 找到相应的候选词条时，
-;;    `pyim-dagger' 的值是完全的中文词条，比如：
-;;    #+BEGIN_EXAMPLE
-;;    你好
-;;    #+END_EXAMPLE
+;; pyim-dagger 内置 5 种类型的处理动作：
+;; 1. empty-dagger-value: 将 pyim-dagger 的取值设置为 ""。
+;; 2. no-need-to-select: 这个动作用于处理英文上屏的情况。
+;; 3. select-only-once: 处理只需要一次选择就完成上屏的情况。
+;; 4. select-entered-instead: 用于"英文上屏"功能。
+;; 5. select-in-steps: 处理需要多次选择才能完成一次上屏得情况。
 
 ;; pyim 会使用 emacs overlay 机制在 *待输入buffer* 光标处高亮显示
 ;; `pyim-dagger'，让用户快速了解当前输入的字符串，具体方式是：
@@ -2834,11 +2833,6 @@ code 字符串."
 ;;    使用变量 `pyim-dagger-overlay' 保存，创建时将 overlay 的 face 属性设置为
 ;;    `pyim-dagger-face' ，用户可以使用这个变量来自定义 face。
 ;; 2. 使用函数 `pyim-dagger-handle' 来设置 `pyim-dagger'
-;;    1. 设置 pyim-dagger 变量值。
-;;    2. 清除光标处原来的字符串。
-;;    3. 插入 `pyim-dagger'
-;;    4. 使用 `move-overlay' 函数调整变量 `pyim-dagger-overlay' 中保存的 overlay，
-;;       让其符合新插入的字符串。
 ;; 3. 在 `pyim-input-method' 中调用 `pyim-dagger-delete-overlay' ，删除
 ;;    `pyim-dagger-overlay' 中保存的 overlay，这个函数同时也删除了 overlay 中包
 ;;    含的文本 `pyim-dagger'。
@@ -2858,18 +2852,22 @@ code 字符串."
   (if (and (overlayp pyim-dagger-overlay) (overlay-start pyim-dagger-overlay))
       (delete-overlay pyim-dagger-overlay)))
 
-(defun pyim-dagger-handle (dagger)
+(defun pyim-dagger-handle (type)
   "更新 `pyim-dagger' 的值。"
-  (cond ((and dagger (stringp dagger))
-         (setq pyim-dagger dagger))
-        ((eq dagger 'last-command-event)
+  (cond ((eq type 'empty-dagger-value)
+         (setq pyim-dagger ""))
+        ((eq type 'no-need-to-select)
          (setq pyim-dagger
                (concat
                 (if (null pyim-candidates)
                     ""
                   pyim-selected)
                 (pyim-translate last-command-event))))
-        ((eq dagger 'candidate)
+        ((eq type 'select-only-once)
+         (setq pyim-dagger pyim-selected))
+        ((eq type 'select-entered-instead)
+         (setq pyim-dagger pyim-entered))
+        ((eq type 'select-in-steps)
          (let* ((class (pyim-scheme-get-option pyim-default-scheme :class))
                 (end (pyim-page-end))
                 (start (1- (pyim-page-start)))
@@ -2889,7 +2887,7 @@ code 字符串."
                  (setq pyim-dagger (concat pyim-dagger rest))))
            (unless enable-multibyte-characters
              (pyim-entered-handle "")
-             (pyim-dagger-handle "")
+             (pyim-dagger-handle 'empty-dagger-value)
              (error "Can't input characters in current unibyte buffer"))
            ;; Delete old dagger string.
            (pyim-dagger-delete-string)
@@ -2898,7 +2896,7 @@ code 字符串."
            ;; Hightlight new dagger string.
            (move-overlay pyim-dagger-overlay
                          (overlay-start pyim-dagger-overlay) (point))))
-        (t (setq pyim-dagger ""))))
+        (t (error "PYIM: wrong pyim-dagger-handle type."))))
 
 (defun pyim-dagger-delete-string ()
   "删除已经插入 buffer 的 dagger 字符串。"
@@ -3087,12 +3085,12 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
   (interactive "p")
   (if (= (length pyim-entered) 0)
       (progn
-        (pyim-dagger-handle 'last-command-event)
+        (pyim-dagger-handle 'no-need-to-select)
         (pyim-terminate-translation))
     (let ((new (+ pyim-candidate-position (* pyim-page-length arg) 1)))
       (setq pyim-candidate-position (if (> new 0) new 1)
             pyim-candidate-position (pyim-page-start))
-      (pyim-dagger-handle 'candidate)
+      (pyim-dagger-handle 'select-in-steps)
       (pyim-page-handle))))
 
 (defun pyim-page-previous-page (arg)
@@ -3103,11 +3101,11 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
   (interactive "p")
   (if (= (length pyim-entered) 0)
       (progn
-        (pyim-dagger-handle 'last-command-event)
+        (pyim-dagger-handle 'no-need-to-select)
         (pyim-terminate-translation))
     (let ((new (+ pyim-candidate-position arg)))
       (setq pyim-candidate-position (if (> new 0) new 1))
-      (pyim-dagger-handle 'candidate)
+      (pyim-dagger-handle 'select-in-steps)
       (pyim-page-handle t))))
 
 (defun pyim-page-previous-word (arg)
@@ -3253,7 +3251,7 @@ tooltip 选词框中显示。
   (interactive)
   (if (null pyim-candidates)  ; 如果没有选项，输入空格
       (progn
-        (pyim-dagger-handle 'last-command-event)
+        (pyim-dagger-handle 'no-need-to-select)
         (pyim-terminate-translation))
     (if (equal 'rime (pyim-scheme-get-option pyim-default-scheme :class))
         (call-interactively #'pyim-page-select-word:rime)
@@ -3269,11 +3267,11 @@ tooltip 选词框中显示。
                                   pyim-imobjs)))
               (setq pyim-candidates (pyim-candidates-create imobjs pyim-default-scheme)
                     pyim-candidate-position 1)
-              (pyim-dagger-handle 'candidate)
+              (pyim-dagger-handle 'select-in-steps)
               (pyim-page-handle))
           (unless (member pyim-selected pyim-candidates)
             (pyim-create-word pyim-selected))
-          (pyim-dagger-handle pyim-selected)
+          (pyim-dagger-handle 'select-only-once)
           (pyim-terminate-translation)
           ;; pyim 使用这个 hook 来处理联想词。
           (run-hooks 'pyim-page-select-finish-hook))))))
@@ -3283,7 +3281,7 @@ tooltip 选词框中显示。
   (interactive)
   (if (null pyim-candidates)  ; 如果没有选项，输入空格
       (progn
-        (pyim-dagger-handle 'last-command-event)
+        (pyim-dagger-handle 'no-need-to-select)
         (pyim-terminate-translation))
     ;; pyim 告诉 liberime 选择其他的词条
     (liberime-select-candidate (- pyim-candidate-position 1))
@@ -3296,7 +3294,7 @@ tooltip 选词框中显示。
           (progn
             (unless (member pyim-selected pyim-candidates)
               (pyim-create-word pyim-selected))
-            (pyim-dagger-handle pyim-selected)
+            (pyim-dagger-handle 'select-only-once)
             (pyim-terminate-translation)
             ;; pyim 使用这个 hook 来处理联想词。
             (run-hooks 'pyim-page-select-finish-hook))
@@ -3307,7 +3305,7 @@ tooltip 选词框中显示。
                      (candidates (alist-get 'candidates menu)))
                 candidates))
         (setq pyim-candidate-position 1)
-        (pyim-dagger-handle 'candidate)
+        (pyim-dagger-handle 'select-in-steps)
         (pyim-page-handle)))))
 
 (defun pyim-page-select-word-by-number (&optional n)
@@ -3315,7 +3313,7 @@ tooltip 选词框中显示。
   (interactive)
   (if (null pyim-candidates)
       (progn
-        (pyim-dagger-handle 'last-command-event)
+        (pyim-dagger-handle 'no-need-to-select)
         (pyim-terminate-translation))
     (let ((index (if (numberp n)
                      (- n 1)
@@ -3674,7 +3672,7 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
   (if (> (length pyim-entered) 1)
       (pyim-entered-handle
        (substring pyim-entered 0 -1))
-    (pyim-dagger-handle "")
+    (pyim-dagger-handle 'empty-dagger-value)
     (pyim-terminate-translation)))
 
 ;; *** 删除拼音字符串最后一个拼音
@@ -3684,7 +3682,7 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
       (pyim-entered-handle
        (replace-match "" nil nil pyim-entered))
     (pyim-entered-handle "")
-    (pyim-dagger-handle "")
+    (pyim-dagger-handle 'empty-dagger-value)
     (pyim-terminate-translation)))
 
 ;; *** 将光标前的用户输入的字符串转换为中文
@@ -3728,12 +3726,12 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
 ;; *** 取消当前输入
 (defun pyim-quit-clear ()
   (interactive)
-  (pyim-dagger-handle "")
+  (pyim-dagger-handle 'empty-dagger-value)
   (pyim-terminate-translation))
 ;; *** 字母上屏
 (defun pyim-quit-no-clear ()
   (interactive)
-  (pyim-dagger-handle pyim-entered)
+  (pyim-dagger-handle 'select-entered-instead)
   (pyim-terminate-translation))
 
 ;; *** pyim 取消激活
