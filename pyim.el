@@ -870,8 +870,8 @@ pyim 内建的功能有：
   "设定糢糊音."
   :group 'pyim)
 
-(defface pyim-dagger-face '((t (:underline t)))
-  "dagger 字符串的 face"
+(defface pyim-preview-face '((t (:underline t)))
+  "preview 字符串的 face"
   :group 'pyim)
 
 (defcustom pyim-english-input-switch-functions nil
@@ -983,37 +983,14 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
 最后使用特定的方式将得到的词条组合成一个候选词列表：`pyim-candidates'
 并通过 pyim-page 相关功能来显示选词框，供用户选择词条。")
 
-(defvar pyim-selected ""
-  "通过选词命令明确选择的词条组成的字符串。
-
-用户使用 `pyim-page-select-word' 或者
-`pyim-page-select-word-by-number' 两个命令明确选择的词条组成的字
-符串，与 `pyim-dagger' 有所区别，具体说明请參考 `pyim-dagger' 变
-量的 docstring." )
-
-(defvar pyim-dagger ""
-  "光标处带下划线字符串.
-
-输入法运行的时候，会在光标处会插入一个带下划线字符串，用于提示用
-户当前选择的词条以及可能的备选词等有用的信息。pyim 称这个字符串为
-\"dragger\" 字符串, 向 \"匕首\" 一样插入当前 buffer 的光标处。
-
-`pyim-dagger' 和 `pyim-selected' 有所联系也有所区别，
-`pyim-selected' 字符串代表用户通过选择命令明确选择的词条，它是
-`pyim-dagger' 字符串构建的基础，许多情况下, `pyim-dagger' 和
-`pyim-selected' 的取值是一样的，但如果用户通过连续选择来生成一个
-长的词条，在连续选择的过程中，`pyim-dagger' 的取值大致为：
-
-    pyim-dagger = pyim-selected + candidate-preview
-
-如果用户设置了 `pyim-magic-converter', 那么上述两个字符串就有可能
-完全不一样。")
-
-(defvar pyim-dagger-overlay nil
-  "用于保存 dagger 的 overlay.")
-
 (defvar pyim-candidates nil
   "所有备选词条组成的列表.")
+
+(defvar pyim-preview-overlay nil
+  "用于保存 preview 的 overlay.")
+
+(defvar pyim-outcome ""
+  "用户通过 pyim 生成的字符串，是最终插入到 buffer 的字符串。" )
 
 (defvar pyim-input-ascii nil
   "是否开启 pyim 英文输入模式.")
@@ -1139,9 +1116,8 @@ pyim 总是使用 emacs-async 包来生成 dcache.")
 (defvar pyim-local-variable-list
   '(pyim-entered
     pyim-imobjs
-    pyim-selected
-    pyim-dagger
-    pyim-dagger-overlay
+    pyim-outcome
+    pyim-preview-overlay
     pyim-candidates
     pyim-candidate-position
     pyim-input-ascii
@@ -2044,8 +2020,7 @@ FILE 的格式与 `pyim-export' 生成的文件格式相同，
           (remove word orig-value))))
     (remhash word pyim-dcache-iword2count)))
 
-;; ** 生成 `pyim-entered' 并插入 `pyim-dagger'
-;; *** 生成 `pyim-entered'
+;; ** 生成 `pyim-entered'
 ;; pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
 ;; `input-method-function' 设置为 `pyim-input-method' ，这个变量
 ;; 会影响 `read-event' 的行为。
@@ -2057,9 +2032,9 @@ FILE 的格式与 `pyim-export' 生成的文件格式相同，
 ;; `pyim-start-translation' 这个函数较复杂，作许多低层工作，但它的一个重
 ;; 要流程是：
 ;; 1. 使用函数 `read-key-sequence' 得到 key-sequence
-;; 2. 使用函数 `lookup-key' 查询 pyim-mode-map 中，上述 key-sequence 对应
+;; 2. 使用函数 `lookup-key' 查询 pyim-mode-map 中，与上述 key-sequence 对应
 ;;    的命令。
-;; 3. 如果查询得到的命令是 'pyim-self-insert-command' 时，
+;; 3. 如果查询得到的命令是 `pyim-self-insert-command' 时，
 ;;    `pyim-start-translation' 会调用这个函数。
 
 ;; `pyim-self-insert-command' 这个函数的核心工作就是将用户输入的字符，组
@@ -2076,15 +2051,14 @@ FILE 的格式与 `pyim-export' 生成的文件格式相同，
 ;;    3. Miscellaneous Event Input Features
 ;;    4. Reading One Event
 
-;; *** 在待输入 buffer 中插入 `pyim-dagger'
+;; ** 得到需要插入到 buffer 的字符串 `pyim-outcome', 并将其插入到 *待输入 buffer*
 ;; `pyim-self-insert-command' 会调用 `pyim-entered-handle' 来处理
-;; `pyim-entered'，并相应的得到对应的 `pyim-dagger'，然后，
-;; `pyim-start-translation' 返回 `pyim-dagger' 的取值。
+;; `pyim-entered'，并最终的得到 `pyim-outcome'，然后，
+;; `pyim-start-translation' 返回 `pyim-outcome' 的取值。
 
-;; 在 `pyim-input-method' 函数内部，`pyim-start-translation' 返回值分解为
-;; event list。
-
-;; 最后，emacs 低层函数 read-event 将这个 list 插入 *待输入buffer* 。
+;; 在 `pyim-input-method' 函数内部，`pyim-start-translation' 返回值
+;; `pyim-outcome' 会被分解为event list, 通过 emacs 低层函数 `read-event'
+;; 来将这些 list 插入到 *待输入buffer* 。
 
 (defun pyim-input-method (key-or-string)
   (if (or buffer-read-only
@@ -2094,7 +2068,7 @@ FILE 的格式与 `pyim-export' 生成的文件格式相同，
           (list key-or-string)
         (mapcar 'identity key-or-string))
     ;; (message "call with key: %S" key-or-string)
-    (pyim-dagger-setup-overlay)
+    (pyim-preview-setup-overlay)
     (with-silent-modifications
       (unwind-protect
           (let ((input-string (pyim-start-translation key-or-string)))
@@ -2104,7 +2078,7 @@ FILE 的格式与 `pyim-export' 生成的文件格式相同，
               (if input-method-exit-on-first-char
                   (list (aref input-string 0))
                 (mapcar 'identity input-string))))
-        (pyim-dagger-delete-overlay)))))
+        (pyim-preview-delete-overlay)))))
 
 (defun pyim-magic-convert (str)
   "用于处理 `pyim-magic-convert' 的函数。"
@@ -2131,7 +2105,7 @@ Return the input string."
              (generated-events nil)
              (input-method-function nil)
              ;; Quail package 用这个变量来控制是否在 buffer 中
-             ;; 插入 dagger string, pyim *强制* 将其设置为 nil
+             ;; 插入 preview string, pyim *强制* 将其设置为 nil
              (input-method-use-echo-area nil)
              (modified-p (buffer-modified-p))
              key str last-command-event last-command this-command)
@@ -2141,10 +2115,9 @@ Return the input string."
           (setq key (string-to-char (substring key-or-string -1)))
           (setq str (substring key-or-string 0 -1)))
 
-        (setq pyim-selected ""
-              pyim-translating t)
+        (setq pyim-translating t)
 
-        (pyim-dagger-handle 'empty-dagger-value)
+        (pyim-outcome-get 'empty-value)
         (pyim-entered-handle (or str ""))
 
         (when key
@@ -2176,8 +2149,8 @@ Return the input string."
                     (string-to-list (this-single-command-raw-keys)))
               ;; (message "unread-command-events: %s" unread-command-events)
               (pyim-terminate-translation))))
-        ;; (message "return: %s" pyim-dagger)
-        pyim-dagger)
+        ;; (message "return: %s" pyim-outcome)
+        (pyim-magic-convert pyim-outcome))
     ;; Since KEY doesn't start any translation, just return it.
     ;; But translate KEY if necessary.
     (char-to-string key-or-string)))
@@ -2225,13 +2198,13 @@ Return the input string."
       (pyim-entered-handle
        (concat pyim-entered
                (char-to-string last-command-event)))
-    (pyim-dagger-handle 'no-need-to-select)
+    (pyim-outcome-get 'without-candidate)
     (pyim-terminate-translation)))
 
 (defun pyim-terminate-translation ()
   "Terminate the translation of the current key."
   (setq pyim-translating nil)
-  (pyim-dagger-delete-string)
+  (pyim-preview-delete-string)
   (setq pyim-candidates nil)
   (when (and (memq pyim-page-tooltip '(posframe child-frame))
              (pyim-tooltip-posframe-valid-p))
@@ -2605,7 +2578,7 @@ code 字符串."
   "创建 code 字符串的函数，用于五笔等基于形码的输入法。
 比如：
 
-    (\"aaaa\") --> \"aaaa\"   用于在 dagger 中显示。
+    (\"aaaa\") --> \"aaaa\"   用于在 preview 中显示。
                `-> \".aaaa\"  用于搜索词库。"
   (when scheme-name
     (let ((code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
@@ -2792,9 +2765,8 @@ code 字符串."
 
 ;; *** 核心函数：拼音字符串处理函数
 ;; `pyim-entered-handle' 这个函数是一个重要的 *核心函数* ，其大致工作流程为：
-;; 1. 查询拼音字符串 `pyim-entered' 得到： 待选词列表
-;;    `pyim-candidates' 和 当前选择的词条 `pyim-entered'
-;; 2. 显示备选词条和选择备选词等待用户选择。
+;; 1. 查询拼音字符串 `pyim-entered' 得到待选词列表 `pyim-candidates'
+;; 2. 显示备选词等待用户选择。
 
 (defun pyim-entered-handle (entered)
   (setq pyim-entered entered)
@@ -2810,107 +2782,72 @@ code 字符串."
                            (delete-dups (pyim-candidates-create pyim-imobjs scheme-name)))
                      (when pyim-candidates
                        (setq pyim-candidate-position 1)
-                       (pyim-dagger-handle 'select-in-steps)
+                       (pyim-preview-handle)
                        (pyim-page-handle)
                        t)))
         (setq pyim-candidates (list pyim-entered))
         (setq pyim-candidate-position 1)
-        (pyim-dagger-handle 'select-in-steps)
+        (pyim-preview-handle)
         (pyim-page-handle)))))
 
 
-;; ** 处理当前需要插入 buffer 的 dagger 字符串： `pyim-dagger'
-;; pyim 使用变量 `pyim-dagger' 保存 *需要在 buffer 光标处插
-;; 入的字符串* 。
-
-;; 使用 `pyim-dagger-handle' 函数集中设置并处理 `pyim-dagger'.
-;; pyim-dagger 内置 5 种类型的处理动作：
-;; 1. empty-dagger-value: 将 pyim-dagger 的取值设置为 ""。
-;; 2. no-need-to-select: 这个动作用于处理英文上屏的情况。
-;; 3. select-only-once: 处理只需要一次选择就完成上屏的情况。
-;; 4. select-entered-instead: 用于"英文上屏"功能。
-;; 5. select-in-steps: 处理需要多次选择才能完成一次上屏得情况。
-
+;; ** 待输入字符串预览功能。
 ;; pyim 会使用 emacs overlay 机制在 *待输入buffer* 光标处高亮显示
-;; `pyim-dagger'，让用户快速了解当前输入的字符串，具体方式是：
-;; 1. 在 `pyim-input-method' 中调用 `pyim-dagger-setup-overlay' 创建 overlay ，并
-;;    使用变量 `pyim-dagger-overlay' 保存，创建时将 overlay 的 face 属性设置为
-;;    `pyim-dagger-face' ，用户可以使用这个变量来自定义 face。
-;; 2. 使用函数 `pyim-dagger-handle' 来设置 `pyim-dagger'
-;; 3. 在 `pyim-input-method' 中调用 `pyim-dagger-delete-overlay' ，删除
-;;    `pyim-dagger-overlay' 中保存的 overlay，这个函数同时也删除了 overlay 中包
-;;    含的文本 `pyim-dagger'。
+;; 一个预览字符串，让用户快速查看将要输入的字符串，具体方式是：
+;; 1. 在 `pyim-input-method' 中调用 `pyim-preview-setup-overlay' 创建 overlay ，并
+;;    使用变量 `pyim-preview-overlay' 保存，创建时将 overlay 的 face 属性设置为
+;;    `pyim-preview-face' ，用户可以使用这个变量来自定义 face。
+;; 2. 使用函数 `pyim-preview-handle' 来设置 preview 字符串。
+;; 3. 在 `pyim-input-method' 中调用 `pyim-preview-delete-overlay' ，删除
+;;    `pyim-preview-overlay' 中保存的 overlay，这个函数同时也删除了 overlay 中包
+;;    含的文本 `pyim-preview'。
 
-;; 真正在 *待输入buffer* 插入 `pyim-dagger' 字符串的函数是
-;; `read-event'，具体见 `pyim-input-method' 相关说明。
-
-(defun pyim-dagger-setup-overlay ()
+(defun pyim-preview-setup-overlay ()
   (let ((pos (point)))
-    (if (overlayp pyim-dagger-overlay)
-        (move-overlay pyim-dagger-overlay pos pos)
-      (setq pyim-dagger-overlay (make-overlay pos pos))
+    (if (overlayp pyim-preview-overlay)
+        (move-overlay pyim-preview-overlay pos pos)
+      (setq pyim-preview-overlay (make-overlay pos pos))
       (if input-method-highlight-flag
-          (overlay-put pyim-dagger-overlay 'face 'pyim-dagger-face)))))
+          (overlay-put pyim-preview-overlay 'face 'pyim-preview-face)))))
 
-(defun pyim-dagger-delete-overlay ()
-  (if (and (overlayp pyim-dagger-overlay) (overlay-start pyim-dagger-overlay))
-      (delete-overlay pyim-dagger-overlay)))
+(defun pyim-preview-delete-overlay ()
+  (if (and (overlayp pyim-preview-overlay) (overlay-start pyim-preview-overlay))
+      (delete-overlay pyim-preview-overlay)))
 
-(defun pyim-dagger-handle (type)
-  "更新 `pyim-dagger' 的值。"
-  (cond ((eq type 'empty-dagger-value)
-         (setq pyim-dagger ""))
-        ((eq type 'no-need-to-select)
-         (setq pyim-dagger
-               (pyim-magic-convert
-                (concat
-                 (if (null pyim-candidates)
-                     ""
-                   pyim-selected)
-                 (pyim-translate last-command-event)))))
-        ((eq type 'select-only-once)
-         (setq pyim-dagger
-               (pyim-magic-convert pyim-selected)))
-        ((eq type 'select-entered-instead)
-         (setq pyim-dagger
-               (pyim-magic-convert pyim-entered)))
-        ((eq type 'select-in-steps)
-         (let* ((class (pyim-scheme-get-option pyim-default-scheme :class))
-                (end (pyim-page-end))
-                (start (1- (pyim-page-start)))
-                (candidates pyim-candidates)
-                (pos (1- (min pyim-candidate-position (length candidates)))))
-           (setq pyim-dagger
-                 (concat pyim-selected
-                         (pyim-candidate-parse (nth pos candidates))))
-           (when (memq class '(quanpin))
-             (let ((rest (mapconcat
-                          #'(lambda (py)
-                              (concat (car py) (cdr py)))
-                          (nthcdr (length pyim-dagger) (car pyim-imobjs))
-                          "'")))
-               (when (string< "" rest)
-                 (setq pyim-dagger (concat pyim-dagger rest)))))
-           (setq pyim-dagger
-                 (pyim-magic-convert pyim-dagger))
-           (unless enable-multibyte-characters
-             (pyim-entered-handle "")
-             (pyim-dagger-handle 'empty-dagger-value)
-             (error "Can't input characters in current unibyte buffer"))
-           ;; Delete old dagger string.
-           (pyim-dagger-delete-string)
-           ;; Insert new dagger string.
-           (insert pyim-dagger)
-           ;; Hightlight new dagger string.
-           (move-overlay pyim-dagger-overlay
-                         (overlay-start pyim-dagger-overlay) (point))))
-        (t (error "PYIM: wrong pyim-dagger-handle type."))))
+(defun pyim-preview-handle ()
+  "处理预览词条.
+在选择备选词条是，当前 buffer 光标处中会插入一个预览字符串，用来
+帮助用户选择词条。"
+  (let* ((class (pyim-scheme-get-option pyim-default-scheme :class))
+         (end (pyim-page-end))
+         (start (1- (pyim-page-start)))
+         (candidates pyim-candidates)
+         (pos (1- (min pyim-candidate-position (length candidates))))
+         (preview
+          (concat pyim-outcome
+                  (pyim-candidate-parse (nth pos candidates)))))
+    (when (memq class '(quanpin))
+      (let ((rest (mapconcat
+                   #'(lambda (py)
+                       (concat (car py) (cdr py)))
+                   (nthcdr (length preview) (car pyim-imobjs))
+                   "'")))
+        (when (string< "" rest)
+          (setq preview (concat preview rest)))))
+    (setq preview (pyim-magic-convert preview))
+    ;; Delete old preview string.
+    (pyim-preview-delete-string)
+    ;; Insert new preview string.
+    (insert preview)
+    ;; Hightlight new preview string.
+    (move-overlay pyim-preview-overlay
+                  (overlay-start pyim-preview-overlay) (point))))
 
-(defun pyim-dagger-delete-string ()
-  "删除已经插入 buffer 的 dagger 字符串。"
-  (if (overlay-start pyim-dagger-overlay)
-      (delete-region (overlay-start pyim-dagger-overlay)
-                     (overlay-end pyim-dagger-overlay))))
+(defun pyim-preview-delete-string ()
+  "删除已经插入 buffer 的 preview 字符串。"
+  (if (overlay-start pyim-preview-overlay)
+      (delete-region (overlay-start pyim-preview-overlay)
+                     (overlay-end pyim-preview-overlay))))
 
 ;; ** 显示和选择备选词条
 ;; *** 构建词条菜单字符串
@@ -3070,7 +3007,7 @@ code 字符串."
                  (if (functionp func)
                      (funcall func page-info)
                    (pyim-page-style:two-lines page-info)))
-               (overlay-start pyim-dagger-overlay))
+               (overlay-start pyim-preview-overlay))
             (message "%s" (pyim-page-style:minibuffer page-info))))))))
 
 (defun pyim-minibuffer-message (string)
@@ -3093,12 +3030,12 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
   (interactive "p")
   (if (= (length pyim-entered) 0)
       (progn
-        (pyim-dagger-handle 'no-need-to-select)
+        (pyim-outcome-get 'without-candidate)
         (pyim-terminate-translation))
     (let ((new (+ pyim-candidate-position (* pyim-page-length arg) 1)))
       (setq pyim-candidate-position (if (> new 0) new 1)
             pyim-candidate-position (pyim-page-start))
-      (pyim-dagger-handle 'select-in-steps)
+      (pyim-preview-handle)
       (pyim-page-handle))))
 
 (defun pyim-page-previous-page (arg)
@@ -3109,11 +3046,11 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
   (interactive "p")
   (if (= (length pyim-entered) 0)
       (progn
-        (pyim-dagger-handle 'no-need-to-select)
+        (pyim-outcome-get 'without-candidate)
         (pyim-terminate-translation))
     (let ((new (+ pyim-candidate-position arg)))
       (setq pyim-candidate-position (if (> new 0) new 1))
-      (pyim-dagger-handle 'select-in-steps)
+      (pyim-preview-handle)
       (pyim-page-handle t))))
 
 (defun pyim-page-previous-word (arg)
@@ -3254,32 +3191,52 @@ tooltip 选词框中显示。
                 (not (display-graphic-p))))))
 
 ;; *** 选择备选词
+(defun pyim-outcome-get (type)
+  "获取 pyim 的最终产出字符串，并将其设置为 pyim-outcome."
+  (cond ((not enable-multibyte-characters)
+         (setq pyim-entered ""
+               pyim-outcome "")
+         (error "Can't input characters in current unibyte buffer"))
+        ((eq type 'empty-value)
+         (setq pyim-outcome ""))
+        ((eq type 'without-candidate)
+         (setq pyim-outcome
+               (concat pyim-outcome
+                       (pyim-translate last-command-event))))
+        ((eq type 'use-candidate)
+         (let ((candidate
+                (pyim-candidate-parse
+                 (nth (1- pyim-candidate-position)
+                      pyim-candidates))))
+           (setq pyim-outcome
+                 (concat pyim-outcome candidate))))
+        ((eq type 'use-entered)
+         (setq pyim-outcome pyim-entered))))
+
 (defun pyim-page-select-word ()
   "从选词框中选择当前词条。"
   (interactive)
   (if (null pyim-candidates)  ; 如果没有选项，输入空格
       (progn
-        (pyim-dagger-handle 'no-need-to-select)
+        (pyim-outcome-get 'without-candidate)
         (pyim-terminate-translation))
     (if (equal 'rime (pyim-scheme-get-option pyim-default-scheme :class))
         (call-interactively #'pyim-page-select-word:rime)
-      (let ((str (pyim-candidate-parse (nth (1- pyim-candidate-position) pyim-candidates)))
-            imobjs)
-        (setq pyim-selected (concat pyim-selected str))
-        (if (< (length pyim-selected) (length (car pyim-imobjs)))
+      (let (imobjs)
+        (pyim-outcome-get 'use-candidate)
+        (if (< (length pyim-outcome) (length (car pyim-imobjs)))
             (progn
               (setq imobjs
                     (delete-dups (mapcar
                                   #'(lambda (imobj)
-                                      (nthcdr (length pyim-selected) imobj))
+                                      (nthcdr (length pyim-outcome) imobj))
                                   pyim-imobjs)))
               (setq pyim-candidates (pyim-candidates-create imobjs pyim-default-scheme)
                     pyim-candidate-position 1)
-              (pyim-dagger-handle 'select-in-steps)
+              (pyim-preview-handle)
               (pyim-page-handle))
-          (unless (member pyim-selected pyim-candidates)
-            (pyim-create-word pyim-selected))
-          (pyim-dagger-handle 'select-only-once)
+          (unless (member pyim-outcome pyim-candidates)
+            (pyim-create-word pyim-outcome))
           (pyim-terminate-translation)
           ;; pyim 使用这个 hook 来处理联想词。
           (run-hooks 'pyim-page-select-finish-hook))))))
@@ -3289,20 +3246,17 @@ tooltip 选词框中显示。
   (interactive)
   (if (null pyim-candidates)  ; 如果没有选项，输入空格
       (progn
-        (pyim-dagger-handle 'no-need-to-select)
+        (pyim-outcome-get 'without-candidate)
         (pyim-terminate-translation))
     ;; pyim 告诉 liberime 选择其他的词条
     (liberime-select-candidate (- pyim-candidate-position 1))
-    (let* ((str (pyim-candidate-parse (nth (1- pyim-candidate-position) pyim-candidates)))
-           (context (liberime-get-context))
+    (let* ((context (liberime-get-context))
            imobjs)
-      (pyim-create-word str t)
-      (setq pyim-selected (concat pyim-selected str))
+      (pyim-outcome-get 'use-candidate)
       (if (not context)
           (progn
-            (unless (member pyim-selected pyim-candidates)
-              (pyim-create-word pyim-selected))
-            (pyim-dagger-handle 'select-only-once)
+            (unless (member pyim-outcome pyim-candidates)
+              (pyim-create-word pyim-outcome))
             (pyim-terminate-translation)
             ;; pyim 使用这个 hook 来处理联想词。
             (run-hooks 'pyim-page-select-finish-hook))
@@ -3313,7 +3267,7 @@ tooltip 选词框中显示。
                      (candidates (alist-get 'candidates menu)))
                 candidates))
         (setq pyim-candidate-position 1)
-        (pyim-dagger-handle 'select-in-steps)
+        (pyim-preview-handle)
         (pyim-page-handle)))))
 
 (defun pyim-page-select-word-by-number (&optional n)
@@ -3321,7 +3275,7 @@ tooltip 选词框中显示。
   (interactive)
   (if (null pyim-candidates)
       (progn
-        (pyim-dagger-handle 'no-need-to-select)
+        (pyim-outcome-get 'without-candidate)
         (pyim-terminate-translation))
     (let ((index (if (numberp n)
                      (- n 1)
@@ -3680,7 +3634,7 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
   (if (> (length pyim-entered) 1)
       (pyim-entered-handle
        (substring pyim-entered 0 -1))
-    (pyim-dagger-handle 'empty-dagger-value)
+    (pyim-outcome-get 'empty-value)
     (pyim-terminate-translation)))
 
 ;; *** 删除拼音字符串最后一个拼音
@@ -3690,7 +3644,7 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
       (pyim-entered-handle
        (replace-match "" nil nil pyim-entered))
     (pyim-entered-handle "")
-    (pyim-dagger-handle 'empty-dagger-value)
+    (pyim-outcome-get 'empty-value)
     (pyim-terminate-translation)))
 
 ;; *** 将光标前的用户输入的字符串转换为中文
@@ -3734,12 +3688,12 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
 ;; *** 取消当前输入
 (defun pyim-quit-clear ()
   (interactive)
-  (pyim-dagger-handle 'empty-dagger-value)
+  (pyim-outcome-get 'empty-value)
   (pyim-terminate-translation))
 ;; *** 字母上屏
 (defun pyim-quit-no-clear ()
   (interactive)
-  (pyim-dagger-handle 'select-entered-instead)
+  (pyim-outcome-get 'use-entered)
   (pyim-terminate-translation))
 
 ;; *** pyim 取消激活
