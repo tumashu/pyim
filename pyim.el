@@ -2879,19 +2879,18 @@ code 字符串."
                 (end (pyim-page-end))
                 (start (1- (pyim-page-start)))
                 (candidates pyim-candidates)
-                (pos (1- (min pyim-candidate-position (length candidates))))
-                rest)
+                (pos (1- (min pyim-candidate-position (length candidates)))))
            (setq pyim-dagger
                  (concat pyim-selected
                          (pyim-candidate-parse (nth pos candidates))))
            (when (memq class '(quanpin))
-             (setq rest (mapconcat
-                         #'(lambda (py)
-                             (concat (car py) (cdr py)))
-                         (nthcdr (length pyim-dagger) (car pyim-imobjs))
-                         "'"))
-             (if (string< "" rest)
-                 (setq pyim-dagger (concat pyim-dagger rest))))
+             (let ((rest (mapconcat
+                          #'(lambda (py)
+                              (concat (car py) (cdr py)))
+                          (nthcdr (length pyim-dagger) (car pyim-imobjs))
+                          "'")))
+               (when (string< "" rest)
+                 (setq pyim-dagger (concat pyim-dagger rest)))))
            (setq pyim-dagger
                  (pyim-magic-convert pyim-dagger))
            (unless enable-multibyte-characters
