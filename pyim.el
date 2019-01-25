@@ -978,9 +978,10 @@ imobj 列表（这个列表大多数情况只包含一个 imobj, 有时候也包
 imobj, 比如：开启拼音模糊音后一个 entered 字符串就有可能生成多个
 imobj）。这个变量用于保存这个列表。
 
-pyim 又通过输入法内部对象 imobj 来创建 code 字符串, 通过从词库中
-搜索 code 字符串来得到所需要的词条，然后使用特定的方式将得到的词
-条组合成一个候选词列表： `pyim-candidates'.")
+然后，pyim 会通过输入法内部对象 imobj 来创建 code 字符串, 得到
+code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要的词条，
+最后使用特定的方式将得到的词条组合成一个候选词列表：`pyim-candidates'
+并通过 pyim-page 相关功能来显示选词框，供用户选择词条。")
 
 (defvar pyim-selected ""
   "用于选择的词条组成的字符串。
@@ -992,14 +993,13 @@ pyim 又通过输入法内部对象 imobj 来创建 code 字符串, 通过从词
 (defvar pyim-dagger ""
   "光标处带下划线字符串.
 
-输入法运行的时候，会在光标处会插入一个带下划线字符串，这个字符串
-提示用户当前选择的词条或者当前输入的字符串等许多有用的信息。
-pyim 称这个字符串为 \"dragger\" 字符串, 向 \"匕首\" 一样插入
-当前 buffer 的光标处。
+输入法运行的时候，会在光标处会插入一个带下划线字符串，用于提示用
+户当前选择的词条以及可能的备选词等有用的信息。pyim 称这个字符串为
+\"dragger\" 字符串, 向 \"匕首\" 一样插入当前 buffer 的光标处。
 
 `pyim-dagger' 和 `pyim-selected' 有所不同， `pyim-selected' 字符
-串代表用户明确选择的词条，它是 `pyim-dagger' 字符串构建的基础，在
-大多数情况下, `pyim-dagger' 可以理解为：
+串代表用户通过选择命令明确选择的词条，它是 `pyim-dagger' 字符串构
+建的基础，在大多数情况下, `pyim-dagger' 可以理解为：
 
     pyim-dagger = pyim-selected + candidate-preview")
 
