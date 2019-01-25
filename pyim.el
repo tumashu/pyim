@@ -268,7 +268,7 @@
 ;; (setq pyim-page-style 'one-line)
 ;; #+END_EXAMPLE
 
-;; 注：用户可以添加函数 pyim-page-style-STYLENAME-style 来定义自己的选词框格式。
+;; 注：用户可以添加函数 pyim-page-style:STYLENAME 来定义自己的选词框格式。
 
 ;; *** 设置模糊音
 ;; 可以通过设置 `pyim-fuzzy-pinyin-alist' 变量来自定义模糊音。
@@ -3053,7 +3053,7 @@ code 字符串."
           ;; 在 minibuffer 中输入中文时，使用当前输入的
           ;; 下一行来显示候选词。
           (pyim-minibuffer-message
-           (concat "\n" (pyim-page-style-minibuffer-style page-info)))
+           (concat "\n" (pyim-page-style:minibuffer page-info)))
         ;; 在普通 buffer 中输入中文时，使用 `pyim-page-tooltip'
         ;; 指定的方式来显示候选词。
         (let ((message-log-max nil))
@@ -3062,9 +3062,9 @@ code 字符串."
                (let ((func (intern (format "pyim-page-style:%S" pyim-page-style))))
                  (if (functionp func)
                      (funcall func page-info)
-                   (pyim-page-style-two-lines-style page-info)))
+                   (pyim-page-style:two-lines page-info)))
                (overlay-start pyim-dagger-overlay))
-            (message "%s" (pyim-page-style-minibuffer-style page-info))))))))
+            (message "%s" (pyim-page-style:minibuffer page-info))))))))
 
 (defun pyim-minibuffer-message (string)
   "当在 minibuffer 中使用 pyim 输入中文时，需要将
