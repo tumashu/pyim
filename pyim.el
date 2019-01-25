@@ -984,7 +984,7 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
 并通过 pyim-page 相关功能来显示选词框，供用户选择词条。")
 
 (defvar pyim-selected ""
-  "用于选择的词条组成的字符串。
+  "通过选词命令明确选择的词条组成的字符串。
 
 用户使用 `pyim-page-select-word' 或者
 `pyim-page-select-word-by-number' 两个命令明确选择的词条组成的字
@@ -1007,14 +1007,14 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
 (defvar pyim-dagger-overlay nil
   "用于保存 dagger 的 overlay.")
 
+(defvar pyim-candidates nil
+  "所有备选词条组成的列表.")
+
 (defvar pyim-input-ascii nil
   "是否开启 pyim 英文输入模式.")
 
 (defvar pyim-force-input-chinese nil
   "是否强制开启中文输入模式.")
-
-(defvar pyim-candidates nil
-  "所有可选的词条，是一个list.")
 
 (defvar pyim-candidate-position nil
   "当前选择的词条在 ‘pyim-candidates’ 中的位置.")
