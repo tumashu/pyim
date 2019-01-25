@@ -2092,8 +2092,7 @@ FILE 的格式与 `pyim-export' 生成的文件格式相同，
     (pyim-dagger-setup-overlay)
     (with-silent-modifications
       (unwind-protect
-          (let ((input-string (pyim-magic-convert
-                               (pyim-start-translation key-or-string))))
+          (let ((input-string (pyim-start-translation key-or-string)))
             ;; (message "input-string: %s" input-string)
             (when (and (stringp input-string)
                        (> (length input-string) 0))
@@ -2858,15 +2857,18 @@ code 字符串."
          (setq pyim-dagger ""))
         ((eq type 'no-need-to-select)
          (setq pyim-dagger
-               (concat
-                (if (null pyim-candidates)
-                    ""
-                  pyim-selected)
-                (pyim-translate last-command-event))))
+               (pyim-magic-convert
+                (concat
+                 (if (null pyim-candidates)
+                     ""
+                   pyim-selected)
+                 (pyim-translate last-command-event)))))
         ((eq type 'select-only-once)
-         (setq pyim-dagger pyim-selected))
+         (setq pyim-dagger
+               (pyim-magic-convert pyim-selected)))
         ((eq type 'select-entered-instead)
-         (setq pyim-dagger pyim-entered))
+         (setq pyim-dagger
+               (pyim-magic-convert pyim-entered)))
         ((eq type 'select-in-steps)
          (let* ((class (pyim-scheme-get-option pyim-default-scheme :class))
                 (end (pyim-page-end))
@@ -2885,6 +2887,8 @@ code 字符串."
                          "'"))
              (if (string< "" rest)
                  (setq pyim-dagger (concat pyim-dagger rest))))
+           (setq pyim-dagger
+                 (pyim-magic-convert pyim-dagger))
            (unless enable-multibyte-characters
              (pyim-entered-handle "")
              (pyim-dagger-handle 'empty-dagger-value)
@@ -2892,7 +2896,7 @@ code 字符串."
            ;; Delete old dagger string.
            (pyim-dagger-delete-string)
            ;; Insert new dagger string.
-           (insert (pyim-magic-convert pyim-dagger))
+           (insert pyim-dagger)
            ;; Hightlight new dagger string.
            (move-overlay pyim-dagger-overlay
                          (overlay-start pyim-dagger-overlay) (point))))
