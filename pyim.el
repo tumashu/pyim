@@ -1086,7 +1086,7 @@ pyim-extra-dicts 时，pyim 会自动生成相关的 dcache 文件。
 pyim 优先使用 emacs thread 功能来生成 dcache, 如果设置为 nil,
 pyim 总是使用 emacs-async 包来生成 dcache.")
 
-(defvar pyim-tooltip-posframe-buffer " *pyim-tooltip-posframe-buffer*"
+(defvar pyim-page-tooltip-posframe-buffer " *pyim-page-tooltip-posframe-buffer*"
   "这个变量用来保存做为 page tooltip 的 posframe 的 buffer.")
 
 (defvar pyim-rime-limit 50
@@ -2230,7 +2230,7 @@ Return the input string."
   (setq pyim-candidates nil)
   (when (and (memq pyim-page-tooltip '(posframe child-frame))
              (pyim-tooltip-posframe-valid-p))
-    (posframe-hide pyim-tooltip-posframe-buffer)))
+    (posframe-hide pyim-page-tooltip-posframe-buffer)))
 
 ;; ** 处理 `pyim-entered' (没有任何分隔符的拼音字符串)
 ;; *** 用户输入的字符串 -> 待选词列表
@@ -3226,7 +3226,7 @@ tooltip 选词框中显示。
         (tooltip pyim-page-tooltip))
     (cond ((and (memq tooltip '(posframe child-frame))
                 (pyim-tooltip-posframe-valid-p))
-           (posframe-show pyim-tooltip-posframe-buffer
+           (posframe-show pyim-page-tooltip-posframe-buffer
                           :string string
                           :position position
                           :min-width (* pyim-page-length 7)
