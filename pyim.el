@@ -1067,7 +1067,10 @@ pyim-extra-dicts 时，pyim 会自动生成相关的 dcache 文件。
 
 如果这个变量设置为 t, 那么当 emacs thread 功能可以使用时，
 pyim 优先使用 emacs thread 功能来生成 dcache, 如果设置为 nil,
-pyim 总是使用 emacs-async 包来生成 dcache.")
+pyim 总是使用 emacs-async 包来生成 dcache.
+
+不过这个选项开启之后，会显著的减慢词库加载速度，特别是
+五笔等形码输入法。")
 
 (defvar pyim-page-tooltip-posframe-buffer " *pyim-page-tooltip-posframe-buffer*"
   "这个变量用来保存做为 page tooltip 的 posframe 的 buffer.")
