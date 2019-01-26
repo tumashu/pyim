@@ -2785,12 +2785,12 @@ code 字符串."
                            (delete-dups (pyim-candidates-create pyim-imobjs scheme-name)))
                      (when pyim-candidates
                        (setq pyim-candidate-position 1)
-                       (pyim-preview-handle)
+                       (pyim-preview-refresh)
                        (pyim-page-handle)
                        t)))
         (setq pyim-candidates (list pyim-entered))
         (setq pyim-candidate-position 1)
-        (pyim-preview-handle)
+        (pyim-preview-refresh)
         (pyim-page-handle)))))
 
 
@@ -2800,7 +2800,7 @@ code 字符串."
 ;; 1. 在 `pyim-input-method' 中调用 `pyim-preview-setup-overlay' 创建 overlay ，并
 ;;    使用变量 `pyim-preview-overlay' 保存，创建时将 overlay 的 face 属性设置为
 ;;    `pyim-preview-face' ，用户可以使用这个变量来自定义 face。
-;; 2. 使用函数 `pyim-preview-handle' 来设置 preview 字符串。
+;; 2. 使用函数 `pyim-preview-refresh' 来设置 preview 字符串。
 ;; 3. 在 `pyim-input-method' 中调用 `pyim-preview-delete-overlay' ，删除
 ;;    `pyim-preview-overlay' 中保存的 overlay，这个函数同时也删除了 overlay 中包
 ;;    含的文本 `pyim-preview'。
@@ -2817,7 +2817,7 @@ code 字符串."
   (if (and (overlayp pyim-preview-overlay) (overlay-start pyim-preview-overlay))
       (delete-overlay pyim-preview-overlay)))
 
-(defun pyim-preview-handle ()
+(defun pyim-preview-refresh ()
   "处理预览词条.
 在选择备选词条是，当前 buffer 光标处中会插入一个预览字符串，用来
 帮助用户选择词条。"
@@ -3038,7 +3038,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
     (let ((new (+ pyim-candidate-position (* pyim-page-length arg) 1)))
       (setq pyim-candidate-position (if (> new 0) new 1)
             pyim-candidate-position (pyim-page-start))
-      (pyim-preview-handle)
+      (pyim-preview-refresh)
       (pyim-page-handle))))
 
 (defun pyim-page-previous-page (arg)
@@ -3053,7 +3053,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
         (pyim-terminate-translation))
     (let ((new (+ pyim-candidate-position arg)))
       (setq pyim-candidate-position (if (> new 0) new 1))
-      (pyim-preview-handle)
+      (pyim-preview-refresh)
       (pyim-page-handle t))))
 
 (defun pyim-page-previous-word (arg)
@@ -3237,7 +3237,7 @@ tooltip 选词框中显示。
                                   pyim-imobjs)))
               (setq pyim-candidates (pyim-candidates-create imobjs pyim-default-scheme)
                     pyim-candidate-position 1)
-              (pyim-preview-handle)
+              (pyim-preview-refresh)
               (pyim-page-handle))
           (unless (member pyim-outcome pyim-candidates)
             (pyim-create-word pyim-outcome))
@@ -3271,7 +3271,7 @@ tooltip 选词框中显示。
                      (candidates (alist-get 'candidates menu)))
                 candidates))
         (setq pyim-candidate-position 1)
-        (pyim-preview-handle)
+        (pyim-preview-refresh)
         (pyim-page-handle)))))
 
 (defun pyim-page-select-word-by-number (&optional n)
