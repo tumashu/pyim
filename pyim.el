@@ -2555,16 +2555,13 @@ Return the input string."
                imobj scheme-name shou-zi-mu))))
 
 (defun pyim-codes-create:quanpin (imobj scheme-name &optional shou-zi-mu)
-  (list
-   (mapconcat 'identity
-              (mapcar
-               #'(lambda (w)
-                   (let ((py (concat (car w) (cdr w))))
-                     (if shou-zi-mu
-                         (substring py 0 1)
-                       py)))
-               imobj)
-              "-")))
+  (mapcar
+   #'(lambda (w)
+       (let ((py (concat (car w) (cdr w))))
+         (if shou-zi-mu
+             (substring py 0 1)
+           py)))
+   imobj))
 
 (defun pyim-codes-create:shuangpin (imobj scheme-name &optional shou-zi-mu)
   (pyim-codes-create:quanpin imobj 'quanpin shou-zi-mu))
@@ -2633,33 +2630,47 @@ IMOBJS 获得候选词条。"
          (jianpin-words
           (when (> (length (car imobjs)) 1)
             (pyim-dcache-get
-             (car (pyim-codes-create (car imobjs) scheme-name t))
+             (mapconcat #'identity
+                        (pyim-codes-create (car imobjs) scheme-name t)
+                        "-")
              pyim-dcache-ishortcode2word)))
-         ;; 将输入的拼音按照声母和韵母打散，得到尽可能多的拼音组合，
-         ;; 查询这些拼音组合，得到的词条做为联想词。
-         (znabc-words
-          (pyim-possible-words
-           (pyim-possible-words-py (car imobjs))))
+         znabc-words
          pinyin-chars
          personal-words
          common-words)
+
+    ;; 智能ABC模式，得到尽可能的拼音组合，查询这些组合，得到的词条做
+    ;; 为联想词。
+    (let* ((codes (pyim-codes-create (car imobjs) scheme-name))
+           (n (- (length codes) 1))
+           output)
+      (dotimes (i (- n 1))
+        (let ((lst (cl-subseq codes 0 (- n i))))
+          (push (mapconcat #'identity lst "-") output)))
+      (dolist (code (reverse output))
+        (setq znabc-words (append znabc-words (pyim-dcache-get code)))))
 
     (dolist (imobj imobjs)
       (setq personal-words
             (append personal-words
                     (pyim-dcache-get
-                     (car (pyim-codes-create imobj scheme-name))
+                     (mapconcat #'identity
+                                (pyim-codes-create imobj scheme-name)
+                                "-")
                      (list pyim-dcache-icode2word
                            pyim-dcache-ishortcode2word))))
       (setq common-words
             (append common-words
                     (pyim-dcache-get
-                     (car (pyim-codes-create imobj scheme-name))
+                     (mapconcat #'identity
+                                (pyim-codes-create imobj scheme-name)
+                                "-")
                      (list pyim-dcache-code2word
                            pyim-dcache-shortcode2word))))
       (setq pinyin-chars
             (append pinyin-chars
-                    (pyim-dcache-get (concat (caar imobj) (cdar imobj))))))
+                    (pyim-dcache-get
+                     (car (pyim-codes-create imobj scheme-name))))))
 
     ;; Debug
     (when pyim-debug
@@ -2674,7 +2685,6 @@ IMOBJS 获得候选词条。"
      (delq nil
            `(,@personal-words
              ,@common-words
-             ,@jianpin-words
              ,@znabc-words
              ,@pinyin-chars)))))
 
@@ -2682,66 +2692,10 @@ IMOBJS 获得候选词条。"
   "`pyim-candidates-create' 处理双拼输入法的函数."
   (pyim-candidates-create:quanpin imobjs 'quanpin))
 
-(defun pyim-flatten-list (my-list)
-  (cond
-   ((null my-list) nil)
-   ((atom my-list) (list my-list))
-   (t (append (pyim-flatten-list (car my-list))
-              (pyim-flatten-list (cdr my-list))))))
-
-(defun pyim-possible-words (wordspy)
-  "根据拼音得到可能的词组。例如：
-  (pyim-possible-words '((\"p-y\" (\"p\" . \"in\") (\"y\" . \"\"))))
-    => (\"拼音\" \"贫铀\" \"聘用\")
-"
-  (let (words)
-    (dolist (word (reverse wordspy))
-      (if (listp word)
-          (setq words (append words (pyim-dcache-get (car word))))
-        (setq words (append words (pyim-dcache-get word)))))
-    words))
-
-(defun pyim-possible-words-py (imobj)
-  "所有可能的词组拼音。从第一个字开始，每个字断开形成一个拼音。如果是
-完整拼音，则给出完整的拼音，如果是给出声母，则为一个 CONS CELL，CAR 是
-拼音，CDR 是拼音列表。例如：
-
- (setq foo-imobj (pyim-imobjs-create \"pin-yin-sh-r\" 'quanpin))
-  => ((\"p\" . \"in\") (\"y\" . \"in\") (\"sh\" . \"\") (\"r\" . \"\"))
-
- (pyim-possible-words-py foo-imobj)
-  => (\"pin-yin\" (\"p-y-sh\" (\"p\" . \"in\") (\"y\" . \"in\") (\"sh\" . \"\")) (\"p-y-sh-r\" (\"p\" . \"in\") (\"y\" . \"in\") (\"sh\" . \"\") (\"r\" . \"\")))
- "
-  (let (pys fullpy smpy wordlist (full t))
-    (if (string< "" (cdar imobj))
-        (setq fullpy (concat (caar imobj) (cdar imobj))
-              smpy (pyim-essential-py (car imobj)))
-      (setq smpy (caar imobj)
-            full nil))
-    (setq wordlist (list (car imobj)))
-    (dolist (py (cdr imobj))
-      (setq wordlist (append wordlist (list py)))
-      (if (and full (string< "" (cdr py)))
-          (setq fullpy (concat fullpy "-" (car py) (cdr py))
-                smpy (concat smpy "-" (pyim-essential-py py))
-                pys (append pys (list fullpy)))
-        (setq full nil
-              smpy (concat smpy "-" (pyim-essential-py py))
-              pys (append pys (list (cons smpy wordlist))))))
-    ;; (message "%s: %s" pys wordlist))
-    pys))
-
-(defun pyim-essential-py (py)
-  "一个拼音中的主要部分，如果有声母返回声母，否则返回韵母"
-  (if (string< "" (car py))
-      (car py)
-    (cdr py)))
-
 ;; *** 核心函数：拼音字符串处理函数
 ;; `pyim-entered-handle' 这个函数是一个重要的 *核心函数* ，其大致工作流程为：
 ;; 1. 查询拼音字符串 `pyim-entered' 得到待选词列表 `pyim-candidates'
 ;; 2. 显示备选词等待用户选择。
-
 (defun pyim-entered-handle (entered)
   (let* ((scheme-name pyim-default-scheme)
          (class (pyim-scheme-get-option scheme-name :class))
@@ -3039,7 +2993,9 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
   (replace-regexp-in-string
    "[-']+" (or separator " ")
    (pyim-entered-restore-user-divide
-    (car (pyim-codes-create (car pyim-imobjs) pyim-default-scheme))
+    (mapconcat #'identity
+               (pyim-codes-create (car pyim-imobjs) pyim-default-scheme)
+               "-")
     (pyim-entered-user-divide-pos pyim-entered))))
 
 (defun pyim-page-preview-create:shuangpin (&optional separator)
@@ -3505,6 +3461,13 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
       (if (equal current-char (car punc-list))
           (insert (pyim-punctuation-return-proper-punct punc-list))
         (insert (car punc-list))))))
+
+(defun pyim-flatten-list (my-list)
+  (cond
+   ((null my-list) nil)
+   ((atom my-list) (list my-list))
+   (t (append (pyim-flatten-list (car my-list))
+              (pyim-flatten-list (cdr my-list))))))
 
 (defun pyim-punctuation-translate-last-n-puncts (&optional punct-style)
   "将光标前面连续的n个标点符号进行全角/半角转换.
