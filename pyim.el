@@ -1102,10 +1102,10 @@ pyim 总是使用 emacs-async 包来生成 dcache.
     (define-key map " " 'pyim-page-select-word)
     (define-key map [backspace] 'pyim-delete-last-char)
     (define-key map [delete] 'pyim-delete-last-char)
-    (define-key map [M-backspace] 'pyim-backward-kill-py)
-    (define-key map [M-delete] 'pyim-backward-kill-py)
-    (define-key map [C-backspace] 'pyim-backward-kill-py)
-    (define-key map [C-delete] 'pyim-backward-kill-py)
+    (define-key map [M-backspace] 'pyim-backward-kill-cchar)
+    (define-key map [M-delete] 'pyim-backward-kill-cchar)
+    (define-key map [C-backspace] 'pyim-backward-kill-cchar)
+    (define-key map [C-delete] 'pyim-backward-kill-cchar)
     (define-key map "\177" 'pyim-delete-last-char)
     (define-key map "\C-n" 'pyim-page-next-page)
     (define-key map "\C-p" 'pyim-page-previous-page)
@@ -3606,13 +3606,22 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
     (pyim-outcome-handle 'set-to-blank-value)
     (pyim-terminate-translation)))
 
-;; *** 删除拼音字符串最后一个拼音
-(defun pyim-backward-kill-py ()
+;; *** 删除最后一个汉字
+(defun pyim-backward-kill-cchar ()
   (interactive)
-  (if (string-match "['-][^'-]+$" pyim-entered)
-      (pyim-entered-handle
-       (replace-match "" nil nil pyim-entered))
-    (pyim-entered-handle "")
+  (if (> (length pyim-entered) 1)
+      (progn
+        (setq pyim-imobjs
+              (mapcar #'(lambda (imobj)
+                          (cl-subseq imobj 0 (- (length imobj) 1)))
+                      pyim-imobjs))
+        (setq pyim-candidates (pyim-candidates-create pyim-imobjs pyim-default-scheme)
+              pyim-candidate-position 1)
+        (if pyim-candidates
+            (progn (pyim-preview-refresh)
+                   (pyim-page-refresh))
+          (pyim-outcome-handle 'set-to-blank-value)
+          (pyim-terminate-translation)))
     (pyim-outcome-handle 'set-to-blank-value)
     (pyim-terminate-translation)))
 
