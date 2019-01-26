@@ -2910,10 +2910,6 @@ pyim 在选择备选词条是，会在 buffer 光标处显示一个预览字符�
 ;; 3. 最后调用 `pyim-page-refresh' 来重新刷新页面。
 
 ;;  page format
-(defun pyim-subseq (list from &optional to)
-  (if (null to) (nthcdr from list)
-    (butlast (nthcdr from list) (- (length list) to))))
-
 (defun pyim-mod (x y)
   "like `mod', but when result is 0, return Y"
   (let ((base (mod x y)))
@@ -2964,7 +2960,7 @@ pyim 在选择备选词条是，会在 buffer 光标处显示一个预览字符�
                       (if (stringp x)
                           (replace-regexp-in-string ":" "" x)
                         x))
-                  (pyim-subseq candidates start end)))
+                  (cl-subseq candidates start end)))
          (pos (- (min pyim-candidate-position (length candidates)) start))
          (page-info (make-hash-table)))
     (puthash :entered pyim-entered page-info)
