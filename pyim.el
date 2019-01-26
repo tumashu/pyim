@@ -3082,7 +3082,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
              (pyim-entered-user-divide-pos entered))))
           (t entered))))
 
-(defun pyim-page-format-candidates (candidates position &optional separator)
+(defun pyim-page-menu-create (candidates position &optional separator)
   "这个函数用于格式化 page 中显示的词条菜单。"
   (let ((i 0) result)
     (dolist (candidate candidates)
@@ -3116,7 +3116,7 @@ tooltip 选词框中显示。
           (pyim-page-preview-create (gethash :entered page-info))
           (gethash :current-page page-info)
           (gethash :total-page page-info)
-          (pyim-page-format-candidates
+          (pyim-page-menu-create
            (gethash :candidates page-info)
            (gethash :position page-info))))
 
@@ -3129,7 +3129,7 @@ tooltip 选词框中显示。
 +-----------------------------------+"
   (format "[%s]: %s(%s/%s)"
           (pyim-page-preview-create (gethash :entered page-info) "")
-          (pyim-page-format-candidates
+          (pyim-page-menu-create
            (gethash :candidates page-info)
            (gethash :position page-info))
           (gethash :current-page page-info)
@@ -3148,7 +3148,7 @@ tooltip 选词框中显示。
           (pyim-page-preview-create (gethash :entered page-info))
           (gethash :current-page page-info)
           (gethash :total-page page-info)
-          (pyim-page-format-candidates
+          (pyim-page-menu-create
            (gethash :candidates page-info)
            (gethash :position page-info)
            "\n")))
@@ -3162,7 +3162,7 @@ tooltip 选词框中显示。
 +------------------------------------+"
   (format "[%s]: %s(%s/%s)"
           (pyim-page-preview-create (gethash :entered page-info))
-          (pyim-page-format-candidates
+          (pyim-page-menu-create
            (gethash :candidates page-info)
            (gethash :position page-info))
           (gethash :current-page page-info)
