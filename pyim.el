@@ -3059,7 +3059,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
   (interactive "p")
   (pyim-page-next-word (- arg)))
 
-(defun pyim-page-format-entered (entered &optional separator)
+(defun pyim-page-preview-create (entered &optional separator)
   "这个函数用于格式化 page 中显示的 entered 字符串, 有些
 输入法可能对 entered 字符串做极多的变化, 让其更养眼。"
   (let* ((scheme-name pyim-default-scheme)
@@ -3113,7 +3113,7 @@ tooltip 选词框中显示。
 | 1.你好 2.你号 ...          |
 +----------------------------+"
   (format "=> %s [%s/%s]: \n%s"
-          (pyim-page-format-entered (gethash :entered page-info))
+          (pyim-page-preview-create (gethash :entered page-info))
           (gethash :current-page page-info)
           (gethash :total-page page-info)
           (pyim-page-format-candidates
@@ -3128,7 +3128,7 @@ tooltip 选词框中显示。
 | [ni hao]: 1.你好 2.你号 ... (1/9) |
 +-----------------------------------+"
   (format "[%s]: %s(%s/%s)"
-          (pyim-page-format-entered (gethash :entered page-info) "")
+          (pyim-page-preview-create (gethash :entered page-info) "")
           (pyim-page-format-candidates
            (gethash :candidates page-info)
            (gethash :position page-info))
@@ -3145,7 +3145,7 @@ tooltip 选词框中显示。
 | 2.你号 ...   |
 +--------------+"
   (format "=> %s [%s/%s]: \n%s"
-          (pyim-page-format-entered (gethash :entered page-info))
+          (pyim-page-preview-create (gethash :entered page-info))
           (gethash :current-page page-info)
           (gethash :total-page page-info)
           (pyim-page-format-candidates
@@ -3161,7 +3161,7 @@ tooltip 选词框中显示。
 | [ni hao]: 1.你好 2.你号 ...  (1/9) |
 +------------------------------------+"
   (format "[%s]: %s(%s/%s)"
-          (pyim-page-format-entered (gethash :entered page-info))
+          (pyim-page-preview-create (gethash :entered page-info))
           (pyim-page-format-candidates
            (gethash :candidates page-info)
            (gethash :position page-info))
