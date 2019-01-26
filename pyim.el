@@ -871,7 +871,7 @@ pyim 内建的功能有：
   :group 'pyim)
 
 (defface pyim-preview-face '((t (:underline t)))
-  "preview 字符串的 face"
+  "设置光标处预览字符串的 face."
   :group 'pyim)
 
 (defcustom pyim-english-input-switch-functions nil
@@ -987,7 +987,7 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
   "所有备选词条组成的列表.")
 
 (defvar pyim-preview-overlay nil
-  "用于保存 preview 的 overlay.")
+  "用于保存光标处预览字符串的 overlay.")
 
 (defvar pyim-outcome ""
   "用户通过 pyim 生成的字符串，是最终插入到 buffer 的字符串。" )
@@ -2800,10 +2800,10 @@ code 字符串."
 ;; 1. 在 `pyim-input-method' 中调用 `pyim-preview-setup-overlay' 创建 overlay ，并
 ;;    使用变量 `pyim-preview-overlay' 保存，创建时将 overlay 的 face 属性设置为
 ;;    `pyim-preview-face' ，用户可以使用这个变量来自定义 face。
-;; 2. 使用函数 `pyim-preview-refresh' 来设置 preview 字符串。
+;; 2. 使用函数 `pyim-preview-refresh' 来刷新光标处的输入法预览。
 ;; 3. 在 `pyim-input-method' 中调用 `pyim-preview-delete-overlay' ，删除
 ;;    `pyim-preview-overlay' 中保存的 overlay，这个函数同时也删除了 overlay 中包
-;;    含的文本 `pyim-preview'。
+;;    含的预览文本。
 
 (defun pyim-preview-setup-overlay ()
   (let ((pos (point)))
@@ -2818,9 +2818,10 @@ code 字符串."
       (delete-overlay pyim-preview-overlay)))
 
 (defun pyim-preview-refresh ()
-  "处理预览词条.
-在选择备选词条是，当前 buffer 光标处中会插入一个预览字符串，用来
-帮助用户选择词条。"
+  "刷新光标处嵌入设预览.
+
+pyim 在选择备选词条是，会在 buffer 光标处显示一个预览字符串，
+用来帮助用户选择词条，这个函数用来刷新这个预览字符串。"
   (let* ((class (pyim-scheme-get-option pyim-default-scheme :class))
          (end (pyim-page-end))
          (start (1- (pyim-page-start)))
