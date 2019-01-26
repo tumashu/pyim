@@ -937,6 +937,14 @@ pyim 内建的有三种选词框格式：
   :group 'pyim
   :type 'integer)
 
+(defcustom pyim-auto-select t
+  "是否开启唯一候选词自动上屏功能.
+
+五笔等型码输入法，重码率很低，开启这个选项后，唯一
+的候选词会自动选择并屏幕，不需要用户按空格选择。"
+  :group 'pyim
+  :type 'boolean)
+
 (defface pyim-page
   '((t (:inherit default :background "#333333" :foreground "#dcdccc")))
   "Face used for the pyim page."
@@ -2733,7 +2741,9 @@ Return the input string."
 ;; 2. 显示备选词等待用户选择。
 
 (defun pyim-entered-handle (entered)
-  (let ((scheme-name pyim-default-scheme))
+  (let* ((scheme-name pyim-default-scheme)
+         (class (pyim-scheme-get-option scheme-name :class))
+         (n (pyim-scheme-get-option scheme-name :code-split-length)))
     (setq pyim-entered entered)
     (when (and entered
                (stringp entered)
@@ -2743,10 +2753,20 @@ Return the input string."
             (if (pyim-imobj-validp (car pyim-imobjs) scheme-name)
                 (delete-dups (pyim-candidates-create pyim-imobjs scheme-name))
               (list pyim-entered)))
-      (when pyim-candidates
-        (setq pyim-candidate-position 1))
-      (pyim-preview-refresh)
-      (pyim-page-refresh))))
+      (cond
+       ;; 五笔等型码输入法，重码率很低，适合盲打，
+       ;; 这是添加自动上屏功能。
+       ((and pyim-auto-select
+             (eq class 'xingma)
+             (= (length pyim-candidates) 1)
+             ;; 检测输入的字符串长度是否达到了 code 长度最大值。
+             (= (length (car (car pyim-imobjs))) n))
+        (pyim-outcome-handle 'select-one-candidate)
+        (pyim-terminate-translation))
+       (pyim-candidates
+        (setq pyim-candidate-position 1)
+        (pyim-preview-refresh)
+        (pyim-page-refresh))))))
 
 ;; ** 待输入字符串预览功能。
 ;; pyim 会使用 emacs overlay 机制在 *待输入buffer* 光标处高亮显示
