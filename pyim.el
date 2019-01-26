@@ -2986,8 +2986,7 @@ code 字符串."
                         x))
                   (pyim-subseq candidates start end)))
          (pos (- (min pyim-candidate-position (length candidates)) start))
-         (page-info (make-hash-table))
-         (i 0))
+         (page-info (make-hash-table)))
     (puthash :entered pyim-entered page-info)
     (puthash :current-page (pyim-page-current-page) page-info)
     (puthash :total-page (pyim-page-total-page) page-info)
@@ -3085,23 +3084,25 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
 
 (defun pyim-page-format-candidates (candidates position &optional separator)
   "这个函数用于格式化 page 中显示的词条菜单。"
-  (mapconcat 'identity
-             (mapcar
-              (lambda (c)
-                (setq i (1+ i))
-                (let (str)
-                  (setq str (if (consp c)
-                                (concat (car c) (cdr c))
-                              c))
-                  ;; 高亮当前选择的词条，用于 `pyim-page-next-word'
-                  (if (and hightlight-current
-                           (= i position))
-                      (format "%d%s" i
-                              (propertize
-                               (format "[%s]" str)
-                               'face 'pyim-page-selection))
-                    (format "%d.%s " i str))))
-              candidates) (or separator "")))
+  (let ((i 0) result)
+    (dolist (candidate candidates)
+      (let ((str (if (consp candidate)
+                     (concat (car candidate) (cdr candidate))
+                   candidate)))
+        (setq i (1+ i))
+        ;; 高亮当前选择的词条，用于 `pyim-page-next-word'
+        (push
+         (if (and hightlight-current
+                  (= i position))
+             (format "%d%s" i
+                     (propertize
+                      (format "[%s]" str)
+                      'face 'pyim-page-selection))
+           (format "%d.%s " i str))
+         result)))
+    (mapconcat #'identity
+               (reverse result)
+               (or separator ""))))
 
 (defun pyim-page-style:two-lines (page-info)
   "将 page-info 格式化为类似下面格式的字符串，这个字符串将在
