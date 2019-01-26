@@ -2733,27 +2733,20 @@ Return the input string."
 ;; 2. 显示备选词等待用户选择。
 
 (defun pyim-entered-handle (entered)
-  (setq pyim-entered entered)
-  (when (and entered
-             (stringp entered)
-             (> (length entered) 0))
-    (let ((scheme-name pyim-default-scheme))
+  (let ((scheme-name pyim-default-scheme))
+    (setq pyim-entered entered)
+    (when (and entered
+               (stringp entered)
+               (> (length entered) 0))
       (setq pyim-imobjs (pyim-imobjs-create entered scheme-name))
-      (unless (and (pyim-imobj-validp
-                    (car pyim-imobjs) scheme-name)
-                   (progn
-                     (setq pyim-candidates
-                           (delete-dups (pyim-candidates-create pyim-imobjs scheme-name)))
-                     (when pyim-candidates
-                       (setq pyim-candidate-position 1)
-                       (pyim-preview-refresh)
-                       (pyim-page-refresh)
-                       t)))
-        (setq pyim-candidates (list pyim-entered))
-        (setq pyim-candidate-position 1)
-        (pyim-preview-refresh)
-        (pyim-page-refresh)))))
-
+      (setq pyim-candidates
+            (if (pyim-imobj-validp (car pyim-imobjs) scheme-name)
+                (delete-dups (pyim-candidates-create pyim-imobjs scheme-name))
+              (list pyim-entered)))
+      (when pyim-candidates
+        (setq pyim-candidate-position 1))
+      (pyim-preview-refresh)
+      (pyim-page-refresh))))
 
 ;; ** 待输入字符串预览功能。
 ;; pyim 会使用 emacs overlay 机制在 *待输入buffer* 光标处高亮显示
