@@ -2527,15 +2527,15 @@ Return the input string."
     (if cur (setq entered (concat entered "'")))  ; the last char is `''
     entered))
 
-(defun pyim-code-create (imobj scheme-name &optional as-search-key shou-zi-mu)
+(defun pyim-code-create (imobj scheme-name &optional shou-zi-mu)
   "按照 `scheme' 对应的输入法方案，从一个 imobj 创建一个用于搜索
 code 字符串."
   (let ((class (pyim-scheme-get-option scheme-name :class)))
     (when class
       (funcall (intern (format "pyim-code-create:%S" class))
-               imobj scheme-name as-search-key shou-zi-mu))))
+               imobj scheme-name shou-zi-mu))))
 
-(defun pyim-code-create:quanpin (imobj scheme-name &optional as-search-key shou-zi-mu)
+(defun pyim-code-create:quanpin (imobj scheme-name &optional shou-zi-mu)
   "创建 code 的函数，用于全拼。
 
 当 `shou-zi-mu' 设置为 t 时，生成拼音首字母字符串，比如 p-y。"
@@ -2549,35 +2549,12 @@ code 字符串."
               imobj)
              "-"))
 
-(defun pyim-code-create:shuangpin (imobj scheme-name &optional as-search-key shou-zi-mu)
+(defun pyim-code-create:shuangpin (imobj scheme-name &optional shou-zi-mu)
   "创建 code 字符串的函数，用于双拼。
 当 `shou-zi-mu' 设置为 t 时，生成双拼首字母字符串，比如 p-y。"
-  (if as-search-key
-      ;; 双拼使用全拼输入法的词库，所以搜索 dcache 用的 key 要使用全拼
-      (pyim-code-create:quanpin imobj scheme-name as-search-key shou-zi-mu)
-    (when scheme-name
-      (let ((keymaps (pyim-scheme-get-option scheme-name :keymaps)))
-        (mapconcat 'identity
-                   (mapcar
-                    #'(lambda (w)
-                        (let ((sm (car w))
-                              (ym (cdr w)))
-                          (if (equal sm "")
-                              (car (rassoc (list ym) keymaps))
-                            (concat (cl-some
-                                     #'(lambda (x)
-                                         (when (equal sm (nth 1 x))
-                                           (car x))) keymaps)
-                                    (unless shou-zi-mu
-                                      (cl-some
-                                       #'(lambda (x)
-                                           (when (or (equal ym (nth 2 x))
-                                                     (equal ym (nth 3 x)))
-                                             (car x))) keymaps))))))
-                    imobj)
-                   "-")))))
+  (pyim-code-create:quanpin imobj 'quanpin shou-zi-mu))
 
-(defun pyim-code-create:xingma (imobj scheme-name &optional as-search-key shou-zi-mu)
+(defun pyim-code-create:xingma (imobj scheme-name &optional _shou-zi-mu)
   "创建 code 字符串的函数，用于五笔等基于形码的输入法。
 比如：
 
@@ -2586,11 +2563,9 @@ code 字符串."
   (when scheme-name
     (let ((code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
           (n (pyim-scheme-get-option scheme-name :code-split-length)))
-      (if as-search-key
-          (concat (or code-prefix "") (car imobj))
-        (car imobj)))))
+      (concat (or code-prefix "") (car imobj)))))
 
-(defun pyim-code-create:rime (imobj scheme-name &optional _as-search-key _shou-zi-mu)
+(defun pyim-code-create:rime (imobj scheme-name &optional _shou-zi-mu)
   "创建 code 字符串的函数, 用于 rime 输入法。"
   (when scheme-name
     (car imobj)))
@@ -2618,7 +2593,7 @@ code 字符串."
         (when output2
           (setq str (mapconcat
                      #'(lambda (code)
-                         (car (pyim-dcache-get (concat code-prefix code))))
+                         (car (pyim-dcache-get code)))
                      output2 "")))
         (setq output3
               (remove "" (or (mapcar #'(lambda (x)
@@ -2637,7 +2612,7 @@ code 字符串."
   (if (functionp 'liberime-search)
       (liberime-search
        (replace-regexp-in-string
-        "-" "" (pyim-code-create (car imobjs) scheme-name t))
+        "-" "" (pyim-code-create (car imobjs) scheme-name))
        pyim-rime-limit)
     nil))
 
@@ -2649,7 +2624,7 @@ code 字符串."
          (jianpin-words
           (when (> (length (car imobjs)) 1)
             (pyim-dcache-get
-             (pyim-code-create (car imobjs) scheme-name t t)
+             (pyim-code-create (car imobjs) scheme-name t)
              pyim-dcache-ishortcode2word)))
          ;; 将输入的拼音按照声母和韵母打散，得到尽可能多的拼音组合，
          ;; 查询这些拼音组合，得到的词条做为联想词。
@@ -2664,13 +2639,13 @@ code 字符串."
       (setq personal-words
             (append personal-words
                     (pyim-dcache-get
-                     (pyim-code-create imobj scheme-name t)
+                     (pyim-code-create imobj scheme-name)
                      (list pyim-dcache-icode2word
                            pyim-dcache-ishortcode2word))))
       (setq common-words
             (append common-words
                     (pyim-dcache-get
-                     (pyim-code-create imobj scheme-name t)
+                     (pyim-code-create imobj scheme-name)
                      (list pyim-dcache-code2word
                            pyim-dcache-shortcode2word))))
       (setq pinyin-chars
@@ -2696,7 +2671,7 @@ code 字符串."
 
 (defun pyim-candidates-create:shuangpin (imobjs scheme-name)
   "候选词获取，用于双拼输入法。"
-  (funcall pyim-candidates-create:quanpin imobjs scheme-name))
+  (pyim-candidates-create:quanpin imobjs 'quanpin))
 
 (defun pyim-split-string-by-number (str n &optional reverse)
   (let (output)
@@ -3066,24 +3041,55 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
 这个预览是在 page 中显示，而 `pyim-preview-refresh' 对应的预览
 是在 buffer 光标处显示，两者要做区别。"
   (let* ((scheme-name pyim-default-scheme)
-         (class (pyim-scheme-get-option scheme-name :class))
-         (code-maximum-length (pyim-scheme-get-option scheme-name :code-split-length)))
-    (cond ((memq class '(rime))
-           (let* ((context (liberime-get-context))
-                  (composition (alist-get 'composition context))
-                  (preedit (alist-get 'preedit composition)))
-             (or preedit "")))
-          ((memq class '(xingma))
-           (mapconcat #'identity
-                      (pyim-split-string-by-number entered code-maximum-length)
-                      " "))
-          ((memq class '(quanpin shuangpin))
-           (replace-regexp-in-string
-            "[-']+" (or separator " ")
-            (pyim-entered-restore-user-divide
-             (pyim-code-create (car pyim-imobjs) scheme-name)
-             (pyim-entered-user-divide-pos entered))))
-          (t entered))))
+         (class (pyim-scheme-get-option scheme-name :class)))
+    (when class
+      (funcall (intern (format "pyim-page-preview-create:%S" class))
+               entered scheme-name separator))))
+
+(defun pyim-page-preview-create:quanpin (entered scheme-name &optional separator)
+  (replace-regexp-in-string
+   "[-']+" (or separator " ")
+   (pyim-entered-restore-user-divide
+    (pyim-code-create (car pyim-imobjs) scheme-name)
+    (pyim-entered-user-divide-pos entered))))
+
+(defun pyim-page-preview-create:shuangpin (entered scheme-name &optional separator)
+  (let ((keymaps (pyim-scheme-get-option scheme-name :keymaps))
+        result)
+    (dolist (w (car pyim-imobjs))
+      (let ((sm (car w))
+            (ym (cdr w)))
+        (if (equal sm "")
+            (car (rassoc (list ym) keymaps))
+          (push
+           (concat (cl-some
+                    #'(lambda (x)
+                        (when (equal sm (nth 1 x))
+                          (car x)))
+                    keymaps)
+                   (cl-some
+                    #'(lambda (x)
+                        (when (or (equal ym (nth 2 x))
+                                  (equal ym (nth 3 x)))
+                          (car x)))
+                    keymaps))
+           result))))
+    (mapconcat 'identity
+               (reverse result)
+               (or separator " "))))
+
+(defun pyim-page-preview-create:rime (entered _scheme-name &optional _separator)
+  (let* ((context (liberime-get-context))
+         (composition (alist-get 'composition context))
+         (preedit (alist-get 'preedit composition)))
+    (or preedit "")))
+
+(defun pyim-page-preview-create:xingma (entered scheme-name &optional _separator)
+  (let ((code-maximum-length
+         (pyim-scheme-get-option scheme-name :code-split-length)))
+    (mapconcat #'identity
+               (pyim-split-string-by-number entered code-maximum-length)
+               " ")))
 
 (defun pyim-page-menu-create (candidates position &optional separator)
   "这个函数用于创建在 page 中显示的备选词条菜单。"
