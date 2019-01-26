@@ -3061,8 +3061,10 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
   (pyim-page-next-word (- arg)))
 
 (defun pyim-page-preview-create (entered &optional separator)
-  "这个函数用于格式化 page 中显示的 entered 字符串, 有些
-输入法可能对 entered 字符串做极多的变化, 让其更养眼。"
+  "这个函数用于创建在 page 中显示的预览字符串。
+
+这个预览是在 page 中显示，而 `pyim-preview-refresh' 对应的预览
+是在 buffer 光标处显示，两者要做区别。"
   (let* ((scheme-name pyim-default-scheme)
          (class (pyim-scheme-get-option scheme-name :class))
          (code-maximum-length (pyim-scheme-get-option scheme-name :code-split-length)))
