@@ -2910,13 +2910,6 @@ pyim 在选择备选词条是，会在 buffer 光标处显示一个预览字符�
 ;; 3. 最后调用 `pyim-page-refresh' 来重新刷新页面。
 
 ;;  page format
-(defun pyim-mod (x y)
-  "like `mod', but when result is 0, return Y"
-  (let ((base (mod x y)))
-    (if (= base 0)
-        y
-      base)))
-
 (defun pyim-candidate-parse (candidate)
   (let ((output
          (if (consp candidate)
@@ -2935,7 +2928,7 @@ pyim 在选择备选词条是，会在 buffer 光标处显示一个预览字符�
 (defun pyim-page-start ()
   "计算当前所在页的第一个词条的位置"
   (let ((pos (min (length pyim-candidates) pyim-candidate-position)))
-    (1+ (- pos (pyim-mod pos pyim-page-length)))))
+    (1+ (- pos (mod pos pyim-page-length)))))
 
 (defun pyim-page-end (&optional finish)
   "计算当前所在页的最后一个词条的位置，如果 pyim-candidates 用
@@ -2943,7 +2936,7 @@ pyim 在选择备选词条是，会在 buffer 光标处显示一个预览字符�
   (let* ((whole (length pyim-candidates))
          (len pyim-page-length)
          (pos pyim-candidate-position)
-         (last (+ (- pos (pyim-mod pos len)) len)))
+         (last (+ (- pos (mod pos len)) len)))
     (if (< last whole)
         last
       (if finish
