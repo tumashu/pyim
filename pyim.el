@@ -3034,7 +3034,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
   (interactive "p")
   (pyim-page-next-word (- arg)))
 
-(defun pyim-page-preview-create (entered &optional separator)
+(defun pyim-page-preview-create (&optional separator)
   "这个函数用于创建在 page 中显示的预览字符串。
 
 这个预览是在 page 中显示，而 `pyim-preview-refresh' 对应的预览
@@ -3042,18 +3042,17 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
   (let* ((scheme-name pyim-default-scheme)
          (class (pyim-scheme-get-option scheme-name :class)))
     (when class
-      (funcall (intern (format "pyim-page-preview-create:%S" class))
-               entered scheme-name separator))))
+      (funcall (intern (format "pyim-page-preview-create:%S" class)) separator))))
 
-(defun pyim-page-preview-create:quanpin (entered scheme-name &optional separator)
+(defun pyim-page-preview-create:quanpin (&optional separator)
   (replace-regexp-in-string
    "[-']+" (or separator " ")
    (pyim-entered-restore-user-divide
-    (car (pyim-codes-create (car pyim-imobjs) scheme-name))
-    (pyim-entered-user-divide-pos entered))))
+    (car (pyim-codes-create (car pyim-imobjs) pyim-default-scheme))
+    (pyim-entered-user-divide-pos pyim-entered))))
 
-(defun pyim-page-preview-create:shuangpin (entered scheme-name &optional separator)
-  (let ((keymaps (pyim-scheme-get-option scheme-name :keymaps))
+(defun pyim-page-preview-create:shuangpin (&optional separator)
+  (let ((keymaps (pyim-scheme-get-option pyim-default-scheme :keymaps))
         result)
     (dolist (w (car pyim-imobjs))
       (let ((sm (car w))
@@ -3077,13 +3076,13 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
                (reverse result)
                (or separator " "))))
 
-(defun pyim-page-preview-create:rime (entered _scheme-name &optional _separator)
+(defun pyim-page-preview-create:rime (&optional _separator)
   (let* ((context (liberime-get-context))
          (composition (alist-get 'composition context))
          (preedit (alist-get 'preedit composition)))
     (or preedit "")))
 
-(defun pyim-page-preview-create:xingma (entered scheme-name &optional _separator)
+(defun pyim-page-preview-create:xingma (&optional separator)
   (mapconcat #'identity
              (car pyim-imobjs)
              (or separator " ")))
@@ -3119,7 +3118,7 @@ tooltip 选词框中显示。
 | 1.你好 2.你号 ...          |
 +----------------------------+"
   (format "=> %s [%s/%s]: \n%s"
-          (pyim-page-preview-create (gethash :entered page-info))
+          (pyim-page-preview-create)
           (gethash :current-page page-info)
           (gethash :total-page page-info)
           (pyim-page-menu-create
@@ -3134,7 +3133,7 @@ tooltip 选词框中显示。
 | [ni hao]: 1.你好 2.你号 ... (1/9) |
 +-----------------------------------+"
   (format "[%s]: %s(%s/%s)"
-          (pyim-page-preview-create (gethash :entered page-info) "")
+          (pyim-page-preview-create "")
           (pyim-page-menu-create
            (gethash :candidates page-info)
            (gethash :position page-info))
@@ -3151,7 +3150,7 @@ tooltip 选词框中显示。
 | 2.你号 ...   |
 +--------------+"
   (format "=> %s [%s/%s]: \n%s"
-          (pyim-page-preview-create (gethash :entered page-info))
+          (pyim-page-preview-create)
           (gethash :current-page page-info)
           (gethash :total-page page-info)
           (pyim-page-menu-create
@@ -3167,7 +3166,7 @@ tooltip 选词框中显示。
 | [ni hao]: 1.你好 2.你号 ...  (1/9) |
 +------------------------------------+"
   (format "[%s]: %s(%s/%s)"
-          (pyim-page-preview-create (gethash :entered page-info))
+          (pyim-page-preview-create)
           (pyim-page-menu-create
            (gethash :candidates page-info)
            (gethash :position page-info))
