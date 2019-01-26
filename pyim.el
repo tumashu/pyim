@@ -3086,7 +3086,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
           (t entered))))
 
 (defun pyim-page-menu-create (candidates position &optional separator)
-  "这个函数用于格式化 page 中显示的词条菜单。"
+  "这个函数用于创建在 page 中显示的备选词条菜单。"
   (let ((i 0) result)
     (dolist (candidate candidates)
       (let ((str (if (consp candidate)
