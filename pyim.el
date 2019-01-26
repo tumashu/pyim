@@ -2196,15 +2196,12 @@ Return the input string."
     (and (or pyim-force-input-chinese
              (and (not pyim-input-ascii)
                   (not (pyim-auto-switch-english-input-p))))
-         (if (pyim-string-emptyp pyim-entered)
+         (if (not (string< "" pyim-entered)) ;判断 pyim-entered 是否为空
              (member last-command-event
                      (mapcar 'identity first-chars))
            (member last-command-event
                    (mapcar 'identity rest-chars)))
          (setq current-input-method-title pyim-title))))
-
-(defun pyim-string-emptyp (str)
-  (not (string< "" str)))
 
 (defun pyim-self-insert-command ()
   "如果在 pyim-first-char 列表中，则查找相应的词条，否则停止转换，插入对应的字符"
