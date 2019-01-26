@@ -2120,7 +2120,7 @@ Return the input string."
 
         (setq pyim-translating t)
 
-        (pyim-outcome-get 'empty-value)
+        (pyim-outcome-handle 'set-to-blank-value)
         (pyim-entered-handle (or str ""))
 
         (when key
@@ -2201,7 +2201,7 @@ Return the input string."
       (pyim-entered-handle
        (concat pyim-entered
                (char-to-string last-command-event)))
-    (pyim-outcome-get 'without-candidate)
+    (pyim-outcome-handle 'select-no-candidate)
     (pyim-terminate-translation)))
 
 (defun pyim-terminate-translation ()
@@ -3033,7 +3033,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
   (interactive "p")
   (if (= (length pyim-entered) 0)
       (progn
-        (pyim-outcome-get 'without-candidate)
+        (pyim-outcome-handle 'select-no-candidate)
         (pyim-terminate-translation))
     (let ((new (+ pyim-candidate-position (* pyim-page-length arg) 1)))
       (setq pyim-candidate-position (if (> new 0) new 1)
@@ -3049,7 +3049,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
   (interactive "p")
   (if (= (length pyim-entered) 0)
       (progn
-        (pyim-outcome-get 'without-candidate)
+        (pyim-outcome-handle 'select-no-candidate)
         (pyim-terminate-translation))
     (let ((new (+ pyim-candidate-position arg)))
       (setq pyim-candidate-position (if (> new 0) new 1))
@@ -3195,26 +3195,26 @@ tooltip 选词框中显示。
                 (not (display-graphic-p))))))
 
 ;; *** 选择备选词
-(defun pyim-outcome-get (type)
+(defun pyim-outcome-handle (type)
   "获取 pyim 的最终产出字符串，并将其设置为 pyim-outcome."
   (cond ((not enable-multibyte-characters)
          (setq pyim-entered ""
                pyim-outcome "")
          (error "Can't input characters in current unibyte buffer"))
-        ((eq type 'empty-value)
+        ((eq type 'set-to-blank-value)
          (setq pyim-outcome ""))
-        ((eq type 'without-candidate)
+        ((eq type 'select-no-candidate)
          (setq pyim-outcome
                (concat pyim-outcome
                        (pyim-translate last-command-event))))
-        ((eq type 'use-candidate)
+        ((eq type 'select-one-candidate)
          (let ((candidate
                 (pyim-candidate-parse
                  (nth (1- pyim-candidate-position)
                       pyim-candidates))))
            (setq pyim-outcome
                  (concat pyim-outcome candidate))))
-        ((eq type 'use-entered)
+        ((eq type 'prefer-entered)
          (setq pyim-outcome pyim-entered))))
 
 (defun pyim-page-select-word ()
@@ -3222,12 +3222,12 @@ tooltip 选词框中显示。
   (interactive)
   (if (null pyim-candidates)  ; 如果没有选项，输入空格
       (progn
-        (pyim-outcome-get 'without-candidate)
+        (pyim-outcome-handle 'select-no-candidate)
         (pyim-terminate-translation))
     (if (equal 'rime (pyim-scheme-get-option pyim-default-scheme :class))
         (call-interactively #'pyim-page-select-word:rime)
       (let (imobjs)
-        (pyim-outcome-get 'use-candidate)
+        (pyim-outcome-handle 'select-one-candidate)
         (if (< (length pyim-outcome) (length (car pyim-imobjs)))
             (progn
               (setq imobjs
@@ -3250,13 +3250,13 @@ tooltip 选词框中显示。
   (interactive)
   (if (null pyim-candidates)  ; 如果没有选项，输入空格
       (progn
-        (pyim-outcome-get 'without-candidate)
+        (pyim-outcome-handle 'select-no-candidate)
         (pyim-terminate-translation))
     ;; pyim 告诉 liberime 选择其他的词条
     (liberime-select-candidate (- pyim-candidate-position 1))
     (let* ((context (liberime-get-context))
            imobjs)
-      (pyim-outcome-get 'use-candidate)
+      (pyim-outcome-handle 'select-one-candidate)
       (if (not context)
           (progn
             (unless (member pyim-outcome pyim-candidates)
@@ -3279,7 +3279,7 @@ tooltip 选词框中显示。
   (interactive)
   (if (null pyim-candidates)
       (progn
-        (pyim-outcome-get 'without-candidate)
+        (pyim-outcome-handle 'select-no-candidate)
         (pyim-terminate-translation))
     (let ((index (if (numberp n)
                      (- n 1)
@@ -3638,7 +3638,7 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
   (if (> (length pyim-entered) 1)
       (pyim-entered-handle
        (substring pyim-entered 0 -1))
-    (pyim-outcome-get 'empty-value)
+    (pyim-outcome-handle 'set-to-blank-value)
     (pyim-terminate-translation)))
 
 ;; *** 删除拼音字符串最后一个拼音
@@ -3648,7 +3648,7 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
       (pyim-entered-handle
        (replace-match "" nil nil pyim-entered))
     (pyim-entered-handle "")
-    (pyim-outcome-get 'empty-value)
+    (pyim-outcome-handle 'set-to-blank-value)
     (pyim-terminate-translation)))
 
 ;; *** 将光标前的用户输入的字符串转换为中文
@@ -3692,12 +3692,12 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
 ;; *** 取消当前输入
 (defun pyim-quit-clear ()
   (interactive)
-  (pyim-outcome-get 'empty-value)
+  (pyim-outcome-handle 'set-to-blank-value)
   (pyim-terminate-translation))
 ;; *** 字母上屏
 (defun pyim-quit-no-clear ()
   (interactive)
-  (pyim-outcome-get 'use-entered)
+  (pyim-outcome-handle 'prefer-entered)
   (pyim-terminate-translation))
 
 ;; *** pyim 取消激活
