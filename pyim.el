@@ -2307,11 +2307,11 @@ Return the input string."
 ;; 结果为:
 ;; : (nil t t t)
 
-;; pyim 使用函数 `pyim-code-create' 从一个 imobj 创建一个 code，
-;; code 是一个字符串，用于从词库中搜索相关词条。
+;; pyim 使用函数 `pyim-codes-create' 从一个 imobj 创建一个列表：codes，这个
+;; 列表中包含一个或者多个 code 字符串，这些 code 字符串用于从词库中搜索相关词条。
 
 ;; #+BEGIN_EXAMPLE
-;; (pyim-code-create '(("w" . "o") ("" . "ai") ("m" . "ei") ("n" . "v")) 'quanpin)
+;; (pyim-codes-create '(("w" . "o") ("" . "ai") ("m" . "ei") ("n" . "v")) 'quanpin)
 ;; #+END_EXAMPLE
 
 ;; 结果为:
@@ -2438,8 +2438,17 @@ Return the input string."
     (pyim-spinyin-find-fuzzy
      (pyim-permutate-list (nreverse results)))))
 
-(defun pyim-imobjs-create:xingma (entered &optional -)
-  (list (list entered)))
+(defun pyim-imobjs-create:xingma (entered &optional scheme-name)
+  (let ((n (pyim-scheme-get-option scheme-name :code-split-length)))
+    (let (output)
+      (while entered
+        (if (< (length entered) n)
+            (progn
+              (push entered output)
+              (setq entered nil))
+          (push (substring entered 0 n) output)
+          (setq entered (substring entered n))))
+      (list (remove "" (nreverse output))))))
 
 (defun pyim-imobjs-create:rime (entered &optional -)
   (list (list entered)))
@@ -2527,48 +2536,40 @@ Return the input string."
     (if cur (setq entered (concat entered "'")))  ; the last char is `''
     entered))
 
-(defun pyim-code-create (imobj scheme-name &optional shou-zi-mu)
-  "按照 `scheme' 对应的输入法方案，从一个 imobj 创建一个用于搜索
-code 字符串."
+(defun pyim-codes-create (imobj scheme-name &optional shou-zi-mu)
+  "按照 `scheme' 对应的输入法方案，从一个 imobj 创建一个列表 codes, 这个列表
+包含一个或者多个 code 字符串，这些 code 字符串用于从词库中搜索词条."
   (let ((class (pyim-scheme-get-option scheme-name :class)))
     (when class
-      (funcall (intern (format "pyim-code-create:%S" class))
+      (funcall (intern (format "pyim-codes-create:%S" class))
                imobj scheme-name shou-zi-mu))))
 
-(defun pyim-code-create:quanpin (imobj scheme-name &optional shou-zi-mu)
-  "创建 code 的函数，用于全拼。
+(defun pyim-codes-create:quanpin (imobj scheme-name &optional shou-zi-mu)
+  (list
+   (mapconcat 'identity
+              (mapcar
+               #'(lambda (w)
+                   (let ((py (concat (car w) (cdr w))))
+                     (if shou-zi-mu
+                         (substring py 0 1)
+                       py)))
+               imobj)
+              "-")))
 
-当 `shou-zi-mu' 设置为 t 时，生成拼音首字母字符串，比如 p-y。"
-  (mapconcat 'identity
-             (mapcar
-              #'(lambda (w)
-                  (let ((py (concat (car w) (cdr w))))
-                    (if shou-zi-mu
-                        (substring py 0 1)
-                      py)))
-              imobj)
-             "-"))
+(defun pyim-codes-create:shuangpin (imobj scheme-name &optional shou-zi-mu)
+  (pyim-codes-create:quanpin imobj 'quanpin shou-zi-mu))
 
-(defun pyim-code-create:shuangpin (imobj scheme-name &optional shou-zi-mu)
-  "创建 code 字符串的函数，用于双拼。
-当 `shou-zi-mu' 设置为 t 时，生成双拼首字母字符串，比如 p-y。"
-  (pyim-code-create:quanpin imobj 'quanpin shou-zi-mu))
-
-(defun pyim-code-create:xingma (imobj scheme-name &optional _shou-zi-mu)
-  "创建 code 字符串的函数，用于五笔等基于形码的输入法。
-比如：
-
-    (\"aaaa\") --> \"aaaa\"   用于在 preview 中显示。
-               `-> \".aaaa\"  用于搜索词库。"
+(defun pyim-codes-create:xingma (imobj scheme-name &optional _shou-zi-mu)
   (when scheme-name
-    (let ((code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
-          (n (pyim-scheme-get-option scheme-name :code-split-length)))
-      (concat (or code-prefix "") (car imobj)))))
+    (let ((code-prefix (pyim-scheme-get-option scheme-name :code-prefix)))
+      (mapcar
+       #'(lambda (x)
+           (concat (or code-prefix "") x))
+       imobj))))
 
-(defun pyim-code-create:rime (imobj scheme-name &optional _shou-zi-mu)
-  "创建 code 字符串的函数, 用于 rime 输入法。"
+(defun pyim-codes-create:rime (imobj scheme-name &optional _shou-zi-mu)
   (when scheme-name
-    (car imobj)))
+    imobj))
 
 ;; **** 获得词语拼音并进一步查询得到备选词列表
 (defun pyim-candidates-create (imobjs scheme-name)
@@ -2583,13 +2584,11 @@ code 字符串."
   "候选词获取，用于五笔仓颉等形码输入法。"
   (let (result)
     (dolist (imobj imobjs)
-      (let* ((code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
-             (code (pyim-code-create imobj scheme-name))
-             (n (pyim-scheme-get-option scheme-name :code-split-length))
-             (output (pyim-split-string-by-number code n t))
-             (output1 (car output))
-             (output2 (reverse (cdr output)))
+      (let* ((codes (reverse (pyim-codes-create imobj scheme-name)))
+             (output1 (car codes))
+             (output2 (reverse (cdr codes)))
              output3 str)
+
         (when output2
           (setq str (mapconcat
                      #'(lambda (code)
@@ -2599,7 +2598,7 @@ code 字符串."
               (remove "" (or (mapcar #'(lambda (x)
                                          (concat str x))
                                      (pyim-dcache-get
-                                      (concat code-prefix output1)
+                                      output1
                                       (list pyim-dcache-code2word
                                             pyim-dcache-shortcode2word)))
                              (list str))))
@@ -2612,7 +2611,7 @@ code 字符串."
   (if (functionp 'liberime-search)
       (liberime-search
        (replace-regexp-in-string
-        "-" "" (pyim-code-create (car imobjs) scheme-name))
+        "-" "" (car (pyim-codes-create (car imobjs) scheme-name)))
        pyim-rime-limit)
     nil))
 
@@ -2624,7 +2623,7 @@ code 字符串."
          (jianpin-words
           (when (> (length (car imobjs)) 1)
             (pyim-dcache-get
-             (pyim-code-create (car imobjs) scheme-name t)
+             (car (pyim-codes-create (car imobjs) scheme-name t))
              pyim-dcache-ishortcode2word)))
          ;; 将输入的拼音按照声母和韵母打散，得到尽可能多的拼音组合，
          ;; 查询这些拼音组合，得到的词条做为联想词。
@@ -2639,13 +2638,13 @@ code 字符串."
       (setq personal-words
             (append personal-words
                     (pyim-dcache-get
-                     (pyim-code-create imobj scheme-name)
+                     (car (pyim-codes-create imobj scheme-name))
                      (list pyim-dcache-icode2word
                            pyim-dcache-ishortcode2word))))
       (setq common-words
             (append common-words
                     (pyim-dcache-get
-                     (pyim-code-create imobj scheme-name)
+                     (car (pyim-codes-create imobj scheme-name))
                      (list pyim-dcache-code2word
                            pyim-dcache-shortcode2word))))
       (setq pinyin-chars
@@ -2672,19 +2671,6 @@ code 字符串."
 (defun pyim-candidates-create:shuangpin (imobjs scheme-name)
   "候选词获取，用于双拼输入法。"
   (pyim-candidates-create:quanpin imobjs 'quanpin))
-
-(defun pyim-split-string-by-number (str n &optional reverse)
-  (let (output)
-    (while str
-      (if (< (length str) n)
-          (progn
-            (push str output)
-            (setq str nil))
-        (push (substring str 0 n) output)
-        (setq str (substring str n))))
-    (if reverse
-        output
-      (nreverse output))))
 
 (defun pyim-flatten-list (my-list)
   (cond
@@ -3050,7 +3036,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
   (replace-regexp-in-string
    "[-']+" (or separator " ")
    (pyim-entered-restore-user-divide
-    (pyim-code-create (car pyim-imobjs) scheme-name)
+    (car (pyim-codes-create (car pyim-imobjs) scheme-name))
     (pyim-entered-user-divide-pos entered))))
 
 (defun pyim-page-preview-create:shuangpin (entered scheme-name &optional separator)
@@ -3085,11 +3071,9 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
     (or preedit "")))
 
 (defun pyim-page-preview-create:xingma (entered scheme-name &optional _separator)
-  (let ((code-maximum-length
-         (pyim-scheme-get-option scheme-name :code-split-length)))
-    (mapconcat #'identity
-               (pyim-split-string-by-number entered code-maximum-length)
-               " ")))
+  (mapconcat #'identity
+             (car pyim-imobjs)
+             (or separator " ")))
 
 (defun pyim-page-menu-create (candidates position &optional separator)
   "这个函数用于创建在 page 中显示的备选词条菜单。"
