@@ -2786,12 +2786,12 @@ code 字符串."
                      (when pyim-candidates
                        (setq pyim-candidate-position 1)
                        (pyim-preview-refresh)
-                       (pyim-page-handle)
+                       (pyim-page-refresh)
                        t)))
         (setq pyim-candidates (list pyim-entered))
         (setq pyim-candidate-position 1)
         (pyim-preview-refresh)
-        (pyim-page-handle)))))
+        (pyim-page-refresh)))))
 
 
 ;; ** 待输入字符串预览功能。
@@ -2908,7 +2908,7 @@ code 字符串."
 ;; 2. 函数 `pyim-page-total-page'  返回值为5，说明 page 共有5页。
 ;; 3. 函数 `pyim-page-start' 返回 B 所在的位置。
 ;; 4. 函数 `pyim-page-end' 返回 E 所在的位置。
-;; 5. 函数 `pyim-page-handle' 用于刷新显示 page
+;; 5. 函数 `pyim-page-refresh' 用于刷新显示 page
 ;;    它会从 `pyim-candidates' 中提取一个 sublist:
 ;;    #+BEGIN_EXAMPLE
 ;;    ("薿" "旎" "睨" "铌" "昵" "匿" "倪" "霓" "暱")
@@ -2927,7 +2927,7 @@ code 字符串."
 ;;    置在下一页。
 ;; 2. 然后将 `pyim-candidate-position' 的值设定为 `pyim-page-start' 的返回值，确
 ;;    保 `pyim-candidate-position' 的取值为下一页第一个词条的位置。
-;; 3. 最后调用 `pyim-page-handle' 来重新刷新页面。
+;; 3. 最后调用 `pyim-page-refresh' 来重新刷新页面。
 
 ;;  page format
 (defun pyim-subseq (list from &optional to)
@@ -2974,7 +2974,7 @@ code 字符串."
           whole
         (pyim-page-end t)))))
 
-(defun pyim-page-handle (&optional hightlight-current)
+(defun pyim-page-refresh (&optional hightlight-current)
   "按当前位置，生成候选词条"
   (let* ((end (pyim-page-end))
          (start (1- (pyim-page-start)))
@@ -3039,7 +3039,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
       (setq pyim-candidate-position (if (> new 0) new 1)
             pyim-candidate-position (pyim-page-start))
       (pyim-preview-refresh)
-      (pyim-page-handle))))
+      (pyim-page-refresh))))
 
 (defun pyim-page-previous-page (arg)
   (interactive "p")
@@ -3054,7 +3054,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
     (let ((new (+ pyim-candidate-position arg)))
       (setq pyim-candidate-position (if (> new 0) new 1))
       (pyim-preview-refresh)
-      (pyim-page-handle t))))
+      (pyim-page-refresh t))))
 
 (defun pyim-page-previous-word (arg)
   (interactive "p")
@@ -3238,7 +3238,7 @@ tooltip 选词框中显示。
               (setq pyim-candidates (pyim-candidates-create imobjs pyim-default-scheme)
                     pyim-candidate-position 1)
               (pyim-preview-refresh)
-              (pyim-page-handle))
+              (pyim-page-refresh))
           (unless (member pyim-outcome pyim-candidates)
             (pyim-create-word pyim-outcome))
           (pyim-terminate-translation)
@@ -3272,7 +3272,7 @@ tooltip 选词框中显示。
                 candidates))
         (setq pyim-candidate-position 1)
         (pyim-preview-refresh)
-        (pyim-page-handle)))))
+        (pyim-page-refresh)))))
 
 (defun pyim-page-select-word-by-number (&optional n)
   "使用数字编号来选择对应的词条。"
@@ -3286,7 +3286,7 @@ tooltip 选词框中显示。
                    (- last-command-event ?1)))
           (end (pyim-page-end)))
       (if (> (+ index (pyim-page-start)) end)
-          (pyim-page-handle)
+          (pyim-page-refresh)
         (setq pyim-candidate-position (+ pyim-candidate-position index))
         (pyim-page-select-word)))))
 
