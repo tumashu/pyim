@@ -961,11 +961,11 @@ pyim 内建的有三种选词框格式：
 (defvar pyim-title "灵通" "Pyim 在 mode-line 中显示的名称.")
 (defvar pyim-extra-dicts nil "与 `pyim-dicts' 类似, 用于和 elpa 格式的词库包集成。.")
 
-(defvar pyim-pinyin-shen-mu
+(defvar pyim-pinyin-shenmu
   '("b" "p" "m" "f" "d" "t" "n" "l" "g" "k" "h"
     "j" "q" "x" "z" "c" "s" "zh" "ch" "sh" "r" "y" "w"))
 
-(defvar pyim-pinyin-yun-mu
+(defvar pyim-pinyin-yunmu
   '("a" "o" "e" "i" "u" "v" "ai" "ei" "ui" "ao" "ou" "iu"
     "ie" "ia" "ua" "ve" "er" "an" "en" "in" "un" "vn" "ang" "iong"
     "eng" "ing" "ong" "uan" "uang" "ian" "iang" "iao" "ue"
@@ -2244,8 +2244,8 @@ Return the input string."
 ;; 2. 将拼音列表合并成适合搜索的，并且带明确分割符的拼音字符串。
 
 ;; 在这之前，pyim 定义了三个变量：
-;; 1. 声母表： `pyim-pinyin-shen-mu'
-;; 2. 韵母表：`pyim-pinyin-yun-mu'
+;; 1. 声母表： `pyim-pinyin-shenmu'
+;; 2. 韵母表：`pyim-pinyin-yunmu'
 ;; 3. 有效韵母表： `pyim-pinyin-valid-yun-mu'
 
 ;; pyim 使用函数 `pyim-imobjs-create' 从用户输入的字符串创建一个输入法
@@ -2328,63 +2328,57 @@ Return the input string."
 ;; : "wo-ai-mei-nv"
 
 ;; 将汉字的拼音分成声母和其它
-(defun pyim-pinyin-get-sm (py)
-  "从一个拼音字符串中提出第一个声母。"
-  (when (and py (string< "" py))
-    (let (shenmu yunmu len)
-      (if (< (length py) 2)
-          (if (member py pyim-pinyin-shen-mu)
-              (cons py "")
-            (cons "" py))
-        (setq shenmu (substring py 0 2))
-        (if (member shenmu pyim-pinyin-shen-mu)
-            (setq py (substring py 2))
-          (setq shenmu (substring py 0 1))
-          (if (member shenmu pyim-pinyin-shen-mu)
-              (setq py (substring py 1))
-            (setq shenmu "")))
-        (cons shenmu py)))))
+(defun pyim-pinyin-get-shenmu (pinyin)
+  "从一个拼音字符串 PINYIN 中提出第一个声母。"
+  (let ((i (min (length pinyin) 2))
+        shenmu)
+    (while (> i 0)
+      (setq shenmu (substring pinyin 0 i))
+      (if (member shenmu pyim-pinyin-shenmu)
+          (setq i 0)
+        (setq i (1- i))
+        (setq shenmu "")))
+    (cons shenmu
+          (substring pinyin (length shenmu)))))
 
-(defun pyim-pinyin-get-ym (py)
-  "从拼音字符串 PY 中提出第一个韵母"
-  (when (and py (string< "" py))
-    (let (yunmu len)
-      (setq len (min (length py) 5))
-      (setq yunmu (substring py 0 len))
-      (while (and (not (member yunmu pyim-pinyin-yun-mu))
-                  (> len 0))
-        (setq yunmu (substring py 0 (setq len (1- len)))))
-      (setq py (substring py len))
-      (if (and (string< "" py)
-               (not (member (substring py 0 1) pyim-pinyin-shen-mu))
-               (member (substring yunmu -1) pyim-pinyin-shen-mu)
-               (member (substring yunmu 0 -1) pyim-pinyin-yun-mu)
-               (not (and (member (substring yunmu -1) '("n" "g"))
-                         (or (string= (substring py 0 1) "o")
-                             (string= (substring py 0 (min (length py) 2)) "er")))))
-          (setq py (concat (substring yunmu -1) py)
-                yunmu (substring yunmu 0 -1)))
-      (cons yunmu py))))
-
-(defun pyim-pinyin-get-charpy (py)
-  "分解拼音字符串 PY 成声母和韵母。"
-  (when (and py (string< "" py))
-    (let* ((sm (pyim-pinyin-get-sm py))
-           (ym (pyim-pinyin-get-ym (cdr sm)))
-           (charpys (mapcar #'(lambda (x)
-                                (concat (car x) (cdr x)))
-                            (pyim-imobjs-find-fuzzy:quanpin-1
-                             (cons (car sm) (car ym))))))
-      (if (or (null ym) ;如果韵母为空
-              (and (string< "" (car ym))
-                   (not (cl-some
-                         #'(lambda (charpy)
-                             (or (pyim-pinyin2cchar-get charpy t)
-                                 (pyim-dcache-get charpy)))
-                         charpys))))
-
-          (cons sm "")
-        (cons (cons (car sm) (car ym)) (cdr ym))))))
+(defun pyim-pinyin-get-charpy (pinyin)
+  "将拼音字符串 PINYIN 分解成声母，韵母和剩余部分."
+  (let* ((x (pyim-pinyin-get-shenmu pinyin))
+         (shenmu (car x))
+         (yunmu-and-rest (cdr x))
+         (i (min (length yunmu-and-rest) 5))
+         yunmu rest result)
+    (while (> i 0)
+      (setq yunmu (substring yunmu-and-rest 0 i))
+      (setq rest (substring yunmu-and-rest i))
+      (if (member yunmu pyim-pinyin-yunmu)
+          (cond ((not (cl-some
+                       #'(lambda (char-pinyin)
+                           (or (pyim-pinyin2cchar-get char-pinyin t)
+                               (pyim-dcache-get char-pinyin)))
+                       (mapcar #'(lambda (x)
+                                   (concat (car x) (cdr x)))
+                               (pyim-imobjs-find-fuzzy:quanpin-1
+                                (cons shenmu yunmu)))))
+                 (setq i (1- i))
+                 (setq yunmu ""))
+                ((and (string< "" rest)
+                      ;; 截取后剩余的字符串 rest 找不出声母
+                      (not (car (pyim-pinyin-get-shenmu rest)))
+                      ;; 截取后的韵母最后一个字符是一个有效声母
+                      (member (substring yunmu -1) pyim-pinyin-shenmu)
+                      ;; 截取得到的韵母如果去掉最后一个字符，还是有效的韵母
+                      (member (substring yunmu 0 -1) pyim-pinyin-yunmu)
+                      (not (and (member (substring yunmu -1) '("n" "g"))
+                                (or (string= (substring pinyin 0 1) "o")
+                                    (string= (substring pinyin 0 (min (length pinyin) 2)) "er")))))
+                 (setq i (1- i))
+                 (setq ym ""))
+                (t (setq i 0)))
+        (setq i (1- i))
+        (setq yunmu "")))
+    (cons (cons shenmu yunmu)
+          (substring yunmu-and-rest (length yunmu)))))
 
 ;; 处理输入的拼音
 (defun pyim-scheme-get (scheme-name)
