@@ -2376,7 +2376,7 @@ Return the input string."
            (ym (pyim-pinyin-get-ym (cdr sm)))
            (charpys (mapcar #'(lambda (x)
                                 (concat (car x) (cdr x)))
-                            (pyim-spinyin-find-fuzzy-1
+                            (pyim-imobjs-find-fuzzy:quanpin-1
                              (cons (car sm) (car ym))))))
       (if (or (null ym) ;如果韵母为空
               (and (string< "" (car ym))
@@ -2414,7 +2414,7 @@ Return the input string."
 
 (defun pyim-imobjs-create:quanpin (entered &optional -)
   (when (and entered (string< "" entered))
-    (pyim-spinyin-find-fuzzy
+    (pyim-imobjs-find-fuzzy:quanpin
      (list (apply 'append
                   (mapcar #'(lambda (p)
                               (let (chpy spinyin)
@@ -2445,7 +2445,7 @@ Return the input string."
                      (if z (cons "" z) (cons sm x))))
                (or ym (list "")))
               results)))
-    (pyim-spinyin-find-fuzzy
+    (pyim-imobjs-find-fuzzy:quanpin
      (pyim-permutate-list (nreverse results)))))
 
 (defun pyim-imobjs-create:xingma (entered &optional scheme-name)
@@ -2463,18 +2463,18 @@ Return the input string."
 (defun pyim-imobjs-create:rime (entered &optional -)
   (list (list entered)))
 
-(defun pyim-spinyin-find-fuzzy (spinyin-list)
+(defun pyim-imobjs-find-fuzzy:quanpin (imobjs)
   "用于处理模糊音的函数。"
-  (let (fuzzy-spinyin-list result1 result2)
-    (dolist (spinyin spinyin-list)
-      (setq fuzzy-spinyin-list
+  (let (fuzzy-imobjs result1 result2)
+    (dolist (imobj imobjs)
+      (setq fuzzy-imobjs
             (pyim-permutate-list
-             (mapcar 'pyim-spinyin-find-fuzzy-1 spinyin)))
-      (push (car fuzzy-spinyin-list) result1)
-      (setq result2 (append result2 (cdr fuzzy-spinyin-list))))
+             (mapcar 'pyim-imobjs-find-fuzzy:quanpin-1 imobj)))
+      (push (car fuzzy-imobjs) result1)
+      (setq result2 (append result2 (cdr fuzzy-imobjs))))
     (append result1 result2)))
 
-(defun pyim-spinyin-find-fuzzy-1 (pycons)
+(defun pyim-imobjs-find-fuzzy:quanpin-1 (pycons)
   "Find all fuzzy pinyins, for example:
 
 (\"f\" . \"en\") -> ((\"f\" . \"en\") (\"f\" . \"eng\"))"
