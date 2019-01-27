@@ -2327,9 +2327,6 @@ Return the input string."
 ;; 结果为:
 ;; : "wo-ai-mei-nv"
 
-;; 最后： `pyim-entered-user-divide-pos' 和 `pyim-entered-restore-user-divide' 用来处理隔
-;; 音符，比如： xi'an
-
 ;; 将汉字的拼音分成声母和其它
 (defun pyim-pinyin-get-sm (py)
   "从一个拼音字符串中提出第一个声母。"
@@ -2519,32 +2516,6 @@ Return the input string."
                  (setq valid nil)
                (setq imobj (cdr imobj)))))
     valid))
-
-(defun pyim-entered-user-divide-pos (entered)
-  "检测 ENTERED 中用户分割的位置，也就是'的位置，主要用于拼音输入法。"
-  (setq entered (replace-regexp-in-string "-" "" entered))
-  (let (poslist (start 0))
-    (while (string-match "'" entered start)
-      (setq start (match-end 0))
-      (setq poslist (append poslist (list (match-beginning 0)))))
-    poslist))
-
-(defun pyim-entered-restore-user-divide (entered pos)
-  "按检测出的用户分解的位置 POS，重新设置 ENTERED，主要用于拼音输入法。"
-  (let ((i 0) (shift 0) cur)
-    (setq cur (car pos)
-          pos (cdr pos))
-    (while (and cur (< i (length entered)))
-      (if (= (aref entered i) ?-)
-          (if (= i (+ cur shift))
-              (progn
-                (aset entered i ?')
-                (setq cur (car pos)
-                      pos (cdr pos)))
-            (setq shift (1+ shift))))
-      (setq i (1+ i)))
-    (if cur (setq entered (concat entered "'")))  ; the last char is `''
-    entered))
 
 (defun pyim-codes-create (imobj scheme-name &optional shou-zi-mu)
   "按照 SCHEME-NAME 对应的输入法方案，从一个 IMOBJ 创建一个列表 codes, 这个列表
@@ -2990,13 +2961,9 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
       (funcall (intern (format "pyim-page-preview-create:%S" class)) separator))))
 
 (defun pyim-page-preview-create:quanpin (&optional separator)
-  (replace-regexp-in-string
-   "[-']+" (or separator " ")
-   (pyim-entered-restore-user-divide
-    (mapconcat #'identity
-               (pyim-codes-create (car pyim-imobjs) pyim-default-scheme)
-               "-")
-    (pyim-entered-user-divide-pos pyim-entered))))
+  (mapconcat #'identity
+             (pyim-codes-create (car pyim-imobjs) pyim-default-scheme)
+             (or separator " ")))
 
 (defun pyim-page-preview-create:shuangpin (&optional separator)
   (let ((keymaps (pyim-scheme-get-option pyim-default-scheme :keymaps))
