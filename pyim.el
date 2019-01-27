@@ -2650,6 +2650,7 @@ IMOBJS 获得候选词条。"
      (delq nil
            `(,@personal-words
              ,@common-words
+             ,@jianpin-words
              ,@znabc-words
              ,@pinyin-chars)))))
 
