@@ -971,7 +971,7 @@ pyim 内建的有三种选词框格式：
     "eng" "ing" "ong" "uan" "uang" "ian" "iang" "iao" "ue"
     "uai" "uo"))
 
-(defvar pyim-pinyin-valid-yun-mu
+(defvar pyim-pinyin-valid-yunmu
   '("a" "o" "e" "ai" "ei" "ui" "ao" "ou" "er" "an" "en"
     "ang" "eng"))
 
@@ -2223,34 +2223,12 @@ Return the input string."
              (pyim-posframe-valid-p))
     (posframe-hide pyim-page-tooltip-posframe-buffer)))
 
-;; ** 处理 `pyim-entered' (没有任何分隔符的拼音字符串)
-;; *** 用户输入的字符串 -> 待选词列表
-;; 从一个用户输入的字符串（没有任何分隔符的拼音字符串）获取其待选词列表，大致可以分成3个步骤：
-;; 1. 分解字符串，得到一个拼音列表。
-;;    #+BEGIN_EXAMPLE
-;;    woaimeinv -> (("w" . "o") ("" . "ai") ("m" . "ei") ("n" . "v"))
-;;    #+END_EXAMPLE
-;; 2. 将拼音列表排列组合，得到多个词语的拼音，并用列表表示。
-;;    #+BEGIN_EXAMPLE
-;;    (("p" . "in") ("y" . "in") ("sh" . "") ("r" . ""))
-;;    => ("pin-yin"  ;; 完整的拼音
-;;        ("p-y-sh" ("p" . "in") ("y" . "in") ("sh" . "")) ;; 不完整的拼音
-;;        ("p-y-sh-r" ("p" . "in") ("y" . "in") ("sh" . "") ("r" . "")) ;; 不完整的拼音
-;;        )
-;;    #+END_EXAMPLE
-;; 3. 递归的查询上述多个词语拼音，将得到的结果合并为待选词列表。
-;; **** 分解用户输入的字符串
-;; 1. 将用户输入的字符串分解为拼音列表。
-;; 2. 将拼音列表合并成适合搜索的，并且带明确分割符的拼音字符串。
+;; ** 处理 `pyim-entered'
 
-;; 在这之前，pyim 定义了三个变量：
-;; 1. 声母表： `pyim-pinyin-shenmu'
-;; 2. 韵母表：`pyim-pinyin-yunmu'
-;; 3. 有效韵母表： `pyim-pinyin-valid-yun-mu'
-
-;; pyim 使用函数 `pyim-imobjs-create' 从用户输入的字符串创建一个输入法
-;; 内部对象列表: imobjs，这个列表可能包含一个 imobj, 也可能包含多个，
-;; 每个 imobj 都包含声母和韵母的相关信息，比如：
+;; pyim 使用函数 `pyim-imobjs-create' 从用户输入的字符串
+;; `pyim-entered' 创建一个输入法内部对象列表: imobjs，这个列表可能包含
+;; 一个 imobj, 也可能包含多个，就全拼输入法而言，每个 imobj 都包含声母
+;; 和韵母的相关信息，比如：
 
 ;; #+BEGIN_EXAMPLE
 ;; (pyim-imobjs-create "woaimeinv" 'quanpin)
@@ -2259,8 +2237,8 @@ Return the input string."
 ;; 结果为:
 ;; : ((("w" . "o") ("" . "ai") ("m" . "ei") ("n" . "v")))
 
-;; 这个过程通过递归的调用 `pyim-pinyin-get-charpy' 来实现，整个过程类
-;; 似用菜刀切黄瓜片，将一个拼音字符串逐渐切开。比如：
+;; 全拼输入法的这个过程通过递归的调用 `pyim-pinyin-get-charpy' 来实现，
+;; 整个过程类似用菜刀切黄瓜片，将一个拼音字符串逐渐切开。比如：
 
 ;; #+BEGIN_EXAMPLE
 ;; (pyim-pinyin-get-charpy "woaimeinv")
@@ -2277,24 +2255,6 @@ Return the input string."
 ;; (("w" . "o") ("" . "ai") ("m" . "ei" ) . "nv")
 ;; (("w" . "o") ("" . "ai") ("m" . "ei" ) ("n" . "v"))
 ;; #+END_EXAMPLE
-
-;; `pyim-pinyin-get-charpy' 由两个基本函数配合实现：
-;; 1. pyim-pinyin-get-sm 从一个拼音字符串中提出第一个声母
-;; 2. pyim-pinyin-get-ym 从一个拼音字符串中提出第一个韵母
-
-;; #+BEGIN_EXAMPLE
-;; (pyim-pinyin-get-sm "woaimeinv")
-;; #+END_EXAMPLE
-
-;; 结果为:
-;; : ("w" . "oaimeinv")
-
-;; #+BEGIN_EXAMPLE
-;; (pyim-pinyin-get-ym "oaimeinv")
-;; #+END_EXAMPLE
-
-;; 结果为:
-;; : ("o" . "aimeinv")
 
 ;; 当用户输入一个错误的拼音时，`pyim-imobjs-create' 创建的 imobj 就不合法 ，比如：
 
@@ -2325,7 +2285,7 @@ Return the input string."
 ;; #+END_EXAMPLE
 
 ;; 结果为:
-;; : "wo-ai-mei-nv"
+;; : ("wo" "ai" "mei" "nv")
 
 ;; 将汉字的拼音分成声母和其它
 (defun pyim-pinyin-get-shenmu (pinyin)
@@ -2370,13 +2330,18 @@ Return the input string."
                       ;; 截取得到的韵母如果去掉最后一个字符，还是有效的韵母
                       (member (substring yunmu 0 -1) pyim-pinyin-yunmu)
                       (not (and (member (substring yunmu -1) '("n" "g"))
-                                (or (string= (substring pinyin 0 1) "o")
-                                    (string= (substring pinyin 0 (min (length pinyin) 2)) "er")))))
+                                (or (string= (substring yunmu 0 1) "o")
+                                    (string= (substring yunmu 0 (min (length yunmu) 2)) "er")))))
                  (setq i (1- i))
-                 (setq ym ""))
+                 (setq yunmu ""))
                 (t (setq i 0)))
         (setq i (1- i))
         (setq yunmu "")))
+    ;; 如果声母和韵母都为空字符串，就特殊处理，
+    ;; 否则容易成为死循环，比如：ua
+    (when (and (equal shenmu "")
+               (equal yunmu ""))
+      (setq yunmu yunmu-and-rest))
     (cons (cons shenmu yunmu)
           (substring yunmu-and-rest (length yunmu)))))
 
@@ -2506,7 +2471,7 @@ Return the input string."
     (while (progn
              (setq py (car imobj))
              (if (and (not (string< "" (car py)))
-                      (not (member (cdr py) pyim-pinyin-valid-yun-mu)))
+                      (not (member (cdr py) pyim-pinyin-valid-yunmu)))
                  (setq valid nil)
                (setq imobj (cdr imobj)))))
     valid))
