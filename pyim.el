@@ -2324,14 +2324,11 @@ Return the input string."
                  (setq yunmu ""))
                 ((and (string< "" rest)
                       ;; 截取后剩余的字符串 rest 找不出声母
-                      (not (car (pyim-pinyin-get-shenmu rest)))
+                      (equal (car (pyim-pinyin-get-shenmu rest)) "")
                       ;; 截取后的韵母最后一个字符是一个有效声母
                       (member (substring yunmu -1) pyim-pinyin-shenmu)
                       ;; 截取得到的韵母如果去掉最后一个字符，还是有效的韵母
-                      (member (substring yunmu 0 -1) pyim-pinyin-yunmu)
-                      (not (and (member (substring yunmu -1) '("n" "g"))
-                                (or (string= (substring yunmu 0 1) "o")
-                                    (string= (substring yunmu 0 (min (length yunmu) 2)) "er")))))
+                      (member (substring yunmu 0 -1) pyim-pinyin-yunmu))
                  (setq i (1- i))
                  (setq yunmu ""))
                 (t (setq i 0)))
