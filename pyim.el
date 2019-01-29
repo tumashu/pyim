@@ -545,7 +545,7 @@
 (require 'pyim-pymap)
 
 (defgroup pyim nil
-  "Chinese pinyin input method"
+  "Pyim is a Chinese input method support quanpin, shuangpin, wubi and cangjie."
   :group 'leim)
 
 (defcustom pyim-dcache-directory (locate-user-emacs-file "pyim/dcache/")
