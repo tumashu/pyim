@@ -2308,32 +2308,40 @@ Return the input string."
          (yunmu-and-rest (cdr x))
          (i (min (length yunmu-and-rest) 5))
          yunmu rest result)
-    (while (> i 0)
-      (setq yunmu (substring yunmu-and-rest 0 i))
-      (setq rest (substring yunmu-and-rest i))
-      (if (member yunmu pyim-pinyin-yunmu)
-          (cond ((not (cl-some
-                       #'(lambda (char-pinyin)
-                           (or (pyim-pinyin2cchar-get char-pinyin t)
-                               (pyim-dcache-get char-pinyin)))
-                       (mapcar #'(lambda (x)
-                                   (concat (car x) (cdr x)))
-                               (pyim-imobjs-find-fuzzy:quanpin-1
-                                (cons shenmu yunmu)))))
-                 (setq i (1- i))
-                 (setq yunmu ""))
-                ((and (string< "" rest)
-                      ;; 截取后剩余的字符串 rest 找不出声母
-                      (equal (car (pyim-pinyin-get-shenmu rest)) "")
-                      ;; 截取后的韵母最后一个字符是一个有效声母
-                      (member (substring yunmu -1) pyim-pinyin-shenmu)
-                      ;; 截取得到的韵母如果去掉最后一个字符，还是有效的韵母
-                      (member (substring yunmu 0 -1) pyim-pinyin-yunmu))
-                 (setq i (1- i))
-                 (setq yunmu ""))
-                (t (setq i 0)))
-        (setq i (1- i))
-        (setq yunmu "")))
+    (cl-flet ((pinyin-valid-p
+               (shenmu yunmu)
+               (cl-some
+                #'(lambda (char-pinyin)
+                    (pyim-pinyin2cchar-get char-pinyin t))
+                (mapcar #'(lambda (x)
+                            (concat (car x) (cdr x)))
+                        (pyim-imobjs-find-fuzzy:quanpin-1
+                         (cons shenmu yunmu))))))
+      (while (> i 0)
+        (setq yunmu (substring yunmu-and-rest 0 i))
+        (setq rest (substring yunmu-and-rest i))
+        (if (member yunmu pyim-pinyin-yunmu)
+            (cond (;; 如果声母和韵母组成的拼音不是一个有效的拼音，
+                   ;; 就继续缩短，如果是，就进一步检测。
+                   (not (pinyin-valid-p shenmu yunmu))
+                   (setq i (1- i))
+                   (setq yunmu ""))
+                  ((and (string< "" rest)
+                        ;; 截取后剩余的字符串 rest 找不出声母
+                        (equal (car (pyim-pinyin-get-shenmu rest)) "")
+                        ;; 截取后的韵母最后一个字符是一个有效声母
+                        (member (substring yunmu -1) pyim-pinyin-shenmu)
+                        ;; 截取得到的韵母如果去掉最后一个字符，还是有效的韵母
+                        (member (substring yunmu 0 -1) pyim-pinyin-yunmu))
+                   (if (not (pinyin-valid-p shenmu (substring yunmu 0 -1)))
+                       ;; 如果去掉韵母最后一个字符后，无法组成一个有效的拼音。
+                       ;; 就不要缩短了。
+                       (setq i 0)
+                     (setq i (1- i))
+                     (setq yunmu "")))
+                  (t (setq i 0)))
+          (setq i (1- i))
+          (setq yunmu ""))))
     ;; 如果声母和韵母都为空字符串，就特殊处理，
     ;; 否则容易成为死循环，比如：ua
     (when (and (equal shenmu "")
@@ -2344,8 +2352,8 @@ Return the input string."
 
 ;; 处理输入的拼音
 (defun pyim-scheme-get (scheme-name)
-  "获取名称为 SCHEME-NAME 的输入法方案。"
-  (assoc scheme-name pyim-schemes))
+"获取名称为 SCHEME-NAME 的输入法方案。"
+(assoc scheme-name pyim-schemes))
 
 (defun pyim-scheme-get-option (scheme-name option)
   "获取名称为 SCHEME-NAME 的输入法方案，并提取其属性 OPTION 。"
