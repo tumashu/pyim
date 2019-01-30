@@ -752,11 +752,6 @@ plist 来表示，比如：
      :first-chars "abcdefghijklmnopqrstuvwxyz"
      :rest-chars "abcdefghijklmnopqrstuvwxyz;"
      :prefer-trigger-chars nil
-     :code-regexp-function ; 这个函数会被 pyim-convert-code-at-point 调用，
-     (lambda ()            ; 用来得到一个 regexp, 用于提取光标处 code.
-       (and (equal (pyim-char-before-to-string 0) ";")
-            (string-match-p "[a-z]" (pyim-char-before-to-string 1))
-            "[a-z'-;]+ *$"))
      :keymaps
      (("a" "a" "a")
       ("b" "b" "ou")
@@ -2352,8 +2347,8 @@ Return the input string."
 
 ;; 处理输入的拼音
 (defun pyim-scheme-get (scheme-name)
-"获取名称为 SCHEME-NAME 的输入法方案。"
-(assoc scheme-name pyim-schemes))
+  "获取名称为 SCHEME-NAME 的输入法方案。"
+  (assoc scheme-name pyim-schemes))
 
 (defun pyim-scheme-get-option (scheme-name option)
   "获取名称为 SCHEME-NAME 的输入法方案，并提取其属性 OPTION 。"
@@ -2439,23 +2434,23 @@ Return the input string."
   "Find all fuzzy pinyins, for example:
 
 (\"f\" . \"en\") -> ((\"f\" . \"en\") (\"f\" . \"eng\"))"
-       (cl-labels ((find-list (str list)
-                              (let (result)
-                                (dolist (x list)
-                                  (when (member str x)
-                                    (setq list nil)
-                                    (setq result
-                                          (delete-dups
-                                           `(,str ,@(cl-copy-list x))))))
-                                (or result (list str)))))
-         (let* ((fuzzy-alist pyim-fuzzy-pinyin-alist)
-                (sm-list (find-list (car pycons) fuzzy-alist))
-                (ym-list (find-list (cdr pycons) fuzzy-alist))
-                result)
-           (dolist (a sm-list)
-             (dolist (b ym-list)
-               (push (cons a b) result)))
-           (reverse result))))
+  (cl-labels ((find-list (str list)
+                         (let (result)
+                           (dolist (x list)
+                             (when (member str x)
+                               (setq list nil)
+                               (setq result
+                                     (delete-dups
+                                      `(,str ,@(cl-copy-list x))))))
+                           (or result (list str)))))
+    (let* ((fuzzy-alist pyim-fuzzy-pinyin-alist)
+           (sm-list (find-list (car pycons) fuzzy-alist))
+           (ym-list (find-list (cdr pycons) fuzzy-alist))
+           result)
+      (dolist (a sm-list)
+        (dolist (b ym-list)
+          (push (cons a b) result)))
+      (reverse result))))
 
 (defun pyim-imobj-validp (imobj scheme-name)
   "检测一个 IMOBJ 是否是一个有效 IMOBJ."
@@ -3558,42 +3553,52 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
     (pyim-terminate-translation)))
 
 ;; *** 将光标前的用户输入的字符串转换为中文
+
+(define-obsolete-function-alias
+  'pyim-convert-code-at-point 'pyim-convert-string-at-point)
+
 ;;;###autoload
-(defun pyim-convert-code-at-point ()
+(defun pyim-convert-string-at-point ()
   (interactive)
   (unless (equal input-method-function 'pyim-input-method)
     (toggle-input-method))
   (let* ((case-fold-search nil)
          (pyim-force-input-chinese t)
+         (scheme-name pyim-default-scheme)
+         (first-chars (pyim-scheme-get-option scheme-name :first-chars))
+         (rest-chars (pyim-scheme-get-option scheme-name :rest-chars))
          (string (if mark-active
                      (buffer-substring-no-properties
                       (region-beginning) (region-end))
                    (buffer-substring (point) (line-beginning-position))))
-         ;; :code-regexp-function 保存的函数会被 pyim-convert-code-at-point 调用，
-         ;; 用来得到一个 regexp, 用于提取光标处 code.
-         (regexp-func (pyim-scheme-get-option pyim-default-scheme :code-regexp-function))
-         (regexp (and (functionp regexp-func) (funcall regexp-func)))
-         ;; 如果一个输入法没有设置 :code-regexp-function, 那么 fallback 方式处理。
-         (regexp-fallback
-          (and (not (pyim-string-match-p "[[:punct:]：－]" (pyim-char-before-to-string 0)))
-               "[a-z'-]+ *$"))
-         (regexp (or regexp regexp-fallback))
+         (length 0)
          code length)
-    (if (not regexp)
-        ;; 当光标前的一个字符是标点符号时，半角/全角切换。
-        (call-interactively 'pyim-punctuation-translate-at-point)
-      (and (string-match regexp string)
+    (cond ((string-match
+            ;; 创建一个 regexp, 用于提取出光标处一个适合
+            ;; 转换的字符串。
+            (format "[%s]+ *$"
+                    (cl-delete-duplicates
+                     (concat first-chars rest-chars "'-")))
+            string)
            (setq code
-                 ;; 一些语言使用 '' 来标记字符串，特殊处理。
+                 ;; 一些编程语言使用单引号 ' 做为字符串的标记，这里需要特殊处理。
                  (replace-regexp-in-string
                   "^[-']" ""
                   (match-string 0 string)))
            (setq length (length code))
-           (setq code (replace-regexp-in-string " +" "" code)))
-      (when (and length (> length 0))
-        (delete-char (- 0 length))
-        (insert (mapconcat #'char-to-string
-                           (pyim-input-method code) ""))))))
+           (setq code (replace-regexp-in-string " +" "" code))
+           (when mark-active
+             (delete-region
+              (region-beginning) (region-end)))
+           (when (and (not mark-active) (> length 0))
+             (delete-char (- 0 length)))
+           (when (> length 0)
+             (insert (mapconcat #'char-to-string
+                                (pyim-input-method code) ""))))
+          ((pyim-string-match-p "[[:punct:]：－]" (pyim-char-before-to-string 0))
+           ;; 当光标前的一个字符是标点符号时，半角/全角切换。
+           (call-interactively 'pyim-punctuation-translate-at-point))
+          (t (message "Pyim: pyim-convert-string-at-point do noting.")))))
 
 ;; *** 取消当前输入
 (defun pyim-quit-clear ()
