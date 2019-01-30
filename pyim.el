@@ -2,7 +2,7 @@
 
 ;; * Header
 ;; Copyright 2006 Ye Wenbin
-;;           2014-2017 Feng Shu
+;;           2014-2019 Feng Shu
 
 ;; Author: Ye Wenbin <wenbinye@163.com>, Feng Shu <tumashu@163.com>
 ;; URL: https://github.com/tumashu/pyim
@@ -843,16 +843,48 @@ plist 来表示，比如：
 (defcustom pyim-translate-trigger-char "v"
   "用于触发特殊操作的字符，相当与单字快捷键.
 
-pyim 内建的功能有：
-1. 光标前面的字符为标点符号时，按这个字符可以切换前面的标
-   点符号的样式（半角/全角）
-2. 当光标前面为中文字符串时，输入 <num>v 可以用于保存自定义词条。
-3. 其它。
+输入中文的时候，我们需要快速频繁的执行一些特定的命令，最直接的方
+法就是将上述命令绑定到一个容易按的快捷键上，但遗憾的是 emacs 大多
+数容易按的快捷键都 *名花有主* 了，甚至找一个 “Ctrl＋单字符”的快
+捷键都不太容易，特殊功能触发字符，可以帮助我们实现“单字符”快捷
+键，类似 org-mode 的 speed key。
 
-注意：单字快捷键受到拼音方案的限制，比如：全拼输入法可以将其设置为v,
-但双拼输入法下设置 v 可能就不行，所以，pyim 首先会检查
-当前拼音方案下，这个快捷键设置是否合理有效，如果不是一个合理的设置，
-则使用拼音方案默认的 :prefer-trigger-chars 。
+默认情况下，我们可以使用特殊功能触发字符执行下面几个操作（假设触
+发字符为 v）：
+
+1. 快速切换中英文标点符号的样式：当光标前的字符是一个标点符号时，
+   按 \"v\" 可以切换这个标点的样式。比如：光标在A处的时候，按
+   \"v\" 可以将A前面的全角逗号转换为半角逗号。
+
+        你好，-A-
+
+   按 \"v\" 后
+
+        你好,-A-
+
+2. 快速将光标前的词条添加到词库：当光标前的字符是中文字符时，按
+   \"num\" + \"v\" 可以将光标前 num 个中文汉字组成的词条添加到个
+   人词频文件中，比如：当光标在A处时，按\"4v\"可以将“的红烧肉”
+   这个词条加入个人词频文件，默认num不超过9。
+
+        我爱吃美味的红烧肉-A-
+
+值得注意的是，这种方式如果添加的功能太多，会造成许多潜在的冲突。
+
+用户可以使用变量 `pyim-translate-trigger-char' 来设置触发字符，默
+认的触发字符是：\"v\", 选择这个字符的理由基于全拼输入法的：
+
+1. \"v\" 不是有效的声母，不会对中文输入造成太大的影响。
+2. \"v\" 字符很容易按。
+
+pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。当待输入的
+字符是触发字符时，`pyim-translate' 根据光标前的字符的不同来调用不
+同的功能，具体见 `pyim-translate' ：
+
+单字快捷键受到输入法方案的限制，比如：全拼输入法可以将其设置为v,
+但双拼输入法下设置 v 可能就不行，所以，pyim 首先会检查当前输入法
+方案下，这个快捷键设置是否合理有效，如果不是一个合理的设置，则使
+用拼音方案默认的 :prefer-trigger-chars 。
 
 具体请参考 `pyim-translate-get-trigger-char' 。"
   :group 'pyim
@@ -893,7 +925,9 @@ pyim 输入半角标点，函数列表中每个函数都有一个参数：char �
   :type 'function)
 
 (defcustom pyim-page-length 5
-  "每页显示的词条数目."
+  "每页显示的词条数目.
+
+细节信息请参考 `pyim-page-refresh' 的 docstring."
   :group 'pyim
   :type 'number)
 
@@ -1002,7 +1036,9 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
   "是否强制开启中文输入模式.")
 
 (defvar pyim-candidate-position nil
-  "当前选择的词条在 ‘pyim-candidates’ 中的位置.")
+  "当前选择的词条在 ‘pyim-candidates’ 中的位置.
+
+细节信息请参考 `pyim-page-refresh' 的 docstring.")
 
 (defvar pyim-last-created-word nil
   "记录最近一次创建的词条， 用于实现快捷删词功能： `pyim-delete-last-word' .")
@@ -1012,13 +1048,17 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
 
 (defvar pyim-magic-convert-cache nil
   "用来临时保存 `pyim-magic-convert' 的结果.
-从而加快同一个字符串第二次的转换速度。")
+  从而加快同一个字符串第二次的转换速度。")
 
 (defvar pyim-load-hook nil)
 (defvar pyim-active-hook nil)
 
 (defvar pyim-punctuation-translate-p '(auto yes no)
-  "The car of its value will control the translation of punctuation.")
+  "这个变量的第一个元素的取值用于控制标点符号全角半角模式切换.
+
+  1. 当第一个元素为 'yes 时，输入全角标点。
+  2. 当第一个元素为 'no 时，输入半角标点。
+  3. 当第一个元素为 'auto 时，根据中英文环境，自动切换。")
 
 (defvar pyim-punctuation-pair-status
   '(("\"" nil) ("'" nil))
@@ -1026,7 +1066,7 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
 
 (defvar pyim-punctuation-escape-list (number-sequence ?0 ?9)
   "Punctuation will not insert after this characters.
-If you don't like this funciton, set the variable to nil")
+  If you don't like this funciton, set the variable to nil")
 
 (defvar pyim-pinyin2cchar-cache1 nil
   "拼音查汉字功能需要的变量.")
@@ -1055,32 +1095,32 @@ If you don't like this funciton, set the variable to nil")
 (defvar pyim-dcache-auto-update t
   "是否自动创建和更新词库对应的 dcache 文件.
 
-这个变量默认设置为 t, 如果有词库文件添加到 pyim-dicts 或者
-pyim-extra-dicts 时，pyim 会自动生成相关的 dcache 文件。
+  这个变量默认设置为 t, 如果有词库文件添加到 pyim-dicts 或者
+  pyim-extra-dicts 时，pyim 会自动生成相关的 dcache 文件。
 
-一般不建议将这个变量设置为 nil，除非有以下情况：
+  一般不建议将这个变量设置为 nil，除非有以下情况：
 
-1. 用户的词库已经非常稳定，并且想通过禁用这个功能来降低
-   pyim 对资源的消耗。
-2. 自动更新功能无法正常工作，用户通过手工从其他机器上拷贝
-   dcache 文件的方法让 pyim 正常工作。")
+  1. 用户的词库已经非常稳定，并且想通过禁用这个功能来降低
+  pyim 对资源的消耗。
+  2. 自动更新功能无法正常工作，用户通过手工从其他机器上拷贝
+  dcache 文件的方法让 pyim 正常工作。")
 
 (defvar pyim-dcache-prefer-emacs-thread nil
   "是否优先使用 emacs thread 功能来生成 dcache.
 
-如果这个变量设置为 t, 那么当 emacs thread 功能可以使用时，
-pyim 优先使用 emacs thread 功能来生成 dcache, 如果设置为 nil,
-pyim 总是使用 emacs-async 包来生成 dcache.
+  如果这个变量设置为 t, 那么当 emacs thread 功能可以使用时，
+  pyim 优先使用 emacs thread 功能来生成 dcache, 如果设置为 nil,
+  pyim 总是使用 emacs-async 包来生成 dcache.
 
-不过这个选项开启之后，会显著的减慢词库加载速度，特别是
-五笔等形码输入法。")
+  不过这个选项开启之后，会显著的减慢词库加载速度，特别是
+  五笔等形码输入法。")
 
 (defvar pyim-page-tooltip-posframe-buffer " *pyim-page-tooltip-posframe-buffer*"
   "这个变量用来保存做为 page tooltip 的 posframe 的 buffer.")
 
 (defvar pyim-rime-limit 50
   "当 pyim 使用 `liberime-search' 来获取词条时，这个变量用来限制
-`liberime-search' 返回词条的数量。")
+  `liberime-search' 返回词条的数量。")
 
 (defvar pyim-mode-map
   (let ((map (make-sparse-keymap))
@@ -1148,8 +1188,8 @@ pyim 总是使用 emacs-async 包来生成 dcache.
 ;; ** "汉字 -> 拼音" 以及 "拼音 -> 汉字" 的转换函数
 (defun pyim-pinyin2cchar-cache-create (&optional force)
   "构建 pinyin 到 chinese char 的缓存.
-用于加快搜索速度，这个函数将缓存保存到 `pyim-pinyin2cchar-cache' 变量中，
-如果 FORCE 设置为 t, 强制更新索引。"
+  用于加快搜索速度，这个函数将缓存保存到 `pyim-pinyin2cchar-cache' 变量中，
+  如果 FORCE 设置为 t, 强制更新索引。"
   (when (or force (or (not pyim-pinyin2cchar-cache1)
                       (not pyim-pinyin2cchar-cache2)))
     (setq pyim-pinyin2cchar-cache1
@@ -1173,17 +1213,17 @@ pyim 总是使用 emacs-async 包来生成 dcache.
 
 (defun pyim-pinyin2cchar-get (pinyin &optional equal-match return-list include-seperator)
   "获取拼音与 PINYIN 想匹配的所有汉字.
-比如：
+  比如：
 
-   “man” -> (\"忙茫盲芒氓莽蟒邙漭硭\" \"满慢漫曼蛮馒瞒蔓颟谩墁幔螨鞔鳗缦熳镘\")
+  “man” -> (\"忙茫盲芒氓莽蟒邙漭硭\" \"满慢漫曼蛮馒瞒蔓颟谩墁幔螨鞔鳗缦熳镘\")
 
-如果 EQUAL-MATCH 是 non-nil, 获取和 PINYIN 完全匹配的汉字。
-如果 RETURN-LIST 是 non-nil, 返回一个由单个汉字字符串组成的列表。
+  如果 EQUAL-MATCH 是 non-nil, 获取和 PINYIN 完全匹配的汉字。
+  如果 RETURN-LIST 是 non-nil, 返回一个由单个汉字字符串组成的列表。
 
   (\"满\" \"慢\" \"漫\"  ...)
 
-如果 INCLUDE-SEPERATOR 是 non-nil, 返回的列表包含一个 ‘|’ 号，pyim 用这个分隔符
-来区分 3500 个常用汉字和生僻字。"
+  如果 INCLUDE-SEPERATOR 是 non-nil, 返回的列表包含一个 ‘|’ 号，pyim 用这个分隔符
+  来区分 3500 个常用汉字和生僻字。"
   (pyim-pinyin2cchar-cache-create)
   (when (and pinyin (stringp pinyin))
     (let ((output
@@ -1199,29 +1239,17 @@ pyim 总是使用 emacs-async 包来生成 dcache.
                         (replace-regexp-in-string "|" "" x))
                       (or output '())))))))
 
-;; *** 查询某个汉字的拼音
-;; pyim 在特定的时候需要读取一个汉字的拼音，这个工作由下面函数完成：
-
-;; 函数 `pyim-cchar2pinyin-get' 从 `pyim-cchar2pinyin-cache' 查询得到一个汉字字符的拼音， 例如：
-;; #+BEGIN_EXAMPLE
-;; (pyim-cchar2pinyin-get ?我)
-;; #+END_EXAMPLE
-
-;; 结果为:
-;; : ("wo")
-
-;; 我们用全局变量 `pyim-cchar2pinyin-cache' 来保存这个 *hash table* 。
-
-;; 这个例子中的语句用于调试上述三个函数。
-;; #+BEGIN_EXAMPLE
-;; (setq pyim-cchar2pinyin-cache nil)
-;; (pyim-cchar2pinyin-create-cache)
-;; (pyim-cchar2pinyin-get ?你)
-;; (pyim-cchar2pinyin-get "你")
-;; #+END_EXAMPLE
-
 (defun pyim-cchar2pinyin-get (char-or-str)
-  "Get the code of CHAR-OR-STR."
+  "获取字符或者字符串 CHAR-OR-STR 对应的拼音 code.
+
+  pyim 在特定的时候需要读取一个汉字的拼音，这个工作由此完成，函数
+  从 `pyim-cchar2pinyin-cache' 查询得到一个汉字字符的拼音， 例如：
+
+  (pyim-cchar2pinyin-get ?我)
+
+  结果为:
+
+  (\"wo\")"
   (pyim-cchar2pinyin-cache-create)
   (let ((key (if (characterp char-or-str)
                  (char-to-string char-or-str)
@@ -1232,7 +1260,7 @@ pyim 总是使用 emacs-async 包来生成 dcache.
 (defun pyim-cchar2pinyin-cache-create (&optional force)
   "Build pinyin cchar->pinyin hashtable from `pyim-pymap'.
 
-If FORCE is non-nil, FORCE build."
+  If FORCE is non-nil, FORCE build."
   (when (or force (not pyim-cchar2pinyin-cache))
     (setq pyim-cchar2pinyin-cache
           (make-hash-table :size 50000 :test #'equal))
@@ -1246,34 +1274,32 @@ If FORCE is non-nil, FORCE build."
                 (puthash key (append (list py) cache) pyim-cchar2pinyin-cache)
               (puthash key (list py) pyim-cchar2pinyin-cache))))))))
 
-;; ** 输入法启动和重启
-;; pyim 使用 emacs 官方自带的输入法框架来启动输入法和重启输入法。
-;; 所以我们首先需要使用 emacs 自带的命令 `register-input-method' 注册一个
-;; 输入法。
-
-;; 注册输入法
+;; ** 注册 Pyim 输入法
 (register-input-method "pyim" "euc-cn" 'pyim-start pyim-title)
 
-;; 真正启动 pyim 的命令是 `pyim-start' ，这个命令做如下工作：
-;; 1. 重置 `pyim-local-variable-list' 中所有的 local 变量。
-;; 2. 使用 `pyim-cchar2pinyin-create-cache' 创建汉字到拼音的 hash table 。
-;; 3. 运行hook： `pyim-load-hook'。
-;; 4. 将 `pyim-dcache-save-caches' 命令添加到 `kill-emacs-hook' , emacs 关闭
-;;    之前将 `pyim-dcache-icode2word' 和 `pyim-dcache-iword2count'
-;;    保存到文件，供以后使用。
-;; 5. 设定变量：
-;;    1. `input-method-function'
-;;    2. `deactivate-current-input-method-function'
-;; 6. 运行 `pyim-active-hook'
-
-;; `pyim-start' 先后会运行两个 hook，所以我们需要事先定义：
-
-;; `pyim-restart' 用于重启 pyim，其过程和 `pyim-start' 类似，
-;; 只是在输入法重启之前，询问用户，是否保存个人词频信息。
-
 (defun pyim-start (name &optional active-func restart save-personal-dcache refresh-common-dcache)
-  "Start pyim.
-TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCACHE"
+  "pyim 启动函数.
+  TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCACHE
+
+  pyim 是使用 `pyim-start' 来启动输入法，这个命令主要做如下工作：
+  1. 重置 `pyim-local-variable-list' 中所有的 local 变量。
+  2. 使用 `pyim-cchar2pinyin-create-cache' 创建汉字到拼音的 hash table 对应表。
+  3. 运行hook： `pyim-load-hook'。
+  4. 将 `pyim-dcache-save-caches' 命令添加到 `kill-emacs-hook' , emacs 关闭
+  之前将 `pyim-dcache-icode2word' 和 `pyim-dcache-iword2count'
+  保存到文件，供以后使用。
+  5. 设定变量：
+  1. `input-method-function'
+  2. `deactivate-current-input-method-function'
+  6. 运行 `pyim-active-hook'
+
+  pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
+  `input-method-function' 设置为 `pyim-input-method' ，这个变量会影
+  响 `read-event' 的行为。
+
+  当输入字符时，`read-event' 会被调用，`read-event' 调用的过程中，
+  会执行 `pyim-input-method' 这个函数。`pyim-input-method' 又调用函
+  数`pyim-start-translation'."
   (interactive)
   (mapc 'kill-local-variable pyim-local-variable-list)
   (mapc 'make-local-variable pyim-local-variable-list)
@@ -1322,7 +1348,10 @@ TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCAC
     (remove-hook 'minibuffer-exit-hook 'quail-exit-from-minibuffer)))
 
 (defun pyim-restart ()
-  "重启 pyim，不建议用于编程环境."
+  "重启 pyim，不建议用于编程环境.
+
+  这个函数用于重启 pyim，其过程和 `pyim-start' 类似，只是在输入法重
+  启之前，询问用户，是否保存个人词频信息。"
   (interactive
    (let ((save-personal-dcache
           (yes-or-no-p "重启 pyim 前，需要保存个人词频信息吗？ "))
@@ -1333,29 +1362,12 @@ TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCAC
 (defun pyim-restart-1 (&optional save-personal-dcache refresh-common-dcache)
   "重启 pyim，用于编程环境.
 
-当 SAVE-PERSONAL-DCACHE 是 non-nil 时，保存个人词库文件。
-当 REFRESH-COMMON-DCACHE 是 non-nil 时，强制刷新词库缓存。"
+  当 SAVE-PERSONAL-DCACHE 是 non-nil 时，保存个人词库文件。
+  当 REFRESH-COMMON-DCACHE 是 non-nil 时，强制刷新词库缓存。"
   (pyim-start "pyim" nil t
               save-personal-dcache refresh-common-dcache))
+
 ;; ** 处理词库文件
-;; *** 自定义词库
-;; **** 词库文件格式
-;; pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 'utf-8-unix,
-;; 结构类似：
-
-;; #+BEGIN_EXAMPLE
-;; ni-bu-hao 你不好
-;; ni-hao  你好 妮好 你豪
-;; #+END_EXAMPLE
-
-;; 第一个空白字符之前的内容为 code，空白字符之后为中文词条列表。
-;; 词库 *不处理* 中文标点符号。
-
-;; 我们使用变量 `pyim-dicts' 和 `pyim-extra-dicts' 来设定词库文件的信息：
-
-;; 1. `:name' 用户给词库设定的名称（可选项）。
-;; 2. `:file' 词库文件的绝对路径。
-
 (defun pyim-dcache-use-emacs-thread-p ()
   "判断是否使用 emacs thread 功能来生成 thread."
   (and pyim-dcache-prefer-emacs-thread
@@ -1363,10 +1375,10 @@ TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCAC
 
 (defun pyim-dcache-update:code2word (&optional force)
   "读取并加载词库.
-读取 `pyim-dicts' 和 `pyim-extra-dicts' 里面的词库文件，生成对应的
-词库缓冲文件，然后加载词库缓存。
+  读取 `pyim-dicts' 和 `pyim-extra-dicts' 里面的词库文件，生成对应的
+  词库缓冲文件，然后加载词库缓存。
 
-如果 FORCE 为真，强制加载。"
+  如果 FORCE 为真，强制加载。"
   (interactive)
   (let* ((version "v1") ;当需要强制更新 dict 缓存时，更改这个字符串。
          (dict-files (mapcar #'(lambda (x)
@@ -1404,7 +1416,7 @@ TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCAC
 
 (defun pyim-dcache-update:ishortcode2word (&optional force)
   "读取 ‘pyim-dcache-icode2word’ 中的词库，创建 *简拼* 缓存，然后加载这个缓存.
-如果 FORCE 为真，强制加载缓存。"
+  如果 FORCE 为真，强制加载缓存。"
   (interactive)
   (when (or force (not pyim-dcache-update:ishortcode2word))
     (if (pyim-dcache-use-emacs-thread-p)
@@ -1463,8 +1475,8 @@ TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCAC
 
 (defun pyim-dcache-update:icode2word (&optional force)
   "对 personal 缓存中的词条进行排序，加载排序后的结果.
-在这个过程中使用了 `pyim-dcache-icode2count' 中记录的词频信息。
-如果 FORCE 为真，强制排序。"
+  在这个过程中使用了 `pyim-dcache-icode2count' 中记录的词频信息。
+  如果 FORCE 为真，强制排序。"
   (interactive)
   (when (or force (not pyim-dcache-update:icode2word))
     (if (pyim-dcache-use-emacs-thread-p)
@@ -1498,7 +1510,7 @@ TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCAC
 
 (defun pyim-dcache-update:shortcode2word (&optional force)
   "使用 `pyim-dcache-code2word' 中的词条，创建简写 code 词库缓存并加载.
-如果 FORCE 为真，强制运行。"
+  如果 FORCE 为真，强制运行。"
   (interactive)
   (when (or force (not pyim-dcache-update:shortcode2word))
     (if (pyim-dcache-use-emacs-thread-p)
@@ -1564,7 +1576,7 @@ TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCAC
 (defun pyim-dcache-return-shortcode (code)
   "获取一个 CODE 的所有简写.
 
-比如：.nihao -> .nihao .niha .nih .ni .n"
+  比如：.nihao -> .nihao .niha .nih .ni .n"
   (when (and (> (length code) 0)
              (not (string-match-p "-" code))
              (pyim-string-match-p "^[[:punct:]]" code))
@@ -1579,7 +1591,7 @@ TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCAC
 
 (defun pyim-dcache-sort-words (words-list)
   "对 WORDS-LIST 排序，词频大的排在前面.
-排序使用 `pyim-dcache-icode2count' 中记录的词频信息"
+  排序使用 `pyim-dcache-icode2count' 中记录的词频信息"
   (sort words-list
         #'(lambda (a b)
             (let ((a (car (split-string a ":")))
@@ -1605,9 +1617,9 @@ TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCAC
 
 (defun pyim-dcache-set-variable (variable &optional force-restore fallback-value)
   "设置变量.
-如果 VARIABLE 的值为 nil, 则使用 ‘pyim-dcache-directory’ 中对应文件的内容来设置
-VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的值将丢失。
-如果获取的变量值为 nil 时，将 VARIABLE 的值设置为 FALLBACK-VALUE ."
+  如果 VARIABLE 的值为 nil, 则使用 ‘pyim-dcache-directory’ 中对应文件的内容来设置
+  VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的值将丢失。
+  如果获取的变量值为 nil 时，将 VARIABLE 的值设置为 FALLBACK-VALUE ."
   (when (or force-restore (not (symbol-value variable)))
     (let ((file (concat (file-name-as-directory pyim-dcache-directory)
                         (symbol-name variable))))
@@ -1634,18 +1646,27 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
   (when value
     (with-temp-buffer
       (insert ";; Auto generated by `pyim-dcache-save-variable-to-file', don't edit it by hand!\n")
-      (insert (format ";; Build time: %s\n\n" (current-time-string)))
-      (insert (prin1-to-string value))
-      (insert "\n\n")
-      (insert ";; Local Variables:\n")
-      (insert ";; coding: utf-8-unix\n")
-      (insert ";; End:")
-      (make-directory (file-name-directory file) t)
-      (let ((save-silently t))
-        (write-file file)))))
+  (insert (format ";; Build time: %s\n\n" (current-time-string)))
+  (insert (prin1-to-string value))
+  (insert "\n\n")
+  (insert ";; Local Variables:\n")
+  (insert ";; coding: utf-8-unix\n")
+  (insert ";; End:")
+  (make-directory (file-name-directory file) t)
+  (let ((save-silently t))
+    (write-file file)))))
 
 (defun pyim-dcache-generate-dcache-file (dict-files dcache-file)
-  "读取词库文件列表：DICT-FILES, 生成一个词库缓冲文件 DCACHE-FILE."
+  "读取词库文件列表：DICT-FILES, 生成一个词库缓冲文件 DCACHE-FILE.
+
+pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 'utf-8-unix,
+其结构类似：
+
+  ni-bu-hao 你不好
+  ni-hao  你好 妮好 你豪
+
+第一个空白字符之前的内容为 code，空白字符之后为中文词条列表。词库
+*不处理* 中文标点符号。"
   (let ((hashtable (make-hash-table :size 1000000 :test #'equal)))
     (dolist (file dict-files)
       (with-temp-buffer
@@ -1793,14 +1814,15 @@ MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表
   (pyim-dcache-update:ishortcode2word t)
   (message "pyim: 词条相关信息导入完成！"))
 
-;; *** 从词库中搜索中文词条
-;; 当词库文件加载完成后， pyim 就可以从词库缓存中搜索某个
-;; code 对应的中文词条了，这个工作由函数 `pyim-dcache-get' 完成。
-
+;; ** 从词库中搜索中文词条
 (defun pyim-dcache-get (code &optional dcache-list)
   "从 DCACHE-LIST 包含的所有 dcache 中搜索 CODE, 得到对应的词条.
-如果 DCACHE-LIST is nil, 搜索 `pyim-dcache-icode2word' 和 `pyim-dcache-code2word'
-两个 dcache."
+
+当词库文件加载完成后，pyim 就可以用这个函数从词库缓存中搜索某个
+code 对应的中文词条了。
+
+如果 DCACHE-LIST 为 nil, 则默认搜索 `pyim-dcache-icode2word' 和
+`pyim-dcache-code2word' 两个 dcache."
   (let ((dcache-list (or (if (listp dcache-list)
                              dcache-list
                            (list dcache-list))
@@ -1838,8 +1860,9 @@ MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表
                pinyin-list "-")))))
 
 
-;; *** 保存词条，删除词条以及调整词条位置
+;; ** 保存词条，删除词条以及调整词条位置
 (defmacro pyim-dcache-put (cache code &rest body)
+  "这个用于保存词条，删除词条以及调整词条位置."
   (declare (indent 0))
   (let ((key (make-symbol "key"))
         (table (make-symbol "table"))
@@ -1941,7 +1964,7 @@ BUG：无法有效的处理多音字。"
   (interactive)
   (pyim-create-word-at-point 4))
 
-;; **** 删词功能
+;; ** 删词功能
 (defun pyim-create-word-from-selection ()
   "Add the selected text as a Chinese word into the personal dictionary."
   (interactive)
@@ -2031,47 +2054,13 @@ FILE 的格式与 `pyim-export' 生成的文件格式相同，
           (remove word orig-value))))
     (remhash word pyim-dcache-iword2count)))
 
-;; ** 生成 `pyim-entered'
-;; pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
-;; `input-method-function' 设置为 `pyim-input-method' ，这个变量
-;; 会影响 `read-event' 的行为。
-
-;; 当输入字符时，`read-event' 会被调用，`read-event' 调用的过程中，
-;; 会执行 `pyim-input-method' 这个函数。`pyim-input-method' 又调用函数
-;; `pyim-start-translation'
-
-;; `pyim-start-translation' 这个函数较复杂，作许多低层工作，但它的一个重
-;; 要流程是：
-;; 1. 使用函数 `read-key-sequence' 得到 key-sequence
-;; 2. 使用函数 `lookup-key' 查询 pyim-mode-map 中，与上述 key-sequence 对应
-;;    的命令。
-;; 3. 如果查询得到的命令是 `pyim-self-insert-command' 时，
-;;    `pyim-start-translation' 会调用这个函数。
-
-;; `pyim-self-insert-command' 这个函数的核心工作就是将用户输入的字符，组
-;; 合成一个字符串并保存到变量 `pyim-entered' 中。
-
-;; 中英文输入模式切换功能也是在 'pyim-self-insert-command' 中实现。
-
-;; 这个部份的代码涉及许多 emacs 低层函数，相对复杂，不容易理解，有兴趣的
-;; 朋友可以参考：
-;; 1. `quail-input-method' 相关函数。
-;; 2. elisp 手册相关章节:
-;;    1. Invoking the Input Method
-;;    2. Input Methods
-;;    3. Miscellaneous Event Input Features
-;;    4. Reading One Event
-
-;; ** 得到需要插入到 buffer 的字符串 `pyim-outcome', 并将其插入到 *待输入 buffer*
-;; `pyim-self-insert-command' 会调用 `pyim-entered-handle' 来处理
-;; `pyim-entered'，并最终的得到 `pyim-outcome'，然后，
-;; `pyim-start-translation' 返回 `pyim-outcome' 的取值。
-
-;; 在 `pyim-input-method' 函数内部，`pyim-start-translation' 返回值
-;; `pyim-outcome' 会被分解为event list, 通过 emacs 低层函数 `read-event'
-;; 来将这些 list 插入到 *待输入buffer* 。
-
+;; ** 处理用户输入字符的相关函数
 (defun pyim-input-method (key-or-string)
+  "得到需要插入到 buffer 的字符串, 并将其插入到待输入 buffer.
+
+这个函数会处理用户输入的字符，并最终的得到需要插入 buffer 的字符
+串。这个字符串会被分解为 event list, 通过 emacs 低层函数
+`read-event' 来将这些 list 插入到 *待输入buffer*。"
   (if (or buffer-read-only
           overriding-terminal-local-map
           overriding-local-map)
@@ -2103,7 +2092,26 @@ FILE 的格式与 `pyim-export' 生成的文件格式相同，
 
 (defun pyim-start-translation (key-or-string)
   "Start translation of the typed character KEY-OR-STRING by pyim.
-Return the input string."
+Return the input string.
+
+`pyim-start-translation' 这个函数较复杂，作许多低层工作，但它的一
+个重要流程是：
+
+1. 使用函数 `read-key-sequence' 得到 key-sequence
+2. 使用函数 `lookup-key' 查询 `pyim-mode-map' 中，与上述 key-sequence 对应
+   的命令。
+3. 如果查询得到的命令是 `pyim-self-insert-command' 时，
+   `pyim-start-translation' 会调用这个函数。
+4. 这个函数最终会返回需要插入到 buffer 的字符串。
+
+这个部份的代码涉及许多 emacs 低层函数，相对复杂，不容易理解，有兴
+趣的朋友可以参考：
+1. `quail-input-method' 相关函数。
+2. elisp 手册相关章节:
+   1. Invoking the Input Method
+   2. Input Methods
+   3. Miscellaneous Event Input Features
+   4. Reading One Event"
   ;; Check the possibility of translating KEY.
   ;; If KEY is nil, we can anyway start translation.
   (if (or (integerp key-or-string)
@@ -2184,7 +2192,7 @@ Return the input string."
                          "-AU英"))))))
 
 (defun pyim-input-chinese-p ()
-  "确定 pyim 是否启动中文输入模式"
+  "确定 pyim 是否需要启动中文输入模式."
   (let* ((scheme-name pyim-default-scheme)
          (first-chars (pyim-scheme-get-option scheme-name :first-chars))
          (rest-chars (pyim-scheme-get-option scheme-name :rest-chars)))
@@ -2199,7 +2207,7 @@ Return the input string."
          (setq current-input-method-title pyim-title))))
 
 (defun pyim-self-insert-command ()
-  "如果在 pyim-first-char 列表中，则查找相应的词条，否则停止转换，插入对应的字符"
+  "Pyim 版本的 self-insert-command."
   (interactive "*")
   ;; (message "%s" (current-buffer))
   (if (pyim-input-chinese-p)
@@ -2218,59 +2226,7 @@ Return the input string."
              (pyim-posframe-valid-p))
     (posframe-hide pyim-page-tooltip-posframe-buffer)))
 
-;; ** 处理 `pyim-entered'
-
-;; pyim 使用函数 `pyim-imobjs-create' 从用户输入的字符串
-;; `pyim-entered' 创建一个输入法内部对象列表: imobjs，这个列表可能包含
-;; 一个 imobj, 也可能包含多个，就全拼输入法而言，每个 imobj 都包含声母
-;; 和韵母的相关信息，比如：
-
-;; #+BEGIN_EXAMPLE
-;; (pyim-imobjs-create "woaimeinv" 'quanpin)
-;; #+END_EXAMPLE
-
-;; 结果为:
-;; : ((("w" . "o") ("" . "ai") ("m" . "ei") ("n" . "v")))
-
-;; 全拼输入法的这个过程通过递归的调用 `pyim-pinyin-get-charpy' 来实现，
-;; 整个过程类似用菜刀切黄瓜片，将一个拼音字符串逐渐切开。比如：
-
-;; #+BEGIN_EXAMPLE
-;; (pyim-pinyin-get-charpy "woaimeinv")
-;; #+END_EXAMPLE
-
-;; 结果为:
-;; : (("w" . "o") . "aimeinv")
-
-;; 一个完整的递归过程类似：
-;; #+BEGIN_EXAMPLE
-;; "woaimeinv"
-;; (("w" . "o") . "aimeinv")
-;; (("w" . "o") ("" . "ai") . "meinv")
-;; (("w" . "o") ("" . "ai") ("m" . "ei" ) . "nv")
-;; (("w" . "o") ("" . "ai") ("m" . "ei" ) ("n" . "v"))
-;; #+END_EXAMPLE
-
-;; 当用户输入一个错误的拼音时，`pyim-imobjs-create' 创建的 imobj 就不合法 ，比如：
-
-;; #+BEGIN_EXAMPLE
-;; (pyim-imobjs-create "ua" 'quanpin)
-;; #+END_EXAMPLE
-
-;; 结果为:
-;; : nil
-
-;; pyim 使用函数 `pyim-codes-create' 从一个 imobj 创建一个列表：codes，这个
-;; 列表中包含一个或者多个 code 字符串，这些 code 字符串用于从词库中搜索相关词条。
-
-;; #+BEGIN_EXAMPLE
-;; (pyim-codes-create '(("w" . "o") ("" . "ai") ("m" . "ei") ("n" . "v")) 'quanpin)
-;; #+END_EXAMPLE
-
-;; 结果为:
-;; : ("wo" "ai" "mei" "nv")
-
-;; 将汉字的拼音分成声母和其它
+;; 分解拼音的相关函数
 (defun pyim-pinyin-get-shenmu (pinyin)
   "从一个拼音字符串 PINYIN 中提出第一个声母。"
   (let ((i (min (length pinyin) 2))
@@ -2329,7 +2285,10 @@ Return the input string."
           (substring yunmu-and-rest (length yunmu)))))
 
 (defun pyim-pinyin-split (pinyin)
-  "将一个代表拼音的字符串： PINYIN 分解为声母韵母对组成的列表."
+  "将一个代表拼音的字符串 PINYIN, 分解为声母韵母对组成的列表.
+
+这个过程通过循环的调用 `pyim-pinyin-get-charpy' 来实现，整个过程
+类似用菜刀切黄瓜片，将一个拼音字符串逐渐切开。"
   (let (charpy spinyin)
     (while (when (string< "" pinyin)
              (setq charpy (pyim-pinyin-get-charpy pinyin))
@@ -2341,7 +2300,6 @@ Return the input string."
                (setq pinyin (cdr charpy)))))
     spinyin))
 
-;; 处理输入的拼音
 (defun pyim-scheme-get (scheme-name)
   "获取名称为 SCHEME-NAME 的输入法方案。"
   (assoc scheme-name pyim-schemes))
@@ -2354,17 +2312,27 @@ Return the input string."
 
 (defun pyim-imobjs-create (entered &optional scheme-name)
   "按照 SCHEME-NAME 对应的输入法方案，从 ENTERED 字符串中创建一个
-或者多个 imobj 组成的列表，类似：
-
-1. pinyin:  (((\"n\" . \"i\") (\"h\" . \"ao\")))
-
-注意： 不同的输入法，imobj 的结构也是不一样的。"
+或者多个 imobj 组成的列表，不同的输入法，imobj 的结构也是不一样的。"
   (let ((class (pyim-scheme-get-option scheme-name :class)))
     (when class
       (funcall (intern (format "pyim-imobjs-create:%S" class))
                entered scheme-name))))
 
 (defun pyim-imobjs-create:quanpin (entered &optional -)
+  "从用户输入的字符串 ENTERED 创建一个输入法内部对象列表: imobjs.
+
+这个 imobjs 可能包含一个 imobj, 也可能包含多个，每个 imobj 都包含
+声母和韵母的相关信息，比如：
+
+    (pyim-imobjs-create:quanpin \"woaimeinv\" 'quanpin)
+
+结果为:
+
+    (((\"w\" . \"o\") (\"\" . \"ai\") (\"m\" . \"ei\") (\"n\" . \"v\")))
+
+如果字符串无法正确处理，则返回 nil, 比如：
+
+   (pyim-imobjs-create \"ua\" 'quanpin)"
   (when (and entered (string< "" entered))
     (let (output)
       (dolist (str (split-string entered "'"))
@@ -2423,10 +2391,9 @@ Return the input string."
       (setq result2 (append result2 (cdr fuzzy-imobjs))))
     (append result1 result2)))
 
+;; (\"f\" . \"en\") -> ((\"f\" . \"en\") (\"f\" . \"eng\"))
 (defun pyim-imobjs-find-fuzzy:quanpin-1 (pycons)
-  "Find all fuzzy pinyins, for example:
-
-(\"f\" . \"en\") -> ((\"f\" . \"en\") (\"f\" . \"eng\"))"
+  "Find all fuzzy pinyins."
   (cl-labels ((find-list (str list)
                          (let (result)
                            (dolist (x list)
@@ -2454,6 +2421,16 @@ Return the input string."
                imobj scheme-name shou-zi-mu))))
 
 (defun pyim-codes-create:quanpin (imobj scheme-name &optional shou-zi-mu)
+  "从IMOBJ 创建一个 code 列表：codes.
+
+列表 codes 中包含一个或者多个 code 字符串，这些 code 字符串用于从
+词库中搜索相关词条。
+
+    (pyim-codes-create '((\"w\" . \"o\") (\"\" . \"ai\") (\"m\" . \"ei\") (\"n\" . \"v\")) 'quanpin)
+
+结果为:
+
+   (\"wo\" \"ai\" \"mei\" \"nv\")"
   (mapcar
    #'(lambda (w)
        (let ((py (concat (car w) (cdr w))))
@@ -2477,7 +2454,7 @@ Return the input string."
   (when scheme-name
     imobj))
 
-;; **** 获得词语拼音并进一步查询得到备选词列表
+;; ** 获取备选词列表
 (defun pyim-candidates-create (imobjs scheme-name)
   "按照 SCHEME-NAME 对应的输入法方案， 从输入法内部对象列表:
 IMOBJS 获得候选词条。"
@@ -2592,11 +2569,13 @@ IMOBJS 获得候选词条。"
   "`pyim-candidates-create' 处理双拼输入法的函数."
   (pyim-candidates-create:quanpin imobjs 'quanpin))
 
-;; *** 核心函数：拼音字符串处理函数
-;; `pyim-entered-handle' 这个函数是一个重要的 *核心函数* ，其大致工作流程为：
-;; 1. 查询拼音字符串 `pyim-entered' 得到待选词列表 `pyim-candidates'
-;; 2. 显示备选词等待用户选择。
 (defun pyim-entered-handle (entered)
+  "处理用户输入的字符串 ENTERED 的核心函数.
+
+主要做如下工作：
+1. 查询拼音字符串 ENTERED 得到被选词列表 `pyim-candidates'
+2. 设置 `pyim-entered' 变量的取值。
+3. 显示备选词等待用户选择。"
   (let* ((scheme-name pyim-default-scheme)
          (class (pyim-scheme-get-option scheme-name :class))
          (n (pyim-scheme-get-option scheme-name :code-split-length)))
@@ -2624,18 +2603,13 @@ IMOBJS 获得候选词条。"
         (pyim-preview-refresh)
         (pyim-page-refresh))))))
 
-;; ** 待输入字符串预览功能。
-;; pyim 会使用 emacs overlay 机制在 *待输入buffer* 光标处高亮显示
-;; 一个预览字符串，让用户快速查看将要输入的字符串，具体方式是：
-;; 1. 在 `pyim-input-method' 中调用 `pyim-preview-setup-overlay' 创建 overlay ，并
-;;    使用变量 `pyim-preview-overlay' 保存，创建时将 overlay 的 face 属性设置为
-;;    `pyim-preview-face' ，用户可以使用这个变量来自定义 face。
-;; 2. 使用函数 `pyim-preview-refresh' 来刷新光标处的输入法预览。
-;; 3. 在 `pyim-input-method' 中调用 `pyim-preview-delete-overlay' ，删除
-;;    `pyim-preview-overlay' 中保存的 overlay，这个函数同时也删除了 overlay 中包
-;;    含的预览文本。
-
+;; ** 待输入字符串预览
 (defun pyim-preview-setup-overlay ()
+  "设置 pyim 光标处实时预览功能所需要的 overlay.
+
+这个函数会在 `pyim-input-method' 中调用，用于创建 overlay ，并将
+其保存到 `pyim-preview-overlay' 变量，overlay 的 face 属性设置为
+`pyim-preview-face' ，用户可以使用这个变量来自定义 face"
   (let ((pos (point)))
     (if (overlayp pyim-preview-overlay)
         (move-overlay pyim-preview-overlay pos pos)
@@ -2644,14 +2618,19 @@ IMOBJS 获得候选词条。"
           (overlay-put pyim-preview-overlay 'face 'pyim-preview-face)))))
 
 (defun pyim-preview-delete-overlay ()
+  "删除 pyim 光标处实时预览功能所需要的 overlay.
+
+这个函数会在 `pyim-input-method' 中调用，用于删除
+`pyim-preview-overlay' 中保存的 overlay。"
   (if (and (overlayp pyim-preview-overlay) (overlay-start pyim-preview-overlay))
       (delete-overlay pyim-preview-overlay)))
 
 (defun pyim-preview-refresh ()
-  "刷新光标处嵌入设预览.
+  "刷新光标处预览.
 
-pyim 在选择备选词条是，会在 buffer 光标处显示一个预览字符串，
-用来帮助用户选择词条，这个函数用来刷新这个预览字符串。"
+pyim 会使用 emacs overlay 机制在 *待输入buffer* 光标处高亮显示一
+个预览字符串，让用户可以查看将要输入的字符串，这个函数用于更新这
+个字符串的内容。"
   (let* ((class (pyim-scheme-get-option pyim-default-scheme :class))
          (end (pyim-page-end))
          (start (1- (pyim-page-start)))
@@ -2678,89 +2657,12 @@ pyim 在选择备选词条是，会在 buffer 光标处显示一个预览字符�
                   (overlay-start pyim-preview-overlay) (point))))
 
 (defun pyim-preview-delete-string ()
-  "删除已经插入 buffer 的 preview 字符串。"
+  "删除已经插入 buffer 的 preview 预览字符串。"
   (if (overlay-start pyim-preview-overlay)
       (delete-region (overlay-start pyim-preview-overlay)
                      (overlay-end pyim-preview-overlay))))
 
-;; ** 显示和选择备选词条
-;; *** 构建词条菜单字符串
-;; pyim 内建两种方式显示选词框：
-
-;; 1. 使用 `pyim-minibuffer-message' 函数在 minibuffer 中显示选词框。
-;; 2. 使用 `pyim-page-tooltip-show' 函数在光标处创建一个 tooltip 来显示选词框。
-
-;; 两种方式的基本原理相同：通过 *待选词列表* 构建为一个字符串，然后显示这个字符串。
-;; 用户可以根据这个字符串的提示，来执行相应的动作，比如按空格确认当前选择的词条或
-;; 者按数字选择这个数字对应的词条。比如：
-
-;; #+BEGIN_EXAMPLE
-;; "1. 你好 2. 倪皓 3. 你 4.泥 ..."
-;; #+END_EXAMPLE
-
-;; pyim 使用 `pyim-candidates' 来保存 *待选词列表* ，我们以
-;; "nihao" 对应的 `pyim-candidates' 的值为例，来说明选词框相关的操作
-;; 函数。
-
-;; #+BEGIN_EXAMPLE
-;; ("你好" "倪皓" "泥" "你" "呢" "拟" "逆" "腻" "妮" "怩" "溺" "尼" "禰" "齯" "麑" "鲵" "蜺" "衵" "薿" "旎" "睨" "铌" "昵" "匿" "倪" "霓" "暱" "柅" "猊" "郳" "輗" "坭" "惄" "堄" "儗" "伲" "祢" "慝")
-;; #+END_EXAMPLE
-
-;; 选词框的格式通过变量 `pyim-page-style' 来控制。
-
-;;  *待选词列表* 一般都很长，不可能在一行中完全显示，所以 pyim 使
-;;  用了 page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以逻辑的分
-;;  成5页：
-
-;; #+BEGIN_EXAMPLE
-;; ("你好"  倪皓"  "泥"  "你"  "呢"  "拟"  "逆"  "腻"  "妮"   ;第1页
-;;  "怩"    "溺"   "尼"  "禰"  "齯"  "麑"  "鲵"  "蜺"  "衵"   ;第2页
-;;  "薿"    "旎"   "睨"  "铌"  "昵"  "匿"  "倪"  "霓"  "暱"   ;第3页
-;;  "柅"    "猊"   "郳"  "輗"  "坭"  "惄"  "堄"  "儗"  "伲"   ;第4页
-;;  "祢"    "慝"                                              ;第5页)
-;; #+END_EXAMPLE
-
-;; 用户可以使用变量 `pyim-page-length' 自定义每一页显示词条的数量，默认设
-;; 置为9。
-
-;; `pyim-candidate-position' 的取值以及 `pyim-page-length' 的设定值，共同决定了
-;; pyim 需要显示哪一页，我们以一个表格来表示上述 *待选词列表* ：
-
-;; |       |          |       |         |      |      |      |      |      |          |
-;; |-------+----------+-------+---------+------+------+------+------+------+----------|
-;; | 第1页 | "你好"   | 倪皓" | "泥"    | "你" | "呢" | "拟" | "逆" | "腻" | "妮"     |
-;; | 第2页 | "怩"     | "溺"  | "尼"    | "禰" | "齯" | "麑" | "鲵" | "蜺" | "衵"     |
-;; | 第3页 | -B- "薿" | "旎"  | -A-"睨" | "铌" | "昵" | "匿" | "倪" | "霓" | -E- "暱" |
-;; | 第4页 | "柅"     | "猊"  | "郳"    | "輗" | "坭" | "惄" | "堄" | "儗" | "伲"     |
-;; | 第5页 | "祢"     | "慝"  |         |      |      |      |      |      |          |
-
-;; 假设 `pyim-candidate-position' 为 A 所在的位置。那么：
-;; 1. 函数 `pyim-page-current-page' 返回值为3， 说明当前 page 为第3页。
-;; 2. 函数 `pyim-page-total-page'  返回值为5，说明 page 共有5页。
-;; 3. 函数 `pyim-page-start' 返回 B 所在的位置。
-;; 4. 函数 `pyim-page-end' 返回 E 所在的位置。
-;; 5. 函数 `pyim-page-refresh' 用于刷新显示 page
-;;    它会从 `pyim-candidates' 中提取一个 sublist:
-;;    #+BEGIN_EXAMPLE
-;;    ("薿" "旎" "睨" "铌" "昵" "匿" "倪" "霓" "暱")
-;;    #+END_EXAMPLE
-;;    这个 sublist 的起点为  `pyim-page-start' 的返回值，终点为
-;;    `pyim-page-end' 的返回值。然后使用这个 sublist 来构建类似下面的字符
-;;    串，并保存到一个 hashtable 的 :candidates 关键字对应的位置，这个 hastable
-;;    最终会做为参数传递给 `pyim-page-style' 相关的函数，用于生成 page。
-;;    #+BEGIN_EXAMPLE
-;;    "1. 薿 2.旎 3.睨 4.铌 5.昵 6.匿 7.倪 8.霓 9.暱"
-;;    #+END_EXAMPLE
-
-;; `pyim-page-next-page' 这个命令用来翻页，其原理是：改变 `pyim-candidate-position'的
-;; 取值，假设一次只翻一页，那么这个函数所做的工作就是：
-;; 1. 首先将 `pyim-candidate-position' 增加 `pyim-page-length' ，确保其指定的位
-;;    置在下一页。
-;; 2. 然后将 `pyim-candidate-position' 的值设定为 `pyim-page-start' 的返回值，确
-;;    保 `pyim-candidate-position' 的取值为下一页第一个词条的位置。
-;; 3. 最后调用 `pyim-page-refresh' 来重新刷新页面。
-
-;;  page format
+;; ** 选词框相关函数
 (defun pyim-candidate-parse (candidate)
   (let ((output
          (if (consp candidate)
@@ -2771,19 +2673,31 @@ pyim 在选择备选词条是，会在 buffer 光标处显示一个预览字符�
       output)))
 
 (defun pyim-page-current-page ()
+  "计算当前选择的词条在第几页面.
+
+细节信息请参考 `pyim-page-refresh' 的 docstring."
   (1+ (/ (1- pyim-candidate-position) pyim-page-length)))
 
 (defun pyim-page-total-page ()
+  "计算 page 总共有多少也多少页.
+
+细节信息请参考 `pyim-page-refresh' 的 docstring."
   (1+ (/ (1- (length pyim-candidates)) pyim-page-length)))
 
 (defun pyim-page-start ()
-  "计算当前所在页的第一个词条的位置"
+  "计算当前所在页的第一个词条的位置.
+
+细节信息请参考 `pyim-page-refresh' 的 docstring."
   (let ((pos (min (length pyim-candidates) pyim-candidate-position)))
     (1+ (- pos (mod pos pyim-page-length)))))
 
 (defun pyim-page-end (&optional finish)
-  "计算当前所在页的最后一个词条的位置，如果 pyim-candidates 用
-完，则检查是否有补全。如果 FINISH 为 non-nil，说明，补全已经用完了"
+  "计算当前所在页的最后一个词条的位置，
+
+如果 pyim-candidates 用完，则检查是否有补全。如果 FINISH 为
+non-nil，说明，补全已经用完了.
+
+细节信息请参考 `pyim-page-refresh' 的 docstring."
   (let* ((whole (length pyim-candidates))
          (len pyim-page-length)
          (pos pyim-candidate-position)
@@ -2795,7 +2709,50 @@ pyim 在选择备选词条是，会在 buffer 光标处显示一个预览字符�
         (pyim-page-end t)))))
 
 (defun pyim-page-refresh (&optional hightlight-current)
-  "按当前位置，生成候选词条"
+  "刷新 page 页面的函数.
+
+这个函数主要用来处理选词框选词后，刷新显示问题，pyim 使用
+`pyim-candidates' 来保存 *待选词列表* ，\"nihao\" 对应的
+`pyim-candidates' 的值类似：
+
+     (\"你好\" \"倪皓\" \"泥\" \"你\"  ...  \"慝\")
+
+*待选词列表* 一般都很长，不可能在一页中完全显示，所以 pyim 使用了
+page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以逻辑的
+分成5页：
+
+
+  第1页   你好  倪皓  泥  你  呢  拟  逆  腻  妮
+  第2页   怩    溺    尼  禰  齯  麑  鲵  蜺  衵
+  第3页   薿    旎    睨  铌  昵  匿  倪  霓  暱
+  第4页   柅    猊    郳  輗  坭  惄  堄  儗  伲
+  第5页   祢    慝
+
+`pyim-candidate-position' 的取值以及 `pyim-page-length' 的设定值
+（默认设置为9），共同决定了 pyim 需要显示哪一页，比如：
+
+  第1页  你好  倪皓   泥    你  呢  拟  逆  腻  妮
+  第2页  怩    溺     尼    禰  齯  麑  鲵  蜺  衵
+  第3页  薿[B] 旎     睨[A] 铌  昵  匿  倪  霓  暱[E]
+  第4页  柅    猊     郳    輗  坭  惄  堄  儗  伲
+  第5页  祢    慝
+
+假设当前选择的词条为 \"睨\", 那么 `pyim-candidate-position' 的取
+值为 A 所在的位置。那么：
+
+1. 函数 `pyim-page-current-page' 返回值为3， 说明当前 page 为第3页。
+2. 函数 `pyim-page-total-page'  返回值为5，说明 page 共有5页。
+3. 函数 `pyim-page-start' 返回 B 所在的位置。
+4. 函数 `pyim-page-end' 返回 E 所在的位置。
+5. 函数 `pyim-page-refresh' 会从 `pyim-candidates' 中提取一个 sublist:
+
+     (\"薿\" \"旎\" \"睨\" \"铌\" \"昵\" \"匿\" \"倪\" \"霓\" \"暱\")
+
+   这个 sublist 的起点为 `pyim-page-start' 的返回值，终点为
+   `pyim-page-end' 的返回值。并保存到一个 hashtable 的
+   :candidates 关键字对应的位置，这个 hastable 最终会做为参数传递
+   给 `pyim-page-style' 相关的函数，用于生成用于在选词框中显示的
+   字符串。"
   (let* ((end (pyim-page-end))
          (start (1- (pyim-page-start)))
          (candidates pyim-candidates)
@@ -2849,6 +2806,16 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
             unread-command-events '(7)))))
 
 (defun pyim-page-next-page (arg)
+  "Pyim page 翻页命令.
+
+原理是：改变 `pyim-candidate-position' 的取值，假设一次只翻一页，
+那么这个函数所做的工作就是：
+1. 首先将 `pyim-candidate-position' 增加 `pyim-page-length' ，确
+   保其指定的位置在下一页。
+2. 然后将 `pyim-candidate-position' 的值设定为 `pyim-page-start'
+   的返回值，确保 `pyim-candidate-position' 的取值为下一页第一个
+   词条的位置。
+3. 最后调用 `pyim-page-refresh' 来重新刷新页面。"
   (interactive "p")
   (if (= (length pyim-entered) 0)
       (progn
@@ -3043,7 +3010,6 @@ tooltip 选词框中显示。
                 emacs-basic-display
                 (not (display-graphic-p))))))
 
-;; *** 选择备选词
 (defun pyim-outcome-handle (type)
   "依照 TYPE, 获取 pyim 的最终产出字符串，并将其设置为变量 pyim-outcome 的值."
   (cond ((not enable-multibyte-characters)
@@ -3140,11 +3106,6 @@ tooltip 选词框中显示。
         (pyim-page-select-word)))))
 
 ;; ** 处理标点符号
-;; 常用的标点符号数量不多，所以 pyim 没有使用文件而是使用一个变量
-;; `pyim-punctuation-dict' 来设置标点符号对应表，这个变量是一个 alist 列表。
-
-;; pyim 在运行过程中调用函数 `pyim-translate' 进行标点符号格式的转换。
-
 (defun pyim-translate-get-trigger-char ()
   "检查 `pyim-translate-trigger-char' 是否为一个合理的 trigger char 。
 
@@ -3171,6 +3132,13 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
       user-trigger-char)))
 
 (defun pyim-translate (char)
+  "Pyim 字符转换函数，主要用于处理标点符号.
+
+pyim 在运行过程中调用这个函数来进行标点符号格式的转换。
+
+常用的标点符号数量不多，所以 pyim 没有使用文件而是使用一个变量
+`pyim-punctuation-dict' 来设置标点符号对应表，这个变量是一个
+alist 列表。"
   (let* ((str (char-to-string char))
          ;; 注意：`str' 是 *待输入* 的字符对应的字符串。
          (str-before-1 (pyim-char-before-to-string 0))
@@ -3215,8 +3183,17 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
      ((not (pyim-punctuation-full-width-p))
       str)
 
-     ;; 当前字符属于 `pyim-punctuation-escape-list'时，
-     ;; 插入英文标点。
+     ;; 当用户使用 org-mode 以及 markdown 等轻量级标记语言撰写文档时，
+     ;; 常常需要输入数字列表，比如：
+
+     ;; 1. item1
+     ;; 2. item2
+     ;; 3. item3
+
+     ;; 在这种情况下，数字后面输入句号必须是半角句号而不是全角句号，
+     ;; pyim 调用 `pyim-translate' 时，会检测光标前面的字符，如果这个
+     ;; 字符属于 `pyim-punctuation-escape-list' ，pyim 将输入半角标点，
+     ;; 具体细节见：`pyim-translate'
      ((member (char-before)
               pyim-punctuation-escape-list)
       str)
@@ -3288,32 +3265,20 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
               (buffer-string)))
       (insert new-string))))
 
-
-;; 当用户使用 org-mode 以及 markdown 等轻量级标记语言撰写文档时，常常需要输入数字列表，比如：
-
-;; #+BEGIN_EXAMPLE
-;; 1. item1
-;; 2. item2
-;; 3. item3
-;; #+END_EXAMPLE
-
-;; 在这种情况下，数字后面输入句号必须是半角句号而不是全角句号，pyim 调用 `pyim-translate' 时，
-;; 会检测光标前面的字符，如果这个字符属于 `pyim-punctuation-escape-list' ，pyim 将输入
-;; 半角标点，具体细节见：`pyim-translate'
-
-;; 输入标点的样式的改变（全角或者半角）受三个方面影响：
-
-;; 1. 用户是否手动切换了标点样式？
-;; 2  用户是否手动切换到英文输入模式？
-;; 3. pyim 是否根据环境自动切换到英文输入模式？
-
-;; 三方面的综合结果为： 只要当前的输入模式是英文输入模式，那么输入的标点符号 *必定* 是半角标点，
-;; 如果当前输入模式是中文输入模式，那么，输入标点的样式用户可以使用 `pyim-punctuation-toggle'
-;; 手动控制，具体请参考 `pyim-punctuation-full-width-p'。
-
-;; 切换中英文标点符号
+;; ** 切换中英文标点符号
 (defun pyim-punctuation-full-width-p ()
-  "判断是否需要切换到全角标点输入模式"
+  "判断是否需要切换到全角标点输入模式
+
+输入标点的样式的改变（全角或者半角）受三个方面影响：
+
+1. 用户是否手动切换了标点样式？
+2  用户是否手动切换到英文输入模式？
+3. pyim 是否根据环境自动切换到英文输入模式？
+
+三方面的综合结果为： 只要当前的输入模式是英文输入模式，那么输入的
+标点符号 *必定* 是半角标点，如果当前输入模式是中文输入模式，那么，
+输入标点的样式用户可以使用 `pyim-punctuation-toggle'手动控制，具
+体请参考 `pyim-punctuation-full-width-p'。"
   (cl-case (car pyim-punctuation-translate-p)
     (yes t)
     (no nil)
@@ -3324,6 +3289,16 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
           (not (pyim-auto-switch-english-input-p))))))
 
 (defun pyim-punctuation-toggle ()
+  "Pyim 标点符号全角半角模式切换命令.
+
+每次运行 `pyim-punctuation-toggle' 命令，都会调整变量
+`pyim-punctuation-translate-p' 的取值，`pyim-translate' 根据
+`pyim-punctuation-full-width-p' 函数的返回值，来决定是否转换标点
+符号：
+
+1. 当返回值为 'yes 时，`pyim-translate' 转换标点符号，从而输入全角标点。
+2. 当返回值为 'no 时，`pyim-translate' 忽略转换，从而输入半角标点。
+3. 当返回值为 'auto 时，根据中英文环境，自动切换。"
   (interactive)
   (setq pyim-punctuation-translate-p
         `(,@(cdr pyim-punctuation-translate-p)
@@ -3334,18 +3309,11 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
      (no "开启半角标点输入模式。")
      (auto "开启全半角标点自动转换模式。"))))
 
-;; 每次运行 `pyim-punctuation-toggle' 命令，都会调整变量 `pyim-punctuation-translate-p'
-;; 的取值，`pyim-translate' 根据 `pyim-punctuation-full-width-p' 函数的返回值，来决定
-;; 是否转换标点符号：
-
-;; 1. 当返回值为 'yes 时，`pyim-translate' 转换标点符号，从而输入全角标点。
-;; 2. 当返回值为 'no 时，`pyim-translate' 忽略转换，从而输入半角标点。
-;; 3. 当返回值为 'auto 时，根据中英文环境，自动切换。
-
-;; 用户也可以使用命令 `pyim-punctuation-translate-at-point' 来切换 *光标前* 标点符号的样式。
-
 (defun pyim-punctuation-translate-at-point ()
-  "切换光标处标点的样式（全角 or 半角）。"
+  "切换光标处标点的样式(全角 or 半角).
+
+用户也可以使用命令 `pyim-punctuation-translate-at-point' 来切换
+ *光标前* 标点符号的样式。"
   (interactive)
   (let* ((current-char (char-to-string (preceding-char)))
          (punc-list
@@ -3402,43 +3370,21 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
                 (push (car puncts) result))))))))
     (insert (mapconcat #'identity (reverse result) ""))))
 
-;; 使用上述命令切换光标前标点符号的样式时，我们使用函数 `pyim-punctuation-return-proper-punct'
-;; 来处理成对的全角标点符号， 比如：
-
-;; #+BEGIN_EXAMPLE
-;; “”
-;; ‘’
-;; #+END_EXAMPLE
-;; 这个函数的参数是一个标点符号对应表，类似：
-
-;; #+BEGIN_EXAMPLE
-;; ("." "。")
-;; #+END_EXAMPLE
-
-;; 第一个元素为半角标点，第二个和第三个元素（如果有）为对应的全角标点。
-
-;; #+BEGIN_EXAMPLE
-;; (list (pyim-punctuation-return-proper-punct '("'" "‘" "’"))
-;;       (pyim-punctuation-return-proper-punct '("'" "‘" "’")))
-;; #+END_EXAMPLE
-
-;; 结果为:
-;; : ("’" "‘")
-
-;; 简单来说，定义这个函数的目的是为了实现类似的功能：如果第一次输入的标点是：（‘）时，
-;; 那么下一次输入的标点就是（’）。
-
-
-;; 处理标点符号
 (defun pyim-punctuation-return-proper-punct (punc-list &optional before)
   "返回合适的标点符号，PUNCT-LIST 为标点符号列表.
 
-其格式类似：
+这个函数用于处理成对的全角标点符号，简单来说：如果第一次输入的标
+点是：（‘）时，那么下一次输入的标点就是（’）。
+
+PUNCT-LIST 格式类似：
 
    `(\",\" \"，\") 或者：`(\"'\" \"‘\" \"’\")
 
 当 BEFORE 为 t 时，只返回切换之前的结果，这个用来获取切换之前的
-标点符号。"
+标点符号。
+
+函数 `pyim-punctuation-return-proper-punct' 内部，我们使用变量
+`pyim-punctuation-pair-status' 来记录 “成对” 中文标点符号的状态。"
   (let* ((str (car punc-list))
          (punc (cdr punc-list))
          (switch-p (cdr (assoc str pyim-punctuation-pair-status))))
@@ -3452,49 +3398,9 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
           (car punc)
         (nth 1 punc)))))
 
-
-;; 函数 `pyim-punctuation-return-proper-punct' 内部，我们使用变量 `pyim-punctuation-pair-status'
-;; 来记录“成对”中文标点符号的状态。
-
-;; ** 处理特殊功能触发字符（单字符快捷键）
-;; 输入中文的时候，我们需要快速频繁的执行一些特定的命令，
-;; 最直接的方法就是将上述命令绑定到一个容易按的快捷键上，但遗憾的是 emacs 大多数容易按
-;; 的快捷键都 *名花有主* 了，甚至找一个 “Ctrl＋单字符”的快捷键都不太容易，特殊功能触发
-;; 字符，可以帮助我们实现“单字符”快捷键，类似 org-mode 的 speed key。
-
-;; 默认情况下，我们可以使用特殊功能触发字符执行下面两个操作：
-;; 1. 快速切换中英文标点符号的样式：当光标前的字符是一个标点符号时，按"v"可以切换这个标点的样式。
-;;    比如：光标在A处的时候，按 "v" 可以将A前面的全角逗号转换为半角逗号。
-;;    #+BEGIN_EXAMPLE
-;;    你好，-A-
-;;    #+END_EXAMPLE
-;;    按 "v" 后
-;;    #+BEGIN_EXAMPLE
-;;    你好,-A-
-;;    #+END_EXAMPLE
-;; 2. 快速将光标前的词条添加到词库：当光标前的字符是中文字符时，按 "num" + "v" 可以将光标前 num 个中文汉字
-;;    组成的词条添加到个人词频文件中，比如：当光标在A处时，按"4v"可以将“的红烧肉”这个词条加入个人词频文件，默认
-;;    num不超过9。
-;;    #+BEGIN_EXAMPLE
-;;    我爱吃美味的红烧肉-A-
-;;    #+END_EXAMPLE
-
-;; 值得注意的是，这种方式如果添加的功能太多，会造成许多潜在的冲突。
-
-;; 用户可以使用变量 `pyim-translate-trigger-char' 来设置触发字符，
-;; 默认的触发字符是："v", 选择这个字符的理由是：
-
-;; 1. "v" 不是有效的声母，不会对中文输入造成太大的影响。
-;; 2. "v" 字符很容易按。
-
-;; pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。
-;; 当待输入的字符是触发字符时，`pyim-translate' 根据光标前的字符的不同
-;; 来调用不同的功能，具体见 `pyim-translate' ：
-
-
 ;; ** 与拼音输入相关的用户命令
-;; *** 删除拼音字符串最后一个字符
 (defun pyim-delete-last-char ()
+  "删除用户输入的最后一个字符."
   (interactive)
   (if (> (length pyim-entered) 1)
       (pyim-entered-handle
@@ -3502,8 +3408,8 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
     (pyim-outcome-handle 'set-to-blank-value)
     (pyim-terminate-translation)))
 
-;; *** 删除最后一个汉字
 (defun pyim-backward-kill-cchar ()
+  "删除最后一个汉字对应的用户输入."
   (interactive)
   (if (> (length pyim-entered) 1)
       (progn
@@ -3521,13 +3427,12 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
     (pyim-outcome-handle 'set-to-blank-value)
     (pyim-terminate-translation)))
 
-;; *** 将光标前的用户输入的字符串转换为中文
-
 (define-obsolete-function-alias
   'pyim-convert-code-at-point 'pyim-convert-string-at-point)
 
 ;;;###autoload
 (defun pyim-convert-string-at-point ()
+  "将光标前的用户输入的字符串转换为中文."
   (interactive)
   (unless (equal input-method-function 'pyim-input-method)
     (toggle-input-method))
@@ -3569,31 +3474,30 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
            (call-interactively 'pyim-punctuation-translate-at-point))
           (t (message "Pyim: pyim-convert-string-at-point do noting.")))))
 
-;; *** 取消当前输入
 (defun pyim-quit-clear ()
+  "取消当前输入的命令."
   (interactive)
   (pyim-outcome-handle 'set-to-blank-value)
   (pyim-terminate-translation))
 
-;; *** 字母上屏
 (defun pyim-quit-no-clear ()
+  "字母上屏命令."
   (interactive)
   (pyim-outcome-handle 'prefer-entered)
   (pyim-terminate-translation))
 
-;; *** pyim 取消激活
 (defun pyim-inactivate ()
+  "取消 pyim 的激活状态."
   (interactive)
   (mapc 'kill-local-variable pyim-local-variable-list))
 
-;; *** 切换中英文输入模式
 (defun pyim-toggle-input-ascii ()
   "pyim 切换中英文输入模式。同时调整标点符号样式。"
   (interactive)
   (setq pyim-input-ascii
         (not pyim-input-ascii)))
 
-;; *** 为 isearch 添加拼音搜索功能
+;; ** 让 isearch-mode 通过 pinyin 搜索中文
 (defun pyim-cregexp-build (string)
   "根据 STRING 构建一个中文 regexp, 用于 \"拼音搜索汉字\".
 比如：\"nihao\" -> \"[你呢...][好号...] \\| nihao\""
@@ -3675,7 +3579,7 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
 
 ;;;###autoload
 (define-minor-mode pyim-isearch-mode
-  "pyim isearch mode."
+  "这个 mode 为 isearch 添加拼音搜索功能."
   :global t
   :group 'pyim
   :require 'pyim
@@ -3788,8 +3692,6 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
      (str (list (list str
                       (- current-pos str-beginning-pos)
                       (- str-end-pos current-pos)))))))
-
-;; ** 简单的中文分词功能
 
 (defun pyim-cstring-split-to-list (chinese-string &optional max-word-length)
   "一个基于 pyim 的中文分词函数。这个函数可以将中文字符
@@ -3933,82 +3835,23 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
   (message "分词完成！"))
 
 ;; ** 汉字到拼音的转换工具
-;; `pyim-hanzi2pinyin' 和 `pyim-hanzi2pinyin-simple' 可以将一个中文字符串转换为拼音字符串
-;; 或者拼音列表，也可以将一个中文字符串转换为拼音首字母字符串或者首字母列表。
-
-;; 在转换的过程中，`pyim-hanzi2pinyin' 考虑多音字，所以适用于制作词库，pyim 使用
-;; 这个函数来制作词库。而 `pyim-hanzi2pinyin-simple' 不考虑多音字，可以用于添加拼音索引。
-
-;; 例如：
-;; #+BEGIN_EXAMPLE
-;; (list (pyim-hanzi2pinyin "银行")
-;;       (pyim-hanzi2pinyin "银行" t)
-;;       (pyim-hanzi2pinyin "银行" nil "-")
-;;       (pyim-hanzi2pinyin "银行" nil "-" t)
-;;       (pyim-hanzi2pinyin "银行" t "-" t))
-;; #+END_EXAMPLE
-
-;; RESULTS:
-;; #+BEGIN_EXAMPLE
-;; ("yinhang yinxing" "yh yx" "yin-hang yin-xing" ("yin-hang" "yin-xing") ("y-h" "y-x"))
-;; #+END_EXAMPLE
-
-;; #+BEGIN_EXAMPLE
-;; (list (pyim-hanzi2pinyin-simple "行长")
-;;       (pyim-hanzi2pinyin-simple "行长" t)
-;;       (pyim-hanzi2pinyin-simple "行长" nil "-")
-;;       (pyim-hanzi2pinyin-simple "行长" nil "-" t)
-;;       (pyim-hanzi2pinyin-simple "行长" t "-" t))
-;; #+END_EXAMPLE
-
-;; RESULTS:
-;; #+BEGIN_EXAMPLE
-;; ("hangchang" "hc" "hang-chang" ("hang-chang") ("h-c"))
-;; #+END_EXAMPLE
-
-;; `pyim-hanzi2pinyin' 函数使用 “排列组合” 函数 `pyim-permutate-list' 来处理多音字，
-;; 这个函数所做工作类似：
-
-;; #+BEGIN_EXAMPLE
-;; (cl-prettyprint
-;;  (pyim-permutate-list
-;;   '(("a" "b")
-;;     ("c" "d")
-;;     ("e" "f" "g"))))
-
-;; OUTPUT:
-
-;; (("a" "c" "e")
-;;  ("a" "c" "f")
-;;  ("a" "c" "g")
-;;  ("a" "d" "e")
-;;  ("a" "d" "f")
-;;  ("a" "d" "g")
-;;  ("b" "c" "e")
-;;  ("b" "c" "f")
-;;  ("b" "c" "g")
-;;  ("b" "d" "e")
-;;  ("b" "d" "f")
-;;  ("b" "d" "g"))
-;; #+END_EXAMPLE
-
-
 ;;;###autoload
 (defun pyim-hanzi2pinyin (string &optional shou-zi-mu separator
                                  return-list ignore-duo-yin-zi adjust-duo-yin-zi)
-  "将汉字字符串转换为对应的拼音字符串.
-如果 SHOU-ZI-MU 设置为t,转换仅得到拼音首字母字符串。当
+  "将汉字字符串转换为对应的拼音字符串的工具.
+
+如果 SHOU-ZI-MU 设置为 t, 转换仅得到拼音首字母字符串。当
 RETURN-LIST 设置为 t 时，返回一个拼音列表，这个列表包含词条的一个
 或者多个拼音（词条包含多音字时）；如果 IGNORE-DUO-YIN-ZI 设置为
 t, 遇到多音字时，只使用第一个拼音，其它拼音忽略；当
-ADJUST-DUO-YIN-Zi 设置为 t 时，pyim-hanzi2pinyin会使用 pyim 已安
-装的词库来校正多音字，但这个功能有一定的限制:
+ADJUST-DUO-YIN-Zi 设置为 t 时, `pyim-hanzi2pinyin' 会使用 pyim 已
+安装的词库来校正多音字，但这个功能有一定的限制:
 
 1. pyim 普通词库中不存在的词条不能较正
 2. 多音字校正速度比较慢，实时转换会产生卡顿。
 
-BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结果
-会包含多余的连接符：比如： '你=好' --> 'ni-=-hao'"
+BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结果会
+包含多余的连接符：比如： '你=好' --> 'ni-=-hao'"
   (if (not (pyim-string-match-p "\\cc" string))
       (if return-list
           (list string)
@@ -4127,13 +3970,6 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
   (pyim-hanzi2pinyin string shou-zi-mu separator return-list t))
 
 ;; ** pyim 词库管理工具
-;; 为 pyim 添加一个简单的词库管理工具 `pyim-dicts-manager' ，可以方便的执行下列命令：
-;; 1. 添加词库。
-;; 2. 删除词库。
-;; 3. 向上和向下移动词库。
-;; 4. 保存词库设置。
-;; 5. 重启输入法。
-
 (defvar pyim-dm-buffer "*pyim-dict-manager*")
 
 (defun pyim-dm-refresh ()
@@ -4282,7 +4118,14 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
 
 ;;;###autoload
 (defun pyim-dicts-manager ()
-  "pyim 词库管理器。"
+  "pyim 词库管理器。
+
+使用这个词库管理器可以方便的执行下列命令：
+1. 添加词库。
+2. 删除词库。
+3. 向上和向下移动词库。
+4. 保存词库设置。
+5. 重启输入法。"
   (interactive)
   (let ((buffer (get-buffer-create pyim-dm-buffer)))
     (pyim-dm-refresh)
