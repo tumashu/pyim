@@ -2258,19 +2258,7 @@ Return the input string."
 ;; #+END_EXAMPLE
 
 ;; 结果为:
-;; : ((("" . "ua")))
-
-;; 这种错误可以使用函数 `pyim-imobj-validp' 来检测。
-
-;; #+BEGIN_EXAMPLE
-;; (list (pyim-imobj-validp (car (pyim-imobjs-create "ua" 'quanpin)) 'quanpin)
-;;       (pyim-imobj-validp (car (pyim-imobjs-create "a" 'quanpin)) 'quanpin)
-;;       (pyim-imobj-validp (car (pyim-imobjs-create "wa" 'quanpin)) 'quanpin)
-;;       (pyim-imobj-validp (car (pyim-imobjs-create "wua" 'quanpin)) 'quanpin))
-;; #+END_EXAMPLE
-
-;; 结果为:
-;; : (nil t t t)
+;; : nil
 
 ;; pyim 使用函数 `pyim-codes-create' 从一个 imobj 创建一个列表：codes，这个
 ;; 列表中包含一个或者多个 code 字符串，这些 code 字符串用于从词库中搜索相关词条。
@@ -2337,13 +2325,21 @@ Return the input string."
                   (t (setq i 0)))
           (setq i (1- i))
           (setq yunmu ""))))
-    ;; 如果声母和韵母都为空字符串，就特殊处理，
-    ;; 否则容易成为死循环，比如：ua
-    (when (and (equal shenmu "")
-               (equal yunmu ""))
-      (setq yunmu yunmu-and-rest))
     (cons (cons shenmu yunmu)
           (substring yunmu-and-rest (length yunmu)))))
+
+(defun pyim-pinyin-split (pinyin)
+  "将一个代表拼音的字符串： PINYIN 分解为声母韵母对组成的列表."
+  (let (charpy spinyin)
+    (while (when (string< "" pinyin)
+             (setq charpy (pyim-pinyin-get-charpy pinyin))
+             (if (equal (car charpy) '("" . ""))
+                 (progn
+                   (setq spinyin nil)
+                   (setq pinyin ""))
+               (setq spinyin (append spinyin (list (car charpy))))
+               (setq pinyin (cdr charpy)))))
+    spinyin))
 
 ;; 处理输入的拼音
 (defun pyim-scheme-get (scheme-name)
@@ -2370,17 +2366,14 @@ Return the input string."
 
 (defun pyim-imobjs-create:quanpin (entered &optional -)
   (when (and entered (string< "" entered))
-    (pyim-imobjs-find-fuzzy:quanpin
-     (list (apply 'append
-                  (mapcar #'(lambda (p)
-                              (let (chpy spinyin)
-                                (setq p (replace-regexp-in-string "[ -]" "" p))
-                                (while (when (string< "" p)
-                                         (setq chpy (pyim-pinyin-get-charpy p))
-                                         (setq spinyin (append spinyin (list (car chpy))))
-                                         (setq p (cdr chpy))))
-                                spinyin))
-                          (split-string entered "'")))))))
+    (let (output)
+      (dolist (str (split-string entered "'"))
+        (let ((x (pyim-pinyin-split str)))
+          (if x
+              (setq output (append output x))
+            (setq output nil))))
+      (when output
+        (pyim-imobjs-find-fuzzy:quanpin (list output))))))
 
 ;; "nihc" -> (((\"n\" . \"i\") (\"h\" . \"ao\")))
 (defun pyim-imobjs-create:shuangpin (entered &optional scheme-name)
@@ -2451,30 +2444,6 @@ Return the input string."
         (dolist (b ym-list)
           (push (cons a b) result)))
       (reverse result))))
-
-(defun pyim-imobj-validp (imobj scheme-name)
-  "检测一个 IMOBJ 是否是一个有效 IMOBJ."
-  (let ((class (pyim-scheme-get-option scheme-name :class)))
-    (cond
-     ((member class '(quanpin shuangpin))
-      (or (pyim-imobj-validp:quanpin imobj)
-          ;; 一些同学使用下面三个字母前缀来定义特殊
-          ;; 词条，所以下面三个字符开头的也算合法。
-          (member (substring (cdr (car imobj)) 0 1)
-                  '("i" "u" "v"))))
-     (t t))))
-
-(defun pyim-imobj-validp:quanpin (imobj)
-  "检查 IMOBJ 是否有效，用于全拼。
-主要检查是否是声母为空且韵母又不正确。"
-  (let ((valid t) py)
-    (while (progn
-             (setq py (car imobj))
-             (if (and (not (string< "" (car py)))
-                      (not (member (cdr py) pyim-pinyin-valid-yunmu)))
-                 (setq valid nil)
-               (setq imobj (cdr imobj)))))
-    valid))
 
 (defun pyim-codes-create (imobj scheme-name &optional shou-zi-mu)
   "按照 SCHEME-NAME 对应的输入法方案，从一个 IMOBJ 创建一个列表 codes, 这个列表
@@ -2637,7 +2606,7 @@ IMOBJS 获得候选词条。"
                (> (length entered) 0))
       (setq pyim-imobjs (pyim-imobjs-create entered scheme-name))
       (setq pyim-candidates
-            (if (pyim-imobj-validp (car pyim-imobjs) scheme-name)
+            (if pyim-imobjs
                 (delete-dups (pyim-candidates-create pyim-imobjs scheme-name))
               (list pyim-entered)))
       (cond
