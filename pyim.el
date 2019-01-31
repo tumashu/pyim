@@ -2334,12 +2334,20 @@ Return the input string.
 
    (pyim-imobjs-create \"ua\" 'quanpin)"
   (when (and entered (string< "" entered))
-    (let (output)
-      (dolist (str (split-string entered "'"))
-        (let ((x (pyim-pinyin-split str)))
-          (if x
-              (setq output (append output x))
-            (setq output nil))))
+    (let* ((str-list (remove "" (split-string entered "'")))
+           (n (length str-list))
+           output)
+      (dotimes (i n)
+        (let* ((str (nth i str-list))
+               (x (pyim-pinyin-split str)))
+          (if (not x)
+              (setq output nil)
+            (when (> i 0)
+              ;; 将强制分割符号附加到封分割符后面的声母开头，
+              ;; 类似： ("'n" . "i"), 用于 `pyim-page-preview-create' 函数。
+              (setf (caar x)
+                    (concat "'" (caar x))))
+            (setq output (append output x)))))
       (when output
         (pyim-imobjs-find-fuzzy:quanpin (list output))))))
 
@@ -2433,7 +2441,8 @@ Return the input string.
    (\"wo\" \"ai\" \"mei\" \"nv\")"
   (mapcar
    #'(lambda (w)
-       (let ((py (concat (car w) (cdr w))))
+       (let ((py (replace-regexp-in-string ;去掉分隔符，在词库中搜索候选词不需要分隔符
+                  "'" "" (concat (car w) (cdr w)))))
          (if shou-zi-mu
              (substring py 0 1)
            py)))
@@ -2857,9 +2866,20 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
       (funcall (intern (format "pyim-page-preview-create:%S" class)) separator))))
 
 (defun pyim-page-preview-create:quanpin (&optional separator)
-  (mapconcat #'identity
-             (pyim-codes-create (car pyim-imobjs) pyim-default-scheme)
-             (or separator " ")))
+  (let* ((separator (or separator " "))
+         (str (mapconcat #'identity
+                         (mapcar
+                          #'(lambda (w)
+                              (concat (car w) (cdr w)))
+                          (car pyim-imobjs))
+                         separator)))
+    (concat
+     (replace-regexp-in-string
+      (concat separator "'") "'" str)
+     ;; 处理 nihao' 这种结尾为分隔符的情况
+     (if (pyim-string-match-p "'$" pyim-entered)
+         "'"
+       ""))))
 
 (defun pyim-page-preview-create:shuangpin (&optional separator)
   (let ((keymaps (pyim-scheme-get-option pyim-default-scheme :keymaps))
