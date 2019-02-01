@@ -2902,17 +2902,28 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
     (or preedit "")))
 
 (defun pyim-page-preview-create:xingma (&optional separator)
-  (let* ((str (mapconcat #'identity
+  (let* ((scheme-name pyim-default-scheme)
+         (class (pyim-scheme-get-option scheme-name :class))
+         (prefix (pyim-scheme-get-option scheme-name :code-prefix))
+         (str (mapconcat #'identity
                          (car pyim-imobjs)
                          (or separator " ")))
          (candidate
           (pyim-candidate-parse
            (nth (1- pyim-candidate-position)
                 pyim-candidates)))
-         (pinyin (pyim-hanzi2pinyin candidate nil " " nil t)))
-    (if (and pinyin (stringp pinyin))
-        (format "%s (%s)" str pinyin)
-      str)))
+         (codes
+          (cl-remove-if
+           #'(lambda (x)
+               (not (equal (substring (or x " ") 0 1) prefix)))
+           (sort
+            (cl-copy-list (gethash candidate pyim-dcache-word2code))
+            #'(lambda (a b) (> (length a) (length b))))))
+         (code (substring (or (car codes) " ") 1)))
+    (if (or (pyim-string-match-p (concat "^" str) code)
+            (equal code ""))
+        str
+      (format "%s (%s)" str code))))
 
 (defun pyim-page-menu-create (candidates position &optional separator)
   "这个函数用于创建在 page 中显示的备选词条菜单。"
