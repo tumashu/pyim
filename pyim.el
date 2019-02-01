@@ -2472,10 +2472,11 @@ Return the input string.
 (defun pyim-candidates-create (imobjs scheme-name)
   "按照 SCHEME-NAME 对应的输入法方案， 从输入法内部对象列表:
 IMOBJS 获得候选词条。"
-  (let ((class (pyim-scheme-get-option scheme-name :class)))
-    (when class
-      (funcall (intern (format "pyim-candidates-create:%S" class))
-               imobjs scheme-name))))
+  (when imobjs
+    (let ((class (pyim-scheme-get-option scheme-name :class)))
+      (when class
+        (funcall (intern (format "pyim-candidates-create:%S" class))
+                 imobjs scheme-name)))))
 
 (defun pyim-candidates-create:xingma (imobjs scheme-name)
   "`pyim-candidates-create' 处理五笔仓颉等形码输入法的函数."
@@ -2599,9 +2600,8 @@ IMOBJS 获得候选词条。"
                (> (length entered) 0))
       (setq pyim-imobjs (pyim-imobjs-create entered scheme-name))
       (setq pyim-candidates
-            (if pyim-imobjs
-                (delete-dups (pyim-candidates-create pyim-imobjs scheme-name))
-              (list pyim-entered)))
+            (or (delete-dups (pyim-candidates-create pyim-imobjs scheme-name))
+                (list pyim-entered)))
       (cond
        ;; 五笔等型码输入法，重码率很低，适合盲打，
        ;; 这是添加自动上屏功能。
@@ -2612,10 +2612,9 @@ IMOBJS 获得候选词条。"
              (= (length (car (car pyim-imobjs))) n))
         (pyim-outcome-handle 'candidate)
         (pyim-terminate-translation))
-       (pyim-candidates
-        (setq pyim-candidate-position 1)
-        (pyim-preview-refresh)
-        (pyim-page-refresh))))))
+       (t (setq pyim-candidate-position 1)
+          (pyim-preview-refresh)
+          (pyim-page-refresh))))))
 
 ;; ** 待输入字符串预览
 (defun pyim-preview-setup-overlay ()
