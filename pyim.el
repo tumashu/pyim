@@ -966,14 +966,6 @@ pyim 内建的有三种选词框格式：
   :group 'pyim
   :type 'integer)
 
-(defcustom pyim-auto-select t
-  "是否开启唯一候选词自动上屏功能.
-
-五笔等型码输入法，重码率很低，开启这个选项后，唯一
-的候选词会自动选择并屏幕，不需要用户按空格选择。"
-  :group 'pyim
-  :type 'boolean)
-
 (defface pyim-page
   '((t (:inherit default :background "#333333" :foreground "#dcdccc")))
   "Face used for the pyim page."
@@ -2605,19 +2597,9 @@ IMOBJS 获得候选词条。"
       (setq pyim-candidates
             (or (delete-dups (pyim-candidates-create pyim-imobjs scheme-name))
                 (list pyim-entered)))
-      (cond
-       ;; 五笔等型码输入法，重码率很低，适合盲打，
-       ;; 这是添加自动上屏功能。
-       ((and pyim-auto-select
-             (eq class 'xingma)
-             (= (length pyim-candidates) 1)
-             ;; 检测输入的字符串长度是否达到了 code 长度最大值。
-             (= (length (car (car pyim-imobjs))) n))
-        (pyim-outcome-handle 'candidate)
-        (pyim-terminate-translation))
-       (t (setq pyim-candidate-position 1)
-          (pyim-preview-refresh)
-          (pyim-page-refresh))))))
+      (setq pyim-candidate-position 1)
+      (pyim-preview-refresh)
+      (pyim-page-refresh))))
 
 ;; ** 待输入字符串预览
 (defun pyim-preview-setup-overlay ()
