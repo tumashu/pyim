@@ -2425,15 +2425,15 @@ Return the input string.
           (push (cons a b) result)))
       (reverse result))))
 
-(defun pyim-codes-create (imobj scheme-name &optional shou-zi-mu)
+(defun pyim-codes-create (imobj scheme-name &optional first-n)
   "按照 SCHEME-NAME 对应的输入法方案，从一个 IMOBJ 创建一个列表 codes, 这个列表
 包含一个或者多个 code 字符串，这些 code 字符串用于从词库中搜索词条."
   (let ((class (pyim-scheme-get-option scheme-name :class)))
     (when class
       (funcall (intern (format "pyim-codes-create:%S" class))
-               imobj scheme-name shou-zi-mu))))
+               imobj scheme-name first-n))))
 
-(defun pyim-codes-create:quanpin (imobj scheme-name &optional shou-zi-mu)
+(defun pyim-codes-create:quanpin (imobj scheme-name &optional first-n)
   "从IMOBJ 创建一个 code 列表：codes.
 
 列表 codes 中包含一个或者多个 code 字符串，这些 code 字符串用于从
@@ -2448,23 +2448,26 @@ Return the input string.
    #'(lambda (w)
        (let ((py (replace-regexp-in-string ;去掉分隔符，在词库中搜索候选词不需要分隔符
                   "'" "" (concat (car w) (cdr w)))))
-         (if shou-zi-mu
-             (substring py 0 1)
+         (if (numberp first-n)
+             (substring py 0 (min first-n (length py)))
            py)))
    imobj))
 
-(defun pyim-codes-create:shuangpin (imobj scheme-name &optional shou-zi-mu)
-  (pyim-codes-create:quanpin imobj 'quanpin shou-zi-mu))
+(defun pyim-codes-create:shuangpin (imobj scheme-name &optional first-n)
+  (pyim-codes-create:quanpin imobj 'quanpin first-n))
 
-(defun pyim-codes-create:xingma (imobj scheme-name &optional _shou-zi-mu)
+(defun pyim-codes-create:xingma (imobj scheme-name &optional first-n)
   (when scheme-name
     (let ((code-prefix (pyim-scheme-get-option scheme-name :code-prefix)))
       (mapcar
        #'(lambda (x)
-           (concat (or code-prefix "") x))
+           (concat (or code-prefix "")
+                   (if (numberp first-n)
+                       (substring x 0 (min first-n (length x)))
+                     x)))
        imobj))))
 
-(defun pyim-codes-create:rime (imobj scheme-name &optional _shou-zi-mu)
+(defun pyim-codes-create:rime (imobj scheme-name &optional _first-n)
   (when scheme-name
     imobj))
 
@@ -2522,7 +2525,7 @@ IMOBJS 获得候选词条。"
           (when (> (length (car imobjs)) 1)
             (pyim-dcache-get
              (mapconcat #'identity
-                        (pyim-codes-create (car imobjs) scheme-name t)
+                        (pyim-codes-create (car imobjs) scheme-name 1)
                         "-")
              pyim-dcache-ishortcode2word)))
          znabc-words
