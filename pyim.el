@@ -2496,6 +2496,7 @@ IMOBJS 获得候选词条。"
                                             pyim-dcache-shortcode2word)))
                              (list str))))
         (setq result (append result output3))))
+    (setq result (remove nil (append result (pyim-dcache-get pyim-entered))))
     (when (car result)
       result)))
 
