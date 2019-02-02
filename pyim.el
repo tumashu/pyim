@@ -220,6 +220,10 @@
 ;; 最简单的方式是从 melpa 中安装 pyim-wbdict 包，然后根据它的
 ;; [[https://github.com/tumashu/pyim-wbdict][README]] 来配置。
 
+;; 如果用户在使用五笔输入法的过程中，想临时切换到拼音输入法，在显示选
+;; 词框的时候，按 TAB 键，就可以切换到临时拼音输入模式，选词之后，自动
+;; 切换回五笔。
+
 ;; *** 使用仓颉输入法
 ;; pyim 支持仓颉输入法，用户可以通过变量 `pyim-default-scheme' 来设定：
 
@@ -1034,6 +1038,9 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
 (defvar pyim-outcome ""
   "用户通过 pyim 生成的字符串，是最终插入到 buffer 的字符串。" )
 
+(defvar pyim-temp-scheme nil
+  "设置临时 scheme, 用于五笔等形码输入法临时拼音输入。")
+
 (defvar pyim-input-ascii nil
   "是否开启 pyim 英文输入模式.")
 
@@ -1146,6 +1153,8 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
     (define-key map [M-delete] 'pyim-backward-kill-cchar)
     (define-key map [C-backspace] 'pyim-backward-kill-cchar)
     (define-key map [C-delete] 'pyim-backward-kill-cchar)
+    (define-key map [TAB]      'pyim-active-temp-quanpin)
+    (define-key map (kbd "TAB") 'pyim-active-temp-quanpin)
     (define-key map "\177" 'pyim-delete-last-char)
     (define-key map "\C-n" 'pyim-page-next-page)
     (define-key map "\C-p" 'pyim-page-previous-page)
@@ -1176,6 +1185,7 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
     pyim-punctuation-half-width-functions
     pyim-translating
     pyim-last-created-word
+    pyim-temp-scheme
 
     input-method-function
     inactivate-current-input-method-function
@@ -2198,7 +2208,7 @@ Return the input string.
 
 (defun pyim-input-chinese-p ()
   "确定 pyim 是否需要启动中文输入模式."
-  (let* ((scheme-name pyim-default-scheme)
+  (let* ((scheme-name (pyim-scheme-get-default-scheme))
          (first-chars (pyim-scheme-get-option scheme-name :first-chars))
          (rest-chars (pyim-scheme-get-option scheme-name :rest-chars)))
     (and (or pyim-force-input-chinese
@@ -2214,7 +2224,7 @@ Return the input string.
 (defun pyim-self-insert-command ()
   "Pyim 版本的 self-insert-command."
   (interactive "*")
-  (let* ((scheme-name pyim-default-scheme)
+  (let* ((scheme-name (pyim-scheme-get-default-scheme))
          (class (pyim-scheme-get-option scheme-name :class))
          (n (pyim-scheme-get-option scheme-name :code-split-length)))
     (cond
@@ -2244,7 +2254,7 @@ Return the input string.
 1. 查询拼音字符串 ENTERED 得到被选词列表 `pyim-candidates'
 2. 设置 `pyim-entered' 变量的取值。
 3. 显示备选词等待用户选择。"
-  (let* ((scheme-name pyim-default-scheme)
+  (let* ((scheme-name (pyim-scheme-get-default-scheme))
          (class (pyim-scheme-get-option scheme-name :class))
          (n (pyim-scheme-get-option scheme-name :code-split-length)))
     (setq pyim-entered entered)
@@ -2264,6 +2274,7 @@ Return the input string.
   (setq pyim-translating nil)
   (pyim-preview-delete-string)
   (setq pyim-candidates nil)
+  (setq pyim-temp-scheme nil)
   (when (and (memq pyim-page-tooltip '(posframe child-frame))
              (pyim-posframe-valid-p))
     (posframe-hide pyim-page-tooltip-posframe-buffer)))
@@ -2345,6 +2356,23 @@ Return the input string.
 (defun pyim-scheme-get (scheme-name)
   "获取名称为 SCHEME-NAME 的输入法方案。"
   (assoc scheme-name pyim-schemes))
+
+(defun pyim-scheme-get-default-scheme ()
+  "获取当前默认的输入法 scheme"
+  (or pyim-temp-scheme
+      pyim-default-scheme))
+
+(defun pyim-active-temp-quanpin (arg)
+  "临时切换到拼音输入法.
+
+这个功能用于五笔等形码输入法，在忘记编码的时候临时用拼音输入中文。"
+  (interactive "p")
+  (if (= (length pyim-entered) 0)
+      (progn
+        (pyim-outcome-handle 'last-char)
+        (pyim-terminate-translation))
+    (setq pyim-temp-scheme 'quanpin)
+    (pyim-entered-handle pyim-entered)))
 
 (defun pyim-scheme-get-option (scheme-name option)
   "获取名称为 SCHEME-NAME 的输入法方案，并提取其属性 OPTION 。"
@@ -2541,7 +2569,6 @@ IMOBJS 获得候选词条。"
                                             pyim-dcache-shortcode2word)))
                              (list str))))
         (setq result (append result output3))))
-    (setq result (remove nil (append result (pyim-dcache-get pyim-entered))))
     (when (car result)
       result)))
 
@@ -2653,7 +2680,7 @@ IMOBJS 获得候选词条。"
 pyim 会使用 emacs overlay 机制在 *待输入buffer* 光标处高亮显示一
 个预览字符串，让用户可以查看将要输入的字符串，这个函数用于更新这
 个字符串的内容。"
-  (let* ((class (pyim-scheme-get-option pyim-default-scheme :class))
+  (let* ((class (pyim-scheme-get-option (pyim-scheme-get-default-scheme) :class))
          (end (pyim-page-end))
          (start (1- (pyim-page-start)))
          (candidates pyim-candidates)
@@ -2873,7 +2900,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
 
 这个预览是在 page 中显示，而 `pyim-preview-refresh' 对应的预览
 是在 buffer 光标处显示，两者要做区别。"
-  (let* ((scheme-name pyim-default-scheme)
+  (let* ((scheme-name (pyim-scheme-get-default-scheme))
          (class (pyim-scheme-get-option scheme-name :class)))
     (when class
       (funcall (intern (format "pyim-page-preview-create:%S" class)) separator))))
@@ -2892,10 +2919,28 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
      ;; 处理 nihao' 这种结尾为分隔符的情况
      (if (pyim-string-match-p "'$" pyim-entered)
          "'"
-       ""))))
+       "")
+     ;; 用于标记临时拼音输入法
+     (when pyim-temp-scheme
+       (let* ((prefix (pyim-scheme-get-option pyim-default-scheme :code-prefix))
+              (candidate
+               (pyim-candidate-parse
+                (nth (1- pyim-candidate-position)
+                     pyim-candidates)))
+              (codes
+               (cl-remove-if
+                #'(lambda (x)
+                    (not (equal (substring (or x " ") 0 1) prefix)))
+                (sort
+                 (cl-copy-list (gethash candidate pyim-dcache-word2code))
+                 #'(lambda (a b) (> (length a) (length b))))))
+              (code (substring (or (car codes) " ") 1)))
+         (if (> (length code) 0)
+             (format " [%s] (Temp)" code)
+           " (Temp)"))))))
 
 (defun pyim-page-preview-create:shuangpin (&optional separator)
-  (let ((keymaps (pyim-scheme-get-option pyim-default-scheme :keymaps))
+  (let ((keymaps (pyim-scheme-get-option (pyim-scheme-get-default-scheme) :keymaps))
         result)
     (dolist (w (car pyim-imobjs))
       (let ((sm (car w))
@@ -2926,28 +2971,13 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
     (or preedit "")))
 
 (defun pyim-page-preview-create:xingma (&optional separator)
-  (let* ((scheme-name pyim-default-scheme)
+  (let* ((scheme-name (pyim-scheme-get-default-scheme))
          (class (pyim-scheme-get-option scheme-name :class))
          (prefix (pyim-scheme-get-option scheme-name :code-prefix))
          (str (mapconcat #'identity
                          (car pyim-imobjs)
-                         (or separator " ")))
-         (candidate
-          (pyim-candidate-parse
-           (nth (1- pyim-candidate-position)
-                pyim-candidates)))
-         (codes
-          (cl-remove-if
-           #'(lambda (x)
-               (not (equal (substring (or x " ") 0 1) prefix)))
-           (sort
-            (cl-copy-list (gethash candidate pyim-dcache-word2code))
-            #'(lambda (a b) (> (length a) (length b))))))
-         (code (substring (or (car codes) " ") 1)))
-    (if (or (pyim-string-match-p (concat "^" str) code)
-            (equal code ""))
-        str
-      (format "%s (%s)" str code))))
+                         (or separator " "))))
+    str))
 
 (defun pyim-page-menu-create (candidates position &optional separator)
   "这个函数用于创建在 page 中显示的备选词条菜单。"
@@ -3100,7 +3130,7 @@ tooltip 选词框中显示。
       (progn
         (pyim-outcome-handle 'last-char)
         (pyim-terminate-translation))
-    (if (equal 'rime (pyim-scheme-get-option pyim-default-scheme :class))
+    (if (equal 'rime (pyim-scheme-get-option (pyim-scheme-get-default-scheme) :class))
         (call-interactively #'pyim-page-select-word:rime)
       (let (imobjs)
         (pyim-outcome-handle 'candidate)
@@ -3111,7 +3141,7 @@ tooltip 选词框中显示。
                                   #'(lambda (imobj)
                                       (nthcdr (length pyim-outcome) imobj))
                                   pyim-imobjs)))
-              (setq pyim-candidates (pyim-candidates-create imobjs pyim-default-scheme)
+              (setq pyim-candidates (pyim-candidates-create imobjs (pyim-scheme-get-default-scheme))
                     pyim-candidate-position 1)
               (pyim-preview-refresh)
               (pyim-page-refresh))
@@ -3180,10 +3210,10 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
             (when (= (length user-trigger-char) 1)
               user-trigger-char)))
          (first-char (pyim-scheme-get-option
-                      pyim-default-scheme
+                      (pyim-scheme-get-default-scheme)
                       :first-chars))
          (prefer-trigger-chars (pyim-scheme-get-option
-                                pyim-default-scheme
+                                (pyim-scheme-get-default-scheme)
                                 :prefer-trigger-chars)))
     (if (pyim-string-match-p user-trigger-char first-char)
         (progn
@@ -3478,7 +3508,7 @@ PUNCT-LIST 格式类似：
               (mapcar #'(lambda (imobj)
                           (cl-subseq imobj 0 (- (length imobj) 1)))
                       pyim-imobjs))
-        (setq pyim-candidates (pyim-candidates-create pyim-imobjs pyim-default-scheme)
+        (setq pyim-candidates (pyim-candidates-create pyim-imobjs (pyim-scheme-get-default-scheme))
               pyim-candidate-position 1)
         (if pyim-candidates
             (progn (pyim-preview-refresh)
@@ -3499,7 +3529,7 @@ PUNCT-LIST 格式类似：
     (toggle-input-method))
   (let* ((case-fold-search nil)
          (pyim-force-input-chinese t)
-         (scheme-name pyim-default-scheme)
+         (scheme-name (pyim-scheme-get-default-scheme))
          (first-chars (pyim-scheme-get-option scheme-name :first-chars))
          (rest-chars (pyim-scheme-get-option scheme-name :rest-chars))
          (string (if mark-active
@@ -3562,7 +3592,7 @@ PUNCT-LIST 格式类似：
 (defun pyim-cregexp-build (string)
   "根据 STRING 构建一个中文 regexp, 用于 \"拼音搜索汉字\".
 比如：\"nihao\" -> \"[你呢...][好号...] \\| nihao\""
-  (let* ((scheme-name pyim-default-scheme)
+  (let* ((scheme-name (pyim-scheme-get-default-scheme))
          (class (pyim-scheme-get-option scheme-name :class)))
     ;; 确保 pyim 词库加载
     (pyim-dcache-init-variables)
