@@ -966,6 +966,14 @@ pyim 内建的有三种选词框格式：
   :group 'pyim
   :type 'integer)
 
+(defcustom pyim-auto-select t
+  "是否开启候选词自动上屏功能.
+
+五笔等型码输入法，重码率很低，开启这个选项后，第一个候选词会自动
+选择并上屏，不需要用户频繁的按空格来选择。"
+  :group 'pyim
+  :type 'boolean)
+
 (defcustom pyim-posframe-min-width (* pyim-page-length 7)
   "使用 posframe 做为选词框时，设置选词框的最小宽度."
   :group 'pyim
@@ -2206,18 +2214,49 @@ Return the input string.
 (defun pyim-self-insert-command ()
   "Pyim 版本的 self-insert-command."
   (interactive "*")
-  ;; (message "%s" (current-buffer))
-  (cond
-   ((pyim-input-chinese-p)
-    (pyim-entered-handle
-     (concat pyim-entered
-             (char-to-string last-command-event))))
-   (pyim-candidates
-    (pyim-outcome-handle 'candidate-and-last-char)
-    (pyim-terminate-translation))
-   (t
-    (pyim-outcome-handle 'last-char)
-    (pyim-terminate-translation))))
+  (let* ((scheme-name pyim-default-scheme)
+         (class (pyim-scheme-get-option scheme-name :class))
+         (n (pyim-scheme-get-option scheme-name :code-split-length)))
+    (cond
+     ((and pyim-auto-select
+           (eq class 'xingma)
+           (= (length pyim-entered) n))
+      ;; 五笔等型码输入法，重码率很低，90%以上的情况都是选择第一个词条，
+      ;; 这里添加自动选择功能，减少按空格强制选词的机会。
+      (pyim-outcome-handle 'candidate)
+      (pyim-entered-handle (char-to-string last-command-event)))
+     ((pyim-input-chinese-p)
+      (pyim-entered-handle
+       (concat pyim-entered
+               (char-to-string last-command-event))))
+     (pyim-candidates
+      (pyim-outcome-handle 'candidate-and-last-char)
+      (pyim-terminate-translation))
+     (t
+      (pyim-outcome-handle 'last-char)
+      (pyim-terminate-translation)))))
+
+(defun pyim-entered-handle (entered)
+  "处理用户输入的字符串 ENTERED 的核心函数.
+
+主要做如下工作：
+1. 查询拼音字符串 ENTERED 得到被选词列表 `pyim-candidates'
+2. 设置 `pyim-entered' 变量的取值。
+3. 显示备选词等待用户选择。"
+  (let* ((scheme-name pyim-default-scheme)
+         (class (pyim-scheme-get-option scheme-name :class))
+         (n (pyim-scheme-get-option scheme-name :code-split-length)))
+    (setq pyim-entered entered)
+    (when (and entered
+               (stringp entered)
+               (> (length entered) 0))
+      (setq pyim-imobjs (pyim-imobjs-create entered scheme-name))
+      (setq pyim-candidates
+            (or (delete-dups (pyim-candidates-create pyim-imobjs scheme-name))
+                (list pyim-entered)))
+      (setq pyim-candidate-position 1)
+      (pyim-preview-refresh)
+      (pyim-page-refresh))))
 
 (defun pyim-terminate-translation ()
   "Terminate the translation of the current key."
@@ -2584,28 +2623,6 @@ IMOBJS 获得候选词条。"
 (defun pyim-candidates-create:shuangpin (imobjs scheme-name)
   "`pyim-candidates-create' 处理双拼输入法的函数."
   (pyim-candidates-create:quanpin imobjs 'quanpin))
-
-(defun pyim-entered-handle (entered)
-  "处理用户输入的字符串 ENTERED 的核心函数.
-
-主要做如下工作：
-1. 查询拼音字符串 ENTERED 得到被选词列表 `pyim-candidates'
-2. 设置 `pyim-entered' 变量的取值。
-3. 显示备选词等待用户选择。"
-  (let* ((scheme-name pyim-default-scheme)
-         (class (pyim-scheme-get-option scheme-name :class))
-         (n (pyim-scheme-get-option scheme-name :code-split-length)))
-    (setq pyim-entered entered)
-    (when (and entered
-               (stringp entered)
-               (> (length entered) 0))
-      (setq pyim-imobjs (pyim-imobjs-create entered scheme-name))
-      (setq pyim-candidates
-            (or (delete-dups (pyim-candidates-create pyim-imobjs scheme-name))
-                (list pyim-entered)))
-      (setq pyim-candidate-position 1)
-      (pyim-preview-refresh)
-      (pyim-page-refresh))))
 
 ;; ** 待输入字符串预览
 (defun pyim-preview-setup-overlay ()
