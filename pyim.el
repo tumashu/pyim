@@ -966,6 +966,10 @@ pyim 内建的有三种选词框格式：
   :group 'pyim
   :type 'integer)
 
+(defcustom pyim-posframe-min-width 0
+  "使用 posframe 做为选词框时，设置选词框的最小宽度."
+  :group 'pyim)
+
 (defface pyim-page
   '((t (:inherit default :background "#333333" :foreground "#dcdccc")))
   "Face used for the pyim page."
@@ -3022,7 +3026,7 @@ tooltip 选词框中显示。
            (posframe-show pyim-page-tooltip-posframe-buffer
                           :string string
                           :position position
-                          :min-width (* pyim-page-length 7)
+                          :min-width pyim-posframe-min-width
                           :background-color (face-attribute 'pyim-page :background)
                           :foreground-color (face-attribute 'pyim-page :foreground)
                           :internal-border-width pyim-posframe-border-width))
