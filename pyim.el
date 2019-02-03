@@ -1153,8 +1153,8 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
     (define-key map [M-delete] 'pyim-backward-kill-cchar)
     (define-key map [C-backspace] 'pyim-backward-kill-cchar)
     (define-key map [C-delete] 'pyim-backward-kill-cchar)
-    (define-key map [TAB]      'pyim-active-temp-quanpin)
-    (define-key map (kbd "TAB") 'pyim-active-temp-quanpin)
+    (define-key map [TAB]      'pyim-toggle-temp-quanpin)
+    (define-key map (kbd "TAB") 'pyim-toggle-temp-quanpin)
     (define-key map "\177" 'pyim-delete-last-char)
     (define-key map "\C-n" 'pyim-page-next-page)
     (define-key map "\C-p" 'pyim-page-previous-page)
@@ -2363,16 +2363,18 @@ Return the input string.
   (or pyim-temp-scheme
       pyim-default-scheme))
 
-(defun pyim-active-temp-quanpin (arg)
+(defun pyim-toggle-temp-quanpin ()
   "临时切换到拼音输入法.
 
 这个功能用于五笔等形码输入法，在忘记编码的时候临时用拼音输入中文。"
-  (interactive "p")
+  (interactive)
   (if (= (length pyim-entered) 0)
       (progn
         (pyim-outcome-handle 'last-char)
         (pyim-terminate-translation))
-    (setq pyim-temp-scheme 'quanpin)
+    (if (eq pyim-temp-scheme 'quanpin)
+        (setq pyim-temp-scheme nil)
+      (setq pyim-temp-scheme 'quanpin))
     (pyim-entered-handle pyim-entered)))
 
 (defun pyim-scheme-get-option (scheme-name option)
@@ -2922,7 +2924,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
          "'"
        "")
      ;; 用于标记临时拼音输入法
-     (when pyim-temp-scheme
+     (when (eq pyim-temp-scheme 'quanpin)
        (let* ((prefix (pyim-scheme-get-option pyim-default-scheme :code-prefix))
               (candidate
                (pyim-candidate-parse
