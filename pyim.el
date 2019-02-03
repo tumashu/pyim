@@ -1163,7 +1163,7 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
     (define-key map [M-delete] 'pyim-backward-kill-cchar)
     (define-key map [C-backspace] 'pyim-backward-kill-cchar)
     (define-key map [C-delete] 'pyim-backward-kill-cchar)
-    (define-key map [TAB]      'pyim-toggle-assistant-scheme)
+    (define-key map [?\t]      'pyim-toggle-assistant-scheme)
     (define-key map (kbd "TAB") 'pyim-toggle-assistant-scheme)
     (define-key map "\177" 'pyim-delete-last-char)
     (define-key map "\C-n" 'pyim-page-next-page)
