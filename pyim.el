@@ -2070,7 +2070,7 @@ FILE 的格式与 `pyim-export' 生成的文件格式相同，
     (remhash word pyim-dcache-iword2count)))
 
 ;; ** 处理用户输入字符的相关函数
-(defun pyim-input-method (key-or-string)
+(defun pyim-input-method (key)
   "得到需要插入到 buffer 的字符串, 并将其插入到待输入 buffer.
 
 这个函数会处理用户输入的字符，并最终的得到需要插入 buffer 的字符
@@ -2079,14 +2079,12 @@ FILE 的格式与 `pyim-export' 生成的文件格式相同，
   (if (or buffer-read-only
           overriding-terminal-local-map
           overriding-local-map)
-      (if (characterp key-or-string)
-          (list key-or-string)
-        (mapcar 'identity key-or-string))
+      (list key)
     ;; (message "call with key: %S" key-or-string)
     (pyim-preview-setup-overlay)
     (with-silent-modifications
       (unwind-protect
-          (let ((input-string (pyim-start-translation key-or-string)))
+          (let ((input-string (pyim-start-translation key)))
             ;; (message "input-string: %s" input-string)
             (when (and (stringp input-string)
                        (> (length input-string) 0))
@@ -2105,7 +2103,7 @@ FILE 的格式与 `pyim-export' 生成的文件格式相同，
             result))
     str))
 
-(defun pyim-start-translation (key-or-string)
+(defun pyim-start-translation (key)
   "Start translation of the typed character KEY-OR-STRING by pyim.
 Return the input string.
 
@@ -2129,9 +2127,7 @@ Return the input string.
    4. Reading One Event"
   ;; Check the possibility of translating KEY.
   ;; If KEY is nil, we can anyway start translation.
-  (if (or (integerp key-or-string)
-          (stringp key-or-string)
-          (null key-or-string))
+  (if (or (integerp key) (null key))
       ;; OK, we can start translation.
       (let* ((echo-keystrokes 0)
              (help-char nil)
@@ -2142,17 +2138,12 @@ Return the input string.
              ;; 插入 preview string, pyim *强制* 将其设置为 nil
              (input-method-use-echo-area nil)
              (modified-p (buffer-modified-p))
-             key str last-command-event last-command this-command)
-
-        (if (integerp key-or-string)
-            (setq key key-or-string)
-          (setq key (string-to-char (substring key-or-string -1)))
-          (setq str (substring key-or-string 0 -1)))
+             last-command-event last-command this-command)
 
         (setq pyim-translating t)
 
+        (pyim-entered-handle "")
         (pyim-outcome-handle 'set-to-blank-value)
-        (pyim-entered-handle (or str ""))
 
         (when key
           (setq unread-command-events
@@ -2187,7 +2178,7 @@ Return the input string.
         (pyim-magic-convert pyim-outcome))
     ;; Since KEY doesn't start any translation, just return it.
     ;; But translate KEY if necessary.
-    (char-to-string key-or-string)))
+    (char-to-string key)))
 
 (defun pyim-auto-switch-english-input-p ()
   "判断是否 *根据环境自动切换* 为英文输入模式，这个函数处理变量：
@@ -3561,8 +3552,9 @@ PUNCT-LIST 格式类似：
            (when (and (not mark-active) (> length 0))
              (delete-char (- 0 length)))
            (when (> length 0)
-             (insert (mapconcat #'char-to-string
-                                (pyim-input-method code) ""))))
+             (setq unread-command-events
+                   (append (listify-key-sequence code)
+                           unread-command-events))))
           ((pyim-string-match-p "[[:punct:]：－]" (pyim-char-before-to-string 0))
            ;; 当光标前的一个字符是标点符号时，半角/全角切换。
            (call-interactively 'pyim-punctuation-translate-at-point))
