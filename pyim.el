@@ -2233,9 +2233,10 @@ Return the input string.
            (= (length pyim-entered) n))
       ;; 五笔等型码输入法，重码率很低，90%以上的情况都是选择第一个词条，
       ;; 这里添加自动选择功能，减少按空格强制选词的机会。
+      (push last-command-event unread-command-events)
       (unless (equal pyim-candidates (list pyim-entered))
         (pyim-outcome-handle 'candidate))
-      (pyim-entered-handle (char-to-string last-command-event)))
+      (pyim-terminate-translation))
      ((pyim-input-chinese-p)
       (pyim-entered-handle
        (concat pyim-entered
