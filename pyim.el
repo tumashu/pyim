@@ -1045,7 +1045,10 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
   "是否开启 pyim 英文输入模式.")
 
 (defvar pyim-force-input-chinese nil
-  "是否强制开启中文输入模式.")
+  "是否强制开启中文输入模式.
+
+这个变量只用于 `pyim-convert-string-at-point', 不要
+在其它地方使用。")
 
 (defvar pyim-candidate-position nil
   "当前选择的词条在 ‘pyim-candidates’ 中的位置.
@@ -2267,6 +2270,7 @@ Return the input string.
   (pyim-preview-delete-string)
   (setq pyim-candidates nil)
   (setq pyim-temp-scheme nil)
+  (setq pyim-force-input-chinese nil)
   (when (and (memq pyim-page-tooltip '(posframe child-frame))
              (pyim-posframe-valid-p))
     (posframe-hide pyim-page-tooltip-posframe-buffer)))
@@ -3522,7 +3526,6 @@ PUNCT-LIST 格式类似：
   (unless (equal input-method-function 'pyim-input-method)
     (toggle-input-method))
   (let* ((case-fold-search nil)
-         (pyim-force-input-chinese t)
          (scheme-name (pyim-scheme-get-default-scheme))
          (first-chars (pyim-scheme-get-option scheme-name :first-chars))
          (rest-chars (pyim-scheme-get-option scheme-name :rest-chars))
@@ -3554,7 +3557,8 @@ PUNCT-LIST 格式类似：
            (when (> length 0)
              (setq unread-command-events
                    (append (listify-key-sequence code)
-                           unread-command-events))))
+                           unread-command-events))
+             (setq pyim-force-input-chinese t)))
           ((pyim-string-match-p "[[:punct:]：－]" (pyim-char-before-to-string 0))
            ;; 当光标前的一个字符是标点符号时，半角/全角切换。
            (call-interactively 'pyim-punctuation-translate-at-point))
