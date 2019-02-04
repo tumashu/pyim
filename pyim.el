@@ -220,6 +220,11 @@
 ;; 最简单的方式是从 melpa 中安装 pyim-wbdict 包，然后根据它的
 ;; [[https://github.com/tumashu/pyim-wbdict][README]] 来配置。
 
+;; 另外 Ye FeiYu 同学维护着 pyim-wbdict 的一个 fork, 里面包含着极点
+;; 五笔和清歌五笔的词库，不做发布，有兴趣的同学可以了解一下：
+
+;;     https://github.com/yefeiyu/pyim-wbdict
+
 ;; 如果用户在使用五笔输入法的过程中，忘记了某个字的五笔码，可以按 TAB
 ;; 键临时切换到辅助输入法来输入，选词完成之后自动退出。辅助输入法可以
 ;; 通过 `pyim-assistant-scheme' 来设置。
