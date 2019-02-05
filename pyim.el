@@ -2157,7 +2157,7 @@ Return the input string.
         (setq pyim-translating t)
 
         (pyim-entered-handle "")
-        (pyim-outcome-handle 'set-to-blank-value)
+        (pyim-outcome-handle "")
 
         (when key
           (setq unread-command-events
@@ -3125,7 +3125,7 @@ tooltip 选词框中显示。
          (setq pyim-entered ""
                pyim-outcome "")
          (error "Can't input characters in current unibyte buffer"))
-        ((eq type 'set-to-blank-value)
+        ((equal type "")
          (setq pyim-outcome ""))
         ((eq type 'last-char)
          (setq pyim-outcome
@@ -3148,7 +3148,8 @@ tooltip 选词框中显示。
                          candidate
                          (pyim-translate last-command-event)))))
         ((eq type 'pyim-entered)
-         (setq pyim-outcome pyim-entered))))
+         (setq pyim-outcome pyim-entered))
+        (t (error "Pyim: invaild pyim-outcome"))))
 
 (defun pyim-page-select-word ()
   "从选词框中选择当前词条。"
@@ -3523,7 +3524,7 @@ PUNCT-LIST 格式类似：
   (if (> (length pyim-entered) 1)
       (pyim-entered-handle
        (substring pyim-entered 0 -1))
-    (pyim-outcome-handle 'set-to-blank-value)
+    (pyim-outcome-handle "")
     (pyim-terminate-translation)))
 
 (defun pyim-backward-kill-cchar ()
@@ -3540,9 +3541,9 @@ PUNCT-LIST 格式类似：
         (if pyim-candidates
             (progn (pyim-preview-refresh)
                    (pyim-page-refresh))
-          (pyim-outcome-handle 'set-to-blank-value)
+          (pyim-outcome-handle "")
           (pyim-terminate-translation)))
-    (pyim-outcome-handle 'set-to-blank-value)
+    (pyim-outcome-handle "")
     (pyim-terminate-translation)))
 
 (define-obsolete-function-alias
@@ -3596,7 +3597,7 @@ PUNCT-LIST 格式类似：
 (defun pyim-quit-clear ()
   "取消当前输入的命令."
   (interactive)
-  (pyim-outcome-handle 'set-to-blank-value)
+  (pyim-outcome-handle "")
   (pyim-terminate-translation))
 
 (defun pyim-quit-no-clear ()
