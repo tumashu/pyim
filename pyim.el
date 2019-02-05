@@ -2554,6 +2554,22 @@ Return the input string.
   (when scheme-name
     imobj))
 
+(defun pyim-code-search (word scheme-name)
+  "从 SCHEME-NAME 对应的输入法词库中，搜索 WORD 对应的 code.
+
+返回最长的 code."
+  (when (and (stringp word)
+             (> (length word) 0))
+    (let* ((prefix (pyim-scheme-get-option scheme-name :code-prefix))
+           (code
+            (cl-find-if
+             #'(lambda (x)
+                 (equal (substring (or x " ") 0 1) prefix))
+             (sort
+              (cl-copy-list (gethash word pyim-dcache-word2code))
+              #'(lambda (a b) (> (length a) (length b)))))))
+      (substring (or code " ") 1))))
+
 ;; ** 获取备选词列表
 (defun pyim-candidates-create (imobjs scheme-name)
   "按照 SCHEME-NAME 对应的输入法方案， 从输入法内部对象列表:
@@ -2941,19 +2957,11 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
      ;; 用于标记辅助输入法
      (when (and (eq pyim-assistant-scheme 'quanpin)
                 (eq pyim-assistant-scheme-enable t))
-       (let* ((prefix (pyim-scheme-get-option (pyim-scheme-name 'default) :code-prefix))
-              (candidate
-               (pyim-candidate-parse
-                (nth (1- pyim-candidate-position)
-                     pyim-candidates)))
-              (codes
-               (cl-remove-if
-                #'(lambda (x)
-                    (not (equal (substring (or x " ") 0 1) prefix)))
-                (sort
-                 (cl-copy-list (gethash candidate pyim-dcache-word2code))
-                 #'(lambda (a b) (> (length a) (length b))))))
-              (code (substring (or (car codes) " ") 1)))
+       (let ((code (pyim-code-search
+                    (pyim-candidate-parse
+                     (nth (1- pyim-candidate-position)
+                          pyim-candidates))
+                    (pyim-scheme-name 'default))))
          (if (> (length code) 0)
              (format " [%s](A)" code)
            " (A)"))))))
