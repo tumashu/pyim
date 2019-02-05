@@ -1075,7 +1075,7 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
 
 (defvar pyim-magic-convert-cache nil
   "用来临时保存 `pyim-magic-convert' 的结果.
-  从而加快同一个字符串第二次的转换速度。")
+从而加快同一个字符串第二次的转换速度。")
 
 (defvar pyim-load-hook nil)
 (defvar pyim-active-hook nil)
@@ -1083,9 +1083,9 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
 (defvar pyim-punctuation-translate-p '(auto yes no)
   "这个变量的第一个元素的取值用于控制标点符号全角半角模式切换.
 
-  1. 当第一个元素为 'yes 时，输入全角标点。
-  2. 当第一个元素为 'no 时，输入半角标点。
-  3. 当第一个元素为 'auto 时，根据中英文环境，自动切换。")
+1. 当第一个元素为 'yes 时，输入全角标点。
+2. 当第一个元素为 'no 时，输入半角标点。
+3. 当第一个元素为 'auto 时，根据中英文环境，自动切换。")
 
 (defvar pyim-punctuation-pair-status
   '(("\"" nil) ("'" nil))
@@ -1093,7 +1093,8 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
 
 (defvar pyim-punctuation-escape-list (number-sequence ?0 ?9)
   "Punctuation will not insert after this characters.
-  If you don't like this funciton, set the variable to nil")
+
+If you don't like this funciton, set the variable to nil")
 
 (defvar pyim-pinyin2cchar-cache1 nil
   "拼音查汉字功能需要的变量.")
@@ -1122,32 +1123,32 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
 (defvar pyim-dcache-auto-update t
   "是否自动创建和更新词库对应的 dcache 文件.
 
-  这个变量默认设置为 t, 如果有词库文件添加到 pyim-dicts 或者
-  pyim-extra-dicts 时，pyim 会自动生成相关的 dcache 文件。
+这个变量默认设置为 t, 如果有词库文件添加到 pyim-dicts 或者
+pyim-extra-dicts 时，pyim 会自动生成相关的 dcache 文件。
 
-  一般不建议将这个变量设置为 nil，除非有以下情况：
+一般不建议将这个变量设置为 nil，除非有以下情况：
 
-  1. 用户的词库已经非常稳定，并且想通过禁用这个功能来降低
-  pyim 对资源的消耗。
-  2. 自动更新功能无法正常工作，用户通过手工从其他机器上拷贝
-  dcache 文件的方法让 pyim 正常工作。")
+1. 用户的词库已经非常稳定，并且想通过禁用这个功能来降低
+pyim 对资源的消耗。
+2. 自动更新功能无法正常工作，用户通过手工从其他机器上拷贝
+dcache 文件的方法让 pyim 正常工作。")
 
 (defvar pyim-dcache-prefer-emacs-thread nil
   "是否优先使用 emacs thread 功能来生成 dcache.
 
-  如果这个变量设置为 t, 那么当 emacs thread 功能可以使用时，
-  pyim 优先使用 emacs thread 功能来生成 dcache, 如果设置为 nil,
-  pyim 总是使用 emacs-async 包来生成 dcache.
+如果这个变量设置为 t, 那么当 emacs thread 功能可以使用时，
+pyim 优先使用 emacs thread 功能来生成 dcache, 如果设置为 nil,
+pyim 总是使用 emacs-async 包来生成 dcache.
 
-  不过这个选项开启之后，会显著的减慢词库加载速度，特别是
-  五笔等形码输入法。")
+不过这个选项开启之后，会显著的减慢词库加载速度，特别是
+五笔等形码输入法。")
 
 (defvar pyim-page-tooltip-posframe-buffer " *pyim-page-tooltip-posframe-buffer*"
   "这个变量用来保存做为 page tooltip 的 posframe 的 buffer.")
 
 (defvar pyim-rime-limit 50
   "当 pyim 使用 `liberime-search' 来获取词条时，这个变量用来限制
-  `liberime-search' 返回词条的数量。")
+`liberime-search' 返回词条的数量。")
 
 (defvar pyim-mode-map
   (let ((map (make-sparse-keymap))
@@ -1217,8 +1218,9 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
 ;; ** "汉字 -> 拼音" 以及 "拼音 -> 汉字" 的转换函数
 (defun pyim-pinyin2cchar-cache-create (&optional force)
   "构建 pinyin 到 chinese char 的缓存.
-  用于加快搜索速度，这个函数将缓存保存到 `pyim-pinyin2cchar-cache' 变量中，
-  如果 FORCE 设置为 t, 强制更新索引。"
+
+用于加快搜索速度，这个函数将缓存保存到 `pyim-pinyin2cchar-cache' 变量中，
+如果 FORCE 设置为 t, 强制更新索引。"
   (when (or force (or (not pyim-pinyin2cchar-cache1)
                       (not pyim-pinyin2cchar-cache2)))
     (setq pyim-pinyin2cchar-cache1
@@ -1242,17 +1244,18 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
 
 (defun pyim-pinyin2cchar-get (pinyin &optional equal-match return-list include-seperator)
   "获取拼音与 PINYIN 想匹配的所有汉字.
-  比如：
 
-  “man” -> (\"忙茫盲芒氓莽蟒邙漭硭\" \"满慢漫曼蛮馒瞒蔓颟谩墁幔螨鞔鳗缦熳镘\")
+比如：
 
-  如果 EQUAL-MATCH 是 non-nil, 获取和 PINYIN 完全匹配的汉字。
-  如果 RETURN-LIST 是 non-nil, 返回一个由单个汉字字符串组成的列表。
+“man” -> (\"忙茫盲芒氓莽蟒邙漭硭\" \"满慢漫曼蛮馒瞒蔓颟谩墁幔螨鞔鳗缦熳镘\")
 
-  (\"满\" \"慢\" \"漫\"  ...)
+如果 EQUAL-MATCH 是 non-nil, 获取和 PINYIN 完全匹配的汉字。
+如果 RETURN-LIST 是 non-nil, 返回一个由单个汉字字符串组成的列表。
 
-  如果 INCLUDE-SEPERATOR 是 non-nil, 返回的列表包含一个 ‘|’ 号，pyim 用这个分隔符
-  来区分 3500 个常用汉字和生僻字。"
+(\"满\" \"慢\" \"漫\"  ...)
+
+如果 INCLUDE-SEPERATOR 是 non-nil, 返回的列表包含一个 ‘|’ 号，pyim 用这个分隔符
+来区分 3500 个常用汉字和生僻字。"
   (pyim-pinyin2cchar-cache-create)
   (when (and pinyin (stringp pinyin))
     (let ((output
@@ -1271,14 +1274,14 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
 (defun pyim-cchar2pinyin-get (char-or-str)
   "获取字符或者字符串 CHAR-OR-STR 对应的拼音 code.
 
-  pyim 在特定的时候需要读取一个汉字的拼音，这个工作由此完成，函数
-  从 `pyim-cchar2pinyin-cache' 查询得到一个汉字字符的拼音， 例如：
+pyim 在特定的时候需要读取一个汉字的拼音，这个工作由此完成，函数
+从 `pyim-cchar2pinyin-cache' 查询得到一个汉字字符的拼音， 例如：
 
-  (pyim-cchar2pinyin-get ?我)
+(pyim-cchar2pinyin-get ?我)
 
-  结果为:
+结果为:
 
-  (\"wo\")"
+(\"wo\")"
   (pyim-cchar2pinyin-cache-create)
   (let ((key (if (characterp char-or-str)
                  (char-to-string char-or-str)
@@ -1289,7 +1292,7 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
 (defun pyim-cchar2pinyin-cache-create (&optional force)
   "Build pinyin cchar->pinyin hashtable from `pyim-pymap'.
 
-  If FORCE is non-nil, FORCE build."
+If FORCE is non-nil, FORCE build."
   (when (or force (not pyim-cchar2pinyin-cache))
     (setq pyim-cchar2pinyin-cache
           (make-hash-table :size 50000 :test #'equal))
@@ -1310,25 +1313,25 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
   "pyim 启动函数.
   TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCACHE
 
-  pyim 是使用 `pyim-start' 来启动输入法，这个命令主要做如下工作：
-  1. 重置 `pyim-local-variable-list' 中所有的 local 变量。
-  2. 使用 `pyim-cchar2pinyin-create-cache' 创建汉字到拼音的 hash table 对应表。
-  3. 运行hook： `pyim-load-hook'。
-  4. 将 `pyim-dcache-save-caches' 命令添加到 `kill-emacs-hook' , emacs 关闭
-  之前将 `pyim-dcache-icode2word' 和 `pyim-dcache-iword2count'
-  保存到文件，供以后使用。
-  5. 设定变量：
-  1. `input-method-function'
-  2. `deactivate-current-input-method-function'
-  6. 运行 `pyim-active-hook'
+pyim 是使用 `pyim-start' 来启动输入法，这个命令主要做如下工作：
+1. 重置 `pyim-local-variable-list' 中所有的 local 变量。
+2. 使用 `pyim-cchar2pinyin-create-cache' 创建汉字到拼音的 hash table 对应表。
+3. 运行hook： `pyim-load-hook'。
+4. 将 `pyim-dcache-save-caches' 命令添加到 `kill-emacs-hook' , emacs 关闭
+之前将 `pyim-dcache-icode2word' 和 `pyim-dcache-iword2count'
+保存到文件，供以后使用。
+5. 设定变量：
+1. `input-method-function'
+2. `deactivate-current-input-method-function'
+6. 运行 `pyim-active-hook'
 
-  pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
-  `input-method-function' 设置为 `pyim-input-method' ，这个变量会影
-  响 `read-event' 的行为。
+pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
+`input-method-function' 设置为 `pyim-input-method' ，这个变量会影
+响 `read-event' 的行为。
 
-  当输入字符时，`read-event' 会被调用，`read-event' 调用的过程中，
-  会执行 `pyim-input-method' 这个函数。`pyim-input-method' 又调用函
-  数`pyim-start-translation'."
+当输入字符时，`read-event' 会被调用，`read-event' 调用的过程中，
+会执行 `pyim-input-method' 这个函数。`pyim-input-method' 又调用函
+数`pyim-start-translation'."
   (interactive)
   (mapc 'kill-local-variable pyim-local-variable-list)
   (mapc 'make-local-variable pyim-local-variable-list)
@@ -1379,8 +1382,8 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
 (defun pyim-restart ()
   "重启 pyim，不建议用于编程环境.
 
-  这个函数用于重启 pyim，其过程和 `pyim-start' 类似，只是在输入法重
-  启之前，询问用户，是否保存个人词频信息。"
+这个函数用于重启 pyim，其过程和 `pyim-start' 类似，只是在输入法重
+启之前，询问用户，是否保存个人词频信息。"
   (interactive
    (let ((save-personal-dcache
           (yes-or-no-p "重启 pyim 前，需要保存个人词频信息吗？ "))
@@ -1391,8 +1394,8 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
 (defun pyim-restart-1 (&optional save-personal-dcache refresh-common-dcache)
   "重启 pyim，用于编程环境.
 
-  当 SAVE-PERSONAL-DCACHE 是 non-nil 时，保存个人词库文件。
-  当 REFRESH-COMMON-DCACHE 是 non-nil 时，强制刷新词库缓存。"
+当 SAVE-PERSONAL-DCACHE 是 non-nil 时，保存个人词库文件。
+当 REFRESH-COMMON-DCACHE 是 non-nil 时，强制刷新词库缓存。"
   (pyim-start "pyim" nil t
               save-personal-dcache refresh-common-dcache))
 
@@ -1404,10 +1407,11 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
 
 (defun pyim-dcache-update:code2word (&optional force)
   "读取并加载词库.
-  读取 `pyim-dicts' 和 `pyim-extra-dicts' 里面的词库文件，生成对应的
-  词库缓冲文件，然后加载词库缓存。
 
-  如果 FORCE 为真，强制加载。"
+读取 `pyim-dicts' 和 `pyim-extra-dicts' 里面的词库文件，生成对应的
+词库缓冲文件，然后加载词库缓存。
+
+如果 FORCE 为真，强制加载。"
   (interactive)
   (let* ((version "v1") ;当需要强制更新 dict 缓存时，更改这个字符串。
          (dict-files (mapcar #'(lambda (x)
@@ -1445,7 +1449,8 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
 
 (defun pyim-dcache-update:ishortcode2word (&optional force)
   "读取 ‘pyim-dcache-icode2word’ 中的词库，创建 *简拼* 缓存，然后加载这个缓存.
-  如果 FORCE 为真，强制加载缓存。"
+
+如果 FORCE 为真，强制加载缓存。"
   (interactive)
   (when (or force (not pyim-dcache-update:ishortcode2word))
     (if (pyim-dcache-use-emacs-thread-p)
@@ -1504,8 +1509,9 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
 
 (defun pyim-dcache-update:icode2word (&optional force)
   "对 personal 缓存中的词条进行排序，加载排序后的结果.
-  在这个过程中使用了 `pyim-dcache-icode2count' 中记录的词频信息。
-  如果 FORCE 为真，强制排序。"
+
+在这个过程中使用了 `pyim-dcache-icode2count' 中记录的词频信息。
+如果 FORCE 为真，强制排序。"
   (interactive)
   (when (or force (not pyim-dcache-update:icode2word))
     (if (pyim-dcache-use-emacs-thread-p)
@@ -1539,7 +1545,8 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
 
 (defun pyim-dcache-update:shortcode2word (&optional force)
   "使用 `pyim-dcache-code2word' 中的词条，创建简写 code 词库缓存并加载.
-  如果 FORCE 为真，强制运行。"
+
+如果 FORCE 为真，强制运行。"
   (interactive)
   (when (or force (not pyim-dcache-update:shortcode2word))
     (if (pyim-dcache-use-emacs-thread-p)
@@ -1605,7 +1612,7 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
 (defun pyim-dcache-return-shortcode (code)
   "获取一个 CODE 的所有简写.
 
-  比如：.nihao -> .nihao .niha .nih .ni .n"
+比如：.nihao -> .nihao .niha .nih .ni .n"
   (when (and (> (length code) 0)
              (not (string-match-p "-" code))
              (pyim-string-match-p "^[[:punct:]]" code))
@@ -1620,7 +1627,8 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
 
 (defun pyim-dcache-sort-words (words-list)
   "对 WORDS-LIST 排序，词频大的排在前面.
-  排序使用 `pyim-dcache-icode2count' 中记录的词频信息"
+
+排序使用 `pyim-dcache-icode2count' 中记录的词频信息"
   (sort words-list
         #'(lambda (a b)
             (let ((a (car (split-string a ":")))
@@ -1646,9 +1654,10 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
 
 (defun pyim-dcache-set-variable (variable &optional force-restore fallback-value)
   "设置变量.
-  如果 VARIABLE 的值为 nil, 则使用 ‘pyim-dcache-directory’ 中对应文件的内容来设置
-  VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的值将丢失。
-  如果获取的变量值为 nil 时，将 VARIABLE 的值设置为 FALLBACK-VALUE ."
+
+如果 VARIABLE 的值为 nil, 则使用 ‘pyim-dcache-directory’ 中对应文件的内容来设置
+VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的值将丢失。
+如果获取的变量值为 nil 时，将 VARIABLE 的值设置为 FALLBACK-VALUE ."
   (when (or force-restore (not (symbol-value variable)))
     (let ((file (concat (file-name-as-directory pyim-dcache-directory)
                         (symbol-name variable))))
@@ -2027,9 +2036,7 @@ FILE 的格式与 `pyim-export' 生成的文件格式相同，
 
    ;;; -*- coding: utf-8-unix -*-
    词条1
-   词条2
-
-"
+   词条2"
   (interactive "F记录待删词条的文件: ")
   (with-temp-buffer
     (let ((coding-system-for-read 'utf-8-unix))
@@ -3029,8 +3036,9 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
                (or separator ""))))
 
 (defun pyim-page-style:two-lines (page-info)
-  "将 PAGE-INFO 格式化为类似下面格式的字符串，这个字符串将在
-tooltip 选词框中显示。
+  "将 PAGE-INFO 格式化为选词框中显示的字符串.
+
+样式类似：
 
 +----------------------------+
 | ni hao [1/9]               |
@@ -3045,8 +3053,9 @@ tooltip 选词框中显示。
            (gethash :position page-info))))
 
 (defun pyim-page-style:one-line (page-info)
-  "将 PAGE-INFO 格式化为类似下面格式的字符串，这个字符串将在
-tooltip 选词框中显示。
+  "将 PAGE-INFO 格式化为选词框中显示的字符串.
+
+样式类似：
 
 +-----------------------------------+
 | [ni hao]: 1.你好 2.你号 ... (1/9) |
@@ -3060,8 +3069,9 @@ tooltip 选词框中显示。
           (gethash :total-page page-info)))
 
 (defun pyim-page-style:vertical (page-info)
-  "将 PAGE-INFO 格式化为类似下面格式的字符串，这个字符串将在
-tooltip 选词框中显示。
+  "将 PAGE-INFO 格式化为选词框中显示的字符串.
+
+样式类似：
 
 +--------------+
 | ni hao [1/9] |
@@ -3078,8 +3088,9 @@ tooltip 选词框中显示。
            "\n")))
 
 (defun pyim-page-style:minibuffer (page-info)
-  "将 PAGE-INFO 格式化为类似下面格式的字符串，这个字符串
-将在 minibuffer 中显示。
+  "将 PAGE-INFO 格式化为选词框中显示的字符串.
+
+样式类似：
 
 +------------------------------------+
 | [ni hao]: 1.你好 2.你号 ...  (1/9) |
@@ -3454,6 +3465,7 @@ alist 列表。"
 
 (defun pyim-punctuation-translate-last-n-puncts (&optional punct-style)
   "将光标前面连续的n个标点符号进行全角/半角转换.
+
 当 PUNCT-STYLE 设置为 'full-width 时，所有的标点符号转换为全角符
 号，设置为 'half-width 时，转换为半角符号。"
   (interactive)
