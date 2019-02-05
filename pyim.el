@@ -2366,11 +2366,17 @@ Return the input string.
 
 (defun pyim-scheme-name (&optional default)
   "获取输入法 scheme"
-  (if (and pyim-assistant-scheme-enable
-           (not default))
-      (or pyim-assistant-scheme
-          pyim-default-scheme)
-    pyim-default-scheme))
+  (let (scheme-name)
+    (if (and pyim-assistant-scheme-enable
+             (not default))
+        (setq scheme-name
+              (or pyim-assistant-scheme
+                  pyim-default-scheme))
+      (setq scheme-name pyim-default-scheme))
+    (if (assq scheme-name pyim-schemes)
+        scheme-name
+      (message "Pyim: invalid scheme, fallback to quanpin scheme.")
+      'quanpin)))
 
 (defun pyim-toggle-assistant-scheme ()
   "临时切换到辅助输入法.
