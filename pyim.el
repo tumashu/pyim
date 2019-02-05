@@ -1718,7 +1718,7 @@ pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 'utf-8-
                  (words (cdr content)))
             (when (and code words)
               (puthash code
-                       (delete-dups `(,@words ,@(gethash code hashtable)))
+                       (delete-dups `(,@(gethash code hashtable) ,@words))
                        hashtable)))
           (forward-line 1))))
     (pyim-dcache-save-value-to-file hashtable dcache-file)
