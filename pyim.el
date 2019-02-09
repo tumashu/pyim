@@ -2870,7 +2870,10 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
         ;; 在普通 buffer 中输入中文时，使用 `pyim-page-tooltip'
         ;; 指定的方式来显示候选词。
         (let ((message-log-max nil))
-          (if pyim-page-tooltip
+          (if (and pyim-page-tooltip
+                   ;; when user enable exwm, page should be showed
+                   ;; in minibuffer.
+                   (not (equal (buffer-name) " *temp*")))
               (pyim-page-tooltip-show
                (let ((func (intern (format "pyim-page-style:%S" pyim-page-style))))
                  (if (functionp func)
