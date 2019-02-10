@@ -2870,17 +2870,19 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
         ;; 在普通 buffer 中输入中文时，使用 `pyim-page-tooltip'
         ;; 指定的方式来显示候选词。
         (let ((message-log-max nil))
-          (if (and pyim-page-tooltip
-                   ;; when user enable exwm, page should be showed
-                   ;; in minibuffer.
-                   (not (equal (buffer-name) " *temp*")))
-              (pyim-page-tooltip-show
-               (let ((func (intern (format "pyim-page-style:%S" pyim-page-style))))
-                 (if (functionp func)
-                     (funcall func page-info)
-                   (pyim-page-style:two-lines page-info)))
-               (overlay-start pyim-preview-overlay))
-            (message "%s" (pyim-page-style:minibuffer page-info))))))))
+          (cond
+           ((equal (buffer-name) " *temp*")
+            ;; when exwm-xim is used, page should be showed
+            ;; in minibuffer.
+            (message (pyim-page-style:exwm page-info)))
+           (pyim-page-tooltip
+            (pyim-page-tooltip-show
+             (let ((func (intern (format "pyim-page-style:%S" pyim-page-style))))
+               (if (functionp func)
+                   (funcall func page-info)
+                 (pyim-page-style:two-lines page-info)))
+             (overlay-start pyim-preview-overlay)))
+           (t (message (pyim-page-style:minibuffer page-info)))))))))
 
 (defun pyim-minibuffer-message (string)
   "当在 minibuffer 中使用 pyim 输入中文时，需要将
@@ -3100,6 +3102,26 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
 +------------------------------------+"
   (format "[%s]: %s(%s/%s)"
           (pyim-page-preview-create)
+          (pyim-page-menu-create
+           (gethash :candidates page-info)
+           (gethash :position page-info))
+          (gethash :current-page page-info)
+          (gethash :total-page page-info)))
+
+(defun pyim-page-style:exwm (page-info)
+  "专门用于 exwm 环境的 page style."
+  (format "[%s]: %s(%s/%s)"
+          (let ((class (pyim-scheme-get-option (pyim-scheme-name) :class))
+                (preview pyim-outcome))
+            (when (memq class '(quanpin))
+              (let ((rest (mapconcat
+                           #'(lambda (py)
+                               (concat (car py) (cdr py)))
+                           (nthcdr (length preview) (car pyim-imobjs))
+                           " ")))
+                (when (string< "" rest)
+                  (setq preview (concat preview rest)))))
+            preview)
           (pyim-page-menu-create
            (gethash :candidates page-info)
            (gethash :position page-info))
