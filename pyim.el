@@ -2985,7 +2985,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
       (let ((sm (car w))
             (ym (cdr w)))
         (if (equal sm "")
-            (car (rassoc (list ym) keymaps))
+            (push (car (rassoc (list ym) keymaps)) result)
           (push
            (concat (cl-some
                     #'(lambda (x)
