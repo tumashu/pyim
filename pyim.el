@@ -976,7 +976,7 @@ pyim 内建的有三种选词框格式：
 这个功能可以实现“简转繁”，“输入中文得到英文”之类的功能。"
   :group 'pyim)
 
-(defcustom pyim-posframe-border-width 5
+(defcustom pyim-posframe-border-width 0
   "posframe的内间距。
 只有当用户使用 posframe 来显示候选词时才有效。"
   :group 'pyim
