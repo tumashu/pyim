@@ -1000,6 +1000,12 @@ pyim 内建的有三种选词框格式：
   "Face used for the pyim page."
   :group 'pyim)
 
+(defface pyim-page-border
+  '((t (:inherit pyim-page)))
+  "Face used for the pyim page border.
+Only useful when use posframe."
+  :group 'pyim)
+
 (defface pyim-page-selection
   '((t (:background "gray44")))
   "选词框中已选词条的 face
@@ -3141,7 +3147,8 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
                           :min-width pyim-posframe-min-width
                           :background-color (face-attribute 'pyim-page :background)
                           :foreground-color (face-attribute 'pyim-page :foreground)
-                          :internal-border-width pyim-posframe-border-width))
+                          :internal-border-width pyim-posframe-border-width
+                          :internal-border-color (face-attribute 'pyim-page-border :background)))
           ((eq tooltip 'minibuffer)
            (let ((max-mini-window-height (+ pyim-page-length 2)))
              (message string)))
