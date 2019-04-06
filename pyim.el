@@ -3374,7 +3374,7 @@ alist 列表。"
      ((and (numberp punc-posit-before-1)
            (= punc-posit-before-1 0)
            (equal str trigger-str))
-      (pyim-punctuation-translate-last-n-puncts 'full-width)
+      (pyim-punctuation-translate 'full-width)
       "")
 
      ;; 当光标前面为中文标点时， 按 `pyim-translate-trigger-char'
@@ -3382,7 +3382,7 @@ alist 列表。"
      ((and (numberp punc-posit-before-1)
            (> punc-posit-before-1 0)
            (equal str trigger-str))
-      (pyim-punctuation-translate-last-n-puncts 'half-width)
+      (pyim-punctuation-translate 'half-width)
       "")
 
      ;; 正常输入标点符号。
@@ -3399,6 +3399,13 @@ alist 列表。"
     (when (and (> point-before 0)
                (char-before point-before))
       (char-to-string (char-before point-before)))))
+
+(defun pyim-char-after-to-string (num)
+  "得到光标后第 `num' 个字符，并将其转换为字符串。"
+  (let* ((point (point))
+         (point-after (+ point num)))
+    (when (char-after point-after)
+      (char-to-string (char-after point-after)))))
 
 (defun pyim-wash-current-line-function ()
   "清理当前行的内容，比如：删除不必要的空格，等。"
@@ -3495,8 +3502,8 @@ alist 列表。"
    (t (append (pyim-flatten-list (car my-list))
               (pyim-flatten-list (cdr my-list))))))
 
-(defun pyim-punctuation-translate-last-n-puncts (&optional punct-style)
-  "将光标前面连续的n个标点符号进行全角/半角转换.
+(defun pyim-punctuation-translate (&optional punct-style)
+  "将光标前1个或前后连续成对的n个标点符号进行全角/半角转换.
 
 当 PUNCT-STYLE 设置为 'full-width 时，所有的标点符号转换为全角符
 号，设置为 'half-width 时，转换为半角符号。"
@@ -3505,20 +3512,32 @@ alist 列表。"
         (punct-style
          (or punct-style
              (intern (completing-read
-                      "将光标前的标点转换为" '("full-width" "half-width")))))
-        (count 0)
-        number last-puncts result)
-    (while count
-      (let ((str (pyim-char-before-to-string count)))
-        (if (member str punc-list)
-            (progn
-              (push str last-puncts)
-              (setq count (+ count 1)))
-          (setq number count)
-          (setq count nil))))
+                      "将光标处的标点转换为" '("full-width" "half-width")))))
+        ;; lnum : puncts on the left (before point)
+        (lnum 0)
+        ;; rnum : puncts on the right (after point)
+        (rnum 0)
+        (point (point))
+        last-puncts result)
+    (catch 'break
+      (while t
+        (let ((str (pyim-char-after-to-string rnum)))
+          (if (member str punc-list)
+              (cl-incf rnum)
+            (throw 'break nil)))))
+    (catch 'break
+      (while (<= lnum rnum)
+        (let ((str (pyim-char-before-to-string lnum)))
+          (if (member str punc-list)
+              (cl-incf lnum)
+            (throw 'break nil)))))
+    ;; 右侧与左侧成对匹配
+    (setq rnum (min lnum rnum))
+    (setq last-puncts (buffer-substring (- point lnum) (+ point rnum)))
     ;; 删除旧的标点符号
-    (delete-char (- 0 number))
-    (dolist (punct last-puncts)
+    (delete-char rnum)
+    (delete-char (- 0 lnum))
+    (dolist (punct (split-string last-puncts ""))
       (dolist (puncts pyim-punctuation-dict)
         (let ((position (cl-position punct puncts :test #'equal)))
           (when position
@@ -3531,7 +3550,8 @@ alist 列表。"
               (if (= position 0)
                   (push punct result)
                 (push (car puncts) result))))))))
-    (insert (mapconcat #'identity (reverse result) ""))))
+    (insert (mapconcat #'identity (reverse result) ""))
+    (backward-char rnum)))
 
 (defun pyim-punctuation-return-proper-punct (punc-list &optional before)
   "返回合适的标点符号，PUNCT-LIST 为标点符号列表.
