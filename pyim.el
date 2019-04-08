@@ -548,7 +548,6 @@
 ;; ** require + defcustom + defvar
 (require 'cl-lib)
 (require 'help-mode)
-(require 'popup)
 (require 'posframe nil t)
 (require 'async)
 (require 'pyim-pymap)
@@ -3152,7 +3151,9 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
           ((eq tooltip 'minibuffer)
            (let ((max-mini-window-height (+ pyim-page-length 2)))
              (message string)))
-          (t (popup-tip string :point position :margin 1)))))
+          (t
+           (require 'popup)
+           (popup-tip string :point position :margin 1)))))
 
 (defun pyim-posframe-valid-p ()
   "Test posframe's status."
