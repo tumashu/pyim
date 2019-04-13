@@ -548,7 +548,7 @@
 ;; ** require + defcustom + defvar
 (require 'cl-lib)
 (require 'help-mode)
-(require 'popup)
+(require 'popup nil t)
 (require 'posframe nil t)
 (require 'async)
 (require 'pyim-pymap)
