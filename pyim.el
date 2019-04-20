@@ -2621,12 +2621,16 @@ IMOBJS 获得候选词条。"
 
 (defun pyim-candidates-create:rime (imobjs scheme-name)
   "`pyim-candidates-create' 处理 rime 输入法的函数."
-  (if (functionp 'liberime-search)
-      (liberime-search
-       (replace-regexp-in-string
-        "-" "" (car (pyim-codes-create (car imobjs) scheme-name)))
-       pyim-rime-limit)
-    nil))
+  (when (functionp 'liberime-clear-composition)
+    (liberime-clear-composition)
+    (let ((s (replace-regexp-in-string
+              "-" "" (car (pyim-codes-create (car imobjs) scheme-name)))))
+      (dolist (key (string-to-list s))
+        (liberime-process-key key))
+      (let* ((context (liberime-get-context))
+             (menu (alist-get 'menu context))
+             (candidates (alist-get 'candidates menu)))
+        candidates))))
 
 (defun pyim-candidates-create:quanpin (imobjs scheme-name)
   "`pyim-candidates-create' 处理全拼输入法的函数."
