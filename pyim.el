@@ -180,16 +180,36 @@
 ;; 来支持 rime, 设置方式：
 
 ;; 1. 安裝 liberime, 见：[[https://gitlab.com/liberime/liberime/blob/master/README.org]] 。
-;; 2. 參考设置：
+;; 2. 创建文件： /home/<username>/.emacs.d/pyim/rime/default.custom.yaml, 内容为：
+
+;;    #+BEGIN_EXAMPLE
+;;    patch:
+;;         "menu/page_size": 50
+;;    #+END_EXAMPLE
+
+;;    `liberime-get-context' 函数在默认情况下一次只能获取5个候选词，如
+;;    果想获取更多的候选词，就需要给 liberime 发送翻页命令字符，模拟翻
+;;    页操作，会让 pyim 代码的维护难度增加许多，所以 pyim 使用了一种简
+;;    单粗暴的方式来处理这个问题： 将 rime 的 page_size 设置为 50, 这
+;;    样，pyim 在不处理 rime 分页的情况下, 一次就可以获取 50 个候选词，
+;;    然后自己方式来分页。用户可以按 TAB 键换到辅助输入法来输入 50 以
+;;    后的词条。
+
+;;    更改配置这种方式有点 hack, 如果 liberime 能设置 menu/page_size
+;;    就好了。
+
+;; 3. 參考设置：
 ;;    #+BEGIN_EXAMPLE
 ;;    (use-package liberime
 ;;      :load-path "/path/to/liberime.[so|dll]"
 ;;      :config
-;;      (liberime-start "/usr/share/rime-data" "~/.emacs.d/rime/")
+;;      ;; 注意：设置的时候最好不要使用软链接，也不要使用 "~" 和相对路径，liberime
+;;      ;; 有时候无法处理。
+;;      (liberime-start "/usr/share/rime-data" "/home/<username>/.emacs.d/pyim/rime/")
 ;;      (liberime-select-schema "luna_pinyin_simp")
 ;;      (setq pyim-default-scheme 'rime))
 ;;    #+END_EXAMPLE
-;; 3. 使用 rime 全拼输入法的用户，也可以使用 rime-quanpin scheme,
+;; 4. 使用 rime 全拼输入法的用户，也可以使用 rime-quanpin scheme,
 ;;    这个 scheme 是专门针对 rime 全拼输入法定制的，支持全拼v快捷键。
 ;;    #+BEGIN_EXAMPLE
 ;;    (setq pyim-default-scheme 'rime-quanpin)
