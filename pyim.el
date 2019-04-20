@@ -203,8 +203,12 @@
 ;;    (use-package liberime
 ;;      :load-path "/path/to/liberime.[so|dll]"
 ;;      :config
-;;      ;; 注意: 文件路径需要用 `expand-file-name' 函数处理。
-;;      (liberime-start (expand-file-name "/usr/share/rime-data")
+;;      ;; 注意事项:
+;;      ;; 1. 文件路径需要用 `expand-file-name' 函数处理。
+;;      ;; 2. `librime-start' 的第一个参数说明 "rime 共享数据文件夹"
+;;      ;;     的位置，不同的平台其位置也各不相同，可以参考：
+;;      ;;     https://github.com/rime/home/wiki/RimeWithSchemata
+;;      (liberime-start (expand-file-name "/path/to/rime-data")
 ;;                      (expand-file-name "~/.emacs.d/pyim/rime/"))
 ;;      (liberime-select-schema "luna_pinyin_simp")
 ;;      (setq pyim-default-scheme 'rime))
