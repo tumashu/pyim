@@ -180,7 +180,7 @@
 ;; 来支持 rime, 设置方式：
 
 ;; 1. 安裝 liberime, 见：[[https://gitlab.com/liberime/liberime/blob/master/README.org]] 。
-;; 2. 创建文件： "/home/USERNAME/.emacs.d/pyim/rime/default.custom.yaml", 内容为：
+;; 2. 创建文件： "~/.emacs.d/pyim/rime/default.custom.yaml", 内容为：
 
 ;;    #+BEGIN_EXAMPLE
 ;;    patch:
@@ -192,8 +192,8 @@
 ;;    页操作，会让 pyim 代码的维护难度增加许多，所以 pyim 使用了一种简
 ;;    单粗暴的方式来处理这个问题： 将 rime 的 page_size 设置为 50, 这
 ;;    样，pyim 在不处理 rime 分页的情况下, 一次就可以获取 50 个候选词，
-;;    然后自己方式来分页。用户可以按 TAB 键换到辅助输入法来输入 50 以
-;;    后的词条。
+;;    然后用自己方式来分页。用户可以按 TAB 键切换到辅助输入法来输入 50
+;;    以后的词条。
 
 ;;    更改配置这种方式有点 hack, 如果 liberime 能设置 menu/page_size
 ;;    就好了。
@@ -205,7 +205,8 @@
 ;;      :config
 ;;      ;; 注意：设置的时候最好不要使用软链接，也不要使用 "~" 和相对路径，liberime
 ;;      ;; 有时候无法处理。
-;;      (liberime-start "/usr/share/rime-data" "/home/USERNAME/.emacs.d/pyim/rime/")
+;;      (liberime-start (file-truename "/usr/share/rime-data")
+;;                      (file-truename "~/.emacs.d/pyim/rime/"))
 ;;      (liberime-select-schema "luna_pinyin_simp")
 ;;      (setq pyim-default-scheme 'rime))
 ;;    #+END_EXAMPLE
