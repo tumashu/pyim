@@ -180,7 +180,7 @@
 ;; 来支持 rime, 设置方式：
 
 ;; 1. 安裝 liberime, 见：[[https://gitlab.com/liberime/liberime/blob/master/README.org]] 。
-;; 2. 创建文件： /home/<username>/.emacs.d/pyim/rime/default.custom.yaml, 内容为：
+;; 2. 创建文件： /home/USERNAME/.emacs.d/pyim/rime/default.custom.yaml, 内容为：
 
 ;;    #+BEGIN_EXAMPLE
 ;;    patch:
@@ -205,7 +205,7 @@
 ;;      :config
 ;;      ;; 注意：设置的时候最好不要使用软链接，也不要使用 "~" 和相对路径，liberime
 ;;      ;; 有时候无法处理。
-;;      (liberime-start "/usr/share/rime-data" "/home/<username>/.emacs.d/pyim/rime/")
+;;      (liberime-start "/usr/share/rime-data" "/home/USERNAME/.emacs.d/pyim/rime/")
 ;;      (liberime-select-schema "luna_pinyin_simp")
 ;;      (setq pyim-default-scheme 'rime))
 ;;    #+END_EXAMPLE
