@@ -180,7 +180,7 @@
 ;; 来支持 rime, 设置方式：
 
 ;; 1. 安裝 liberime, 见：[[https://gitlab.com/liberime/liberime/blob/master/README.org]] 。
-;; 2. 创建文件： /home/USERNAME/.emacs.d/pyim/rime/default.custom.yaml, 内容为：
+;; 2. 创建文件： "/home/USERNAME/.emacs.d/pyim/rime/default.custom.yaml", 内容为：
 
 ;;    #+BEGIN_EXAMPLE
 ;;    patch:
