@@ -203,10 +203,9 @@
 ;;    (use-package liberime
 ;;      :load-path "/path/to/liberime.[so|dll]"
 ;;      :config
-;;      ;; 注意：设置的时候最好不要使用软链接，也不要使用 "~" 和相对路径，liberime
-;;      ;; 有时候无法处理。
-;;      (liberime-start (file-truename "/usr/share/rime-data")
-;;                      (file-truename "~/.emacs.d/pyim/rime/"))
+;;      ;; 注意: 文件路径需要用 `expand-file-name' 函数处理。
+;;      (liberime-start (expand-file-name "/usr/share/rime-data")
+;;                      (expand-file-name "~/.emacs.d/pyim/rime/"))
 ;;      (liberime-select-schema "luna_pinyin_simp")
 ;;      (setq pyim-default-scheme 'rime))
 ;;    #+END_EXAMPLE
