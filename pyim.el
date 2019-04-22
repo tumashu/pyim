@@ -177,7 +177,10 @@
 ;; *** 通过 pyim 来支持 rime 所有输入法
 
 ;; pyim 使用 emacs 动态模块：[[https://gitlab.com/liberime/liberime][liberime]]
-;; 来支持 rime, 设置方式：
+;; 来支持 rime, 在这种情况下，pyim 仅仅用于显示候选词，不会处理词库，
+;; 自定义词库使用 rime 自己的方式。
+
+;;  设置方式：
 
 ;; 1. 安裝 liberime, 见：[[https://gitlab.com/liberime/liberime/blob/master/README.org]] 。
 ;; 2. 创建文件： "~/.emacs.d/pyim/rime/default.custom.yaml", 内容为：
