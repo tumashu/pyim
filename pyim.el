@@ -1400,7 +1400,7 @@ pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
   (run-hooks 'pyim-active-hook)
   (when (and (memq pyim-page-tooltip '(posframe child-frame))
              (not (pyim-posframe-valid-p)))
-    (message "PYIM: posframe 包没有安装，请手工安装这个包。"))
+    (message "PYIM: posframe 没有正确安装或者当前 emacs 版本不支持 posframe。"))
   (when restart
     (message "pyim 重启完成。"))
   nil)
