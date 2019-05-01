@@ -436,6 +436,14 @@
 ;; (define-key map "," 'pyim-page-previous-page)
 ;; #+END_EXAMPLE
 
+;; *** 如何用 ";" 来选择第二个候选词
+;; #+BEGIN_EXAMPLE
+;; (define-key pyim-mode-map ";"
+;;   (lambda ()
+;;     (interactive)
+;;     (pyim-page-select-word-by-number 2)))
+;; #+END_EXAMPLE
+
 ;; *** 如何添加自定义拼音词库
 ;; pyim 默认没有携带任何拼音词库，用户可以使用下面几种方式，获取
 ;; 质量较好的拼音词库：
