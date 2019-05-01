@@ -1011,6 +1011,13 @@ pyim 内建的有三种选词框格式：
   :group 'pyim
   :type 'hook)
 
+(defcustom pyim-page-select-word-by-number t
+  "使用数字键来选择词条.
+
+如果设置为 nil, 将直接输入数字，适用于使用数字做为
+编码的输入法。"
+  :group 'pyim)
+
 (defcustom pyim-magic-converter nil
   "将 “待选词条” 在 “上屏” 之前自动转换为其他字符串.
 这个功能可以实现“简转繁”，“输入中文得到英文”之类的功能。"
@@ -3296,18 +3303,22 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
 (defun pyim-page-select-word-by-number (&optional n)
   "使用数字编号来选择对应的词条。"
   (interactive)
-  (if (null pyim-candidates)
-      (progn
-        (pyim-outcome-handle 'last-char)
-        (pyim-terminate-translation))
-    (let ((index (if (numberp n)
-                     (- n 1)
-                   (- last-command-event ?1)))
-          (end (pyim-page-end)))
-      (if (> (+ index (pyim-page-start)) end)
-          (pyim-page-refresh)
-        (setq pyim-candidate-position (+ pyim-candidate-position index))
-        (pyim-page-select-word)))))
+  (if pyim-page-select-word-by-number
+      (if (null pyim-candidates)
+          (progn
+            (pyim-outcome-handle 'last-char)
+            (pyim-terminate-translation))
+        (let ((index (if (numberp n)
+                         (- n 1)
+                       (- last-command-event ?1)))
+              (end (pyim-page-end)))
+          (if (> (+ index (pyim-page-start)) end)
+              (pyim-page-refresh)
+            (setq pyim-candidate-position (+ pyim-candidate-position index))
+            (pyim-page-select-word)))))
+  ;; 有些输入法使用数字键编码，这种情况下，数字键就
+  ;; 不能用来选词了。
+  (call-interactively #'pyim-self-insert-command))
 
 ;; ** 处理标点符号
 (defun pyim-translate-get-trigger-char ()
