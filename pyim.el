@@ -3303,7 +3303,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
 (defun pyim-page-select-word-by-number (&optional n)
   "使用数字编号来选择对应的词条。"
   (interactive)
-  (if pyim-page-select-word-by-number
+  (if (or pyim-page-select-word-by-number n)
       (if (null pyim-candidates)
           (progn
             (pyim-outcome-handle 'last-char)
