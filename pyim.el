@@ -430,6 +430,12 @@
 ;; (global-set-key (kbd "M-i") 'pyim-convert-string-at-point)
 ;; #+END_EXAMPLE
 
+;; *** 如何使用其它字符翻页
+;; #+BEGIN_EXAMPLE
+;; (define-key map "." 'pyim-page-next-page)
+;; (define-key map "," 'pyim-page-previous-page)
+;; #+END_EXAMPLE
+
 ;; *** 如何添加自定义拼音词库
 ;; pyim 默认没有携带任何拼音词库，用户可以使用下面几种方式，获取
 ;; 质量较好的拼音词库：
@@ -1210,8 +1216,6 @@ pyim 总是使用 emacs-async 包来生成 dcache.
     (define-key map "\C-b" 'pyim-page-previous-word)
     (define-key map "=" 'pyim-page-next-page)
     (define-key map "-" 'pyim-page-previous-page)
-    (define-key map "." 'pyim-page-next-page)
-    (define-key map "," 'pyim-page-previous-page)
     (define-key map "\M-n" 'pyim-page-next-page)
     (define-key map "\M-p" 'pyim-page-previous-page)
     (define-key map "\C-m" 'pyim-quit-no-clear)
