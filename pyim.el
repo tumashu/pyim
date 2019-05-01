@@ -3315,10 +3315,10 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
           (if (> (+ index (pyim-page-start)) end)
               (pyim-page-refresh)
             (setq pyim-candidate-position (+ pyim-candidate-position index))
-            (pyim-page-select-word)))))
-  ;; 有些输入法使用数字键编码，这种情况下，数字键就
-  ;; 不能用来选词了。
-  (call-interactively #'pyim-self-insert-command))
+            (pyim-page-select-word))))
+    ;; 有些输入法使用数字键编码，这种情况下，数字键就
+    ;; 不能用来选词了。
+    (call-interactively #'pyim-self-insert-command)))
 
 ;; ** 处理标点符号
 (defun pyim-translate-get-trigger-char ()
