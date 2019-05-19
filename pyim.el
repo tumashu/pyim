@@ -3671,7 +3671,7 @@ PUNCT-LIST 格式类似：
   "将光标前的用户输入的字符串转换为中文."
   (interactive)
   (unless (equal input-method-function 'pyim-input-method)
-    (toggle-input-method))
+    (activate-input-method 'pyim))
   (let* ((case-fold-search nil)
          (scheme-name (pyim-scheme-name))
          (first-chars (pyim-scheme-get-option scheme-name :first-chars))
