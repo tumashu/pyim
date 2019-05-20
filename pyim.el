@@ -848,6 +848,51 @@ plist 来表示，比如：
       ("og" "eng")
       ("oo" "o")
       ("ob" "ou")))
+    (zhinengabc-shuangpin
+     :document "智能ABC双拼方案"
+     :class shuangpin
+     :first-chars "abcdefghjklmnopqrstvwxyz"
+     :rest-chars "abcdefghijklmnopqrstuvwxyz"
+     :prefer-trigger-chars nil
+     :keymaps
+     (("q" "q" "ei")
+      ("w" "w" "ian")
+      ("e" "ch" "e")
+      ("r" "r" "iu" "er")
+      ("t" "t" "uang" "iang")
+      ("y" "y" "ing")
+      ("u" "u" "u")
+      ("i" "i" "i")
+      ("o" "o" "o" "uo")
+      ("p" "p" "uan" "van")
+      ("a" "zh" "a")
+      ("s" "s" "ong" "iong")
+      ("d" "d" "ua" "ia")
+      ("f" "f" "en")
+      ("g" "g" "eng")
+      ("h" "h" "ang")
+      ("j" "j" "an")
+      ("k" "k" "ao")
+      ("l" "l" "ai")
+      ("z" "z" "iao")
+      ("x" "x" "ie")
+      ("c" "c" "in" "uai")
+      ("v" "sh" "v")
+      ("b" "b" "ou")
+      ("n" "n" "un")
+      ("m" "m" "ue" "ui")
+      ("oa" "a")
+      ("oj" "an")
+      ("ol" "ai")
+      ("ok" "ao")
+      ("oh" "ang")
+      ("oe" "e")
+      ("oz" "ei")
+      ("of" "en")
+      ("or" "er")
+      ("og" "eng")
+      ("oo" "o")
+      ("ob" "ou")))
     (xiaohe-shuangpin
      :document "小鹤双拼输入法方案。"
      :class shuangpin
