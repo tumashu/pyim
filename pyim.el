@@ -1775,6 +1775,21 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
         (value (symbol-value variable)))
     (pyim-dcache-save-value-to-file value file)))
 
+(defun pyim--write-file (filename &optional confirm)
+  "A helper function to write dcache files."
+  (let ((coding-system-for-write 'utf-8-unix))
+    (when (and confirm
+               (file-exists-p filename)
+               ;; NS does its own confirm dialog.
+               (not (and (eq (framep-on-display) 'ns)
+                         (listp last-nonmenu-event)
+                         use-dialog-box))
+               (or (y-or-n-p (format-message
+                              "File `%s' exists; overwrite? " filename))
+                   (user-error "Canceled"))))
+    (write-region (point-min) (point-max) filename nil :silent)
+    (message "Saving file %s..." filename)))
+
 (defun pyim-dcache-save-value-to-file (value file)
   "将 VALUE 保存到 FILE 文件中."
   (when value
@@ -1788,7 +1803,7 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
       (insert ";; End:")
       (make-directory (file-name-directory file) t)
       (let ((save-silently t))
-        (write-file file)))))
+        (pyim--write-file file)))))
 
 (defun pyim-dcache-generate-dcache-file (dict-files dcache-file)
   "读取词库文件列表：DICT-FILES, 生成一个词库缓冲文件 DCACHE-FILE.
@@ -1886,7 +1901,7 @@ DCACHE 是一个 code -> words 的 hashtable.
                              (mapconcat #'identity value " ")
                            value))))
      dcache)
-    (write-file file confirm)))
+    (pyim--write-file file confirm)))
 
 (defun pyim-export (file &optional confirm)
   "将个人词条以及词条对应的词频信息导出到文件 FILE.
@@ -1910,7 +1925,7 @@ DCACHE 是一个 code -> words 的 hashtable.
            (unless (gethash word pyim-dcache-iword2count)
              (insert (format "%s %s\n" word 0)))))
      pyim-dcache-icode2word)
-    (write-file file confirm)))
+    (pyim--write-file file confirm)))
 
 (defun pyim-import (file &optional merge-method)
   "从 FILE 中导入词条以及词条对应的词频信息。
