@@ -1415,6 +1415,7 @@ pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
 会执行 `pyim-input-method' 这个函数。`pyim-input-method' 又调用函
 数`pyim-start-translation'."
   (interactive)
+  (pyim-upgrade)
   (mapc 'kill-local-variable pyim-local-variable-list)
   (mapc 'make-local-variable pyim-local-variable-list)
   (when (and restart save-personal-dcache)
@@ -1450,6 +1451,26 @@ pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
   (when restart
     (message "pyim 重启完成。"))
   nil)
+
+(defun pyim-upgrade ()
+  (interactive)
+  ;; breaking changes, dcache -> dhashcache, more information:
+  ;; https://github.com/tumashu/pyim/pull/277
+  ;; https://emacs-china.org/t/2019-07-08-pyim/9876/8
+  (let ((old (concat pyim-dcache-directory "pyim-dcache-icode2word"))
+        (new (concat pyim-dcache-directory "pyim-dhashcache-icode2word"))
+        (default-directory pyim-dcache-directory))
+    (when (and (file-exists-p old)
+               (or (not (file-exists-p new))
+                   (and (file-exists-p new)
+                        (> (file-attribute-size
+                            (file-attributes old))
+                           (file-attribute-size
+                            (file-attributes new)))))
+               (message "PYIM: dcache格式已经调整，自动升级！"))
+      (dolist (f (directory-files default-directory nil "^pyim-dcache"))
+        (copy-file f (replace-regexp-in-string
+                      "^pyim-dcache" "pyim-dhashcache" f))))))
 
 (defun pyim-exit-from-minibuffer ()
   "Pyim 从 minibuffer 退出."
