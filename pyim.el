@@ -1690,17 +1690,17 @@ code-prefix)。当RETURN-LIST 设置为 t 时，返回一个 code list。"
               code
               (cl-case len
                 ;; 双字词，分别取两个字的前两个编码
-                (2 (concat (substring (pyim-hanzi2wubi (nth 0 string)) 0 2)
-                           (substring (pyim-hanzi2wubi (nth 1 string)) 0 2)))
+                (2 (concat (substring (pyim-hanzi2xingma:wubi (nth 0 string)) 0 2)
+                           (substring (pyim-hanzi2xingma:wubi (nth 1 string)) 0 2)))
                 ;; 三字词，取前二字的首编码，及第三个字的前两个编码
-                (3 (concat (substring (pyim-hanzi2wubi (nth 0 string)) 0 1)
-                           (substring (pyim-hanzi2wubi (nth 1 string)) 0 1)
-                           (substring (pyim-hanzi2wubi (nth 2 string)) 0 2)))
+                (3 (concat (substring (pyim-hanzi2xingma:wubi (nth 0 string)) 0 1)
+                           (substring (pyim-hanzi2xingma:wubi (nth 1 string)) 0 1)
+                           (substring (pyim-hanzi2xingma:wubi (nth 2 string)) 0 2)))
                 ;; 四字词及以上，分别前三个字及最后一个字的首编码
-                (t (concat (substring (pyim-hanzi2wubi (nth 0 string)) 0 1)
-                           (substring (pyim-hanzi2wubi (nth 1 string)) 0 1)
-                           (substring (pyim-hanzi2wubi (nth 2 string)) 0 1)
-                           (substring (pyim-hanzi2wubi (nth (1- len) string)) 0 1))))))
+                (t (concat (substring (pyim-hanzi2xingma:wubi (nth 0 string)) 0 1)
+                           (substring (pyim-hanzi2xingma:wubi (nth 1 string)) 0 1)
+                           (substring (pyim-hanzi2xingma:wubi (nth 2 string)) 0 1)
+                           (substring (pyim-hanzi2xingma:wubi (nth (1- len) string)) 0 1))))))
       code)))
 
 (defun pyim-list-merge (a b)
