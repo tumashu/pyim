@@ -2982,7 +2982,7 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
          (prefer-trigger-chars (pyim-scheme-get-option
                                 (pyim-scheme-name)
                                 :prefer-trigger-chars)))
-    (if (pyim-string-match-p user-trigger-char first-char)
+    (if (pyim-string-match-p (regexp-quote user-trigger-char) first-char)
         (progn
           ;; (message "注意：pyim-translate-trigger-char 设置和当前输入法冲突，使用推荐设置：\"%s\""
           ;;          prefer-trigger-chars)
