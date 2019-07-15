@@ -1239,6 +1239,12 @@ dcache 文件的方法让 pyim 正常工作。")
 (defvar pyim-page-tooltip-posframe-buffer " *pyim-page-tooltip-posframe-buffer*"
   "这个变量用来保存做为 page tooltip 的 posframe 的 buffer.")
 
+(defconst pyim-shuangpin-invalid-pinyin-regexp
+  "^\\([qtghklzcsdn]o\\|[rypfbmw]uo\\|[qj]ong\\|[rtysdghklzxcn]iong\\|[qtypdjlxbnm]uai\\|[ghk]ing?\\|[qjklxn]uang\\|[dgh]iang\\|[qjlxg]ia\\|[hk]ia\\|[rtsdghkzc]v\\|[jl]ui\\)$"
+  "双拼可能自动产生的无效拼音. 例如输入 kk 得到有效拼音 kuai .
+但同时产生了无效拼音 king .  用户手动输入的无效拼音无需考虑.
+因为用户有即时界面反馈,不可能连续输入无效拼音.")
+
 (defvar pyim-rime-limit 50
   "当 pyim 使用 `liberime-search' 来获取词条时，这个变量用来限制
 `liberime-search' 返回词条的数量。")
@@ -2167,14 +2173,19 @@ Return the input string.
              (sp-sm (when sp-sm (char-to-string sp-sm)))
              (sp-ym (when sp-ym (char-to-string sp-ym)))
              (sm (nth 1 (assoc sp-sm keymaps)))
-             (ym (cdr (cdr (assoc sp-ym keymaps)))))
-        (push (mapcar
-               #'(lambda (x)
-                   (let* ((y (concat sp-sm (or sp-ym " ")))
-                          (z (cadr (assoc y keymaps))))
-                     (if z (cons "" z) (cons sm x))))
-               (or ym (list "")))
-              results)))
+             (ym (or (cdr (cdr (assoc sp-ym keymaps))) (list "")))
+             one-word-pinyins)
+
+        (dolist (x ym)
+          (let* ((y (concat sp-sm (or sp-ym " ")))
+                 (z (cadr (assoc y keymaps)))
+                 (py (if z (cons "" z) (cons sm x))))
+            (unless (string-match-p pyim-shuangpin-invalid-pinyin-regexp
+                                    (concat (car py) (cdr py)))
+              (push py one-word-pinyins))))
+
+        (when (and one-word-pinyins (> (length one-word-pinyins) 0))
+          (push one-word-pinyins results))))
     (pyim-imobjs-find-fuzzy:quanpin
      (pyim-permutate-list (nreverse results)))))
 
