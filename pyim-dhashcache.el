@@ -20,6 +20,7 @@
 (defvar pyim-dhashcache-code2word nil)
 (defvar pyim-dhashcache-code2word-md5 nil)
 (defvar pyim-dhashcache-word2code nil)
+(defvar pyim-dhashcache-iword2count nil)
 (defvar pyim-dhashcache-shortcode2word nil)
 (defvar pyim-dhashcache-icode2word nil)
 (defvar pyim-dhashcache-ishortcode2word nil)
@@ -30,13 +31,13 @@
 (defun pyim-dhashcache-sort-words (words-list)
   "对 WORDS-LIST 排序，词频大的排在前面.
 
-排序使用 `pyim-dcache-iword2count' 中记录的词频信息"
+排序使用 `pyim-dhashcache-iword2count' 中记录的词频信息"
   (sort words-list
         #'(lambda (a b)
             (let ((a (car (split-string a ":")))
                   (b (car (split-string b ":"))))
-              (> (or (gethash a pyim-dcache-iword2count) 0)
-                 (or (gethash b pyim-dcache-iword2count) 0))))))
+              (> (or (gethash a pyim-dhashcache-iword2count) 0)
+                 (or (gethash b pyim-dhashcache-iword2count) 0))))))
 
 (defun pyim-dhashcache-return-shortcode (code)
   "获取一个 CODE 的所有简写.
@@ -89,7 +90,7 @@
           ,(async-inject-variables "^pyim-.+?directory$")
           (require 'pyim-dhashcache)
           (pyim-dcache-set-variable 'pyim-dhashcache-icode2word)
-          (pyim-dcache-set-variable 'pyim-dcache-iword2count)
+          (pyim-dcache-set-variable 'pyim-dhashcache-iword2count)
           (setq pyim-dhashcache-ishortcode2word
                 (make-hash-table :test #'equal))
           (maphash
@@ -149,7 +150,7 @@
           ,(async-inject-variables "^pyim-.+?directory$")
           (require 'pyim-dhashcache)
           (pyim-dcache-set-variable 'pyim-dhashcache-code2word)
-          (pyim-dcache-set-variable 'pyim-dcache-iword2count)
+          (pyim-dcache-set-variable 'pyim-dhashcache-iword2count)
           (setq pyim-dhashcache-shortcode2word
                 (make-hash-table :test #'equal))
           (maphash
@@ -308,7 +309,7 @@ code 对应的中文词条了。
 (defun pyim-dhashcache-update:icode2word (&optional force)
   "对 personal 缓存中的词条进行排序，加载排序后的结果.
 
-在这个过程中使用了 `pyim-dcache-iword2count' 中记录的词频信息。
+在这个过程中使用了 `pyim-dhashcache-iword2count' 中记录的词频信息。
 如果 FORCE 为真，强制排序。"
   (interactive)
   (when (or force (not pyim-dhashcache-update:icode2word-p))
@@ -320,7 +321,7 @@ code 对应的中文词条了。
                  (puthash key (pyim-dhashcache-sort-words value)
                           pyim-dhashcache-icode2word))
              pyim-dhashcache-icode2word)
-              (pyim-dcache-save-variable 'pyim-dhashcache-icode2word)
+            (pyim-dcache-save-variable 'pyim-dhashcache-icode2word)
             (setq pyim-dhashcache-update:icode2word-p t)))
       (async-start
        `(lambda ()
@@ -329,7 +330,7 @@ code 对应的中文词条了。
           ,(async-inject-variables "^pyim-.+?directory$")
           (require 'pyim-dhashcache)
           (pyim-dcache-set-variable 'pyim-dhashcache-icode2word)
-          (pyim-dcache-set-variable 'pyim-dcache-iword2count)
+          (pyim-dcache-set-variable 'pyim-dhashcache-iword2count)
           (maphash
            #'(lambda (key value)
                (puthash key (pyim-dhashcache-sort-words value)
@@ -347,7 +348,7 @@ code 对应的中文词条了。
 
 (defun pyim-dhashcache-init-variables ()
   "初始化 dcache 缓存相关变量."
-  (pyim-dcache-set-variable 'pyim-dcache-iword2count)
+  (pyim-dcache-set-variable 'pyim-dhashcache-iword2count)
   (pyim-dcache-set-variable 'pyim-dhashcache-code2word)
   (pyim-dcache-set-variable 'pyim-dhashcache-word2code)
   (pyim-dcache-set-variable 'pyim-dhashcache-shortcode2word)
@@ -358,21 +359,21 @@ code 对应的中文词条了。
   ;; 用户选择过的词
   (pyim-dcache-save-variable 'pyim-dhashcache-icode2word)
   ;; 词频
-  (pyim-dcache-save-variable 'pyim-dcache-iword2count))
+  (pyim-dcache-save-variable 'pyim-dhashcache-iword2count))
 
 (defun pyim-dhashcache-insert-export-content ()
   (maphash
    #'(lambda (key value)
        (insert (format "%s %s\n" key value)))
-   pyim-dcache-iword2count)
-    ;; 在默认情况下，用户选择过的词生成的缓存中存在的词条，
-    ;; `pyim-dcache-iword2count' 中也一定存在，但如果用户
-    ;; 使用了特殊的方式给用户选择过的词生成的缓存中添加了
-    ;; 词条，那么就需要将这些词条也导出，且设置词频为 0
+   pyim-dhashcache-iword2count)
+  ;; 在默认情况下，用户选择过的词生成的缓存中存在的词条，
+  ;; `pyim-dhashcache-iword2count' 中也一定存在，但如果用户
+  ;; 使用了特殊的方式给用户选择过的词生成的缓存中添加了
+  ;; 词条，那么就需要将这些词条也导出，且设置词频为 0
   (maphash
    #'(lambda (_ words)
        (dolist (word words)
-         (unless (gethash word pyim-dcache-iword2count)
+         (unless (gethash word pyim-dhashcache-iword2count)
            (insert (format "%s %s\n" word 0)))))
    pyim-dhashcache-icode2word))
 
@@ -393,13 +394,13 @@ code 对应的中文词条了。
 (defun pyim-dhashcache-put-iword2count (word &optional prepend wordcount-handler)
   "保存词频到缓存."
   (pyim-dhashcache-put
-   pyim-dcache-iword2count word
-   (cond
-    ((functionp wordcount-handler)
-     (funcall wordcount-handler orig-value))
-    ((numberp wordcount-handler)
-     wordcount-handler)
-    (t (+ (or orig-value 0) 1)))))
+    pyim-dhashcache-iword2count word
+    (cond
+     ((functionp wordcount-handler)
+      (funcall wordcount-handler orig-value))
+     ((numberp wordcount-handler)
+      wordcount-handler)
+     (t (+ (or orig-value 0) 1)))))
 
 (defun pyim-dhashcache-delete-word-1 (word)
   "将中文词条 WORD 从个人词库中删除"
@@ -420,14 +421,14 @@ code 对应的中文词条了。
         (pyim-dhashcache-put
           pyim-dhashcache-icode2word pinyin
           (remove word orig-value))))
-    (remhash word pyim-dcache-iword2count)))
+    (remhash word pyim-dhashcache-iword2count)))
 
 (defun pyim-dhashcache-insert-word-into-icode2word (word pinyin prepend)
   "保存个人词到缓存."
   (pyim-dhashcache-put pyim-dhashcache-icode2word
-                  pinyin
-                  (if prepend (pyim-list-merge word orig-value)
-                    (pyim-list-merge orig-value word))))
+                       pinyin
+                       (if prepend (pyim-list-merge word orig-value)
+                         (pyim-list-merge orig-value word))))
 
 (defun pyim-dhashcache-search-word-code (string)
   (gethash string pyim-dhashcache-word2code))
@@ -436,7 +437,7 @@ code 对应的中文词条了。
   "以 CODE 搜索词和联想词."
   (when pyim-debug (message "pyim-dhashcache-get-code2word-shortcode2word called => %s" code))
   (pyim-dhashcache-get code (list pyim-dhashcache-code2word
-                              pyim-dhashcache-shortcode2word)))
+                                  pyim-dhashcache-shortcode2word)))
 
 (defun pyim-dhashcache-get-code2word (code)
   "以 CODE 现有词库搜索词."
@@ -447,7 +448,7 @@ code 对应的中文词条了。
   "以 CODE 搜索个人词和个人联想词."
   (when pyim-debug (message "pyim-dhashcache-get-icode2word-ishortcode2word called => %s" code))
   (pyim-dhashcache-get code (list pyim-dhashcache-icode2word
-                              pyim-dhashcache-ishortcode2word)))
+                                  pyim-dhashcache-ishortcode2word)))
 
 (defun pyim-dhashcache-get-icode2word (code)
   "以 CODE 搜索个人词."
