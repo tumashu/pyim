@@ -434,25 +434,34 @@ code 对应的中文词条了。
 
 (defun pyim-dhashcache-get-code2word-shortcode2word (code)
   "以 CODE 搜索词和联想词."
+  (when pyim-debug (message "pyim-dhashcache-get-code2word-shortcode2word called => %s" code))
   (pyim-dhashcache-get code (list pyim-dhashcache-code2word
                               pyim-dhashcache-shortcode2word)))
 
 (defun pyim-dhashcache-get-code2word (code)
   "以 CODE 现有词库搜索词."
+  (when pyim-debug (message "pyim-dhashcache-get-code2word called => %s" code))
   (pyim-dhashcache-get code pyim-dhashcache-code2word))
-
-(defun pyim-dhashcache-get-ishortcode2word (code)
-  "以 CODE 搜索个人联想词."
-  (pyim-dhashcache-get code pyim-dhashcache-ishortcode2word))
 
 (defun pyim-dhashcache-get-icode2word-ishortcode2word (code)
   "以 CODE 搜索个人词和个人联想词."
+  (when pyim-debug (message "pyim-dhashcache-get-icode2word-ishortcode2word called => %s" code))
   (pyim-dhashcache-get code (list pyim-dhashcache-icode2word
                               pyim-dhashcache-ishortcode2word)))
 
-(defun pyim-dhashcache-export-personal-words (file &optional confirm)
-  (pyim-dhashcache-export pyim-dhashcache-icode2word file confirm))
+(defun pyim-dhashcache-get-icode2word (code)
+  "以 CODE 搜索个人词."
+  (when pyim-debug (message "pyim-dhashcache-get-icode2word called => %s" code))
+  (pyim-dhashcache-get code (list pyim-dhashcache-icode2word)))
 
+(defun pyim-dhashcache-get-ishortcode2word (code)
+  "以 CODE 搜索个人联想词."
+  (when pyim-debug (message "pyim-dhashcache-get-ishortcode2word called => %s" code))
+  (pyim-dhashcache-get code pyim-dhashcache-ishortcode2word))
+
+(defun pyim-dhashcache-export-personal-words (file &optional confirm)
+  "导出个人词库到 FILE."
+  (pyim-dhashcache-export pyim-dhashcache-icode2word file confirm))
 
 ;; * Footer
 
