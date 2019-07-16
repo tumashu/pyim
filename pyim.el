@@ -2000,14 +2000,15 @@ Return the input string.
 
 (defun pyim-terminate-translation ()
   "Terminate the translation of the current key."
-  (setq pyim-translating nil)
-  (pyim-preview-delete-string)
-  (setq pyim-candidates nil)
-  (setq pyim-assistant-scheme-enable nil)
-  (setq pyim-force-input-chinese nil)
-  (when (and (memq pyim-page-tooltip '(posframe child-frame))
-             (pyim-posframe-valid-p))
-    (posframe-hide pyim-page-tooltip-posframe-buffer)))
+  (when (string-equal pyim-entered "")
+    (setq pyim-translating nil)
+    (pyim-preview-delete-string)
+    (setq pyim-candidates nil)
+    (setq pyim-assistant-scheme-enable nil)
+    (setq pyim-force-input-chinese nil)
+    (when (and (memq pyim-page-tooltip '(posframe child-frame))
+               (pyim-posframe-valid-p))
+      (posframe-hide pyim-page-tooltip-posframe-buffer))))
 
 ;; 分解拼音的相关函数
 (defun pyim-pinyin-get-shenmu (pinyin)
