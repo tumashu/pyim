@@ -2072,7 +2072,8 @@ Return the input string.
 
 这个过程通过循环的调用 `pyim-pinyin-get-charpy' 来实现，整个过程
 类似用菜刀切黄瓜片，将一个拼音字符串逐渐切开。"
-  (let (charpy spinyin)
+  (let ((py pinyin)
+        charpy spinyin)
     (while (when (string< "" pinyin)
              (setq charpy (pyim-pinyin-get-charpy pinyin))
              (if (equal (car charpy) '("" . ""))
@@ -2081,7 +2082,12 @@ Return the input string.
                    (setq pinyin ""))
                (setq spinyin (append spinyin (list (car charpy))))
                (setq pinyin (cdr charpy)))))
-    spinyin))
+    (or spinyin
+        ;; 如果无法按照拼音的规则来分解字符串，
+        ;; 就将字符串简单的包装一下，然后返回。
+        ;; 目前这个功能用于： 以u或者i开头的词库 #226
+        ;; https://github.com/tumashu/pyim/issues/226
+        (list (cons "" py)))))
 
 (defun pyim-scheme-get (scheme-name)
   "获取名称为 SCHEME-NAME 的输入法方案。"
