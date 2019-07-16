@@ -2387,14 +2387,39 @@ IMOBJS 获得候选词条。"
                              (mapconcat #'identity
                                         (pyim-codes-create imobj scheme-name)
                                         "-"))))
+
+      (setq common-words (delete-dups common-words))
       (setq common-words
-            (append common-words
-                    (funcall (pyim-dcache-backend-api (if pyim-enable-shortcode
-                                                          "get-code2word-shortcode2word"
-                                                        "get-code2word"))
-                             (mapconcat #'identity
-                                        (pyim-codes-create imobj scheme-name)
-                                        "-"))))
+            (let* ((cands (funcall (pyim-dcache-backend-api (if pyim-enable-shortcode
+                                                                "get-code2word-shortcode2word"
+                                                              "get-code2word"))
+                                   (mapconcat #'identity
+                                              (pyim-codes-create imobj scheme-name)
+                                              "-"))))
+              (cond
+               ((and (> (length cands) 0)
+                     (> (length common-words) 0)
+                     (or (eq 1 (length imobj))
+                         (eq 2 (length imobj))))
+                ;; 两个单字或者两字词序列合并,确保常用字词在前面
+                (let* ((size (min (length cands) (length common-words)))
+                       new-common-words
+                       (i 0))
+                  ;; 两个序列轮流取出一个元素输入新序列
+                  (while (< i size)
+                    (push (nth i common-words) new-common-words)
+                    (push (nth i cands) new-common-words)
+                    (setq i (1+ i)))
+                  ;; 较长序列的剩余元素加入新序列
+                  (append (nreverse new-common-words)
+                          (nthcdr size (cond
+                                        ((< size (length cands))
+                                         cands)
+                                        ((< size (length common-words))
+                                         common-words))))))
+               (t
+                (append common-words cands)))))
+
       (setq pinyin-chars
             (append pinyin-chars
                     (pyim-dcache-get
