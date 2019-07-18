@@ -1240,7 +1240,7 @@ dcache 文件的方法让 pyim 正常工作。")
   "这个变量用来保存做为 page tooltip 的 posframe 的 buffer.")
 
 (defconst pyim-shuangpin-invalid-pinyin-regexp
-  "^\\([qtghklzcsdn]o\\|[rypfbmw]uo\\|[qj]ong\\|[rtysdghklzxcn]iong\\|[qtypdjlxbnm]uai\\|[ghk]ing?\\|[qjklxn]uang\\|[dgh]iang\\|[qjlxg]ia\\|[hk]ia\\|[rtsdghkzc]v\\|[jl]ui\\)$"
+  "^\\([qtghklzcsdn]o\\|[rypfbmw]uo\\|[qj]ong\\|[rtysdghklzxcn]iong\\|[qtypdjlxbnm]uai\\|[ghk]ing?\\|[qjklxn]uang\\|[dgh]iang\\|[qjlx]ua\\|[hkg]ia\\|[rtsdghkzc]v\\|[jl]ui\\)$"
   "双拼可能自动产生的无效拼音. 例如输入 kk 得到有效拼音 kuai .
 但同时产生了无效拼音 king .  用户手动输入的无效拼音无需考虑.
 因为用户有即时界面反馈,不可能连续输入无效拼音.")
@@ -2387,14 +2387,39 @@ IMOBJS 获得候选词条。"
                              (mapconcat #'identity
                                         (pyim-codes-create imobj scheme-name)
                                         "-"))))
+
+      (setq common-words (delete-dups common-words))
       (setq common-words
-            (append common-words
-                    (funcall (pyim-dcache-backend-api (if pyim-enable-shortcode
-                                                          "get-code2word-shortcode2word"
-                                                        "get-code2word"))
-                             (mapconcat #'identity
-                                        (pyim-codes-create imobj scheme-name)
-                                        "-"))))
+            (let* ((cands (funcall (pyim-dcache-backend-api (if pyim-enable-shortcode
+                                                                "get-code2word-shortcode2word"
+                                                              "get-code2word"))
+                                   (mapconcat #'identity
+                                              (pyim-codes-create imobj scheme-name)
+                                              "-"))))
+              (cond
+               ((and (> (length cands) 0)
+                     (> (length common-words) 0)
+                     (or (eq 1 (length imobj))
+                         (eq 2 (length imobj))))
+                ;; 两个单字或者两字词序列合并,确保常用字词在前面
+                (let* ((size (min (length cands) (length common-words)))
+                       new-common-words
+                       (i 0))
+                  ;; 两个序列轮流取出一个元素输入新序列
+                  (while (< i size)
+                    (push (nth i common-words) new-common-words)
+                    (push (nth i cands) new-common-words)
+                    (setq i (1+ i)))
+                  ;; 较长序列的剩余元素加入新序列
+                  (append (nreverse new-common-words)
+                          (nthcdr size (cond
+                                        ((< size (length cands))
+                                         cands)
+                                        ((< size (length common-words))
+                                         common-words))))))
+               (t
+                (append common-words cands)))))
+
       (setq pinyin-chars
             (append pinyin-chars
                     (pyim-dcache-get
