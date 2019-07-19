@@ -22,7 +22,6 @@
 (defvar pyim-dregcache-icode2word nil)
 (defvar pyim-dregcache-iword2count nil)
 (defvar pyim-dregcache-dicts-md5 nil)
-(defvar pyim-dregcache-cache nil)
 
 (defun pyim-dregcache-variable-file (variable)
   "Get VARIABLE dcache file path."
@@ -286,13 +285,15 @@ DCACHE-LIST 只是符号而已,并不代表真实的缓存数据."
   (when pyim-debug (message "pyim-dregcache-put-iword2count. word=%s" word))
   (let* ((orig-value (gethash word pyim-dregcache-iword2count))
          (new-value (cond
-                     ((functionp wordcount-handler)
-                      (funcall wordcount-handler orig-value))
-                     ((numberp wordcount-handler)
-                      wordcount-handler)
-                     (t (+ (or orig-value 0) 1)))))
+                      ((functionp wordcount-handler)
+                       (funcall wordcount-handler orig-value))
+                      ((numberp wordcount-handler)
+                       wordcount-handler)
+                      (t (+ (or orig-value 0) 1)))))
     (unless (equal orig-value new-value)
-      (puthash word new-value pyim-dregcache-iword2count))))
+      (puthash word new-value pyim-dregcache-iword2count)))
+  ;; TODO 限制 pyim-dregcache-iword2count 小于30万条，当超出时，把频率最小的词删除
+)
 
 (defun pyim-dregcache-delete-word-1 (word)
   "TODO"
@@ -336,7 +337,7 @@ DCACHE-LIST 只是符号而已,并不代表真实的缓存数据."
       (dolist (line pyim-dregcache-icode2word)
         (when (string-match pattern line)
           (push (nth 1 (split-string line " ")) rlt))))
-    rlt))
+    (nreverse rlt)))
 
 (defun pyim-dregcache-get-icode2word (code)
   "以 CODE 搜索个人词.  正则表达式搜索词库,不需要为联想词开单独缓存."

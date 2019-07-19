@@ -1673,7 +1673,8 @@ BUG：无法有效的处理多音字。"
       ;; 添加词条到个人缓存
       (dolist (py pinyins)
         (unless (pyim-string-match-p "[^ a-z-]" py)
-          (pyim-insert-word-into-icode2word word py prepend))))))
+          (pyim-insert-word-into-icode2word word py prepend)
+          (funcall (pyim-dcache-backend-api "sort-icode2word")))))))
 
 (defun pyim-list-merge (a b)
   "Join list A and B to a new list, then delete dups."
