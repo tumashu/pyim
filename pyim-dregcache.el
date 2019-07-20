@@ -225,7 +225,7 @@ DCACHE-LIST 只是符号而已,并不代表真实的缓存数据."
             (cond
              ((string-match "^[^ ]+$" word)
               ;; 单个词
-              (push word result))
+              (add-to-list 'result word t))
              (t
               ;; 多个字
               (setq result (append result (split-string word " +")))))
