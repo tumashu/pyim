@@ -1673,8 +1673,7 @@ BUG：无法有效的处理多音字。"
       ;; 添加词条到个人缓存
       (dolist (py pinyins)
         (unless (pyim-string-match-p "[^ a-z-]" py)
-          (pyim-insert-word-into-icode2word word py prepend)
-          (funcall (pyim-dcache-backend-api "sort-icode2word")))))))
+          (pyim-insert-word-into-icode2word word py prepend))))))
 
 (defun pyim-list-merge (a b)
   "Join list A and B to a new list, then delete dups."
@@ -2388,7 +2387,11 @@ IMOBJS 获得候选词条。"
                              (mapconcat #'identity
                                         (pyim-codes-create imobj scheme-name)
                                         "-"))))
-
+      (when (> (length personal-words) 0)
+        (setq personal-words (sort personal-words
+                                   #'(lambda (a b)
+                                       (> (or (gethash a pyim-dregcache-iword2count) 0)
+                                          (or (gethash b pyim-dregcache-iword2count) 0))))))
       (setq common-words (delete-dups common-words))
       (setq common-words
             (let* ((cands (funcall (pyim-dcache-backend-api (if pyim-enable-shortcode
