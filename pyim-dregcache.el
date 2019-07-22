@@ -270,9 +270,7 @@ DCACHE-LIST 只是符号而已,并不代表真实的缓存数据."
    ;; dregcache 引擎也需要词频信息，第一次使用 dregcache 引擎的时候，
    ;; 自动导入 dhashcache 引擎的词频信息，以后两个引擎的词频信息就
    ;; 完全分开了。
-   (let ((file (concat (file-name-as-directory pyim-dcache-directory)
-                       "pyim-dhashcache-iword2count")))
-     (pyim-dcache-get-value-from-file file))))
+   (pyim-dcache-get-variable 'pyim-dhashcache-iword2count)))
 
 (defun pyim-dregcache-icode2word-formatted ()
   "个人词库格式化以便存入文件."
