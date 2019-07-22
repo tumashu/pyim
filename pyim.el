@@ -2383,18 +2383,20 @@ IMOBJS 获得候选词条。"
     (dolist (imobj imobjs)
       (setq personal-words
             (append personal-words
-                    (funcall (pyim-dcache-backend-api (if pyim-enable-shortcode
-                                                          "get-icode2word-ishortcode2word"
-                                                        "get-icode2word"))
+                    (funcall (pyim-dcache-backend-api
+                              (if pyim-enable-shortcode
+                                  "get-icode2word-ishortcode2word"
+                                "get-icode2word"))
                              (mapconcat #'identity
                                         (pyim-codes-create imobj scheme-name)
                                         "-"))))
 
       (setq common-words (delete-dups common-words))
       (setq common-words
-            (let* ((cands (funcall (pyim-dcache-backend-api (if pyim-enable-shortcode
-                                                                "get-code2word-shortcode2word"
-                                                              "get-code2word"))
+            (let* ((cands (funcall (pyim-dcache-backend-api
+                                    (if pyim-enable-shortcode
+                                        "get-code2word-shortcode2word"
+                                      "get-code2word"))
                                    (mapconcat #'identity
                                               (pyim-codes-create imobj scheme-name)
                                               "-"))))
@@ -2426,6 +2428,14 @@ IMOBJS 获得候选词条。"
             (append pinyin-chars
                     (pyim-dcache-get
                      (car (pyim-codes-create imobj scheme-name))))))
+
+    ;; 使用词频信息，对个人词库得到的候选词排序，
+    ;; 第一个词的位置比较特殊，不参与排序，
+    ;; 具体原因请参考 `pyim-page-select-word' 中的 comment.
+    (setq personal-words
+          `(,(car personal-words)
+            ,@(funcall (pyim-dcache-backend-api "sort-words")
+                       (cdr personal-words))))
 
     ;; Debug
     (when pyim-debug

@@ -45,6 +45,17 @@
         (insert-file-contents file)
         (buffer-string)))))
 
+(defun pyim-dregcache-sort-words (words-list)
+  "对 WORDS-LIST 排序，词频大的排在前面.
+
+排序使用 `pyim-dregcache-iword2count' 中记录的词频信息"
+  (sort words-list
+        #'(lambda (a b)
+            (let ((a (car (split-string a ":")))
+                  (b (car (split-string b ":"))))
+              (> (or (gethash a pyim-dregcache-iword2count) 0)
+                 (or (gethash b pyim-dregcache-iword2count) 0))))))
+
 (defun pyim-dregcache-sort-icode2word ()
   "对个人词库排序."
   (setq pyim-dregcache-icode2word
