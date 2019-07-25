@@ -303,8 +303,15 @@ DCACHE-LIST 只是符号而已,并不代表真实的缓存数据."
       (puthash word new-value pyim-dregcache-iword2count))))
 
 (defun pyim-dregcache-delete-word-1 (word)
-  "TODO"
-  )
+  "将中文词条 WORD 从个人词库中删除."
+  (let* ((pinyins (pyim-hanzi2pinyin word nil "-" t nil t))) ;使用了多音字校正
+    ;; 从个人缓存删除词条
+    (dolist (py pinyins)
+      (unless (pyim-string-match-p "[^ a-z-]" py)
+        (setq pyim-dregcache-icode2word
+              (delete (concat py " " word) pyim-dregcache-icode2word)))))
+  ;; 删除对应词条的词频
+  (remhash word pyim-dregcache-iword2count))
 
 (defun pyim-dregcache-insert-word-into-icode2word (word code prepend)
   "保存个人词到缓存."
