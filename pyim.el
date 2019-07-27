@@ -1262,6 +1262,7 @@ dcache 文件的方法让 pyim 正常工作。")
     (dolist (i (number-sequence ?1 ?9))
       (define-key map (char-to-string i) 'pyim-page-select-word-by-number))
     (define-key map " " 'pyim-page-select-word)
+    (define-key map (kbd "C-SPC") 'pyim-page-select-word-simple)
     (define-key map [backspace] 'pyim-delete-last-char)
     (define-key map [delete] 'pyim-delete-last-char)
     (define-key map [M-backspace] 'pyim-backward-kill-cchar)
@@ -2931,6 +2932,19 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
         ((eq type 'pyim-entered)
          (setq pyim-outcome pyim-entered))
         (t (error "Pyim: invalid pyim-outcome"))))
+
+(defun pyim-page-select-word-simple ()
+  "从选词框中选择当前词条.
+这个函数与 `pyim-page-select-word' 的区别是：
+这个函数不会将选择的词条加入个人词库，主要的使用场景是：
+当用户需要输入一个生僻字时，输入包含该字的一个词条，
+然后再删除不需要的字，由于这个词条不是常用词条，所以
+不需要保存到个人词库。"
+  (interactive)
+  (if (null pyim-candidates)
+      (pyim-outcome-handle 'last-char)
+    (pyim-outcome-handle 'candidate))
+  (pyim-terminate-translation))
 
 (defun pyim-page-select-word ()
   "从选词框中选择当前词条。"
