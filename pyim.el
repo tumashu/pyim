@@ -703,7 +703,7 @@ plist 来表示，比如：
      :document "五笔输入法。"
      :class xingma
      :first-chars "abcdefghijklmnopqrstuvwxyz"
-     :rest-chars "abcdefghijklmnopqrstuvwxyz"
+     :rest-chars "abcdefghijklmnopqrstuvwxyz'"
      :code-prefix "." ;五笔词库中所有的 code 都以 "." 开头，防止和拼音词库冲突。
      :code-split-length 4 ;默认将用户输入切成 4 个字符长的 code 列表（不计算 code-prefix）
      :code-maximum-length 4 ;五笔词库中，code 的最大长度（不计算 code-prefix）
@@ -2235,14 +2235,16 @@ Return the input string.
 (defun pyim-imobjs-create:xingma (entered &optional scheme-name)
   (let ((n (pyim-scheme-get-option scheme-name :code-split-length)))
     (let (output)
-      (while entered
-        (if (< (length entered) n)
-            (progn
-              (push entered output)
-              (setq entered nil))
-          (push (substring entered 0 n) output)
-          (setq entered (substring entered n))))
-      (list (remove "" (nreverse output))))))
+      (mapc (lambda (x)
+              (while (not (string-empty-p x))
+                (if (< (length x) n)
+                    (progn
+                      (push x output)
+                      (setq x ""))
+                  (push (substring x 0 n) output)
+                  (setq x (substring x n)))))
+            (split-string entered "'"))
+      (list (nreverse output)))))
 
 (defun pyim-imobjs-create:rime (entered &optional -)
   (list (list entered)))
