@@ -1670,14 +1670,14 @@ BUG：拼音无法有效地处理多音字。
 (defun pyim-hanzi2xingma (string scheme-name &optional return-list)
   "返回汉字 STRING 对应形码方案 SCHEME-NAME 的 code (不包括
 code-prefix)。当RETURN-LIST 设置为 t 时，返回一个 code list。"
-  (let* ((fun (intern (concat "pyim-hanzi2" (symbol-name scheme-name))))
+  (let* ((fun (intern (concat "pyim-hanzi2xingma:" (symbol-name scheme-name))))
          (code (and fun (funcall fun string))))
     (when code
       (if return-list
           (list code)
         code))))
 
-(defun pyim-hanzi2wubi (string)
+(defun pyim-hanzi2xingma:wubi (string)
   "返回汉字 STRING 的五笔编码(不包括 code-prefix)。当RETURN-LIST
 设置为 t 时，返回一个编码列表。"
   (when (string-match-p "^\\cc+\\'" string)
@@ -1702,11 +1702,6 @@ code-prefix)。当RETURN-LIST 设置为 t 时，返回一个 code list。"
                            (substring (pyim-hanzi2wubi (nth 2 string)) 0 1)
                            (substring (pyim-hanzi2wubi (nth (1- len) string)) 0 1))))))
       code)))
-
-(defun pyim-hanzi2cangjie (string)
-  "返回汉字 STRING 的仓颉编码(不包括 code-prefix)。
-TODO"
-  )
 
 (defun pyim-list-merge (a b)
   "Join list A and B to a new list, then delete dups."
