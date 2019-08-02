@@ -1185,14 +1185,6 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
 (defvar pyim-outcome ""
   "用户通过 pyim 生成的字符串，是最终插入到 buffer 的字符串。" )
 
-(defvar pyim-outcome-confirmed-words ""
-  "用户待输入词中已经确认的部分。
-
-`pyim-entered-buffer' 中的字符串全部翻译完后把该词加入个人词库.
-
-TODO: 这个变量的概念不清楚，需要进一步明确，它的功能是什么？
-和 `pyim-outcome' 有什么区别，是否必须存在？")
-
 (defvar pyim-assistant-scheme-enable nil
   "设置临时 scheme, 用于五笔等形码输入法临时拼音输入。")
 
@@ -1365,14 +1357,14 @@ dcache 文件的方法让 pyim 正常工作。")
   (interactive)
   (pyim-with-entered-buffer
     (forward-char))
-  (pyim-refresh-ui-with-latest-candidates))
+  (pyim-entered-refresh t))
 
 (defun pyim-entered-backward-point ()
   "`pyim-entered-buffer' 中光标后移"
   (interactive)
   (pyim-with-entered-buffer
     (backward-char))
-  (pyim-refresh-ui-with-latest-candidates))
+  (pyim-entered-refresh t))
 
 (defun pyim-entered-forward-imobj ()
   "`pyim-entered-buffer’ 中光标向前移动一个imobj对应的字符串
@@ -1382,7 +1374,7 @@ dcache 文件的方法让 pyim 正常工作。")
   (let ((position (pyim-entered-find-adjacent-imobjs-end-position 1 t)))
     (pyim-with-entered-buffer
       (goto-char position))
-    (pyim-refresh-ui-with-latest-candidates)))
+    (pyim-entered-refresh t)))
 
 (defun pyim-entered-backward-imobj ()
   "`pyim-entered-buffer’ 中光标向后移动一个imobj对应的字符串
@@ -1392,21 +1384,21 @@ dcache 文件的方法让 pyim 正常工作。")
   (let ((position (pyim-entered-find-adjacent-imobjs-end-position 1)))
     (pyim-with-entered-buffer
       (goto-char position))
-    (pyim-refresh-ui-with-latest-candidates)))
+    (pyim-entered-refresh t)))
 
 (defun pyim-entered-end-of-line ()
   "`pyim-entered-buffer' 中光标移至行尾"
   (interactive)
   (pyim-with-entered-buffer
     (end-of-line))
-  (pyim-refresh-ui-with-latest-candidates))
+  (pyim-entered-refresh t))
 
 (defun pyim-entered-beginning-of-line ()
   "`pyim-entered-buffer' 中光标移至行首"
   (interactive)
   (pyim-with-entered-buffer
     (beginning-of-line))
-  (pyim-refresh-ui-with-latest-candidates))
+  (pyim-entered-refresh t))
 
 ;; ** "汉字 -> 拼音" 以及 "拼音 -> 汉字" 的转换函数
 (defun pyim-pinyin2cchar-cache-create (&optional force)
@@ -1948,8 +1940,7 @@ FILE 的格式与 `pyim-export' 生成的文件格式相同，
                   (list (aref input-string 0))
                 (mapcar 'identity input-string))))
         (pyim-preview-delete-overlay)
-        (pyim-entered-erase-buffer)
-        (setq pyim-outcome-confirmed-words "")))))
+        (pyim-entered-erase-buffer)))))
 
 (defun pyim-magic-convert (str)
   "用于处理 `pyim-magic-convert' 的函数。"
@@ -1999,7 +1990,6 @@ Return the input string.
              last-command-event last-command this-command)
 
         (setq pyim-translating t)
-        (setq pyim-outcome-confirmed-words "")
         (pyim-entered-erase-buffer)
         (pyim-outcome-handle "")
 
@@ -2097,7 +2087,7 @@ Return the input string.
       (pyim-outcome-handle 'last-char)
       (pyim-terminate-translation)))))
 
-(defun pyim-refresh-ui-with-latest-candidates()
+(defun pyim-entered-refresh-1 ()
   "查询 `pyim-entered-buffer' 光标前的拼音字符串（如果光标在行首则为光标后的）, 显示备选词等待用户选择。"
   (let* ((scheme-name (pyim-scheme-name))
          pinyin-to-translate)
@@ -2114,18 +2104,18 @@ Return the input string.
     (pyim-preview-refresh)
     (pyim-page-refresh)))
 
-(defun pyim-entered-refresh ()
+(defun pyim-entered-refresh (&optional no-delay)
   "延迟 `pyim-exhibit-delay-ms' 显示备选词等待用户选择。"
   (when (> (length (pyim-entered-get)) 0)
     (when pyim--exhibit-timer (cancel-timer pyim--exhibit-timer))
     (cond
-     ((or (not pyim-exhibit-delay-ms) (eq pyim-exhibit-delay-ms 0))
-      (pyim-refresh-ui-with-latest-candidates))
+     ((or no-delay (not pyim-exhibit-delay-ms) (eq pyim-exhibit-delay-ms 0))
+      (pyim-entered-refresh-1))
      (t
       (setq pyim--exhibit-timer
             (run-with-timer (/ pyim-exhibit-delay-ms 1000.0)
                             nil
-                            #'pyim-refresh-ui-with-latest-candidates))))))
+                            #'pyim-entered-refresh-1))))))
 
 (defun pyim-terminate-translation ()
   "Terminate the translation of the current key."
@@ -2137,8 +2127,7 @@ Return the input string.
   (when (and (memq pyim-page-tooltip '(posframe child-frame))
              (pyim-posframe-valid-p))
     (posframe-hide pyim-page-tooltip-posframe-buffer))
-  (pyim-entered-erase-buffer)
-  (setq pyim-outcome-confirmed-words ""))
+  (pyim-entered-erase-buffer))
 
 ;; 分解拼音的相关函数
 (defun pyim-pinyin-get-shenmu (pinyin)
@@ -3155,12 +3144,6 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
               (pyim-with-entered-buffer
                 (delete-region 1 pyim-entered-translated-index)
                 (end-of-line))
-              (pyim-preview-delete-string)
-              (insert pyim-outcome)
-              (setq pyim-outcome-confirmed-words (concat pyim-outcome-confirmed-words pyim-outcome))
-              (pyim-preview-delete-overlay)
-              (pyim-preview-setup-overlay)
-              (setq pyim-outcome "")
               (pyim-entered-refresh))
           ;; pyim 词频调整策略：
           ;; 1. 如果一个词条是用户在输入过程中，自己新建的词条，那么就将这个词条
@@ -3169,10 +3152,9 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
           ;;    这样的话，一个新词要输入两遍之后才可能出现在第一位。
           ;; 3. pyim 在启动的时候，会使用词频信息，对个人词库作一次排序。
           ;;    用作 pyim 下一次使用。
-          (setq pyim-outcome-confirmed-words (concat pyim-outcome-confirmed-words pyim-outcome))
-          (if (member pyim-outcome-confirmed-words pyim-candidates)
-              (pyim-create-word pyim-outcome-confirmed-words t)
-            (pyim-create-word pyim-outcome-confirmed-words))
+          (if (member pyim-outcome pyim-candidates)
+              (pyim-create-word pyim-outcome t)
+            (pyim-create-word pyim-outcome))
 
           (pyim-terminate-translation)
           ;; pyim 使用这个 hook 来处理联想词。
@@ -3559,7 +3541,7 @@ PUNCT-LIST 格式类似：
   (pyim-with-entered-buffer
     (delete-backward-char (or N 1)))
   (if (> (length (pyim-entered-get)) 1)
-      (pyim-entered-refresh)
+      (pyim-entered-refresh t)
     (pyim-outcome-handle "")
     (pyim-terminate-translation)))
 
