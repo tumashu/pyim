@@ -1625,25 +1625,33 @@ code 对应的中文词条了."
   (funcall (pyim-dcache-backend-api "insert-word-into-icode2word") word pinyin prepend))
 
 (defun pyim-create-word (word &optional prepend wordcount-handler)
-  "将中文词条 WORD 添加拼音后，保存到用户选择过的词生成的缓存中。
+  "将中文词条 WORD 添加编码后，保存到用户选择过的词生成的缓存中。
 
 词条 WORD 默认会追加到已有词条的后面，如果 PREPEND 设置为 t,
 词条就会放到已有词条的最前面。
 
-调用 `pyim-hanzi2pinyin' 来获取中文词条的拼音 code。
+根据当前输入法，决定是调用 `pyim-hanzi2pinyin' 还是
+`pyim-hanzi2xingma' 来获取中文词条的编码。
 
 WORDCOUNT-HANDLER 可以是一个数字，代表将此数字设置为 WORD 的新词频，
 WORDCOUNT-HANDLER 也可以是一个函数，其返回值将设置为 WORD 的新词频，
 而这个函数的参数则表示 WORD 当前词频，这个功能用于：`pyim-import',
 如果 WORDCOUNT-HANDLER 设置为其他, 则表示让 WORD 当前词频加1.
 
-BUG：无法有效的处理多音字。"
+BUG：拼音无法有效地处理多音字。
+"
   (when (and (> (length word) 0)
              (< (length word) 11) ;十个汉字以上的词条，加到个人词库里面用处不大，忽略。
              (not (pyim-string-match-p "\\CC" word)))
     ;; 记录最近创建的词条，用于快速删词功能。
     (setq pyim-last-created-word word)
-    (let* ((pinyins (pyim-hanzi2pinyin word nil "-" t nil t))) ;使用了多音字校正
+    (let* ((scheme-name (pyim-scheme-name))
+           (class (pyim-scheme-get-option scheme-name :class))
+           (code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
+           (codes (if (eq class 'xingma)
+                      (pyim-hanzi2xingma word scheme-name t)
+                    ;;拼音使用了多音字校正
+                    (pyim-hanzi2pinyin word nil "-" t nil t))))
       ;; 保存对应词条的词频
       (when (> (length word) 0)
         (funcall (pyim-dcache-backend-api "put-iword2count")
@@ -1651,11 +1659,54 @@ BUG：无法有效的处理多音字。"
                  prepend
                  wordcount-handler))
       ;; 添加词条到个人缓存
-      (dolist (py pinyins)
-        (unless (pyim-string-match-p "[^ a-z-]" py)
-          (pyim-insert-word-into-icode2word word py prepend)))
+      (dolist (code codes)
+        (unless (pyim-string-match-p "[^ a-z-]" code)
+          (pyim-insert-word-into-icode2word word
+                                            (concat (or code-prefix "") code)
+                                            prepend)))
       ;; TODO, 排序个人词库?
       )))
+
+(defun pyim-hanzi2xingma (string scheme-name &optional return-list)
+  "返回汉字 STRING 对应形码方案 SCHEME-NAME 的 code (不包括
+code-prefix)。当RETURN-LIST 设置为 t 时，返回一个 code list。"
+  (let* ((fun (intern (concat "pyim-hanzi2" (symbol-name scheme-name))))
+         (code (and fun (funcall fun string))))
+    (when code
+      (if return-list
+          (list code)
+        code))))
+
+(defun pyim-hanzi2wubi (string)
+  "返回汉字 STRING 的五笔编码(不包括 code-prefix)。当RETURN-LIST
+设置为 t 时，返回一个编码列表。"
+  (when (string-match-p "^\\cc+\\'" string)
+    (let ((code (pyim-code-search string 'wubi))
+          (len (length string)))
+      (when (string-empty-p code)
+        (when (= len 1)
+          (error "No code found for %s" string))
+        (setq string (split-string string "" t)
+              code
+              (cl-case len
+                ;; 双字词，分别取两个字的前两个编码
+                (2 (concat (substring (pyim-hanzi2wubi (nth 0 string)) 0 2)
+                           (substring (pyim-hanzi2wubi (nth 1 string)) 0 2)))
+                ;; 三字词，取前二字的首编码，及第三个字的前两个编码
+                (3 (concat (substring (pyim-hanzi2wubi (nth 0 string)) 0 1)
+                           (substring (pyim-hanzi2wubi (nth 1 string)) 0 1)
+                           (substring (pyim-hanzi2wubi (nth 2 string)) 0 2)))
+                ;; 四字词及以上，分别前三个字及最后一个字的首编码
+                (t (concat (substring (pyim-hanzi2wubi (nth 0 string)) 0 1)
+                           (substring (pyim-hanzi2wubi (nth 1 string)) 0 1)
+                           (substring (pyim-hanzi2wubi (nth 2 string)) 0 1)
+                           (substring (pyim-hanzi2wubi (nth (1- len) string)) 0 1))))))
+      code)))
+
+(defun pyim-hanzi2cangjie (string)
+  "返回汉字 STRING 的仓颉编码(不包括 code-prefix)。
+TODO"
+  )
 
 (defun pyim-list-merge (a b)
   "Join list A and B to a new list, then delete dups."
@@ -2322,8 +2373,10 @@ IMOBJS 获得候选词条。"
         (setq output3
               (remove "" (or (mapcar #'(lambda (x)
                                          (concat str x))
-                                     (funcall (pyim-dcache-backend-api "get-code2word-shortcode2word")
-                                              output1))
+                                     `(,@(funcall (pyim-dcache-backend-api "get-code2word-shortcode2word")
+                                                  output1)
+                                       ,@(funcall (pyim-dcache-backend-api "get-icode2word")
+                                                  output1)))
                              (list str))))
         (setq result (append result output3))))
     (when (car result)
