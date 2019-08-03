@@ -1597,7 +1597,9 @@ pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
     (if (functionp func)
         (apply func api-args)
       (when pyim-debug
-        (message "%S 不是一个有效的 dcache api 函数." (symbol-name func))))))
+        (message "%S 不是一个有效的 dcache api 函数." (symbol-name func))
+        ;; Need to return nil
+        nil))))
 
 (defun pyim-dcache-update-code2word (&optional force)
   "读取并加载词库.
@@ -2375,7 +2377,7 @@ Return the input string.
   "search-forward为t表示向前，nil表示向后，找出光标向该方向移动 number-of-imobj 个拼音时的位置"
   (pyim-with-entered-buffer
     ;; if user uses quanpin, we can use pyim-pinyin-split instead of pyim-imobjs-create
-    (cl-labels ((string-starts-with 
+    (cl-labels ((string-starts-with
                  (s begins)
                  ;; Return non-nil if string S starts with BEGINS
                  (cond ((>= (length s) (length begins))
