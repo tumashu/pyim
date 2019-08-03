@@ -1594,8 +1594,10 @@ pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
     (require pyim-dcache-backend))
   (let ((func (intern (concat (symbol-name pyim-dcache-backend)
                               "-" (symbol-name api-name)))))
-    (when (functionp func)
-      (apply func api-args))))
+    (if (functionp func)
+        (apply func api-args)
+      (when pyim-debug
+        (message "%S 不是一个有效的 dcache api 函数." (symbol-name func))))))
 
 (defun pyim-dcache-update-code2word (&optional force)
   "读取并加载词库.
