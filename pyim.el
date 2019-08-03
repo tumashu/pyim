@@ -2497,7 +2497,7 @@ IMOBJS 获得候选词条。"
         (setq output3
               (remove "" (or (mapcar #'(lambda (x)
                                          (concat str x))
-                                     (pyim-dcache-call-api 'get output1 '(code2word shortcode2word icode2word)))
+                                     (pyim-dcache-get output1 '(code2word shortcode2word icode2word)))
                              (list str))))
         (setq result (append result output3))))
     (when (car result)
@@ -2523,8 +2523,7 @@ IMOBJS 获得候选词条。"
          ;; 个人文件。
          (jianpin-words
           (when (and (> (length (car imobjs)) 1) pyim-enable-shortcode)
-            (pyim-dcache-call-api
-             'get
+            (pyim-dcache-get
              (mapconcat #'identity
                         (pyim-codes-create (car imobjs) scheme-name 1)
                         "-")
@@ -2548,8 +2547,7 @@ IMOBJS 获得候选词条。"
     (dolist (imobj imobjs)
       (setq personal-words
             (append personal-words
-                    (pyim-dcache-call-api
-                     'get
+                    (pyim-dcache-get
                      (mapconcat #'identity
                                 (pyim-codes-create imobj scheme-name)
                                 "-")
@@ -2559,8 +2557,7 @@ IMOBJS 获得候选词条。"
 
       (setq common-words (delete-dups common-words))
       (setq common-words
-            (let* ((cands (pyim-dcache-call-api
-                           'get
+            (let* ((cands (pyim-dcache-get
                            (mapconcat #'identity
                                       (pyim-codes-create imobj scheme-name)
                                       "-")
@@ -3897,7 +3894,7 @@ PUNCT-LIST 格式类似：
       (dolist (string-list string-alist)
         (let ((pinyin-list (pyim-hanzi2pinyin (car string-list) nil "-" t)))
           (dolist (pinyin pinyin-list)
-            (let ((words (pyim-dcache-call-api 'get pinyin '(code2word)))) ; 忽略个人词库可以提高速度
+            (let ((words (pyim-dcache-get pinyin '(code2word)))) ; 忽略个人词库可以提高速度
               (dolist (word words)
                 (when (equal word (car string-list))
                   (push string-list result)))))))
@@ -4056,7 +4053,7 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
                   ;; pyim-buffer-list 中第一个 buffer 对应的是个人词库文件
                   ;; 个人词库文件中的词条，极有可能存在 *多音字污染*。
                   ;; 这是由 pyim 保存词条的机制决定的。
-                  (pyim-dcache-call-api 'get py-str '(code2word))))
+                  (pyim-dcache-get py-str '(code2word))))
             (when (member string words-from-dicts)
               (push pinyin-list pinyins-list-adjusted))))
         (setq pinyins-list-adjusted
