@@ -2371,42 +2371,42 @@ Return the input string.
           (push (cons a b) result)))
       (reverse result))))
 
-(defun pyim--string-starts-with (s begins)
-  "Return non-nil if string S starts with BEGINS."
-  (cond ((>= (length s) (length begins))
-         (string-equal (substring s 0 (length begins)) begins))
-        (t nil)))
-
 (defun pyim-entered-find-adjacent-imobjs-end-position (number-of-imobj &optional search-forward start)
   "search-forward为t表示向前，nil表示向后，找出光标向该方向移动 number-of-imobj 个拼音时的位置"
   (pyim-with-entered-buffer
     ;; if user uses quanpin, we can use pyim-pinyin-split instead of pyim-imobjs-create
-    (let* ((scheme-name (pyim-scheme-name))
-           (start (or start (point)))
-           (end-position start)
-           pinyin-string)
-      (save-excursion
-        (goto-char start)
-        (if search-forward
+    (cl-labels ((string-starts-with 
+                 (s begins)
+                 ;; Return non-nil if string S starts with BEGINS
+                 (cond ((>= (length s) (length begins))
+                        (string-equal (substring s 0 (length begins)) begins))
+                       (t nil))))
+      (let* ((scheme-name (pyim-scheme-name))
+             (start (or start (point)))
+             (end-position start)
+             pinyin-string)
+        (save-excursion
+          (goto-char start)
+          (if search-forward
+              (progn
+                (while (and (not (eobp))
+                            (progn (forward-char)
+                                   (setq pinyin-string (buffer-substring-no-properties start (point)))
+                                   (<= (length (car (pyim-imobjs-create pinyin-string scheme-name)))
+                                       number-of-imobj))))
+                (setq end-position (if (equal start (point)) start (- (point) 1))))
+            ;; search backward (start from beginning): "nihao|" "nengli|" -> "ni|hao" "neng|li"
             (progn
-              (while (and (not (eobp))
-                          (progn (forward-char)
-                                 (setq pinyin-string (buffer-substring-no-properties start (point)))
-                                 (<= (length (car (pyim-imobjs-create pinyin-string scheme-name)))
-                                     number-of-imobj))))
-              (setq end-position (if (equal start (point)) start (- (point) 1))))
-          ;; search backward (start from beginning): "nihao|" "nengli|" -> "ni|hao" "neng|li"
-          (progn
-            (goto-char 1)
-            (while (and (< (point) start) (= end-position start))
-              (forward-char)
-              (setq pinyin-string (buffer-substring-no-properties start (point)))
-              (unless (or (pyim--string-starts-with pinyin-string "i")
-                          (pyim--string-starts-with pinyin-string "u"))
-                (when  (= (length (car (pyim-imobjs-create pinyin-string scheme-name)))
-                          number-of-imobj)
-                  (setq end-position (point))))))))
-      end-position)))
+              (goto-char 1)
+              (while (and (< (point) start) (= end-position start))
+                (forward-char)
+                (setq pinyin-string (buffer-substring-no-properties start (point)))
+                (unless (or (string-starts-with pinyin-string "i")
+                            (string-starts-with pinyin-string "u"))
+                  (when  (= (length (car (pyim-imobjs-create pinyin-string scheme-name)))
+                            number-of-imobj)
+                    (setq end-position (point))))))))
+        end-position))))
 
 (defun pyim-codes-create (imobj scheme-name &optional first-n)
   "按照 SCHEME-NAME 对应的输入法方案，从一个 IMOBJ 创建一个列表 codes, 这个列表
