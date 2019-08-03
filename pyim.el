@@ -1185,8 +1185,20 @@ code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要�
 (defvar pyim-outcome ""
   "用户通过 pyim 生成的字符串，是最终插入到 buffer 的字符串。" )
 
-(defvar pyim-outcome-length-last 0
-  "保存上屏之前用户已经确认的pyim-outcome字符长度。" )
+(defvar pyim-outcome-last ""
+  "用来保存上一次确认得到的 `pyim-outcome'
+
+这个变量 *仅仅* 用于 “多次确认才能生成一个词条” 的情况，比如：
+
+输入： yiersansi
+输出： 一二三四
+
+1. 第一次确认选择 “一二” 之后，`pyim-outcome' 的取值为 “一二”，
+   `pyim-outcome-last' 取值为空。
+2. 第二次确认选择“三”之后，`pyim-outcome' 的取值为 “一二三”，
+   `pyim-outcome-last' 取值为 “一二”。
+3. 第三次确认选择“四”之后，`pyim-outcome' 的取值为 “一二三四”，
+   `pyim-outcome-last' 取值为 “一二三”。" )
 
 (defvar pyim-assistant-scheme-enable nil
   "设置临时 scheme, 用于五笔等形码输入法临时拼音输入。")
@@ -1315,6 +1327,7 @@ dcache 文件的方法让 pyim 正常工作。")
 (defvar pyim-local-variable-list
   '(pyim-imobjs
     pyim-outcome
+    pyim-outcome-last
     pyim-preview-overlay
     pyim-candidates
     pyim-candidate-position
@@ -2128,7 +2141,7 @@ Return the input string.
 (defun pyim-terminate-translation ()
   "Terminate the translation of the current key."
   (setq pyim-translating nil)
-  (setq pyim-outcome-length-last 0)
+  (setq pyim-outcome-last "")
   (pyim-preview-delete-string)
   (setq pyim-candidates nil)
   (setq pyim-assistant-scheme-enable nil)
@@ -3136,16 +3149,16 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
         (call-interactively #'pyim-page-select-word:rime)
       (pyim-outcome-handle 'candidate)
       (let* ((imobjs (car pyim-imobjs))
-             (pyim-outcome-length-increment (- (length pyim-outcome) pyim-outcome-length-last))
-             (translated-index (pyim-entered-find-adjacent-imobjs-end-position pyim-outcome-length-increment t 1)))
-        (if (or (< pyim-outcome-length-increment (length imobjs))
+             (length-increment (- (length pyim-outcome) (length pyim-outcome-last)))
+             (translated-index (pyim-entered-find-adjacent-imobjs-end-position length-increment t 1)))
+        (if (or (< length-increment (length imobjs))
                 (pyim-with-entered-buffer (< (point) (point-max))))
             (progn
               (pyim-with-entered-buffer
                 (delete-region 1 translated-index)
                 ;; 长词光标往后，大部份需要逐字确认，所以一次移动一个字
                 (goto-char (pyim-entered-find-adjacent-imobjs-end-position 1 t 1)))
-              (setq pyim-outcome-length-last (length pyim-outcome))
+              (setq pyim-outcome-last pyim-outcome)
               (pyim-entered-refresh))
           ;; pyim 词频调整策略：
           ;; 1. 如果一个词条是用户在输入过程中，自己新建的词条，那么就将这个词条
@@ -3555,7 +3568,7 @@ PUNCT-LIST 格式类似：
 (defun pyim-entered-delete-backward-imobj (&optional search-forward)
   "`pyim-entered-buffer’ 中向后删除一个imobj对应的字符串"
   (interactive)
-  (let* ((position (pyim-entered-find-adjacent-imobjs-end-position 1 search-forward)))
+  (let ((position (pyim-entered-find-adjacent-imobjs-end-position 1 search-forward)))
     (pyim-with-entered-buffer
       (delete-region (point) position))
     (pyim-entered-refresh)))
