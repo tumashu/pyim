@@ -1143,20 +1143,19 @@ Only useful when use posframe."
   '("a" "o" "e" "ai" "ei" "ui" "ao" "ou" "er" "an" "en"
     "ang" "eng"))
 
-(defvar pyim-entered ""
-  "用户输入的字符组成的字符串。
-
-这个变量实际没有任何用处，放在这里只是用来说明“用户输入字符串”
-这个抽象的概念。
-
-pyim 是使用一个 buffer 来处理用户输入的字符串，
-具体细节参考 `pyim-entered-buffer'.")
-
 (defvar pyim-entered-buffer " *pyim-entered-buffer*"
-  "一个 buffer，用来处理用户输入的字符串。
+  "一个 buffer，用来处理用户已经输入的字符串： entered。
 
-用户输入的字符串在 pyim 里面，叫做 entered, pyim 使用一个
-buffer 来实现 “用户输入字符串” 编辑等功能：
+用户 *已经* 输入的字符组成的字符串，在 pyim 里面，叫做 entered,
+说白了就是 input, 选择 entered 而不选择 input 的原因是：
+
+1. input 太常见了， 和其它词语组和起来容易产生歧义，比如：
+   pyim-entered-output 就比 pyim-input-output 更加容易理解。
+2. entered 这个词语很少见，只要明白它代表的概念，就不容易产生混乱。
+
+pyim 使用一个 buffer 来处理 entered, 以实现 “用户输入字符串” 编
+辑等高级功能：
+
 1. 如果输入的字符串有错误，可以修改，不用取消重新输入；
 2. 如果光标不在行首，pyim 只使用光标前的字符串来查找词条，
    如果词条上屏，词条对应的输入就从 buffer 中清除，然后
