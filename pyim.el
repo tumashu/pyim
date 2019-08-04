@@ -1402,14 +1402,16 @@ dcache 文件的方法让 pyim 正常工作。")
   "`pyim-entered-buffer' 中光标前移"
   (interactive)
   (pyim-with-entered-buffer
-    (forward-char))
+    (ignore-errors
+      (forward-char)))
   (pyim-entered-refresh t))
 
 (defun pyim-entered-backward-point ()
   "`pyim-entered-buffer' 中光标后移"
   (interactive)
   (pyim-with-entered-buffer
-    (backward-char))
+    (ignore-errors
+      (backward-char)))
   (pyim-entered-refresh t))
 
 (defun pyim-entered-backward-imelem (&optional search-forward)
