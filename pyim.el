@@ -1210,23 +1210,25 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 (defvar pyim-preview-overlay nil
   "用于保存光标处预览字符串的 overlay.")
 
-(defvar pyim-outcome ""
-  "用户通过 pyim 生成的字符串，是最终插入到 buffer 的字符串。" )
+(defvar pyim-outcome-history nil
+  "记录 pyim outcome 的变化的历史
 
-(defvar pyim-outcome-last ""
-  "用来保存上一次确认得到的 `pyim-outcome'
+在 pyim 中 outcome 代表用户通过输入法选择，并最终插入到 buffer
+的字符串。
 
-这个变量 *仅仅* 用于 “多次确认才能生成一个词条” 的情况，比如：
+“一次确认就生成的词条” , 当前变量一般只有一个元素，比如：
+1. 输入： nihao
+2. 输出： 你好
+2. 变量取值为： (\"你好\")
 
-输入： yiersansi
-输出： 一二三四
+“多次确认才能生成词条” , 当前变量记录了选择的历史，比如：
 
-1. 第一次确认选择 “一二” 之后，`pyim-outcome' 的取值为 “一二”，
-   `pyim-outcome-last' 取值为空。
-2. 第二次确认选择“三”之后，`pyim-outcome' 的取值为 “一二三”，
-   `pyim-outcome-last' 取值为 “一二”。
-3. 第三次确认选择“四”之后，`pyim-outcome' 的取值为 “一二三四”，
-   `pyim-outcome-last' 取值为 “一二三”。" )
+1. 输入： yiersansi
+2. 输出： 一二三四
+3. 第一次选择：一二
+4. 第二次选择：三
+5. 第三次选择：四
+6. 变量取值为： (\"一二三四\" \"一二三\" \"一二\")")
 
 (defvar pyim-assistant-scheme-enable nil
   "设置临时 scheme, 用于五笔等形码输入法临时拼音输入。")
@@ -1354,8 +1356,7 @@ dcache 文件的方法让 pyim 正常工作。")
 ;; ** 将变量转换为 local 变量
 (defvar pyim-local-variable-list
   '(pyim-imobjs
-    pyim-outcome
-    pyim-outcome-last
+    pyim-outcome-history
     pyim-preview-overlay
     pyim-candidates
     pyim-candidate-position
@@ -2071,8 +2072,8 @@ Return the input string.
                     (string-to-list (this-single-command-raw-keys)))
               ;; (message "unread-command-events: %s" unread-command-events)
               (pyim-terminate-translation))))
-        ;; (message "return: %s" pyim-outcome)
-        (pyim-magic-convert pyim-outcome))
+        ;; (message "return: %s" (pyim-outcome-get))
+        (pyim-magic-convert (pyim-outcome-get)))
     ;; Since KEY doesn't start any translation, just return it.
     ;; But translate KEY if necessary.
     (char-to-string key)))
@@ -2169,7 +2170,6 @@ Return the input string.
 (defun pyim-terminate-translation ()
   "Terminate the translation of the current key."
   (setq pyim-translating nil)
-  (setq pyim-outcome-last "")
   (pyim-preview-delete-string)
   (setq pyim-candidates nil)
   (setq pyim-assistant-scheme-enable nil)
@@ -2695,7 +2695,7 @@ pyim 会使用 emacs overlay 机制在 *待输入buffer* 光标处高亮显示�
          (candidates pyim-candidates)
          (pos (1- (min pyim-candidate-position (length candidates))))
          (preview
-          (concat pyim-outcome
+          (concat (pyim-outcome-get)
                   (pyim-candidate-parse (nth pos candidates)))))
     (when (memq class '(quanpin))
       (let ((rest (mapconcat
@@ -3079,7 +3079,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
   "专门用于 exwm 环境的 page style."
   (format "[%s]: %s(%s/%s)"
           (let ((class (pyim-scheme-get-option (pyim-scheme-name) :class))
-                (preview pyim-outcome))
+                (preview (pyim-outcome-get)))
             (when (memq class '(quanpin))
               (let ((rest (mapconcat
                            #'(lambda (py)
@@ -3123,37 +3123,44 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
                 emacs-basic-display
                 (not (display-graphic-p))))))
 
+(defun pyim-outcome-get (&optional n)
+  "获取 outcome"
+  (nth (or n 0) pyim-outcome-history))
+
 (defun pyim-outcome-handle (type)
-  "依照 TYPE, 获取 pyim 的最终产出字符串，并将其设置为变量 pyim-outcome 的值."
+  "依照 TYPE, 获取 pyim 的 outcome，并将其加入 `pyim-outcome-history'."
   (cond ((not enable-multibyte-characters)
          (pyim-entered-erase-buffer)
-         (setq pyim-outcome "")
+         (setq pyim-outcome-history nil)
          (error "Can't input characters in current unibyte buffer"))
         ((equal type "")
-         (setq pyim-outcome ""))
+         (setq pyim-outcome-history nil))
         ((eq type 'last-char)
-         (setq pyim-outcome
-               (concat pyim-outcome
-                       (pyim-translate last-command-event))))
+         (push
+          (concat (pyim-outcome-get)
+                  (pyim-translate last-command-event))
+          pyim-outcome-history))
         ((eq type 'candidate)
          (let* ((candidate
                  (pyim-candidate-parse
                   (nth (1- pyim-candidate-position)
                        pyim-candidates))))
-           (setq pyim-outcome
-                 (concat pyim-outcome candidate))))
+           (push
+            (concat (pyim-outcome-get) candidate)
+            pyim-outcome-history)))
         ((eq type 'candidate-and-last-char)
          (let* ((candidate
                  (pyim-candidate-parse
                   (nth (1- pyim-candidate-position)
                        pyim-candidates))))
-           (setq pyim-outcome
-                 (concat pyim-outcome
-                         candidate
-                         (pyim-translate last-command-event)))))
+           (push
+            (concat (pyim-outcome-get)
+                    candidate
+                    (pyim-translate last-command-event))
+            pyim-outcome-history)))
         ((eq type 'pyim-entered)
-         (setq pyim-outcome (pyim-entered-get)))
-        (t (error "Pyim: invalid pyim-outcome"))))
+         (push (pyim-entered-get) pyim-outcome-history))
+        (t (error "Pyim: invalid outcome"))))
 
 (defun pyim-page-select-word-simple ()
   "从选词框中选择当前词条.
@@ -3179,7 +3186,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
         (call-interactively #'pyim-page-select-word:rime)
       (pyim-outcome-handle 'candidate)
       (let* ((imobj (car pyim-imobjs))
-             (length-increment (- (length pyim-outcome) (length pyim-outcome-last)))
+             (length-increment (- (length (pyim-outcome-get)) (length (pyim-outcome-get 1))))
              (translated-index (pyim-entered-next-imelem-position length-increment t 1)))
         (if (or (< length-increment (length imobj))
                 (pyim-with-entered-buffer (< (point) (point-max))))
@@ -3188,7 +3195,6 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
                 (delete-region 1 translated-index)
                 ;; 长词光标往后，大部份需要逐字确认，所以一次移动一个字
                 (goto-char (pyim-entered-next-imelem-position 1 t 1)))
-              (setq pyim-outcome-last pyim-outcome)
               (pyim-entered-refresh))
           ;; pyim 词频调整策略：
           ;; 1. 如果一个词条是用户在输入过程中，自己新建的词条，那么就将这个词条
@@ -3197,9 +3203,9 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
           ;;    这样的话，一个新词要输入两遍之后才可能出现在第一位。
           ;; 3. pyim 在启动的时候，会使用词频信息，对个人词库作一次排序。
           ;;    用作 pyim 下一次使用。
-          (if (member pyim-outcome pyim-candidates)
-              (pyim-create-word pyim-outcome t)
-            (pyim-create-word pyim-outcome))
+          (if (member (pyim-outcome-get) pyim-candidates)
+              (pyim-create-word (pyim-outcome-get) t)
+            (pyim-create-word (pyim-outcome-get)))
 
           (pyim-terminate-translation)
           ;; pyim 使用这个 hook 来处理联想词。
@@ -3219,8 +3225,8 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
       (pyim-outcome-handle 'candidate)
       (if (not context)
           (progn
-            (unless (member pyim-outcome pyim-candidates)
-              (pyim-create-word pyim-outcome))
+            (unless (member (pyim-outcome-get) pyim-candidates)
+              (pyim-create-word (pyim-outcome-get)))
             (pyim-terminate-translation)
             ;; pyim 使用这个 hook 来处理联想词。
             (run-hooks 'pyim-page-select-finish-hook))
