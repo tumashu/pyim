@@ -1416,7 +1416,7 @@ dcache 文件的方法让 pyim 正常工作。")
 
 在全拼输入法中，就是向前移动一个拼音"
   (interactive)
-  (let* ((position (pyim-entered-find-adjacent-imelem-end-position 1 search-forward)))
+  (let* ((position (pyim-entered-next-imelem-position 1 search-forward)))
     (pyim-with-entered-buffer
       (goto-char position))
     (pyim-entered-refresh t)))
@@ -2414,33 +2414,35 @@ Return the input string.
           (push (cons a b) result)))
       (reverse result))))
 
-(defun pyim-entered-find-adjacent-imelem-end-position (number-of-imelem &optional search-forward start)
-  "search-forward为t表示向前，nil表示向后，找出光标向该方向移动 number-of-imelem 个拼音时的位置"
+(defun pyim-entered-next-imelem-position (num &optional search-forward start)
+  "从 `pyim-entered-buffer' 的当前位置，找到下一个或者下 NUM 个 imelem 对应的位置
+
+如果 SEARCH-FORWARD 为 t, 则向前搜索，反之，向后搜索。"
   (pyim-with-entered-buffer
     (let* ((scheme-name (pyim-scheme-name))
            (start (or start (point)))
            (end-position start)
-           pinyin-string imobj)
+           string imobj)
       (save-excursion
         (if search-forward
             (progn
               (goto-char (point-max))
               (while (and (> (point) start) (= end-position start))
-                (setq pinyin-string (buffer-substring-no-properties start (point)))
-                (when (= (length (car (pyim-imobjs-create pinyin-string scheme-name)))
-                         number-of-imelem)
+                (setq string (buffer-substring-no-properties start (point)))
+                (when (= (length (car (pyim-imobjs-create string scheme-name)))
+                         num)
                   (setq end-position (point)))
                 (backward-char)))
           ;; search backward (start from beginning): "nihao|" "nengli|" -> "ni|hao" "neng|li" "wangshidan|"
           (progn
             (goto-char 1)
             (while (and (< (point) start) (= end-position start))
-              (setq pinyin-string (buffer-substring-no-properties start (point)))
-              (setq imobj (car (pyim-imobjs-create pinyin-string scheme-name)))
-              ;; 判断 pinyin-string 是否有效
+              (setq string (buffer-substring-no-properties start (point)))
+              (setq imobj (car (pyim-imobjs-create string scheme-name)))
+              ;; 判断 string 是否有效
               (unless (string-equal "" (car (nth 0 imobj)))
                 (when  (= (length imobj)
-                          number-of-imelem)
+                          num)
                   (setq end-position (point))))
               (forward-char)))))
       end-position)))
@@ -3178,14 +3180,14 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
       (pyim-outcome-handle 'candidate)
       (let* ((imobj (car pyim-imobjs))
              (length-increment (- (length pyim-outcome) (length pyim-outcome-last)))
-             (translated-index (pyim-entered-find-adjacent-imelem-end-position length-increment t 1)))
+             (translated-index (pyim-entered-next-imelem-position length-increment t 1)))
         (if (or (< length-increment (length imobj))
                 (pyim-with-entered-buffer (< (point) (point-max))))
             (progn
               (pyim-with-entered-buffer
                 (delete-region 1 translated-index)
                 ;; 长词光标往后，大部份需要逐字确认，所以一次移动一个字
-                (goto-char (pyim-entered-find-adjacent-imelem-end-position 1 t 1)))
+                (goto-char (pyim-entered-next-imelem-position 1 t 1)))
               (setq pyim-outcome-last pyim-outcome)
               (pyim-entered-refresh))
           ;; pyim 词频调整策略：
@@ -3596,7 +3598,7 @@ PUNCT-LIST 格式类似：
 (defun pyim-entered-delete-backward-imelem (&optional search-forward)
   "`pyim-entered-buffer’ 中向后删除一个 imelem 对应的字符串"
   (interactive)
-  (let ((position (pyim-entered-find-adjacent-imelem-end-position 1 search-forward)))
+  (let ((position (pyim-entered-next-imelem-position 1 search-forward)))
     (pyim-with-entered-buffer
       (delete-region (point) position))
     (pyim-entered-refresh)))
