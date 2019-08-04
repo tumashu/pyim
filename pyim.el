@@ -1165,15 +1165,44 @@ pyim 使用一个 buffer 来处理 entered, 以实现 “用户输入字符串�
 (defvar pyim-imobjs nil
   "Imobj (Input method object) 组成的 list.
 
-pyim 会依据用户输入的字符串来生成一个 imobj 列表（这个列表大多数情
-况只包含一个 imobj, 有时候也包含多个imobj, 比如：开启拼音模糊音后
-一个 entered 字符串就有可能生成多个imobj）。这个变量用于保存这个
-列表。
+imobj 在 pyim 里面的概念，类似与编译器里面的语法树，
+它代表 pyim 输入的字符串 entered 解析得到的一个结构化对象，
+以全拼输入法的为例：
 
-然后，pyim 会通过输入法内部对象 imobj 来创建 code 字符串, 得到
-code 字符串之后，pyim 在词库中搜索 code 字符串来得到所需要的词条，
-最后使用特定的方式将得到的词条组合成一个候选词列表：`pyim-candidates'
-并通过 pyim-page 相关功能来显示选词框，供用户选择词条。")
+1. entered: nihaoma
+2. imobj: ((\"n\" . \"i\") (\"h\" . \"ao\") (\"m\" . \"a\"))
+
+而 imobjs 是 imobj 组成的一个列表，因为有糢糊音等概念的存在，一个
+entered 需要以多种方式或者多步骤解析，得到多种可能的 imobj, 这些
+imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
+
+1. entered: guafeng (设置了糢糊音 en -> eng)
+2. imobj-1: ((\"g\" . \"ua\") (\"f\" . \"en\"))
+3. imobj-2: ((\"g\" . \"ua\") (\"f\" . \"eng\"))
+4. imobjs:  (((\"g\" . \"ua\") (\"f\" . \"en\"))
+             ((\"g\" . \"ua\") (\"f\" . \"eng\")))
+
+这个变量用来保存解析得到的 imobjs。
+
+解析完成之后，pyim 会为每一个 imobj 创建对应 code 字符串, 然后在词库
+中搜索 code 字符串来得到所需要的词条，最后使用特定的方式将得到的
+词条组合成一个候选词列表：`pyim-candidates' 并通过 pyim-page 相关
+功能来显示选词框，供用户选择词条，比如：
+
+1. imobj: ((\"g\" . \"ua\") (\"f\" . \"en\"))
+2. code: gua-fen
+
+从上面的说明可以看出，imobj 本身也是有结构的：
+
+1. imobj: ((\"g\" . \"ua\") (\"f\" . \"en\"))
+
+我们将 (\"g\" . \"ua\") 这些子结构，叫做 imelem (IM element), *大
+多数情况下*, 一个 imelem 能够代表一个汉字，这个概念在编辑 entered
+的时候，非常有用。
+
+另外要注意的是，不同的输入法， imelem 的内部结构是不一样的，比如：
+1. quanping: (\"g\" . \"ua\")
+2. wubi: (\"aaaa\")")
 
 (defvar pyim-candidates nil
   "所有备选词条组成的列表.")
