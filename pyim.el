@@ -3191,7 +3191,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
         (call-interactively #'pyim-page-select-word:rime)
       (pyim-outcome-handle 'candidate)
       (let* ((imobj (car pyim-imobjs))
-             (length-increment
+             (length-selected-word
               ;; 获取 *这一次* 选择词条的长度， 在“多次选择词条才能上屏”的情况下，
               ;; 一定要和 outcome 的概念作区别。
               ;; 比如： xiaolifeidao
@@ -3201,7 +3201,8 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
               (- (length (pyim-outcome-get))
                  (length (pyim-outcome-get 1))))
              (translated-index
-              (pyim-entered-next-imelem-position length-increment t 1)))
+              (pyim-entered-next-imelem-position
+               length-selected-word t 1)))
         ;; 在使用全拼输入法输入长词的时候，可能需要多次选择，才能够将
         ;; 这个词条上屏，这个地方用来判断是否是 “最后一次选择”，如果
         ;; 不是最后一次选择，就需要截断 entered, 准备下一轮的选择。
@@ -3209,18 +3210,21 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
         ;; 判断方法：entered 为 xiaolifeidao, 本次选择 “小李” 之后，
         ;; 需要将 entered 截断，“小李” 这个词条长度为2, 就将 entered
         ;; 从头开始缩减 2 个 imelem 对应的字符，变成 feidao, 为下一次
-        ;; 选择 “飞刀” 做准备。
+        ;; 选择 “飞” 做准备。
 
         ;; 注意事项： 这里有一个假设前提是： 一个 imelem 对应一个汉字，
         ;; 在全拼输入法中，这个假设大多数情况是成立的，但在型码输入法
         ;; 中，比如五笔输入法，就不成立，好在型码输入法一般不需要多次
         ;; 选择。
-        (if (or (< length-increment (length imobj))
+        (if (or (< length-selected-word (length imobj))
                 (pyim-with-entered-buffer (< (point) (point-max))))
             (progn
               (pyim-with-entered-buffer
-                (delete-region 1 translated-index)
-                ;; 长词光标往后，大部份需要逐字确认，所以一次移动一个字
+                ;; 把本次已经选择的词条对应的子 entered, 从 entered
+                ;; 字符串里面剪掉。
+                (delete-region (point-min) translated-index)
+                ;; 为下一次选词作准备， 长词大部份需要逐字确认，
+                ;; 所以向前移动一个 imelem.
                 (goto-char (pyim-entered-next-imelem-position 1 t 1)))
               (pyim-entered-refresh))
           ;; pyim 词频调整策略：
