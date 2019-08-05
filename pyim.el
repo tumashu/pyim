@@ -3188,8 +3188,17 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
         (call-interactively #'pyim-page-select-word:rime)
       (pyim-outcome-handle 'candidate)
       (let* ((imobj (car pyim-imobjs))
-             (length-increment (- (length (pyim-outcome-get)) (length (pyim-outcome-get 1))))
-             (translated-index (pyim-entered-next-imelem-position length-increment t 1)))
+             (length-increment
+              ;; 获取 *这一次* 选择词条的长度， 在“多次选择词条才能上屏”的情况下，
+              ;; 一定要和 outcome 的概念作区别。
+              ;; 比如： xiaolifeidao
+              ;; 第一次选择：小李， outcome = 小李
+              ;; 第二次选择：飞，   outcome = 小李飞
+              ;; 第三次选择：刀，   outcome = 小李飞刀
+              (- (length (pyim-outcome-get))
+                 (length (pyim-outcome-get 1))))
+             (translated-index
+              (pyim-entered-next-imelem-position length-increment t 1)))
         ;; 在使用全拼输入法输入长词的时候，可能需要多次选择，才能够将
         ;; 这个词条上屏，这个地方用来判断是否是 “最后一次选择”，如果
         ;; 不是最后一次选择，就需要截断 entered, 准备下一轮的选择。
