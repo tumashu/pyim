@@ -3190,6 +3190,19 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
       (let* ((imobj (car pyim-imobjs))
              (length-increment (- (length (pyim-outcome-get)) (length (pyim-outcome-get 1))))
              (translated-index (pyim-entered-next-imelem-position length-increment t 1)))
+        ;; 在使用全拼输入法输入长词的时候，可能需要多次选择，才能够将
+        ;; 这个词条上屏，这个地方用来判断是否是 “最后一次选择”，如果
+        ;; 不是最后一次选择，就需要截断 entered, 准备下一轮的选择。
+
+        ;; 判断方法：entered 为 xiaolifeidao, 本次选择 “小李” 之后，
+        ;; 需要将 entered 截断，“小李” 这个词条长度为2, 就将 entered
+        ;; 从头开始缩减 2 个 imelem 对应的字符，变成 feidao, 为下一次
+        ;; 选择 “飞刀” 做准备。
+
+        ;; 注意事项： 这里有一个假设前提是： 一个 imelem 对应一个汉字，
+        ;; 在全拼输入法中，这个假设大多数情况是成立的，但在型码输入法
+        ;; 中，比如五笔输入法，就不成立，好在型码输入法一般不需要多次
+        ;; 选择。
         (if (or (< length-increment (length imobj))
                 (pyim-with-entered-buffer (< (point) (point-max))))
             (progn
