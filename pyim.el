@@ -2158,16 +2158,19 @@ Return the input string.
 
 (defun pyim-entered-refresh (&optional no-delay)
   "延迟 `pyim-exhibit-delay-ms' 显示备选词等待用户选择。"
-  (when (> (length (pyim-entered-get)) 0)
-    (when pyim--exhibit-timer (cancel-timer pyim--exhibit-timer))
+  (if (= (length (pyim-entered-get)) 0)
+      (pyim-terminate-translation)
+    (when pyim--exhibit-timer
+      (cancel-timer pyim--exhibit-timer))
     (cond
-     ((or no-delay (not pyim-exhibit-delay-ms) (eq pyim-exhibit-delay-ms 0))
+     ((or no-delay
+          (not pyim-exhibit-delay-ms)
+          (eq pyim-exhibit-delay-ms 0))
       (pyim-entered-refresh-1))
-     (t
-      (setq pyim--exhibit-timer
-            (run-with-timer (/ pyim-exhibit-delay-ms 1000.0)
-                            nil
-                            #'pyim-entered-refresh-1))))))
+     (t (setq pyim--exhibit-timer
+              (run-with-timer (/ pyim-exhibit-delay-ms 1000.0)
+                              nil
+                              #'pyim-entered-refresh-1))))))
 
 (defun pyim-terminate-translation ()
   "Terminate the translation of the current key."
@@ -3631,7 +3634,7 @@ PUNCT-LIST 格式类似：
   (let ((position (pyim-entered-next-imelem-position 1 search-forward)))
     (pyim-with-entered-buffer
       (delete-region (point) position))
-    (pyim-entered-refresh)))
+    (pyim-entered-refresh t)))
 
 (defun pyim-entered-delete-forward-imelem ()
   "`pyim-entered-buffer’ 中向前删除一个 imelem 对应的字符串"
