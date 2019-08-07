@@ -3617,12 +3617,12 @@ PUNCT-LIST 格式类似：
         (nth 1 punc)))))
 
 ;; ** 与拼音输入相关的用户命令
-(defun pyim-entered-delete-backward-char (&optional N)
+(defun pyim-entered-delete-backward-char (&optional n)
   "在pyim-entered-buffer中向后删除1个字符"
   (interactive)
   (pyim-with-entered-buffer
-    (delete-backward-char (or N 1)))
-  (if (> (length (pyim-entered-get)) 1)
+    (delete-backward-char (or n 1)))
+  (if (> (length (pyim-entered-get)) 0)
       (pyim-entered-refresh t)
     (pyim-outcome-handle "")
     (pyim-terminate-translation)))
@@ -3644,26 +3644,6 @@ PUNCT-LIST 格式类似：
   "`pyim-entered-buffer’ 中向前删除一个 imelem 对应的字符串"
   (interactive)
   (pyim-entered-delete-backward-imelem t))
-
-
-(defun pyim-backward-kill-cchar ()
-  "删除最后一个汉字对应的用户输入."
-  (interactive)
-  (if (> (length (pyim-entered-get)) 1)
-      (progn
-        (setq pyim-imobjs
-              (mapcar #'(lambda (imobj)
-                          (cl-subseq imobj 0 (- (length imobj) 1)))
-                      pyim-imobjs))
-        (setq pyim-candidates (pyim-candidates-create pyim-imobjs (pyim-scheme-name))
-              pyim-candidate-position 1)
-        (if pyim-candidates
-            (progn (pyim-preview-refresh)
-                   (pyim-page-refresh))
-          (pyim-outcome-handle "")
-          (pyim-terminate-translation)))
-    (pyim-outcome-handle "")
-    (pyim-terminate-translation)))
 
 (define-obsolete-function-alias
   'pyim-convert-code-at-point 'pyim-convert-string-at-point)
