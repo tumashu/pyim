@@ -2066,8 +2066,8 @@ Return the input string.
                   (setq key t)
                   (condition-case-unless-debug err
                       (call-interactively cmd)
-                    (error (message "pyim 出现错误: %s , 开启 debug-on-error 后可以了解详细情况。"
-                                    (cdr err)) (beep))))
+                    (error (message "pyim 出现错误: %S , 开启 debug-on-error 后可以了解详细情况。" err)
+                           (beep))))
               ;; KEYSEQ is not defined in the translation keymap.
               ;; Let's return the event(s) to the caller.
               (setq unread-command-events
@@ -3621,7 +3621,8 @@ PUNCT-LIST 格式类似：
   "在pyim-entered-buffer中向后删除1个字符"
   (interactive)
   (pyim-with-entered-buffer
-    (delete-backward-char (or n 1)))
+    (ignore-errors
+      (delete-char (- 0 (or n 1)))))
   (if (> (length (pyim-entered-get)) 0)
       (pyim-entered-refresh t)
     (pyim-outcome-handle "")
