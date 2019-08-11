@@ -3187,8 +3187,14 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
       (progn
         (pyim-outcome-handle 'last-char)
         (pyim-terminate-translation))
-    (if (equal 'rime (pyim-scheme-get-option (pyim-scheme-name) :class))
-        (call-interactively #'pyim-page-select-word:rime)
+    (cl-case (pyim-scheme-get-option (pyim-scheme-name) :class)
+      (rime (call-interactively #'pyim-page-select-word:rime))
+      (xingma (call-interactively #'pyim-page-select-word:xingma))
+      (t (call-interactively #'pyim-page-select-word:pinyin)))))
+
+(defun pyim-page-select-word:pinyin ()
+  "从选词框中选择当前词条，然后删除该词条对应拼音。"
+  (interactive)
       (pyim-outcome-handle 'candidate)
       (let* ((imobj (car pyim-imobjs))
              (length-selected-word
@@ -3240,7 +3246,27 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
 
           (pyim-terminate-translation)
           ;; pyim 使用这个 hook 来处理联想词。
-          (run-hooks 'pyim-page-select-finish-hook))))))
+          (run-hooks 'pyim-page-select-finish-hook))))
+
+(defun pyim-page-select-word:xingma ()
+  "从选词框中选择当前词条，然后删除该词条对应编码。"
+  (interactive)
+  (pyim-outcome-handle 'candidate)
+  (if (pyim-with-entered-buffer
+        (and (> (point) 1)
+             (< (point) (point-max))))
+      (progn
+        (pyim-with-entered-buffer
+          ;; 把本次已经选择的词条对应的子 entered, 从 entered
+          ;; 字符串里面剪掉。
+          (delete-region (point-min) (point)))
+        (pyim-entered-refresh))
+    (when (string-empty-p (pyim-code-search (pyim-outcome-get)
+                                            (pyim-scheme-name)))
+      (pyim-create-word (pyim-outcome-get) t))
+    (pyim-terminate-translation)
+    ;; pyim 使用这个 hook 来处理联想词。
+    (run-hooks 'pyim-page-select-finish-hook)))
 
 (defun pyim-page-select-word:rime ()
   "从选词框中选择当前词条， 专门用于 rime 输入法支持。"
