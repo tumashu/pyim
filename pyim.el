@@ -2427,29 +2427,29 @@ Return the input string.
     (let* ((scheme-name (pyim-scheme-name))
            (start (or start (point)))
            (end-position start)
-           string imobj)
-      (save-excursion
-        (if search-forward
-            (progn
-              (goto-char (point-max))
-              (while (and (> (point) start) (= end-position start))
-                (setq string (buffer-substring-no-properties start (point)))
-                (when (= (length (car (pyim-imobjs-create string scheme-name)))
-                         num)
-                  (setq end-position (point)))
-                (backward-char)))
-          ;; search backward (start from beginning): "nihao|" "nengli|" -> "ni|hao" "neng|li" "wangshidan|"
+           (string (buffer-substring-no-properties (point-min) start))
+           (orig-imobj-len (length (car (pyim-imobjs-create string scheme-name))))
+           imobj)
+      (if search-forward
+          ;; "ni|haoshijie" -> "nihao|shijie"
           (progn
-            (goto-char 1)
-            (while (and (< (point) start) (= end-position start))
-              (setq string (buffer-substring-no-properties start (point)))
-              (setq imobj (car (pyim-imobjs-create string scheme-name)))
-              ;; 判断 string 是否有效
-              (unless (string-equal "" (car (nth 0 imobj)))
-                (when  (= (length imobj)
-                          num)
-                  (setq end-position (point))))
-              (forward-char)))))
+            (setq pos (point-max))
+            (while (and (> pos start) (= end-position start))
+              (setq string (buffer-substring-no-properties (point-min) pos)
+                    imobj (car (pyim-imobjs-create string scheme-name)))
+              (if (>= (+ orig-imobj-len num) (length imobj))
+                  (setq end-position pos)
+                (decf pos))))
+        ;; "nihao|shijie" -> "ni|haoshijie"
+        (if (<= orig-imobj-len num)
+            (setq end-position (point-min))
+          (setq pos start)
+          (while (and (>= pos (point-min)) (= end-position start))
+            (setq string (buffer-substring-no-properties (point-min) pos)
+                  imobj (car (pyim-imobjs-create string scheme-name)))
+            (if (= (- orig-imobj-len num) (length imobj))
+                (setq end-position pos)
+              (decf pos)))))
       end-position)))
 
 (defun pyim-codes-create (imobj scheme-name &optional first-n)
