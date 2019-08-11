@@ -2982,13 +2982,22 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
     (or preedit "")))
 
 (defun pyim-page-preview-create:xingma (&optional separator)
-  (let* ((scheme-name (pyim-scheme-name))
-         (class (pyim-scheme-get-option scheme-name :class))
-         (prefix (pyim-scheme-get-option scheme-name :code-prefix))
-         (str (mapconcat #'identity
-                         (car pyim-imobjs)
-                         (or separator " "))))
-    str))
+  (let* ((scheme-name (pyim-scheme-name)))
+    (cl-flet* ((segment (x)
+                       (mapconcat #'identity
+                                  (car (pyim-imobjs-create x scheme-name))
+                                  (or separator " ")))
+               (fmt (x)
+                    (mapconcat #'segment
+                               (split-string x "'")
+                               "'")))
+    ;; | 显示光标位置的字符
+    (pyim-with-entered-buffer
+      (if (equal (point) (point-max))
+          (fmt (buffer-substring-no-properties (point-min) (point-max)))
+        (concat (fmt (buffer-substring-no-properties (point-min) (point)))
+                "| "
+                (fmt (buffer-substring-no-properties (point) (point-max)))))))))
 
 (defun pyim-page-menu-create (candidates position &optional separator)
   "这个函数用于创建在 page 中显示的备选词条菜单。"
