@@ -438,8 +438,8 @@
 
 ;; *** 如何使用其它字符翻页
 ;; #+BEGIN_EXAMPLE
-;; (define-key map "." 'pyim-page-next-page)
-;; (define-key map "," 'pyim-page-previous-page)
+;; (define-key pyim-mode-map "." 'pyim-page-next-page)
+;; (define-key pyim-mode-map "," 'pyim-page-previous-page)
 ;; #+END_EXAMPLE
 
 ;; *** 如何用 ";" 来选择第二个候选词
