@@ -2439,7 +2439,7 @@ Return the input string.
                     imobj (car (pyim-imobjs-create string scheme-name)))
               (if (>= (+ orig-imobj-len num) (length imobj))
                   (setq end-position pos)
-                (decf pos))))
+                (cl-decf pos))))
         ;; "nihao|shijie" -> "ni|haoshijie"
         (if (<= orig-imobj-len num)
             (setq end-position (point-min))
@@ -2449,7 +2449,7 @@ Return the input string.
                   imobj (car (pyim-imobjs-create string scheme-name)))
             (if (= (- orig-imobj-len num) (length imobj))
                 (setq end-position pos)
-              (decf pos)))))
+              (cl-decf pos)))))
       end-position)))
 
 (defun pyim-codes-create (imobj scheme-name &optional first-n)
