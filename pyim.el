@@ -1126,6 +1126,7 @@ Only useful when use posframe."
 `pyim-dregcache' 速度和词库大小成正比.  当词库接近100M大小时,
 在六年历史的笔记本上会有一秒的延迟. 这时建议换用 `pyim-dhashcache'.")
 
+;;;###autoload
 (defvar pyim-title "灵通" "Pyim 在 mode-line 中显示的名称.")
 (defvar pyim-extra-dicts nil "与 `pyim-dicts' 类似, 用于和 elpa 格式的词库包集成。.")
 
@@ -1535,8 +1536,10 @@ If FORCE is non-nil, FORCE build."
               (puthash key (list py) pyim-cchar2pinyin-cache))))))))
 
 ;; ** 注册 Pyim 输入法
+;;;###autoload
 (register-input-method "pyim" "euc-cn" 'pyim-start pyim-title)
 
+;;;###autoload
 (defun pyim-start (name &optional active-func restart save-personal-dcache refresh-common-dcache)
   "pyim 启动函数.
   TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCACHE
