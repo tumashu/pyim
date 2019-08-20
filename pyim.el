@@ -3688,9 +3688,13 @@ PUNCT-LIST 格式类似：
   'pyim-convert-code-at-point 'pyim-convert-string-at-point)
 
 ;;;###autoload
-(defun pyim-convert-string-at-point ()
-  "将光标前的用户输入的字符串转换为中文."
-  (interactive)
+(defun pyim-convert-string-at-point (&optional return-cregexp)
+  "将光标前的用户输入的字符串转换为中文.
+
+如果 RETURN-CREGEXP 为真, pyim 会把用户输入的字符串当作
+拼音，依照这个拼音来构建一个 regexp, 用户可以用这个 regexp
+搜索拼音对应的汉字。"
+  (interactive "P")
   (unless (equal input-method-function 'pyim-input-method)
     (activate-input-method 'pyim))
   (let* ((case-fold-search nil)
@@ -3723,10 +3727,14 @@ PUNCT-LIST 格式类似：
            (when (and (not mark-active) (> length 0))
              (delete-char (- 0 length)))
            (when (> length 0)
-             (setq unread-command-events
-                   (append (listify-key-sequence code)
-                           unread-command-events))
-             (setq pyim-force-input-chinese t)))
+             (if return-cregexp
+                 ;; 根据拼音，返回一个 regexp, 用这个 regexp
+                 ;; 可以搜索对应拼音的汉字
+                 (insert (pyim-cregexp-build code))
+               (setq unread-command-events
+                     (append (listify-key-sequence code)
+                             unread-command-events))
+               (setq pyim-force-input-chinese t))))
           ((pyim-string-match-p "[[:punct:]：－]" (pyim-char-before-to-string 0))
            ;; 当光标前的一个字符是标点符号时，半角/全角切换。
            (call-interactively 'pyim-punctuation-translate-at-point))
