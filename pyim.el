@@ -3884,12 +3884,10 @@ PUNCT-LIST 格式类似：
   (funcall
    (lambda ()
      `(lambda (string &optional bound noerror count)
-        (if (pyim-string-match-p "[^a-z']+" string)
-            (funcall (isearch-search-fun-default) string bound noerror count)
-          (funcall (if ,isearch-forward
-                       're-search-forward
-                     're-search-backward)
-                   (pyim-cregexp-build string) bound noerror count))))))
+        (funcall (if ,isearch-forward
+                     're-search-forward
+                   're-search-backward)
+                 (pyim-cregexp-build string) bound noerror count)))))
 
 ;;;###autoload
 (define-minor-mode pyim-isearch-mode
