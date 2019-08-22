@@ -7,7 +7,7 @@
 ;; Author: Ye Wenbin <wenbinye@163.com>, Feng Shu <tumashu@163.com>
 ;; URL: https://github.com/tumashu/pyim
 ;; Version: 1.6.0
-;; Package-Requires: ((emacs "24.4") (popup "0.1") (async "1.6") (pyim-basedict "0.1"))
+;; Package-Requires: ((emacs "24.4") (popup "0.1") (async "1.6") (xr "1.13") (pyim-basedict "0.1"))
 ;; Keywords: convenience, Chinese, pinyin, input-method
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -598,6 +598,8 @@
 (require 'posframe nil t)
 (require 'pyim-pymap)
 (require 'pyim-common)
+(require 'xr) ;Used by pyim-cregexp-build
+(require 'rx) ;Used by pyim-cregexp-build
 
 (defgroup pyim nil
   "Pyim is a Chinese input method support quanpin, shuangpin, wubi and cangjie."
@@ -3789,6 +3791,30 @@ PUNCT-LIST 格式类似：
 (defun pyim-cregexp-build (string)
   "根据 STRING 构建一个中文 regexp, 用于 \"拼音搜索汉字\".
 比如：\"nihao\" -> \"[你呢...][好号...] \\| nihao\""
+  (rx-form (pyim-cregexp-build-from-rx
+            (lambda (x)
+              (if (stringp x)
+                  (xr (pyim-cregexp-build-1 x))
+                x))
+            (xr string))))
+
+(defun pyim-cregexp-build-from-rx (fn rx-form)
+  (cond
+   ((not rx-form) nil)
+   ((and (listp rx-form)
+         (not (listp (cdr rx-form))))
+    (funcall fn rx-form))
+   ((and (listp rx-form)
+         (not (eq 'any (car rx-form))))
+    (mapcar (lambda (x)
+              (pyim-cregexp-build-from-rx fn x))
+            rx-form))
+   ((and (listp rx-form)
+         (eq 'any (car rx-form)))
+    rx-form)
+   (t (funcall fn rx-form))))
+
+(defun pyim-cregexp-build-1 (string)
   (let* ((scheme-name (pyim-scheme-name))
          (class (pyim-scheme-get-option scheme-name :class)))
     ;; 确保 pyim 词库加载
