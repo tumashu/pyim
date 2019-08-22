@@ -3791,12 +3791,14 @@ PUNCT-LIST 格式类似：
 (defun pyim-cregexp-build (string)
   "根据 STRING 构建一个中文 regexp, 用于 \"拼音搜索汉字\".
 比如：\"nihao\" -> \"[你呢...][好号...] \\| nihao\""
-  (rx-form (pyim-cregexp-build-from-rx
-            (lambda (x)
-              (if (stringp x)
-                  (xr (pyim-cregexp-build-1 x))
-                x))
-            (xr string))))
+  (or (ignore-errors
+        (rx-form (pyim-cregexp-build-from-rx
+                  (lambda (x)
+                    (if (stringp x)
+                        (xr (pyim-cregexp-build-1 x))
+                      x))
+                  (xr string))))
+      string))
 
 (defun pyim-cregexp-build-from-rx (fn rx-form)
   (cond
