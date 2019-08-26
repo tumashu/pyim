@@ -3699,70 +3699,68 @@ PUNCT-LIST 格式类似：
   (interactive "P")
   (unless (equal input-method-function 'pyim-input-method)
     (activate-input-method 'pyim))
-  (let* ((case-fold-search nil)
-         (scheme-name (pyim-scheme-name))
-         (first-chars (pyim-scheme-get-option scheme-name :first-chars))
-         (rest-chars (pyim-scheme-get-option scheme-name :rest-chars))
-         (string (if mark-active
-                     (buffer-substring-no-properties
-                      (region-beginning) (region-end))
-                   (buffer-substring (point) (line-beginning-position))))
-         (length 0)
-         code length)
-    (cond ((string-match
-            ;; 创建一个 regexp, 用于提取出光标处一个适合
-            ;; 转换的字符串。
-            (format "[%s]+ *$"
-                    (cl-delete-duplicates
-                     (concat first-chars rest-chars "'-")))
-            string)
-           (setq code
-                 ;; 一些编程语言使用单引号 ' 做为字符串的标记，这里需要特殊处理。
-                 (replace-regexp-in-string
-                  "^[-']" ""
-                  (match-string 0 string)))
-           (setq length (length code))
-           (setq code (replace-regexp-in-string " +" "" code))
-           (when mark-active
-             (delete-region
-              (region-beginning) (region-end)))
-           (when (and (not mark-active) (> length 0))
-             (delete-char (- 0 length)))
-           (when (> length 0)
-             (if return-cregexp
-                 ;; 根据拼音，返回一个 regexp, 用这个 regexp
-                 ;; 可以搜索对应拼音的汉字
-                 (insert (pyim-cregexp-build code))
+  (if return-cregexp
+      (pyim-convert-cregexp-at-point t)
+    (let* ((case-fold-search nil)
+           (scheme-name (pyim-scheme-name))
+           (first-chars (pyim-scheme-get-option scheme-name :first-chars))
+           (rest-chars (pyim-scheme-get-option scheme-name :rest-chars))
+           (string (if mark-active
+                       (buffer-substring-no-properties
+                        (region-beginning) (region-end))
+                     (buffer-substring (point) (line-beginning-position))))
+           (length 0)
+           code length)
+      (cond ((string-match
+              ;; 创建一个 regexp, 用于提取出光标处一个适合
+              ;; 转换的字符串。
+              (format "[%s]+ *$"
+                      (cl-delete-duplicates
+                       (concat first-chars rest-chars "'-")))
+              string)
+             (setq code
+                   ;; 一些编程语言使用单引号 ' 做为字符串的标记，这里需要特殊处理。
+                   (replace-regexp-in-string
+                    "^[-']" ""
+                    (match-string 0 string)))
+             (setq length (length code))
+             (setq code (replace-regexp-in-string " +" "" code))
+             (when mark-active
+               (delete-region
+                (region-beginning) (region-end)))
+             (when (and (not mark-active) (> length 0))
+               (delete-char (- 0 length)))
+             (when (> length 0)
                (setq unread-command-events
                      (append (listify-key-sequence code)
                              unread-command-events))
-               (setq pyim-force-input-chinese t))))
-          ((pyim-string-match-p "[[:punct:]：－]" (pyim-char-before-to-string 0))
-           ;; 当光标前的一个字符是标点符号时，半角/全角切换。
-           (call-interactively 'pyim-punctuation-translate-at-point))
-          ((and nil ;; 暂时还没有准备启用这个功能
-                (eq pyim-default-scheme 'quanpin)
-                (string-match "\\cc *$" string))
-           ;; 如果光标处是汉字，就用汉字的拼音来重新启动输入法
-           (setq string
-                 (if mark-active
-                     string
-                   (match-string 0 string)))
-           (setq length (length string))
-           (when mark-active
-             (delete-region
-              (region-beginning) (region-end)))
-           (when (and (not mark-active) (> length 0))
-             (delete-char (- 0 length)))
-           (setq code (pyim-hanzi2pinyin
-                       (replace-regexp-in-string " " "" string)
-                       nil "-" nil t))
-           (when (> length 0)
-             (setq unread-command-events
-                   (append (listify-key-sequence code)
-                           unread-command-events))
-             (setq pyim-force-input-chinese t)))
-          (t (message "Pyim: pyim-convert-string-at-point do noting.")))))
+               (setq pyim-force-input-chinese t)))
+            ((pyim-string-match-p "[[:punct:]：－]" (pyim-char-before-to-string 0))
+             ;; 当光标前的一个字符是标点符号时，半角/全角切换。
+             (call-interactively 'pyim-punctuation-translate-at-point))
+            ((and nil ;; 暂时还没有准备启用这个功能
+                  (eq pyim-default-scheme 'quanpin)
+                  (string-match "\\cc *$" string))
+             ;; 如果光标处是汉字，就用汉字的拼音来重新启动输入法
+             (setq string
+                   (if mark-active
+                       string
+                     (match-string 0 string)))
+             (setq length (length string))
+             (when mark-active
+               (delete-region
+                (region-beginning) (region-end)))
+             (when (and (not mark-active) (> length 0))
+               (delete-char (- 0 length)))
+             (setq code (pyim-hanzi2pinyin
+                         (replace-regexp-in-string " " "" string)
+                         nil "-" nil t))
+             (when (> length 0)
+               (setq unread-command-events
+                     (append (listify-key-sequence code)
+                             unread-command-events))
+               (setq pyim-force-input-chinese t)))
+            (t (message "Pyim: pyim-convert-string-at-point do noting."))))))
 
 (defun pyim-quit-clear ()
   "取消当前输入的命令."
@@ -3903,6 +3901,39 @@ PUNCT-LIST 格式类似：
         (advice-add 'isearch-search-fun :override #'pyim-isearch-search-fun)
         (message "PYIM: `pyim-isearch-mode' 已经激活，激活后，一些 isearch 扩展包有可能失效。"))
     (advice-remove 'isearch-search-fun #'pyim-isearch-search-fun)))
+
+(defun pyim-convert-cregexp-at-point (&optional insert-only)
+  "将光标前的字符串按拼音的规则转换为一个搜索中文的 regexp.
+用于实现拼音搜索中文的功能。
+
+在 minibuffer 中，这个命令默认会自动运行 `exit-minibuffer'.
+这个可以使用 INSERT-ONLY 参数控制。"
+  (interactive "P")
+  (unless (equal input-method-function 'pyim-input-method)
+    (activate-input-method 'pyim))
+  (let* ((buffer-string
+          (buffer-substring (point-min) (point-max)))
+         (string (if mark-active
+                     (buffer-substring-no-properties
+                      (region-beginning) (region-end))
+                   (buffer-substring
+                    (point)
+                    (save-excursion
+                      (skip-syntax-backward "w")
+                      (point)))))
+         (length (length string))
+         (cregexp (pyim-cregexp-build string)))
+    (delete-char (- 0 length))
+    (cond
+     ;; Deal with `org-search-view'
+     ((and (window-minibuffer-p)
+           (string-match-p
+            (regexp-quote "[+-]Word/{Regexp}") buffer-string))
+      (insert (format "{%s}" cregexp)))
+     (t (insert cregexp)))
+    (when (and (not insert-only)
+               (window-minibuffer-p))
+      (exit-minibuffer))))
 
 ;; ** 让 forward/backward 支持中文
 (defun pyim-forward-word (&optional arg)
