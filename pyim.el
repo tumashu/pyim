@@ -598,7 +598,6 @@
 (require 'posframe nil t)
 (require 'pyim-pymap)
 (require 'pyim-common)
-(require 'xr) ;Used by pyim-cregexp-build
 (require 'rx) ;Used by pyim-cregexp-build
 
 (defgroup pyim nil
