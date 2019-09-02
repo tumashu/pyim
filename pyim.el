@@ -3220,6 +3220,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
               ;; 第三次选择：刀，   outcome = 小李飞刀
               (- (length (pyim-outcome-get))
                  (length (pyim-outcome-get 1))))
+             ;; pyim-imobjs 包含 *pyim-entered-buffer* 里面光标前面的字符串，某些情况只有部分被翻译，剩余部分保存在下面这个变量
              (to-be-translated (mapconcat #'identity
                                 (mapcar
                                  #'(lambda (w)
