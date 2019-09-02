@@ -3246,7 +3246,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
               (pyim-with-entered-buffer
                 ;; 把本次已经选择的词条对应的子 entered, 从 entered
                 ;; 字符串里面剪掉。
-                (delete-region 1 (point))
+                (delete-region (point-min) (point))
                 (insert to-be-translated)
                 ;; 为下一次选词作准备， 长词大部份需要逐字确认，
                 ;; 所以向前移动一个 imelem.
