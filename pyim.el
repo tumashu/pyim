@@ -3220,9 +3220,13 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
               ;; 第三次选择：刀，   outcome = 小李飞刀
               (- (length (pyim-outcome-get))
                  (length (pyim-outcome-get 1))))
-             (translated-index
-              (pyim-entered-next-imelem-position
-               length-selected-word t 1)))
+             ;; pyim-imobjs 包含 *pyim-entered-buffer* 里面光标前面的字符串，某些情况只有部分被翻译，剩余部分保存在下面这个变量
+             (to-be-translated (mapconcat #'identity
+                                (mapcar
+                                 #'(lambda (w)
+                                     (concat (car w) (cdr w)))
+                                 (nthcdr length-selected-word imobj))
+                                "")))
         ;; 在使用全拼输入法输入长词的时候，可能需要多次选择，才能够将
         ;; 这个词条上屏，这个地方用来判断是否是 “最后一次选择”，如果
         ;; 不是最后一次选择，就需要截断 entered, 准备下一轮的选择。
@@ -3242,7 +3246,8 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
               (pyim-with-entered-buffer
                 ;; 把本次已经选择的词条对应的子 entered, 从 entered
                 ;; 字符串里面剪掉。
-                (delete-region (point-min) translated-index)
+                (delete-region (point-min) (point))
+                (insert to-be-translated)
                 ;; 为下一次选词作准备， 长词大部份需要逐字确认，
                 ;; 所以向前移动一个 imelem.
                 (goto-char (pyim-entered-next-imelem-position 1 t 1)))
