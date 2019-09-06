@@ -1087,10 +1087,10 @@ pyim 内建的有三种选词框格式：
   :group 'pyim
   :type 'integer)
 
-(defcustom pyim-autoselector '(xingma)
+(defcustom pyim-autoselector '(pyim-autoselector-xingma)
   "已经启用的自动上屏器.
 
-自动上屏器对应一个函数，如果这个函数返回t,那么当前的词条就会自动
+自动上屏器是一个函数，如果这个函数返回t, 那么当前的词条就会自动
 上屏，不需要手动选择。"
   :group 'pyim)
 
@@ -2114,7 +2114,7 @@ Return the input string.
                    (mapcar 'identity rest-chars)))
          (setq current-input-method-title pyim-title))))
 
-(defun pyim-autoselector:xingma (&rest args)
+(defun pyim-autoselector-xingma (&rest args)
   "适用于型码输入法的自动上屏器.
 
 比如：五笔等型码输入法，重码率很低，90%以上的情况都是选择第一个词
@@ -2129,14 +2129,12 @@ Return the input string.
   "Pyim 版本的 self-insert-command."
   (interactive "*")
   (cond
-   ;; 自动上屏器设置： 自动上屏器对应一个函数，如果这个函数返回t, 就自
+   ;; 自动上屏器设置： 自动上屏器是一个函数，如果这个函数返回t, 就自
    ;; 动上屏。
-   ((cl-some
-     #'(lambda (x)
-         (let ((func (intern (concat "pyim-autoselector:" (symbol-name x)))))
-           (when (functionp func)
-             (funcall func))))
-     pyim-autoselector)
+   ((cl-some #'(lambda (x)
+                 (when (functionp x)
+                   (funcall x)))
+             pyim-autoselector)
     (push last-command-event unread-command-events)
     (unless (equal pyim-candidates (list (pyim-entered-get)))
       (pyim-outcome-handle 'candidate))
