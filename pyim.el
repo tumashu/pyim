@@ -1087,13 +1087,12 @@ pyim 内建的有三种选词框格式：
   :group 'pyim
   :type 'integer)
 
-(defcustom pyim-auto-select t
-  "是否开启候选词自动上屏功能.
+(defcustom pyim-autoselector '(xingma)
+  "已经启用的自动上屏器.
 
-五笔等型码输入法，重码率很低，开启这个选项后，第一个候选词会自动
-选择并上屏，不需要用户频繁的按空格来选择。"
-  :group 'pyim
-  :type 'boolean)
+自动上屏器对应一个函数，如果这个函数返回t,那么当前的词条就会自动
+上屏，不需要手动选择。"
+  :group 'pyim)
 
 (defcustom pyim-posframe-min-width (* pyim-page-length 7)
   "使用 posframe 做为选词框时，设置选词框的最小宽度."
@@ -2115,32 +2114,43 @@ Return the input string.
                    (mapcar 'identity rest-chars)))
          (setq current-input-method-title pyim-title))))
 
-(defun pyim-self-insert-command ()
-  "Pyim 版本的 self-insert-command."
-  (interactive "*")
+(defun pyim-autoselector:xingma (&rest args)
+  "适用于型码输入法的自动上屏器.
+
+比如：五笔等型码输入法，重码率很低，90%以上的情况都是选择第一个词
+条，自动选择可以减少按空格强制选词的机会。"
   (let* ((scheme-name (pyim-scheme-name))
          (class (pyim-scheme-get-option scheme-name :class))
          (n (pyim-scheme-get-option scheme-name :code-split-length)))
-    (cond
-     ((and pyim-auto-select
-           (eq class 'xingma)
-           (= (length (pyim-entered-get)) n))
-      ;; 五笔等型码输入法，重码率很低，90%以上的情况都是选择第一个词条，
-      ;; 这里添加自动选择功能，减少按空格强制选词的机会。
-      (push last-command-event unread-command-events)
-      (unless (equal pyim-candidates (list (pyim-entered-get)))
-        (pyim-outcome-handle 'candidate))
-      (pyim-terminate-translation))
-     ((pyim-input-chinese-p)
-      (pyim-with-entered-buffer
-        (insert (char-to-string last-command-event)))
-      (pyim-entered-refresh))
-     (pyim-candidates
-      (pyim-outcome-handle 'candidate-and-last-char)
-      (pyim-terminate-translation))
-     (t
-      (pyim-outcome-handle 'last-char)
-      (pyim-terminate-translation)))))
+    (and (eq class 'xingma)
+         (= (length (pyim-entered-get)) n))))
+
+(defun pyim-self-insert-command ()
+  "Pyim 版本的 self-insert-command."
+  (interactive "*")
+  (cond
+   ;; 自动上屏器设置： 自动上屏器对应一个函数，如果这个函数返回t, 就自
+   ;; 动上屏。
+   ((cl-some
+     #'(lambda (x)
+         (let ((func (intern (concat "pyim-autoselector:" (symbol-name x)))))
+           (when (functionp func)
+             (funcall func))))
+     pyim-autoselector)
+    (push last-command-event unread-command-events)
+    (unless (equal pyim-candidates (list (pyim-entered-get)))
+      (pyim-outcome-handle 'candidate))
+    (pyim-terminate-translation))
+   ((pyim-input-chinese-p)
+    (pyim-with-entered-buffer
+      (insert (char-to-string last-command-event)))
+    (pyim-entered-refresh))
+   (pyim-candidates
+    (pyim-outcome-handle 'candidate-and-last-char)
+    (pyim-terminate-translation))
+   (t
+    (pyim-outcome-handle 'last-char)
+    (pyim-terminate-translation))))
 
 (defun pyim-entered-refresh-1 ()
   "查询 `pyim-entered-buffer' 光标前的拼音字符串（如果光标在行首则为光标后的）, 显示备选词等待用户选择。"
