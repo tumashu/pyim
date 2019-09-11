@@ -1786,10 +1786,13 @@ BUG：拼音无法有效地处理多音字。
     (let* ((scheme-name (pyim-scheme-name))
            (class (pyim-scheme-get-option scheme-name :class))
            (code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
-           (codes (if (eq class 'xingma)
-                      (pyim-hanzi2xingma word scheme-name t)
-                    ;;拼音使用了多音字校正
-                    (pyim-hanzi2pinyin word nil "-" t nil t))))
+           (codes (or
+                   ;;优先使用词库拼音
+                   (pyim-dcache-call-api 'search-word-code word)
+                   (if (eq class 'xingma)
+                       (pyim-hanzi2xingma word scheme-name t)
+                     ;;拼音使用了多音字校正
+                     (pyim-hanzi2pinyin word nil "-" t nil t)))))
       ;; 保存对应词条的词频
       (when (> (length word) 0)
         (pyim-dcache-call-api
@@ -1802,9 +1805,7 @@ BUG：拼音无法有效地处理多音字。
         (unless (pyim-string-match-p "[^ a-z-]" code)
           (pyim-insert-word-into-icode2word word
                                             (concat (or code-prefix "") code)
-                                            prepend)))
-      ;; TODO, 排序个人词库?
-      )))
+                                            prepend))))))
 
 (defun pyim-hanzi2xingma (string scheme-name &optional return-list)
   "返回汉字 STRING 对应形码方案 SCHEME-NAME 的 code (不包括
@@ -2647,14 +2648,6 @@ IMOBJS 获得候选词条。"
             (append pinyin-chars
                     (pyim-dcache-get
                      (car (pyim-codes-create imobj scheme-name))))))
-
-    ;; 使用词频信息，对个人词库得到的候选词排序，
-    ;; 第一个词的位置比较特殊，不参与排序，
-    ;; 具体原因请参考 `pyim-page-select-word' 中的 comment.
-    (setq personal-words
-          `(,(car personal-words)
-            ,@(pyim-dcache-call-api
-               'sort-words (cdr personal-words))))
 
     ;; Debug
     (when pyim-debug
