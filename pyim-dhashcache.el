@@ -443,10 +443,6 @@ code 对应的中文词条了。
   "保存个人词到缓存."
   (pyim-dhashcache-put pyim-dhashcache-icode2word
                        pinyin
-                       ;; 第一个词的位置比较特殊，不参与排序，
-                       ;; 具体原因请参考 `pyim-page-select-word' 中的 comment.
-                       ;; pyim-candidates-create:quanpin 不用重复排序
-                       (setq orig-value (pyim-dhashcache-sort-words orig-value))
                        (if prepend (pyim-list-merge word orig-value)
                          (pyim-list-merge orig-value word))))
 

@@ -1,7 +1,7 @@
 ;;; pyim-dregcache --- map dictionary to plain cache and use regular expression to search
 
 ;; * Header
-; Copyright 2019 Chen Bin
+;; ; Copyright 2019 Chen Bin
 
 ;; Author: Chen Bin <chenbin.sh@gmail.com>
 
@@ -360,19 +360,16 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
       (insert pyim-dregcache-icode2word))
     (goto-char (point-min))
     (let* ((case-fold-search t)
-           substring replace-string beg end sorted-words)
+           substring replace-string beg end old-word-list)
       (if (re-search-forward (concat "^\\" code " \\(.*\\)") nil t)
           (progn
             (setq beg (match-beginning 0))
             (setq end (match-end 0))
             (setq substring (match-string-no-properties 1))
             (delete-region beg end)
-            ;; 第一个词的位置比较特殊，不参与排序，
-            ;; 具体原因请参考 `pyim-page-select-word' 中的 comment.
-            (setq sorted-words (pyim-dregcache-sort-words (split-string substring " ")))
-            (setq replace-string (concat code " " (string-join (if prepend
-                                                                   (delete-dups `(,word ,@sorted-words))
-                                                                 (delete-dups `(,@sorted-words ,word))) " "))))
+            ;; 这里不进行排序，在pyim-dregcache-update-personal-words排序
+            (setq old-word-list (pyim-dregcache-sort-words (split-string substring " ")))
+            (setq replace-string (concat code " " (string-join (delete-dups `(,@old-word-list ,word)) " "))))
         (setq replace-string (concat code " " (or replace-string word) "\n")))
       (goto-char (or beg (point-max)))
       (insert replace-string))
