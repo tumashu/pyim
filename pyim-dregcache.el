@@ -1,7 +1,7 @@
 ;;; pyim-dregcache --- map dictionary to plain cache and use regular expression to search
 
 ;; * Header
-;; ; Copyright 2019 Chen Bin
+;; Copyright 2019 Chen Bin
 
 ;; Author: Chen Bin <chenbin.sh@gmail.com>
 
@@ -272,23 +272,40 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
     (nreverse (pyim-dregcache-get-1 pyim-dregcache-icode2word code))))
 
 (defun pyim-dregcache-update-personal-words (&optional force)
-  "载入 `pyim-dregcache-icode2word' . 加载排序后的结果.
+  "合并 `pyim-dregcache-icode2word' 磁盘文件. 加载排序后的结果.
 
 在这个过程中使用了 `pyim-dregcache-iword2count' 中记录的词频信息。
 如果 FORCE 为真，强制排序"
-  ;; (let* ((content (pyim-dregcache-load-variable 'pyim-dregcache-icode2word))
-  ;;        (lines (and content (split-string content "\n"))))
-    ;; (when (and lines (> (length lines) 0))
-    ;;   (setq pyim-dregcache-icode2word
-    ;;         ;; unique list
-    ;;         (delq nil (delete-dups (append pyim-dregcache-icode2word lines))))))
-    (when (and force pyim-dregcache-icode2word)
-      (pyim-dregcache-sort-icode2word)))
-
-(setq pyim-dregcache-icode2word (pyim-dregcache-load-variable 'pyim-dregcache-icode2word))
+  (let* ((content (pyim-dregcache-load-variable 'pyim-dregcache-icode2word)))
+    (with-temp-buffer
+      (let* (prev-record prev-code record code)
+        (insert pyim-dregcache-icode2word)
+        (insert content)
+        (sort-lines nil (point-min) (point-max))
+        (delete-duplicate-lines (point-min) (point-max) nil t nil)
+        (goto-char (point-min))
+        ;; 词库在创建时已经保证1个code只有1行
+        (while (not (eobp))
+          ;; initiate prev-point and prev-line
+          (setq prev-point (point))
+          (setq prev-record (pyim-dline-parse))
+          (setq prev-code (car prev-record))
+          (when (= (forward-line 1) 0)
+            (setq record (pyim-dline-parse))
+            (setq code (car record))
+            (when (string-equal prev-code code)
+              ;; line-end-position donesn't contain "\n"
+              (progn (delete-region prev-point (line-end-position))
+                     (insert (string-join (delete-dups `(,@prev-record ,@record)) " "))
+                     (forward-line))))))
+      (setq pyim-dregcache-icode2word (buffer-string))))
+  (when (and force pyim-dregcache-icode2word)
+    (pyim-dregcache-sort-icode2word)))
 
 (defun pyim-dregcache-init-variables ()
   "初始化 cache 缓存相关变量."
+  (unless pyim-dregcache-icode2word
+    (setq pyim-dregcache-icode2word (pyim-dregcache-load-variable 'pyim-dregcache-icode2word)))
   (pyim-dcache-set-variable
    'pyim-dregcache-iword2count
    nil
@@ -401,8 +418,12 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
 (defun pyim-dregcache-export-personal-words (file &optional confirm)
   "将个人词库存入 FILE."
   (when pyim-dregcache-icode2word
+    ;; 按词频排序，把词频信息保存到用户词典
+    (pyim-dregcache-sort-icode2word)
     (with-temp-buffer
       (insert pyim-dregcache-icode2word)
+      ;; 按拼音排序
+      (sort-lines nil (point-min) (point-max))
       (pyim-dcache-write-file file confirm))))
 
 ;; * Footer
