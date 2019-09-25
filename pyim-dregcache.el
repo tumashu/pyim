@@ -286,6 +286,9 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
           (sort-lines nil (point-min) (point-max))
           (delete-duplicate-lines (point-min) (point-max) nil t nil)
           (goto-char (point-min))
+          (unless (re-search-forward "utf-8-unix" (line-end-position) t)
+            (insert "## -*- coding: utf-8-unix -*-\n"))
+          (goto-char (point-min))
           ;; 词库在创建时已经保证1个code只有1行
           (while (not (eobp))
             ;; initiate prev-point and prev-line
