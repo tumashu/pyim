@@ -289,13 +289,14 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
           (unless (re-search-forward "utf-8-unix" (line-end-position) t)
             (insert "## -*- coding: utf-8-unix -*-\n"))
           (goto-char (point-min))
-          ;; 词库在创建时已经保证1个code只有1行
           (while (not (eobp))
             ;; initiate prev-point and prev-line
             (goto-char (line-beginning-position))
             (setq prev-point (point))
             (setq prev-record (pyim-dline-parse))
             (setq prev-code (car prev-record))
+            ;; 词库在创建时已经保证1个code只有1行，因此合并词库文件一般只有2行需要合并
+            ;; 所以这里没有对2行以上的合并进行优化
             (when (= (forward-line 1) 0)
               (setq record (pyim-dline-parse))
               (setq code (car record))
@@ -383,7 +384,7 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
     (goto-char (point-min))
     (let* ((case-fold-search t)
            substring replace-string beg end old-word-list)
-      (if (re-search-forward (concat "^\\" code " \\(.*\\)") nil t)
+      (if (re-search-forward (concat "^" code " \\(.*\\)") nil t)
           (progn
             (setq beg (match-beginning 0))
             (setq end (match-end 0))
