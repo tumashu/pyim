@@ -219,16 +219,8 @@
 ;;    #+BEGIN_EXAMPLE
 ;;    (setq pyim-default-scheme 'rime-quanpin)
 ;;    #+END_EXAMPLE
-;; 5. 如果通过 rime 使用微软双拼，自带的 rime 和 rime-quanqin scheme 都
-;;    无法处理 ; 的输入，可以用以下设置：
+;; 5. 如果通过 rime 使用微软双拼，可以用以下设置：
 ;;    #+BEGIN_EXAMPLE
-;;    (add-to-list 'pyim-schemes
-;;                 '(rime-microsoft-shuangpin
-;;                   :document "rime 微软双拼输入法。"
-;;                   :class rime
-;;                   :first-chars "abcdefghijklmnopqrstuvwxyz"
-;;                   :rest-chars "abcdefghijklmnopqrstuvwxyz;"
-;;                   :prefer-trigger-chars nil))
 ;;    (setq pyim-default-scheme 'rime-microsoft-shuangpin)
 ;;    #+END_EXAMPLE
 ;; *** 使用五笔输入
@@ -711,6 +703,12 @@ plist 来表示，比如：
      :first-chars "abcdefghjklmnopqrstwxyz"
      :rest-chars "vmpfwckzyjqdltxuognbhsrei'-a"
      :prefer-trigger-chars "v")
+    (rime-microsoft-shuangpin
+     :document "rime 微软双拼输入法。"
+     :class rime
+     :first-chars "abcdefghijklmnopqrstuvwxyz"
+     :rest-chars "abcdefghijklmnopqrstuvwxyz;"
+     :prefer-trigger-chars nil)
     (wubi
      :document "五笔输入法。"
      :class xingma
