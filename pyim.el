@@ -4,7 +4,8 @@
 ;; Copyright 2006 Ye Wenbin
 ;;           2014-2019 Feng Shu
 
-;; Author: Ye Wenbin <wenbinye@163.com>, Feng Shu <tumashu@163.com>
+;; Author: Ye Wenbin <wenbinye@163.com>
+;;         Feng Shu <tumashu@163.com>
 ;; URL: https://github.com/tumashu/pyim
 ;; Keywords: convenience, Chinese, pinyin, input-method
 
