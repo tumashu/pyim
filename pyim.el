@@ -1182,17 +1182,17 @@ imobj 在 pyim 里面的概念，类似与编译器里面的语法树，
 以全拼输入法的为例：
 
 1. entered: nihaoma
-2. imobj: ((\"n\" . \"i\") (\"h\" . \"ao\") (\"m\" . \"a\"))
+2. imobj: ((\"n\" \"i\" \"n\" \"i\") (\"h\" \"ao\" \"h\" \"ao\") (\"m\" \"a\" \"m\" \"a\"))
 
 而 imobjs 是 imobj 组成的一个列表，因为有糢糊音等概念的存在，一个
 entered 需要以多种方式或者多步骤解析，得到多种可能的 imobj, 这些
 imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 
 1. entered: guafeng (设置了糢糊音 en -> eng)
-2. imobj-1: ((\"g\" . \"ua\") (\"f\" . \"en\"))
-3. imobj-2: ((\"g\" . \"ua\") (\"f\" . \"eng\"))
-4. imobjs:  (((\"g\" . \"ua\") (\"f\" . \"en\"))
-             ((\"g\" . \"ua\") (\"f\" . \"eng\")))
+2. imobj-1: ((\"g\" \"ua\" \"g\" \"ua\") (\"f\" \"en\" \"f\" \"eng\"))
+3. imobj-2: ((\"g\" \"ua\" \"g\" \"ua\") (\"f\" \"eng\" \"f\" \"eng\"))
+4. imobjs:  (((\"g\" \"ua\" \"g\" \"ua\") (\"f\" \"en\" \"f\" \"eng\"))
+             ((\"g\" \"ua\" \"g\" \"ua\") (\"f\" \"eng\" \"f\" \"eng\")))
 
 这个变量用来保存解析得到的 imobjs。
 
@@ -1201,20 +1201,21 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 词条组合成一个候选词列表：`pyim-candidates' 并通过 pyim-page 相关
 功能来显示选词框，供用户选择词条，比如：
 
-1. imobj: ((\"g\" . \"ua\") (\"f\" . \"en\"))
+1. imobj: ((\"g\" \"ua\" \"g\" \"ua\") (\"f\" \"en\" \"f\" \"en\"))
 2. code: gua-fen
 
 从上面的说明可以看出，imobj 本身也是有结构的：
 
-1. imobj: ((\"g\" . \"ua\") (\"f\" . \"en\"))
+1. imobj: ((\"g\" \"ua\" \"g\" \"ua\") (\"f\" \"en\" \"f\" \"en\"))
 
-我们将 (\"g\" . \"ua\") 这些子结构，叫做 imelem (IM element), *大
+我们将 (\"g\" \"ua\" \"g\" \"ua\") 这些子结构，叫做 imelem (IM element), *大
 多数情况下*, 一个 imelem 能够代表一个汉字，这个概念在编辑 entered
 的时候，非常有用。
 
 另外要注意的是，不同的输入法， imelem 的内部结构是不一样的，比如：
-1. quanping: (\"g\" . \"ua\")
-2. wubi: (\"aaaa\")")
+1. quanping:  (\"g\" \"ua\" \"g\" \"ua\")
+2. shuangpin: (\"h\" \"ao\" \"h\" \"c\")
+3. wubi:      (\"aaaa\")")
 
 (defvar pyim-candidates nil
   "所有备选词条组成的列表.")
@@ -2234,9 +2235,9 @@ Return the input string.
                 #'(lambda (char-pinyin)
                     (pyim-pinyin2cchar-get char-pinyin t))
                 (mapcar #'(lambda (x)
-                            (concat (car x) (cdr x)))
+                            (concat (nth 0 x) (nth 1 x)))
                         (pyim-imobjs-find-fuzzy:quanpin-1
-                         (cons shenmu yunmu))))))
+                         (list shenmu yunmu shenmu yunmu))))))
       (while (> i 0)
         (setq yunmu (substring yunmu-and-rest 0 i))
         (setq rest (substring yunmu-and-rest i))
@@ -2262,7 +2263,7 @@ Return the input string.
                   (t (setq i 0)))
           (setq i (1- i))
           (setq yunmu ""))))
-    (cons (cons shenmu yunmu)
+    (cons (list shenmu yunmu shenmu yunmu)
           (substring yunmu-and-rest (length yunmu)))))
 
 (defun pyim-pinyin-split (pinyin)
@@ -2274,7 +2275,8 @@ Return the input string.
         charpy spinyin)
     (while (when (string< "" pinyin)
              (setq charpy (pyim-pinyin-get-charpy pinyin))
-             (if (equal (car charpy) '("" . ""))
+             (if (and (equal (nth 0 (car charpy)) "")
+                      (equal (nth 1 (car charpy)) ""))
                  (progn
                    (setq spinyin nil)
                    (setq pinyin ""))
@@ -2285,7 +2287,7 @@ Return the input string.
         ;; 就将字符串简单的包装一下，然后返回。
         ;; 目前这个功能用于： 以u或者i开头的词库 #226
         ;; https://github.com/tumashu/pyim/issues/226
-        (list (cons "" py)))))
+        (list (list "" py "" py)))))
 
 (defun pyim-scheme-get (scheme-name)
   "获取名称为 SCHEME-NAME 的输入法方案。"
@@ -2343,11 +2345,26 @@ Return the input string.
 
 结果为:
 
-    (((\"w\" . \"o\") (\"\" . \"ai\") (\"m\" . \"ei\") (\"n\" . \"v\")))
+    (((\"w\" \"o\" \"w\" \"o\") (\"\" \"ai\" \"\" \"ai\") (\"m\" \"ei\" \"m\" \"ei\") (\"n\" \"v\" \"n\" \"v\")))
 
 如果字符串无法正确处理，则返回 nil, 比如：
 
-   (pyim-imobjs-create \"ua\" 'quanpin)"
+   (pyim-imobjs-create \"ua\" 'quanpin)
+
+全拼输入法的 imelem 是四个字符串组成的 list, 类似：
+
+  (\"w\" \"o\" \"w\" \"o\")
+
+代表：
+
+  (声母1, 韵母1, 声母2, 韵母2)
+
+声母1和声母2一般用来生成 code 字符串，用于词库中寻找词条。声母2和
+韵母2一般用来反向构建 entered 字符串，用于“多次选择生成词条”这个
+功能。
+
+大多数情况，声母1 = 声母2, 韵母1 = 韵母2, 只有在使用糢糊音的时候，
+才可能出现不一致的情况。"
   (when (and entered (string< "" entered))
     (let* ((str-list (remove "" (split-string entered "'")))
            (n (length str-list))
@@ -2359,14 +2376,14 @@ Return the input string.
               (setq output nil)
             (when (> i 0)
               ;; 将强制分割符号附加到封分割符后面的声母开头，
-              ;; 类似： ("'n" . "i"), 用于 `pyim-page-preview-create' 函数。
+              ;; 类似： ("'n" "i" "n" "i"), 用于 `pyim-page-preview-create' 函数。
               (setf (caar x)
                     (concat "'" (caar x))))
             (setq output (append output x)))))
       (when output
         (pyim-imobjs-find-fuzzy:quanpin (list output))))))
 
-;; "nihc" -> (((\"n\" . \"i\") (\"h\" . \"ao\")))
+;; "nihc" -> (((\"n\" \"i\" \"n\" \"i\") (\"h\" \"ao\" \"h\" \"c\")))
 (defun pyim-imobjs-create:shuangpin (entered &optional scheme-name)
   (let ((keymaps (pyim-scheme-get-option scheme-name :keymaps))
         (list (string-to-list (replace-regexp-in-string "-" "" entered)))
@@ -2383,9 +2400,9 @@ Return the input string.
         (dolist (x ym)
           (let* ((y (concat sp-sm (or sp-ym " ")))
                  (z (cadr (assoc y keymaps)))
-                 (py (if z (cons "" z) (cons sm x))))
+                 (py (if z (list "" z sp-sm sp-ym) (list sm x sp-sm sp-ym))))
             (unless (string-match-p pyim-shuangpin-invalid-pinyin-regexp
-                                    (concat (car py) (cdr py)))
+                                    (concat (nth 0 py) (nth 1 py)))
               (push py one-word-pinyins))))
 
         (when (and one-word-pinyins (> (length one-word-pinyins) 0))
@@ -2421,8 +2438,8 @@ Return the input string.
       (setq result2 (append result2 (cdr fuzzy-imobjs))))
     (append result1 result2)))
 
-;; (\"f\" . \"en\") -> ((\"f\" . \"en\") (\"f\" . \"eng\"))
-(defun pyim-imobjs-find-fuzzy:quanpin-1 (pycons)
+;; (\"f\" \"en\" \"f\" \"en\") -> ((\"f\" \"en\" \"f\" \"en\") (\"f\" \"eng\" \"f\" \"en\"))
+(defun pyim-imobjs-find-fuzzy:quanpin-1 (imelem)
   "Find all fuzzy pinyins."
   (cl-labels ((find-list (str list)
                          (let (result)
@@ -2434,12 +2451,12 @@ Return the input string.
                                       `(,str ,@(cl-copy-list x))))))
                            (or result (list str)))))
     (let* ((fuzzy-alist pyim-fuzzy-pinyin-alist)
-           (sm-list (find-list (car pycons) fuzzy-alist))
-           (ym-list (find-list (cdr pycons) fuzzy-alist))
+           (sm-list (find-list (nth 0 imelem) fuzzy-alist))
+           (ym-list (find-list (nth 1 imelem) fuzzy-alist))
            result)
       (dolist (a sm-list)
         (dolist (b ym-list)
-          (push (cons a b) result)))
+          (push `(,a ,b ,@(nthcdr 2 imelem)) result)))
       (reverse result))))
 
 (defun pyim-entered-next-imelem-position (num &optional search-forward start)
@@ -2489,7 +2506,7 @@ Return the input string.
 列表 codes 中包含一个或者多个 code 字符串，这些 code 字符串用于从
 词库中搜索相关词条。
 
-    (pyim-codes-create '((\"w\" . \"o\") (\"\" . \"ai\") (\"m\" . \"ei\") (\"n\" . \"v\")) 'quanpin)
+    (pyim-codes-create '((\"w\" \"o\" \"w\" \"o\") (\"\" \"ai\" \"\" \"ai\") (\"m\" \"ei\" \"m\" \"ei\") (\"n\"  \"v\" \"n\"  \"v\")) 'quanpin)
 
 结果为:
 
@@ -2497,7 +2514,7 @@ Return the input string.
   (mapcar
    #'(lambda (w)
        (let ((py (replace-regexp-in-string ;去掉分隔符，在词库中搜索候选词不需要分隔符
-                  "'" "" (concat (car w) (cdr w)))))
+                  "'" "" (concat (nth 0 w) (nth 1 w)))))
          (if (numberp first-n)
              (substring py 0 (min first-n (length py)))
            py)))
@@ -2728,7 +2745,7 @@ pyim 会使用 emacs overlay 机制在 *待输入buffer* 光标处高亮显示�
     (when (memq class '(quanpin))
       (let ((rest (mapconcat
                    #'(lambda (py)
-                       (concat (car py) (cdr py)))
+                       (concat (nth 0 py) (nth 1 py)))
                    (nthcdr (length preview) (car pyim-imobjs))
                    "'")))
         (when (string< "" rest)
@@ -2951,7 +2968,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
          (translated (mapconcat #'identity
                                 (mapcar
                                  #'(lambda (w)
-                                     (concat (car w) (cdr w)))
+                                     (concat (nth 0 w) (nth 1 w)))
                                  (car pyim-imobjs))
                                 separator)))
     (concat
@@ -2977,8 +2994,8 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
   (let ((keymaps (pyim-scheme-get-option (pyim-scheme-name) :keymaps))
         result)
     (dolist (w (car pyim-imobjs))
-      (let ((sm (car w))
-            (ym (cdr w)))
+      (let ((sm (nth 0 w))
+            (ym (nth 1 w)))
         (if (equal sm "")
             (push (car (rassoc (list ym) keymaps)) result)
           (push
@@ -3120,7 +3137,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
             (when (memq class '(quanpin))
               (let ((rest (mapconcat
                            #'(lambda (py)
-                               (concat (car py) (cdr py)))
+                               (concat (nth 0 py) (nth 1 py)))
                            (nthcdr (length preview) (car pyim-imobjs))
                            " ")))
                 (when (string< "" rest)
@@ -3227,63 +3244,64 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
 (defun pyim-page-select-word:pinyin ()
   "从选词框中选择当前词条，然后删除该词条对应拼音。"
   (interactive)
-      (pyim-outcome-handle 'candidate)
-      (let* ((imobj (car pyim-imobjs))
-             (length-selected-word
-              ;; 获取 *这一次* 选择词条的长度， 在“多次选择词条才能上屏”的情况下，
-              ;; 一定要和 outcome 的概念作区别。
-              ;; 比如： xiaolifeidao
-              ;; 第一次选择：小李， outcome = 小李
-              ;; 第二次选择：飞，   outcome = 小李飞
-              ;; 第三次选择：刀，   outcome = 小李飞刀
-              (- (length (pyim-outcome-get))
-                 (length (pyim-outcome-get 1))))
-             ;; pyim-imobjs 包含 *pyim-entered-buffer* 里面光标前面的字符串，某些情况只有部分被翻译，剩余部分保存在下面这个变量
-             (to-be-translated (mapconcat #'identity
-                                (mapcar
-                                 #'(lambda (w)
-                                     (concat (car w) (cdr w)))
-                                 (nthcdr length-selected-word imobj))
-                                "")))
-        ;; 在使用全拼输入法输入长词的时候，可能需要多次选择，才能够将
-        ;; 这个词条上屏，这个地方用来判断是否是 “最后一次选择”，如果
-        ;; 不是最后一次选择，就需要截断 entered, 准备下一轮的选择。
+  (pyim-outcome-handle 'candidate)
+  (let* ((imobj (car pyim-imobjs))
+         (length-selected-word
+          ;; 获取 *这一次* 选择词条的长度， 在“多次选择词条才能上屏”的情况下，
+          ;; 一定要和 outcome 的概念作区别。
+          ;; 比如： xiaolifeidao
+          ;; 第一次选择：小李， outcome = 小李
+          ;; 第二次选择：飞，   outcome = 小李飞
+          ;; 第三次选择：刀，   outcome = 小李飞刀
+          (- (length (pyim-outcome-get))
+             (length (pyim-outcome-get 1))))
+         ;; pyim-imobjs 包含 *pyim-entered-buffer* 里面光标前面的字符串，
+         ;; 某些情况只有部分被翻译，剩余部分保存在下面这个变量
+         (to-be-translated (mapconcat #'identity
+                                      (mapcar
+                                       #'(lambda (w)
+                                           (concat (nth 2 w) (nth 3 w)))
+                                       (nthcdr length-selected-word imobj))
+                                      "")))
+    ;; 在使用全拼输入法输入长词的时候，可能需要多次选择，才能够将
+    ;; 这个词条上屏，这个地方用来判断是否是 “最后一次选择”，如果
+    ;; 不是最后一次选择，就需要截断 entered, 准备下一轮的选择。
 
-        ;; 判断方法：entered 为 xiaolifeidao, 本次选择 “小李” 之后，
-        ;; 需要将 entered 截断，“小李” 这个词条长度为2, 就将 entered
-        ;; 从头开始缩减 2 个 imelem 对应的字符，变成 feidao, 为下一次
-        ;; 选择 “飞” 做准备。
+    ;; 判断方法：entered 为 xiaolifeidao, 本次选择 “小李” 之后，
+    ;; 需要将 entered 截断，“小李” 这个词条长度为2, 就将 entered
+    ;; 从头开始缩减 2 个 imelem 对应的字符，变成 feidao, 为下一次
+    ;; 选择 “飞” 做准备。
 
-        ;; 注意事项： 这里有一个假设前提是： 一个 imelem 对应一个汉字，
-        ;; 在全拼输入法中，这个假设大多数情况是成立的，但在型码输入法
-        ;; 中，比如五笔输入法，就不成立，好在型码输入法一般不需要多次
-        ;; 选择。
-        (if (or (< length-selected-word (length imobj))
-                (pyim-with-entered-buffer (< (point) (point-max))))
-            (progn
-              (pyim-with-entered-buffer
-                ;; 把本次已经选择的词条对应的子 entered, 从 entered
-                ;; 字符串里面剪掉。
-                (delete-region (point-min) (point))
-                (insert to-be-translated)
-                ;; 为下一次选词作准备， 长词大部份需要逐字确认，
-                ;; 所以向前移动一个 imelem.
-                (goto-char (pyim-entered-next-imelem-position 1 t 1)))
-              (pyim-entered-refresh))
-          ;; pyim 词频调整策略：
-          ;; 1. 如果一个词条是用户在输入过程中，自己新建的词条，那么就将这个词条
-          ;;    添加到个人词库的后面（不放置前面是为了减少误输词条的影响）。
-          ;; 2. 如果输入的词条，先前已经在候选词列表中，就自动将其放到第一位。
-          ;;    这样的话，一个新词要输入两遍之后才可能出现在第一位。
-          ;; 3. pyim 在启动的时候，会使用词频信息，对个人词库作一次排序。
-          ;;    用作 pyim 下一次使用。
-          (if (member (pyim-outcome-get) pyim-candidates)
-              (pyim-create-word (pyim-outcome-get) t)
-            (pyim-create-word (pyim-outcome-get)))
+    ;; 注意事项： 这里有一个假设前提是： 一个 imelem 对应一个汉字，
+    ;; 在全拼输入法中，这个假设大多数情况是成立的，但在型码输入法
+    ;; 中，比如五笔输入法，就不成立，好在型码输入法一般不需要多次
+    ;; 选择。
+    (if (or (< length-selected-word (length imobj))
+            (pyim-with-entered-buffer (< (point) (point-max))))
+        (progn
+          (pyim-with-entered-buffer
+           ;; 把本次已经选择的词条对应的子 entered, 从 entered
+           ;; 字符串里面剪掉。
+           (delete-region (point-min) (point))
+           (insert to-be-translated)
+           ;; 为下一次选词作准备， 长词大部份需要逐字确认，
+           ;; 所以向前移动一个 imelem.
+           (goto-char (pyim-entered-next-imelem-position 1 t 1)))
+          (pyim-entered-refresh))
+      ;; pyim 词频调整策略：
+      ;; 1. 如果一个词条是用户在输入过程中，自己新建的词条，那么就将这个词条
+      ;;    添加到个人词库的后面（不放置前面是为了减少误输词条的影响）。
+      ;; 2. 如果输入的词条，先前已经在候选词列表中，就自动将其放到第一位。
+      ;;    这样的话，一个新词要输入两遍之后才可能出现在第一位。
+      ;; 3. pyim 在启动的时候，会使用词频信息，对个人词库作一次排序。
+      ;;    用作 pyim 下一次使用。
+      (if (member (pyim-outcome-get) pyim-candidates)
+          (pyim-create-word (pyim-outcome-get) t)
+        (pyim-create-word (pyim-outcome-get)))
 
-          (pyim-terminate-translation)
-          ;; pyim 使用这个 hook 来处理联想词。
-          (run-hooks 'pyim-page-select-finish-hook))))
+      (pyim-terminate-translation)
+      ;; pyim 使用这个 hook 来处理联想词。
+      (run-hooks 'pyim-page-select-finish-hook))))
 
 (defun pyim-page-select-word:xingma ()
   "从选词框中选择当前词条，然后删除该词条对应编码。"
