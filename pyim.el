@@ -3892,7 +3892,7 @@ PUNCT-LIST 格式类似：
   "从 IMOBJ 创建一个搜索中文的 regexp."
   (let* ((imobj
           (mapcar #'(lambda (x)
-                      (concat (car x) (cdr x)))
+                      (concat (nth 0 x) (nth 1 x)))
                   imobj))
          (cchar-list
           (let ((n 0) results)
