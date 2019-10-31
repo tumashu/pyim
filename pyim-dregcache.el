@@ -310,15 +310,15 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
 
 (defun pyim-dregcache-init-variables ()
   "初始化 cache 缓存相关变量."
-  (unless pyim-dregcache-icode2word
-    (pyim-dregcache-update-personal-words t))
   (pyim-dcache-set-variable
    'pyim-dregcache-iword2count
    nil
    ;; dregcache 引擎也需要词频信息，第一次使用 dregcache 引擎的时候，
    ;; 自动导入 dhashcache 引擎的词频信息，以后两个引擎的词频信息就
    ;; 完全分开了。
-   (pyim-dcache-get-variable 'pyim-dhashcache-iword2count)))
+   (pyim-dcache-get-variable 'pyim-dhashcache-iword2count))
+  (unless pyim-dregcache-icode2word
+    (pyim-dregcache-update-personal-words t)))
 
 (defun pyim-dregcache-save-personal-dcache-to-file ()
   "保存缓存内容到默认目录."
