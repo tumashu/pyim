@@ -175,10 +175,10 @@
 
 ;; *** 通过 pyim 来支持 rime 所有输入法
 
-;; pyim 使用 emacs 动态模块：[[https://gitlab.com/liberime/liberime][liberime]]
+;; pyim 使用 emacs 动态模块：[[https://github.com/merrickluo/liberime][liberime]]
 ;; 来支持 rime, 设置方式：
 
-;; 1. 安裝 liberime, 见：[[https://gitlab.com/liberime/liberime/blob/master/README.org]] 。
+;; 1. 安裝 liberime, 见：[[https://github.com/merrickluo/liberime]] 。
 ;; 2. 创建文件： "~/.emacs.d/pyim/rime/default.custom.yaml", 内容为：
 
 ;;    #+BEGIN_EXAMPLE
