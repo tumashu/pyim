@@ -221,8 +221,10 @@
 ;;    #+END_EXAMPLE
 ;; 5. 如果通过 rime 使用微软双拼，可以用以下设置：
 ;;    #+BEGIN_EXAMPLE
+;;    (liberime-select-schema "double_pinyin_mspy")
 ;;    (setq pyim-default-scheme 'rime-microsoft-shuangpin)
 ;;    #+END_EXAMPLE
+;;    默认是用繁体中文，想要改成简体中文的话，可以参考 [[https://github.com/rime/home/wiki/CustomizationGuide#%E4%B8%80%E4%BE%8B%E5%AE%9A%E8%A3%BD%E7%B0%A1%E5%8C%96%E5%AD%97%E8%BC%B8%E5%87%BA][rime wiki]]，或者[[http://wenshanren.org/?p=1070#orgc7dbd8e][这篇博客]]
 ;; *** 使用五笔输入
 ;; pyim 支持五笔输入模式，用户可以通过变量 `pyim-default-scheme' 来设定：
 
