@@ -202,7 +202,7 @@
 ;; 3. 參考设置：
 ;;    #+BEGIN_EXAMPLE
 ;;    (use-package liberime
-;;      :load-path "/path/to/liberime.[so|dll]"
+;;      :load-path "/path/to/liberime-module/" ;liberime.so 或者 liberime.dll 所在的目录
 ;;      :config
 ;;      ;; 注意事项:
 ;;      ;; 1. 文件路径需要用 `expand-file-name' 函数处理。
