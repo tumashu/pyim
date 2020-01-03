@@ -2576,6 +2576,18 @@ IMOBJS 获得候选词条。"
              (candidates (alist-get 'candidates menu)))
         candidates))))
 
+(defun pyim-liberime-get (string)
+  "让 liberime 搜索 STRING, 然后返回对应的中文词条列表.
+这个函数常常用于测试目的。"
+  (when (functionp 'liberime-clear-composition)
+    (liberime-clear-composition)
+    (dolist (key (string-to-list string))
+      (liberime-process-key key))
+    (let* ((context (liberime-get-context))
+           (menu (alist-get 'menu context))
+           (candidates (alist-get 'candidates menu)))
+      candidates)))
+
 (defun pyim-candidates-create:quanpin (imobjs scheme-name)
   "`pyim-candidates-create' 处理全拼输入法的函数."
   (let* (;; 如果输入 "ni-hao" ，搜索 code 为 "n-h" 的词条做为联想词。
