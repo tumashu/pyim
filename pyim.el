@@ -3000,20 +3000,20 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
 (defun pyim-page-preview-create:xingma (&optional separator)
   (let* ((scheme-name (pyim-scheme-name)))
     (cl-flet* ((segment (x)
-                       (mapconcat #'identity
-                                  (car (pyim-imobjs-create x scheme-name))
-                                  (or separator " ")))
+                        (mapconcat #'identity
+                                   (car (pyim-imobjs-create x scheme-name))
+                                   (or separator " ")))
                (fmt (x)
                     (mapconcat #'segment
                                (split-string x "'")
                                "'")))
-    ;; | 显示光标位置的字符
-    (pyim-with-entered-buffer
-      (if (equal (point) (point-max))
-          (fmt (buffer-substring-no-properties (point-min) (point-max)))
-        (concat (fmt (buffer-substring-no-properties (point-min) (point)))
-                "| "
-                (fmt (buffer-substring-no-properties (point) (point-max)))))))))
+      ;; | 显示光标位置的字符
+      (pyim-with-entered-buffer
+        (if (equal (point) (point-max))
+            (fmt (buffer-substring-no-properties (point-min) (point-max)))
+          (concat (fmt (buffer-substring-no-properties (point-min) (point)))
+                  "| "
+                  (fmt (buffer-substring-no-properties (point) (point-max)))))))))
 
 (defun pyim-page-menu-create (candidates position &optional separator)
   "这个函数用于创建在 page 中显示的备选词条菜单。"
@@ -3256,13 +3256,13 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
             (pyim-with-entered-buffer (< (point) (point-max))))
         (progn
           (pyim-with-entered-buffer
-           ;; 把本次已经选择的词条对应的子 entered, 从 entered
-           ;; 字符串里面剪掉。
-           (delete-region (point-min) (point))
-           (insert to-be-translated)
-           ;; 为下一次选词作准备， 长词大部份需要逐字确认，
-           ;; 所以向前移动一个 imelem.
-           (goto-char (pyim-entered-next-imelem-position 1 t 1)))
+            ;; 把本次已经选择的词条对应的子 entered, 从 entered
+            ;; 字符串里面剪掉。
+            (delete-region (point-min) (point))
+            (insert to-be-translated)
+            ;; 为下一次选词作准备， 长词大部份需要逐字确认，
+            ;; 所以向前移动一个 imelem.
+            (goto-char (pyim-entered-next-imelem-position 1 t 1)))
           (pyim-entered-refresh))
       ;; pyim 词频调整策略：
       ;; 1. 如果一个词条是用户在输入过程中，自己新建的词条，那么就将这个词条
