@@ -3260,9 +3260,10 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
             ;; 字符串里面剪掉。
             (delete-region (point-min) (point))
             (insert to-be-translated)
-            ;; 为下一次选词作准备， 长词大部份需要逐字确认，
-            ;; 所以向前移动一个 imelem.
-            (goto-char (pyim-entered-next-imelem-position 1 t 1)))
+            ;; 为下一次选词作准备，一般情况下词库里面的词条不会超过20
+            ;; 个汉字，所以这里一次递归的处理20个 imelem. 这种方式
+            ;; 可能比逐字选择更加好用。
+            (goto-char (pyim-entered-next-imelem-position 20 t 1)))
           (pyim-entered-refresh))
       ;; pyim 词频调整策略：
       ;; 1. 如果一个词条是用户在输入过程中，自己新建的词条，那么就将这个词条
