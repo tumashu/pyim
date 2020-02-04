@@ -2758,7 +2758,7 @@ pyim 会使用 emacs overlay 机制在 *待输入buffer* 光标处高亮显示�
   (1+ (/ (1- pyim-candidate-position) pyim-page-length)))
 
 (defun pyim-page-total-page ()
-  "计算 page 总共有多少也多少页.
+  "计算 page 总共有多少页.
 
 细节信息请参考 `pyim-page-refresh' 的 docstring."
   (1+ (/ (1- (length pyim-candidates)) pyim-page-length)))
@@ -2768,7 +2768,7 @@ pyim 会使用 emacs overlay 机制在 *待输入buffer* 光标处高亮显示�
 
 细节信息请参考 `pyim-page-refresh' 的 docstring."
   (let ((pos (min (length pyim-candidates) pyim-candidate-position)))
-    (1+ (- pos (mod pos pyim-page-length)))))
+    (1+ (* (/ (1- pos) pyim-page-length) pyim-page-length))))
 
 (defun pyim-page-end (&optional finish)
   "计算当前所在页的最后一个词条的位置，
@@ -2780,7 +2780,7 @@ non-nil，说明，补全已经用完了.
   (let* ((whole (length pyim-candidates))
          (len pyim-page-length)
          (pos pyim-candidate-position)
-         (last (+ (- pos (mod pos len)) len)))
+         (last (* (/ (+ (1- pos) len) len) len)))
     (if (< last whole)
         last
       (if finish
@@ -2921,7 +2921,11 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
         (pyim-outcome-handle 'last-char)
         (pyim-terminate-translation))
     (let ((new (+ pyim-candidate-position arg)))
-      (setq pyim-candidate-position (if (> new 0) new 1))
+      (setq len (length pyim-candidates))
+      (setq pyim-candidate-position
+       (if (>= len new)
+         (if (> new 0) new len)
+         1))
       (pyim-preview-refresh)
       (pyim-page-refresh t))))
 
