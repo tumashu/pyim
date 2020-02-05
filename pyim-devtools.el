@@ -24,14 +24,14 @@
 
 ;;; Commentary:
 
-;; * 說明文檔                                                              :doc:
-;; 這個文件包含了與 pyim 開發相關的配置或者工具，比如：
+;; * 说明文档                                                              :doc:
+;; 这个文件包含了与 pyim 开发相关的配置或者工具，比如：
 
 ;; 1. org-webpage config for pyim
 
 ;;; Code:
 
-;; * 代碼                                                                 :code:
+;; * 代码                                                                 :code:
 (require 'org2web)
 
 (defvar pyim-website-repository-directory
@@ -43,7 +43,7 @@
    :remote (git "https://github.com/tumashu/pyim.git" "gh-pages")
    :site-domain "https://tumashu.github.io/pyim"
    :site-main-title "pyim"
-   :site-sub-title "(一個 emacs 環境下的中文拼音輸入法)"
+   :site-sub-title "(一个 emacs 环境下的中文拼音输入法)"
    :default-category "documents"
    :theme (worg killjs)
    :force-absolute-url t
