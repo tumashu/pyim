@@ -5,18 +5,18 @@
 
 ;;; Commentary:
 
-;; * 說明文檔                                                              :doc:
-;; 這個文件為詞典建立散列表 (Hash Table) 結構緩存，提供基於散列表的辭典搜索演算法。
-;; 搜索速度極快，消耗記憶體較多。
+;; * 说明文档                                                              :doc:
+;; 这个文件为词典建立散列表(Hash Table)结构缓存,提供基于散列表的辞典搜索算法.
+;; 搜索速度极快,消耗内存较多.
 ;;
-;; 可以 (setq pyim-dcache-backend 'pyim-dhashcache) 然後重啟輸入法啟用此引擎
+;; 可以 (setq pyim-dcache-backend 'pyim-dhashcache) 然后重启输入法启用此引擎
 
 ;;; Code:
-;; * 代碼                                                                 :code:
+;; * 代码                                                                 :code:
 (require 'pyim-common)
 (require 'async nil t)
 
-;; Pyim 詞庫緩存文件，注意：變數名稱中不能出現 ":" 等，不能作為文件名稱的字元。
+;; Pyim 词库缓存文件，注意：变量名称中不能出现 ":" 等，不能作为文件名称的字符。
 (defvar pyim-dhashcache-code2word nil)
 (defvar pyim-dhashcache-code2word-md5 nil)
 (defvar pyim-dhashcache-word2code nil)
@@ -29,9 +29,9 @@
 (defvar pyim-dhashcache-update-icode2word-p nil)
 
 (defun pyim-dhashcache-sort-words (words-list)
-  "對 WORDS-LIST 排序，詞頻大的排在前面。
+  "对 WORDS-LIST 排序，词频大的排在前面.
 
-排序使用 `pyim-dhashcache-iword2count' 中記錄的詞頻信息"
+排序使用 `pyim-dhashcache-iword2count' 中记录的词频信息"
   (sort words-list
         #'(lambda (a b)
             (let ((a (car (split-string a ":")))
@@ -40,7 +40,7 @@
                  (or (gethash b pyim-dhashcache-iword2count) 0))))))
 
 (defun pyim-dhashcache-get-shortcode (code)
-  "獲取一個 CODE 的所有簡寫。
+  "获取一个 CODE 的所有简写.
 
 比如：.nihao -> .nihao .niha .nih .ni .n"
   (when (and (> (length code) 0)
@@ -56,9 +56,9 @@
       results)))
 
 (defun pyim-dhashcache-update-ishortcode2word (&optional force)
-  "讀取 ‘pyim-dhashcache-icode2word’ 中的詞庫，創建 *簡拼* 緩存，然後加載這個緩存。
+  "读取 ‘pyim-dhashcache-icode2word’ 中的词库，创建 *简拼* 缓存，然后加载这个缓存.
 
-如果 FORCE 為真，強制加載緩存。"
+如果 FORCE 为真，强制加载缓存。"
   (interactive)
   (when (or force (not pyim-dhashcache-update-ishortcode2word))
     (if (pyim-use-emacs-thread-p)
@@ -116,9 +116,9 @@
           (pyim-dcache-set-variable 'pyim-dhashcache-ishortcode2word t))))))
 
 (defun pyim-dhashcache-update-shortcode2word (&optional force)
-  "使用 `pyim-dhashcache-code2word' 中的詞條，創建簡寫 code 詞庫緩存並加載。
+  "使用 `pyim-dhashcache-code2word' 中的词条，创建简写 code 词库缓存并加载.
 
-如果 FORCE 為真，強制運行。"
+如果 FORCE 为真，强制运行。"
   (interactive)
   (when (or force (not pyim-dhashcache-update-shortcode2word))
     (if (pyim-use-emacs-thread-p)
@@ -159,8 +159,8 @@
                  (puthash x
                           (mapcar
                            #'(lambda (word)
-                               ;; 這個地方的代碼用於實現五筆 code 自動提示功能，
-                               ;; 比如輸入 'aa' 後得到選詞框：
+                               ;; 这个地方的代码用于实现五笔 code 自动提示功能，
+                               ;; 比如输入 'aa' 后得到选词框：
                                ;; ----------------------
                                ;; | 1. 莁aa 2.匶wv ... |
                                ;; ----------------------
@@ -182,22 +182,22 @@
           (pyim-dcache-set-variable 'pyim-dhashcache-shortcode2word t))))))
 
 (defun pyim-dhashcache-get-path (variable)
-  "獲取保存 VARIABLE 取值的文件的路徑。"
+  "获取保存 VARIABLE 取值的文件的路径."
   (when (symbolp variable)
     (concat (file-name-as-directory pyim-dcache-directory)
             (symbol-name variable))))
 
 (defun pyim-dhashcache-generate-dcache-file (dict-files dcache-file)
-  "讀取詞庫文件列表：DICT-FILES，生成一個詞庫緩沖文件 DCACHE-FILE。
+  "读取词库文件列表：DICT-FILES, 生成一个词库缓冲文件 DCACHE-FILE.
 
-pyim 使用的詞庫文件是簡單的文本文件，編碼 *強制* 為 'utf-8-unix，
-其結構類似：
+pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 'utf-8-unix,
+其结构类似：
 
   ni-bu-hao 你不好
   ni-hao  你好 妮好 你豪
 
-第一個空白字元之前的內容為 code，空白字元之後為中文詞條列表。詞庫
-*不處理* 中文標點符號。"
+第一个空白字符之前的内容为 code，空白字符之后为中文词条列表。词库
+*不处理* 中文标点符号。"
   (let ((hashtable (make-hash-table :size 1000000 :test #'equal)))
     (dolist (file dict-files)
       (with-temp-buffer
@@ -218,9 +218,9 @@ pyim 使用的詞庫文件是簡單的文本文件，編碼 *強制* 為 'utf-8-
     hashtable))
 
 (defun pyim-dhashcache-generate-word2code-dcache-file (dcache file)
-  "從 DCACHE 生成一個 word -> code 的反向查詢表。
-DCACHE 是一個 code -> words 的 hashtable。
-並將生成的表保存到 FILE 中。"
+  "从 DCACHE 生成一个 word -> code 的反向查询表.
+DCACHE 是一个 code -> words 的 hashtable.
+并将生成的表保存到 FILE 中."
   (when (hash-table-p dcache)
     (let ((hashtable (make-hash-table :size 1000000 :test #'equal)))
       (maphash
@@ -237,12 +237,12 @@ DCACHE 是一個 code -> words 的 hashtable。
       (pyim-dcache-save-value-to-file hashtable file))))
 
 (defun pyim-dhashcache-update-code2word (dict-files dicts-md5 &optional force)
-  "讀取並加載詞庫。
+  "读取并加载词库.
 
-讀取 `pyim-dicts' 和 `pyim-extra-dicts' 裡面的詞庫文件，生成對應的
-詞庫緩沖文件，然後加載詞庫緩存。
+读取 `pyim-dicts' 和 `pyim-extra-dicts' 里面的词库文件，生成对应的
+词库缓冲文件，然后加载词库缓存。
 
-如果 FORCE 為真，強制加載。"
+如果 FORCE 为真，强制加载。"
   (interactive)
   (let* ((code2word-file (pyim-dhashcache-get-path 'pyim-dhashcache-code2word))
          (word2code-file (pyim-dhashcache-get-path 'pyim-dhashcache-word2code))
@@ -271,10 +271,10 @@ DCACHE 是一個 code -> words 的 hashtable。
             (pyim-dcache-set-variable 'pyim-dhashcache-word2code t)))))))
 
 (defun pyim-dhashcache-export (dcache file &optional confirm)
-  "將一個 pyim DCACHE 導出為文件 FILE。
+  "将一个 pyim DCACHE 导出为文件 FILE.
 
-如果 CONFIRM 為 non-nil，文件存在時將會提示用戶是否覆蓋，
-預設為覆蓋模式"
+如果 CONFIRM 为 non-nil，文件存在时将会提示用户是否覆盖，
+默认为覆盖模式"
   (with-temp-buffer
     (insert ";;; -*- coding: utf-8-unix -*-\n")
     (maphash
@@ -288,13 +288,13 @@ DCACHE 是一個 code -> words 的 hashtable。
     (pyim-dcache-write-file file confirm)))
 
 (defun pyim-dhashcache-get (code &optional from)
-  "從 FROM 對應的 dcaches 中搜索 CODE，得到對應的詞條。
+  "从 FROM 对应的 dcaches 中搜索 CODE, 得到对应的词条.
 
-當詞庫文件加載完成後，pyim 就可以用這個函數從詞庫緩存中搜索某個
-code 對應的中文詞條了。
+当词库文件加载完成后，pyim 就可以用这个函数从词库缓存中搜索某个
+code 对应的中文词条了。
 
-如果 FROM 為 nil，則預設搜索 `pyim-dhashcache-icode2word' 和
-`pyim-dhashcache-code2word' 兩個 dcache。"
+如果 FROM 为 nil, 则默认搜索 `pyim-dhashcache-icode2word' 和
+`pyim-dhashcache-code2word' 两个 dcache."
   (let* ((caches (mapcar (lambda (x)
                            (intern (concat "pyim-dhashcache-" (symbol-name x))))
                          (or (and from
@@ -311,10 +311,10 @@ code 對應的中文詞條了。
     `(,@result ,@(pyim-pinyin2cchar-get code t t))))
 
 (defun pyim-dhashcache-update-icode2word (&optional force)
-  "對 personal 緩存中的詞條進行排序，加載排序後的結果。
+  "对 personal 缓存中的词条进行排序，加载排序后的结果.
 
-在這個過程中使用了 `pyim-dhashcache-iword2count' 中記錄的詞頻信息。
-如果 FORCE 為真，強制排序。"
+在这个过程中使用了 `pyim-dhashcache-iword2count' 中记录的词频信息。
+如果 FORCE 为真，强制排序。"
   (interactive)
   (when (or force (not pyim-dhashcache-update-icode2word-p))
     (if (pyim-use-emacs-thread-p)
@@ -351,30 +351,30 @@ code 對應的中文詞條了。
   (pyim-dhashcache-update-ishortcode2word force))
 
 (defun pyim-dhashcache-init-variables ()
-  "初始化 dcache 緩存相關變數。"
+  "初始化 dcache 缓存相关变量."
   (pyim-dcache-set-variable
    'pyim-dhashcache-iword2count nil
-   ;; 添加 dregcache 後端之後，原來的 dcache 更名為 dhashcache，
-   ;; 升級遷移
+   ;; 添加 dregcache 后端之后， 原来的 dcache 更名为 dhashcache,
+   ;; 升级迁移
    (pyim-dcache-get-variable 'pyim-dcache-iword2count))
   (pyim-dcache-set-variable 'pyim-dhashcache-code2word)
   (pyim-dcache-set-variable 'pyim-dhashcache-word2code)
   (pyim-dcache-set-variable 'pyim-dhashcache-shortcode2word)
   (pyim-dcache-set-variable
    'pyim-dhashcache-icode2word nil
-   ;; 添加 dregcache 後端之後，原來的 dcache 更名為 dhashcache，
-   ;; 升級遷移
+   ;; 添加 dregcache 后端之后， 原来的 dcache 更名为 dhashcache,
+   ;; 升级迁移
    (pyim-dcache-get-variable 'pyim-dcache-icode2word))
   (pyim-dcache-set-variable
    'pyim-dhashcache-ishortcode2word nil
-   ;; 添加 dregcache 後端之後，原來的 dcache 更名為 dhashcache，
-   ;; 升級遷移
+   ;; 添加 dregcache 后端之后， 原来的 dcache 更名为 dhashcache,
+   ;; 升级迁移
    (pyim-dcache-get-variable 'pyim-dcache-ishortcode2word)))
 
 (defun pyim-dhashcache-save-personal-dcache-to-file ()
-  ;; 用戶選擇過的詞
+  ;; 用户选择过的词
   (pyim-dcache-save-variable 'pyim-dhashcache-icode2word)
-  ;; 詞頻
+  ;; 词频
   (pyim-dcache-save-variable 'pyim-dhashcache-iword2count))
 
 (defun pyim-dhashcache-insert-export-content ()
@@ -382,10 +382,10 @@ code 對應的中文詞條了。
    #'(lambda (key value)
        (insert (format "%s %s\n" key value)))
    pyim-dhashcache-iword2count)
-  ;; 在預設情況下，用戶選擇過的詞生成的緩存中存在的詞條，
-  ;; `pyim-dhashcache-iword2count' 中也一定存在，但如果用戶
-  ;; 使用了特殊的方式給用戶選擇過的詞生成的緩存中添加了
-  ;; 詞條，那麼就需要將這些詞條也導出，且設置詞頻為 0
+  ;; 在默认情况下，用户选择过的词生成的缓存中存在的词条，
+  ;; `pyim-dhashcache-iword2count' 中也一定存在，但如果用户
+  ;; 使用了特殊的方式给用户选择过的词生成的缓存中添加了
+  ;; 词条，那么就需要将这些词条也导出，且设置词频为 0
   (maphash
    #'(lambda (_ words)
        (dolist (word words)
@@ -394,7 +394,7 @@ code 對應的中文詞條了。
    pyim-dhashcache-icode2word))
 
 (defmacro pyim-dhashcache-put (cache code &rest body)
-  "這個用於保存詞條，刪除詞條以及調整詞條位置。"
+  "这个用于保存词条，删除词条以及调整词条位置."
   (declare (indent 0))
   (let ((key (make-symbol "key"))
         (table (make-symbol "table"))
@@ -408,7 +408,7 @@ code 對應的中文詞條了。
          (puthash ,key ,new-value ,table)))))
 
 (defun pyim-dhashcache-update-iword2count (word &optional prepend wordcount-handler)
-  "保存詞頻到緩存。"
+  "保存词频到缓存."
   (pyim-dhashcache-put
     pyim-dhashcache-iword2count word
     (cond
@@ -419,7 +419,7 @@ code 對應的中文詞條了。
      (t (+ (or orig-value 0) 1)))))
 
 (defun pyim-dhashcache-delete-word (word)
-  "將中文詞條 WORD 從個人詞庫中刪除"
+  "将中文词条 WORD 从个人词库中删除"
   (let* ((pinyins (pyim-hanzi2pinyin word nil "-" t))
          (pinyins-szm (mapcar
                        #'(lambda (pinyin)
@@ -440,7 +440,7 @@ code 對應的中文詞條了。
     (remhash word pyim-dhashcache-iword2count)))
 
 (defun pyim-dhashcache-insert-word-into-icode2word (word pinyin prepend)
-  "保存個人詞到緩存。"
+  "保存个人词到缓存."
   (pyim-dhashcache-put pyim-dhashcache-icode2word
                        pinyin
                        (if prepend (pyim-list-merge word orig-value)
@@ -450,7 +450,7 @@ code 對應的中文詞條了。
   (gethash string pyim-dhashcache-word2code))
 
 (defun pyim-dhashcache-export-personal-words (file &optional confirm)
-  "導出個人詞庫到 FILE。"
+  "导出个人词库到 FILE."
   (pyim-dhashcache-export pyim-dhashcache-icode2word file confirm))
 
 ;; * Footer
