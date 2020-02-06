@@ -1310,7 +1310,7 @@ dcache 文件的方法让 pyim 正常工作。")
     (while (< i 256)
       (define-key map (vector i) 'pyim-self-insert-command)
       (setq i (1+ i)))
-    (dolist (i (number-sequence ?1 ?9))
+    (dolist (i (number-sequence ?0 ?9))
       (define-key map (char-to-string i) 'pyim-page-select-word-by-number))
     (define-key map " " 'pyim-page-select-word)
     (define-key map (kbd "C-SPC") 'pyim-page-select-word-simple)
@@ -1481,12 +1481,10 @@ dcache 文件的方法让 pyim 正常工作。")
                    (gethash pinyin pyim-pinyin2cchar-cache2)
                  (gethash pinyin pyim-pinyin2cchar-cache1))
              (gethash pinyin pyim-pinyin2cchar-cache3))))
+         (delete "" output)
       (if include-seperator
           output
-        (delq ""
-              (mapcar (lambda (x)
-                        (replace-regexp-in-string "|" "" x))
-                      (or output '())))))))
+          (delete "|" output)))))
 
 (defun pyim-cchar2pinyin-get (char-or-str)
   "获取字符或者字符串 CHAR-OR-STR 对应的拼音 code.
@@ -2758,7 +2756,7 @@ pyim 会使用 emacs overlay 机制在 *待输入buffer* 光标处高亮显示�
   (1+ (/ (1- pyim-candidate-position) pyim-page-length)))
 
 (defun pyim-page-total-page ()
-  "计算 page 总共有多少也多少页.
+  "计算 page 总共有多少页.
 
 细节信息请参考 `pyim-page-refresh' 的 docstring."
   (1+ (/ (1- (length pyim-candidates)) pyim-page-length)))
@@ -2768,7 +2766,7 @@ pyim 会使用 emacs overlay 机制在 *待输入buffer* 光标处高亮显示�
 
 细节信息请参考 `pyim-page-refresh' 的 docstring."
   (let ((pos (min (length pyim-candidates) pyim-candidate-position)))
-    (1+ (- pos (mod pos pyim-page-length)))))
+       (1+ (* (/ (1- pos) pyim-page-length) pyim-page-length))))
 
 (defun pyim-page-end (&optional finish)
   "计算当前所在页的最后一个词条的位置，
@@ -2780,7 +2778,7 @@ non-nil，说明，补全已经用完了.
   (let* ((whole (length pyim-candidates))
          (len pyim-page-length)
          (pos pyim-candidate-position)
-         (last (+ (- pos (mod pos len)) len)))
+         (last (* (/ (+ (1- pos) len) len) len)))
     (if (< last whole)
         last
       (if finish
@@ -2905,7 +2903,11 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
         (pyim-outcome-handle 'last-char)
         (pyim-terminate-translation))
     (let ((new (+ pyim-candidate-position (* pyim-page-length arg) 1)))
-      (setq pyim-candidate-position (if (> new 0) new 1)
+      (setq maxpos (length pyim-candidates))
+      (setq pyim-candidate-position
+            (if (> new 0)
+                (if (> new maxpos) 1 new)
+                maxpos)
             pyim-candidate-position (pyim-page-start))
       (pyim-preview-refresh)
       (pyim-page-refresh))))
@@ -2921,7 +2923,11 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
         (pyim-outcome-handle 'last-char)
         (pyim-terminate-translation))
     (let ((new (+ pyim-candidate-position arg)))
-      (setq pyim-candidate-position (if (> new 0) new 1))
+      (setq len (length pyim-candidates))
+      (setq pyim-candidate-position
+        (if (>= len new)
+            (if (> new 0) new len)
+            1))
       (pyim-preview-refresh)
       (pyim-page-refresh t))))
 
@@ -3341,6 +3347,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
                          (- n 1)
                        (- last-command-event ?1)))
               (end (pyim-page-end)))
+          (if (= index -1) (setq index 9) nil)
           (if (> (+ index (pyim-page-start)) end)
               (pyim-page-refresh)
             (setq pyim-candidate-position (+ pyim-candidate-position index))
