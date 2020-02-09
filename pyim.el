@@ -572,6 +572,7 @@
 
 ;; * 核心代码                                                           :code:
 ;; ** require + defcustom + defvar
+(require 'subr-x)
 (require 'cl-lib)
 (require 'help-mode)
 (require 'popup nil t)
