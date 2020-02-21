@@ -429,6 +429,9 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
     (pyim-dregcache-sort-icode2word)
     (with-temp-buffer
       (insert pyim-dregcache-icode2word)
+      ;; 删除单字词
+      (goto-char (point-min))
+      (replace-regexp "^[a-z]+ [^a-z]*" "")
       ;; 按拼音排序
       (sort-lines nil (point-min) (point-max))
       (pyim-dcache-write-file file confirm))))
