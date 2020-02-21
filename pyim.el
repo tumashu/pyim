@@ -3840,39 +3840,48 @@ PUNCT-LIST 格式类似：
     rx-form)
    (t (funcall fn rx-form))))
 
-(defun pyim-cregexp-build-1 (string)
+(defun pyim-cregexp-build-1 (str)
   (let* ((scheme-name (pyim-scheme-name))
-         (class (pyim-scheme-get-option scheme-name :class)))
+         (class (pyim-scheme-get-option scheme-name :class))
+         (sep "#####&&&&#####")
+         (lst (split-string
+               (replace-regexp-in-string
+                "\\([a-z']+\\)" (concat sep "\\1" sep) str)
+               sep))
+         (lst (remove "" lst)))
     ;; 确保 pyim 词库加载
     (pyim-dcache-init-variables)
     ;; pyim 暂时只支持全拼和双拼搜索
     (when (not (member class '(quanpin shuangpin)))
       (setq scheme-name 'quanpin))
-    (if (or (pyim-string-match-p "[^a-z']+" string))
-        string
-      (let* ((imobjs
-              ;; 如果一个字符串以'结尾,就按照拼音首字母字符串处理。
-              (if (pyim-string-match-p "'$" string)
-                  (list (mapcar #'(lambda (x)
-                                    (list (char-to-string x)))
-                                (string-to-list string)))
-                ;; Slowly operating, need to improve.
-                (pyim-imobjs-create string scheme-name)))
-             (regexp-list
-              (mapcar
-               #'(lambda (imobj)
-                   (pyim-cregexp-build:quanpin imobj))
-               imobjs))
-             (regexp
-              (when regexp-list
-                (mapconcat #'identity
-                           (delq nil regexp-list)
-                           "\\|")))
-             (regexp
-              (if (> (length regexp) 0)
-                  (concat string "\\|" regexp)
-                string)))
-        regexp))))
+    (mapconcat
+     (lambda (string)
+       (if (or (pyim-string-match-p "[^a-z']+" string))
+           string
+         (let* ((imobjs
+                 ;; 如果一个字符串以'结尾,就按照拼音首字母字符串处理。
+                 (if (pyim-string-match-p "'$" string)
+                     (list (mapcar #'(lambda (x)
+                                       (list (char-to-string x)))
+                                   (string-to-list string)))
+                   ;; Slowly operating, need to improve.
+                   (pyim-imobjs-create string scheme-name)))
+                (regexp-list
+                 (mapcar
+                  #'(lambda (imobj)
+                      (pyim-cregexp-build:quanpin imobj))
+                  imobjs))
+                (regexp
+                 (when regexp-list
+                   (mapconcat #'identity
+                              (delq nil regexp-list)
+                              "\\|")))
+                (regexp
+                 (if (> (length regexp) 0)
+                     (concat string "\\|" regexp)
+                   string)))
+           (format "\\(?:%s\\)" regexp))))
+     lst "")))
 
 (defun pyim-cregexp-build:quanpin (imobj &optional match-beginning
                                          first-equal all-equal)
