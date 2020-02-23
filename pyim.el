@@ -2105,10 +2105,11 @@ Return the input string.
   (cond
    ;; 自动上屏器设置： 自动上屏器是一个函数，如果这个函数返回t, 就自
    ;; 动上屏。
-   ((cl-some #'(lambda (x)
-                 (when (functionp x)
-                   (funcall x)))
-             pyim-autoselector)
+   ((and pyim-candidates
+         (cl-some #'(lambda (x)
+                      (when (functionp x)
+                        (funcall x)))
+                  pyim-autoselector))
     (push last-command-event unread-command-events)
     (unless (equal pyim-candidates (list (pyim-entered-get)))
       (pyim-outcome-handle 'candidate))
