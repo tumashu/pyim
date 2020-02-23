@@ -176,26 +176,12 @@
 ;; *** 通过 pyim 来支持 rime 所有输入法
 
 ;; 1. 安裝配置 liberime 和 pyim, 方式见：[[https://github.com/merrickluo/liberime][liberime]].
-;; 2. 将 liberime 的 page_size 设置为 100, 这样 pyim 一次可以获取 100
-;;    个候选词，然后自己处理分页。用户可以按 TAB 键切换到辅助输入
-;;    法来输入 100 以后的词条。
-
-;;    手动设置方式是： 在 `liberime-user-data-dir'/default.custom.yaml
-;;    文件中添加类似下面的内容：
-
-;;    #+BEGIN_EXAMPLE
-;;    patch:
-;;         "menu/page_size": 100
-;;         "speller/auto_select": false
-;;         "speller/auto_select_unique_candidate": false
-;;    #+END_EXAMPLE
-
-;; 3. 使用 rime 全拼输入法的用户，也可以使用 rime-quanpin scheme,
+;; 2. 使用 rime 全拼输入法的用户，也可以使用 rime-quanpin scheme,
 ;;    这个 scheme 是专门针对 rime 全拼输入法定制的，支持全拼v快捷键。
 ;;    #+BEGIN_EXAMPLE
 ;;    (setq pyim-default-scheme 'rime-quanpin)
 ;;    #+END_EXAMPLE
-;; 4. 如果通过 rime 使用微软双拼，可以用以下设置：
+;; 3. 如果通过 rime 使用微软双拼，可以用以下设置：
 ;;    #+BEGIN_EXAMPLE
 ;;    (liberime-select-schema "double_pinyin_mspy")
 ;;    (setq pyim-default-scheme 'rime-microsoft-shuangpin)
@@ -1297,7 +1283,7 @@ dcache 文件的方法让 pyim 正常工作。")
 但同时产生了无效拼音 king .  用户手动输入的无效拼音无需考虑.
 因为用户有即时界面反馈,不可能连续输入无效拼音.")
 
-(defvar pyim-rime-limit 50
+(defvar pyim-liberime-search-limit 50
   "当 pyim 使用 `liberime-search' 来获取词条时，这个变量用来限制
 `liberime-search' 返回词条的数量。")
 
@@ -2564,16 +2550,11 @@ IMOBJS 获得候选词条。"
 
 (defun pyim-candidates-create:rime (imobjs scheme-name)
   "`pyim-candidates-create' 处理 rime 输入法的函数."
-  (when (functionp 'liberime-clear-composition)
+  (when (functionp 'liberime-search)
     (liberime-clear-composition)
     (let ((s (replace-regexp-in-string
               "-" "" (car (pyim-codes-create (car imobjs) scheme-name)))))
-      (dolist (key (string-to-list s))
-        (liberime-process-key key))
-      (let* ((context (liberime-get-context))
-             (menu (alist-get 'menu context))
-             (candidates (alist-get 'candidates menu)))
-        candidates))))
+      (liberime-search s pyim-liberime-search-limit))))
 
 (defun pyim-candidates-create:quanpin (imobjs scheme-name)
   "`pyim-candidates-create' 处理全拼输入法的函数."
@@ -2998,11 +2979,16 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
                (reverse result)
                (or separator " "))))
 
-(defun pyim-page-preview-create:rime (&optional _separator)
+(defun pyim-page-preview-create:rime (&optional separator)
   (let* ((context (liberime-get-context))
          (composition (alist-get 'composition context))
-         (preedit (alist-get 'preedit composition)))
-    (or preedit "")))
+         (preedit (or (alist-get 'preedit composition)
+                      (pyim-entered-get))))
+    (pyim-with-entered-buffer
+      (if (equal 1 (point))
+          (concat "|" preedit)
+        (concat (replace-regexp-in-string (concat separator "'") "'" preedit)
+                " |" (buffer-substring-no-properties (point) (point-max)))))))
 
 (defun pyim-page-preview-create:xingma (&optional separator)
   (let* ((scheme-name (pyim-scheme-name)))
@@ -3308,33 +3294,49 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
     (run-hooks 'pyim-page-select-finish-hook)))
 
 (defun pyim-page-select-word:rime ()
-  "从选词框中选择当前词条， 专门用于 rime 输入法支持。"
+  "从选词框中选择当前词条，然后删除该词条对应拼音。"
   (interactive)
-  (if (null pyim-candidates)  ; 如果没有选项，输入空格
-      (progn
-        (pyim-outcome-handle 'last-char)
-        (pyim-terminate-translation))
-    ;; pyim 告诉 liberime 选择其他的词条
-    (liberime-select-candidate (- pyim-candidate-position 1))
-    (let* ((context (liberime-get-context))
-           imobjs)
-      (pyim-outcome-handle 'candidate)
-      (if (not context)
-          (progn
-            (unless (member (pyim-outcome-get) pyim-candidates)
-              (pyim-create-word (pyim-outcome-get)))
-            (pyim-terminate-translation)
-            ;; pyim 使用这个 hook 来处理联想词。
-            (run-hooks 'pyim-page-select-finish-hook))
-        ;; BUG: 默认 liberime 得到的 candidate 是分页的，一页只包含5个词条，
-        ;; pyim 需要 liberime 不分页，或者一页包含尽可能多个词。
-        (setq pyim-candidates
-              (let* ((menu (alist-get 'menu context))
-                     (candidates (alist-get 'candidates menu)))
-                candidates))
-        (setq pyim-candidate-position 1)
-        (pyim-preview-refresh)
-        (pyim-page-refresh)))))
+  (pyim-outcome-handle 'candidate)
+  ;; 将 `pyim-candidate-position' 转换为 rime 内部的页数和词条在已选页
+  ;; 面的位置，然后给 rime 发送翻页事件，让 rime 内部做翻页操作并选择
+  ;; 对应的词条，这个操作是为了获取 rime 的 preedit, 从而让 pyim 知道，
+  ;; 输入的字符串，哪些已经转换，那些没有转换。
+  ;;
+  ;; 比如：如果 preedit 为 "你好zhe shi wei shen me",那么我们就知道
+  ;; "zheshiweishenme" 这个字符串是没有转换的字符串，需要截取出来做下
+  ;; 一轮的转换。
+  (let* ((context (liberime-get-context))
+         (menu (alist-get 'menu context))
+         (page-size (or (alist-get 'page-size menu) 5))
+         (position (- pyim-candidate-position 1))
+         (page-n (/ position page-size))
+         (n (% position page-size)))
+    (dotimes (_ page-n)
+      (liberime-process-key 65366)) ;发送翻页
+    (liberime-select-candidate n))
+
+  (let* ((context (liberime-get-context))
+         (composition (alist-get 'composition context))
+         ;; rime 有 sel-start 和 sel-end, 但不知道该怎么用这两个值，暂
+         ;; 时从 preedit 截取。NEED IMPROVE.
+         (preedit (alist-get 'preedit composition))
+         (to-be-translated
+          (replace-regexp-in-string
+           "\\cc\\| " "" (or preedit ""))))
+    (if (or (> (length to-be-translated) 0)
+            (pyim-with-entered-buffer (< (point) (point-max))))
+        (progn
+          (pyim-with-entered-buffer
+            (delete-region (point-min) (point))
+            (insert to-be-translated)
+            (goto-char (point-max)))
+          (pyim-entered-refresh))
+      (if (member (pyim-outcome-get) pyim-candidates)
+          (pyim-create-word (pyim-outcome-get) t)
+        (pyim-create-word (pyim-outcome-get)))
+      (pyim-terminate-translation)
+      ;; pyim 使用这个 hook 来处理联想词。
+      (run-hooks 'pyim-page-select-finish-hook))))
 
 (defun pyim-page-select-word-by-number (&optional n)
   "使用数字编号来选择对应的词条。"
