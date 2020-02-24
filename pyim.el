@@ -2105,6 +2105,28 @@ Return the input string.
   (cond
    ;; 自动上屏器设置： 自动上屏器是一个函数，如果这个函数返回t, 就自
    ;; 动上屏。
+
+   ;; 在 pyim 中，autoselector 机制是这样子的，假如你已经输入 nihao,
+   ;; 并且当前输入一个字符 m, 那么：
+
+   ;; 1. 字符串 "nihao" 已经处理完成，得到的候选词条已经保存到变量
+   ;; `pyim-candidates'中，
+
+   ;; 2. 当用户按下 "m" 键的时候，首先判断 "nihao" 的 pyim-candidates
+   ;;    是否存在，如果存在，pyim 就会调用 autoselector 函数, 如果 返
+   ;;    回值为 t 时, 说明 autoselector 机启动， pyim 会将当前的输入
+   ;;    "m" 推送到 emacs 变量 `unread-command-events' 中。并将
+   ;;    "nihao" 对应的第一个候选词条“你好”上屏，并关闭选词框等，等待
+   ;;    下一轮输入。
+
+   ;; 3. 当用户输入另外字符，比如 "a" 时，emacs 自动会将
+   ;;    `unread-command-events' 的 "m" 提取出来优先处理，然后再处理当
+   ;;    前输入 "a".
+
+   ;; 与 rime 集成的过程中，可能会遇到 “预判型 autoselector”, 比较绕脑
+   ;; 袋，假如已经完成输入 "nihao", 当前输入的是 "m"，但这是，pyim 只
+   ;; 获取到 "nihao" 的候选词条，用户需要在 pyim 没有处理 "m" 的时候，
+   ;; 将 "nihaom" 发送到 rime, 以获取到某种自动上屏信息。
    ((and pyim-candidates
          (cl-some #'(lambda (x)
                       (when (functionp x)
