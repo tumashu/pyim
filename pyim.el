@@ -2211,7 +2211,14 @@ Return the input string.
   (when (and (memq pyim-page-tooltip '(posframe child-frame))
              (pyim-posframe-valid-p))
     (posframe-hide pyim-page-tooltip-posframe-buffer))
-  (pyim-entered-erase-buffer))
+  (pyim-entered-erase-buffer)
+  (when (eq (pyim-scheme-get-option (pyim-scheme-name) :class) 'rime)
+    (pyim-terminate-translation:rime)))
+
+(defun pyim-terminate-translation:rime ()
+  ;; NEED IMPROVE: 清除 liberime commit, 也许有更好的方式。
+  (liberime-get-commit)
+  (liberime-clear-composition))
 
 ;; 分解拼音的相关函数
 (defun pyim-pinyin-get-shenmu (pinyin)
@@ -3380,10 +3387,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
         (pyim-create-word (pyim-outcome-get)))
       (pyim-terminate-translation)
       ;; pyim 使用这个 hook 来处理联想词。
-      (run-hooks 'pyim-page-select-finish-hook)))
-  ;; 清除 liberime commit
-  (liberime-get-commit)
-  (liberime-clear-composition))
+      (run-hooks 'pyim-page-select-finish-hook))))
 
 (defun pyim-page-select-word-by-number (&optional n)
   "使用数字编号来选择对应的词条。"
