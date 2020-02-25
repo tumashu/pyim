@@ -2152,14 +2152,14 @@ Return the input string.
                         (or (stringp (setq str (plist-get x :select)))
                             (equal (plist-get x :select) 'last)))
                       autoselect-p)
-          (push last-command-event unread-command-events)
           (unless (equal candidates-last (list entered-last))
             (let ((pyim-candidates
                    (if (and str (stringp str))
                        (list str)
                      candidates-last)))
               (pyim-outcome-handle 'candidate)))
-          (pyim-terminate-translation))
+          (pyim-terminate-translation)
+          (push last-command-event unread-command-events))
          (t nil)))))
    (pyim-candidates
     (pyim-outcome-handle 'candidate-and-last-char)
