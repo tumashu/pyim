@@ -2127,10 +2127,12 @@ Return the input string.
         (insert (char-to-string last-command-event)))
       (pyim-entered-refresh)
       ;; 自动上屏功能
-      (let ((autoselect-p (mapcar #'(lambda (x)
-                                      (when (functionp x)
-                                        (funcall x)))
-                                  pyim-autoselector))
+      (let ((autoselect-p
+             (mapcar #'(lambda (x)
+                         (when (functionp x)
+                           (ignore-errors
+                             (funcall x))))
+                     pyim-autoselector))
             str)
         (cond
          ;; 假设用户已经输入 "niha", 然后按了 "o" 键，那么，当前
