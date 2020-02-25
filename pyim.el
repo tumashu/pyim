@@ -1062,11 +1062,17 @@ pyim 内建的有三种选词框格式：
   :group 'pyim
   :type 'integer)
 
-(defcustom pyim-autoselector '(pyim-autoselector-xingma)
+(defcustom pyim-autoselector '(pyim-autoselector-xingma pyim-autoselector-rime)
   "已经启用的自动上屏器.
 
-自动上屏器是一个函数，如果这个函数返回t, 那么当前的词条就会自动
-上屏，不需要手动选择。"
+自动上屏器是一个函数。假设用户已经输入 \"nihao\", 并按下 \"m\" 键，
+那么当前entered 就是 \"nihaom\". 上次 entered 是 \"nihao\". 那么
+返回值有4种情况：
+
+1. (:select current) 自动上屏当前 entered (nihaom) 的第一个候选词。
+2. (:select last)    自动上屏上次 entered (nihao) 的第一个候选词，m 键下一轮处理。
+3. (:select \"str\") 自动上屏 str，m 键下一轮处理。
+4. nil               不自动上屏。"
   :group 'pyim)
 
 (defcustom pyim-posframe-min-width (* pyim-page-length 7)
@@ -2096,50 +2102,66 @@ Return the input string.
   (let* ((scheme-name (pyim-scheme-name))
          (class (pyim-scheme-get-option scheme-name :class))
          (n (pyim-scheme-get-option scheme-name :code-split-length)))
-    (and (eq class 'xingma)
-         (= (length (pyim-entered-get)) n))))
+    (when (and (eq class 'xingma)
+               (= (length (pyim-entered-get)) n))
+      (list :select 'current))))
+
+(defun pyim-autoselector-rime (&rest args)
+  "适用于RIME的自动上屏器."
+  (let* ((scheme-name (pyim-scheme-name))
+         (class (pyim-scheme-get-option scheme-name :class))
+         (entered (pyim-entered-get)))
+    (when (and (eq class 'rime)
+               (functionp 'liberime-get-commit))
+      (let ((commit (liberime-get-commit)))
+        (when commit
+          (list :select commit))))))
 
 (defun pyim-self-insert-command ()
   "Pyim 版本的 self-insert-command."
   (interactive "*")
   (cond
-   ;; 自动上屏器设置： 自动上屏器是一个函数，如果这个函数返回t, 就自
-   ;; 动上屏。
-
-   ;; 在 pyim 中，autoselector 机制是这样子的，假如你已经输入 nihao,
-   ;; 并且当前输入一个字符 m, 那么：
-
-   ;; 1. 字符串 "nihao" 已经处理完成，得到的候选词条已经保存到变量
-   ;; `pyim-candidates'中，
-
-   ;; 2. 当用户按下 "m" 键的时候，首先判断 "nihao" 的 pyim-candidates
-   ;;    是否存在，如果存在，pyim 就会调用 autoselector 函数, 如果 返
-   ;;    回值为 t 时, 说明 autoselector 机启动， pyim 会将当前的输入
-   ;;    "m" 推送到 emacs 变量 `unread-command-events' 中。并将
-   ;;    "nihao" 对应的第一个候选词条“你好”上屏，并关闭选词框等，等待
-   ;;    下一轮输入。
-
-   ;; 3. 当用户输入另外字符，比如 "a" 时，emacs 自动会将
-   ;;    `unread-command-events' 的 "m" 提取出来优先处理，然后再处理当
-   ;;    前输入 "a".
-
-   ;; 与 rime 集成的过程中，可能会遇到 “预判型 autoselector”, 比较绕脑
-   ;; 袋，假如已经完成输入 "nihao", 当前输入的是 "m"，但这是，pyim 只
-   ;; 获取到 "nihao" 的候选词条，用户需要在 pyim 没有处理 "m" 的时候，
-   ;; 将 "nihaom" 发送到 rime, 以获取到某种自动上屏信息。
-   ((and pyim-candidates
-         (cl-some #'(lambda (x)
-                      (when (functionp x)
-                        (funcall x)))
-                  pyim-autoselector))
-    (push last-command-event unread-command-events)
-    (unless (equal pyim-candidates (list (pyim-entered-get)))
-      (pyim-outcome-handle 'candidate))
-    (pyim-terminate-translation))
    ((pyim-input-chinese-p)
-    (pyim-with-entered-buffer
-      (insert (char-to-string last-command-event)))
-    (pyim-entered-refresh))
+    (let ((candidates-last pyim-candidates)
+          (entered-last (pyim-entered-get)))
+      (pyim-with-entered-buffer
+        (insert (char-to-string last-command-event)))
+      (pyim-entered-refresh)
+      ;; 自动上屏功能
+      (let ((autoselect-p (mapcar #'(lambda (x)
+                                      (when (functionp x)
+                                        (funcall x)))
+                                  pyim-autoselector))
+            str)
+        (cond
+         ;; 假设用户已经输入 "niha", 然后按了 "o" 键，那么，当前
+         ;; entered 就是 "nihao". 如果 autoselector 函数返回一个 list:
+         ;; (:select current), 那么就直接将 "nihao" 对应的第一个候选词
+         ;; 上屏幕。
+         ((cl-find-if (lambda (x)
+                        (equal (plist-get x :select) 'current))
+                      autoselect-p)
+          (unless (equal pyim-candidates (list (pyim-entered-get)))
+            (pyim-outcome-handle 'candidate))
+          (pyim-terminate-translation))
+         ;; 假如用户输入 "nihao", 然后按了 "m" 键, 那么当前的 entered
+         ;; 就是"nihaom", 如果 autoselector 返回 list: (:select last),
+         ;; 那么，“nihao” 对应的第一个候选词将上屏，m键下一轮继续处理。
+         ;; 这是一种 "踩雷确认模式". 如果 autoselector 返回 list:
+         ;; (:select "xxx") , 那么，"xxx" 将上屏，m键下一轮处理。
+         ((cl-find-if (lambda (x)
+                        (or (stringp (setq str (plist-get x :select)))
+                            (equal (plist-get x :select) 'last)))
+                      autoselect-p)
+          (push last-command-event unread-command-events)
+          (unless (equal candidates-last (list entered-last))
+            (let ((pyim-candidates
+                   (if (and str (stringp str))
+                       (list str)
+                     candidates-last)))
+              (pyim-outcome-handle 'candidate)))
+          (pyim-terminate-translation))
+         (t nil)))))
    (pyim-candidates
     (pyim-outcome-handle 'candidate-and-last-char)
     (pyim-terminate-translation))
@@ -3359,7 +3381,10 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
         (pyim-create-word (pyim-outcome-get)))
       (pyim-terminate-translation)
       ;; pyim 使用这个 hook 来处理联想词。
-      (run-hooks 'pyim-page-select-finish-hook))))
+      (run-hooks 'pyim-page-select-finish-hook)))
+  ;; 清除 liberime commit
+  (liberime-get-commit)
+  (liberime-clear-composition))
 
 (defun pyim-page-select-word-by-number (&optional n)
   "使用数字编号来选择对应的词条。"
