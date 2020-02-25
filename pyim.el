@@ -2109,8 +2109,7 @@ Return the input string.
 (defun pyim-autoselector-rime (&rest args)
   "适用于RIME的自动上屏器."
   (let* ((scheme-name (pyim-scheme-name))
-         (class (pyim-scheme-get-option scheme-name :class))
-         (entered (pyim-entered-get)))
+         (class (pyim-scheme-get-option scheme-name :class)))
     (when (and (eq class 'rime)
                (functionp 'liberime-get-commit))
       (let ((commit (liberime-get-commit)))
