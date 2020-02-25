@@ -2161,6 +2161,9 @@ Return the input string.
                      candidates-last)))
               (pyim-outcome-handle 'candidate)))
           (pyim-terminate-translation)
+          ;; BUG: 这条代码和 popup-tip 有冲突，如果用户
+          ;; `pyim-page-tooltip' 设置为 popup, 在自动上屏的时选词框会
+          ;; 有反常行为。
           (push last-command-event unread-command-events))
          (t nil)))))
    (pyim-candidates
