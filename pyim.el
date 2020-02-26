@@ -1067,12 +1067,13 @@ pyim 内建的有三种选词框格式：
 
 自动上屏器是一个函数。假设用户已经输入 \"nihao\", 并按下 \"m\" 键，
 那么当前entered 就是 \"nihaom\". 上次 entered 是 \"nihao\". 那么
-返回值有4种情况：
+返回值有3种情况（优先级按照下面的顺序）：
 
-1. (:select current) 自动上屏当前 entered (nihaom) 的第一个候选词。
-2. (:select last)    自动上屏上次 entered (nihao) 的第一个候选词，m 键下一轮处理。
-3. (:select \"str\") 自动上屏 str，m 键下一轮处理。
-4. nil               不自动上屏。"
+1. (:select last :replace-with \"xxx\")    自动上屏上次 entered (nihao) 的第一个候选词，m 键下一轮处理。
+3. (:select current :replace-with \"xxx\") 自动上屏当前 entered (nihaom) 的第一个候选词。
+4. nil                                     不自动上屏。
+
+如果 :replace-with 设置为一个字符串，则选择最终会被这个字符串替代。"
   :group 'pyim)
 
 (defcustom pyim-posframe-min-width (* pyim-page-length 7)
@@ -1188,6 +1189,9 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 
 (defvar pyim-candidates nil
   "所有备选词条组成的列表.")
+
+(defvar pyim-candidates-last nil
+  "上一轮备选词条列表，这个变量主要用于 autoselector 机制.")
 
 (defvar pyim-preview-overlay nil
   "用于保存光标处预览字符串的 overlay.")
@@ -2104,68 +2108,35 @@ Return the input string.
          (n (pyim-scheme-get-option scheme-name :code-split-length)))
     (when (and (eq class 'xingma)
                (= (length (pyim-entered-get)) n))
-      (list :select 'current))))
+      '(:select current))))
 
 (defun pyim-autoselector-rime (&rest args)
   "适用于RIME的自动上屏器."
   (let* ((scheme-name (pyim-scheme-name))
          (class (pyim-scheme-get-option scheme-name :class)))
-    (when (and (eq class 'rime)
-               (functionp 'liberime-get-commit))
-      (let ((commit (liberime-get-commit)))
-        (when commit
-          (list :select commit))))))
+    (when (eq class 'rime)
+      (let* ((commit (liberime-get-commit))
+             (context (liberime-get-context))
+             (composition (alist-get 'composition context))
+             (length (alist-get 'length composition)))
+        (cond
+         ;; 有新输入的顶屏模式
+         ((and commit (eq length 1))
+          `(:select last :replace-with ,commit))
+         ;; 无新输入的顶屏模式
+         (commit
+          `(:select current :replace-with ,commit))
+         (t nil))))))
 
 (defun pyim-self-insert-command ()
   "Pyim 版本的 self-insert-command."
   (interactive "*")
+  (setq pyim-candidates-last pyim-candidates)
   (cond
    ((pyim-input-chinese-p)
-    (let ((candidates-last pyim-candidates)
-          (entered-last (pyim-entered-get)))
-      (pyim-with-entered-buffer
-        (insert (char-to-string last-command-event)))
-      (pyim-entered-refresh)
-      ;; 自动上屏功能
-      (let ((autoselect-p
-             (mapcar #'(lambda (x)
-                         (when (functionp x)
-                           (ignore-errors
-                             (funcall x))))
-                     pyim-autoselector))
-            str)
-        (cond
-         ;; 假设用户已经输入 "niha", 然后按了 "o" 键，那么，当前
-         ;; entered 就是 "nihao". 如果 autoselector 函数返回一个 list:
-         ;; (:select current), 那么就直接将 "nihao" 对应的第一个候选词
-         ;; 上屏幕。
-         ((cl-find-if (lambda (x)
-                        (equal (plist-get x :select) 'current))
-                      autoselect-p)
-          (unless (equal pyim-candidates (list (pyim-entered-get)))
-            (pyim-outcome-handle 'candidate))
-          (pyim-terminate-translation))
-         ;; 假如用户输入 "nihao", 然后按了 "m" 键, 那么当前的 entered
-         ;; 就是"nihaom", 如果 autoselector 返回 list: (:select last),
-         ;; 那么，“nihao” 对应的第一个候选词将上屏，m键下一轮继续处理。
-         ;; 这是一种 "踩雷确认模式". 如果 autoselector 返回 list:
-         ;; (:select "xxx") , 那么，"xxx" 将上屏，m键下一轮处理。
-         ((cl-find-if (lambda (x)
-                        (or (stringp (setq str (plist-get x :select)))
-                            (equal (plist-get x :select) 'last)))
-                      autoselect-p)
-          (unless (equal candidates-last (list entered-last))
-            (let ((pyim-candidates
-                   (if (and str (stringp str))
-                       (list str)
-                     candidates-last)))
-              (pyim-outcome-handle 'candidate)))
-          (pyim-terminate-translation)
-          ;; BUG: 这条代码和 popup-tip 有冲突，如果用户
-          ;; `pyim-page-tooltip' 设置为 popup, 在自动上屏的时选词框会
-          ;; 有反常行为。
-          (push last-command-event unread-command-events))
-         (t nil)))))
+    (pyim-with-entered-buffer
+      (insert (char-to-string last-command-event)))
+    (pyim-entered-refresh))
    (pyim-candidates
     (pyim-outcome-handle 'candidate-and-last-char)
     (pyim-terminate-translation))
@@ -2186,9 +2157,50 @@ Return the input string.
     (setq pyim-candidates
           (or (delete-dups (pyim-candidates-create pyim-imobjs scheme-name))
               (list pinyin-to-translate)))
-    (setq pyim-candidate-position 1)
-    (pyim-preview-refresh)
-    (pyim-page-refresh)))
+
+    ;; 自动上屏功能
+    (let ((autoselector-results
+           (mapcar #'(lambda (x)
+                       (when (functionp x)
+                         (ignore-errors
+                           (funcall x))))
+                   pyim-autoselector))
+          result)
+      (cond
+       ;; 假如用户输入 "nihao", 然后按了 "m" 键, 那么当前的 entered
+       ;; 就是"nihaom", 如果 autoselector 返回 list: (:select last),
+       ;; 那么，“nihao” 对应的第一个候选词将上屏，m键下一轮继续处理。
+       ;; 这是一种 "踩雷确认模式".
+       ((cl-find-if (lambda (x)
+                      (setq result x)
+                      (equal (plist-get x :select) 'last))
+                    autoselector-results)
+        (let* ((str (plist-get result :replace-with))
+               (pyim-candidates
+                (if (and str (stringp str))
+                    (list str)
+                  pyim-candidates-last)))
+          (pyim-outcome-handle 'candidate))
+        (pyim-terminate-translation)
+        (push last-command-event unread-command-events))
+       ;; 假设用户已经输入 "niha", 然后按了 "o" 键，那么，当前
+       ;; entered 就是 "nihao". 如果 autoselector 函数返回一个 list:
+       ;; (:select current), 那么就直接将 "nihao" 对应的第一个候选词
+       ;; 上屏幕。
+       ((cl-find-if (lambda (x)
+                      (setq result x)
+                      (equal (plist-get x :select) 'current))
+                    autoselector-results)
+        (let* ((str (plist-get result :replace-with))
+               (pyim-candidates
+                (if (and str (stringp str))
+                    (list str)
+                  pyim-candidates)))
+          (pyim-outcome-handle 'candidate))
+        (pyim-terminate-translation))
+       (t (setq pyim-candidate-position 1)
+          (pyim-preview-refresh)
+          (pyim-page-refresh))))))
 
 (defun pyim-entered-refresh (&optional no-delay)
   "延迟 `pyim-exhibit-delay-ms' 显示备选词等待用户选择。"
@@ -2211,6 +2223,7 @@ Return the input string.
   (setq pyim-translating nil)
   (pyim-preview-delete-string)
   (setq pyim-candidates nil)
+  (setq pyim-candidates-last nil)
   (setq pyim-assistant-scheme-enable nil)
   (setq pyim-force-input-chinese nil)
   (when (and (memq pyim-page-tooltip '(posframe child-frame))
