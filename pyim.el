@@ -2623,7 +2623,7 @@ IMOBJS 获得候选词条。"
   "`pyim-candidates-create' 处理 rime 输入法的函数."
   (let ((s (replace-regexp-in-string
             "-" "" (car (pyim-codes-create (car imobjs) scheme-name)))))
-    (if (and nil (functionp 'liberime-search))
+    (if (functionp 'liberime-search)
         (liberime-search s pyim-liberime-search-limit))
     (pyim-liberime-search s pyim-liberime-search-limit)))
 
