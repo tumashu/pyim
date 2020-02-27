@@ -3444,7 +3444,8 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
           (if (= index -1) (setq index 9) nil)
           (if (> (+ index (pyim-page-start)) end)
               (pyim-page-refresh)
-            (setq pyim-candidate-position (+ pyim-candidate-position index))
+            (setq pyim-candidate-position
+                  (+ (pyim-page-start) index))
             (pyim-page-select-word))))
     ;; 有些输入法使用数字键编码，这种情况下，数字键就
     ;; 不能用来选词了。
