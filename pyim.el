@@ -1075,7 +1075,10 @@ pyim 内建的有三种选词框格式：
 3. (:select current :replace-with \"xxx\") 自动上屏当前 entered (nihaom) 的第一个候选词。
 4. nil                                     不自动上屏。
 
-如果 :replace-with 设置为一个字符串，则选择最终会被这个字符串替代。"
+如果 :replace-with 设置为一个字符串，则选择最终会被这个字符串替代。
+
+注意：多个 autoselector 函数运行时，最好不要相互影响，如果相互有
+影响，需要用户自己管理。"
   :group 'pyim)
 
 (defcustom pyim-posframe-min-width (* pyim-page-length 7)
