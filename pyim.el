@@ -2159,7 +2159,6 @@ Return the input string.
     (setq pyim-candidates
           (or (delete-dups (pyim-candidates-create pyim-imobjs scheme-name))
               (list pinyin-to-translate)))
-
     ;; 自动上屏功能
     (let ((autoselector-results
            (mapcar #'(lambda (x)
@@ -2624,8 +2623,8 @@ IMOBJS 获得候选词条。"
   (let ((s (replace-regexp-in-string
             "-" "" (car (pyim-codes-create (car imobjs) scheme-name)))))
     (if (functionp 'liberime-search)
-        (liberime-search s pyim-liberime-search-limit))
-    (pyim-liberime-search s pyim-liberime-search-limit)))
+        (liberime-search s pyim-liberime-search-limit)
+      (pyim-liberime-search s pyim-liberime-search-limit))))
 
 (defun pyim-liberime-search (string &optional limit)
   "Elisp 版本的 `liberime-search', 临时过渡方案，未来会删除。"
