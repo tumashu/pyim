@@ -2152,16 +2152,16 @@ Return the input string.
 (defun pyim-entered-refresh-1 ()
   "查询 `pyim-entered-buffer' 光标前的拼音字符串（如果光标在行首则为光标后的）, 显示备选词等待用户选择。"
   (let* ((scheme-name (pyim-scheme-name))
-         pinyin-to-translate)
-    (pyim-with-entered-buffer
-      (setq pinyin-to-translate
+         entered-to-translate)
+    (setq entered-to-translate
+          (pyim-with-entered-buffer
             (if (equal 1 (point))
                 (buffer-string)
               (buffer-substring-no-properties 1 (point)))))
-    (setq pyim-imobjs (pyim-imobjs-create pinyin-to-translate scheme-name))
+    (setq pyim-imobjs (pyim-imobjs-create entered-to-translate scheme-name))
     (setq pyim-candidates
           (or (delete-dups (pyim-candidates-create pyim-imobjs scheme-name))
-              (list pinyin-to-translate)))
+              (list entered-to-translate)))
     ;; 自动上屏功能
     (let ((autoselector-results
            (mapcar #'(lambda (x)
