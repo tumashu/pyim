@@ -3380,6 +3380,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
          (position (- pyim-candidate-position 1))
          (page-n (/ position page-size))
          (n (% position page-size)))
+    (liberime-process-key 65360) ;回退到第一页
     (dotimes (_ page-n)
       (liberime-process-key 65366)) ;发送翻页
     (liberime-select-candidate n))
