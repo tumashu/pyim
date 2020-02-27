@@ -2619,11 +2619,32 @@ IMOBJS 获得候选词条。"
 
 (defun pyim-candidates-create:rime (imobjs scheme-name)
   "`pyim-candidates-create' 处理 rime 输入法的函数."
-  (when (functionp 'liberime-search)
-    (liberime-clear-composition)
-    (let ((s (replace-regexp-in-string
-              "-" "" (car (pyim-codes-create (car imobjs) scheme-name)))))
-      (liberime-search s pyim-liberime-search-limit))))
+  (let ((s (replace-regexp-in-string
+            "-" "" (car (pyim-codes-create (car imobjs) scheme-name)))))
+    (if (functionp 'liberime-search)
+        (liberime-search s pyim-liberime-search-limit))
+    (pyim-liberime-search s pyim-liberime-search-limit)))
+
+(defun pyim-liberime-search (string &optional limit)
+  "Elisp 版本的 `liberime-search', 临时过渡方案，未来会删除。"
+  (liberime-clear-composition)
+  (dolist (key (string-to-list string))
+    (liberime-process-key key))
+  (let* ((context (liberime-get-context))
+         (menu (alist-get 'menu context))
+         (n (or (alist-get 'page-size menu) 0))
+         output)
+    (while (> n 0)
+      (let* ((context (liberime-get-context))
+             (menu (alist-get 'menu context))
+             (candidates (alist-get 'candidates menu)))
+        (setq output `(,@output ,@candidates))
+        (if (and limit (>= (length output) limit))
+            (setq n 0)
+          (setq n (- n 1)))
+        ;;发送翻页
+        (liberime-process-key 65366)))
+    output))
 
 (defun pyim-candidates-create:quanpin (imobjs scheme-name)
   "`pyim-candidates-create' 处理全拼输入法的函数."
