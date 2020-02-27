@@ -2165,7 +2165,7 @@ Return the input string.
                        (when (functionp x)
                          (ignore-errors
                            (funcall x))))
-                   pyim-autoselector))
+                   (cl-remove-duplicates pyim-autoselector :from-end t)))
           result)
       (cond
        ;; 假如用户输入 "nihao", 然后按了 "m" 键, 那么当前的 entered
