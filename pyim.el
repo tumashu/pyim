@@ -1352,7 +1352,7 @@ dcache 文件的方法让 pyim 正常工作。")
     pyim-candidates
     pyim-candidate-position
     pyim-input-ascii
-    pyim-english-input-switch-functions
+    ;; pyim-english-input-switch-functions
     pyim-punctuation-half-width-functions
     pyim-translating
     pyim-last-created-word
