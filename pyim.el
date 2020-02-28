@@ -2111,9 +2111,14 @@ Return the input string.
   (let* ((scheme-name (pyim-scheme-name))
          (class (pyim-scheme-get-option scheme-name :class))
          (n (pyim-scheme-get-option scheme-name :code-split-length)))
-    (when (and (eq class 'xingma)
-               (= (length (pyim-entered-get)) n))
-      '(:select current))))
+    (when (eq class 'xingma)
+      (cond
+       ((and (= (length (pyim-entered-get)) n)
+             (= (length pyim-candidates) 1))
+        '(:select current))
+       ((> (length (pyim-entered-get)) n)
+        '(:select last))
+       (t nil)))))
 
 (defun pyim-autoselector-rime (&rest args)
   "适用于RIME的自动上屏器."
