@@ -2189,10 +2189,14 @@ Return the input string.
        ;; 就是"nihaom", 如果 autoselector 返回 list: (:select last),
        ;; 那么，“nihao” 对应的第一个候选词将上屏，m键下一轮继续处理。
        ;; 这是一种 "踩雷确认模式".
-       ((cl-find-if (lambda (x)
-                      (setq result x)
-                      (equal (plist-get x :select) 'last))
-                    autoselector-results)
+       ((and
+         ;; autoselector 功能会影响手动连续选择功能，所以这里做了一些限制，
+         ;; 只有在输入的时候才能够触发 autoselector 机制。
+         (eq this-command 'pyim-self-insert-command)
+         (cl-find-if (lambda (x)
+                       (setq result x)
+                       (equal (plist-get x :select) 'last))
+                     autoselector-results))
         (let* ((str (plist-get result :replace-with))
                (pyim-candidates
                 (if (and str (stringp str))
@@ -2205,10 +2209,11 @@ Return the input string.
        ;; entered 就是 "nihao". 如果 autoselector 函数返回一个 list:
        ;; (:select current), 那么就直接将 "nihao" 对应的第一个候选词
        ;; 上屏幕。
-       ((cl-find-if (lambda (x)
-                      (setq result x)
-                      (equal (plist-get x :select) 'current))
-                    autoselector-results)
+       ((and (eq this-command 'pyim-self-insert-command)
+             (cl-find-if (lambda (x)
+                           (setq result x)
+                           (equal (plist-get x :select) 'current))
+                         autoselector-results))
         (let* ((str (plist-get result :replace-with))
                (pyim-candidates
                 (if (and str (stringp str))
