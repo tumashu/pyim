@@ -2205,6 +2205,12 @@ Return the input string.
                     (list str)
                   pyim-candidates-last)))
           (pyim-outcome-handle 'candidate))
+        ;; autoselector 机制已经触发的时候，如果发现 entered buffer 中
+        ;; point 后面还有未处理的输入，就将其转到下一轮处理，这种情况
+        ;; 很少出现，一般是型码输入法，entered 编辑的时候有可能触发。
+        (setq unread-command-events
+              (append (listify-key-sequence (pyim-entered-get 'point-after))
+                      unread-command-events))
         (push last-command-event unread-command-events)
         (pyim-terminate-translation))
        ;; 假设用户已经输入 "niha", 然后按了 "o" 键，那么，当前
@@ -2222,6 +2228,9 @@ Return the input string.
                     (list str)
                   pyim-candidates)))
           (pyim-outcome-handle 'candidate))
+        (setq unread-command-events
+              (append (listify-key-sequence (pyim-entered-get 'point-after))
+                      unread-command-events))
         (pyim-terminate-translation))
        (t (setq pyim-candidate-position 1)
           (pyim-preview-refresh)
