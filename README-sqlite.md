@@ -1,14 +1,22 @@
 
-* 编译安装sqlite3 module
-需要mingw64。
+* 编译emacs-sqlite3 module
+编译时需要mingw64。安装 libsqlite 和 开发包。
 #+begin_src sh
 pacman -S libsqlite libsqlite-devel
 #+end_src
 
+clone https://github.com/syohex/emacs-sqlite3，编译emacs-sqlite3。编译后的动态链接库在windows上需要修改扩展名为dll。
+#+begin_src sh
+git clone https://github.com/syohex/emacs-sqlite3.git
+cd emacs-sqlite3 && make && make test
+cp sqlite3-core.so sqlite3-core.dll
+#+end_src
+
+调用关系：
 pyim -> emacs-sqlite3 -> sqlite3-core.dll(emacs的动态链接库) -> libsqlite3.dll(on windows)
 
 * 设置sqlite3的环境变量
-由于使用了emacs 的module，需要设置环境变量LIB_LIBRARY=/path/to/才能找到sqlite3-core.dll
+由于使用了emacs 的module，需要设置环境变量 LIB_LIBRARY=/path/to/ emacs才能找到sqlite3-core.dll
 
 #+begin_src lisp
 (setq pyim-dcache-backend 'pyim-sqlite)
