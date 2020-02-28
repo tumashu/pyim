@@ -3348,38 +3348,45 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
           ;; 第三次选择：刀，   outcome = 小李飞刀
           (- (length (pyim-outcome-get))
              (length (pyim-outcome-get 1))))
-         ;; pyim-imobjs 包含 *pyim-entered-buffer* 里面光标前面的字符串，
-         ;; 某些情况只有部分被翻译，剩余部分保存在下面这个变量
+         ;; pyim-imobjs 包含 *pyim-entered-buffer* 里面光标前面的字符
+         ;; 串，通过与 selected-word 做比较，获取光标前未转换的字符串。
+         ;; to-be-translated.
          (to-be-translated (mapconcat #'identity
                                       (mapcar
                                        #'(lambda (w)
                                            (concat (nth 2 w) (nth 3 w)))
                                        (nthcdr length-selected-word imobj))
                                       "")))
-    ;; 在使用全拼输入法输入长词的时候，可能需要多次选择，才能够将
-    ;; 这个词条上屏，这个地方用来判断是否是 “最后一次选择”，如果
-    ;; 不是最后一次选择，就需要截断 entered, 准备下一轮的选择。
+    ;; 大体来说，entered 字符串可以分解为三个部分：
 
-    ;; 判断方法：entered 为 xiaolifeidao, 本次选择 “小李” 之后，
-    ;; 需要将 entered 截断，“小李” 这个词条长度为2, 就将 entered
-    ;; 从头开始缩减 2 个 imelem 对应的字符，变成 feidao, 为下一次
-    ;; 选择 “飞” 做准备。
+    ;; 1. 光标前字符串
+    ;;    1. 光标前已经转换的字符串
+    ;;    2. 光标前还没有转换的字符串。
+    ;; 2. 光标后字符串
+
+    ;; 下面对 entered 字符串的大体思路是：截取已经转换的字符串，把未转
+    ;; 换的字符串和光标后的字符串合并后下一轮递归的处理。
+
+    ;; 比如：entered 为 xiaolifeidao, 本次选择 “小李” 之后，需要将
+    ;; entered 截断，“小李” 这个词条长度为2, 就将 entered从头开始缩减
+    ;; 2 个 imelem 对应的字符，变成 feidao, 为下一次选择 “飞” 做准备。
 
     ;; 注意事项： 这里有一个假设前提是： 一个 imelem 对应一个汉字，
     ;; 在全拼输入法中，这个假设大多数情况是成立的，但在型码输入法
     ;; 中，比如五笔输入法，就不成立，好在型码输入法一般不需要多次
     ;; 选择。
-    (if (or (< length-selected-word (length imobj))
-            (> (length (pyim-entered-get 'point-after)) 0))
+    (if (or (< length-selected-word (length imobj)) ;是否有未转换的光标前字符串
+            (> (length (pyim-entered-get 'point-after)) 0)) ;是否有光标后字符串
         (progn
           (pyim-with-entered-buffer
-            ;; 把本次已经选择的词条对应的子 entered, 从 entered
-            ;; 字符串里面剪掉。
+            ;; 把光标前已转换的 entered 字符串, 从 entered字符串里面剪
+            ;; 掉，保留未转换的字符串和光标之后的字符串。
             (delete-region (point-min) (point))
             (insert to-be-translated)
             ;; 为下一次选词作准备，一般情况下词库里面的词条不会超过20
-            ;; 个汉字，所以这里一次递归的处理20个 imelem. 这种方式
-            ;; 可能比逐字选择更加好用。
+            ;; 个汉字，所以这里光标向前移动不超过20个 imelem. 从而让下
+            ;; 一轮处理时的“光标前字符串”比较长，这种方式可能比逐字选
+            ;; 择更加好用。
             (goto-char (pyim-entered-next-imelem-position 20 t 1)))
           (pyim-entered-refresh))
       ;; pyim 词频调整策略：
@@ -3448,8 +3455,8 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
          (to-be-translated
           (replace-regexp-in-string
            "\\cc\\| " "" (or preedit ""))))
-    (if (or (> (length to-be-translated) 0)
-            (> (length (pyim-entered-get 'point-after)) 0))
+    (if (or (> (length to-be-translated) 0) ;是否有光标前未转换的字符串
+            (> (length (pyim-entered-get 'point-after)) 0)) ;是否有光标后字符串
         (progn
           (pyim-with-entered-buffer
             (delete-region (point-min) (point))
