@@ -7,7 +7,7 @@
 
 ;; * 说明文档                                                              :doc:
 ;; 这个文件把系统和用户词典保存在sqlite database中，提供基于sql的辞典搜索算法.
-;; 搜索速度极快?
+;; select 查询sqlite database 的速度比从 hash-table get 差一个数量级。0.00005s 和 0.000003s 的区别。
 ;;
 ;; 可以 (setq pyim-dcache-backend 'pyim-sqlite) 然后重启输入法启用此引擎
 
@@ -128,7 +128,7 @@ pyim_code2word按拼音查询，cchars字段中的词用空格分割."
   )
 
 (defun pyim-sqlite-init-variables ()
-  "初始化 dcache 缓存相关变量. 为什么会调用多次呢？搞笑吗？"
+  "初始化 dcache 缓存相关变量. 会调用多次，如果在这里初始化数据库连接要小心些，被覆盖的话，insert or update 时，会lock database."
   ;; (message "pyim-sqlite-init-variables: %s" (current-time-string))
   ;; (setq pyim-sqlite-systemdb (sqlite3-new "e:\\tmp\\pyim_sogou.db"))
   ;; (setq pyim-sqlite-userdb (sqlite3-new "e:\\tmp\\test.db"))
@@ -150,12 +150,12 @@ pyim_code2word按拼音查询，cchars字段中的词用空格分割."
   )
 
 (defun pyim-sqlite-update-iword2count (word &optional prepend wordcount-handler)
-  "保存词频到缓存. 需要
+  "保存词频到缓存. 需要判断是否有记录，存在的话update，没有就insert.
+测试了一下，不需要手动commit，lock database 是因为多次初始化数据库连接导致。
 update pyim_iword2count set count=count+1 where word='字库';"
   ;; (message "pyim-sqlite-update-iword2count: %s" word)
   (let ((count (pyim-sqlite--get-iword2count pyim-sqlite-userdb word))
         (db pyim-sqlite-userdb))
-    ;; (sqlite3-commit db)
     (if (not (null count))
         (progn ;; (sqlite3-transaction pyim-sqlite-userdb)
           ;; (message "%s: %i" word count)
@@ -166,8 +166,7 @@ update pyim_iword2count set count=count+1 where word='字库';"
           )
       (sqlite3-execute-batch db
                              "insert into pyim_iword2count(word, count) values(?,?)"
-                             (vector word 1))
-      )))
+                             (vector word 1)))))
 
 (defun pyim-sqlite-delete-word (word)
   "将中文词条 WORD 从个人词库中删除"
@@ -197,7 +196,6 @@ update pyim_iword2count set count=count+1 where word='字库';"
 
 (defun pyim-sqlite-export-personal-words (file &optional confirm)
   "导出个人词库到 FILE."
-  ;; (pyim-dhashcache-export pyim-dhashcache-icode2word file confirm)
   )
 
 ;; * Footer
