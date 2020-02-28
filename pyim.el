@@ -2157,6 +2157,8 @@ Return the input string.
   (cond
    ((pyim-input-chinese-p)
     (pyim-with-entered-buffer
+      ;; 一定要注意，point 可能不在 point-min, 或者 point-max. 因为用
+      ;; 户可能通过命令移动了 entered 中的 point。
       (insert (char-to-string last-command-event)))
     (pyim-entered-refresh))
    (pyim-candidates
