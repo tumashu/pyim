@@ -118,12 +118,43 @@ def insert_data(db_path, all_dict):
     conn.close()
 
 
-create_pyim_dict(db_path)
-all_dict = {}
-all_dict = load_single_line_dict("e://tmp//pyim-basedict.pyim", all_dict)
-all_dict = load_single_line_dict("e://tmp//pyim-greatdict.pyim", all_dict)
-all_dict = load_multi_line_dict("e://tmp//sogou.txt", all_dict)
-print("dict length: %i", len(all_dict))
-insert_data(db_path, all_dict)
+def convert_single_line_dict(dict_path, new_dict_path):
+    """将pyim使用的单行格式词库 转换为 rime使用的多行词库格式。
+词库格式:py<SPC>中文<SPC>中文 -> rime格式：中文<tab>pinyin<tab>词频\n
+
+    @params
+        str dict_path: 词库文件路径
+        str new_dict_path: rime词库路径
+    """
+    count = 0
+
+    new_dict_file = open(new_dict_path, 'w', encoding='UTF-8')
+
+    # basedict，拼音无重复，词按空格分割
+    with open(dict_path, 'r', encoding='UTF-8') as py_dict:
+        for line in py_dict:
+            space = line.find(" ")
+            # - 改为 空格
+            py = line[:space].replace("-", " ")
+            # 行末最后的回车要取掉
+            words = line[space+1:-1].split(" ")
+            for word in words:
+                new_dict_file.write(word + "\t" + py + "\t1\n")
+                # all_dict[word] = py
+                count = count + 1
+
+    new_dict_file.close()
+    log.debug("%i word written to %s" % (count, new_dict_path))
+
+
+# create_pyim_dict(db_path)
+# all_dict = {}
+# all_dict = load_single_line_dict("e://tmp//pyim-basedict.pyim", all_dict)
+# all_dict = load_single_line_dict("e://tmp//pyim-greatdict.pyim", all_dict)
+# all_dict = load_multi_line_dict("e://tmp//sogou.txt", all_dict)
+# print("dict length: %i", len(all_dict))
+# insert_data(db_path, all_dict)
+
+convert_single_line_dict("e://tmp//pyim-greatdict.pyim", "e://tmp//luna_pinyin.greatdict.dict.yaml")
 
 # CREATE INDEX idx_py ON PYIM_CODE2WORD_SOGOU (py);
