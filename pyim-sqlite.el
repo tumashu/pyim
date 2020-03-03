@@ -15,7 +15,7 @@
 ;; * 代码                                                                 :code:
 (require 'pyim-common)
 
-(push "e:/workspace/emacs-sqlite3" load-path)
+;; (push "e:/workspace/emacs-sqlite3" load-path)
 (require 'sqlite3)
 
 (defvar pyim-sqlite-systemdb nil
