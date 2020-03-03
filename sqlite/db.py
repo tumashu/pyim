@@ -128,7 +128,23 @@ def convert_single_line_dict(dict_path, new_dict_path):
     """
     count = 0
 
+    dict_header = '''---
+name: luna_pinyin.basedict
+version: "2020.03.01"
+sort: by_weight
+use_preset_vocabulary: true
+# 此处为扩充词库（基本）默认链接载入的词库
+#import_tables:
+#    - luna_pinyin
+#    - luna_pinyin.basedict
+...
+
+# 自定义词语
+
+'''
+
     new_dict_file = open(new_dict_path, 'w', encoding='UTF-8')
+    new_dict_file.write(dict_header)
 
     # basedict，拼音无重复，词按空格分割
     with open(dict_path, 'r', encoding='UTF-8') as py_dict:
@@ -155,6 +171,7 @@ def convert_single_line_dict(dict_path, new_dict_path):
 # print("dict length: %i", len(all_dict))
 # insert_data(db_path, all_dict)
 
-convert_single_line_dict("e://tmp//pyim-greatdict.pyim", "e://tmp//luna_pinyin.greatdict.dict.yaml")
+# convert_single_line_dict("e://tmp//pyim-greatdict.pyim", "e://tmp//luna_pinyin.greatdict.dict.yaml")
+convert_single_line_dict("e://tmp//pyim-basedict.pyim", "e://tmp//luna_pinyin.basedict.dict.yaml")
 
 # CREATE INDEX idx_py ON PYIM_CODE2WORD_SOGOU (py);
