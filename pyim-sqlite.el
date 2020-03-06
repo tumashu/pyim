@@ -28,6 +28,12 @@
 (setq pyim-sqlite-systemdb (sqlite3-new (expand-file-name "pyim/pyim_system.db" user-emacs-directory)))
 (setq pyim-sqlite-userdb (sqlite3-new (expand-file-name "pyim/pyim_user.db" user-emacs-directory)))
 
+(setq get-iword2count-stmt (sqlite3-prepare pyim-sqlite-userdb
+                                            "SELECT count FROM pyim_iword2count where word=?"))
+
+(setq get-icode2word2-stmt (sqlite3-prepare pyim-sqlite-userdb
+                                            "SELECT cchars FROM pyim_icode2word WHERE py=?"))
+
 (defmacro with-timer (title &rest forms)
   "Run the given FORMS, counting the elapsed time.
 A message including the given TITLE and the corresponding elapsed
@@ -41,13 +47,15 @@ time is displayed."
                 (float-time (time-subtract (current-time) ,nowvar))))
            (message "%s... done (%.7fs)" ,title elapsed))))))
 
-(defun pyim-sqlite--get-iword2count(mydb word)
+(defun pyim-sqlite--get-iword2count(db word)
   "从数据库获取word的词频."
 
-  ;; (let ((resultset (with-timer (concat "get-iword2count:" word) (sqlite3-execute mydb
+  ;; (let ((resultset (with-timer (concat "get-iword2count:" word) (sqlite3-execute db
   ;;                                    "SELECT count FROM pyim_iword2count where word=?" (vector word)))))
-  (let ((resultset (sqlite3-execute mydb
-                                    "SELECT count FROM pyim_iword2count where word=?" (vector word))))
+  ;; (let ((resultset (sqlite3-execute db
+  ;;                                   "SELECT count FROM pyim_iword2count where word=?" (vector word))))
+  (let ((resultset (sqlite3-execute-with-stmt db
+                                              get-iword2count-stmt (vector word) nil)))
     (car (sqlite3-resultset-next resultset))
     ))
 
@@ -81,11 +89,13 @@ time is displayed."
           (push (concat prefix (substring code1 0 i)) results)))
       results)))
 
-(defun pyim-sqlite--get-icode2word(mydb code)
+(defun pyim-sqlite--get-icode2word(db code)
   "按拼音从user数据库查询用户保存的词.
 多个词，按空格分割. 为什么查询不到数据返回nil时，sqlite3-resultset-next 会导致程序segfault."
-  (let ((resultset (sqlite3-execute mydb
-                                    "SELECT cchars FROM pyim_icode2word WHERE py=?" (vector code))))
+  ;; (let ((resultset (sqlite3-execute db
+  ;;                                   "SELECT cchars FROM pyim_icode2word WHERE py=?" (vector code))))
+  (let ((resultset (sqlite3-execute-with-stmt db
+                                              get-icode2word2-stmt (vector code) nil)))
     (let ((result (sqlite3-resultset-next resultset)))
       (when result
         (split-string (car result) " ")))))
