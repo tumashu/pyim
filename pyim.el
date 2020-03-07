@@ -2367,7 +2367,13 @@ Return the input string.
                   pyim-default-scheme))
       (setq scheme-name pyim-default-scheme))
     (if (assq scheme-name pyim-schemes)
-        scheme-name
+        (let ((class (pyim-scheme-get-option scheme-name :class)))
+          (if (eq class 'rime)
+              (if (featurep 'liberime-core)
+                  scheme-name
+                (message "Pyim: liberime is not ready, fallback to quanpin scheme.")
+                'quanpin)
+            scheme-name))
       (message "Pyim: invalid scheme, fallback to quanpin scheme.")
       'quanpin)))
 
