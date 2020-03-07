@@ -3411,18 +3411,35 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
   (pyim-outcome-handle 'candidate)
   ;; 将 `pyim-candidate-position' 转换为 rime 内部的页数和词条在已选页
   ;; 面的位置，然后给 rime 发送翻页事件，让 rime 内部做翻页操作并选择
-  ;; 对应的词条，这个操作是为了获取 rime 的 preedit, 从而让 pyim 知道，
-  ;; 输入的字符串，哪些已经转换，那些没有转换。
-  ;;
-  ;; 比如：如果 preedit 为 "你好zhe shi wei shen me",那么我们就知道
-  ;; "zheshiweishenme" 这个字符串是没有转换的字符串，需要截取出来做下
-  ;; 一轮的转换。
+  ;; 对应的词条，这个操作主要是为了获取正确的 preedit 和 commit.
   (liberime-select-candidate-crosspage pyim-candidate-position)
 
-  (let* ((preedit (liberime-get-preedit))
-         (to-be-translated
-          (replace-regexp-in-string
-           "\\cc\\| " "" (or preedit ""))))
+  (let* ((to-be-translated
+          (if (= pyim-candidate-position 1)
+              ""
+            (let* ((entered (pyim-entered-get 'point-before))
+                   (word (string-remove-prefix
+                          (or (pyim-outcome-get 1) "")
+                          (pyim-outcome-get)))
+                   (n (length word))
+                   (i 1)
+                   str1 str2)
+              ;; librime 暂时没有提供 entered 截取接口，比如：输入
+              ;; "nihaoma", 如果选择了“你好”，就需要把 "ma"提取出来。
+
+              ;; 这里使用一个比较笨的方式，以 "nihaoma" 为例：
+              ;; 1. 依次搜索 n, ni, nih ... zui nihaoma
+              ;; 2. 在搜索 nihao 的时候，发现返回列表中包含已经选择的词条“你好”。
+              ;; 3. 同时 nihaom 搜索到的第一个词条长度已经超过“你好”。
+              ;; 4. 于是就将 ma 提取出来返回。
+              (while (not (equal str1 entered))
+                (setq str1 (substring entered 0 i))
+                (setq str2 (substring entered 0 (min (length entered) (+ i 1))))
+                (when (and (> (length (car (liberime-search str2 1))) n)
+                           (member word (liberime-search str1)))
+                  (setq str1 entered))
+                (setq i (+ i 1)))
+              (substring entered (- i 1))))))
     (if (or (> (length to-be-translated) 0) ;是否有光标前未转换的字符串
             (> (length (pyim-entered-get 'point-after)) 0)) ;是否有光标后字符串
         (progn
