@@ -2661,30 +2661,7 @@ IMOBJS 获得候选词条。"
   "`pyim-candidates-create' 处理 rime 输入法的函数."
   (let ((s (replace-regexp-in-string
             "-" "" (car (pyim-codes-create (car imobjs) scheme-name)))))
-    (if (functionp 'liberime-search)
-        (liberime-search s pyim-liberime-search-limit)
-      (pyim-liberime-search s pyim-liberime-search-limit))))
-
-(defun pyim-liberime-search (string &optional limit)
-  "Elisp 版本的 `liberime-search', 临时过渡方案，未来会删除。"
-  (liberime-clear-composition)
-  (dolist (key (string-to-list string))
-    (liberime-process-key key))
-  (let* ((context (liberime-get-context))
-         (menu (alist-get 'menu context))
-         (n (or (alist-get 'page-size menu) 0))
-         output)
-    (while (> n 0)
-      (let* ((context (liberime-get-context))
-             (menu (alist-get 'menu context))
-             (candidates (alist-get 'candidates menu)))
-        (setq output `(,@output ,@candidates))
-        (if (and limit (>= (length output) limit))
-            (setq n 0)
-          (setq n (- n 1)))
-        ;;发送翻页
-        (liberime-process-key 65366)))
-    output))
+    (liberime-search s pyim-liberime-search-limit)))
 
 (defun pyim-candidates-create:quanpin (imobjs scheme-name)
   "`pyim-candidates-create' 处理全拼输入法的函数."
@@ -3110,9 +3087,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
                (or separator " "))))
 
 (defun pyim-page-preview-create:rime (&optional separator)
-  (let* ((context (liberime-get-context))
-         (composition (alist-get 'composition context))
-         (preedit (or (alist-get 'preedit composition)
+  (let* ((preedit (or (liberime-get-preedit)
                       (pyim-entered-get 'point-before))))
     (pyim-with-entered-buffer
       (if (equal 1 (point))
@@ -3442,22 +3417,9 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
   ;; 比如：如果 preedit 为 "你好zhe shi wei shen me",那么我们就知道
   ;; "zheshiweishenme" 这个字符串是没有转换的字符串，需要截取出来做下
   ;; 一轮的转换。
-  (let* ((context (liberime-get-context))
-         (menu (alist-get 'menu context))
-         (page-size (or (alist-get 'page-size menu) 5))
-         (position (- pyim-candidate-position 1))
-         (page-n (/ position page-size))
-         (n (% position page-size)))
-    (liberime-process-key 65360) ;回退到第一页
-    (dotimes (_ page-n)
-      (liberime-process-key 65366)) ;发送翻页
-    (liberime-select-candidate n))
+  (liberime-select-candidate-crosspage pyim-candidate-position)
 
-  (let* ((context (liberime-get-context))
-         (composition (alist-get 'composition context))
-         ;; rime 有 sel-start 和 sel-end, 但不知道该怎么用这两个值，暂
-         ;; 时从 preedit 截取。NEED IMPROVE.
-         (preedit (alist-get 'preedit composition))
+  (let* ((preedit (liberime-get-preedit))
          (to-be-translated
           (replace-regexp-in-string
            "\\cc\\| " "" (or preedit ""))))
