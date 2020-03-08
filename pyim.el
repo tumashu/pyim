@@ -985,7 +985,7 @@ pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。当待输
   '(("en" "eng")
     ("in" "ing")
     ("un" "ong"))
-  "设定糢糊音."
+  "设定模糊音."
   :group 'pyim)
 
 (defface pyim-preview-face '((t (:underline t)))
@@ -1161,11 +1161,11 @@ imobj 在 pyim 里面的概念，类似与编译器里面的语法树，
 1. entered: nihaoma
 2. imobj: ((\"n\" \"i\" \"n\" \"i\") (\"h\" \"ao\" \"h\" \"ao\") (\"m\" \"a\" \"m\" \"a\"))
 
-而 imobjs 是 imobj 组成的一个列表，因为有糢糊音等概念的存在，一个
+而 imobjs 是 imobj 组成的一个列表，因为有模糊音等概念的存在，一个
 entered 需要以多种方式或者多步骤解析，得到多种可能的 imobj, 这些
 imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 
-1. entered: guafeng (设置了糢糊音 en -> eng)
+1. entered: guafeng (设置了模糊音 en -> eng)
 2. imobj-1: ((\"g\" \"ua\" \"g\" \"ua\") (\"f\" \"en\" \"f\" \"eng\"))
 3. imobj-2: ((\"g\" \"ua\" \"g\" \"ua\") (\"f\" \"eng\" \"f\" \"eng\"))
 4. imobjs:  (((\"g\" \"ua\" \"g\" \"ua\") (\"f\" \"en\" \"f\" \"eng\"))
@@ -2436,7 +2436,7 @@ Return the input string.
 韵母2一般用来反向构建 entered 字符串，用于“多次选择生成词条”这个
 功能。
 
-大多数情况，声母1 = 声母2, 韵母1 = 韵母2, 只有在使用糢糊音的时候，
+大多数情况，声母1 = 声母2, 韵母1 = 韵母2, 只有在使用模糊音的时候，
 才可能出现不一致的情况。"
   (when (and entered (string< "" entered))
     (let* ((str-list (remove "" (split-string entered "'")))
