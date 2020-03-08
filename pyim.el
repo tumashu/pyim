@@ -2992,7 +2992,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
         (pyim-outcome-handle 'last-char)
         (pyim-terminate-translation))
     (let ((new (+ pyim-candidate-position (* pyim-page-length arg) 1)))
-      (setq maxpos (length pyim-candidates))
+      (setq maxpos (+ 1 (length pyim-candidates)))
       (setq pyim-candidate-position
             (if (> new 0)
                 (if (> new maxpos) 1 new)
