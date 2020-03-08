@@ -3413,33 +3413,15 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
   ;; 面的位置，然后给 rime 发送翻页事件，让 rime 内部做翻页操作并选择
   ;; 对应的词条，这个操作主要是为了获取正确的 preedit 和 commit.
   (liberime-select-candidate-crosspage pyim-candidate-position)
-
   (let* ((to-be-translated
           (if (= pyim-candidate-position 1)
               ""
             (let* ((entered (pyim-entered-get 'point-before))
                    (word (string-remove-prefix
-                          (or (pyim-outcome-get 1) "")
-                          (pyim-outcome-get)))
-                   (n (length word))
-                   (i 1)
-                   str1 str2)
-              ;; librime 暂时没有提供 entered 截取接口，比如：输入
-              ;; "nihaoma", 如果选择了“你好”，就需要把 "ma"提取出来。
-
-              ;; 这里使用一个比较笨的方式，以 "nihaoma" 为例：
-              ;; 1. 依次搜索 n, ni, nih ... zui nihaoma
-              ;; 2. 在搜索 nihao 的时候，发现返回列表中包含已经选择的词条“你好”。
-              ;; 3. 同时 nihaom 搜索到的第一个词条长度已经超过“你好”。
-              ;; 4. 于是就将 ma 提取出来返回。
-              (while (not (equal str1 entered))
-                (setq str1 (substring entered 0 i))
-                (setq str2 (substring entered 0 (min (length entered) (+ i 1))))
-                (when (and (> (length (car (liberime-search str2 1))) n)
-                           (member word (liberime-search str1)))
-                  (setq str1 entered))
-                (setq i (+ i 1)))
-              (substring entered (- i 1))))))
+                          (or (pyim-outcome-get 1) "") (pyim-outcome-get)))
+                   (code (pyim-liberime-get-code
+                          word entered pyim-candidate-position)))
+              (string-remove-prefix code entered)))))
     (if (or (> (length to-be-translated) 0) ;是否有光标前未转换的字符串
             (> (length (pyim-entered-get 'point-after)) 0)) ;是否有光标后字符串
         (progn
@@ -3454,6 +3436,25 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
       (pyim-terminate-translation)
       ;; pyim 使用这个 hook 来处理联想词。
       (run-hooks 'pyim-page-select-finish-hook))))
+
+(defun pyim-liberime-get-code (word input &optional limit)
+  "Get the code of WORD from the beginning of INPUT.
+`liberime-search' with LIMIT argument is used internal."
+  (let* ((n (length word))
+         (i (min (length input) (* n 5)))
+         words str result)
+    (while (> i 0)
+      (setq str (substring input 0 i))
+      (setq words (liberime-search str limit))
+      (if (and (= (length (car words)) n)
+               (member word words))
+          (setq i 0)
+        (setq i (- i 1))
+        (when (= i 0)
+          (setq str ""))))
+    str))
+
+;; (pyim-liberime-get-code "你好" "nihaoma")
 
 (defun pyim-page-select-word-by-number (&optional n)
   "使用数字编号来选择对应的词条。"
