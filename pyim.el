@@ -2270,7 +2270,8 @@ Return the input string.
 (defun pyim-terminate-translation:rime ()
   ;; NEED IMPROVE: 清除 liberime commit, 也许有更好的方式。
   (liberime-get-commit)
-  (liberime-clear-composition))
+  (liberime-clear-composition)
+  (setq pyim-liberime-code-cache nil))
 
 ;; 分解拼音的相关函数
 (defun pyim-pinyin-get-shenmu (pinyin)
@@ -2659,9 +2660,14 @@ IMOBJS 获得候选词条。"
 
 (defun pyim-candidates-create:rime (imobjs scheme-name)
   "`pyim-candidates-create' 处理 rime 输入法的函数."
-  (let ((s (replace-regexp-in-string
-            "-" "" (car (pyim-codes-create (car imobjs) scheme-name)))))
-    (liberime-search s pyim-liberime-search-limit)))
+  (let* ((s (replace-regexp-in-string
+             "-" "" (car (pyim-codes-create (car imobjs) scheme-name))))
+         (words (liberime-search s pyim-liberime-search-limit)))
+    ;; 这个缓存用于加快 rime 多次选择上屏的速度。见
+    ;; `pyim-liberime-get-code', 也许这是过早的优化。。。。
+    ;; 未来也许应该重新考虑。
+    (push (cons s words) pyim-liberime-code-cache)
+    words))
 
 (defun pyim-candidates-create:quanpin (imobjs scheme-name)
   "`pyim-candidates-create' 处理全拼输入法的函数."
@@ -3437,6 +3443,9 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
       ;; pyim 使用这个 hook 来处理联想词。
       (run-hooks 'pyim-page-select-finish-hook))))
 
+(defvar pyim-liberime-code-cache nil
+  "Cache used by `pyim-liberime-get-code'.")
+
 (defun pyim-liberime-get-code (word input &optional limit)
   "Get the code of WORD from the beginning of INPUT.
 `liberime-search' with LIMIT argument is used internal."
@@ -3445,7 +3454,9 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
          words str result)
     (while (> i 0)
       (setq str (substring input 0 i))
-      (setq words (liberime-search str limit))
+      (setq words
+            (or (cdr (assoc str pyim-liberime-code-cache))
+                (liberime-search str limit)))
       (if (and (= (length (car words)) n)
                (member word words))
           (setq i 0)
