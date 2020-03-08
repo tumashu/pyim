@@ -1114,6 +1114,8 @@ Only useful when use posframe."
 
 ;;;###autoload
 (defvar pyim-title "灵通" "Pyim 在 mode-line 中显示的名称.")
+(defvar pyim-title-ascii "-英文" "Pyim 英文模式下在 mode-line 显示的后缀")
+(defvar pyim-title-AU "-AU英" "Pyim 自动切换到英文模式下在 mode-line 显示的后缀")
 (defvar pyim-extra-dicts nil "与 `pyim-dicts' 类似, 用于和 elpa 格式的词库包集成。.")
 
 (defvar pyim-pinyin-shenmu
@@ -2097,8 +2099,8 @@ Return the input string.
          (setq current-input-method-title
                (concat pyim-title
                        (if pyim-input-ascii
-                           "-英文"
-                         "-AU英"))))))
+                           pyim-title-ascii
+                         pyim-title-AU))))))
 
 (defun pyim-input-chinese-p ()
   "确定 pyim 是否需要启动中文输入模式."
