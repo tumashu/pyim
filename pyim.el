@@ -2268,8 +2268,7 @@ Return the input string.
     (pyim-terminate-translation:rime)))
 
 (defun pyim-terminate-translation:rime ()
-  ;; NEED IMPROVE: 清除 liberime commit, 也许有更好的方式。
-  (liberime-get-commit)
+  (liberime-clear-commit)
   (liberime-clear-composition)
   (setq pyim-liberime-code-cache nil))
 
