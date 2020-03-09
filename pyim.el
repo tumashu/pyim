@@ -1377,10 +1377,22 @@ dcache 文件的方法让 pyim 正常工作。")
   `(with-current-buffer (get-buffer-create pyim-entered-buffer)
      ,@forms))
 
-(defun pyim-entered-get ()
-  "从 `pyim-entered-buffer' 中获取拼音字符串"
+(defun pyim-entered-get (&optional type)
+  "从 `pyim-entered-buffer' 中获取拼音字符串.
+
+默认返回 entered buffer 中的全部字符串。如果 TYPE 取值为
+point-before, 返回 entered buffer 中 point 之前的字符串，如果
+TYPE 取值为 point-after, 返回 entered buffer 中 point 之后的字符
+串。"
   (pyim-with-entered-buffer
-    (buffer-string)))
+    (cond
+     ((equal 1 (point))
+      (buffer-string))
+     ((eq type 'point-before)
+      (buffer-substring-no-properties 1 (point)))
+     ((eq type 'point-after)
+      (buffer-substring-no-properties (point) (point-max)))
+     (t (buffer-string)))))
 
 (defun pyim-entered-erase-buffer ()
   "清除 `pyim-entered-buffer' 的内容"
@@ -1483,10 +1495,10 @@ dcache 文件的方法让 pyim 正常工作。")
                    (gethash pinyin pyim-pinyin2cchar-cache2)
                  (gethash pinyin pyim-pinyin2cchar-cache1))
              (gethash pinyin pyim-pinyin2cchar-cache3))))
-         (delete "" output)
+      (delete "" output)
       (if include-seperator
           output
-          (delete "|" output)))))
+        (delete "|" output)))))
 
 (defun pyim-cchar2pinyin-get (char-or-str)
   "获取字符或者字符串 CHAR-OR-STR 对应的拼音 code.
@@ -2096,7 +2108,7 @@ Return the input string.
     (and (or pyim-force-input-chinese
              (and (not pyim-input-ascii)
                   (not (pyim-auto-switch-english-input-p))))
-         (if (not (string< "" (pyim-entered-get)))
+         (if (not (string< "" (pyim-entered-get 'point-before)))
              (member last-command-event
                      (mapcar 'identity first-chars))
            (member last-command-event
@@ -2111,9 +2123,14 @@ Return the input string.
   (let* ((scheme-name (pyim-scheme-name))
          (class (pyim-scheme-get-option scheme-name :class))
          (n (pyim-scheme-get-option scheme-name :code-split-length)))
-    (when (and (eq class 'xingma)
-               (= (length (pyim-entered-get)) n))
-      '(:select current))))
+    (when (eq class 'xingma)
+      (cond
+       ((and (= (length (pyim-entered-get 'point-before)) n)
+             (= (length pyim-candidates) 1))
+        '(:select current))
+       ((> (length (pyim-entered-get 'point-before)) n)
+        '(:select last))
+       (t nil)))))
 
 (defun pyim-autoselector-rime (&rest args)
   "适用于RIME的自动上屏器."
@@ -2140,6 +2157,8 @@ Return the input string.
   (cond
    ((pyim-input-chinese-p)
     (pyim-with-entered-buffer
+      ;; 一定要注意，point 可能不在 point-min, 或者 point-max. 因为用
+      ;; 户可能通过命令移动了 entered 中的 point。
       (insert (char-to-string last-command-event)))
     (pyim-entered-refresh))
    (pyim-candidates
@@ -2152,16 +2171,13 @@ Return the input string.
 (defun pyim-entered-refresh-1 ()
   "查询 `pyim-entered-buffer' 光标前的拼音字符串（如果光标在行首则为光标后的）, 显示备选词等待用户选择。"
   (let* ((scheme-name (pyim-scheme-name))
-         pinyin-to-translate)
-    (pyim-with-entered-buffer
-      (setq pinyin-to-translate
-            (if (equal 1 (point))
-                (buffer-string)
-              (buffer-substring-no-properties 1 (point)))))
-    (setq pyim-imobjs (pyim-imobjs-create pinyin-to-translate scheme-name))
+         entered-to-translate)
+    (setq entered-to-translate
+          (pyim-entered-get 'point-before))
+    (setq pyim-imobjs (pyim-imobjs-create entered-to-translate scheme-name))
     (setq pyim-candidates
           (or (delete-dups (pyim-candidates-create pyim-imobjs scheme-name))
-              (list pinyin-to-translate)))
+              (list entered-to-translate)))
     ;; 自动上屏功能
     (let ((autoselector-results
            (mapcar #'(lambda (x)
@@ -2175,32 +2191,46 @@ Return the input string.
        ;; 就是"nihaom", 如果 autoselector 返回 list: (:select last),
        ;; 那么，“nihao” 对应的第一个候选词将上屏，m键下一轮继续处理。
        ;; 这是一种 "踩雷确认模式".
-       ((cl-find-if (lambda (x)
-                      (setq result x)
-                      (equal (plist-get x :select) 'last))
-                    autoselector-results)
+       ((and
+         ;; autoselector 功能会影响手动连续选择功能，所以这里做了一些限制，
+         ;; 只有在输入的时候才能够触发 autoselector 机制。
+         (eq this-command 'pyim-self-insert-command)
+         (cl-find-if (lambda (x)
+                       (setq result x)
+                       (equal (plist-get x :select) 'last))
+                     autoselector-results))
         (let* ((str (plist-get result :replace-with))
                (pyim-candidates
                 (if (and str (stringp str))
                     (list str)
                   pyim-candidates-last)))
           (pyim-outcome-handle 'candidate))
-        (pyim-terminate-translation)
-        (push last-command-event unread-command-events))
+        ;; autoselector 机制已经触发的时候，如果发现 entered buffer 中
+        ;; point 后面还有未处理的输入，就将其转到下一轮处理，这种情况
+        ;; 很少出现，一般是型码输入法，entered 编辑的时候有可能触发。
+        (setq unread-command-events
+              (append (listify-key-sequence (pyim-entered-get 'point-after))
+                      unread-command-events))
+        (push last-command-event unread-command-events)
+        (pyim-terminate-translation))
        ;; 假设用户已经输入 "niha", 然后按了 "o" 键，那么，当前
        ;; entered 就是 "nihao". 如果 autoselector 函数返回一个 list:
        ;; (:select current), 那么就直接将 "nihao" 对应的第一个候选词
        ;; 上屏幕。
-       ((cl-find-if (lambda (x)
-                      (setq result x)
-                      (equal (plist-get x :select) 'current))
-                    autoselector-results)
+       ((and (eq this-command 'pyim-self-insert-command)
+             (cl-find-if (lambda (x)
+                           (setq result x)
+                           (equal (plist-get x :select) 'current))
+                         autoselector-results))
         (let* ((str (plist-get result :replace-with))
                (pyim-candidates
                 (if (and str (stringp str))
                     (list str)
                   pyim-candidates)))
           (pyim-outcome-handle 'candidate))
+        (setq unread-command-events
+              (append (listify-key-sequence (pyim-entered-get 'point-after))
+                      unread-command-events))
         (pyim-terminate-translation))
        (t (setq pyim-candidate-position 1)
           (pyim-preview-refresh)
@@ -2208,7 +2238,7 @@ Return the input string.
 
 (defun pyim-entered-refresh (&optional no-delay)
   "延迟 `pyim-exhibit-delay-ms' 显示备选词等待用户选择。"
-  (if (= (length (pyim-entered-get)) 0)
+  (if (= (length (pyim-entered-get 'point-before)) 0)
       (pyim-terminate-translation)
     (when pyim--exhibit-timer
       (cancel-timer pyim--exhibit-timer))
@@ -2238,9 +2268,9 @@ Return the input string.
     (pyim-terminate-translation:rime)))
 
 (defun pyim-terminate-translation:rime ()
-  ;; NEED IMPROVE: 清除 liberime commit, 也许有更好的方式。
-  (liberime-get-commit)
-  (liberime-clear-composition))
+  (liberime-clear-commit)
+  (liberime-clear-composition)
+  (setq pyim-liberime-code-cache nil))
 
 ;; 分解拼音的相关函数
 (defun pyim-pinyin-get-shenmu (pinyin)
@@ -2337,7 +2367,13 @@ Return the input string.
                   pyim-default-scheme))
       (setq scheme-name pyim-default-scheme))
     (if (assq scheme-name pyim-schemes)
-        scheme-name
+        (let ((class (pyim-scheme-get-option scheme-name :class)))
+          (if (eq class 'rime)
+              (if (featurep 'liberime-core)
+                  scheme-name
+                (message "Pyim: liberime is not ready, fallback to quanpin scheme.")
+                'quanpin)
+            scheme-name))
       (message "Pyim: invalid scheme, fallback to quanpin scheme.")
       'quanpin)))
 
@@ -2347,7 +2383,7 @@ Return the input string.
 这个功能一般用于五笔等形码输入法，在忘记编码的时候临时用拼音输入
 中文。"
   (interactive)
-  (if (= (length (pyim-entered-get)) 0)
+  (if (= (length (pyim-entered-get 'point-before)) 0)
       (progn
         (pyim-outcome-handle 'last-char)
         (pyim-terminate-translation))
@@ -2623,32 +2659,14 @@ IMOBJS 获得候选词条。"
 
 (defun pyim-candidates-create:rime (imobjs scheme-name)
   "`pyim-candidates-create' 处理 rime 输入法的函数."
-  (let ((s (replace-regexp-in-string
-            "-" "" (car (pyim-codes-create (car imobjs) scheme-name)))))
-    (if (functionp 'liberime-search)
-        (liberime-search s pyim-liberime-search-limit)
-      (pyim-liberime-search s pyim-liberime-search-limit))))
-
-(defun pyim-liberime-search (string &optional limit)
-  "Elisp 版本的 `liberime-search', 临时过渡方案，未来会删除。"
-  (liberime-clear-composition)
-  (dolist (key (string-to-list string))
-    (liberime-process-key key))
-  (let* ((context (liberime-get-context))
-         (menu (alist-get 'menu context))
-         (n (or (alist-get 'page-size menu) 0))
-         output)
-    (while (> n 0)
-      (let* ((context (liberime-get-context))
-             (menu (alist-get 'menu context))
-             (candidates (alist-get 'candidates menu)))
-        (setq output `(,@output ,@candidates))
-        (if (and limit (>= (length output) limit))
-            (setq n 0)
-          (setq n (- n 1)))
-        ;;发送翻页
-        (liberime-process-key 65366)))
-    output))
+  (let* ((s (replace-regexp-in-string
+             "-" "" (car (pyim-codes-create (car imobjs) scheme-name))))
+         (words (liberime-search s pyim-liberime-search-limit)))
+    ;; 这个缓存用于加快 rime 多次选择上屏的速度。见
+    ;; `pyim-liberime-get-code', 也许这是过早的优化。。。。
+    ;; 未来也许应该重新考虑。
+    (push (cons s words) pyim-liberime-code-cache)
+    words))
 
 (defun pyim-candidates-create:quanpin (imobjs scheme-name)
   "`pyim-candidates-create' 处理全拼输入法的函数."
@@ -2842,7 +2860,7 @@ pyim 会使用 emacs overlay 机制在 *待输入buffer* 光标处高亮显示�
 
 细节信息请参考 `pyim-page-refresh' 的 docstring."
   (let ((pos (min (length pyim-candidates) pyim-candidate-position)))
-       (1+ (* (/ (1- pos) pyim-page-length) pyim-page-length))))
+    (1+ (* (/ (1- pos) pyim-page-length) pyim-page-length))))
 
 (defun pyim-page-end (&optional finish)
   "计算当前所在页的最后一个词条的位置，
@@ -2974,16 +2992,16 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
    词条的位置。
 3. 最后调用 `pyim-page-refresh' 来重新刷新页面。"
   (interactive "p")
-  (if (= (length (pyim-entered-get)) 0)
+  (if (= (length (pyim-entered-get 'point-before)) 0)
       (progn
         (pyim-outcome-handle 'last-char)
         (pyim-terminate-translation))
     (let ((new (+ pyim-candidate-position (* pyim-page-length arg) 1)))
-      (setq maxpos (length pyim-candidates))
+      (setq maxpos (+ 1 (length pyim-candidates)))
       (setq pyim-candidate-position
             (if (> new 0)
                 (if (> new maxpos) 1 new)
-                maxpos)
+              maxpos)
             pyim-candidate-position (pyim-page-start))
       (pyim-preview-refresh)
       (pyim-page-refresh))))
@@ -2994,16 +3012,16 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
 
 (defun pyim-page-next-word (arg)
   (interactive "p")
-  (if (= (length (pyim-entered-get)) 0)
+  (if (= (length (pyim-entered-get 'point-before)) 0)
       (progn
         (pyim-outcome-handle 'last-char)
         (pyim-terminate-translation))
     (let ((new (+ pyim-candidate-position arg)))
       (setq len (length pyim-candidates))
       (setq pyim-candidate-position
-        (if (>= len new)
-            (if (> new 0) new len)
-            1))
+            (if (>= len new)
+                (if (> new 0) new len)
+              1))
       (pyim-preview-refresh)
       (pyim-page-refresh t))))
 
@@ -3074,10 +3092,8 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
                (or separator " "))))
 
 (defun pyim-page-preview-create:rime (&optional separator)
-  (let* ((context (liberime-get-context))
-         (composition (alist-get 'composition context))
-         (preedit (or (alist-get 'preedit composition)
-                      (pyim-entered-get))))
+  (let* ((preedit (or (liberime-get-preedit)
+                      (pyim-entered-get 'point-before))))
     (pyim-with-entered-buffer
       (if (equal 1 (point))
           (concat "|" preedit)
@@ -3276,7 +3292,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
                     (pyim-translate last-command-event))
             pyim-outcome-history)))
         ((eq type 'pyim-entered)
-         (push (pyim-entered-get) pyim-outcome-history))
+         (push (pyim-entered-get 'point-before) pyim-outcome-history))
         (t (error "Pyim: invalid outcome"))))
 
 (defun pyim-page-select-word-simple ()
@@ -3318,38 +3334,45 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
           ;; 第三次选择：刀，   outcome = 小李飞刀
           (- (length (pyim-outcome-get))
              (length (pyim-outcome-get 1))))
-         ;; pyim-imobjs 包含 *pyim-entered-buffer* 里面光标前面的字符串，
-         ;; 某些情况只有部分被翻译，剩余部分保存在下面这个变量
+         ;; pyim-imobjs 包含 *pyim-entered-buffer* 里面光标前面的字符
+         ;; 串，通过与 selected-word 做比较，获取光标前未转换的字符串。
+         ;; to-be-translated.
          (to-be-translated (mapconcat #'identity
                                       (mapcar
                                        #'(lambda (w)
                                            (concat (nth 2 w) (nth 3 w)))
                                        (nthcdr length-selected-word imobj))
                                       "")))
-    ;; 在使用全拼输入法输入长词的时候，可能需要多次选择，才能够将
-    ;; 这个词条上屏，这个地方用来判断是否是 “最后一次选择”，如果
-    ;; 不是最后一次选择，就需要截断 entered, 准备下一轮的选择。
+    ;; 大体来说，entered 字符串可以分解为三个部分：
 
-    ;; 判断方法：entered 为 xiaolifeidao, 本次选择 “小李” 之后，
-    ;; 需要将 entered 截断，“小李” 这个词条长度为2, 就将 entered
-    ;; 从头开始缩减 2 个 imelem 对应的字符，变成 feidao, 为下一次
-    ;; 选择 “飞” 做准备。
+    ;; 1. 光标前字符串
+    ;;    1. 光标前已经转换的字符串
+    ;;    2. 光标前还没有转换的字符串。
+    ;; 2. 光标后字符串
+
+    ;; 下面对 entered 字符串的大体思路是：截取已经转换的字符串，把未转
+    ;; 换的字符串和光标后的字符串合并后下一轮递归的处理。
+
+    ;; 比如：entered 为 xiaolifeidao, 本次选择 “小李” 之后，需要将
+    ;; entered 截断，“小李” 这个词条长度为2, 就将 entered从头开始缩减
+    ;; 2 个 imelem 对应的字符，变成 feidao, 为下一次选择 “飞” 做准备。
 
     ;; 注意事项： 这里有一个假设前提是： 一个 imelem 对应一个汉字，
     ;; 在全拼输入法中，这个假设大多数情况是成立的，但在型码输入法
     ;; 中，比如五笔输入法，就不成立，好在型码输入法一般不需要多次
     ;; 选择。
-    (if (or (< length-selected-word (length imobj))
-            (pyim-with-entered-buffer (< (point) (point-max))))
+    (if (or (< length-selected-word (length imobj)) ;是否有未转换的光标前字符串
+            (> (length (pyim-entered-get 'point-after)) 0)) ;是否有光标后字符串
         (progn
           (pyim-with-entered-buffer
-            ;; 把本次已经选择的词条对应的子 entered, 从 entered
-            ;; 字符串里面剪掉。
+            ;; 把光标前已转换的 entered 字符串, 从 entered字符串里面剪
+            ;; 掉，保留未转换的字符串和光标之后的字符串。
             (delete-region (point-min) (point))
             (insert to-be-translated)
             ;; 为下一次选词作准备，一般情况下词库里面的词条不会超过20
-            ;; 个汉字，所以这里一次递归的处理20个 imelem. 这种方式
-            ;; 可能比逐字选择更加好用。
+            ;; 个汉字，所以这里光标向前移动不超过20个 imelem. 从而让下
+            ;; 一轮处理时的“光标前字符串”比较长，这种方式可能比逐字选
+            ;; 择更加好用。
             (goto-char (pyim-entered-next-imelem-position 20 t 1)))
           (pyim-entered-refresh))
       ;; pyim 词频调整策略：
@@ -3393,33 +3416,19 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
   (pyim-outcome-handle 'candidate)
   ;; 将 `pyim-candidate-position' 转换为 rime 内部的页数和词条在已选页
   ;; 面的位置，然后给 rime 发送翻页事件，让 rime 内部做翻页操作并选择
-  ;; 对应的词条，这个操作是为了获取 rime 的 preedit, 从而让 pyim 知道，
-  ;; 输入的字符串，哪些已经转换，那些没有转换。
-  ;;
-  ;; 比如：如果 preedit 为 "你好zhe shi wei shen me",那么我们就知道
-  ;; "zheshiweishenme" 这个字符串是没有转换的字符串，需要截取出来做下
-  ;; 一轮的转换。
-  (let* ((context (liberime-get-context))
-         (menu (alist-get 'menu context))
-         (page-size (or (alist-get 'page-size menu) 5))
-         (position (- pyim-candidate-position 1))
-         (page-n (/ position page-size))
-         (n (% position page-size)))
-    (liberime-process-key 65360) ;回退到第一页
-    (dotimes (_ page-n)
-      (liberime-process-key 65366)) ;发送翻页
-    (liberime-select-candidate n))
-
-  (let* ((context (liberime-get-context))
-         (composition (alist-get 'composition context))
-         ;; rime 有 sel-start 和 sel-end, 但不知道该怎么用这两个值，暂
-         ;; 时从 preedit 截取。NEED IMPROVE.
-         (preedit (alist-get 'preedit composition))
-         (to-be-translated
-          (replace-regexp-in-string
-           "\\cc\\| " "" (or preedit ""))))
-    (if (or (> (length to-be-translated) 0)
-            (pyim-with-entered-buffer (< (point) (point-max))))
+  ;; 对应的词条，这个操作主要是为了获取正确的 preedit 和 commit.
+  (liberime-select-candidate-crosspage pyim-candidate-position)
+  (let* ((to-be-translated
+          (if (= pyim-candidate-position 1)
+              ""
+            (let* ((entered (pyim-entered-get 'point-before))
+                   (word (string-remove-prefix
+                          (or (pyim-outcome-get 1) "") (pyim-outcome-get)))
+                   (code (pyim-liberime-get-code
+                          word entered pyim-candidate-position)))
+              (string-remove-prefix code entered)))))
+    (if (or (> (length to-be-translated) 0) ;是否有光标前未转换的字符串
+            (> (length (pyim-entered-get 'point-after)) 0)) ;是否有光标后字符串
         (progn
           (pyim-with-entered-buffer
             (delete-region (point-min) (point))
@@ -3432,6 +3441,30 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
       (pyim-terminate-translation)
       ;; pyim 使用这个 hook 来处理联想词。
       (run-hooks 'pyim-page-select-finish-hook))))
+
+(defvar pyim-liberime-code-cache nil
+  "Cache used by `pyim-liberime-get-code'.")
+
+(defun pyim-liberime-get-code (word input &optional limit)
+  "Get the code of WORD from the beginning of INPUT.
+`liberime-search' with LIMIT argument is used internal."
+  (let* ((n (length word))
+         (i (min (length input) (* n 5)))
+         words str result)
+    (while (> i 0)
+      (setq str (substring input 0 i))
+      (setq words
+            (or (cdr (assoc str pyim-liberime-code-cache))
+                (liberime-search str limit)))
+      (if (and (= (length (car words)) n)
+               (member word words))
+          (setq i 0)
+        (setq i (- i 1))
+        (when (= i 0)
+          (setq str ""))))
+    str))
+
+;; (pyim-liberime-get-code "你好" "nihaoma")
 
 (defun pyim-page-select-word-by-number (&optional n)
   "使用数字编号来选择对应的词条。"
@@ -3787,7 +3820,7 @@ PUNCT-LIST 格式类似：
   (pyim-with-entered-buffer
     (ignore-errors
       (delete-char (- 0 (or n 1)))))
-  (if (> (length (pyim-entered-get)) 0)
+  (if (> (length (pyim-entered-get 'point-before)) 0)
       (pyim-entered-refresh t)
     (pyim-outcome-handle "")
     (pyim-terminate-translation)))
