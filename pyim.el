@@ -1113,9 +1113,7 @@ Only useful when use posframe."
 在六年历史的笔记本上会有一秒的延迟. 这时建议换用 `pyim-dhashcache'.")
 
 ;;;###autoload
-(defvar pyim-title "灵通" "Pyim 在 mode-line 中显示的名称.")
-(defvar pyim-title-ascii "-英文" "Pyim 英文模式下在 mode-line 显示的后缀")
-(defvar pyim-title-AU "-AU英" "Pyim 自动切换到英文模式下在 mode-line 显示的后缀")
+(defvar pyim-titles '("PYIM " "PYIM-EN " "PYIM-AU ") "Pyim 在 mode-line 中显示的名称.")
 (defvar pyim-extra-dicts nil "与 `pyim-dicts' 类似, 用于和 elpa 格式的词库包集成。.")
 
 (defvar pyim-pinyin-shenmu
@@ -1539,7 +1537,7 @@ If FORCE is non-nil, FORCE build."
 
 ;; ** 注册 Pyim 输入法
 ;;;###autoload
-(register-input-method "pyim" "euc-cn" 'pyim-start pyim-title)
+(register-input-method "pyim" "euc-cn" 'pyim-start (nth 0 pyim-titles))
 
 ;;;###autoload
 (defun pyim-start (name &optional active-func restart save-personal-dcache refresh-common-dcache)
@@ -2097,10 +2095,9 @@ Return the input string.
                         ((listp func-or-list) func-or-list)
                         (t nil)))
          (setq current-input-method-title
-               (concat pyim-title
-                       (if pyim-input-ascii
-                           pyim-title-ascii
-                         pyim-title-AU))))))
+               (if pyim-input-ascii
+                   (nth 1 pyim-titles)
+                 (nth 2 pyim-titles))))))
 
 (defun pyim-input-chinese-p ()
   "确定 pyim 是否需要启动中文输入模式."
@@ -2115,7 +2112,7 @@ Return the input string.
                      (mapcar 'identity first-chars))
            (member last-command-event
                    (mapcar 'identity rest-chars)))
-         (setq current-input-method-title pyim-title))))
+         (setq current-input-method-title (nth 0 pyim-titles)))))
 
 (defun pyim-autoselector-xingma (&rest args)
   "适用于型码输入法的自动上屏器.
