@@ -3446,8 +3446,12 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
             (insert to-be-translated)
             (goto-char (point-max)))
           (pyim-entered-refresh))
-      (pyim-create-word (pyim-outcome-get))
-      (pyim-create-word (pyim-outcome-get) nil nil pyim-liberime-multi-select-entered)
+      (if (member (pyim-outcome-get) pyim-candidates)
+          (progn
+            (pyim-create-word (pyim-outcome-get) t)
+            (pyim-create-word (pyim-outcome-get) t nil pyim-liberime-multi-select-entered))
+        (pyim-create-word (pyim-outcome-get))
+        (pyim-create-word (pyim-outcome-get) nil nil pyim-liberime-multi-select-entered))
       (setq pyim-liberime-multi-select-entered nil)
       (pyim-terminate-translation)
       ;; pyim 使用这个 hook 来处理联想词。
