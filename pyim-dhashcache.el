@@ -95,15 +95,17 @@
                 (make-hash-table :test #'equal))
           (maphash
            #'(lambda (key value)
-               (let ((newkey (mapconcat
-                              #'(lambda (x)
-                                  (substring x 0 1))
-                              (split-string key "-") "-")))
-                 (puthash newkey
-                          (delete-dups
-                           `(,@value
-                             ,@(gethash newkey pyim-dhashcache-ishortcode2word)))
-                          pyim-dhashcache-ishortcode2word)))
+               (when (and (> (length key) 0)
+                          (not (string-match-p "[^a-z-]" key)))
+                 (let* ((newkey (mapconcat
+                                 #'(lambda (x)
+                                     (substring x 0 1))
+                                 (split-string key "-") "-")))
+                   (puthash newkey
+                            (delete-dups
+                             `(,@value
+                               ,@(gethash newkey pyim-dhashcache-ishortcode2word)))
+                            pyim-dhashcache-ishortcode2word))))
            pyim-dhashcache-icode2word)
           (maphash
            #'(lambda (key value)

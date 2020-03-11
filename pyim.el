@@ -657,6 +657,7 @@ plist 来表示，比如：
 这个 scheme 适用于 librime 支持的所有输入法，通用性较好，但无法支
 持 trigger-chars, 所以类似 pyim 全拼支持的v快捷键将无法使用。"
      :class rime
+     :code-prefix "&"
      :first-chars "abcdefghijklmnopqrstuvwxyz"
      :rest-chars "abcdefghijklmnopqrstuvwxyz'-a"
      :prefer-trigger-chars nil)
@@ -667,12 +668,14 @@ plist 来表示，比如：
 这个 scheme 专门用于 librime 全拼输入法，同时支持 trigger-chars,
 也就是v快捷键，使用 rime 全拼的朋友建议使用这个 scheme。"
      :class rime
+     :code-prefix "&"
      :first-chars "abcdefghjklmnopqrstwxyz"
      :rest-chars "vmpfwckzyjqdltxuognbhsrei'-a"
      :prefer-trigger-chars "v")
     (rime-microsoft-shuangpin
      :document "rime 微软双拼输入法。"
      :class rime
+     :code-prefix "&"
      :first-chars "abcdefghijklmnopqrstuvwxyz"
      :rest-chars "abcdefghijklmnopqrstuvwxyz;"
      :prefer-trigger-chars nil)
@@ -1763,7 +1766,7 @@ code 对应的中文词条了."
 (defun pyim-insert-word-into-icode2word (word pinyin prepend)
   (pyim-dcache-call-api 'insert-word-into-icode2word word pinyin prepend))
 
-(defun pyim-create-word (word &optional prepend wordcount-handler)
+(defun pyim-create-word (word &optional prepend wordcount-handler code)
   "将中文词条 WORD 添加编码后，保存到用户选择过的词生成的缓存中。
 
 词条 WORD 默认会追加到已有词条的后面，如果 PREPEND 设置为 t,
@@ -1777,8 +1780,7 @@ WORDCOUNT-HANDLER 也可以是一个函数，其返回值将设置为 WORD 的�
 而这个函数的参数则表示 WORD 当前词频，这个功能用于：`pyim-import',
 如果 WORDCOUNT-HANDLER 设置为其他, 则表示让 WORD 当前词频加1.
 
-BUG：拼音无法有效地处理多音字。
-"
+BUG：拼音无法有效地处理多音字。"
   (when (and (> (length word) 0)
              (< (length word) 11) ;十个汉字以上的词条，加到个人词库里面用处不大，忽略。
              (not (pyim-string-match-p "\\CC" word)))
@@ -1787,10 +1789,12 @@ BUG：拼音无法有效地处理多音字。
     (let* ((scheme-name (pyim-scheme-name))
            (class (pyim-scheme-get-option scheme-name :class))
            (code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
-           (codes (if (eq class 'xingma)
-                      (pyim-hanzi2xingma word scheme-name t)
-                    ;;拼音使用了多音字校正
-                    (pyim-hanzi2pinyin word nil "-" t nil t))))
+           (codes (or (when (> (length code) 0)
+                        (list code))
+                      (if (eq class 'xingma)
+                          (pyim-hanzi2xingma word scheme-name t)
+                        ;;拼音使用了多音字校正
+                        (pyim-hanzi2pinyin word nil "-" t nil t)))))
       ;; 保存对应词条的词频
       (when (> (length word) 0)
         (pyim-dcache-call-api
@@ -2603,9 +2607,8 @@ Return the input string.
                      x)))
        imobj))))
 
-(defun pyim-codes-create:rime (imobj scheme-name &optional _first-n)
-  (when scheme-name
-    imobj))
+(defun pyim-codes-create:rime (imobj scheme-name &optional first-n)
+  (pyim-codes-create:xingma imobj scheme-name first-n))
 
 (defun pyim-code-search (word scheme-name)
   "从 SCHEME-NAME 对应的输入法词库中，搜索 WORD 对应的 code.
@@ -2658,9 +2661,15 @@ IMOBJS 获得候选词条。"
 
 (defun pyim-candidates-create:rime (imobjs scheme-name)
   "`pyim-candidates-create' 处理 rime 输入法的函数."
-  (let* ((s (replace-regexp-in-string
-             "-" "" (car (pyim-codes-create (car imobjs) scheme-name))))
-         (words (liberime-search s pyim-liberime-search-limit)))
+  (let* ((code (car (pyim-codes-create (car imobjs) scheme-name)))
+         (code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
+         (words-1 (pyim-dcache-get code '(icode2word)))
+         (s (replace-regexp-in-string "-" "" code))
+         ;; `liberime-search' 搜索的时候不需要 code-prefix, 去除。
+         (s (if code-prefix (substring s 1) s))
+         (words-2 (liberime-search s pyim-liberime-search-limit))
+         words)
+    (setq words (remove nil `(,(car words-2) ,@words-1 ,@(cdr words-2))))
     ;; 这个缓存用于加快 rime 多次选择上屏的速度。见
     ;; `pyim-liberime-get-code', 也许这是过早的优化。。。。
     ;; 未来也许应该重新考虑。
@@ -3409,10 +3418,17 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
     ;; pyim 使用这个 hook 来处理联想词。
     (run-hooks 'pyim-page-select-finish-hook)))
 
+(defvar pyim-liberime-multi-select-entered nil)
 (defun pyim-page-select-word:rime ()
   "从选词框中选择当前词条，然后删除该词条对应拼音。"
   (interactive)
   (pyim-outcome-handle 'candidate)
+  ;; pyim 与 liberime 集成的方式，无法通过 rime 来创建多次选择生成的词
+  ;; 条，这里通过 pyim personal dcache 来实现。
+  ;; `pyim-liberime-multi-select-entered' 用来记录多次选择生成的词条对应的 entered.
+  (setq pyim-liberime-multi-select-entered
+        (or pyim-liberime-multi-select-entered
+            (pyim-entered-get 'point-before)))
   (let* ((to-be-translated
           (if (= pyim-candidate-position 1)
               ""
@@ -3430,9 +3446,9 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
             (insert to-be-translated)
             (goto-char (point-max)))
           (pyim-entered-refresh))
-      (if (member (pyim-outcome-get) pyim-candidates)
-          (pyim-create-word (pyim-outcome-get) t)
-        (pyim-create-word (pyim-outcome-get)))
+      (pyim-create-word (pyim-outcome-get))
+      (pyim-create-word (pyim-outcome-get) nil nil pyim-liberime-multi-select-entered)
+      (setq pyim-liberime-multi-select-entered nil)
       (pyim-terminate-translation)
       ;; pyim 使用这个 hook 来处理联想词。
       (run-hooks 'pyim-page-select-finish-hook))))
