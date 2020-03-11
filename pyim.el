@@ -3413,10 +3413,6 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
   "从选词框中选择当前词条，然后删除该词条对应拼音。"
   (interactive)
   (pyim-outcome-handle 'candidate)
-  ;; 将 `pyim-candidate-position' 转换为 rime 内部的页数和词条在已选页
-  ;; 面的位置，然后给 rime 发送翻页事件，让 rime 内部做翻页操作并选择
-  ;; 对应的词条，这个操作主要是为了获取正确的 preedit 和 commit.
-  (liberime-select-candidate-crosspage pyim-candidate-position)
   (let* ((to-be-translated
           (if (= pyim-candidate-position 1)
               ""
