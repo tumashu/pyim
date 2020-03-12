@@ -422,24 +422,13 @@ code 对应的中文词条了。
 
 (defun pyim-dhashcache-delete-word (word)
   "将中文词条 WORD 从个人词库中删除"
-  (let* ((pinyins (pyim-hanzi2pinyin word nil "-" t))
-         (pinyins-szm (mapcar
-                       #'(lambda (pinyin)
-                           (mapconcat #'(lambda (x)
-                                          (substring x 0 1))
-                                      (split-string pinyin "-") "-"))
-                       pinyins)))
-    (dolist (pinyin pinyins)
-      (unless (pyim-string-match-p "[^ a-z-]" pinyin)
-        (pyim-dhashcache-put
-          pyim-dhashcache-icode2word pinyin
-          (remove word orig-value))))
-    (dolist (pinyin pinyins-szm)
-      (unless (pyim-string-match-p "[^ a-z-]" pinyin)
-        (pyim-dhashcache-put
-          pyim-dhashcache-icode2word pinyin
-          (remove word orig-value))))
-    (remhash word pyim-dhashcache-iword2count)))
+  (maphash
+   (lambda (key value)
+     (when (member word value)
+       (puthash key (remove word value)
+                pyim-dhashcache-icode2word)))
+   pyim-dhashcache-icode2word)
+  (remhash word pyim-dhashcache-iword2count))
 
 (defun pyim-dhashcache-insert-word-into-icode2word (word pinyin prepend)
   "保存个人词到缓存."
