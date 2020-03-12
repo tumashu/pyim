@@ -1766,7 +1766,7 @@ code 对应的中文词条了."
 (defun pyim-insert-word-into-icode2word (word pinyin prepend)
   (pyim-dcache-call-api 'insert-word-into-icode2word word pinyin prepend))
 
-(defun pyim-create-word (word &optional prepend wordcount-handler code)
+(defun pyim-create-word (word &optional prepend wordcount-handler code scheme)
   "将中文词条 WORD 添加编码后，保存到用户选择过的词生成的缓存中。
 
 词条 WORD 默认会追加到已有词条的后面，如果 PREPEND 设置为 t,
@@ -1786,7 +1786,7 @@ BUG：拼音无法有效地处理多音字。"
              (not (pyim-string-match-p "\\CC" word)))
     ;; 记录最近创建的词条，用于快速删词功能。
     (setq pyim-last-created-word word)
-    (let* ((scheme-name (pyim-scheme-name))
+    (let* ((scheme-name (or scheme (pyim-scheme-name)))
            (class (pyim-scheme-get-option scheme-name :class))
            (code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
            (codes (or (when (> (length code) 0)
@@ -3448,9 +3448,10 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
           (pyim-entered-refresh))
       (if (member (pyim-outcome-get) pyim-candidates)
           (progn
-            (pyim-create-word (pyim-outcome-get) t)
+            ;; 使用 rime 的同时，也附带的优化 quanpin 的词库。
+            (pyim-create-word (pyim-outcome-get) t nil nil 'quanpin)
             (pyim-create-word (pyim-outcome-get) t nil pyim-liberime-multi-select-entered))
-        (pyim-create-word (pyim-outcome-get))
+        (pyim-create-word (pyim-outcome-get) nil nil nil 'quanpin)
         (pyim-create-word (pyim-outcome-get) nil nil pyim-liberime-multi-select-entered))
       (setq pyim-liberime-multi-select-entered nil)
       (pyim-terminate-translation)
