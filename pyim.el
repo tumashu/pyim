@@ -2669,7 +2669,7 @@ IMOBJS 获得候选词条。"
          (s (if code-prefix (substring s 1) s))
          (words-2 (liberime-search s pyim-liberime-search-limit))
          words)
-    (setq words (remove nil `(,(car words-2) ,@words-1 ,@(cdr words-2))))
+    (setq words (remove nil `(,@words-1 ,@words-2)))
     ;; 这个缓存用于加快 rime 多次选择上屏的速度。见
     ;; `pyim-liberime-get-code', 也许这是过早的优化。。。。
     ;; 未来也许应该重新考虑。
