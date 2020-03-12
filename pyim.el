@@ -1699,7 +1699,8 @@ pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
 注： 这个函数的用途是制作 pyim 词库，个人词条导入导出建议使用：
 `pyim-import' 和 `pyim-export' ."
   (interactive "F将个人缓存中的词条导出到文件：")
-  (pyim-dcache-call-api 'export-personal-words file confirm))
+  (pyim-dcache-call-api 'export-personal-words file confirm)
+  (message "Pyim export finished."))
 
 (defun pyim-import (file &optional merge-method)
   "从 FILE 中导入词条以及词条对应的词频信息。
