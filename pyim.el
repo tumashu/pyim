@@ -1292,6 +1292,10 @@ pyim 对资源的消耗。
 2. 自动更新功能无法正常工作，用户通过手工从其他机器上拷贝
 dcache 文件的方法让 pyim 正常工作。")
 
+(defvar pyim-prefer-personal-dcache t
+  "让 pyim 优先使用 personal dcache 里面的词条.
+这个选项暂时只影响 rime scheme.")
+
 (defvar pyim-page-tooltip-posframe-buffer " *pyim-page-tooltip-posframe-buffer*"
   "这个变量用来保存做为 page tooltip 的 posframe 的 buffer.")
 
@@ -2670,7 +2674,10 @@ IMOBJS 获得候选词条。"
          (s (if code-prefix (substring s 1) s))
          (words-2 (liberime-search s pyim-liberime-search-limit))
          words)
-    (setq words (remove nil `(,@words-1 ,@words-2)))
+    (setq words (remove nil
+                        (if pyim-prefer-personal-dcache
+                            `(,@words-1 ,@words-2)
+                          `(,@words-2 ,@words-1))))
     ;; 这个缓存用于加快 rime 多次选择上屏的速度。见
     ;; `pyim-liberime-get-code', 也许这是过早的优化。。。。
     ;; 未来也许应该重新考虑。
