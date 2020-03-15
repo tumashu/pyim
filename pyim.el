@@ -3467,19 +3467,25 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
 `liberime-search' with LIMIT argument is used internal."
   (let* ((n (length word))
          (i (min (length input) (* n 5)))
-         words str result)
+         words found str results index)
     (while (> i 0)
       (setq str (substring input 0 i))
       (setq words
             (or (cdr (assoc str pyim-liberime-code-cache))
                 (liberime-search str limit)))
-      (if (and (= (length (car words)) n)
-               (member word words))
-          (setq i 0)
-        (setq i (- i 1))
-        (when (= i 0)
-          (setq str ""))))
-    str))
+      (let ((pos (cl-position word words :test 'equal)))
+        (if pos
+            (progn
+              (push (cons pos str) results)
+              (setq found t)
+              (setq i (- i 1)))
+          (if found
+              (setq i 0)
+            (setq i (- i 1))))))
+    (if (not results)
+        ""
+      (setq index (apply #'min (mapcar 'car results)))
+      (cdr (assoc index (reverse results))))))
 
 ;; (pyim-liberime-get-code "你好" "nihaoma")
 
