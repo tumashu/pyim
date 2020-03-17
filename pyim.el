@@ -2685,8 +2685,8 @@ IMOBJS 获得候选词条。"
                             (when (cl-some
                                    (lambda (y)
                                      (and x y
-                                          (string-match-p x y)
-                                          (string-match-p y x)))
+                                          (or (string-match-p x y)
+                                              (string-match-p y x))))
                                    words-2)
                               x))
                           words-1)))
