@@ -3488,7 +3488,8 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
 (defun pyim-liberime-get-code (word input &optional limit)
   "Get the code of WORD from the beginning of INPUT.
 `liberime-search' with LIMIT argument is used internal."
-  (let* ((n (length word))
+  (let* ((test-words (liberime-search "nh" limit))
+         (n (length word))
          (i (min (length input) (* n 5)))
          words str result1 result2)
     (while (> i 0)
@@ -3502,8 +3503,15 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
       (when (member word words)
         (push str result2))
       (setq i (- i 1)))
-    (or (car (reverse result1))
-        (car (reverse result2)))))
+    (cond
+     ;; 不同的输入法处理方式也不一样，这里使用了一个笨办法做探测当前输
+     ;; 入法：获取 "nh" 对应的词条列表，如果词条列表中包含 “你好”，那
+     ;; 么当前输入法可能是全屏或者双拼。
+     ((member "你好" test-words)
+      (or (car (reverse result1))
+          (car (reverse result2))))
+     (t (or (car (reverse result2))
+            (car (reverse result1)))))))
 
 ;; (pyim-liberime-get-code "你好" "nihaoma")
 
