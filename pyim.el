@@ -3503,10 +3503,28 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
         (push str result2))
       (setq i (- i 1)))
     (cond
-     ;; 不同的输入法处理方式也不一样，这里使用了一个笨办法做探测当前输
-     ;; 入法：获取 "nih" 对应的词条列表，如果词条列表中包含 “你好”，那
-     ;; 么当前输入法可能是全屏或者双拼。
-     ((member "你好" (liberime-search "nih" limit))
+     ;; 不同的输入法处理方式也不一样，这里使用一套笨办法探测当前是什么
+     ;; 类型的输入法输入法：
+
+     ;; 1. input 的第一个字符，与 word 的第一个汉字拼音首字母对应。
+     ;; 2. 获取 "nih" 对应的词条列表，词条列表中包含 “你好” 这个词。
+
+     ;; 如果符合上面两条规则，那么就可以大致判断，当前输入法可能是全屏
+     ;; 或者双拼。
+     ((and
+       (let ((szm (substring input 0 1))
+             (szm-list
+              (mapcar (lambda (x)
+                        (and (stringp x)
+                             (substring x 0 1)))
+                      (pyim-cchar2pinyin-get
+                       (substring word 0 1)))))
+         (if szm-list
+             (member szm szm-list)
+           ;; 如果 szm-list 为空，那说明待处理的汉字没有包含在 pyim-pymap
+           ;; 中，有可能是繁体字或者生僻字，直接放行。
+           t))
+       (member "你好" (liberime-search "nih" limit)))
       (or (car (reverse result1))
           (car (reverse result2))))
      (t
