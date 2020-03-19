@@ -3507,7 +3507,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
      ;; 类型的输入法输入法：
 
      ;; 1. input 的第一个字符，与 word 的第一个汉字拼音首字母对应。
-     ;; 2. 获取 "nih" 对应的词条列表，词条列表中包含 “你好” 这个词。
+     ;; 2. 获取 "ziji" 对应的词条列表，词条列表中包含 “自己” 这个词。
 
      ;; 如果符合上面两条规则，那么就可以大致判断，当前输入法可能是全屏
      ;; 或者双拼。
@@ -3524,7 +3524,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
            ;; 如果 szm-list 为空，那说明待处理的汉字没有包含在 pyim-pymap
            ;; 中，有可能是繁体字或者生僻字，直接放行。
            t))
-       (member "你好" (liberime-search "nih" limit)))
+       (member "自己" (liberime-search "ziji" limit)))
       (or (car (reverse result1))
           (car (reverse result2))))
      (t
