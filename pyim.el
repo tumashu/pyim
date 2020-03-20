@@ -4131,10 +4131,16 @@ PUNCT-LIST 格式类似：
                                             (substring x 0 1)
                                           x)))
                           (reg
-                           (format "\\(?:%s\\)"
-                                   (mapconcat #'identity
-                                              (pyim-dcache-get code) "\\|"))))
-                     reg))
+                           ;; 暂时只能支持单字，不支持词语
+                           (mapconcat
+                            #'(lambda (x)
+                                (when (= (length x) 1)
+                                  x))
+                            (pyim-dcache-get code)
+                            "")))
+                     (if (> (length reg) 0)
+                         (format "[%s]" reg)
+                       "")))
                  imobj "")))
     (unless (equal regexp "")
       (concat (if match-beginning "^" "") regexp))))
