@@ -4041,6 +4041,7 @@ PUNCT-LIST 格式类似：
 (defun pyim-cregexp-build-1 (str)
   (let* ((scheme-name (pyim-scheme-name))
          (class (pyim-scheme-get-option scheme-name :class))
+         (code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
          (sep "#####&&&&#####")
          (lst (split-string
                (replace-regexp-in-string
@@ -4050,7 +4051,7 @@ PUNCT-LIST 格式类似：
     ;; 确保 pyim 词库加载
     (pyim-dcache-init-variables)
     ;; pyim 暂时只支持全拼和双拼搜索
-    (when (not (member class '(quanpin shuangpin)))
+    (when (not (member class '(quanpin shuangpin xingma)))
       (setq scheme-name 'quanpin))
     (mapconcat
      (lambda (string)
@@ -4067,7 +4068,9 @@ PUNCT-LIST 格式类似：
                 (regexp-list
                  (mapcar
                   #'(lambda (imobj)
-                      (pyim-cregexp-build:quanpin imobj))
+                      (if (eq class 'xingma)
+                          (pyim-cregexp-build:xingma imobj nil nil nil code-prefix)
+                        (pyim-cregexp-build:quanpin imobj)))
                   imobjs))
                 (regexp
                  (when regexp-list
@@ -4108,6 +4111,24 @@ PUNCT-LIST 格式类似：
                          (when (pyim-string-match-p "\\cc" x)
                            (format "[%s]" x)))
                      cchar-list "")))
+    (unless (equal regexp "")
+      (concat (if match-beginning "^" "") regexp))))
+
+(defun pyim-cregexp-build:xingma (imobj &optional match-beginning
+                                        first-equal all-equal code-prefix)
+  "从 IMOBJ 创建一个搜索中文的 regexp."
+  (let ((regexp (mapconcat
+                 (lambda (x)
+                   (let* ((code (concat (or code-prefix "")
+                                        (if first-equal
+                                            (substring x 0 1)
+                                          x)))
+                          (reg
+                           (format "\\(?:%s\\)"
+                                   (mapconcat #'identity
+                                              (pyim-dcache-get code) "\\|"))))
+                     reg))
+                 imobj "")))
     (unless (equal regexp "")
       (concat (if match-beginning "^" "") regexp))))
 
