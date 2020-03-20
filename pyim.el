@@ -643,6 +643,13 @@ plist 来表示，比如：
 临时激活某种辅助输入法（比如：拼音输入法）来输入汉字。"
   :group 'pyim)
 
+(defcustom pyim-cregexp-fallback-scheme 'quanpin
+  "`pyim-cregexp-build' 使用的 Fallback scheme.
+
+如果 `pyim-cregexp-build' 无法支持用户正在使用的 scheme 时，
+将使用这个 scheme."
+  :group 'pyim)
+
 (defcustom pyim-schemes
   '((quanpin
      :document "全拼输入法方案（不可删除）。"
@@ -4052,7 +4059,7 @@ PUNCT-LIST 格式类似：
     (pyim-dcache-init-variables)
     ;; pyim 暂时只支持全拼和双拼搜索
     (when (not (member class '(quanpin shuangpin xingma)))
-      (setq scheme-name 'quanpin))
+      (setq scheme-name pyim-cregexp-fallback-scheme))
     (mapconcat
      (lambda (string)
        (if (or (pyim-string-match-p "[^a-z']+" string))
