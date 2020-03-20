@@ -4124,26 +4124,32 @@ PUNCT-LIST 格式类似：
 (defun pyim-cregexp-build:xingma (imobj &optional match-beginning
                                         first-equal all-equal code-prefix)
   "从 IMOBJ 创建一个搜索中文的 regexp."
-  (let ((regexp (mapconcat
-                 (lambda (x)
-                   (let* ((code (concat (or code-prefix "")
-                                        (if first-equal
-                                            (substring x 0 1)
-                                          x)))
-                          (reg
-                           ;; 暂时只能支持单字，不支持词语
-                           (mapconcat
-                            #'(lambda (x)
-                                (when (= (length x) 1)
-                                  x))
-                            (pyim-dcache-get code)
-                            "")))
-                     (if (> (length reg) 0)
-                         (format "[%s]" reg)
-                       "")))
-                 imobj "")))
-    (unless (equal regexp "")
-      (concat (if match-beginning "^" "") regexp))))
+  (cl-flet ((build-regexp
+             (list)
+             (let* ((n (apply #'max (mapcar #'length list)))
+                    results)
+               (dotimes (i n)
+                 (push (format "[%s]%s"
+                               (mapconcat
+                                (lambda (x)
+                                  (if (> i (- (length x) 1))
+                                      ""
+                                    (char-to-string
+                                     (elt x i))))
+                                list "")
+                               (if (> i 0) "?" ""))
+                       results))
+               (mapconcat #'identity (reverse results) ""))))
+    (let ((regexp (mapconcat
+                   (lambda (x)
+                     (let ((code (concat (or code-prefix "")
+                                         (if first-equal
+                                             (substring x 0 1)
+                                           x))))
+                       (build-regexp (pyim-dcache-get code))))
+                   imobj "")))
+      (unless (equal regexp "")
+        (concat (if match-beginning "^" "") regexp)))))
 
 (defun pyim-isearch-search-fun ()
   "这个函数为 isearch 相关命令添加中文拼音搜索功能，
