@@ -1,4 +1,4 @@
-;;; pyim-devtools.el --- Tools for pyim developers
+;;; pyim-devtools.el --- Tools for pyim developers  -*- lexical-binding: t; -*-
 
 ;; * Header
 ;; Copyright 2015-2017 Feng Shu

@@ -1,4 +1,4 @@
-;;; pyim-dhashcache --- uses hash table to cache and search dictionaries
+;;; pyim-dhashcache --- uses hash table to cache and search dictionaries   -*- lexical-binding: t; -*-
 
 ;; * Header
 ;; This file uses hash table to cache and search dictionaries.
@@ -289,6 +289,8 @@ DCACHE 是一个 code -> words 的 hashtable.
      dcache)
     (pyim-dcache-write-file file confirm)))
 
+(declare-function pyim-pinyin2cchar-get "pyim" (pinyin &optional equal-match return-list include-seperator))
+
 (defun pyim-dhashcache-get (code &optional from)
   "从 FROM 对应的 dcaches 中搜索 CODE, 得到对应的词条.
 
@@ -409,7 +411,7 @@ code 对应的中文词条了。
        (unless (equal orig-value ,new-value)
          (puthash ,key ,new-value ,table)))))
 
-(defun pyim-dhashcache-update-iword2count (word &optional prepend wordcount-handler)
+(defun pyim-dhashcache-update-iword2count (word &optional _prepend wordcount-handler)
   "保存词频到缓存."
   (pyim-dhashcache-put
     pyim-dhashcache-iword2count word
@@ -429,6 +431,8 @@ code 对应的中文词条了。
                 pyim-dhashcache-icode2word)))
    pyim-dhashcache-icode2word)
   (remhash word pyim-dhashcache-iword2count))
+
+(declare-function pyim-list-merge "pyim" (a b))
 
 (defun pyim-dhashcache-insert-word-into-icode2word (word pinyin prepend)
   "保存个人词到缓存."

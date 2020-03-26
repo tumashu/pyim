@@ -1,4 +1,4 @@
-;;; pyim-common.el --- common utilities for pyim
+;;; pyim-common.el --- common utilities for pyim    -*- lexical-binding: t; -*-
 
 ;; * Header
 ;; This file has common utilities used by pyim

@@ -1,4 +1,4 @@
-;;; pyim-dregcache --- map dictionary to plain cache and use regular expression to search
+;;; pyim-dregcache --- map dictionary to plain cache and use regular expression to search     -*- lexical-binding: t; -*-
 
 ;; * Header
 ;; Copyright 2019 Chen Bin
@@ -97,9 +97,7 @@
           (setq end (string-match pattern raw-content start))
           (when end
             (setq content-segments
-                  (add-to-list 'content-segments
-                               (substring-no-properties raw-content start end)
-                               t))
+                  `(,@content-segments ,(substring-no-properties raw-content start end)))
             (setq dict-splited t)
             ;; 将搜索起始点前移
             (setq start end))
@@ -110,9 +108,7 @@
          (dict-splited
           ;; 将剩余的附后
           (setq content-segments
-                (add-to-list 'content-segments
-                             (substring-no-properties raw-content start)
-                             t))
+                `(,@content-segments ,(substring-no-properties raw-content start end)))
           (setq rlt (list :content content-segments)))
          (t
           (setq rlt (list :content raw-content)))))))
@@ -247,6 +243,8 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
       (setq start (+ start 2 (length code) (length word))))
     output))
 
+(declare-function pyim-pinyin2cchar-get "pyim" (pinyin &optional equal-match return-list include-seperator))
+
 (defun pyim-dregcache-get (code &optional from)
   "从 `pyim-dregcache-cache' 搜索 CODE, 得到对应的词条."
   (if (or (memq 'icode2word from)
@@ -254,12 +252,12 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
       (pyim-dregcache-get-icode2word-ishortcode2word code)
     (let ((dict-files (pyim-dregcache-all-dict-files))
           result)
-      (when pyim-debug (message "pyim-dregcache-get is called. code=%s pattern=%s" code pattern))
+      (when pyim-debug (message "pyim-dregcache-get is called. code=%s" code))
       (when dict-files
         (dolist (file dict-files)
-                 (let* ((file-info (lax-plist-get pyim-dregcache-cache file))
-                        (content (pyim-dregcache-get-content code file-info)))
-                   (setq result (append (pyim-dregcache-get-1 content code) result)))))
+          (let* ((file-info (lax-plist-get pyim-dregcache-cache file))
+                 (content (pyim-dregcache-get-content code file-info)))
+            (setq result (append (pyim-dregcache-get-1 content code) result)))))
       ;; `push' plus `nreverse' is more efficient than `add-to-list'
       ;; Many examples exist in Emacs' own code
       (setq result (nreverse result))
@@ -279,7 +277,7 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
   (let* ((content (pyim-dregcache-load-variable 'pyim-dregcache-icode2word)))
     (when content
       (with-temp-buffer
-        (let* (prev-record prev-code record code)
+        (let* (prev-record prev-code record code prev-point)
           (when pyim-dregcache-icode2word
             (insert pyim-dregcache-icode2word))
           (insert content)
@@ -334,7 +332,7 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
   "TODO"
   )
 
-(defun pyim-dregcache-update-iword2count (word &optional prepend wordcount-handler)
+(defun pyim-dregcache-update-iword2count (word &optional _prepend wordcount-handler)
   "保存词频到缓存."
   (when pyim-debug (message "pyim-dregcache-update-iword2count. word=%s" word))
   (let* ((orig-value (gethash word pyim-dregcache-iword2count))
@@ -431,7 +429,8 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
       (insert pyim-dregcache-icode2word)
       ;; 删除单字词
       (goto-char (point-min))
-      (replace-regexp "^[a-z]+ [^a-z]*" "")
+      (while (re-search-forward "^[a-z]+ [^a-z]*" nil t)
+        (replace-match "" nil t))
       ;; 按拼音排序
       (sort-lines nil (point-min) (point-max))
       (pyim-dcache-write-file file confirm))))

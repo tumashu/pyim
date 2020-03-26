@@ -1,4 +1,4 @@
-;;; pyim-probe.el --- Auto-Switch-to-English-Input probes for pyim
+;;; pyim-probe.el --- Auto-Switch-to-English-Input probes for pyim  -*- lexical-binding: t; -*-
 
 ;; * Header
 ;; Copyright 2015-2017 Feng Shu
@@ -64,6 +64,9 @@
        (or (car (setq ppss (nthcdr 3 ppss)))
            (car (setq ppss (cdr ppss)))
            (nth 3 ppss))))))
+
+(defvar org-heading-regexp)
+(defvar org-use-speed-commands)
 
 (defun pyim-probe-org-speed-commands ()
   "激活这个 pyim 探针函数后，可以解决 org-speed-commands 与 pyim 冲突问题。
@@ -144,12 +147,15 @@
                 (and (not (pyim-string-match-p "\\cc" str-before-1))
                      (= (length (pyim-entered-get 'point-before)) 0))))))))
 
+(declare-function evil-normal-state-p "evil")
 (defun pyim-probe-evil-normal-mode ()
   "判断是否是evil的normal模式，如果是则返回true.
 这个函数用于：`pyim-english-input-switch-functions'."
   (evil-normal-state-p))
 
 ;; ** 根据环境自动切换到半角标点输入模式
+(defvar pyim-punctuation-dict)
+
 (defun pyim-probe-punctuation-line-beginning (char)
   "激活这个 pyim 探针函数后，行首输入标点时，强制输入半角标点。
 
@@ -159,6 +165,11 @@
       (and (member (char-to-string char)
                    (mapcar 'car pyim-punctuation-dict))
            (string-match "^[ \t]*$" line-string)))))
+
+(declare-function pyim-char-before-to-string "pyim" (num))
+(declare-function pyim-entered-get "pyim" (&optional type))
+(declare-function org-inside-LaTeX-fragment-p "org")
+(declare-function org-inside-latex-macro-p "org")
 
 (defun pyim-probe-punctuation-after-punctuation (char)
   "激活这个 pyim 探针函数后，半角标点后再输入一个标点符号时，强制输入半角标点。

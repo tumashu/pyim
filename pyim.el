@@ -1,4 +1,4 @@
-;;; pyim.el --- A Chinese input method support quanpin, shuangpin, wubi and cangjie.
+;;; pyim.el --- A Chinese input method support quanpin, shuangpin, wubi and cangjie.        -*- lexical-binding: t; -*-
 
 ;; * Header
 ;; Copyright 2006 Ye Wenbin
@@ -634,21 +634,24 @@ plist 来表示，比如：
 
 (defcustom pyim-default-scheme 'quanpin
   "设置 pyim 使用哪一种输入法方案，默认使用全拼输入."
-  :group 'pyim)
+  :group 'pyim
+  :type 'symbol)
 
 (defcustom pyim-assistant-scheme 'quanpin
   "设置辅助输入法方案.
 
 这个功能主要用于五笔等形码输入法，在忘记编码的情况下，
 临时激活某种辅助输入法（比如：拼音输入法）来输入汉字。"
-  :group 'pyim)
+  :group 'pyim
+  :type 'symbol)
 
 (defcustom pyim-cregexp-fallback-scheme 'quanpin
   "`pyim-cregexp-build' 使用的 Fallback scheme.
 
 如果 `pyim-cregexp-build' 无法支持用户正在使用的 scheme 时，
 将使用这个 scheme."
-  :group 'pyim)
+  :group 'pyim
+  :type 'symbol)
 
 (defcustom pyim-schemes
   '((quanpin
@@ -932,7 +935,9 @@ plist 来表示，比如：
       ("og" "ng")
       ("oo" "o")
       ("ou" "ou"))))
-  "Pyim 支持的所有拼音方案.")
+  "Pyim 支持的所有拼音方案."
+  :group 'pyim
+  :type 'sexp)
 
 (defcustom pyim-translate-trigger-char "v"
   "用于触发特殊操作的字符，相当与单字快捷键.
@@ -982,7 +987,7 @@ pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。当待输
 
 具体请参考 `pyim-translate-get-trigger-char' 。"
   :group 'pyim
-  :type 'character)
+  :type '(choice (const nil) string))
 
 (defcustom pyim-exhibit-delay-ms 0
   "输入或者删除拼音字符后等待多少毫秒后才显示可选词
@@ -996,7 +1001,8 @@ pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。当待输
     ("in" "ing")
     ("un" "ong"))
   "设定模糊音."
-  :group 'pyim)
+  :group 'pyim
+  :type 'sexp)
 
 (defface pyim-preview-face '((t (:underline t)))
   "设置光标处预览字符串的 face."
@@ -1007,7 +1013,8 @@ pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。当待输
 
 这个变量的取值为一个函数列表，这个函数列表中的任意一个函数的
 运行结果为 t 时，pyim 开启英文输入功能。"
-  :group 'pyim)
+  :group 'pyim
+  :type 'symbol)
 
 (defcustom pyim-punctuation-half-width-functions nil
   "让 pyim 输入半角标点.
@@ -1015,7 +1022,9 @@ pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。当待输
 取值为一个函数列表，这个函数列表中的任意一个函数的运行结果为 t 时，
 pyim 输入半角标点，函数列表中每个函数都有一个参数：char ，表示
 最后输入的一个字符，具体见: `pyim-translate' 。"
-  :group 'pyim)
+  :group 'pyim
+  :type '(choice (const nil)
+                 (repeat function)))
 
 (defcustom pyim-wash-function 'pyim-wash-current-line-function
   "清洗光标前面的文字内容.
@@ -1038,7 +1047,8 @@ pyim 输入半角标点，函数列表中每个函数都有一个参数：char �
 1. 当这个变量取值为 posframe 时，使用 posframe 包来绘制选词框；
 2. 当这个变量取值为 minibuffer 时，使用 minibuffer 做为选词框；
 3. 当这个变量取值为 popup 时，使用 popup-el 包来绘制选词框；"
-  :group 'pyim)
+  :group 'pyim
+  :type 'symbol)
 
 (defcustom pyim-page-style 'two-lines
   "这个变量用来控制选词框的格式.
@@ -1061,12 +1071,14 @@ pyim 内建的有三种选词框格式：
 
 如果设置为 nil, 将直接输入数字，适用于使用数字做为
 编码的输入法。"
-  :group 'pyim)
+  :group 'pyim
+  :type 'boolean)
 
 (defcustom pyim-magic-converter nil
   "将 “待选词条” 在 “上屏” 之前自动转换为其他字符串.
 这个功能可以实现“简转繁”，“输入中文得到英文”之类的功能。"
-  :group 'pyim)
+  :group 'pyim
+  :type 'boolean)
 
 (defcustom pyim-posframe-border-width 0
   "posframe的内间距。
@@ -1089,7 +1101,9 @@ pyim 内建的有三种选词框格式：
 
 注意：多个 autoselector 函数运行时，最好不要相互影响，如果相互有
 影响，需要用户自己管理。"
-  :group 'pyim)
+  :group 'pyim
+  :type '(choice (const nil)
+                 (repeat function)))
 
 (defcustom pyim-posframe-min-width (* pyim-page-length 7)
   "使用 posframe 做为选词框时，设置选词框的最小宽度."
@@ -1120,7 +1134,9 @@ Only useful when use posframe."
 前者搜索单词速度很快,消耗内存多.  后者搜索单词速度较快,消耗内存少.
 
 `pyim-dregcache' 速度和词库大小成正比.  当词库接近100M大小时,
-在六年历史的笔记本上会有一秒的延迟. 这时建议换用 `pyim-dhashcache'.")
+在六年历史的笔记本上会有一秒的延迟. 这时建议换用 `pyim-dhashcache'."
+  :group 'pyim
+  :type 'symbol)
 
 ;;;###autoload
 (defvar pyim-titles '("PYIM " "PYIM-EN " "PYIM-AU ") "Pyim 在 mode-line 中显示的名称.")
@@ -1315,6 +1331,16 @@ dcache 文件的方法让 pyim 正常工作。")
 (defvar pyim-liberime-search-limit 50
   "当 pyim 使用 `liberime-search' 来获取词条时，这个变量用来限制
 `liberime-search' 返回词条的数量。")
+
+(defvar pyim-liberime-code-cache nil
+  "Cache used by `pyim-liberime-get-code'.")
+
+(declare-function  liberime-get-commit "liberime")
+(declare-function liberime-get-context "liberime")
+(declare-function liberime-clear-commit "liberime")
+(declare-function liberime-clear-composition "liberime")
+(declare-function liberime-search "liberime" (string limit))
+(declare-function liberime-get-preedit "liberime")
 
 (defvar pyim-mode-map
   (let ((map (make-sparse-keymap))
@@ -1554,7 +1580,7 @@ If FORCE is non-nil, FORCE build."
 (register-input-method "pyim" "euc-cn" 'pyim-start (nth 0 pyim-titles))
 
 ;;;###autoload
-(defun pyim-start (name &optional active-func restart save-personal-dcache refresh-common-dcache)
+(defun pyim-start (_name &optional _active-func restart save-personal-dcache refresh-common-dcache)
   "pyim 启动函数.
   TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE REFRESH-COMMON-DCACHE
 
@@ -2052,7 +2078,7 @@ Return the input string.
       (let* ((echo-keystrokes 0)
              (help-char nil)
              (overriding-terminal-local-map pyim-mode-map)
-             (generated-events nil)
+             ;; (generated-events nil)
              (input-method-function nil)
              ;; Quail package 用这个变量来控制是否在 buffer 中
              ;; 插入 preview string, pyim *强制* 将其设置为 nil
@@ -2130,7 +2156,7 @@ Return the input string.
                    (mapcar 'identity rest-chars)))
          (setq current-input-method-title (nth 0 pyim-titles)))))
 
-(defun pyim-autoselector-xingma (&rest args)
+(defun pyim-autoselector-xingma (&rest _args)
   "适用于型码输入法的自动上屏器.
 
 比如：五笔等型码输入法，重码率很低，90%以上的情况都是选择第一个词
@@ -2147,7 +2173,7 @@ Return the input string.
         '(:select last))
        (t nil)))))
 
-(defun pyim-autoselector-rime (&rest args)
+(defun pyim-autoselector-rime (&rest _args)
   "适用于RIME的自动上屏器."
   (let* ((scheme-name (pyim-scheme-name))
          (class (pyim-scheme-get-option scheme-name :class)))
@@ -2307,7 +2333,7 @@ Return the input string.
          (shenmu (car x))
          (yunmu-and-rest (cdr x))
          (i (min (length yunmu-and-rest) 5))
-         yunmu rest result)
+         yunmu rest)
     (cl-flet ((pinyin-valid-p
                (shenmu yunmu)
                (cl-some
@@ -2420,7 +2446,7 @@ Return the input string.
       (funcall (intern (format "pyim-imobjs-create:%S" class))
                entered scheme-name))))
 
-(defun pyim-imobjs-create:quanpin (entered &optional -)
+(defun pyim-imobjs-create:quanpin (entered &optional _)
   "从用户输入的字符串 ENTERED 创建一个输入法内部对象列表: imobjs.
 
 这个 imobjs 可能包含一个 imobj, 也可能包含多个，每个 imobj 都包含
@@ -2509,7 +2535,7 @@ Return the input string.
             (split-string entered "'"))
       (list (nreverse output)))))
 
-(defun pyim-imobjs-create:rime (entered &optional -)
+(defun pyim-imobjs-create:rime (entered &optional _)
   (list (list entered)))
 
 (defun pyim-imobjs-find-fuzzy:quanpin (imobjs)
@@ -2554,7 +2580,7 @@ Return the input string.
            (end-position start)
            (string (buffer-substring-no-properties (point-min) start))
            (orig-imobj-len (length (car (pyim-imobjs-create string scheme-name))))
-           imobj)
+           imobj pos)
       (if search-forward
           ;; "ni|haoshijie" -> "nihao|shijie"
           (progn
@@ -2585,7 +2611,7 @@ Return the input string.
       (funcall (intern (format "pyim-codes-create:%S" class))
                imobj scheme-name first-n))))
 
-(defun pyim-codes-create:quanpin (imobj scheme-name &optional first-n)
+(defun pyim-codes-create:quanpin (imobj _scheme-name &optional first-n)
   "从IMOBJ 创建一个 code 列表：codes.
 
 列表 codes 中包含一个或者多个 code 字符串，这些 code 字符串用于从
@@ -2605,7 +2631,7 @@ Return the input string.
            py)))
    imobj))
 
-(defun pyim-codes-create:shuangpin (imobj scheme-name &optional first-n)
+(defun pyim-codes-create:shuangpin (imobj _scheme-name &optional first-n)
   (pyim-codes-create:quanpin imobj 'quanpin first-n))
 
 (defun pyim-codes-create:xingma (imobj scheme-name &optional first-n)
@@ -2809,7 +2835,7 @@ IMOBJS 获得候选词条。"
              ,@znabc-words
              ,@pinyin-chars)))))
 
-(defun pyim-candidates-create:shuangpin (imobjs scheme-name)
+(defun pyim-candidates-create:shuangpin (imobjs _scheme-name)
   "`pyim-candidates-create' 处理双拼输入法的函数."
   (pyim-candidates-create:quanpin imobjs 'quanpin))
 
@@ -2842,8 +2868,6 @@ pyim 会使用 emacs overlay 机制在 *待输入buffer* 光标处高亮显示�
 个预览字符串，让用户可以查看将要输入的字符串，这个函数用于更新这
 个字符串的内容。"
   (let* ((class (pyim-scheme-get-option (pyim-scheme-name) :class))
-         (end (pyim-page-end))
-         (start (1- (pyim-page-start)))
          (candidates pyim-candidates)
          (pos (1- (min pyim-candidate-position (length candidates))))
          (preview
@@ -2978,6 +3002,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
     (puthash :total-page (pyim-page-total-page) page-info)
     (puthash :candidates candidate-showed page-info)
     (puthash :position pos page-info)
+    (puthash :hightlight-current hightlight-current page-info)
     ;; Show page.
     (when (and (null unread-command-events)
                (null unread-post-input-method-events))
@@ -3035,7 +3060,8 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
       (progn
         (pyim-outcome-handle 'last-char)
         (pyim-terminate-translation))
-    (let ((new (+ pyim-candidate-position (* pyim-page-length arg) 1)))
+    (let ((new (+ pyim-candidate-position (* pyim-page-length arg) 1))
+          maxpos)
       (setq maxpos (+ 1 (length pyim-candidates)))
       (setq pyim-candidate-position
             (if (> new 0)
@@ -3055,7 +3081,8 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
       (progn
         (pyim-outcome-handle 'last-char)
         (pyim-terminate-translation))
-    (let ((new (+ pyim-candidate-position arg)))
+    (let ((new (+ pyim-candidate-position arg))
+          len)
       (setq len (length pyim-candidates))
       (setq pyim-candidate-position
             (if (>= len new)
@@ -3157,7 +3184,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
                   "| "
                   (fmt (buffer-substring-no-properties (point) (point-max)))))))))
 
-(defun pyim-page-menu-create (candidates position &optional separator)
+(defun pyim-page-menu-create (candidates position &optional separator hightlight-current)
   "这个函数用于创建在 page 中显示的备选词条菜单。"
   (let ((i 0) result)
     (dolist (candidate candidates)
@@ -3194,7 +3221,9 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
           (gethash :total-page page-info)
           (pyim-page-menu-create
            (gethash :candidates page-info)
-           (gethash :position page-info))))
+           (gethash :position page-info)
+           nil
+           (gethash :hightlight-current page-info))))
 
 (defun pyim-page-style:one-line (page-info)
   "将 PAGE-INFO 格式化为选词框中显示的字符串.
@@ -3208,7 +3237,9 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
           (pyim-page-preview-create " ")
           (pyim-page-menu-create
            (gethash :candidates page-info)
-           (gethash :position page-info))
+           (gethash :position page-info)
+           nil
+           (gethash :hightlight-current page-info))
           (gethash :current-page page-info)
           (gethash :total-page page-info)))
 
@@ -3229,7 +3260,8 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
           (pyim-page-menu-create
            (gethash :candidates page-info)
            (gethash :position page-info)
-           "\n")))
+           "\n"
+           (gethash :hightlight-current page-info))))
 
 (defun pyim-page-style:minibuffer (page-info)
   "将 PAGE-INFO 格式化为选词框中显示的字符串.
@@ -3243,7 +3275,9 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
           (pyim-page-preview-create)
           (pyim-page-menu-create
            (gethash :candidates page-info)
-           (gethash :position page-info))
+           (gethash :position page-info)
+           nil
+           (gethash :hightlight-current page-info))
           (gethash :current-page page-info)
           (gethash :total-page page-info)))
 
@@ -3263,15 +3297,15 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
             preview)
           (pyim-page-menu-create
            (gethash :candidates page-info)
-           (gethash :position page-info))
+           (gethash :position page-info)
+           nil
+           (gethash :hightlight-current page-info))
           (gethash :current-page page-info)
           (gethash :total-page page-info)))
 
 (defun pyim-page-tooltip-show (string position)
   "在 POSITION 位置，使用 posframe 或者 popup 显示字符串 STRING."
-  (let ((frame (window-frame (selected-window)))
-        (length (* pyim-page-length 10))
-        (tooltip pyim-page-tooltip))
+  (let ((tooltip pyim-page-tooltip))
     (cond ((and (memq tooltip '(posframe child-frame))
                 (pyim-posframe-valid-p))
            (posframe-show pyim-page-tooltip-posframe-buffer
@@ -3489,9 +3523,6 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
       ;; pyim 使用这个 hook 来处理联想词。
       (run-hooks 'pyim-page-select-finish-hook))))
 
-(defvar pyim-liberime-code-cache nil
-  "Cache used by `pyim-liberime-get-code'.")
-
 (defun pyim-liberime-get-code (word input &optional limit)
   "Get the code of WORD from the beginning of INPUT.
 `liberime-search' with LIMIT argument is used internal."
@@ -3601,7 +3632,6 @@ alist 列表。"
          (str-before-1 (pyim-char-before-to-string 0))
          (str-before-2 (pyim-char-before-to-string 1))
          (str-before-3 (pyim-char-before-to-string 2))
-         (str-before-4 (pyim-char-before-to-string 3))
          ;; 从标点词库中搜索与 `str' 对应的标点列表。
          (punc-list (assoc str pyim-punctuation-dict))
          ;; 从标点词库中搜索与 `str-before-1' 对应的标点列表。
@@ -3940,7 +3970,6 @@ PUNCT-LIST 格式类似：
                        (buffer-substring-no-properties
                         (region-beginning) (region-end))
                      (buffer-substring (point) (line-beginning-position))))
-           (length 0)
            code length)
       (cond ((string-match
               ;; 创建一个 regexp, 用于提取出光标处一个适合
@@ -4122,7 +4151,7 @@ PUNCT-LIST 格式类似：
       (concat (if match-beginning "^" "") regexp))))
 
 (defun pyim-cregexp-build:xingma (imobj &optional match-beginning
-                                        first-equal all-equal code-prefix)
+                                        first-equal _all-equal code-prefix)
   "从 IMOBJ 创建一个搜索中文的 regexp."
   (cl-flet ((build-regexp
              (list)
@@ -4213,7 +4242,7 @@ PUNCT-LIST 格式类似：
   "向前移动 ARG 英文或者中文词，向前移动时基于 *最长* 的词移动。"
   (interactive "P")
   (or arg (setq arg 1))
-  (dotimes (i arg)
+  (dotimes (_ arg)
     (let* ((words (pyim-cwords-at-point t))
            (max-length
             (cl-reduce #'max
@@ -4227,7 +4256,7 @@ PUNCT-LIST 格式类似：
   "向后移动 ARG 个英文或者中文词，向后移动时基于 *最长* 的词移动。"
   (interactive "P")
   (or arg (setq arg 1))
-  (dotimes (i arg)
+  (dotimes (_ arg)
     (let* ((words (pyim-cwords-at-point))
            (max-length
             (cl-reduce #'max
@@ -4360,7 +4389,7 @@ PUNCT-LIST 格式类似：
            (get-possible-words
             (mapcar #'char-to-string
                     (string-to-vector chinese-string)) 1))
-          words-list result)
+          result)
       (dolist (string-list string-alist)
         (let ((pinyin-list (pyim-hanzi2pinyin (car string-list) nil "-" t)))
           (dolist (pinyin pinyin-list)
@@ -4636,12 +4665,11 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
           [s] 保存配置  [R] 重启输入法 [C-c C-c] 禁用/启用当前词库"
                           'face face-attr)))))
 
-(defun pyim-dm-toggle-dict (&optional enable)
+(defun pyim-dm-toggle-dict (&optional _enable)
   "启用当前行对应的词库。"
   (interactive)
   (when (equal (buffer-name) pyim-dm-buffer)
     (let* ((id (get-text-property (point) 'id))
-           (disable (get-text-property (point) 'disable))
            (dict (cl-copy-list (nth (1- id) pyim-dicts)))
            (disable (plist-get dict :disable))
            (line (line-number-at-pos)))
@@ -4658,7 +4686,6 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
   (interactive)
   (when (equal (buffer-name) pyim-dm-buffer)
     (let ((id (get-text-property (point) 'id))
-          (file (get-text-property (point) 'file))
           (line (line-number-at-pos)))
       (when (yes-or-no-p "确定要删除这条词库信息吗? ")
         (setq pyim-dicts (delq (nth (1- id) pyim-dicts) pyim-dicts))
@@ -4673,7 +4700,6 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
     (let* ((id (get-text-property (point) 'id))
            (dict1 (nth (- id 1) pyim-dicts))
            (dict2 (nth (- id 2) pyim-dicts))
-           (length (length pyim-dicts))
            (line (line-number-at-pos)))
       (when (> id 1)
         (setf (nth (- id 1) pyim-dicts) dict2)
@@ -4710,7 +4736,7 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
   (interactive)
   (when (equal (buffer-name) pyim-dm-buffer)
     (let ((line (line-number-at-pos))
-          dict name file coding first-used dict-type)
+          dict name file first-used)
       (setq name (read-from-minibuffer "请输入词库名称： "))
       (setq file (read-file-name "请选择词库文件： " "~/"))
       (setq first-used  (yes-or-no-p "是否让 pyim 优先使用词库？ "))

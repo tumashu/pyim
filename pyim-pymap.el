@@ -1,4 +1,4 @@
-;;; pyim-pymap.el --- Pinyin map used by pyim
+;;; pyim-pymap.el --- Pinyin map used by pyim  -*- lexical-binding: t; -*-
 
 ;; * Header
 
