@@ -2702,22 +2702,6 @@ IMOBJS 获得候选词条。"
 
 (defun pyim-liberime-merge-words (words-1 words-2)
   "将 WORDS-1 和 WORDS-2 合并为一个列表，然后输出。"
-  ;; rime 支持多种输入法，所以个人词条列表 words-1 中一个 code 可能
-  ;; 保存多种输入法对应的词条，这里使用 words-2 对其进行筛选，最大限
-  ;; 度的降低 "输入拼音出五笔词条" 类似的问题。 筛选规则很简单：如果
-  ;; words-1 中某个词条与 words-2 中某个词条相互匹配，就保留这个词条，
-  ;; 否则就删除此词条。
-  (setq words-1
-        (remove nil
-                (mapcar (lambda (x)
-                          (when (cl-some
-                                 (lambda (y)
-                                   (and x y
-                                        (or (string-match-p x y)
-                                            (string-match-p y x))))
-                                 words-2)
-                            x))
-                        words-1)))
   (remove nil
           (if pyim-prefer-personal-dcache
               `(,@words-1 ,@words-2)
