@@ -3559,16 +3559,21 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
 `liberime-search' with LIMIT argument is used internal."
   (let* ((n (length word))
          (i (min (length input) (* n 5)))
-         words str result1 result2)
+         words words-1 str result1 result2)
     (while (> i 0)
       (setq str (substring input 0 i))
-      (setq words
-            (or (cdr (assoc str pyim-liberime-code-cache))
-                (liberime-search str limit)))
+      (setq words (cdr (assoc str pyim-liberime-code-cache)))
       (when (and (= (length (car words)) n)
-                 (member word words))
+                 ;; 先测试从 cache 中搜索到的词条是否包含 word, 速度很
+                 ;; 快。由于 cache 中一般只包含最常用的几十个词，如果
+                 ;; 测试不通过, 那么就通过 `liberime-search' 搜索，获
+                 ;; 取更多的词条来测试，之所以进行两步处理，是为了规避
+                 ;; `liberime-search' 性能问题。
+                 (or (member word words)
+                     (member word (setq words-1 (liberime-search str limit)))))
         (push str result1))
-      (when (member word words)
+      (when (or (member word words)
+                (member word words-1))
         (push str result2))
       (setq i (- i 1)))
     (cond
