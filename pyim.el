@@ -2757,13 +2757,11 @@ IMOBJS 获得候选词条。"
               (if (functionp 'make-thread)
                   (make-thread
                    (lambda ()
-                     (let ((words (pyim-liberime-merge-words ',words-1 (liberime-search ,s))))
-                       (setq pyim-candidates words)
-                       (push (cons ,s words) pyim-liberime-code-cache)))
+                     (setq pyim-candidates
+                           (pyim-liberime-merge-words ',words-1 (liberime-search ,s))))
                    "pyim-liberime-search")
-                (let ((words (pyim-liberime-merge-words ',words-1 (liberime-search ,s))))
-                  (setq pyim-candidates words)
-                  (push (cons ,s words) pyim-liberime-code-cache))))))
+                (setq pyim-candidates
+                      (pyim-liberime-merge-words ',words-1 (liberime-search ,s)))))))
     words))
 
 (defun pyim-candidates-create:quanpin (imobjs scheme-name)
