@@ -176,8 +176,6 @@
 ;; *** 通过 pyim 来支持 rime 所有输入法
 
 ;; 1. 安裝配置 liberime 和 pyim, 方式见：[[https://github.com/merrickluo/liberime][liberime]].
-;;    注意，由于特殊的集成方式，pyim 通过变量 `pyim-liberime-search-limit' 来限制从 rime 获取
-;;    的词条数量，以提高输入法响应速度，用户可以根据自己设备的性能来灵活调整这个选项。
 ;; 2. 使用 rime 全拼输入法的用户，也可以使用 rime-quanpin scheme,
 ;;    这个 scheme 是专门针对 rime 全拼输入法定制的，支持全拼v快捷键。
 ;;    #+BEGIN_EXAMPLE
@@ -1328,9 +1326,12 @@ dcache 文件的方法让 pyim 正常工作。")
 但同时产生了无效拼音 king .  用户手动输入的无效拼音无需考虑.
 因为用户有即时界面反馈,不可能连续输入无效拼音.")
 
-(defvar pyim-liberime-search-limit 50
+(defvar pyim-liberime-search-limit (* pyim-page-length 2)
   "当 pyim 使用 `liberime-search' 来获取词条时，这个变量用来限制
 `liberime-search' 返回词条的数量。")
+
+(defvar pyim-liberime-search-timer nil
+  "`liberime-search' 搜索速度慢，采用 timer+两步搜索的方式提高速度.")
 
 (defvar pyim-liberime-code-cache nil
   "Cache used by `pyim-liberime-get-code'.")
@@ -2311,7 +2312,9 @@ Return the input string.
 (defun pyim-terminate-translation:rime ()
   (liberime-clear-commit)
   (liberime-clear-composition)
-  (setq pyim-liberime-code-cache nil))
+  (setq pyim-liberime-code-cache nil)
+  (when pyim-liberime-search-timer
+    (cancel-timer pyim-liberime-search-timer)))
 
 ;; 分解拼音的相关函数
 (defun pyim-pinyin-get-shenmu (pinyin)
@@ -2697,6 +2700,29 @@ IMOBJS 获得候选词条。"
     (when (car result)
       result)))
 
+(defun pyim-liberime-merge-words (words-1 words-2)
+  "将 WORDS-1 和 WORDS-2 合并为一个列表，然后输出。"
+  ;; rime 支持多种输入法，所以个人词条列表 words-1 中一个 code 可能
+  ;; 保存多种输入法对应的词条，这里使用 words-2 对其进行筛选，最大限
+  ;; 度的降低 "输入拼音出五笔词条" 类似的问题。 筛选规则很简单：如果
+  ;; words-1 中某个词条与 words-2 中某个词条相互匹配，就保留这个词条，
+  ;; 否则就删除此词条。
+  (setq words-1
+        (remove nil
+                (mapcar (lambda (x)
+                          (when (cl-some
+                                 (lambda (y)
+                                   (and x y
+                                        (or (string-match-p x y)
+                                            (string-match-p y x))))
+                                 words-2)
+                            x))
+                        words-1)))
+  (remove nil
+          (if pyim-prefer-personal-dcache
+              `(,@words-1 ,@words-2)
+            `(,@words-2 ,@words-1))))
+
 (defun pyim-candidates-create:rime (imobjs scheme-name)
   "`pyim-candidates-create' 处理 rime 输入法的函数."
   (let* ((code (car (pyim-codes-create (car imobjs) scheme-name)))
@@ -2706,31 +2732,38 @@ IMOBJS 获得候选词条。"
          ;; `liberime-search' 搜索的时候不需要 code-prefix, 去除。
          (s (if code-prefix (substring s 1) s))
          (words-2 (liberime-search s pyim-liberime-search-limit))
-         words)
-    ;; rime 支持多种输入法，所以个人词条列表 words-1 中一个 code 可能
-    ;; 保存多种输入法对应的词条，这里使用 words-2 对其进行筛选，最大限
-    ;; 度的降低 "输入拼音出五笔词条" 类似的问题。 筛选规则很简单：如果
-    ;; words-1 中某个词条与 words-2 中某个词条相互匹配，就保留这个词条，
-    ;; 否则就删除此词条。
-    (setq words-1
-          (remove nil
-                  (mapcar (lambda (x)
-                            (when (cl-some
-                                   (lambda (y)
-                                     (and x y
-                                          (or (string-match-p x y)
-                                              (string-match-p y x))))
-                                   words-2)
-                              x))
-                          words-1)))
-    (setq words (remove nil
-                        (if pyim-prefer-personal-dcache
-                            `(,@words-1 ,@words-2)
-                          `(,@words-2 ,@words-1))))
+         (words (pyim-liberime-merge-words words-1 words-2)))
     ;; 这个缓存用于加快 rime 多次选择上屏的速度。见
     ;; `pyim-liberime-get-code', 也许这是过早的优化。。。。
     ;; 未来也许应该重新考虑。
     (push (cons s words) pyim-liberime-code-cache)
+    (when pyim-liberime-search-timer
+      (cancel-timer pyim-liberime-search-timer))
+    (setq pyim-liberime-search-timer
+          (run-with-timer
+           1 nil
+           `(lambda ()
+              ;; `liberime-search' 如果不限制返回词条数量的话，有时
+              ;; 候速度特别慢，这里采用如下方式来提高用户响应速度：
+
+              ;; 1. 首先搜索少量词条（比如10个）快速返回，以提高输入法
+              ;;    响应速度。
+              ;; 2. 延迟2秒，使用 thread 异步获取全部词条并更新
+              ;;    `pyim-candidates', 这样用户在翻页的时候就可以找
+              ;;    到所有的词条。
+
+              ;; 注意： 这个地方使用 `pyim-candidates' 的方式是违反
+              ;; pyim 正常流程的。
+              (if (functionp 'make-thread)
+                  (make-thread
+                   (lambda ()
+                     (let ((words (pyim-liberime-merge-words ',words-1 (liberime-search ,s))))
+                       (setq pyim-candidates words)
+                       (push (cons ,s words) pyim-liberime-code-cache)))
+                   "pyim-liberime-search")
+                (let ((words (pyim-liberime-merge-words ',words-1 (liberime-search ,s))))
+                  (setq pyim-candidates words)
+                  (push (cons ,s words) pyim-liberime-code-cache))))))
     words))
 
 (defun pyim-candidates-create:quanpin (imobjs scheme-name)
