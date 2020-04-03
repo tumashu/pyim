@@ -1222,6 +1222,9 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 (defvar pyim-candidates-last nil
   "上一轮备选词条列表，这个变量主要用于 autoselector 机制.")
 
+(defvar pyim-candidates-create-timer nil
+  "异步创建 candidates 时，使用的 timer.")
+
 (defvar pyim-preview-overlay nil
   "用于保存光标处预览字符串的 overlay.")
 
@@ -1325,13 +1328,6 @@ dcache 文件的方法让 pyim 正常工作。")
   "双拼可能自动产生的无效拼音. 例如输入 kk 得到有效拼音 kuai .
 但同时产生了无效拼音 king .  用户手动输入的无效拼音无需考虑.
 因为用户有即时界面反馈,不可能连续输入无效拼音.")
-
-(defvar pyim-liberime-search-limit (* pyim-page-length 2)
-  "当 pyim 使用 `liberime-search' 来获取词条时，这个变量用来限制
-`liberime-search' 返回词条的数量。")
-
-(defvar pyim-liberime-search-timer nil
-  "`liberime-search' 搜索速度慢，采用 timer+两步搜索的方式提高速度.")
 
 (defvar pyim-liberime-code-cache nil
   "Cache used by `pyim-liberime-get-code'.")
@@ -2220,6 +2216,31 @@ Return the input string.
     (setq pyim-candidates
           (or (delete-dups (pyim-candidates-create pyim-imobjs scheme-name))
               (list entered-to-translate)))
+    (when pyim-candidates-create-timer
+      (cancel-timer pyim-candidates-create-timer))
+    ;; 延迟1秒异步获取 candidates, pyim 内置的输入法目前不使用异步获取
+    ;; 词条的方式，主要用于 rime 支持。
+    (setq pyim-candidates-create-timer
+          (run-with-timer
+           1 nil
+           `(lambda ()
+              (if (functionp 'make-thread)
+                  (make-thread
+                   (lambda ()
+                     (let ((words (delete-dups (pyim-candidates-create pyim-imobjs ',scheme-name t))))
+                       (when words
+                         (setq pyim-candidates words)
+                         (pyim-preview-refresh)
+                         ;; NEED HELP: popup tooltop 无法使用，原因未知。
+                         (unless (member pyim-page-tooltip '(popup))
+                           (pyim-page-refresh)))))
+                   "pyim-candidates-create")
+                (let ((words (delete-dups (pyim-candidates-create pyim-imobjs ',scheme-name t))))
+                  (when words
+                    (setq pyim-candidates words)
+                    (pyim-preview-refresh)
+                    (unless (member pyim-page-tooltip '(popup))
+                      (pyim-page-refresh))))))))
     ;; 自动上屏功能
     (let ((autoselector-results
            (mapcar #'(lambda (x)
@@ -2300,6 +2321,8 @@ Return the input string.
   (pyim-preview-delete-string)
   (setq pyim-candidates nil)
   (setq pyim-candidates-last nil)
+  (when pyim-candidates-create-timer
+    (cancel-timer pyim-candidates-create-timer))
   (setq pyim-assistant-scheme-enable nil)
   (setq pyim-force-input-chinese nil)
   (when (and (memq pyim-page-tooltip '(posframe child-frame))
@@ -2312,9 +2335,7 @@ Return the input string.
 (defun pyim-terminate-translation:rime ()
   (liberime-clear-commit)
   (liberime-clear-composition)
-  (setq pyim-liberime-code-cache nil)
-  (when pyim-liberime-search-timer
-    (cancel-timer pyim-liberime-search-timer)))
+  (setq pyim-liberime-code-cache nil))
 
 ;; 分解拼音的相关函数
 (defun pyim-pinyin-get-shenmu (pinyin)
@@ -2668,46 +2689,40 @@ Return the input string.
       (substring (or code " ") 1))))
 
 ;; ** 获取备选词列表
-(defun pyim-candidates-create (imobjs scheme-name)
+(defun pyim-candidates-create (imobjs scheme-name &optional async)
   "按照 SCHEME-NAME 对应的输入法方案， 从输入法内部对象列表:
 IMOBJS 获得候选词条。"
   (when imobjs
     (let ((class (pyim-scheme-get-option scheme-name :class)))
       (when class
         (funcall (intern (format "pyim-candidates-create:%S" class))
-                 imobjs scheme-name)))))
+                 imobjs scheme-name async)))))
 
-(defun pyim-candidates-create:xingma (imobjs scheme-name)
+(defun pyim-candidates-create:xingma (imobjs scheme-name &optional async)
   "`pyim-candidates-create' 处理五笔仓颉等形码输入法的函数."
-  (let (result)
-    (dolist (imobj imobjs)
-      (let* ((codes (reverse (pyim-codes-create imobj scheme-name)))
-             (output1 (car codes))
-             (output2 (reverse (cdr codes)))
-             output3 str)
+  (unless async
+    (let (result)
+      (dolist (imobj imobjs)
+        (let* ((codes (reverse (pyim-codes-create imobj scheme-name)))
+               (output1 (car codes))
+               (output2 (reverse (cdr codes)))
+               output3 str)
 
-        (when output2
-          (setq str (mapconcat
-                     #'(lambda (code)
-                         (car (pyim-dcache-get code)))
-                     output2 "")))
-        (setq output3
-              (remove "" (or (mapcar #'(lambda (x)
-                                         (concat str x))
-                                     (pyim-dcache-get output1 '(code2word shortcode2word icode2word)))
-                             (list str))))
-        (setq result (append result output3))))
-    (when (car result)
-      result)))
+          (when output2
+            (setq str (mapconcat
+                       #'(lambda (code)
+                           (car (pyim-dcache-get code)))
+                       output2 "")))
+          (setq output3
+                (remove "" (or (mapcar #'(lambda (x)
+                                           (concat str x))
+                                       (pyim-dcache-get output1 '(code2word shortcode2word icode2word)))
+                               (list str))))
+          (setq result (append result output3))))
+      (when (car result)
+        result))))
 
-(defun pyim-liberime-merge-words (words-1 words-2)
-  "将 WORDS-1 和 WORDS-2 合并为一个列表，然后输出。"
-  (remove nil
-          (if pyim-prefer-personal-dcache
-              `(,@words-1 ,@words-2)
-            `(,@words-2 ,@words-1))))
-
-(defun pyim-candidates-create:rime (imobjs scheme-name)
+(defun pyim-candidates-create:rime (imobjs scheme-name &optional async)
   "`pyim-candidates-create' 处理 rime 输入法的函数."
   (let* ((code (car (pyim-codes-create (car imobjs) scheme-name)))
          (code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
@@ -2715,144 +2730,126 @@ IMOBJS 获得候选词条。"
          (s (replace-regexp-in-string "-" "" code))
          ;; `liberime-search' 搜索的时候不需要 code-prefix, 去除。
          (s (if code-prefix (substring s 1) s))
-         (words-2 (liberime-search s pyim-liberime-search-limit))
-         (words (pyim-liberime-merge-words words-1 words-2)))
+         (words-2 (liberime-search s (if async
+                                         nil
+                                       (* pyim-page-length 2))))
+         (words (remove nil
+                        (if pyim-prefer-personal-dcache
+                            `(,@words-1 ,@words-2)
+                          `(,@words-2 ,@words-1)))))
     ;; 这个缓存用于加快 rime 多次选择上屏的速度。见
     ;; `pyim-liberime-get-code', 也许这是过早的优化。。。。
     ;; 未来也许应该重新考虑。
-    (push (cons s words) pyim-liberime-code-cache)
-    (when pyim-liberime-search-timer
-      (cancel-timer pyim-liberime-search-timer))
-    (setq pyim-liberime-search-timer
-          (run-with-timer
-           1 nil
-           `(lambda ()
-              ;; `liberime-search' 如果不限制返回词条数量的话，有时
-              ;; 候速度特别慢，这里采用如下方式来提高用户响应速度：
-
-              ;; 1. 首先搜索少量词条（比如10个）快速返回，以提高输入法
-              ;;    响应速度。
-              ;; 2. 延迟2秒，使用 thread 异步获取全部词条并更新
-              ;;    `pyim-candidates', 这样用户在翻页的时候就可以找
-              ;;    到所有的词条。
-
-              ;; 注意： 这个地方使用 `pyim-candidates' 的方式是违反
-              ;; pyim 正常流程的。
-              (if (functionp 'make-thread)
-                  (make-thread
-                   (lambda ()
-                     (setq pyim-candidates
-                           (pyim-liberime-merge-words ',words-1 (liberime-search ,s))))
-                   "pyim-liberime-search")
-                (setq pyim-candidates
-                      (pyim-liberime-merge-words ',words-1 (liberime-search ,s)))))))
+    (unless async
+      (push (cons s words) pyim-liberime-code-cache))
     words))
 
-(defun pyim-candidates-create:quanpin (imobjs scheme-name)
+(defun pyim-candidates-create:quanpin (imobjs scheme-name &optional async)
   "`pyim-candidates-create' 处理全拼输入法的函数."
-  (let* (;; 如果输入 "ni-hao" ，搜索 code 为 "n-h" 的词条做为联想词。
-         ;; 搜索首字母得到的联想词太多，这里限制联想词要大于两个汉字并且只搜索
-         ;; 个人文件。
-         (jianpin-words
-          (when (and (> (length (car imobjs)) 1) pyim-enable-shortcode)
-            (pyim-dcache-get
-             (mapconcat #'identity
-                        (pyim-codes-create (car imobjs) scheme-name 1)
-                        "-")
-             '(ishortcode2word))))
-         znabc-words
-         pinyin-chars
-         personal-words
-         common-words)
+  (unless async
+    (let* (;; 如果输入 "ni-hao" ，搜索 code 为 "n-h" 的词条做为联想词。
+           ;; 搜索首字母得到的联想词太多，这里限制联想词要大于两个汉字并且只搜索
+           ;; 个人文件。
+           (jianpin-words
+            (when (and (> (length (car imobjs)) 1) pyim-enable-shortcode)
+              (pyim-dcache-get
+               (mapconcat #'identity
+                          (pyim-codes-create (car imobjs) scheme-name 1)
+                          "-")
+               '(ishortcode2word))))
+           znabc-words
+           pinyin-chars
+           personal-words
+           common-words)
 
-    ;; 智能ABC模式，得到尽可能的拼音组合，查询这些组合，得到的词条做
-    ;; 为联想词。
-    (let* ((codes (pyim-codes-create (car imobjs) scheme-name))
-           (n (- (length codes) 1))
-           output)
-      (dotimes (i (- n 1))
-        (let ((lst (cl-subseq codes 0 (- n i))))
-          (push (mapconcat #'identity lst "-") output)))
-      (dolist (code (reverse output))
-        (setq znabc-words (append znabc-words (pyim-dcache-get code)))))
+      ;; 智能ABC模式，得到尽可能的拼音组合，查询这些组合，得到的词条做
+      ;; 为联想词。
+      (let* ((codes (pyim-codes-create (car imobjs) scheme-name))
+             (n (- (length codes) 1))
+             output)
+        (dotimes (i (- n 1))
+          (let ((lst (cl-subseq codes 0 (- n i))))
+            (push (mapconcat #'identity lst "-") output)))
+        (dolist (code (reverse output))
+          (setq znabc-words (append znabc-words (pyim-dcache-get code)))))
 
-    (dolist (imobj imobjs)
+      (dolist (imobj imobjs)
+        (setq personal-words
+              (append personal-words
+                      (pyim-dcache-get
+                       (mapconcat #'identity
+                                  (pyim-codes-create imobj scheme-name)
+                                  "-")
+                       (if pyim-enable-shortcode
+                           '(icode2word ishortcode2word)
+                         '(icode2word)))))
+
+        (setq common-words (delete-dups common-words))
+        (setq common-words
+              (let* ((cands (pyim-dcache-get
+                             (mapconcat #'identity
+                                        (pyim-codes-create imobj scheme-name)
+                                        "-")
+                             (if pyim-enable-shortcode
+                                 '(code2word shortcode2word)
+                               '(code2word)))))
+                (cond
+                 ((and (> (length cands) 0)
+                       (> (length common-words) 0)
+                       (or (eq 1 (length imobj))
+                           (eq 2 (length imobj))))
+                  ;; 两个单字或者两字词序列合并,确保常用字词在前面
+                  (let* ((size (min (length cands) (length common-words)))
+                         new-common-words
+                         (i 0))
+                    ;; 两个序列轮流取出一个元素输入新序列
+                    (while (< i size)
+                      (push (nth i common-words) new-common-words)
+                      (push (nth i cands) new-common-words)
+                      (setq i (1+ i)))
+                    ;; 较长序列的剩余元素加入新序列
+                    (append (nreverse new-common-words)
+                            (nthcdr size (cond
+                                          ((< size (length cands))
+                                           cands)
+                                          ((< size (length common-words))
+                                           common-words))))))
+                 (t
+                  (append common-words cands)))))
+
+        (setq pinyin-chars
+              (append pinyin-chars
+                      (pyim-dcache-get
+                       (car (pyim-codes-create imobj scheme-name))))))
+
+      ;; 使用词频信息，对个人词库得到的候选词排序，
+      ;; 第一个词的位置比较特殊，不参与排序，
+      ;; 具体原因请参考 `pyim-page-select-word' 中的 comment.
       (setq personal-words
-            (append personal-words
-                    (pyim-dcache-get
-                     (mapconcat #'identity
-                                (pyim-codes-create imobj scheme-name)
-                                "-")
-                     (if pyim-enable-shortcode
-                         '(icode2word ishortcode2word)
-                       '(icode2word)))))
+            `(,(car personal-words)
+              ,@(pyim-dcache-call-api
+                 'sort-words (cdr personal-words))))
 
-      (setq common-words (delete-dups common-words))
-      (setq common-words
-            (let* ((cands (pyim-dcache-get
-                           (mapconcat #'identity
-                                      (pyim-codes-create imobj scheme-name)
-                                      "-")
-                           (if pyim-enable-shortcode
-                               '(code2word shortcode2word)
-                             '(code2word)))))
-              (cond
-               ((and (> (length cands) 0)
-                     (> (length common-words) 0)
-                     (or (eq 1 (length imobj))
-                         (eq 2 (length imobj))))
-                ;; 两个单字或者两字词序列合并,确保常用字词在前面
-                (let* ((size (min (length cands) (length common-words)))
-                       new-common-words
-                       (i 0))
-                  ;; 两个序列轮流取出一个元素输入新序列
-                  (while (< i size)
-                    (push (nth i common-words) new-common-words)
-                    (push (nth i cands) new-common-words)
-                    (setq i (1+ i)))
-                  ;; 较长序列的剩余元素加入新序列
-                  (append (nreverse new-common-words)
-                          (nthcdr size (cond
-                                        ((< size (length cands))
-                                         cands)
-                                        ((< size (length common-words))
-                                         common-words))))))
-               (t
-                (append common-words cands)))))
+      ;; Debug
+      (when pyim-debug
+        (princ (list :imobjs imobjs
+                     :personal-words personal-words
+                     :common-words common-words
+                     :jianpin-words jianpin-words
+                     :znabc-words znabc-words
+                     :pinyin-chars pinyin-chars)))
 
-      (setq pinyin-chars
-            (append pinyin-chars
-                    (pyim-dcache-get
-                     (car (pyim-codes-create imobj scheme-name))))))
+      (delete-dups
+       (delq nil
+             `(,@personal-words
+               ,@common-words
+               ,@jianpin-words
+               ,@znabc-words
+               ,@pinyin-chars))))))
 
-    ;; 使用词频信息，对个人词库得到的候选词排序，
-    ;; 第一个词的位置比较特殊，不参与排序，
-    ;; 具体原因请参考 `pyim-page-select-word' 中的 comment.
-    (setq personal-words
-          `(,(car personal-words)
-            ,@(pyim-dcache-call-api
-               'sort-words (cdr personal-words))))
-
-    ;; Debug
-    (when pyim-debug
-      (princ (list :imobjs imobjs
-                   :personal-words personal-words
-                   :common-words common-words
-                   :jianpin-words jianpin-words
-                   :znabc-words znabc-words
-                   :pinyin-chars pinyin-chars)))
-
-    (delete-dups
-     (delq nil
-           `(,@personal-words
-             ,@common-words
-             ,@jianpin-words
-             ,@znabc-words
-             ,@pinyin-chars)))))
-
-(defun pyim-candidates-create:shuangpin (imobjs _scheme-name)
+(defun pyim-candidates-create:shuangpin (imobjs _scheme-name &optional async)
   "`pyim-candidates-create' 处理双拼输入法的函数."
-  (pyim-candidates-create:quanpin imobjs 'quanpin))
+  (pyim-candidates-create:quanpin imobjs 'quanpin async))
 
 ;; ** 待输入字符串预览
 (defun pyim-preview-setup-overlay ()
