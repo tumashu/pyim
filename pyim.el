@@ -2206,6 +2206,17 @@ Return the input string.
     (pyim-outcome-handle 'last-char)
     (pyim-terminate-translation))))
 
+(defun pyim-candidates-create-timer-function ()
+  "Function used by `pyim-candidates-create-timer'"
+  (let* ((scheme-name (pyim-scheme-name))
+         (words (delete-dups (pyim-candidates-create pyim-imobjs scheme-name t))))
+    (when words
+      (setq pyim-candidates words)
+      (pyim-preview-refresh)
+      ;; NEED HELP: popup tooltop 无法使用，原因未知。
+      (unless (member pyim-page-tooltip '(popup))
+        (pyim-page-refresh)))))
+
 (defun pyim-entered-refresh-1 ()
   "查询 `pyim-entered-buffer' 光标前的拼音字符串（如果光标在行首则为光标后的）, 显示备选词等待用户选择。"
   (let* ((scheme-name (pyim-scheme-name))
@@ -2223,24 +2234,11 @@ Return the input string.
     (setq pyim-candidates-create-timer
           (run-with-timer
            1 nil
-           `(lambda ()
-              (if (functionp 'make-thread)
-                  (make-thread
-                   (lambda ()
-                     (let ((words (delete-dups (pyim-candidates-create pyim-imobjs ',scheme-name t))))
-                       (when words
-                         (setq pyim-candidates words)
-                         (pyim-preview-refresh)
-                         ;; NEED HELP: popup tooltop 无法使用，原因未知。
-                         (unless (member pyim-page-tooltip '(popup))
-                           (pyim-page-refresh)))))
-                   "pyim-candidates-create")
-                (let ((words (delete-dups (pyim-candidates-create pyim-imobjs ',scheme-name t))))
-                  (when words
-                    (setq pyim-candidates words)
-                    (pyim-preview-refresh)
-                    (unless (member pyim-page-tooltip '(popup))
-                      (pyim-page-refresh))))))))
+           (lambda ()
+             (if (functionp 'make-thread)
+                 (make-thread #'pyim-candidates-create-timer-function
+                              "pyim-candidates-create")
+               (pyim-candidates-create-timer-function)))))
     ;; 自动上屏功能
     (let ((autoselector-results
            (mapcar #'(lambda (x)
