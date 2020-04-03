@@ -2320,7 +2320,8 @@ Return the input string.
   (setq pyim-candidates nil)
   (setq pyim-candidates-last nil)
   (when pyim-candidates-create-timer
-    (cancel-timer pyim-candidates-create-timer))
+    (cancel-timer pyim-candidates-create-timer)
+    (setq pyim-candidates-create-timer nil))
   (setq pyim-assistant-scheme-enable nil)
   (setq pyim-force-input-chinese nil)
   (when (and (memq pyim-page-tooltip '(posframe child-frame))
