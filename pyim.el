@@ -1325,15 +1325,13 @@ dcache 文件的方法让 pyim 正常工作。")
 但同时产生了无效拼音 king .  用户手动输入的无效拼音无需考虑.
 因为用户有即时界面反馈,不可能连续输入无效拼音.")
 
-(defvar pyim-liberime-code-cache nil
-  "Cache used by `pyim-liberime-get-code'.")
-
-(declare-function  liberime-get-commit "liberime")
+(declare-function liberime-get-commit "liberime")
 (declare-function liberime-get-context "liberime")
 (declare-function liberime-clear-commit "liberime")
 (declare-function liberime-clear-composition "liberime")
 (declare-function liberime-search "liberime" (string limit))
 (declare-function liberime-get-preedit "liberime")
+(declare-function liberime-get-status "liberime")
 
 (defvar pyim-mode-map
   (let ((map (make-sparse-keymap))
@@ -2329,8 +2327,7 @@ Return the input string.
 
 (defun pyim-terminate-translation:rime ()
   (liberime-clear-commit)
-  (liberime-clear-composition)
-  (setq pyim-liberime-code-cache nil))
+  (liberime-clear-composition))
 
 ;; 分解拼音的相关函数
 (defun pyim-pinyin-get-shenmu (pinyin)
@@ -2727,11 +2724,6 @@ IMOBJS 获得候选词条。"
          (words (liberime-search s (if async
                                        nil
                                      (* pyim-page-length 2)))))
-    ;; 这个缓存用于加快 rime 多次选择上屏的速度。见
-    ;; `pyim-liberime-get-code', 也许这是过早的优化。。。。
-    ;; 未来也许应该重新考虑。
-    (unless async
-      (push (cons s words) pyim-liberime-code-cache))
     words))
 
 (defun pyim-candidates-create:quanpin (imobjs scheme-name &optional async)
@@ -3546,66 +3538,51 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
         (while status
           (let* ((context (liberime-get-context))
                  (menu (alist-get 'menu context))
+                 (last-page-p (alist-get 'last-page-p menu))
                  (candidates (alist-get 'candidates menu))
                  (pos (cl-position word candidates :test #'equal)))
-            (if pos
-                (progn
-                  (liberime-select-candidate pos)
+            (cond
+             (pos (liberime-select-candidate pos)
                   (setq status nil))
-              (liberime-process-key 65366))))))))
+             (last-page-p
+              (setq status nil)
+              (setq words nil))
+             (t (liberime-process-key 65366)))))))))
 
 (defun pyim-liberime-get-code (word input &optional limit)
   "Get the code of WORD from the beginning of INPUT.
 `liberime-search' with LIMIT argument is used internal."
-  (let* ((n (length word))
-         (i (min (length input) (* n 5)))
-         words words-1 str result1 result2)
-    (while (> i 0)
-      (setq str (substring input 0 i))
-      (setq words (cdr (assoc str pyim-liberime-code-cache)))
-      (when (and (= (length (car words)) n)
-                 ;; 先测试从 cache 中搜索到的词条是否包含 word, 速度很
-                 ;; 快。由于 cache 中一般只包含最常用的几十个词，如果
-                 ;; 测试不通过, 那么就通过 `liberime-search' 搜索，获
-                 ;; 取更多的词条来测试，之所以进行两步处理，是为了规避
-                 ;; `liberime-search' 性能问题。
-                 (or (member word words)
-                     (member word (setq words-1 (liberime-search str limit)))))
-        (push str result1))
-      (when (or (member word words)
-                (member word words-1))
-        (push str result2))
-      (setq i (- i 1)))
-    (cond
-     ;; 不同的输入法处理方式也不一样，这里使用一套笨办法探测当前是什么
-     ;; 类型的输入法输入法：
-
-     ;; 1. input 的第一个字符，与 word 的第一个汉字拼音首字母对应。
-     ;; 2. 获取 "ziji" 对应的词条列表，词条列表中包含 “自己” 这个词。
-
-     ;; 如果符合上面两条规则，那么就可以大致判断，当前输入法可能是全屏
-     ;; 或者双拼。
-     ((and
-       (let ((szm (substring input 0 1))
-             (szm-list
-              (mapcar (lambda (x)
-                        (and (stringp x)
-                             (substring x 0 1)))
-                      (pyim-cchar2pinyin-get
-                       (substring word 0 1)))))
-         (if szm-list
-             (member szm szm-list)
-           ;; 如果 szm-list 为空，那说明待处理的汉字没有包含在 pyim-pymap
-           ;; 中，有可能是繁体字或者生僻字，直接放行。
-           t))
-       (member "自己" (liberime-search "ziji" limit)))
-      (or (car (reverse result1))
-          (car (reverse result2))))
-     (t
-      (or (car (reverse result2))
-          (car (reverse result1)))))))
-
-;; (pyim-liberime-get-code "你好" "nihaoma")
+  (cond
+   ;; 处理基于语音的输入法，比如：拼音，这类输入法 preedit 一般用空格
+   ;; 分隔，与汉字一一对应。
+   ((string-match-p
+     (mapconcat #'identity
+                '("pinyin" "luna" "terra" "bopomofo"
+                  "combo" "stenotype" "jyut6ping3"
+                  "wugniu" "soutzoe" "zyenpheng"
+                  "sampheng")
+                "\\|")
+     (alist-get 'schema_id (liberime-get-status)))
+    (liberime-search input 1)
+    (let* ((n (length word))
+           (preedit (cl-subseq
+                     (split-string
+                      (liberime-get-preedit))
+                     0 n))
+           (i (min (length input) (* n 5)))
+           str)
+      (while (> i 0)
+        (setq str (substring input 0 i))
+        (liberime-search str 1)
+        (if (equal preedit
+                   (split-string
+                    (liberime-get-preedit)))
+            (setq i 0)
+          (setq i (- i 1))))
+      str))
+   ;; 主要处理非语音类输入法，比如字形输入法，由于暂时找不到通用的处理
+   ;; 方式，暂时不做处理。
+   (t input)))
 
 (defun pyim-page-select-word-by-number (&optional n)
   "使用数字编号来选择对应的词条。"
