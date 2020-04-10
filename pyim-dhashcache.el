@@ -34,10 +34,8 @@
 排序使用 `pyim-dhashcache-iword2count' 中记录的词频信息"
   (sort words-list
         #'(lambda (a b)
-            (let ((a (car (split-string a ":")))
-                  (b (car (split-string b ":"))))
-              (> (or (gethash a pyim-dhashcache-iword2count) 0)
-                 (or (gethash b pyim-dhashcache-iword2count) 0))))))
+            (> (or (gethash a pyim-dhashcache-iword2count) 0)
+               (or (gethash b pyim-dhashcache-iword2count) 0)))))
 
 (defun pyim-dhashcache-get-shortcode (code)
   "获取一个 CODE 的所有简写.
@@ -132,9 +130,9 @@
                    (puthash x
                             (mapcar
                              #'(lambda (word)
-                                 (if (string-match-p ":"  word)
+                                 (if (get-text-property 0 :comments word)
                                      word
-                                   (concat word ":" (substring key (length x)))))
+                                   (propertize word :comments (substring key (length x)))))
                              (delete-dups `(,@value ,@(gethash x pyim-dhashcache-shortcode2word))))
                             pyim-dhashcache-shortcode2word)))
              pyim-dhashcache-code2word)
@@ -166,9 +164,9 @@
                                ;; ----------------------
                                ;; | 1. 莁aa 2.匶wv ... |
                                ;; ----------------------
-                               (if (string-match-p ":"  word)
+                               (if (get-text-property 0 :comments word)
                                    word
-                                 (concat word ":" (substring key (length x)))))
+                                 (propertize word :comments (substring key (length x)))))
                            (delete-dups `(,@value ,@(gethash x pyim-dhashcache-shortcode2word))))
                           pyim-dhashcache-shortcode2word)))
            pyim-dhashcache-code2word)

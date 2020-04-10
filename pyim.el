@@ -2905,6 +2905,8 @@ pyim 会使用 emacs overlay 机制在 *待输入buffer* 光标处高亮显示�
              (car candidate)
            candidate)))
     (if (stringp output)
+        ;; 注：五笔支持 comments 遗留下来的代码，现在作为兼容而保留，
+        ;; 等用户的 dcache 都升级之后，这个就可以删除了。
         (car (split-string output ":"))
       output)))
 
@@ -2994,9 +2996,10 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
          (candidates pyim-candidates)
          (candidate-showed
           (mapcar #'(lambda (x)
-                      (if (stringp x)
-                          (replace-regexp-in-string ":" "" x)
-                        x))
+                      (let ((comments (get-text-property 0 :comments x)))
+                        (if comments
+                            (concat x comments)
+                          x)))
                   (cl-subseq candidates start end)))
          (pos (- (min pyim-candidate-position (length candidates)) start))
          (page-info (make-hash-table)))
