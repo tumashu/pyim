@@ -130,9 +130,9 @@
                    (puthash x
                             (mapcar
                              #'(lambda (word)
-                                 (if (get-text-property 0 :comments word)
+                                 (if (get-text-property 0 :comment word)
                                      word
-                                   (propertize word :comments (substring key (length x)))))
+                                   (propertize word :comment (substring key (length x)))))
                              (delete-dups `(,@value ,@(gethash x pyim-dhashcache-shortcode2word))))
                             pyim-dhashcache-shortcode2word)))
              pyim-dhashcache-code2word)
@@ -164,9 +164,9 @@
                                ;; ----------------------
                                ;; | 1. 莁aa 2.匶wv ... |
                                ;; ----------------------
-                               (if (get-text-property 0 :comments word)
+                               (if (get-text-property 0 :comment word)
                                    word
-                                 (propertize word :comments (substring key (length x)))))
+                                 (propertize word :comment (substring key (length x)))))
                            (delete-dups `(,@value ,@(gethash x pyim-dhashcache-shortcode2word))))
                           pyim-dhashcache-shortcode2word)))
            pyim-dhashcache-code2word)

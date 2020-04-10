@@ -2996,7 +2996,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
          (candidates pyim-candidates)
          (candidate-showed
           (mapcar #'(lambda (x)
-                      (let ((comments (get-text-property 0 :comments x)))
+                      (let ((comments (get-text-property 0 :comment x)))
                         (if comments
                             (concat x comments)
                           x)))
