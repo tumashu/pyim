@@ -3489,16 +3489,11 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
   (let* ((entered (pyim-entered-get 'point-before))
          (word (string-remove-prefix
                 (or (pyim-outcome-get 1) "") (pyim-outcome-get)))
+         (code (pyim-liberime-get-code word entered))
          (to-be-translated
-          (if (= pyim-candidate-position 1)
-              (progn (push entered pyim-liberime-code-log)
-                     (push word pyim-liberime-word-log)
-                     "")
-            (let* ((code (pyim-liberime-get-code
-                          word entered pyim-candidate-position)))
-              (push code pyim-liberime-code-log)
-              (push word pyim-liberime-word-log)
-              (string-remove-prefix code entered)))))
+          (string-remove-prefix code entered)))
+    (push code pyim-liberime-code-log)
+    (push word pyim-liberime-word-log)
     (if (or (> (length to-be-translated) 0) ;是否有光标前未转换的字符串
             (> (length (pyim-entered-get 'point-after)) 0)) ;是否有光标后字符串
         (progn
@@ -3544,12 +3539,13 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
             (cond
              (pos (liberime-select-candidate pos)
                   (setq status nil))
-             (last-page-p
+             ((or last-page-p
+                  (not menu))
               (setq status nil)
               (setq words nil))
              (t (liberime-process-key 65366)))))))))
 
-(defun pyim-liberime-get-code (word input &optional limit)
+(defun pyim-liberime-get-code (word input &optional _limit)
   "Get the code of WORD from the beginning of INPUT.
 `liberime-search' with LIMIT argument is used internal."
   (cond
@@ -3563,20 +3559,17 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
                   "sampheng")
                 "\\|")
      (alist-get 'schema_id (liberime-get-status)))
-    (liberime-search input 1)
+    (unless (liberime-get-preedit)
+      (liberime-search input 1))
     (let* ((n (length word))
-           (preedit (cl-subseq
-                     (split-string
-                      (liberime-get-preedit))
-                     0 n))
+           (preedit (split-string (liberime-get-preedit) "[ ']+"))
+           (preedit-list (cl-subseq preedit 0 (min n (length preedit))))
            (i (min (length input) (* n 5)))
            str)
       (while (> i 0)
         (setq str (substring input 0 i))
         (liberime-search str 1)
-        (if (equal preedit
-                   (split-string
-                    (liberime-get-preedit)))
+        (if (equal preedit-list (split-string (liberime-get-preedit) "[ ']+"))
             (setq i 0)
           (setq i (- i 1))))
       str))
