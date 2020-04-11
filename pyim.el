@@ -1853,7 +1853,8 @@ ONlY works with quanpin."
           (unless (pyim-string-match-p "[^ a-z-]" code)
             (pyim-liberime-create-word
              (split-string code "-")
-             (remove "" (split-string word "")))))))))
+             (remove "" (split-string word "")))
+            (pyim-terminate-translation:rime)))))))
 
 (defun pyim-hanzi2xingma (string scheme-name &optional return-list)
   "返回汉字 STRING 对应形码方案 SCHEME-NAME 的 code (不包括
