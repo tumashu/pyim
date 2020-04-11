@@ -3524,26 +3524,30 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
 2. WORDS -> (\"你好\" \"吗\")
 
 在 rime 后端将生成 “你好吗” 这个词条。"
-  (liberime-clear-composition)
-  (dolist (key (string-to-list (mapconcat #'identity codes "")))
-    (liberime-process-key key))
-  (let (word)
-    (while (setq word (pop words))
-      (let ((status t))
-        (while status
-          (let* ((context (liberime-get-context))
-                 (menu (alist-get 'menu context))
-                 (last-page-p (alist-get 'last-page-p menu))
-                 (candidates (alist-get 'candidates menu))
-                 (pos (cl-position word candidates :test #'equal)))
-            (cond
-             (pos (liberime-select-candidate pos)
-                  (setq status nil))
-             ((or last-page-p
-                  (not menu))
-              (setq status nil)
-              (setq words nil))
-             (t (liberime-process-key 65366)))))))))
+  (when (and (listp codes)
+             (listp words)
+             (not (cl-find-if-not #'stringp codes))
+             (not (cl-find-if-not #'stringp words)))
+    (liberime-clear-composition)
+    (dolist (key (string-to-list (mapconcat #'identity codes "")))
+      (liberime-process-key key))
+    (let (word)
+      (while (setq word (pop words))
+        (let ((status t))
+          (while status
+            (let* ((context (liberime-get-context))
+                   (menu (alist-get 'menu context))
+                   (last-page-p (alist-get 'last-page-p menu))
+                   (candidates (alist-get 'candidates menu))
+                   (pos (cl-position word candidates :test #'equal)))
+              (cond
+               (pos (liberime-select-candidate pos)
+                    (setq status nil))
+               ((or last-page-p
+                    (not menu))
+                (setq status nil)
+                (setq words nil))
+               (t (liberime-process-key 65366))))))))))
 
 (defun pyim-liberime-get-code (word input &optional _limit)
   "Get the code of WORD from the beginning of INPUT.
