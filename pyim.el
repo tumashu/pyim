@@ -1796,6 +1796,10 @@ code 对应的中文词条了."
   (pyim-dcache-call-api 'insert-word-into-icode2word word pinyin prepend))
 
 (defun pyim-create-word (word &optional prepend wordcount-handler)
+  (pyim-create-pyim-word word prepend wordcount-handler)
+  (pyim-create-rime-word word))
+
+(defun pyim-create-pyim-word (word &optional prepend wordcount-handler)
   "将中文词条 WORD 添加编码后，保存到用户选择过的词生成的缓存中。
 
 词条 WORD 默认会追加到已有词条的后面，如果 PREPEND 设置为 t,
@@ -1838,12 +1842,13 @@ BUG：拼音无法有效地处理多音字。"
       ;; TODO, 排序个人词库?
       )))
 
-(defun pyim-create-quanpin-rime-word (word)
-  "Create quanpin WORD at rime backend."
+(defun pyim-create-rime-word (word)
+  "Create WORD at current rime backend.
+ONlY works with quanpin."
   ;; 判断当前 rime 环境是否支持全拼，如果支持，就添加词条。
   (ignore-errors
     (let ((codes (pyim-hanzi2pinyin word nil "-" t nil t)))
-      (when (member "你好" (ignore-errors (liberime-search "nihao" 10)))
+      (when (member "你好" (liberime-search "nihao" 10))
         (dolist (code codes)
           (unless (pyim-string-match-p "[^ a-z-]" code)
             (pyim-liberime-create-word
@@ -1917,7 +1922,6 @@ code-prefix)。当RETURN-LIST 设置为 t 时，返回一个 code list。"
   (let* ((string (pyim-cstring-at-point (or number 2))))
     (when string
       (pyim-create-word string)
-      (pyim-create-quanpin-rime-word string)
       (unless silent
         (message "将词条: \"%s\" 加入 personal 缓冲。" string)))))
 
@@ -1947,7 +1951,6 @@ code-prefix)。当RETURN-LIST 设置为 t 时，返回一个 code list。"
         (if (not (string-match-p "^\\cc+\\'" string))
             (error "不是纯中文字符串")
           (pyim-create-word string)
-          (pyim-create-quanpin-rime-word string)
           (message "将词条: %S 插入 personal file。" string))))))
 
 (defun pyim-search-word-code ()
@@ -3465,8 +3468,8 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
       ;; 3. pyim 在启动的时候，会使用词频信息，对个人词库作一次排序。
       ;;    用作 pyim 下一次使用。
       (if (member (pyim-outcome-get) pyim-candidates)
-          (pyim-create-word (pyim-outcome-get) t)
-        (pyim-create-word (pyim-outcome-get)))
+          (pyim-create-pyim-word (pyim-outcome-get) t)
+        (pyim-create-pyim-word (pyim-outcome-get)))
 
       (pyim-terminate-translation)
       ;; pyim 使用这个 hook 来处理联想词。
@@ -3487,7 +3490,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
         (pyim-entered-refresh))
     (when (string-empty-p (pyim-code-search (pyim-outcome-get)
                                             (pyim-scheme-name)))
-      (pyim-create-word (pyim-outcome-get) t))
+      (pyim-create-pyim-word (pyim-outcome-get) t))
     (pyim-terminate-translation)
     ;; pyim 使用这个 hook 来处理联想词。
     (run-hooks 'pyim-page-select-finish-hook)))
@@ -3521,8 +3524,8 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
       ;; 使用 rime 的同时，也附带的优化 quanpin 的词库。
       (let ((pyim-default-scheme 'quanpin))
         (if (member (pyim-outcome-get) pyim-candidates)
-            (pyim-create-word (pyim-outcome-get) t)
-          (pyim-create-word (pyim-outcome-get))))
+            (pyim-create-pyim-word (pyim-outcome-get) t)
+          (pyim-create-pyim-word (pyim-outcome-get))))
       (setq pyim-liberime-code-log nil)
       (setq pyim-liberime-word-log nil)
       (pyim-terminate-translation)
