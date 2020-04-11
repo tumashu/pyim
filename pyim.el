@@ -1820,10 +1820,10 @@ BUG：拼音无法有效地处理多音字。"
            (code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
            (codes (or (when (> (length code) 0)
                         (list code))
-                      (if (eq class 'xingma)
-                          (pyim-hanzi2xingma word scheme-name t)
-                        ;;拼音使用了多音字校正
-                        (pyim-hanzi2pinyin word nil "-" t nil t)))))
+                      (cond ((eq class 'xingma)
+                             (pyim-hanzi2xingma word scheme-name t))
+                            ;;拼音使用了多音字校正
+                            (t (pyim-hanzi2pinyin word nil "-" t nil t))))))
       ;; 保存对应词条的词频
       (when (> (length word) 0)
         (pyim-dcache-call-api
@@ -1836,7 +1836,12 @@ BUG：拼音无法有效地处理多音字。"
         (unless (pyim-string-match-p "[^ a-z-]" code)
           (pyim-insert-word-into-icode2word word
                                             (concat (or code-prefix "") code)
-                                            prepend)))
+                                            prepend)
+          ;; 判断当前 rime 环境是否支持全拼，如果支持，就添加词条。
+          (when (member "你好" (ignore-errors (liberime-search "nihao" 10)))
+            (pyim-liberime-create-word
+             (split-string code "-")
+             (remove "" (split-string word ""))))))
       ;; TODO, 排序个人词库?
       )))
 
