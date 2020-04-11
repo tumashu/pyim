@@ -1795,7 +1795,7 @@ code 对应的中文词条了."
 (defun pyim-insert-word-into-icode2word (word pinyin prepend)
   (pyim-dcache-call-api 'insert-word-into-icode2word word pinyin prepend))
 
-(defun pyim-create-word (word &optional prepend wordcount-handler code scheme)
+(defun pyim-create-word (word &optional prepend wordcount-handler)
   "将中文词条 WORD 添加编码后，保存到用户选择过的词生成的缓存中。
 
 词条 WORD 默认会追加到已有词条的后面，如果 PREPEND 设置为 t,
@@ -1815,15 +1815,13 @@ BUG：拼音无法有效地处理多音字。"
              (not (pyim-string-match-p "\\CC" word)))
     ;; 记录最近创建的词条，用于快速删词功能。
     (setq pyim-last-created-word word)
-    (let* ((scheme-name (or scheme (pyim-scheme-name)))
+    (let* ((scheme-name (pyim-scheme-name))
            (class (pyim-scheme-get-option scheme-name :class))
            (code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
-           (codes (or (when (> (length code) 0)
-                        (list code))
-                      (cond ((eq class 'xingma)
-                             (pyim-hanzi2xingma word scheme-name t))
-                            ;;拼音使用了多音字校正
-                            (t (pyim-hanzi2pinyin word nil "-" t nil t))))))
+           (codes (cond ((eq class 'xingma)
+                         (pyim-hanzi2xingma word scheme-name t))
+                        ;;拼音使用了多音字校正
+                        (t (pyim-hanzi2pinyin word nil "-" t nil t)))))
       ;; 保存对应词条的词频
       (when (> (length word) 0)
         (pyim-dcache-call-api
@@ -1836,14 +1834,21 @@ BUG：拼音无法有效地处理多音字。"
         (unless (pyim-string-match-p "[^ a-z-]" code)
           (pyim-insert-word-into-icode2word word
                                             (concat (or code-prefix "") code)
-                                            prepend)
-          ;; 判断当前 rime 环境是否支持全拼，如果支持，就添加词条。
-          (when (member "你好" (ignore-errors (liberime-search "nihao" 10)))
-            (pyim-liberime-create-word
-             (split-string code "-")
-             (remove "" (split-string word ""))))))
+                                            prepend)))
       ;; TODO, 排序个人词库?
       )))
+
+(defun pyim-create-quanpin-rime-word (word)
+  "Create quanpin WORD at rime backend."
+  ;; 判断当前 rime 环境是否支持全拼，如果支持，就添加词条。
+  (ignore-errors
+    (let ((codes (pyim-hanzi2pinyin word nil "-" t nil t)))
+      (when (member "你好" (ignore-errors (liberime-search "nihao" 10)))
+        (dolist (code codes)
+          (unless (pyim-string-match-p "[^ a-z-]" code)
+            (pyim-liberime-create-word
+             (split-string code "-")
+             (remove "" (split-string word "")))))))))
 
 (defun pyim-hanzi2xingma (string scheme-name &optional return-list)
   "返回汉字 STRING 对应形码方案 SCHEME-NAME 的 code (不包括
@@ -1912,6 +1917,7 @@ code-prefix)。当RETURN-LIST 设置为 t 时，返回一个 code list。"
   (let* ((string (pyim-cstring-at-point (or number 2))))
     (when string
       (pyim-create-word string)
+      (pyim-create-quanpin-rime-word string)
       (unless silent
         (message "将词条: \"%s\" 加入 personal 缓冲。" string)))))
 
@@ -1941,6 +1947,7 @@ code-prefix)。当RETURN-LIST 设置为 t 时，返回一个 code list。"
         (if (not (string-match-p "^\\cc+\\'" string))
             (error "不是纯中文字符串")
           (pyim-create-word string)
+          (pyim-create-quanpin-rime-word string)
           (message "将词条: %S 插入 personal file。" string))))))
 
 (defun pyim-search-word-code ()
@@ -3511,10 +3518,11 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
       (pyim-liberime-create-word
        (reverse pyim-liberime-code-log)
        (reverse pyim-liberime-word-log))
-      (if (member (pyim-outcome-get) pyim-candidates)
-          ;; 使用 rime 的同时，也附带的优化 quanpin 的词库。
-          (pyim-create-word (pyim-outcome-get) t nil nil 'quanpin)
-        (pyim-create-word (pyim-outcome-get) nil nil nil 'quanpin))
+      ;; 使用 rime 的同时，也附带的优化 quanpin 的词库。
+      (let ((pyim-default-scheme 'quanpin))
+        (if (member (pyim-outcome-get) pyim-candidates)
+            (pyim-create-word (pyim-outcome-get) t)
+          (pyim-create-word (pyim-outcome-get))))
       (setq pyim-liberime-code-log nil)
       (setq pyim-liberime-word-log nil)
       (pyim-terminate-translation)
