@@ -343,7 +343,10 @@
 ;;               '(probe-function1 probe-function2 probe-function3))
 ;; #+END_EXAMPLE
 
-;; 注：上述函数列表中，任意一个函数的返回值为 t 时，pyim 切换到英文输入模式。
+;; 注意事项：
+;; 1. 上述函数列表中，任意一个函数的返回值为 t 时，pyim 切换到英文输入模式。
+;; 2. [[https://github.com/DogLooksGood/emacs-rime][Emacs-rime]] 和 [[https://github.com/laishulu/emacs-smart-input-source][smart-input-source]]
+;;    也有类似探针的功能，其对应函数可以直接或者简单包装后作为 pyim 探针使用，有兴趣的同学可以了解一下。
 
 ;; **** 根据环境自动切换到半角标点输入模式
 
