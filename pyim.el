@@ -2223,8 +2223,8 @@ Return the input string.
     (when words
       (setq pyim-candidates words)
       (pyim-preview-refresh)
-      ;; NEED HELP: popup tooltop 无法使用，原因未知。
-      (unless (member pyim-page-tooltip '(popup))
+      ;; NEED HELP: 目前只有 posframe 可以正确处理异步刷新 page
+      (when (member pyim-page-tooltip '(posframe))
         (pyim-page-refresh)))))
 
 (defun pyim-entered-refresh-1 ()
