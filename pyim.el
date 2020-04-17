@@ -2224,7 +2224,8 @@ Return the input string.
       (setq pyim-candidates words)
       (pyim-preview-refresh)
       ;; NEED HELP: 目前只有 posframe 可以正确处理异步刷新 page
-      (when (member pyim-page-tooltip '(posframe))
+      (when (and (member pyim-page-tooltip '(posframe minibuffer))
+                 (not (eq (selected-window) (minibuffer-window))))
         (pyim-page-refresh)))))
 
 (defun pyim-entered-refresh-1 ()
