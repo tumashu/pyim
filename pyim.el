@@ -3574,13 +3574,12 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
   "Get the code of WORD from the beginning of INPUT.
 `liberime-search' with LIMIT argument is used internal."
   (cond
-   ;; 处理基于语音的输入法，比如：拼音，这类输入法 preedit 一般用空格
+   ;; 处理圂档语音的输入法，比如：拼音，这类输入法 preedit 一般用空格
    ;; 分隔，与汉字一一对应。
    ((string-match-p
      (mapconcat #'identity
-                '("pinyin" "luna" "terra" "bopomofo"
-                  "combo" "stenotype" "jyut6ping3"
-                  "wugniu" "soutzoe" "zyenpheng"
+                '("pinyin" "luna" "terra" "bopomofo" "stenotype"
+                  "jyut6ping3" "wugniu" "soutzoe" "zyenpheng"
                   "sampheng")
                 "\\|")
      (alist-get 'schema_id (liberime-get-status)))
