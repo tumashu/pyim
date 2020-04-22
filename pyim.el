@@ -3597,8 +3597,21 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
             (setq i 0)
           (setq i (- i 1))))
       str))
-   ;; 主要处理非语音类输入法，比如字形输入法，由于暂时找不到通用的处理
-   ;; 方式，暂时不做处理。
+   ((string-match-p
+     (mapconcat #'identity
+                '("wubi86")
+                "\\|")
+     (alist-get 'schema_id (liberime-get-status)))
+    (let ((lst (split-string (liberime-get-preedit) "[ ']+"))
+          (str "")
+          words)
+      (while lst
+        (setq str (concat str (pop lst)))
+        (setq words (liberime-search str 20))
+        (when (member word words)
+          (setq lst nil)))
+      (or str input)))
+   ;; 找不到通用的处理方式的话就不做截取处理。
    (t input)))
 
 (defun pyim-page-select-word-by-number (&optional n)
