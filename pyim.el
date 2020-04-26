@@ -2502,13 +2502,14 @@ Return the input string.
 
 (defun pyim-scheme-get-option (scheme-name option)
   "获取名称为 SCHEME-NAME 的输入法方案，并提取其属性 OPTION 。"
-  (let* ((scheme (pyim-scheme-get scheme-name))
-         (scheme-inhert
-          (pyim-scheme-get
-           (plist-get (cdr scheme) :inherit))))
-    (when scheme
-      (or (plist-get (cdr scheme) option)
-          (plist-get (cdr scheme-inhert) option)))))
+  (when scheme-name
+    (let* ((scheme (pyim-scheme-get scheme-name))
+           (scheme-inherit
+            (car (pyim-scheme-get
+                  (plist-get (cdr scheme) :inherit)))))
+      (if (member option (cdr scheme))
+          (plist-get (cdr scheme) option)
+        (pyim-scheme-get-option scheme-inherit option)))))
 
 (defun pyim-imobjs-create (entered &optional scheme-name)
   "按照 SCHEME-NAME 对应的输入法方案，从 ENTERED 字符串中创建一个
