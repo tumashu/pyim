@@ -2480,10 +2480,8 @@ Return the input string.
           (if (eq class 'rime)
               (if (featurep 'liberime-core)
                   scheme-name
-                (message "Pyim: liberime is not ready, fallback to quanpin scheme.")
                 'quanpin)
             scheme-name))
-      (message "Pyim: invalid scheme, fallback to quanpin scheme.")
       'quanpin)))
 
 (defun pyim-toggle-assistant-scheme ()
