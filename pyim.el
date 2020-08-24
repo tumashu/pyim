@@ -3607,9 +3607,14 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
 
 (defun pyim-liberime-get-code (word input &optional _limit)
   "Get the code of WORD from the beginning of INPUT.
-`liberime-search' with LIMIT argument is used internal."
+`liberime-search' with LIMIT argument is used internal.
+
+NOTE: This is a hacky approach, the better way is let librime
+provide an API.
+
+Please see: https://github.com/rime/librime/issues/349"
   (cond
-   ;; 处理圂档语音的输入法，比如：拼音，这类输入法 preedit 一般用空格
+   ;; 处理基于语音的输入法，比如：拼音，这类输入法 preedit 一般用空格
    ;; 分隔，与汉字一一对应。
    ((string-match-p
      (mapconcat #'identity
@@ -3634,7 +3639,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
       str))
    ((string-match-p
      (mapconcat #'identity
-                '("wubi86")
+                '("wubi86" "wubi98")
                 "\\|")
      (alist-get 'schema_id (liberime-get-status)))
     (let ((lst (split-string (liberime-get-preedit) "[ ']+"))
