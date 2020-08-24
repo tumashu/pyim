@@ -3615,7 +3615,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
      (mapconcat #'identity
                 '("pinyin" "luna" "terra" "bopomofo" "stenotype"
                   "jyut6ping3" "wugniu" "soutzoe" "zyenpheng"
-                  "sampheng")
+                  "sampheng" "clover")
                 "\\|")
      (alist-get 'schema_id (liberime-get-status)))
     (unless (liberime-get-preedit)
