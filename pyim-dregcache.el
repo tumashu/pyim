@@ -18,6 +18,8 @@
 ;;; Code:
 ;; * 代码                                                                 :code:
 (require 'pyim-common)
+(require 'subr-x)
+
 (defvar pyim-dregcache-cache nil)
 (defvar pyim-dregcache-icode2word nil)
 (defvar pyim-dregcache-iword2count nil)
