@@ -117,6 +117,7 @@
 ;;   ;; 使用 popup-el 来绘制选词框, 如果用 emacs26, 建议设置
 ;;   ;; 为 'posframe, 速度很快并且菜单不会变形，不过需要用户
 ;;   ;; 手动安装 posframe 包。
+;;   ;; (setq pyim-page-tooltip 'posframe)
 ;;   (setq pyim-page-tooltip 'popup)
 
 ;;   ;; 选词框显示5个候选词
