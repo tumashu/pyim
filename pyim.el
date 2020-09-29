@@ -1053,6 +1053,8 @@ dcache 文件的方法让 pyim 正常工作。")
 (declare-function liberime-search "liberime" (string limit))
 (declare-function liberime-get-preedit "liberime")
 (declare-function liberime-get-status "liberime")
+(declare-function liberime-process-key "liberime" (keycode &optional mask))
+(declare-function liberime-select-candidate "liberime" (num))
 
 (defvar pyim-mode-map
   (let ((map (make-sparse-keymap))
@@ -2153,7 +2155,7 @@ Return the input string.
   (if (listp scheme)
       (let ((scheme-name (car scheme)))
         (when (symbolp scheme-name)
-          (setq pyim-scheme
+          (setq pyim-schemes
                 (remove (assoc scheme-name pyim-schemes)
                         pyim-schemes)))
         (push scheme pyim-schemes))
