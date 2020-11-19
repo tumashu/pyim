@@ -20,6 +20,9 @@
 (require 'pyim-common)
 (require 'subr-x)
 
+(defvar pyim-dregcache-partition-minimum-size 32
+  "小于这个数值(单位为M)的词典不需要用分区算法加速.可节约一半的内存.")
+
 (defvar pyim-dregcache-cache nil)
 (defvar pyim-dregcache-icode2word nil)
 (defvar pyim-dregcache-iword2count nil)
@@ -82,8 +85,9 @@
   "将 RAW-CONTENT 划分成可以更高效搜索的缓冲区."
   (let* (rlt)
     (cond
-     ;; 小于1M的词库不用划分"子搜索区域"
-     ((< (length raw-content) (* 1 1024 1024))
+     ;; 小词库不用划分"子搜索区域".
+     ;; `pyim-dregcache-partition-minimum-size'定义了小词库的最大值
+     ((< (length raw-content) (* pyim-dregcache-partition-minimum-size 1024 1024))
       (setq rlt (list :content raw-content)))
      (t
       (let* ((chars "bcdefghjklmnopqrstwxyz")
