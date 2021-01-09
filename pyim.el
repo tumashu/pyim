@@ -4035,7 +4035,7 @@ PUNCT-LIST 格式类似：
   (pyim-entered-delete-backward-imelem t))
 
 (define-obsolete-function-alias
-  'pyim-convert-code-at-point 'pyim-convert-string-at-point)
+  'pyim-convert-code-at-point 'pyim-convert-string-at-point "2.0")
 
 ;;;###autoload
 (defun pyim-convert-string-at-point (&optional return-cregexp)
