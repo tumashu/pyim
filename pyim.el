@@ -998,6 +998,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 
 (defvar pyim-load-hook nil)
 (defvar pyim-active-hook nil)
+(defvar pyim-inactive-hook nil)
 
 (defvar pyim-punctuation-translate-p '(auto yes no)
   "这个变量的第一个元素的取值用于控制标点符号全角半角模式切换.
@@ -4123,7 +4124,8 @@ PUNCT-LIST 格式类似：
 (defun pyim-inactivate ()
   "取消 pyim 的激活状态."
   (interactive)
-  (mapc 'kill-local-variable pyim-local-variable-list))
+  (mapc 'kill-local-variable pyim-local-variable-list)
+  (run-hooks 'pyim-inactive-hook))
 
 (defun pyim-toggle-input-ascii ()
   "pyim 切换中英文输入模式。同时调整标点符号样式。"
