@@ -116,11 +116,11 @@
 ;;   ;; 开启拼音搜索功能
 ;;   (pyim-isearch-mode 1)
 
-;;   ;; 使用 popup-el 来绘制选词框, 如果用 emacs26, 建议设置
-;;   ;; 为 'posframe, 速度很快并且菜单不会变形，不过需要用户
-;;   ;; 手动安装 posframe 包。
+;;   ;; 使用 posframe 绘制 page, (需要用户手动安装 posframe 包）。
 ;;   ;; (setq pyim-page-tooltip 'posframe)
-;;   (setq pyim-page-tooltip 'popup)
+
+;;   ;; 如果 posframe 不可用，可以试着安装 popup 包，然后设置：
+;;   ;; ;; (setq pyim-page-tooltip 'popup)
 
 ;;   ;; 选词框显示5个候选词
 ;;   (setq pyim-page-length 5)
@@ -759,12 +759,16 @@ pyim 输入半角标点，函数列表中每个函数都有一个参数：char �
   :group 'pyim
   :type 'number)
 
-(defcustom pyim-page-tooltip 'popup
+(defcustom pyim-page-tooltip 'posframe
   "如何绘制 pyim 选词框.
 
-1. 当这个变量取值为 posframe 时，使用 posframe 包来绘制选词框；
-2. 当这个变量取值为 minibuffer 时，使用 minibuffer 做为选词框；
-3. 当这个变量取值为 popup 时，使用 popup-el 包来绘制选词框；"
+1. 当这个变量取值为 posframe 时，使用 posframe 包来绘制选词框，
+   如果使用 emacs26 图形版的用户推荐使用这个选项。
+2. 当这个变量取值为 popup 时，使用 popup-el 包来绘制选词框，
+   这个选项可以在 emacs 图形版和终端版使用，速度没有 posframe 快，
+   有时会遇到选词框错位的问题；
+3. 当这个变量取值为 minibuffer 时，使用 minibuffer 做为选词框，
+   这个选项也作为其他选项不可用时的 fallback."
   :group 'pyim
   :type 'symbol)
 
