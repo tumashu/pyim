@@ -3327,10 +3327,11 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
                           :foreground-color (face-attribute 'pyim-page :foreground)
                           :internal-border-width pyim-posframe-border-width
                           :internal-border-color (face-attribute 'pyim-page-border :background)))
-          ((eq tooltip 'minibuffer)
-           (let ((max-mini-window-height (+ pyim-page-length 2)))
-             (message string)))
-          (t (popup-tip string :point position :margin 1)))))
+          ((and (eq tooltip 'popup)
+                (functionp 'popup-tip))
+           (popup-tip string :point position :margin 1))
+          (t (let ((max-mini-window-height (+ pyim-page-length 2)))
+               (message string))))))
 
 (defun pyim-posframe-valid-p ()
   "Test posframe's status."
