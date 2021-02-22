@@ -25,13 +25,67 @@
 
 ;;; Commentary:
 
+;; * 说明文档                                                              :doc:
+
+;; This file is converted from pinyin_simp.dict.yaml of
+;; [[https://github.com/rime/rime-pinyin-simp][rime-pinyin-simp]]
+
+;; rime-pinyin-simp use LGPL-3.0 License, while pinyin_simp.dict.yaml
+;; has the header like below:
+
+;; # Rime dictionary
+;; # encoding: utf-8
+;; #
+;; # A minimal Pinyin dictionary for simplified Chinese script
+;; #
+;; # Derived from android open source project:
+;; # http://android.git.kernel.org/?p=platform/packages/inputmethods/PinyinIME.git
+;; #
+
 ;; 这个文件是 pyim 内部使用的 "拼音-汉字" 对照表，
 ;; 这个对照表用来实现拼音查询功能，即，查询某个汉字对应的拼音代码。
 
-;; 词库中汉字拼音的信息从 android project 中得到：
-;; http://android.git.kernel.org/?p=platform/packages/inputmethods/PinyinIME.git
-
 ;; 注意： 这个文件 *不用于* 输入法自定义词库！！！
+
+;; (defun pyim-pymap-new nil)
+
+;; (defun pyim-pymap-importer ()
+;;   "将格式为：
+
+;; 你	ni
+;; 我	wo
+
+;; 的文件内容，转换为 pyim 的 pymap
+
+;; 注意： 这个文件中词条的词率由低到高排列。"
+;;   (interactive)
+;;   (let ((hashtable (make-hash-table :size 1000000 :test #'equal))
+;;         alist)
+;;     (while (not (eobp))
+;;       (let* ((begin (line-beginning-position))
+;;              (end (line-end-position))
+;;              (items (split-string
+;;                      (buffer-substring-no-properties begin end)
+;;                      "	"))
+;;              (word (nth 0 items))
+;;              (pinyin (nth 1 items)))
+;;         (when (and pinyin word)
+;;           (puthash pinyin
+;;                    (concat word
+;;                            (replace-regexp-in-string
+;;                             word ""
+;;                             (or (gethash pinyin hashtable) "")))
+;;                    hashtable)))
+;;       (forward-line 1))
+;;     (maphash
+;;      #'(lambda (key value)
+;;          (push (list key value) alist))
+;;      hashtable)
+;;     (setq pyim-pymap-new
+;;           (seq-sort
+;;            #'(lambda (a b)
+;;                (string< (car a) (car b)))
+;;            alist))))
 
 ;;; Code:
 
