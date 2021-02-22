@@ -8,6 +8,7 @@
 ;; Maintainer: Feng Shu <tumashu@163.com>
 ;; URL: https://github.com/tumashu/pyim
 ;; Keywords: convenience, Chinese, pinyin, input-method
+;; Package-Requires: ((emacs "24.4") (async "1.6") (xr "1.13"))
 
 ;; This file is part of GNU Emacs.
 
