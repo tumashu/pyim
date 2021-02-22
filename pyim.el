@@ -1349,7 +1349,7 @@ pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
   (when (eq (selected-window) (minibuffer-window))
     (add-hook 'minibuffer-exit-hook 'pyim-exit-from-minibuffer))
   (run-hooks 'pyim-active-hook)
-  (when (and (memq pyim-page-tooltip '(posframe child-frame))
+  (when (and (eq pyim-page-tooltip 'posframe)
              (not (pyim-posframe-valid-p)))
     (message "PYIM: posframe 没有正确安装或者当前 emacs 版本不支持 posframe。"))
   (when restart
@@ -2061,7 +2061,7 @@ Return the input string.
     (setq pyim-candidates-create-timer nil))
   (setq pyim-assistant-scheme-enable nil)
   (setq pyim-force-input-chinese nil)
-  (when (and (memq pyim-page-tooltip '(posframe child-frame))
+  (when (and (eq pyim-page-tooltip 'posframe)
              (pyim-posframe-valid-p))
     (posframe-hide pyim-page-tooltip-posframe-buffer))
   (pyim-entered-erase-buffer)
@@ -3317,7 +3317,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
 (defun pyim-page-tooltip-show (string position)
   "在 POSITION 位置，使用 posframe 或者 popup 显示字符串 STRING."
   (let ((tooltip pyim-page-tooltip))
-    (cond ((and (memq tooltip '(posframe child-frame))
+    (cond ((and (eq tooltip 'posframe)
                 (pyim-posframe-valid-p))
            (posframe-show pyim-page-tooltip-posframe-buffer
                           :string string
