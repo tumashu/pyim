@@ -712,7 +712,7 @@
      (or (cl-position b pyim-pymap-commonly-used-cchar :test #'equal) 1000000)))
 
 (defun pyim-pymap-sort-pymap ()
-  "对 `pyim-pymap' 的取值进行排序, 用于维护 pyim-pymap."
+  "对 `pyim-pymap' 重新排序, 这个函数主要用于维护 `pyim-pymap'."
   (let (pymap)
     (dolist (py pyim-pymap)
       (push (list (car py)
