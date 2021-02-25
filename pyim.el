@@ -2230,6 +2230,17 @@ Return the input string.
    :prefer-trigger-chars nil))
 
 (pyim-scheme-add
+ '(smzm
+   :document "三码郑码（至至）输入法。"
+   :class xingma
+   :first-chars "abcdefghijklmnopqrstuvwxyz"
+   :rest-chars "abcdefghijklmnopqrstuvwxyz"
+   :code-prefix "_" ;三码郑码输入法词库中所有的 code 都以 "_" 开头，防止词库冲突。
+   :code-split-length 3 ;默认将用户输入切成 3 个字符长的 code 列表（不计算 code-prefix）
+   :code-maximum-length 3 ;三码郑码词库中，code 的最大长度（不计算 code-prefix）
+   :prefer-trigger-chars nil))
+
+(pyim-scheme-add
  '(pyim-shuangpin
    :document "与 pyim 配合良好的双拼输入法方案，源自小鹤双拼方案。"
    :class shuangpin
