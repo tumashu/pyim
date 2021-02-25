@@ -251,6 +251,38 @@
 
 ;; 用户可以使用命令：`pyim-search-word-code' 来查询当前选择词条的仓颉编码
 
+;; *** 使用三码郑码输入法
+;; pyim 支持三码郑码（至至）输入法，用户可以通过变量 `pyim-default-scheme' 来设定：
+
+;; #+BEGIN_EXAMPLE
+;; (setq pyim-default-scheme 'smzm)
+;; #+END_EXAMPLE
+
+;; 在使用三码郑码输入法之前，请用 pyim-dicts-manager 添加一个仓颉词库，词库的格式类似：
+
+;; #+BEGIN_EXAMPLE
+;;; -*- coding: utf-8-unix -*-
+;; _k 是
+;; _y 了
+;; _g 在
+;; _o 人
+;; _m 我
+;; _n 他
+;; _gv 有
+;; _j 中
+;; #+END_EXAMPLE
+
+;; 目前词库`pyim-smzmdict'尚未被 melpa 收录，用户可以从 [[https://github.com/p1uxtar/pyim-smzmdict/blob/main/pyim-smzm.pyim][这里]] 下载词库文件，并参考如下配置进行添加：
+
+;; #+BEGIN_EXAMPLE
+;; (with-eval-after-load 'pyim
+;;   (let* ((dict (concat
+;;                 (file-name-directory user-emacs-directory)
+;;                 "path/of/pyim-smzmdict.pyim")))
+;;     (pyim-extra-dicts-add-dict
+;;      `(:name "triple Zhengma" :file ,dict))))
+;; #+END_EXAMPLE
+
 ;; *** 让选词框跟随光标
 ;; 用户可以通过下面的设置让 pyim 在 *光标处* 显示一个选词框：
 
