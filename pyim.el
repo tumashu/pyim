@@ -1,7 +1,7 @@
 ;;; pyim.el --- A Chinese input method support quanpin, shuangpin, wubi and cangjie.        -*- lexical-binding: t; -*-
 
 ;; * Header
-;; Copyright (C) 2015-2020 Free Software Foundation, Inc.
+;; Copyright (C) 2015-2021 Free Software Foundation, Inc.
 
 ;; Author: Ye Wenbin <wenbinye@163.com>
 ;;         Feng Shu <tumashu@163.com>
@@ -582,12 +582,10 @@ plist 来表示，比如：
 
 另外一个与这个变量功能类似的变量是： `pyim-extra-dicts', 专门
 用于和 elpa 格式的词库包集成。"
-  :group 'pyim
   :type 'list)
 
 (defcustom pyim-enable-shortcode t
   "启用输入联想词功能."
-  :group 'pyim
   :type 'boolean)
 
 (defcustom pyim-punctuation-dict
@@ -623,12 +621,10 @@ plist 来表示，比如：
     ("|" "÷")
     ("{" "『"))
   "标点符号表."
-  :group 'pyim
   :type 'list)
 
 (defcustom pyim-default-scheme 'quanpin
   "设置 pyim 使用哪一种输入法方案，默认使用全拼输入."
-  :group 'pyim
   :type 'symbol)
 
 (defcustom pyim-assistant-scheme 'quanpin
@@ -636,7 +632,6 @@ plist 来表示，比如：
 
 这个功能主要用于五笔等形码输入法，在忘记编码的情况下，
 临时激活某种辅助输入法（比如：拼音输入法）来输入汉字。"
-  :group 'pyim
   :type 'symbol)
 
 (defcustom pyim-cregexp-fallback-scheme 'quanpin
@@ -644,7 +639,6 @@ plist 来表示，比如：
 
 如果 `pyim-cregexp-build' 无法支持用户正在使用的 scheme 时，
 将使用这个 scheme."
-  :group 'pyim
   :type 'symbol)
 
 (defcustom pyim-translate-trigger-char "v"
@@ -694,14 +688,12 @@ pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。当待输
 用拼音方案默认的 :prefer-trigger-chars 。
 
 具体请参考 `pyim-translate-get-trigger-char' 。"
-  :group 'pyim
   :type '(choice (const nil) string))
 
 (defcustom pyim-exhibit-delay-ms 0
   "输入或者删除拼音字符后等待多少毫秒后才显示可选词
 当用户快速输入连续的拼音时可提升用户体验.
 如果为 0 或者 nil, 则不等待立刻显示可选词."
-  :group 'pyim
   :type 'integer)
 
 (defcustom pyim-fuzzy-pinyin-alist
@@ -709,19 +701,16 @@ pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。当待输
     ("in" "ing")
     ("un" "ong"))
   "设定模糊音."
-  :group 'pyim
   :type 'sexp)
 
 (defface pyim-preview-face '((t (:underline t)))
-  "设置光标处预览字符串的 face."
-  :group 'pyim)
+  "设置光标处预览字符串的 face.")
 
 (defcustom pyim-english-input-switch-functions nil
   "让 pyim 开启英文输入功能.
 
 这个变量的取值为一个函数列表，这个函数列表中的任意一个函数的
 运行结果为 t 时，pyim 开启英文输入功能。"
-  :group 'pyim
   :type 'symbol)
 
 (defcustom pyim-punctuation-half-width-functions nil
@@ -730,7 +719,6 @@ pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。当待输
 取值为一个函数列表，这个函数列表中的任意一个函数的运行结果为 t 时，
 pyim 输入半角标点，函数列表中每个函数都有一个参数：char ，表示
 最后输入的一个字符，具体见: `pyim-translate' 。"
-  :group 'pyim
   :type '(choice (const nil)
                  (repeat function)))
 
@@ -739,14 +727,12 @@ pyim 输入半角标点，函数列表中每个函数都有一个参数：char �
 这个函数与『单字快捷键配合使用』，当光标前面的字符为汉字字符时，
 按 `pyim-translate-trigger-char' 对应字符，可以调用这个函数来清洗
 光标前面的文字内容。"
-  :group 'pyim
   :type 'function)
 
 (defcustom pyim-page-length 5
   "每页显示的词条数目.
 
 细节信息请参考 `pyim-page-refresh' 的 docstring."
-  :group 'pyim
   :type 'number)
 
 (defcustom pyim-page-tooltip 'posframe
@@ -759,7 +745,6 @@ pyim 输入半角标点，函数列表中每个函数都有一个参数：char �
    有时会遇到选词框错位的问题；
 3. 当这个变量取值为 minibuffer 时，使用 minibuffer 做为选词框，
    这个选项也作为其他选项不可用时的 fallback."
-  :group 'pyim
   :type 'symbol)
 
 (defcustom pyim-page-style 'two-lines
@@ -770,12 +755,10 @@ pyim 内建的有三种选词框格式：
 1. one-line  单行选词框
 2. two-lines 双行选词框
 3. vertical  垂直选词框"
-  :group 'pyim
   :type 'symbol)
 
 (defcustom pyim-page-select-finish-hook nil
   "Pyim 选词完成时运行的 hook."
-  :group 'pyim
   :type 'hook)
 
 (defcustom pyim-page-select-word-by-number t
@@ -783,19 +766,16 @@ pyim 内建的有三种选词框格式：
 
 如果设置为 nil, 将直接输入数字，适用于使用数字做为
 编码的输入法。"
-  :group 'pyim
   :type 'boolean)
 
 (defcustom pyim-magic-converter nil
   "将 “待选词条” 在 “上屏” 之前自动转换为其他字符串.
 这个功能可以实现“简转繁”，“输入中文得到英文”之类的功能。"
-  :group 'pyim
   :type 'boolean)
 
 (defcustom pyim-posframe-border-width 0
   "posframe的内间距。
 只有当用户使用 posframe 来显示候选词时才有效。"
-  :group 'pyim
   :type 'integer)
 
 (defcustom pyim-autoselector '(pyim-autoselector-xingma)
@@ -813,32 +793,27 @@ pyim 内建的有三种选词框格式：
 
 注意：多个 autoselector 函数运行时，最好不要相互影响，如果相互有
 影响，需要用户自己管理。"
-  :group 'pyim
   :type '(choice (const nil)
                  (repeat function)))
 
 (defcustom pyim-posframe-min-width (* pyim-page-length 7)
   "使用 posframe 做为选词框时，设置选词框的最小宽度."
-  :group 'pyim
   :type 'integer)
 
 (defface pyim-page
   '((t (:inherit default :background "#333333" :foreground "#dcdccc")))
-  "Face used for the pyim page."
-  :group 'pyim)
+  "Face used for the pyim page.")
 
 (defface pyim-page-border
   '((t (:inherit pyim-page)))
   "Face used for the pyim page border.
-Only useful when use posframe."
-  :group 'pyim)
+Only useful when use posframe.")
 
 (defface pyim-page-selection
   '((t (:background "gray44")))
   "选词框中已选词条的 face
 
-注意：当使用 minibuffer 为选词框时，这个选项才有用处。"
-  :group 'pyim)
+注意：当使用 minibuffer 为选词框时，这个选项才有用处。")
 
 (defcustom pyim-dcache-backend 'pyim-dhashcache
   "词库后端引擎.负责缓冲词库并提供搜索词的算法.
@@ -847,7 +822,6 @@ Only useful when use posframe."
 
 `pyim-dregcache' 速度和词库大小成正比.  当词库接近100M大小时,
 在六年历史的笔记本上会有一秒的延迟. 这时建议换用 `pyim-dhashcache'."
-  :group 'pyim
   :type 'symbol)
 
 ;;;###autoload
@@ -1047,41 +1021,41 @@ dcache 文件的方法让 pyim 正常工作。")
   (let ((map (make-sparse-keymap))
         (i ?\ ))
     (while (< i 127)
-      (define-key map (char-to-string i) 'pyim-self-insert-command)
+      (define-key map (char-to-string i) #'pyim-self-insert-command)
       (setq i (1+ i)))
     (setq i 128)
     (while (< i 256)
-      (define-key map (vector i) 'pyim-self-insert-command)
+      (define-key map (vector i) #'pyim-self-insert-command)
       (setq i (1+ i)))
     (dolist (i (number-sequence ?0 ?9))
-      (define-key map (char-to-string i) 'pyim-page-select-word-by-number))
-    (define-key map " " 'pyim-page-select-word)
-    (define-key map (kbd "C-SPC") 'pyim-page-select-word-simple)
-    (define-key map [backspace] 'pyim-entered-delete-backward-char)
-    (define-key map [delete] 'pyim-entered-delete-forward-char)
-    (define-key map "\C-d" 'pyim-entered-delete-forward-char)
-    (define-key map [M-backspace] 'pyim-entered-delete-backward-imelem)
-    (define-key map [M-delete] 'pyim-entered-delete-forward-imelem)
-    (define-key map [C-backspace] 'pyim-entered-delete-backward-imelem)
-    (define-key map [C-delete] 'pyim-entered-delete-forward-imelem)
-    (define-key map [?\t]      'pyim-toggle-assistant-scheme)
-    (define-key map (kbd "TAB") 'pyim-toggle-assistant-scheme)
-    (define-key map "\177" 'pyim-entered-delete-backward-char)
-    (define-key map "\C-f" 'pyim-entered-forward-point)
-    (define-key map "\C-b" 'pyim-entered-backward-point)
-    (define-key map "\M-f" 'pyim-entered-forward-imelem)
-    (define-key map "\M-b" 'pyim-entered-backward-imelem)
-    (define-key map "\C-e" 'pyim-entered-end-of-line)
-    (define-key map "\C-a" 'pyim-entered-beginning-of-line)
-    (define-key map "=" 'pyim-page-next-page)
-    (define-key map "-" 'pyim-page-previous-page)
-    (define-key map "\C-n" 'pyim-page-next-word)
-    (define-key map "\C-p" 'pyim-page-previous-word)
-    (define-key map "\M-n" 'pyim-page-next-page)
-    (define-key map "\M-p" 'pyim-page-previous-page)
-    (define-key map "\C-m" 'pyim-quit-no-clear)
-    (define-key map [return] 'pyim-quit-no-clear)
-    (define-key map "\C-c" 'pyim-quit-clear)
+      (define-key map (char-to-string i) #'pyim-page-select-word-by-number))
+    (define-key map " " #'pyim-page-select-word)
+    (define-key map (kbd "C-SPC") #'pyim-page-select-word-simple)
+    (define-key map [backspace] #'pyim-entered-delete-backward-char)
+    (define-key map [delete] #'pyim-entered-delete-forward-char)
+    (define-key map "\C-d" #'pyim-entered-delete-forward-char)
+    (define-key map [M-backspace] #'pyim-entered-delete-backward-imelem)
+    (define-key map [M-delete] #'pyim-entered-delete-forward-imelem)
+    (define-key map [C-backspace] #'pyim-entered-delete-backward-imelem)
+    (define-key map [C-delete] #'pyim-entered-delete-forward-imelem)
+    (define-key map [?\t]      #'pyim-toggle-assistant-scheme)
+    (define-key map (kbd "TAB") #'pyim-toggle-assistant-scheme)
+    (define-key map "\177" #'pyim-entered-delete-backward-char)
+    (define-key map "\C-f" #'pyim-entered-forward-point)
+    (define-key map "\C-b" #'pyim-entered-backward-point)
+    (define-key map "\M-f" #'pyim-entered-forward-imelem)
+    (define-key map "\M-b" #'pyim-entered-backward-imelem)
+    (define-key map "\C-e" #'pyim-entered-end-of-line)
+    (define-key map "\C-a" #'pyim-entered-beginning-of-line)
+    (define-key map "=" #'pyim-page-next-page)
+    (define-key map "-" #'pyim-page-previous-page)
+    (define-key map "\C-n" #'pyim-page-next-word)
+    (define-key map "\C-p" #'pyim-page-previous-word)
+    (define-key map "\M-n" #'pyim-page-next-page)
+    (define-key map "\M-p" #'pyim-page-previous-page)
+    (define-key map "\C-m" #'pyim-quit-no-clear)
+    (define-key map [return] #'pyim-quit-no-clear)
+    (define-key map "\C-c" #'pyim-quit-clear)
     map)
   "Pyim 的 Keymap.")
 
@@ -1299,8 +1273,8 @@ pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
 会执行 `pyim-input-method' 这个函数。`pyim-input-method' 又调用函
 数`pyim-start-translation'."
   (interactive)
-  (mapc 'kill-local-variable pyim-local-variable-list)
-  (mapc 'make-local-variable pyim-local-variable-list)
+  (mapc #'kill-local-variable pyim-local-variable-list)
+  (mapc #'make-local-variable pyim-local-variable-list)
   (when (and restart save-personal-dcache)
     (pyim-dcache-save-caches))
 
@@ -1318,15 +1292,15 @@ pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
     ;; 这个命令 *当前* 主要用于五笔输入法。
     (pyim-dcache-call-api 'update-shortcode2word restart))
 
-  (unless (member 'pyim-dcache-save-caches kill-emacs-hook)
-    (add-to-list 'kill-emacs-hook 'pyim-dcache-save-caches))
+  (unless (member #'pyim-dcache-save-caches kill-emacs-hook) ;FIXME: Why?
+    (add-to-list 'kill-emacs-hook #'pyim-dcache-save-caches))
   (setq input-method-function 'pyim-input-method)
   (setq deactivate-current-input-method-function 'pyim-inactivate)
   ;; (setq describe-current-input-method-function 'pyim-help)
   ;; If we are in minibuffer, turn off the current input method
   ;; before exiting.
   (when (eq (selected-window) (minibuffer-window))
-    (add-hook 'minibuffer-exit-hook 'pyim-exit-from-minibuffer))
+    (add-hook 'minibuffer-exit-hook #'pyim-exit-from-minibuffer))
   (run-hooks 'pyim-active-hook)
   (when (and (eq pyim-page-tooltip 'posframe)
              (not (pyim-posframe-valid-p)))
@@ -1339,6 +1313,7 @@ pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
   "Pyim 从 minibuffer 退出."
   (deactivate-input-method)
   (when (<= (minibuffer-depth) 1)
+    ;; FIXME: Why do we remove a hook function we didn't add ourselves?
     (remove-hook 'minibuffer-exit-hook 'quail-exit-from-minibuffer)))
 
 (defun pyim-restart ()
@@ -1732,7 +1707,7 @@ FILE 的格式与 `pyim-export' 生成的文件格式相同，
                        (> (length input-string) 0))
               (if input-method-exit-on-first-char
                   (list (aref input-string 0))
-                (mapcar 'identity input-string))))
+                (mapcar #'identity input-string))))
         (pyim-preview-delete-overlay)
         (pyim-entered-erase-buffer)))))
 
@@ -1848,9 +1823,9 @@ Return the input string.
                   (not (pyim-auto-switch-english-input-p))))
          (if (not (string< "" (pyim-entered-get 'point-before)))
              (member last-command-event
-                     (mapcar 'identity first-chars))
+                     (mapcar #'identity first-chars))
            (member last-command-event
-                   (mapcar 'identity rest-chars)))
+                   (mapcar #'identity rest-chars)))
          (setq current-input-method-title (nth 0 pyim-titles)))))
 
 (defun pyim-autoselector-xingma (&rest _args)
@@ -2475,7 +2450,7 @@ Return the input string.
     (dolist (imobj imobjs)
       (setq fuzzy-imobjs
             (pyim-permutate-list
-             (mapcar 'pyim-imobjs-find-fuzzy:quanpin-1 imobj)))
+             (mapcar #'pyim-imobjs-find-fuzzy:quanpin-1 imobj)))
       (push (car fuzzy-imobjs) result1)
       (setq result2 (append result2 (cdr fuzzy-imobjs))))
     (append result1 result2)))
@@ -2758,7 +2733,7 @@ IMOBJS 获得候选词条。"
 (defun pyim-preview-refresh ()
   "刷新光标处预览.
 
-pyim 会使用 emacs overlay 机制在 *待输入buffer* 光标处高亮显示一
+pyim 会使用 Emacs overlay 机制在 *待输入buffer* 光标处高亮显示一
 个预览字符串，让用户可以查看将要输入的字符串，这个函数用于更新这
 个字符串的内容。"
   (let* ((class (pyim-scheme-get-option (pyim-scheme-name) :class))
@@ -3050,7 +3025,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
                           (car x)))
                     keymaps))
            result))))
-    (mapconcat 'identity
+    (mapconcat #'identity
                (reverse result)
                (or separator " "))))
 
@@ -3091,7 +3066,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
            (format "%d.%s " i str))
          result)))
     (mapconcat #'identity
-               (reverse result)
+               (nreverse result)
                (or separator ""))))
 
 (defun pyim-page-style:two-lines (page-info)
@@ -3751,7 +3726,7 @@ PUNCT-LIST 格式类似：
   (pyim-entered-delete-backward-imelem t))
 
 (define-obsolete-function-alias
-  'pyim-convert-code-at-point 'pyim-convert-string-at-point "2.0")
+  'pyim-convert-code-at-point #'pyim-convert-string-at-point "2.0")
 
 ;;;###autoload
 (defun pyim-convert-string-at-point (&optional return-cregexp)
@@ -3840,7 +3815,7 @@ PUNCT-LIST 格式类似：
 (defun pyim-inactivate ()
   "取消 pyim 的激活状态."
   (interactive)
-  (mapc 'kill-local-variable pyim-local-variable-list)
+  (mapc #'kill-local-variable pyim-local-variable-list)
   (run-hooks 'pyim-inactive-hook))
 
 (defun pyim-toggle-input-ascii ()
@@ -4002,7 +3977,6 @@ PUNCT-LIST 格式类似：
 (define-minor-mode pyim-isearch-mode
   "这个 mode 为 isearch 添加拼音搜索功能."
   :global t
-  :group 'pyim
   :require 'pyim
   :lighter " pyim-isearch"
   (if pyim-isearch-mode
@@ -4195,7 +4169,8 @@ PUNCT-LIST 格式类似：
     (let ((string-alist
            (get-possible-words
             (mapcar #'char-to-string
-                    (string-to-vector chinese-string)) 1))
+                    (string-to-vector chinese-string))
+            1))
           result)
       (dolist (string-list string-alist)
         (let ((pinyin-list (pyim-hanzi2pinyin (car string-list) nil "-" t)))
@@ -4225,7 +4200,8 @@ PUNCT-LIST 格式类似：
          (if (pyim-string-match-p "\\CC" string)
              (split-string
               (replace-regexp-in-string
-               "\\(\\CC+\\)" "@@@@\\1@@@@" string) "@@@@")
+               "\\(\\CC+\\)" "@@@@\\1@@@@" string)
+              "@@@@")
            (list string))))
     (mapconcat
      #'(lambda (str)
@@ -4558,14 +4534,14 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
 (define-derived-mode pyim-dm-mode special-mode "pyim-dicts-manager"
   "Major mode for managing pyim dicts"
   (read-only-mode)
-  (define-key pyim-dm-mode-map (kbd "D") 'pyim-dm-delete-dict)
-  (define-key pyim-dm-mode-map (kbd "g") 'pyim-dm-refresh)
-  (define-key pyim-dm-mode-map (kbd "A") 'pyim-dm-add-dict)
-  (define-key pyim-dm-mode-map (kbd "N") 'pyim-dm-dict-position-down)
-  (define-key pyim-dm-mode-map (kbd "P") 'pyim-dm-dict-position-up)
-  (define-key pyim-dm-mode-map (kbd "s") 'pyim-dm-save-dict-info)
-  (define-key pyim-dm-mode-map (kbd "C-c C-c") 'pyim-dm-toggle-dict)
-  (define-key pyim-dm-mode-map (kbd "R") 'pyim-restart))
+  (define-key pyim-dm-mode-map (kbd "D") #'pyim-dm-delete-dict)
+  (define-key pyim-dm-mode-map (kbd "g") #'pyim-dm-refresh)
+  (define-key pyim-dm-mode-map (kbd "A") #'pyim-dm-add-dict)
+  (define-key pyim-dm-mode-map (kbd "N") #'pyim-dm-dict-position-down)
+  (define-key pyim-dm-mode-map (kbd "P") #'pyim-dm-dict-position-up)
+  (define-key pyim-dm-mode-map (kbd "s") #'pyim-dm-save-dict-info)
+  (define-key pyim-dm-mode-map (kbd "C-c C-c") #'pyim-dm-toggle-dict)
+  (define-key pyim-dm-mode-map (kbd "R") #'pyim-restart))
 
 ;;;###autoload
 (defun pyim-dicts-manager ()

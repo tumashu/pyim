@@ -1,7 +1,7 @@
 ;;; pyim-dregcache --- map dictionary to plain cache and use regular expression to search     -*- lexical-binding: t; -*-
 
 ;; * Header
-;; Copyright (C) 2019-2020 Free Software Foundation, Inc.
+;; Copyright (C) 2019-2021 Free Software Foundation, Inc.
 
 ;; Author: Chen Bin <chenbin.sh@gmail.com>
 ;; Maintainer: Chen Bin <chenbin.sh@gmail.com>
@@ -89,7 +89,7 @@
          ;; ((string-match "^\\([a-z]+ \\|[a-z]+-[a-z]+ \\|[a-z]+-[a-z]+-[a-z]+ \\)\\(.*\\)" l)
          (let* ((pinyin (match-string 1 l))
                 (words (pyim-dregcache-sort-words (split-string (match-string 2 l) " "))))
-           (insert (format "%s\n" (concat pinyin (mapconcat 'identity words " "))))))
+           (insert (format "%s\n" (concat pinyin (mapconcat #'identity words " "))))))
         ;; 其他词
         ((string= l "")
          ;; skip empty line

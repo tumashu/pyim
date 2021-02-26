@@ -1,7 +1,7 @@
-;;; pyim-tests.el ---  unit tests for pyim -*- coding: utf-8 -*-
+;;; pyim-tests.el ---  unit tests for pyim -*- lexical-binding: t; -*-
 
 ;; * Header
-;; Copyright (C) 2019-2020 Free Software Foundation, Inc.
+;; Copyright (C) 2019-2021 Free Software Foundation, Inc.
 
 ;; Author: Chen Bin <chenbin.sh@gmail.com>
 ;; Maintainer: Chen Bin <chenbin.sh@gmail.com>

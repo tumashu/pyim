@@ -1,7 +1,7 @@
 ;;; pyim-probe.el --- Auto-Switch-to-English-Input probes for pyim  -*- lexical-binding: t; -*-
 
 ;; * Header
-;; Copyright (C) 2015-2020 Free Software Foundation, Inc.
+;; Copyright (C) 2015-2021 Free Software Foundation, Inc.
 
 ;; Author: Feng Shu <tumashu@163.com>
 ;; Maintainer: Feng Shu <tumashu@163.com>
@@ -52,6 +52,9 @@
 ;; 探针函数。
 
 ;;; Code:
+
+(require 'pyim-common)
+
 ;; * 代码                                                                 :code:
 ;; ** 根据环境自动切换到英文输入模式
 (defun pyim-probe-program-mode ()
@@ -167,7 +170,7 @@
   (let ((line-string (buffer-substring (point-at-bol) (point))))
     (unless (string= (buffer-name) " *temp*") ; Make sure this probe can work with exim of exwm.
       (and (member (char-to-string char)
-                   (mapcar 'car pyim-punctuation-dict))
+                   (mapcar #'car pyim-punctuation-dict))
            (string-match "^[ \t]*$" line-string)))))
 
 (declare-function pyim-char-before-to-string "pyim" (num))
@@ -180,7 +183,7 @@
 
 用于：`pyim-punctuation-half-width-functions' 。"
   (let ((str-before-1 (pyim-char-before-to-string 0))
-        (puncts (mapcar 'car pyim-punctuation-dict)))
+        (puncts (mapcar #'car pyim-punctuation-dict)))
     (and (member str-before-1 puncts)
          (member (char-to-string char) puncts))))
 
