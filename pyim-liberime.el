@@ -293,4 +293,4 @@ Please see: https://github.com/rime/librime/issues/349"
 ;; * Footer
 (provide 'pyim-liberime)
 
-;;; pyim.el ends here
+;;; pyim-librime.el ends here
