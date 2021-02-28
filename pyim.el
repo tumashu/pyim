@@ -4236,19 +4236,8 @@ PUNCT-LIST 格式类似：
                                                       separator max-word-length)
   "`pyim-cstring-split-to-string' 内部函数。"
   (let ((str-length (length chinese-string))
-        (word-list (cl-delete-duplicates
-                    ;;  判断两个词条在字符串中的位置
-                    ;;  是否冲突，如果冲突，仅保留一个，
-                    ;;  删除其它。
-                    (pyim-cstring-split-to-list chinese-string max-word-length)
-                    :test #'(lambda (x1 x2)
-                              (let ((begin1 (nth 1 x1))
-                                    (begin2 (nth 1 x2))
-                                    (end1 (nth 2 x1))
-                                    (end2 (nth 2 x2)))
-                                (not (or (<= end1 begin2)
-                                         (<= end2 begin1)))))
-                    :from-end prefer-short-word))
+        (word-list (pyim-cstring-split-to-list
+                    chinese-string max-word-length t prefer-short-word))
         position-list result)
 
     ;; 提取词条相对于字符串的位置信息。
