@@ -550,6 +550,13 @@
 ;;               '(pyim-probe-isearch-mode))
 ;; #+END_EXAMPLE
 
+;; *** 让 ivy 支持拼音搜索候选项功能
+;; #+BEGIN_EXAMPLE
+;; (setq ivy-re-builders-alist
+;;       '((t . pyim-ivy-cregexp)))
+;; #+END_EXAMPLE
+
+
 ;;; Code:
 
 ;; * 核心代码                                                           :code:
@@ -3982,6 +3989,24 @@ PUNCT-LIST 格式类似：
         (advice-add 'isearch-search-fun :override #'pyim-isearch-search-fun)
         (message "PYIM: `pyim-isearch-mode' 已经激活，激活后，一些 isearch 扩展包有可能失效。"))
     (advice-remove 'isearch-search-fun #'pyim-isearch-search-fun)))
+
+(declare-function ivy--regex-plus "ivy")
+(defun pyim-ivy-cregexp (str)
+  "Let ivy support search Chinese with pinyin feature."
+  (let ((x (ivy--regex-plus str))
+        (case-fold-search nil))
+    (if (listp x)
+        (mapcar (lambda (y)
+                  (if (cdr y)
+                      (list (if (equal (car y) "")
+                                ""
+                              (pyim-cregexp-build (car y)))
+                            (cdr y))
+                    (list (pyim-cregexp-build (car y)))))
+                x)
+      (if (string= "" x)
+          x
+        (pyim-cregexp-build x)))))
 
 (defun pyim-convert-cregexp-at-point (&optional insert-only)
   "将光标前的字符串按拼音的规则转换为一个搜索中文的 regexp.
