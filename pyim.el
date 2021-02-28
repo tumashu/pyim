@@ -1312,10 +1312,7 @@ pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
 
 (defun pyim-exit-from-minibuffer ()
   "Pyim 从 minibuffer 退出."
-  (deactivate-input-method)
-  (when (<= (minibuffer-depth) 1)
-    ;; FIXME: Why do we remove a hook function we didn't add ourselves?
-    (remove-hook 'minibuffer-exit-hook 'quail-exit-from-minibuffer)))
+  (quail-exit-from-minibuffer))
 
 (defun pyim-restart ()
   "重启 pyim，不建议用于编程环境.
