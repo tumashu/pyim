@@ -55,12 +55,7 @@ pyim 总是使用 emacs-async 包来生成 dcache.
       (insert-file-contents file)
       (let ((output
              (condition-case nil
-                 ;; FIXME: Why `eval'?  AFAICT, the file was created
-                 ;; by `pyim-dcache-save-variable' where we just write the
-                 ;; value (i.e. something already evaluated) held in the
-                 ;; variable, and not some ELisp expression that still needs to
-                 ;; be evaluated.
-                 (eval (read (current-buffer)) t)
+                 (read (current-buffer))
                (error nil))))
         (unless output
           ;; 有时候词库缓存会发生错误，这时候，就将词库缓存转存到一个
