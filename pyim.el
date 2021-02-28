@@ -4119,13 +4119,20 @@ PUNCT-LIST 格式类似：
                       (- current-pos str-beginning-pos)
                       (- str-end-pos current-pos)))))))
 
-(defun pyim-cstring-split-to-list (chinese-string &optional max-word-length)
+(defun pyim-cstring-split-to-list (chinese-string &optional max-word-length delete-dups prefer-short-word)
   "一个基于 pyim 的中文分词函数。这个函数可以将中文字符
 串 CHINESE-STRING 分词，得到一个词条 alist，这个 alist 的元素
 都是列表，其中第一个元素为分词得到的词条，第二个元素为词条相对于
 字符串中的起始位置，第三个元素为结束位置。分词时，默认词条不超过
 6个字符，用户可以通过 MAX-WORD-LENGTH 来自定义，但值得注意的是：
 这个值设置越大，分词速度越慢。
+
+如果 DELETE-DUPS 设置为 non-nil, 一个中文字符串只保留一种分割方式。
+比如：
+
+  我爱北京天安门 => 我爱 北京 天安门
+
+如果 PREFER-SHORT-WORD 为 non-nil, 去重的时候则优先保留较短的词。
 
 注意事项：
 1. 这个工具使用暴力匹配模式来分词，*不能检测出* pyim 词库中不存在
@@ -4177,7 +4184,22 @@ PUNCT-LIST 格式类似：
               (dolist (word words)
                 (when (equal word (car string-list))
                   (push string-list result)))))))
-      result)))
+
+      (if delete-dups
+          (cl-delete-duplicates
+           ;;  判断两个词条在字符串中的位置
+           ;;  是否冲突，如果冲突，仅保留一个，
+           ;;  删除其它。
+           result
+           :test #'(lambda (x1 x2)
+                     (let ((begin1 (nth 1 x1))
+                           (begin2 (nth 1 x2))
+                           (end1 (nth 2 x1))
+                           (end2 (nth 2 x2)))
+                       (not (or (<= end1 begin2)
+                                (<= end2 begin1)))))
+           :from-end prefer-short-word)
+        result))))
 
 ;; (let ((str "医生随时都有可能被患者及其家属反咬一口"))
 ;;   (benchmark 1 '(pyim-cstring-split-to-list str)))
