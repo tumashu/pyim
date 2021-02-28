@@ -1292,7 +1292,8 @@ pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
     ;; 这个命令 *当前* 主要用于五笔输入法。
     (pyim-dcache-call-api 'update-shortcode2word restart))
 
-  (unless (member #'pyim-dcache-save-caches kill-emacs-hook) ;FIXME: Why?
+  ;; Make sure personal or other dcache are saved to file before kill emacs.
+  (unless (member #'pyim-dcache-save-caches kill-emacs-hook)
     (add-to-list 'kill-emacs-hook #'pyim-dcache-save-caches))
   (setq input-method-function 'pyim-input-method)
   (setq deactivate-current-input-method-function 'pyim-inactivate)
