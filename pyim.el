@@ -3798,7 +3798,8 @@ PUNCT-LIST 格式类似：
              (setq code (pyim-hanzi2pinyin
                          (replace-regexp-in-string " " "" string)
                          nil "-" nil t))
-             (when (> length 0)
+             (when (and (> code 0)
+                        (> length 0))
                (setq unread-command-events
                      (append (listify-key-sequence code)
                              unread-command-events))
@@ -4347,8 +4348,7 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
              (push (list str) pinyins-list))
             ((and (> (length str) 0)
                   (pyim-string-match-p "\\cc" str))
-             (push (or (pyim-cchar2pinyin-get (string-to-char str))
-                       (list str))
+             (push (pyim-cchar2pinyin-get (string-to-char str))
                    pinyins-list))
             ((> (length str) 0)
              (push (list str) pinyins-list))))
