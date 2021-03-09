@@ -3834,14 +3834,17 @@ PUNCT-LIST 格式类似：
 (defun pyim-cregexp-build (string)
   "根据 STRING 构建一个中文 regexp, 用于 \"拼音搜索汉字\".
 比如：\"nihao\" -> \"[你呢...][好号...] \\| nihao\""
-  (or (ignore-errors
-        (rx-to-string (pyim-cregexp-build-from-rx
-                       (lambda (x)
-                         (if (stringp x)
-                             (xr (pyim-cregexp-build-1 x))
-                           x))
-                       (xr string))))
-      string))
+  ;; FIXME: (rx-to-string "") => "\\(?:\\)"
+  (if (equal string "")
+      string
+    (or (ignore-errors
+          (rx-to-string (pyim-cregexp-build-from-rx
+                         (lambda (x)
+                           (if (stringp x)
+                               (xr (pyim-cregexp-build-1 x))
+                             x))
+                         (xr string))))
+        string)))
 
 (defun pyim-cregexp-build-from-rx (fn rx-form)
   (cond
@@ -3875,7 +3878,8 @@ PUNCT-LIST 格式类似：
       (setq scheme-name pyim-cregexp-fallback-scheme))
     (mapconcat
      (lambda (string)
-       (if (or (pyim-string-match-p "[^a-z']+" string))
+       (if (or (pyim-string-match-p "[^a-z']+" string)
+               (equal string ""))
            string
          (let* ((imobjs (pyim-imobjs-create
                          (replace-regexp-in-string "'" "" string)
@@ -3999,9 +4003,7 @@ PUNCT-LIST 格式类似：
                             (cdr y))
                     (list (pyim-cregexp-build (car y)))))
                 x)
-      (if (string= "" x)
-          x
-        (pyim-cregexp-build x)))))
+      (pyim-cregexp-build x))))
 
 (defun pyim-convert-cregexp-at-point (&optional insert-only)
   "将光标前的字符串按拼音的规则转换为一个搜索中文的 regexp.
