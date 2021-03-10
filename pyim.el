@@ -3881,9 +3881,8 @@ PUNCT-LIST 格式类似：
        (if (or (pyim-string-match-p "[^a-z']+" string)
                (equal string ""))
            string
-         (let* ((imobjs (pyim-imobjs-create
-                         (replace-regexp-in-string "'" "" string)
-                         scheme-name))
+         (let* ((string1 (replace-regexp-in-string "'" "" string))
+                (imobjs (pyim-imobjs-create string1 scheme-name))
                 (regexp-list
                  (mapcar
                   #'(lambda (imobj)
@@ -3898,7 +3897,7 @@ PUNCT-LIST 格式类似：
                               "\\|")))
                 (regexp
                  (if (> (length regexp) 0)
-                     (concat string "\\|" regexp)
+                     (concat string "\\|" string1 "\\|" regexp)
                    string)))
            (format "\\(?:%s\\)" regexp))))
      lst "")))
