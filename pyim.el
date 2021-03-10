@@ -1300,10 +1300,9 @@ pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
     (pyim-dcache-call-api 'update-shortcode2word restart))
 
   ;; Make sure personal or other dcache are saved to file before kill emacs.
-  (unless (member #'pyim-dcache-save-caches kill-emacs-hook)
-    (add-to-list 'kill-emacs-hook #'pyim-dcache-save-caches))
-  (setq input-method-function 'pyim-input-method)
-  (setq deactivate-current-input-method-function 'pyim-inactivate)
+  (add-hook 'kill-emacs-hook #'pyim-dcache-save-caches)
+  (setq input-method-function #'pyim-input-method)
+  (setq deactivate-current-input-method-function #'pyim-inactivate)
   ;; (setq describe-current-input-method-function 'pyim-help)
   ;; If we are in minibuffer, turn off the current input method
   ;; before exiting.
@@ -1312,13 +1311,18 @@ pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
   (run-hooks 'pyim-active-hook)
   (when (and (eq pyim-page-tooltip 'posframe)
              (not (pyim-posframe-valid-p)))
-    (message "PYIM: posframe 没有正确安装或者当前 emacs 版本不支持 posframe。"))
+    (message "PYIM: posframe 没有正确安装或者当前 Emacs 版本不支持 posframe。"))
   (when restart
     (message "pyim 重启完成。"))
   nil)
 
+(declare-function quail-exit-from-minibuffer "quail" ())
+
 (defun pyim-exit-from-minibuffer ()
   "Pyim 从 minibuffer 退出."
+  ;; FIXME: `quail-exit-from-minibuffer' removes itself from
+  ;; `minibuffer-exit-hook' but it won't remove `pyim-exit-from-minibuffer' from
+  ;; that hook.  Is that indeed what we want here?
   (quail-exit-from-minibuffer))
 
 (defun pyim-restart ()
@@ -3847,20 +3851,15 @@ PUNCT-LIST 格式类似：
         string)))
 
 (defun pyim-cregexp-build-from-rx (fn rx-form)
-  (cond
-   ((not rx-form) nil)
-   ((and (listp rx-form)
-         (not (listp (cdr rx-form))))
-    (funcall fn rx-form))
-   ((and (listp rx-form)
-         (not (eq 'any (car rx-form))))
-    (mapcar (lambda (x)
-              (pyim-cregexp-build-from-rx fn x))
-            rx-form))
-   ((and (listp rx-form)
-         (eq 'any (car rx-form)))
-    rx-form)
-   (t (funcall fn rx-form))))
+  (pcase rx-form
+    ('nil nil)
+    (`(,form) (funcall fn form))
+    (`(any . ,_) rx-form)
+    (`(,_ . ,_)
+     (mapcar (lambda (x)
+               (pyim-cregexp-build-from-rx fn x))
+             rx-form))
+    (_ (funcall fn rx-form))))
 
 (defun pyim-cregexp-build-1 (str)
   (let* ((scheme-name (pyim-scheme-name))
