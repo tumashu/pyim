@@ -725,6 +725,8 @@
             pymap))
     (reverse pymap)))
 
+(declare-function 'pyim-dline-parse "pyim")
+
 (defun pyim-pymap-build-pymap ()
   "使用 libpinyin 自带的 data 文件创建 `pyim-pymap'."
   (interactive)
