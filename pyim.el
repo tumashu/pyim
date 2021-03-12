@@ -3902,7 +3902,9 @@ PUNCT-LIST 格式类似：
                               "\\|")))
                 (regexp
                  (if (> (length regexp) 0)
-                     (concat string "\\|" string1 "\\|" regexp)
+                     (if (equal string string1)
+                         (concat string "\\|" regexp)
+                       (concat string "\\|" string1 "\\|" regexp))
                    string)))
            (format "\\(?:%s\\)" regexp))))
      lst "")))
