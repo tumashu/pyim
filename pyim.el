@@ -1195,7 +1195,7 @@ TYPE 取值为 point-after, 返回 entered buffer 中 point 之后的字符
             (puthash key (delete-dups `(,@orig-value ,@cchars))
                      pyim-pinyin2cchar-cache3)))))))
 
-(defun pyim-pinyin2cchar-get (pinyin &optional equal-match return-list)
+(defun pyim-pinyin2cchar-get (pinyin &optional equal-match return-list include-seperator)
   "获取拼音与 PINYIN 想匹配的所有汉字.
 
 比如：
@@ -1205,7 +1205,10 @@ TYPE 取值为 point-after, 返回 entered buffer 中 point 之后的字符
 如果 EQUAL-MATCH 是 non-nil, 获取和 PINYIN 完全匹配的汉字。
 如果 RETURN-LIST 是 non-nil, 返回一个由单个汉字字符串组成的列表。
 
-(\"满\" \"慢\" \"漫\"  ...)"
+(\"满\" \"慢\" \"漫\"  ...)
+
+如果 INCLUDE-SEPERATOR 是 non-nil, 返回的列表包含一个 ‘|’ 号，pyim 用这个分隔符
+来区分 3500 个常用汉字和生僻字。"
   (pyim-pinyin2cchar-cache-create)
   (when (and pinyin (stringp pinyin))
     (let ((output
@@ -1215,7 +1218,9 @@ TYPE 取值为 point-after, 返回 entered buffer 中 point 之后的字符
                  (gethash pinyin pyim-pinyin2cchar-cache1))
              (gethash pinyin pyim-pinyin2cchar-cache3))))
       (delete "" output)
-      output)))
+      (if include-seperator
+          output
+        (delete "|" output)))))
 
 (defun pyim-cchar2pinyin-get (char-or-str)
   "获取字符或者字符串 CHAR-OR-STR 对应的拼音 code.
@@ -3918,12 +3923,9 @@ PUNCT-LIST 格式类似：
                      (cchars
                       ;; 只取常用字，不常用的汉字忽略，防止生成的
                       ;; regexp 太长而无法搜索
-                      (cl-remove-if-not
-                       (lambda (char)
-                         (member (char-to-string char) pyim-pymap-commonly-used-cchar))
-                       (mapconcat #'identity
-                                  (pyim-pinyin2cchar-get py equal-match)
-                                  ""))))
+                      (mapconcat #'(lambda (x)
+                                     (car (split-string x "|")))
+                                 (pyim-pinyin2cchar-get py equal-match nil t) "")))
                 (push cchars results))
               (setq n (+ 1 n)))
             (nreverse results)))
