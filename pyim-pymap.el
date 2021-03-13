@@ -776,8 +776,7 @@
 (defun pyim-pymap-add-commonly-used-sep (string)
   "在 STRING 中添加一个 |, 用来分割常用字和不常用字。"
   (let ((chars (reverse (string-to-list string)))
-        (add-sep nil)
-        output)
+        add-sep output)
     (while chars
       (let ((char (char-to-string (pop chars))))
         (when (and (not add-sep)
