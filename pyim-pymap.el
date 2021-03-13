@@ -755,7 +755,6 @@
           (forward-line 1))))
     (insert
      (with-temp-buffer
-       (emacs-lisp-mode)
        (maphash
         (lambda (key value)
           (setq value (sort (delete-dups (reverse value)) #'pyim-pymap-cchar<))
@@ -771,6 +770,7 @@
        (insert ")\n\"拼音汉字对照表\n
 第一个元素为拼音，第二个元素为拼音对应的汉字组成的字符串，字符串
 中汉字按照使用频率排序， 字符串用 “|” 隔开，“|” 之前的汉字为常用汉字。\")")
+       (emacs-lisp-mode)
        (indent-region (point-min) (point-max))
        (buffer-string)))))
 
