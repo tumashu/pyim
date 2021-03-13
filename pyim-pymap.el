@@ -767,6 +767,7 @@
        (goto-char (point-min))
        (insert "(defvar pyim-pymap\n'(")
        (goto-char (point-max))
+       (delete-char -1)
        (insert ")\n\"拼音汉字对照表\n
 第一个元素为拼音，第二个元素为拼音对应的汉字组成的字符串，字符串
 中汉字按照使用频率排序， 字符串用 “|” 隔开，“|” 之前的汉字为常用汉字。\")")
