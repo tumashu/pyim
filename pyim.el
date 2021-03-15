@@ -3847,14 +3847,19 @@ PUNCT-LIST 格式类似：
   ;; While I want (pyim-cregexp-build "") return just "".
   (if (equal string "")
       string
-    (or (ignore-errors
-          (rx-to-string (pyim-cregexp-build-from-rx
-                         (lambda (x)
-                           (if (stringp x)
-                               (xr (pyim-cregexp-build-1 x))
-                             x))
-                         (xr string))))
-        string)))
+    (let ((rx-string (ignore-errors
+                       (rx-to-string (pyim-cregexp-build-from-rx
+                                      (lambda (x)
+                                        (if (stringp x)
+                                            (xr (pyim-cregexp-build-1 x))
+                                          x))
+                                      (xr string))))))
+      (if (and rx-string
+               (stringp rx-string)
+               ;; FIXME: Emacs seem to can not handle regexp, which length is too big.
+               (length< rx-string 5000))
+          rx-string
+        string))))
 
 (defun pyim-cregexp-build-from-rx (fn rx-form)
   (pcase rx-form
