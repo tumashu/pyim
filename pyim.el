@@ -3840,25 +3840,30 @@ PUNCT-LIST 格式类似：
         (not pyim-input-ascii)))
 
 ;; ** 让 isearch-mode 通过 pinyin 搜索中文
-(defun pyim-cregexp-build (string)
+(defun pyim-cregexp-build (string &optional char-level-num)
   "根据 STRING 构建一个中文 regexp, 用于 \"拼音搜索汉字\".
 比如：\"nihao\" -> \"[你呢...][好号...] \\| nihao\""
   ;; NOTE: (rx-to-string "") will return "\\(?:\\)",
   ;; While I want (pyim-cregexp-build "") return just "".
   (if (equal string "")
       string
-    (let ((rx-string (ignore-errors
-                       (rx-to-string (pyim-cregexp-build-from-rx
-                                      (lambda (x)
-                                        (if (stringp x)
-                                            (xr (pyim-cregexp-build-1 x))
-                                          x))
-                                      (xr string))))))
-      (if (and rx-string
-               (stringp rx-string)
-               ;; FIXME: Emacs seem to can not handle regexp, which length is too big.
-               (length< rx-string 5000))
-          rx-string
+    (let* ((char-level-num (or char-level-num 3))
+           (rx-string (ignore-errors
+                        (rx-to-string (pyim-cregexp-build-from-rx
+                                       (lambda (x)
+                                         (if (stringp x)
+                                             (xr (pyim-cregexp-build-1 x char-level-num))
+                                           x))
+                                       (xr string))))))
+      (if (and rx-string (stringp rx-string))
+          ;; NOTE: Emacs seem to can not handle regexp which length is too big,
+          ;; for example: > 6000
+          (if (or (= char-level-num 0)
+                  (length< rx-string 5000))
+              (if (length< rx-string 5000)
+                  rx-string
+                string)
+            (pyim-cregexp-build string (- char-level-num 1)))
         string))))
 
 (defun pyim-cregexp-build-from-rx (fn rx-form)
@@ -3872,7 +3877,7 @@ PUNCT-LIST 格式类似：
              rx-form))
     (_ (funcall fn rx-form))))
 
-(defun pyim-cregexp-build-1 (str)
+(defun pyim-cregexp-build-1 (str &optional char-level-num)
   (let* ((scheme-name (pyim-scheme-name))
          (class (pyim-scheme-get-option scheme-name :class))
          (code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
@@ -3880,7 +3885,12 @@ PUNCT-LIST 格式类似：
          (lst (remove "" (split-string
                           (replace-regexp-in-string
                            "\\([a-z]+'*\\)" (concat sep "\\1" sep) str)
-                          sep))))
+                          sep)))
+         (char-level-num
+          (cond
+           ((and char-level-num (> char-level-num 3)) 3)
+           ((and char-level-num (< char-level-num 1)) 1)
+           (t char-level-num))))
     ;; 确保 pyim 词库加载
     (pyim-dcache-init-variables)
     ;; pyim 暂时只支持全拼和双拼搜索
@@ -3898,7 +3908,7 @@ PUNCT-LIST 格式类似：
                   #'(lambda (imobj)
                       (if (eq class 'xingma)
                           (pyim-cregexp-build:xingma imobj nil nil nil code-prefix)
-                        (pyim-cregexp-build:quanpin imobj)))
+                        (pyim-cregexp-build:quanpin imobj nil nil nil char-level-num)))
                   imobjs))
                 (regexp
                  (when regexp-list
@@ -3915,7 +3925,7 @@ PUNCT-LIST 格式类似：
      lst "")))
 
 (defun pyim-cregexp-build:quanpin (imobj &optional match-beginning
-                                         first-equal all-equal)
+                                         first-equal all-equal char-level-num)
   "从 IMOBJ 创建一个搜索中文的 regexp."
   (let* ((imobj
           (mapcar #'(lambda (x)
@@ -3931,7 +3941,9 @@ PUNCT-LIST 格式类似：
                       ;; 只取常用字，不常用的汉字忽略，防止生成的
                       ;; regexp 太长而无法搜索
                       (mapconcat #'(lambda (x)
-                                     (car (split-string x "|")))
+                                     (mapconcat #'identity
+                                                (cl-subseq (split-string x "|") 0 char-level-num)
+                                                ""))
                                  (pyim-pinyin2cchar-get py equal-match nil t) "")))
                 (push cchars results))
               (setq n (+ 1 n)))
