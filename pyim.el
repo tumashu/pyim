@@ -3848,23 +3848,31 @@ PUNCT-LIST 格式类似：
   (if (equal string "")
       string
     (let* ((char-level-num (or char-level-num 3))
-           (rx-string (ignore-errors
-                        (rx-to-string (pyim-cregexp-build-from-rx
-                                       (lambda (x)
-                                         (if (stringp x)
-                                             (xr (pyim-cregexp-build-1 x char-level-num))
-                                           x))
-                                       (xr string))))))
+           (rx-string
+            (if (= char-level-num 0)
+                string
+              (ignore-errors
+                (rx-to-string
+                 (pyim-cregexp-build-from-rx
+                  (lambda (x)
+                    (if (stringp x)
+                        (xr (pyim-cregexp-build-1 x char-level-num))
+                      x))
+                  (xr string)))))))
       (if (and rx-string (stringp rx-string))
-          ;; NOTE: Emacs seem to can not handle regexp which length is too big,
-          ;; for example: > 6000
-          (if (or (= char-level-num 0)
-                  (length< rx-string 5000))
-              (if (length< rx-string 5000)
-                  rx-string
-                string)
+          (if (pyim-cregexp-valid-p rx-string)
+              rx-string
             (pyim-cregexp-build string (- char-level-num 1)))
         string))))
+
+(defun pyim-cregexp-valid-p (cregexp)
+  "Return t when cregexp is a valid regexp."
+  (and cregexp
+       (stringp cregexp)
+       (condition-case nil
+           (progn (string-match-p cregexp "") t)
+         ;; FIXME: Emacs can't handle regexps whose length is too big :-(
+         (error nil))))
 
 (defun pyim-cregexp-build-from-rx (fn rx-form)
   (pcase rx-form
