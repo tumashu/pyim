@@ -143,6 +143,10 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
                  seperaters)))
     items))
 
+(defun pyim-exwm-enable-p ()
+  "测试当前是否是 exwm 环境。"
+  (string-match-p " \\*temp\\*" (buffer-name)))
+
 ;; * Footer
 (provide 'pyim-common)
 

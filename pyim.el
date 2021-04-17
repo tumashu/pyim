@@ -2910,7 +2910,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
         ;; 指定的方式来显示候选词。
         (let ((message-log-max nil))
           (cond
-           ((equal (buffer-name) " *temp*")
+           ((pyim-exwm-enable-p)
             ;; when exwm-xim is used, page should be showed
             ;; in minibuffer.
             (message (pyim-page-style:exwm page-info)))
@@ -3170,17 +3170,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
 (defun pyim-page-style:exwm (page-info)
   "专门用于 exwm 环境的 page style."
   (format "[%s]: %s(%s/%s)"
-          (let ((class (pyim-scheme-get-option (pyim-scheme-name) :class))
-                (preview (pyim-outcome-get)))
-            (when (memq class '(quanpin))
-              (let ((rest (mapconcat
-                           #'(lambda (py)
-                               (concat (nth 0 py) (nth 1 py)))
-                           (nthcdr (length preview) (car pyim-imobjs))
-                           " ")))
-                (when (string< "" rest)
-                  (setq preview (concat preview rest)))))
-            preview)
+          (pyim-page-preview-create)
           (pyim-page-menu-create
            (gethash :candidates page-info)
            (gethash :position page-info)

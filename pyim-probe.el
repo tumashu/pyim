@@ -122,7 +122,7 @@
                 (cl-search non-digit-str-before-1 "0123456789"))
       (cl-incf offset)
       (setq non-digit-str-before-1 (pyim-char-before-to-string offset)))
-    (unless (string= (buffer-name) " *temp*") ; Make sure this probe can work with exim of exwm.
+    (unless (pyim-exwm-enable-p)
       (if (<= (point) (save-excursion (back-to-indentation)
                                       (point)))
           (not (or (pyim-string-match-p
@@ -146,7 +146,7 @@
 这个函数用于：`pyim-english-input-switch-functions' 。"
   (let ((str-before-1 (pyim-char-before-to-string 0))
         (str-before-2 (pyim-char-before-to-string 1)))
-    (unless (string= (buffer-name) " *temp*")
+    (unless (pyim-exwm-enable-p)
       (if (> (point) (save-excursion (back-to-indentation)
                                      (point)))
           (or (if (pyim-string-match-p " " str-before-1)
@@ -168,7 +168,7 @@
 
 用于：`pyim-punctuation-half-width-functions' 。"
   (let ((line-string (buffer-substring (point-at-bol) (point))))
-    (unless (string= (buffer-name) " *temp*") ; Make sure this probe can work with exim of exwm.
+    (unless (pyim-exwm-enable-p)
       (and (member (char-to-string char)
                    (mapcar #'car pyim-punctuation-dict))
            (string-match "^[ \t]*$" line-string)))))
