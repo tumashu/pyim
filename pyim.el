@@ -235,10 +235,35 @@
 ;; #+END_EXAMPLE
 
 ;; 如果用户使用仓颉第五代，最简单的方式是从 melpa 中安装 pyim-cangjie5dict 包，
-;; 然后根据它的 [[https://github.com/erstern/pyim-cangjie5dict][README]] 来配置。
+;; 然后根据它的 [[https://github.com/p1uxtar/pyim-cangjie5dict][README]] 来配置。
 ;; pyim 支持其它版本的仓颉，但需要用户自己创建词库文件。
 
 ;; 用户可以使用命令：`pyim-search-word-code' 来查询当前选择词条的仓颉编码
+
+;; *** 使用三码郑码（至至郑码）输入法
+;; pyim 支持三码郑码输入法，用户可以通过变量 `pyim-default-scheme' 来设定：
+
+;; #+BEGIN_EXAMPLE
+;; (setq pyim-default-scheme 'smzm)
+;; #+END_EXAMPLE
+
+;; 在使用三码郑码输入法之前，请用 pyim-dicts-manager 添加一个三码郑码词库，词库的格式类似：
+
+;; #+BEGIN_EXAMPLE
+;;; -*- coding: utf-8-unix -*-
+;; _k 是
+;; _y 了
+;; _g 在
+;; _o 人
+;; _m 我
+;; _n 他
+;; _gv 有
+;; #+END_EXAMPLE
+
+;; 用户也可以从 melpa 中安装 pyim-smzmdict 包，
+;; 然后根据它的 [[https://github.com/p1uxtar/pyim-smzmdict][README]] 来配置。
+
+;; 用户可以使用命令：`pyim-search-word-code' 来查询当前选择词条的三码郑码编码
 
 ;; *** 让选词框跟随光标
 ;; 用户可以通过下面的设置让 pyim 在 *光标处* 显示一个选词框：
@@ -2134,6 +2159,17 @@ Return the input string.
    :code-prefix "@" ;仓颉输入法词库中所有的 code 都以 "@" 开头，防止词库冲突。
    :code-split-length 5 ;默认将用户输入切成 5 个字符长的 code 列表（不计算 code-prefix）
    :code-maximum-length 5 ;仓颉词库中，code 的最大长度（不计算 code-prefix）
+   :prefer-trigger-chars nil))
+
+(pyim-scheme-add
+ '(smzm
+   :document "三码郑码（至至版）输入法。"
+   :class xingma
+   :first-chars "abcdefghijklmnopqrstuvwxyz"
+   :rest-chars "abcdefghijklmnopqrstuvwxyz"
+   :code-prefix "_" ;三码郑码输入法词库中所有的 code 都以 "_" 开头，防止词库冲突。
+   :code-split-length 3 ;默认将用户输入切成 3 个字符长的 code 列表（不计算 code-prefix）
+   :code-maximum-length 3 ;三码郑码词库中，code 的最大长度（不计算 code-prefix）
    :prefer-trigger-chars nil))
 
 (pyim-scheme-add
