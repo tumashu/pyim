@@ -594,17 +594,6 @@
   "启用输入联想词功能."
   :type 'boolean)
 
-(defcustom pyim-default-scheme 'quanpin
-  "设置 pyim 使用哪一种输入法方案，默认使用全拼输入."
-  :type 'symbol)
-
-(defcustom pyim-assistant-scheme 'quanpin
-  "设置辅助输入法方案.
-
-这个功能主要用于五笔等形码输入法，在忘记编码的情况下，
-临时激活某种辅助输入法（比如：拼音输入法）来输入汉字。"
-  :type 'symbol)
-
 (defcustom pyim-translate-trigger-char "v"
   "用于触发特殊操作的字符，相当与单字快捷键.
 
@@ -866,9 +855,6 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 4. 第二次选择：三
 5. 第三次选择：四
 6. 变量取值为： (\"一二三四\" \"一二三\" \"一二\")")
-
-(defvar pyim-assistant-scheme-enable nil
-  "设置临时 scheme, 用于五笔等形码输入法临时拼音输入。")
 
 (defvar pyim-input-ascii nil
   "是否开启 pyim 英文输入模式.")

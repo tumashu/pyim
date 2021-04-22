@@ -30,6 +30,20 @@
 ;; * 代码                                                           :code:
 (require 'cl-lib)
 
+(defcustom pyim-default-scheme 'quanpin
+  "设置 pyim 使用哪一种输入法方案，默认使用全拼输入."
+  :type 'symbol)
+
+(defcustom pyim-assistant-scheme 'quanpin
+  "设置辅助输入法方案.
+
+这个功能主要用于五笔等形码输入法，在忘记编码的情况下，
+临时激活某种辅助输入法（比如：拼音输入法）来输入汉字。"
+  :type 'symbol)
+
+(defvar pyim-assistant-scheme-enable nil
+  "设置临时 scheme, 用于五笔等形码输入法临时拼音输入。")
+
 (defvar pyim-schemes nil
   "Pyim 支持的所有拼音方案.")
 
