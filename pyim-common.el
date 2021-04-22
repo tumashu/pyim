@@ -143,10 +143,6 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
                  seperaters)))
     items))
 
-(defun pyim-exwm-enable-p ()
-  "测试当前是否是 exwm 环境。"
-  (string-match-p " \\*temp\\*" (buffer-name)))
-
 (defun pyim-permutate-list (list)
   "使用排列组合的方式重新排列 LIST.
 这个函数由 ‘二中’ 提供，`pyim-hanzi2pinyin' 没有使用这个函数
@@ -188,6 +184,16 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
    (t (append (pyim-flatten-list (car my-list))
               (pyim-flatten-list (cdr my-list))))))
 
+(defun pyim-list-merge (a b)
+  "Join list A and B to a new list, then delete dups."
+  (let ((a (if (listp a)
+               a
+             (list a)))
+        (b (if (listp b)
+               b
+             (list b))))
+    (delete-dups `(,@a ,@b))))
+
 (defun pyim-char-before-to-string (num)
   "得到光标前第 `num' 个字符，并将其转换为字符串。"
   (let* ((point (point))
@@ -211,15 +217,10 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
                 emacs-basic-display
                 (not (display-graphic-p))))))
 
-(defun pyim-list-merge (a b)
-  "Join list A and B to a new list, then delete dups."
-  (let ((a (if (listp a)
-               a
-             (list a)))
-        (b (if (listp b)
-               b
-             (list b))))
-    (delete-dups `(,@a ,@b))))
+(defun pyim-exwm-enable-p ()
+  "测试当前是否是 exwm 环境。"
+  (string-match-p " \\*temp\\*" (buffer-name)))
+
 
 ;; * Footer
 (provide 'pyim-common)
