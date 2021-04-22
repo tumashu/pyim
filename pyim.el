@@ -583,6 +583,7 @@
 (require 'pyim-pinyin)
 (require 'pyim-punctuation)
 (require 'pyim-dict)
+(require 'pyim-dcache)
 (require 'pyim-scheme)
 
 (defgroup pyim nil
@@ -769,15 +770,6 @@ Only useful when use posframe.")
 
 注意：当使用 minibuffer 为选词框时，这个选项才有用处。")
 
-(defcustom pyim-dcache-backend 'pyim-dhashcache
-  "词库后端引擎.负责缓冲词库并提供搜索词的算法.
-可选项为 `pyim-dhashcache' 或 `pyim-dregcache'.
-前者搜索单词速度很快,消耗内存多.  后者搜索单词速度较快,消耗内存少.
-
-`pyim-dregcache' 速度和词库大小成正比.  当词库接近100M大小时,
-在六年历史的笔记本上会有一秒的延迟. 这时建议换用 `pyim-dhashcache'."
-  :type 'symbol)
-
 ;;;###autoload
 (defvar pyim-titles '("PYIM " "PYIM-EN " "PYIM-AU ") "Pyim 在 mode-line 中显示的名称.")
 
@@ -905,19 +897,6 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 (defvar pyim-load-hook nil)
 (defvar pyim-active-hook nil)
 (defvar pyim-inactive-hook nil)
-
-(defvar pyim-dcache-auto-update t
-  "是否自动创建和更新词库对应的 dcache 文件.
-
-这个变量默认设置为 t, 如果有词库文件添加到 `pyim-dicts' 或者
-`pyim-extra-dicts' 时，pyim 会自动生成相关的 dcache 文件。
-
-一般不建议将这个变量设置为 nil，除非有以下情况：
-
-1. 用户的词库已经非常稳定，并且想通过禁用这个功能来降低
-pyim 对资源的消耗。
-2. 自动更新功能无法正常工作，用户通过手工从其他机器上拷贝
-dcache 文件的方法让 pyim 正常工作。")
 
 (defvar pyim-page-tooltip-posframe-buffer " *pyim-page-tooltip-posframe-buffer*"
   "这个变量用来保存做为 page tooltip 的 posframe 的 buffer.")
@@ -1192,49 +1171,6 @@ pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
   (pyim-start "pyim" nil t
               save-personal-dcache refresh-common-dcache))
 
-(defun pyim-dcache-call-api (api-name &rest api-args)
-  "Get backend API named API-NAME then call it with arguments API-ARGS."
-  ;; make sure the backend is load
-  (unless (featurep pyim-dcache-backend)
-    (require pyim-dcache-backend))
-  (let ((func (intern (concat (symbol-name pyim-dcache-backend)
-                              "-" (symbol-name api-name)))))
-    (if (functionp func)
-        (apply func api-args)
-      (when pyim-debug
-        (message "%S 不是一个有效的 dcache api 函数." (symbol-name func))
-        ;; Need to return nil
-        nil))))
-
-(defun pyim-dcache-update-code2word (&optional force)
-  "读取并加载词库.
-
-读取 `pyim-dicts' 和 `pyim-extra-dicts' 里面的词库文件，生成对应的
-词库缓冲文件，然后加载词库缓存。
-
-如果 FORCE 为真，强制加载。"
-  (let* ((dict-files (mapcar #'(lambda (x)
-                                 (unless (plist-get x :disable)
-                                   (plist-get x :file)))
-                             `(,@pyim-dicts ,@pyim-extra-dicts)))
-         (dicts-md5 (pyim-create-dicts-md5 dict-files)))
-    (pyim-dcache-call-api 'update-code2word dict-files dicts-md5 force)))
-
-(defun pyim-dcache-init-variables ()
-  "初始化 dcache 缓存相关变量."
-  (pyim-dcache-call-api 'init-variables))
-
-(defun pyim-dcache-save-caches ()
-  "保存 dcache.
-
-  将用户选择过的词生成的缓存和词频缓存的取值
-  保存到它们对应的文件中.
-
-  这个函数默认作为 `kill-emacs-hook' 使用。"
-  (interactive)
-  (pyim-dcache-call-api 'save-personal-dcache-to-file)
-  t)
-
 (defun pyim-export (file &optional confirm)
   "将个人词条以及词条对应的词频信息导出到文件 FILE.
 
@@ -1287,20 +1223,12 @@ MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表
   ;; 中读取变量值, 然后再对用户选择过的词生成的缓存排序，如果没
   ;; 有这一步骤，导入的词条就会被覆盖，使用 emacs-thread 机制来更新 dcache
   ;; 不存在此问题。
-  (unless pyim-prefer-emacs-thread
+  (unless pyim-dcache-prefer-emacs-thread
     (pyim-dcache-save-caches))
   ;; 更新相关的 dcache
   (pyim-dcache-call-api 'update-personal-words t)
 
   (message "pyim: 词条相关信息导入完成！"))
-
-;; ** 从词库中搜索中文词条
-(defun pyim-dcache-get (code &optional from)
-  "从 FROM 对应的 dcache 中搜索 CODE, 得到对应的词条.
-
-当词库文件加载完成后，pyim 就可以用这个函数从词库缓存中搜索某个
-code 对应的中文词条了."
-  (pyim-dcache-call-api 'get code from))
 
 (defun pyim-insert-word-into-icode2word (word pinyin prepend)
   (pyim-dcache-call-api 'insert-word-into-icode2word word pinyin prepend))
