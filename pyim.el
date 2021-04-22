@@ -3400,13 +3400,6 @@ alist 列表。"
           (insert (pyim-punctuation-return-proper-punct punc-list))
         (insert (car punc-list))))))
 
-(defun pyim-flatten-list (my-list)
-  (cond
-   ((null my-list) nil)
-   ((atom my-list) (list my-list))
-   (t (append (pyim-flatten-list (car my-list))
-              (pyim-flatten-list (cdr my-list))))))
-
 (defun pyim-punctuation-translate (&optional punct-style)
   "将光标前1个或前后连续成对的n个标点符号进行全角/半角转换.
 

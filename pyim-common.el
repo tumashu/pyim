@@ -181,6 +181,13 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
       (setq one return)
       (pyim-permutate-list2-internal one (cdr two)))))
 
+(defun pyim-flatten-list (my-list)
+  (cond
+   ((null my-list) nil)
+   ((atom my-list) (list my-list))
+   (t (append (pyim-flatten-list (car my-list))
+              (pyim-flatten-list (cdr my-list))))))
+
 ;; * Footer
 (provide 'pyim-common)
 
