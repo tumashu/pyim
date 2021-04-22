@@ -188,6 +188,39 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
    (t (append (pyim-flatten-list (car my-list))
               (pyim-flatten-list (cdr my-list))))))
 
+(defun pyim-char-before-to-string (num)
+  "得到光标前第 `num' 个字符，并将其转换为字符串。"
+  (let* ((point (point))
+         (point-before (- point num)))
+    (when (and (> point-before 0)
+               (char-before point-before))
+      (char-to-string (char-before point-before)))))
+
+(defun pyim-char-after-to-string (num)
+  "得到光标后第 `num' 个字符，并将其转换为字符串。"
+  (let* ((point (point))
+         (point-after (+ point num)))
+    (when (char-after point-after)
+      (char-to-string (char-after point-after)))))
+
+(defun pyim-posframe-valid-p ()
+  "Test posframe's status."
+  (and (>= emacs-major-version 26)
+       (featurep 'posframe)
+       (not (or noninteractive
+                emacs-basic-display
+                (not (display-graphic-p))))))
+
+(defun pyim-list-merge (a b)
+  "Join list A and B to a new list, then delete dups."
+  (let ((a (if (listp a)
+               a
+             (list a)))
+        (b (if (listp b)
+               b
+             (list b))))
+    (delete-dups `(,@a ,@b))))
+
 ;; * Footer
 (provide 'pyim-common)
 

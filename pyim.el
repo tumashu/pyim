@@ -1439,16 +1439,6 @@ code-prefix)。当RETURN-LIST 设置为 t 时，返回一个 code list。"
                            (substring (pyim-hanzi2xingma:wubi (nth (1- len) string)) 0 1))))))
       code)))
 
-(defun pyim-list-merge (a b)
-  "Join list A and B to a new list, then delete dups."
-  (let ((a (if (listp a)
-               a
-             (list a)))
-        (b (if (listp b)
-               b
-             (list b))))
-    (delete-dups `(,@a ,@b))))
-
 (defun pyim-cstring-at-point (&optional number)
   "获取光标一个中文字符串，字符数量为：NUMBER."
   (save-excursion
@@ -2976,14 +2966,6 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
           (t (let ((max-mini-window-height (+ pyim-page-length 2)))
                (message string))))))
 
-(defun pyim-posframe-valid-p ()
-  "Test posframe's status."
-  (and (>= emacs-major-version 26)
-       (featurep 'posframe)
-       (not (or noninteractive
-                emacs-basic-display
-                (not (display-graphic-p))))))
-
 (defun pyim-outcome-get (&optional n)
   "获取 outcome"
   (nth (or n 0) pyim-outcome-history))
@@ -3296,21 +3278,6 @@ alist 列表。"
 
      ;; 当输入的字符不是标点符号时，原样插入。
      (t str))))
-
-(defun pyim-char-before-to-string (num)
-  "得到光标前第 `num' 个字符，并将其转换为字符串。"
-  (let* ((point (point))
-         (point-before (- point num)))
-    (when (and (> point-before 0)
-               (char-before point-before))
-      (char-to-string (char-before point-before)))))
-
-(defun pyim-char-after-to-string (num)
-  "得到光标后第 `num' 个字符，并将其转换为字符串。"
-  (let* ((point (point))
-         (point-after (+ point num)))
-    (when (char-after point-after)
-      (char-to-string (char-after point-after)))))
 
 (defun pyim-wash-current-line-function ()
   "清理当前行的内容，比如：删除不必要的空格，等。"
