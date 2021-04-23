@@ -33,7 +33,8 @@
   "Outcome tools for pyim."
   :group 'pyim)
 
-(defcustom pyim-translate-trigger-char "v"
+(define-obsolete-variable-alias 'pyim-translate-trigger-char 'pyim-outcome-trigger-char "3.0")
+(defcustom pyim-outcome-trigger-char "v"
   "用于触发特殊操作的字符，相当与单字快捷键.
 
 输入中文的时候，我们需要快速频繁的执行一些特定的命令，最直接的方
@@ -64,28 +65,28 @@
 
 值得注意的是，这种方式如果添加的功能太多，会造成许多潜在的冲突。
 
-用户可以使用变量 `pyim-translate-trigger-char' 来设置触发字符，默
+用户可以使用变量 `pyim-outcome-trigger-char' 来设置触发字符，默
 认的触发字符是：\"v\", 选择这个字符的理由基于全拼输入法的：
 
 1. \"v\" 不是有效的声母，不会对中文输入造成太大的影响。
 2. \"v\" 字符很容易按。
 
-pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。当待输入的
-字符是触发字符时，`pyim-translate' 根据光标前的字符的不同来调用不
-同的功能，具体见 `pyim-translate' ：
+pyim 使用函数 `pyim-outcome-handle-char' 来处理特殊功能触发字符。当待输入的
+字符是触发字符时，`pyim-outcome-handle-char' 根据光标前的字符的不同来调用不
+同的功能，具体见 `pyim-outcome-handle-char' ：
 
 单字快捷键受到输入法方案的限制，比如：全拼输入法可以将其设置为v,
 但双拼输入法下设置 v 可能就不行，所以，pyim 首先会检查当前输入法
 方案下，这个快捷键设置是否合理有效，如果不是一个合理的设置，则使
 用拼音方案默认的 :prefer-trigger-chars 。
 
-具体请参考 `pyim-translate-get-trigger-char' 。"
+具体请参考 `pyim-outcome-get-trigger-char' 。"
   :type '(choice (const nil) string))
 
 (defcustom pyim-wash-function 'pyim-wash-current-line-function
   "清洗光标前面的文字内容.
 这个函数与『单字快捷键配合使用』，当光标前面的字符为汉字字符时，
-按 `pyim-translate-trigger-char' 对应字符，可以调用这个函数来清洗
+按 `pyim-outcome-trigger-char' 对应字符，可以调用这个函数来清洗
 光标前面的文字内容。"
   :type 'function)
 
@@ -125,7 +126,7 @@ pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。当待输
         ((eq type 'last-char)
          (push
           (concat (pyim-outcome-get)
-                  (pyim-translate last-command-event))
+                  (pyim-outcome-handle-char last-command-event))
           pyim-outcome-history))
         ((eq type 'candidate)
          (let* ((candidate
@@ -143,19 +144,19 @@ pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。当待输
            (push
             (concat (pyim-outcome-get)
                     candidate
-                    (pyim-translate last-command-event))
+                    (pyim-outcome-handle-char last-command-event))
             pyim-outcome-history)))
         ((eq type 'pyim-entered)
          (push (pyim-entered-get 'point-before) pyim-outcome-history))
         (t (error "Pyim: invalid outcome"))))
 
-(defun pyim-translate-get-trigger-char ()
-  "检查 `pyim-translate-trigger-char' 是否为一个合理的 trigger char 。
+(defun pyim-outcome-get-trigger-char ()
+  "检查 `pyim-outcome-trigger-char' 是否为一个合理的 trigger char 。
 
 pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
 自定义设置与输入法冲突，这里需要检查一下这个键位设置的是否合理，
 如果不合理，就返回输入法默认设定。"
-  (let* ((user-trigger-char pyim-translate-trigger-char)
+  (let* ((user-trigger-char pyim-outcome-trigger-char)
          (user-trigger-char
           (if (characterp user-trigger-char)
               (char-to-string user-trigger-char)
@@ -169,7 +170,7 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
                                 :prefer-trigger-chars)))
     (if (pyim-string-match-p (regexp-quote user-trigger-char) first-char)
         (progn
-          ;; (message "注意：pyim-translate-trigger-char 设置和当前输入法冲突，使用推荐设置：\"%s\""
+          ;; (message "注意：pyim-outcome-trigger-char 设置和当前输入法冲突，使用推荐设置：\"%s\""
           ;;          prefer-trigger-chars)
           prefer-trigger-chars)
       user-trigger-char)))
@@ -177,7 +178,7 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
 (declare-function pyim-create-word-at-point "pyim")
 (declare-function pyim-delete-word-at-point "pyim")
 
-(defun pyim-translate (char)
+(defun pyim-outcome-handle-char (char)
   "Pyim 字符转换函数，主要用于处理标点符号.
 
 pyim 在运行过程中调用这个函数来进行标点符号格式的转换。
@@ -201,7 +202,7 @@ alist 列表。"
          (punc-posit-before-1
           (cl-position str-before-1 punc-list-before-1
                        :test #'equal))
-         (trigger-str (pyim-translate-get-trigger-char)))
+         (trigger-str (pyim-outcome-get-trigger-char)))
     (cond
      ;; 空格之前的字符什么也不输入。
      ((< char ? ) "")
@@ -247,9 +248,9 @@ alist 列表。"
      ;; 3. item3
 
      ;; 在这种情况下，数字后面输入句号必须是半角句号而不是全角句号，
-     ;; pyim 调用 `pyim-translate' 时，会检测光标前面的字符，如果这个
+     ;; pyim 调用 `pyim-outcome-handle-char' 时，会检测光标前面的字符，如果这个
      ;; 字符属于 `pyim-punctuation-escape-list' ，pyim 将输入半角标点，
-     ;; 具体细节见：`pyim-translate'
+     ;; 具体细节见：`pyim-outcome-handle-char'
      ((member (char-before)
               pyim-punctuation-escape-list)
       str)
@@ -263,7 +264,7 @@ alist 列表。"
                pyim-punctuation-half-width-functions)
       str)
 
-     ;; 当光标前面为英文标点时， 按 `pyim-translate-trigger-char'
+     ;; 当光标前面为英文标点时， 按 `pyim-outcome-trigger-char'
      ;; 对应的字符后， 自动将其转换为对应的中文标点。
      ((and (numberp punc-posit-before-1)
            (= punc-posit-before-1 0)
@@ -271,7 +272,7 @@ alist 列表。"
       (pyim-punctuation-translate 'full-width)
       "")
 
-     ;; 当光标前面为中文标点时， 按 `pyim-translate-trigger-char'
+     ;; 当光标前面为中文标点时， 按 `pyim-outcome-trigger-char'
      ;; 对应的字符后， 自动将其转换为对应的英文标点。
      ((and (numberp punc-posit-before-1)
            (> punc-posit-before-1 0)
