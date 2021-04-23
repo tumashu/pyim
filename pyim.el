@@ -1488,7 +1488,6 @@ Return the input string.
     ;; pyim 使用这个 hook 来处理联想词。
     (run-hooks 'pyim-page-select-finish-hook)))
 
-
 (defun pyim-page-select-word-by-number (&optional n)
   "使用数字编号来选择对应的词条。"
   (interactive)
