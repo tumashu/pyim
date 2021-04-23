@@ -43,9 +43,13 @@
 那么当前entered 就是 \"nihaom\". 上次 entered 是 \"nihao\". 那么
 返回值有3种情况（优先级按照下面的顺序）：
 
-1. (:select last :replace-with \"xxx\")    自动上屏上次 entered (nihao) 的第一个候选词，m 键下一轮处理。
-3. (:select current :replace-with \"xxx\") 自动上屏当前 entered (nihaom) 的第一个候选词。
-4. nil                                     不自动上屏。
+1. (:select last :replace-with \"xxx\") 自动上屏上次
+entered (nihao) 的第一个候选词，m 键下一轮处理。
+
+2. (:select current :replace-with \"xxx\") 自动上屏当前
+entered (nihaom) 的第一个候选词。
+
+3. nil  不自动上屏。
 
 如果 :replace-with 设置为一个字符串，则选择最终会被这个字符串替代。
 

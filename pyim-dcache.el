@@ -29,6 +29,7 @@
 ;; * 代码                                                           :code:
 (require 'cl-lib)
 (require 'pyim-common)
+(require 'pyim-dict)
 
 (defgroup pyim-dcache nil
   "Dcache for pyim."
@@ -232,6 +233,8 @@ code 对应的中文词条了."
   (interactive "F将个人缓存中的词条导出到文件：")
   (pyim-dcache-call-api 'export-personal-words file confirm)
   (message "Pyim export finished."))
+
+(declare-function pyim-create-word "pyim")
 
 (defalias 'pyim-import 'pyim-dcache-import)
 (defun pyim-dcache-import (file &optional merge-method)
