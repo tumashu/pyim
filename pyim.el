@@ -66,12 +66,12 @@
 运行结果为 t 时，pyim 开启英文输入功能。"
   :type 'symbol)
 
-(define-obsolete-variable-alias 'pyim-page-select-finish-hook 'pyim-select-finish-hook "3.0")
+(define-obsolete-variable-alias 'pyim-page-select-finish-hook 'pyim-select-finish-hook "4.0")
 (defcustom pyim-select-finish-hook nil
   "Pyim 选词完成时运行的 hook."
   :type 'hook)
 
-(define-obsolete-variable-alias 'pyim-page-select-word-by-number 'pyim-select-word-by-number "3.0")
+(define-obsolete-variable-alias 'pyim-page-select-word-by-number 'pyim-select-word-by-number "4.0")
 (defcustom pyim-select-word-by-number t
   "使用数字键来选择词条.
 
@@ -652,7 +652,7 @@ Return the input string.
           (not pyim-assistant-scheme-enable))
     (pyim-entered-refresh)))
 
-(define-obsolete-function-alias 'pyim-page-select-word-simple 'pyim-select-word-simple "3.0")
+(define-obsolete-function-alias 'pyim-page-select-word-simple 'pyim-select-word-simple "4.0")
 (defun pyim-select-word-simple ()
   "从选词框中选择当前词条.
 这个函数与 `pyim-select-word' 的区别是：
@@ -666,7 +666,7 @@ Return the input string.
     (pyim-outcome-handle 'candidate))
   (pyim-terminate-translation))
 
-(define-obsolete-function-alias 'pyim-page-select-word 'pyim-select-word "3.0")
+(define-obsolete-function-alias 'pyim-page-select-word 'pyim-select-word "4.0")
 (defun pyim-select-word ()
   "从选词框中选择当前词条，然后删除该词条对应拼音。"
   (interactive)
@@ -770,7 +770,7 @@ Return the input string.
     ;; pyim 使用这个 hook 来处理联想词。
     (run-hooks 'pyim-select-finish-hook)))
 
-(define-obsolete-function-alias 'pyim-page-select-word-by-number 'pyim-select-word-by-number "3.0")
+(define-obsolete-function-alias 'pyim-page-select-word-by-number 'pyim-select-word-by-number "4.0")
 (defun pyim-select-word-by-number (&optional n)
   "使用数字编号来选择对应的词条。"
   (interactive)

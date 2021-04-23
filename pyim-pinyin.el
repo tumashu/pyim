@@ -48,7 +48,7 @@
   '("a" "o" "e" "ai" "ei" "ui" "ao" "ou" "er" "an" "en"
     "ang" "eng"))
 
-(define-obsolete-function-alias 'pyim-fuzzy-pinyin-alist 'pyim-pinyin-fuzzy-alist "3.0")
+(define-obsolete-function-alias 'pyim-fuzzy-pinyin-alist 'pyim-pinyin-fuzzy-alist "4.0")
 (defcustom pyim-pinyin-fuzzy-alist
   '(("en" "eng")
     ("in" "ing")

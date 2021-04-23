@@ -44,7 +44,7 @@
 在六年历史的笔记本上会有一秒的延迟. 这时建议换用 `pyim-dhashcache'."
   :type 'symbol)
 
-(define-obsolete-variable-alias 'pyim-prefer-emacs-thread 'pyim-dcache-prefer-emacs-thread "3.0")
+(define-obsolete-variable-alias 'pyim-prefer-emacs-thread 'pyim-dcache-prefer-emacs-thread "4.0")
 (defvar pyim-dcache-prefer-emacs-thread nil
   "是否优先使用 emacs thread 功能来生成 dcache.
 

@@ -33,7 +33,7 @@
   "Outcome tools for pyim."
   :group 'pyim)
 
-(define-obsolete-variable-alias 'pyim-translate-trigger-char 'pyim-outcome-trigger-char "3.0")
+(define-obsolete-variable-alias 'pyim-translate-trigger-char 'pyim-outcome-trigger-char "4.0")
 (defcustom pyim-outcome-trigger-char "v"
   "用于触发特殊操作的字符，相当与单字快捷键.
 
