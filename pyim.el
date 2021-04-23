@@ -268,7 +268,7 @@
 ;; 注：用户可以添加函数 pyim-page-style:STYLENAME 来定义自己的选词框格式。
 
 ;; *** 设置模糊音
-;; 可以通过设置 `pyim-fuzzy-pinyin-alist' 变量来自定义模糊音。
+;; 可以通过设置 `pyim-pinyin-fuzzy-alist' 变量来自定义模糊音。
 
 ;; *** 使用魔术转换器
 ;; 用户可以将待选词条作 “特殊处理” 后再 “上屏”，比如 “简体转繁体” 或者
@@ -650,13 +650,6 @@ pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。当待输
 当用户快速输入连续的拼音时可提升用户体验.
 如果为 0 或者 nil, 则不等待立刻显示可选词."
   :type 'integer)
-
-(defcustom pyim-fuzzy-pinyin-alist
-  '(("en" "eng")
-    ("in" "ing")
-    ("un" "ong"))
-  "设定模糊音."
-  :type 'sexp)
 
 (defface pyim-preview-face '((t (:underline t)))
   "设置光标处预览字符串的 face.")

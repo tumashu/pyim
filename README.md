@@ -416,7 +416,7 @@ pyim 的 tooltip 选词框默认使用 **双行显示** 的样式，在一些特
 
 ### 设置模糊音
 
-可以通过设置 \`pyim-fuzzy-pinyin-alist' 变量来自定义模糊音。
+可以通过设置 \`pyim-pinyin-fuzzy-alist' 变量来自定义模糊音。
 
 
 <a id="org24edf90"></a>

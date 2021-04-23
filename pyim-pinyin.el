@@ -44,6 +44,14 @@
   '("a" "o" "e" "ai" "ei" "ui" "ao" "ou" "er" "an" "en"
     "ang" "eng"))
 
+(define-obsolete-function-alias 'pyim-fuzzy-pinyin-alist 'pyim-pinyin-fuzzy-alist "3.0")
+(defcustom pyim-pinyin-fuzzy-alist
+  '(("en" "eng")
+    ("in" "ing")
+    ("un" "ong"))
+  "设定模糊音."
+  :type 'sexp)
+
 (defconst pyim-pinyin-shuangpin-invalid-pinyin-regexp
   (format "^\\(%s\\)$"
           (mapconcat #'identity

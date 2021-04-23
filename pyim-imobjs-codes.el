@@ -193,7 +193,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
                                      (delete-dups
                                       `(,str ,@(cl-copy-list x))))))
                            (or result (list str)))))
-    (let* ((fuzzy-alist pyim-fuzzy-pinyin-alist)
+    (let* ((fuzzy-alist pyim-pinyin-fuzzy-alist)
            (sm-list (find-list (nth 0 imelem) fuzzy-alist))
            (ym-list (find-list (nth 1 imelem) fuzzy-alist))
            result)
