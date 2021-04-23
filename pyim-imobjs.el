@@ -28,6 +28,7 @@
 ;;; Code:
 ;; * 代码                                                           :code:
 (require 'cl-lib)
+(require 'pyim-common)
 
 (defgroup pyim-imobjs nil
   "Imobjs lib for pyim."
@@ -75,6 +76,8 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 1. quanping:  (\"g\" \"ua\" \"g\" \"ua\")
 2. shuangpin: (\"h\" \"ao\" \"h\" \"c\")
 3. wubi:      (\"aaaa\")")
+
+(pyim-register-local-variables '(pyim-imobjs))
 
 (defun pyim-imobjs-create (entered &optional scheme-name)
   "按照 SCHEME-NAME 对应的输入法方案，从 ENTERED 字符串中创建一个

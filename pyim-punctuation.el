@@ -28,6 +28,7 @@
 ;;; Code:
 ;; * 代码                                                           :code:
 (require 'cl-lib)
+(require 'pyim-common)
 
 (defgroup pyim-punctuation nil
   "Punctuation libs for pyim."
@@ -92,6 +93,12 @@ pyim 输入半角标点，函数列表中每个函数都有一个参数：char �
   "Punctuation will not insert after this characters.
 
 If you don't like this function, set the variable to nil")
+
+(pyim-register-local-variables
+ '(pyim-punctuation-translate-p
+   pyim-punctuation-pair-status
+   pyim-punctuation-escape-list
+   pyim-punctuation-half-width-functions))
 
 (defvar pyim-input-ascii)
 (declare-function pyim-auto-switch-english-input-p "pyim")

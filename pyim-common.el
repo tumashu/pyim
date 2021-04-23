@@ -37,6 +37,22 @@
 
 (defvar pyim-debug nil)
 
+(defvar pyim-local-variable-list nil
+  "A list of buffer local variable.")
+
+(defun pyim-register-local-variables (vars)
+  "Recode variables VARS to `pyim-local-variable-list'."
+  (dolist (var vars)
+    (cl-pushnew var pyim-local-variable-list)
+    (make-variable-buffer-local var)
+    (put var 'permanent-local t))
+  pyim-local-variable-list)
+
+(defun pyim-recreate-local-variables ()
+  "Kill then make all variables in `pyim-local-variable-list'."
+  (mapc #'kill-local-variable pyim-local-variable-list)
+  (mapc #'make-local-variable pyim-local-variable-list))
+
 (defun pyim-string-match-p (regexp string &optional start)
   "与 `string-match-p' 类似，如果 REGEXP 和 STRING 是非字符串时，
 不会报错。"

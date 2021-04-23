@@ -28,6 +28,7 @@
 ;;; Code:
 ;; * 代码                                                           :code:
 (require 'cl-lib)
+(require 'pyim-common)
 
 (defgroup pyim-outcome nil
   "Outcome tools for pyim."
@@ -167,6 +168,8 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
           ;;          prefer-trigger-chars)
           prefer-trigger-chars)
       user-trigger-char)))
+
+(pyim-register-local-variables '(pyim-outcome-history))
 
 ;; Fix compile warn.
 (declare-function pyim-create-word-at-point "pyim")

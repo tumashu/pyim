@@ -159,31 +159,14 @@
     map)
   "Pyim 的 Keymap.")
 
-;; ** 将变量转换为 local 变量
-(defvar pyim-local-variable-list
-  '(pyim-imobjs
-    pyim-outcome-history
-    pyim-preview-overlay
-    pyim-candidates
-    pyim-candidate-position
-    pyim-input-ascii
-    ;; pyim-english-input-switch-functions
-    pyim-punctuation-half-width-functions
-    pyim-translating
-    pyim-last-created-word
-
-    input-method-function
-    inactivate-current-input-method-function
-    describe-current-input-method-function
-
-    pyim-punctuation-translate-p
-    pyim-punctuation-pair-status
-    pyim-punctuation-escape-list)
-  "A list of buffer local variable.")
-
-(dolist (var pyim-local-variable-list)
-  (make-variable-buffer-local var)
-  (put var 'permanent-local t))
+(pyim-register-local-variables
+ '(pyim-input-ascii
+   pyim-translating
+   pyim-last-created-word
+   input-method-function
+   inactivate-current-input-method-function
+   ;;pyim-english-input-switch-functions
+   describe-current-input-method-function))
 
 ;; ** 注册 Pyim 输入法
 ;;;###autoload
@@ -213,8 +196,7 @@ pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
 会执行 `pyim-input-method' 这个函数。`pyim-input-method' 又调用函
 数`pyim-start-translation'."
   (interactive)
-  (mapc #'kill-local-variable pyim-local-variable-list)
-  (mapc #'make-local-variable pyim-local-variable-list)
+  (pyim-recreate-local-variables)
   (when (and restart save-personal-dcache)
     (pyim-dcache-save-caches))
 

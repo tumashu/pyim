@@ -53,6 +53,9 @@
 
 细节信息请参考 `pyim-page-refresh' 的 docstring.")
 
+(pyim-register-local-variables
+ '(pyim-candidates pyim-candidate-position))
+
 (defun pyim-candidates-create-timer-function ()
   "Function used by `pyim-candidates-create-timer'"
   (let* ((scheme-name (pyim-scheme-name))

@@ -28,6 +28,7 @@
 ;;; Code:
 ;; * 代码                                                           :code:
 (require 'cl-lib)
+(require 'pyim-common)
 
 (defgroup pyim-preview nil
   "Preview libs for pyim."
@@ -38,6 +39,9 @@
 
 (defvar pyim-preview-overlay nil
   "用于保存光标处预览字符串的 overlay.")
+
+(pyim-register-local-variables
+ '(pyim-preview-overlay pyim-local-variable-list))
 
 ;; ** 待输入字符串预览
 (defun pyim-preview-setup-overlay ()
