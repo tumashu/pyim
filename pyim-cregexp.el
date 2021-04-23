@@ -116,10 +116,10 @@
                 (imobjs (pyim-imobjs-create string1 scheme-name))
                 (regexp-list
                  (mapcar
-                  #'(lambda (imobj)
-                      (if (eq class 'xingma)
-                          (pyim-cregexp-build:xingma imobj nil nil nil code-prefix)
-                        (pyim-cregexp-build:quanpin imobj nil nil nil char-level-num)))
+                  (lambda (imobj)
+                    (if (eq class 'xingma)
+                        (pyim-cregexp-build:xingma imobj nil nil nil code-prefix)
+                      (pyim-cregexp-build:quanpin imobj nil nil nil char-level-num)))
                   imobjs))
                 (regexp
                  (when regexp-list
@@ -139,8 +139,8 @@
                                          first-equal all-equal char-level-num)
   "从 IMOBJ 创建一个搜索中文的 regexp."
   (let* ((imobj
-          (mapcar #'(lambda (x)
-                      (concat (nth 0 x) (nth 1 x)))
+          (mapcar (lambda (x)
+                    (concat (nth 0 x) (nth 1 x)))
                   imobj))
          (cchar-list
           (let ((n 0) results)
@@ -151,18 +151,18 @@
                      (cchars
                       ;; 只取常用字，不常用的汉字忽略，防止生成的
                       ;; regexp 太长而无法搜索
-                      (mapconcat #'(lambda (x)
-                                     (mapconcat #'identity
-                                                (cl-subseq (split-string x "|") 0 char-level-num)
-                                                ""))
+                      (mapconcat (lambda (x)
+                                   (mapconcat #'identity
+                                              (cl-subseq (split-string x "|") 0 char-level-num)
+                                              ""))
                                  (pyim-pymap-py2cchar-get py equal-match nil t) "")))
                 (push cchars results))
               (setq n (+ 1 n)))
             (nreverse results)))
          (regexp
-          (mapconcat #'(lambda (x)
-                         (when (pyim-string-match-p "\\cc" x)
-                           (format "[%s]" x)))
+          (mapconcat (lambda (x)
+                       (when (pyim-string-match-p "\\cc" x)
+                         (format "[%s]" x)))
                      cchar-list "")))
     (unless (equal regexp "")
       (concat (if match-beginning "^" "") regexp))))

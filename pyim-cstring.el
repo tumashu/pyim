@@ -120,13 +120,13 @@
            ;;  是否冲突，如果冲突，仅保留一个，
            ;;  删除其它。
            result
-           :test #'(lambda (x1 x2)
-                     (let ((begin1 (nth 1 x1))
-                           (begin2 (nth 1 x2))
-                           (end1 (nth 2 x1))
-                           (end2 (nth 2 x2)))
-                       (not (or (<= end1 begin2)
-                                (<= end2 begin1)))))
+           :test (lambda (x1 x2)
+                   (let ((begin1 (nth 1 x1))
+                         (begin2 (nth 1 x2))
+                         (end1 (nth 2 x1))
+                         (end2 (nth 2 x2)))
+                     (not (or (<= end1 begin2)
+                              (<= end2 begin1)))))
            :from-end prefer-short-word)
         result))))
 
@@ -153,12 +153,12 @@
               "@@@@")
            (list string))))
     (mapconcat
-     #'(lambda (str)
-         (when (> (length str) 0)
-           (if (not (pyim-string-match-p "\\CC" str))
-               (pyim-cstring-split-to-string-1
-                str prefer-short-word separator max-word-length)
-             (concat " " str " "))))
+     (lambda (str)
+       (when (> (length str) 0)
+         (if (not (pyim-string-match-p "\\CC" str))
+             (pyim-cstring-split-to-string-1
+              str prefer-short-word separator max-word-length)
+           (concat " " str " "))))
      string-list "")))
 
 (defun pyim-cstring-split-to-string-1 (chinese-string &optional prefer-short-word
@@ -243,19 +243,19 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
       ;; 将上述汉字字符串里面的所有汉字转换为与之对应的拼音list。
       ;; 比如： ("Hello" "银" "行") -> (("Hello") ("yin") ("hang" "xing"))
       (mapc
-       #'(lambda (str)
-           ;; `string-to-vector' 得到的是 char vector, 需要将其转换为 string。
-           (when (numberp str)
-             (setq str (char-to-string str)))
-           (cond
-            ((> (length str) 1)
-             (push (list str) pinyins-list))
-            ((and (> (length str) 0)
-                  (pyim-string-match-p "\\cc" str))
-             (push (pyim-pymap-cchar2py-get (string-to-char str))
-                   pinyins-list))
-            ((> (length str) 0)
-             (push (list str) pinyins-list))))
+       (lambda (str)
+         ;; `string-to-vector' 得到的是 char vector, 需要将其转换为 string。
+         (when (numberp str)
+           (setq str (char-to-string str)))
+         (cond
+          ((> (length str) 1)
+           (push (list str) pinyins-list))
+          ((and (> (length str) 0)
+                (pyim-string-match-p "\\cc" str))
+           (push (pyim-pymap-cchar2py-get (string-to-char str))
+                 pinyins-list))
+          ((> (length str) 0)
+           (push (list str) pinyins-list))))
        string-list)
       (setq pinyins-list (nreverse pinyins-list))
 
@@ -284,13 +284,13 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
               (or pinyins-list-adjusted
                   pinyins-list-permutated))
              (list (mapcar
-                    #'(lambda (x)
-                        (mapconcat
-                         #'(lambda (str)
-                             (if shou-zi-mu
-                                 (substring str 0 1)
-                               str))
-                         x separator))
+                    (lambda (x)
+                      (mapconcat
+                       (lambda (str)
+                         (if shou-zi-mu
+                             (substring str 0 1)
+                           str))
+                       x separator))
                     (if ignore-duo-yin-zi
                         (list (car pinyins-list))
                       pinyins-list))))
@@ -426,8 +426,8 @@ code-prefix)。当RETURN-LIST 设置为 t 时，返回一个 code list。"
     (let* ((words (pyim-cstring-words-at-point t))
            (max-length
             (cl-reduce #'max
-                       (cons 0 (mapcar #'(lambda (word)
-                                           (nth 2 word))
+                       (cons 0 (mapcar (lambda (word)
+                                         (nth 2 word))
                                        words))))
            (max-length (max (or max-length 1) 1)))
       (forward-char max-length))))
@@ -441,8 +441,8 @@ code-prefix)。当RETURN-LIST 设置为 t 时，返回一个 code list。"
     (let* ((words (pyim-cstring-words-at-point))
            (max-length
             (cl-reduce #'max
-                       (cons 0 (mapcar #'(lambda (word)
-                                           (nth 1 word))
+                       (cons 0 (mapcar (lambda (word)
+                                         (nth 1 word))
                                        words))))
            (max-length (max (or max-length 1) 1)))
       (backward-char max-length))))

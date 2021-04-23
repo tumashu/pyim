@@ -51,12 +51,12 @@
 
    (\"wo\" \"ai\" \"mei\" \"nv\")"
   (mapcar
-   #'(lambda (w)
-       (let ((py (replace-regexp-in-string ;去掉分隔符，在词库中搜索候选词不需要分隔符
-                  "'" "" (concat (nth 0 w) (nth 1 w)))))
-         (if (numberp first-n)
-             (substring py 0 (min first-n (length py)))
-           py)))
+   (lambda (w)
+     (let ((py (replace-regexp-in-string ;去掉分隔符，在词库中搜索候选词不需要分隔符
+                "'" "" (concat (nth 0 w) (nth 1 w)))))
+       (if (numberp first-n)
+           (substring py 0 (min first-n (length py)))
+         py)))
    imobj))
 
 (defun pyim-codes-create:shuangpin (imobj _scheme-name &optional first-n)
@@ -66,11 +66,11 @@
   (when scheme-name
     (let ((code-prefix (pyim-scheme-get-option scheme-name :code-prefix)))
       (mapcar
-       #'(lambda (x)
-           (concat (or code-prefix "")
-                   (if (numberp first-n)
-                       (substring x 0 (min first-n (length x)))
-                     x)))
+       (lambda (x)
+         (concat (or code-prefix "")
+                 (if (numberp first-n)
+                     (substring x 0 (min first-n (length x)))
+                   x)))
        imobj))))
 
 (defun pyim-code-search (word scheme-name)
@@ -82,11 +82,11 @@
     (let* ((prefix (pyim-scheme-get-option scheme-name :code-prefix))
            (code
             (cl-find-if
-             #'(lambda (x)
-                 (equal (substring (or x " ") 0 1) prefix))
+             (lambda (x)
+               (equal (substring (or x " ") 0 1) prefix))
              (sort
               (cl-copy-list (pyim-dcache-call-api 'search-word-code word))
-              #'(lambda (a b) (> (length a) (length b)))))))
+              (lambda (a b) (> (length a) (length b)))))))
       (substring (or code " ") 1))))
 
 ;; * Footer

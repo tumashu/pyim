@@ -54,9 +54,9 @@
 
 排序使用 `pyim-dhashcache-iword2count' 中记录的词频信息"
   (sort words-list
-        #'(lambda (a b)
-            (> (or (gethash a pyim-dhashcache-iword2count) 0)
-               (or (gethash b pyim-dhashcache-iword2count) 0)))))
+        (lambda (a b)
+          (> (or (gethash a pyim-dhashcache-iword2count) 0)
+             (or (gethash b pyim-dhashcache-iword2count) 0)))))
 
 (defun pyim-dhashcache-get-shortcode (code)
   "获取一个 CODE 的所有简写.
@@ -84,21 +84,21 @@
         (make-thread
          `(lambda ()
             (maphash
-             #'(lambda (key value)
-                 (let ((newkey (mapconcat
-                                #'(lambda (x)
-                                    (substring x 0 1))
-                                (split-string key "-") "-")))
-                   (puthash newkey
-                            (delete-dups
-                             `(,@value
-                               ,@(gethash newkey pyim-dhashcache-ishortcode2word)))
-                            pyim-dhashcache-ishortcode2word)))
+             (lambda (key value)
+               (let ((newkey (mapconcat
+                              (lambda (x)
+                                (substring x 0 1))
+                              (split-string key "-") "-")))
+                 (puthash newkey
+                          (delete-dups
+                           `(,@value
+                             ,@(gethash newkey pyim-dhashcache-ishortcode2word)))
+                          pyim-dhashcache-ishortcode2word)))
              pyim-dhashcache-icode2word)
             (maphash
-             #'(lambda (key value)
-                 (puthash key (pyim-dhashcache-sort-words value)
-                          pyim-dhashcache-ishortcode2word))
+             (lambda (key value)
+               (puthash key (pyim-dhashcache-sort-words value)
+                        pyim-dhashcache-ishortcode2word))
              pyim-dhashcache-ishortcode2word)
             (pyim-dcache-save-variable 'pyim-dhashcache-ishortcode2word)
             (setq pyim-dhashcache-update-ishortcode2word t)))
@@ -113,23 +113,23 @@
           (setq pyim-dhashcache-ishortcode2word
                 (make-hash-table :test #'equal))
           (maphash
-           #'(lambda (key value)
-               (when (and (> (length key) 0)
-                          (not (string-match-p "[^a-z-]" key)))
-                 (let* ((newkey (mapconcat
-                                 #'(lambda (x)
-                                     (substring x 0 1))
-                                 (split-string key "-") "-")))
-                   (puthash newkey
-                            (delete-dups
-                             `(,@value
-                               ,@(gethash newkey pyim-dhashcache-ishortcode2word)))
-                            pyim-dhashcache-ishortcode2word))))
+           (lambda (key value)
+             (when (and (> (length key) 0)
+                        (not (string-match-p "[^a-z-]" key)))
+               (let* ((newkey (mapconcat
+                               (lambda (x)
+                                 (substring x 0 1))
+                               (split-string key "-") "-")))
+                 (puthash newkey
+                          (delete-dups
+                           `(,@value
+                             ,@(gethash newkey pyim-dhashcache-ishortcode2word)))
+                          pyim-dhashcache-ishortcode2word))))
            pyim-dhashcache-icode2word)
           (maphash
-           #'(lambda (key value)
-               (puthash key (pyim-dhashcache-sort-words value)
-                        pyim-dhashcache-ishortcode2word))
+           (lambda (key value)
+             (puthash key (pyim-dhashcache-sort-words value)
+                      pyim-dhashcache-ishortcode2word))
            pyim-dhashcache-ishortcode2word)
           (pyim-dcache-save-variable 'pyim-dhashcache-ishortcode2word))
        `(lambda (result)
@@ -146,21 +146,21 @@
         (make-thread
          `(lambda ()
             (maphash
-             #'(lambda (key value)
-                 (dolist (x (pyim-dhashcache-get-shortcode key))
-                   (puthash x
-                            (mapcar
-                             #'(lambda (word)
-                                 (if (get-text-property 0 :comment word)
-                                     word
-                                   (propertize word :comment (substring key (length x)))))
-                             (delete-dups `(,@value ,@(gethash x pyim-dhashcache-shortcode2word))))
-                            pyim-dhashcache-shortcode2word)))
+             (lambda (key value)
+               (dolist (x (pyim-dhashcache-get-shortcode key))
+                 (puthash x
+                          (mapcar
+                           (lambda (word)
+                             (if (get-text-property 0 :comment word)
+                                 word
+                               (propertize word :comment (substring key (length x)))))
+                           (delete-dups `(,@value ,@(gethash x pyim-dhashcache-shortcode2word))))
+                          pyim-dhashcache-shortcode2word)))
              pyim-dhashcache-code2word)
             (maphash
-             #'(lambda (key value)
-                 (puthash key (pyim-dhashcache-sort-words value)
-                          pyim-dhashcache-shortcode2word))
+             (lambda (key value)
+               (puthash key (pyim-dhashcache-sort-words value)
+                        pyim-dhashcache-shortcode2word))
              pyim-dhashcache-shortcode2word)
             (pyim-dcache-save-variable 'pyim-dhashcache-shortcode2word)
             (setq pyim-dhashcache-update-shortcode2word t)))
@@ -175,26 +175,26 @@
           (setq pyim-dhashcache-shortcode2word
                 (make-hash-table :test #'equal))
           (maphash
-           #'(lambda (key value)
-               (dolist (x (pyim-dhashcache-get-shortcode key))
-                 (puthash x
-                          (mapcar
-                           #'(lambda (word)
-                               ;; 这个地方的代码用于实现五笔 code 自动提示功能，
-                               ;; 比如输入 'aa' 后得到选词框：
-                               ;; ----------------------
-                               ;; | 1. 莁aa 2.匶wv ... |
-                               ;; ----------------------
-                               (if (get-text-property 0 :comment word)
-                                   word
-                                 (propertize word :comment (substring key (length x)))))
-                           (delete-dups `(,@value ,@(gethash x pyim-dhashcache-shortcode2word))))
-                          pyim-dhashcache-shortcode2word)))
+           (lambda (key value)
+             (dolist (x (pyim-dhashcache-get-shortcode key))
+               (puthash x
+                        (mapcar
+                         (lambda (word)
+                           ;; 这个地方的代码用于实现五笔 code 自动提示功能，
+                           ;; 比如输入 'aa' 后得到选词框：
+                           ;; ----------------------
+                           ;; | 1. 莁aa 2.匶wv ... |
+                           ;; ----------------------
+                           (if (get-text-property 0 :comment word)
+                               word
+                             (propertize word :comment (substring key (length x)))))
+                         (delete-dups `(,@value ,@(gethash x pyim-dhashcache-shortcode2word))))
+                        pyim-dhashcache-shortcode2word)))
            pyim-dhashcache-code2word)
           (maphash
-           #'(lambda (key value)
-               (puthash key (pyim-dhashcache-sort-words value)
-                        pyim-dhashcache-shortcode2word))
+           (lambda (key value)
+             (puthash key (pyim-dhashcache-sort-words value)
+                      pyim-dhashcache-shortcode2word))
            pyim-dhashcache-shortcode2word)
           (pyim-dcache-save-variable 'pyim-dhashcache-shortcode2word)
           nil)
@@ -245,15 +245,15 @@ DCACHE 是一个 code -> words 的 hashtable.
   (when (hash-table-p dcache)
     (let ((hashtable (make-hash-table :size 1000000 :test #'equal)))
       (maphash
-       #'(lambda (code words)
-           (unless (pyim-string-match-p "-" code)
-             (dolist (word words)
-               (let ((value (gethash word hashtable)))
-                 (puthash word
-                          (if value
-                              `(,code ,@value)
-                            (list code))
-                          hashtable)))))
+       (lambda (code words)
+         (unless (pyim-string-match-p "-" code)
+           (dolist (word words)
+             (let ((value (gethash word hashtable)))
+               (puthash word
+                        (if value
+                            `(,code ,@value)
+                          (list code))
+                        hashtable)))))
        dcache)
       (pyim-dcache-save-value-to-file hashtable file))))
 
@@ -299,12 +299,12 @@ DCACHE 是一个 code -> words 的 hashtable.
   (with-temp-buffer
     (insert ";;; -*- coding: utf-8-unix -*-\n")
     (maphash
-     #'(lambda (key value)
-         (insert (format "%s %s\n"
-                         key
-                         (if (listp value)
-                             (mapconcat #'identity value " ")
-                           value))))
+     (lambda (key value)
+       (insert (format "%s %s\n"
+                       key
+                       (if (listp value)
+                           (mapconcat #'identity value " ")
+                         value))))
      dcache)
     (pyim-dcache-write-file file confirm)))
 
@@ -344,9 +344,9 @@ code 对应的中文词条了。
         (make-thread
          `(lambda ()
             (maphash
-             #'(lambda (key value)
-                 (puthash key (pyim-dhashcache-sort-words value)
-                          pyim-dhashcache-icode2word))
+             (lambda (key value)
+               (puthash key (pyim-dhashcache-sort-words value)
+                        pyim-dhashcache-icode2word))
              pyim-dhashcache-icode2word)
             (pyim-dcache-save-variable 'pyim-dhashcache-icode2word)
             (setq pyim-dhashcache-update-icode2word-p t)))
@@ -359,9 +359,9 @@ code 对应的中文词条了。
           (pyim-dcache-set-variable 'pyim-dhashcache-icode2word)
           (pyim-dcache-set-variable 'pyim-dhashcache-iword2count)
           (maphash
-           #'(lambda (key value)
-               (puthash key (pyim-dhashcache-sort-words value)
-                        pyim-dhashcache-icode2word))
+           (lambda (key value)
+             (puthash key (pyim-dhashcache-sort-words value)
+                      pyim-dhashcache-icode2word))
            pyim-dhashcache-icode2word)
           (pyim-dcache-save-variable 'pyim-dhashcache-icode2word)
           nil)
@@ -402,18 +402,18 @@ code 对应的中文词条了。
 
 (defun pyim-dhashcache-insert-export-content ()
   (maphash
-   #'(lambda (key value)
-       (insert (format "%s %s\n" key value)))
+   (lambda (key value)
+     (insert (format "%s %s\n" key value)))
    pyim-dhashcache-iword2count)
   ;; 在默认情况下，用户选择过的词生成的缓存中存在的词条，
   ;; `pyim-dhashcache-iword2count' 中也一定存在，但如果用户
   ;; 使用了特殊的方式给用户选择过的词生成的缓存中添加了
   ;; 词条，那么就需要将这些词条也导出，且设置词频为 0
   (maphash
-   #'(lambda (_ words)
-       (dolist (word words)
-         (unless (gethash word pyim-dhashcache-iword2count)
-           (insert (format "%s %s\n" word 0)))))
+   (lambda (_ words)
+     (dolist (word words)
+       (unless (gethash word pyim-dhashcache-iword2count)
+         (insert (format "%s %s\n" word 0)))))
    pyim-dhashcache-icode2word))
 
 (defmacro pyim-dhashcache-put (cache code &rest body)

@@ -72,11 +72,11 @@
 
 排序使用 `pyim-dregcache-iword2count' 中记录的词频信息"
   (sort words-list
-        #'(lambda (a b)
-            (let ((a (car (split-string a ":")))
-                  (b (car (split-string b ":"))))
-              (> (or (gethash a pyim-dregcache-iword2count) 0)
-                 (or (gethash b pyim-dregcache-iword2count) 0))))))
+        (lambda (a b)
+          (let ((a (car (split-string a ":")))
+                (b (car (split-string b ":"))))
+            (> (or (gethash a pyim-dregcache-iword2count) 0)
+               (or (gethash b pyim-dregcache-iword2count) 0))))))
 
 (defun pyim-dregcache-sort-icode2word ()
   "对个人词库排序."
@@ -84,18 +84,18 @@
   (with-temp-buffer
     (dolist (l (split-string pyim-dregcache-icode2word "\n"))
       (cond
-        ((string-match "^\\([a-z-]+ \\)\\(.*\\)" l)
-         ;; 3字以上词很少，如果只处理单字,2字词,3字词
-         ;; ((string-match "^\\([a-z]+ \\|[a-z]+-[a-z]+ \\|[a-z]+-[a-z]+-[a-z]+ \\)\\(.*\\)" l)
-         (let* ((pinyin (match-string 1 l))
-                (words (pyim-dregcache-sort-words (split-string (match-string 2 l) " "))))
-           (insert (format "%s\n" (concat pinyin (mapconcat #'identity words " "))))))
-        ;; 其他词
-        ((string= l "")
-         ;; skip empty line
-         )
-        (t
-         (insert (format "%s\n" l)))))
+       ((string-match "^\\([a-z-]+ \\)\\(.*\\)" l)
+        ;; 3字以上词很少，如果只处理单字,2字词,3字词
+        ;; ((string-match "^\\([a-z]+ \\|[a-z]+-[a-z]+ \\|[a-z]+-[a-z]+-[a-z]+ \\)\\(.*\\)" l)
+        (let* ((pinyin (match-string 1 l))
+               (words (pyim-dregcache-sort-words (split-string (match-string 2 l) " "))))
+          (insert (format "%s\n" (concat pinyin (mapconcat #'identity words " "))))))
+       ;; 其他词
+       ((string= l "")
+        ;; skip empty line
+        )
+       (t
+        (insert (format "%s\n" l)))))
     (setq pyim-dregcache-icode2word (buffer-string))))
 
 (defun pyim-dregcache-create-cache-content (raw-content)
@@ -376,17 +376,17 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
     (let* ((case-fold-search t)
            substring beg end)
       (while (re-search-forward (concat "^\\([a-z-]+\\) \\(.*\\)" word "\\(.*\\)$") nil t)
-          (setq beg (match-beginning 0))
-          (setq end (match-end 0))
-          (setq substring (concat (match-string-no-properties 1)
-                                  (match-string-no-properties 2)
-                                  (match-string-no-properties 3)))
+        (setq beg (match-beginning 0))
+        (setq end (match-end 0))
+        (setq substring (concat (match-string-no-properties 1)
+                                (match-string-no-properties 2)
+                                (match-string-no-properties 3)))
 
-          ;; delete string and the newline char
-          (delete-region beg (+ 1 end))
-          (when (> (length (split-string substring " ")) 1)
-            (goto-char beg)
-            (insert substring)))
+        ;; delete string and the newline char
+        (delete-region beg (+ 1 end))
+        (when (> (length (split-string substring " ")) 1)
+          (goto-char beg)
+          (insert substring)))
       (setq pyim-dregcache-icode2word
             (buffer-string))))
   ;; 删除对应词条的词频
@@ -418,13 +418,13 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
       (goto-char (or beg (point-max)))
       (insert replace-string))
     (setq pyim-dregcache-icode2word
-            (buffer-string))))
+          (buffer-string))))
 
 (defun pyim-dregcache-search-word-code-1 (word content)
-    (let* ((case-fold-search t)
-           (regexp (concat "^\\([a-z-]+\\)\\(.*\\) " "\\(" word " \\|" word "$\\)")))
-      (when (string-match regexp content)
-        (match-string-no-properties 1 content))))
+  (let* ((case-fold-search t)
+         (regexp (concat "^\\([a-z-]+\\)\\(.*\\) " "\\(" word " \\|" word "$\\)")))
+    (when (string-match regexp content)
+      (match-string-no-properties 1 content))))
 
 (defun pyim-dregcache-search-word-code (word)
   "从 `pyim-dregcache-cache' 和 `pyim-dregcache-icode2word' 搜索 word, 得到对应的code."

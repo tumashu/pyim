@@ -178,11 +178,11 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
          (start (1- (pyim-page-start)))
          (candidates pyim-candidates)
          (candidate-showed
-          (mapcar #'(lambda (x)
-                      (let ((comment (get-text-property 0 :comment x)))
-                        (if comment
-                            (concat x comment)
-                          x)))
+          (mapcar (lambda (x)
+                    (let ((comment (get-text-property 0 :comment x)))
+                      (if comment
+                          (concat x comment)
+                        x)))
                   (cl-subseq candidates start end)))
          (pos (- (min pyim-candidate-position (length candidates)) start))
          (page-info (make-hash-table)))
@@ -283,8 +283,8 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
   (let* ((separator (or separator " "))
          (translated (mapconcat #'identity
                                 (mapcar
-                                 #'(lambda (w)
-                                     (concat (nth 0 w) (nth 1 w)))
+                                 (lambda (w)
+                                   (concat (nth 0 w) (nth 1 w)))
                                  (car pyim-imobjs))
                                 separator)))
     (concat
@@ -316,15 +316,15 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
             (push (car (rassoc (list ym) keymaps)) result)
           (push
            (concat (cl-some
-                    #'(lambda (x)
-                        (when (equal sm (nth 1 x))
-                          (car x)))
+                    (lambda (x)
+                      (when (equal sm (nth 1 x))
+                        (car x)))
                     keymaps)
                    (cl-some
-                    #'(lambda (x)
-                        (when (or (equal ym (nth 2 x))
-                                  (equal ym (nth 3 x)))
-                          (car x)))
+                    (lambda (x)
+                      (when (or (equal ym (nth 2 x))
+                                (equal ym (nth 3 x)))
+                        (car x)))
                     keymaps))
            result))))
     (mapconcat #'identity

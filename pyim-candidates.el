@@ -87,12 +87,12 @@ IMOBJS 获得候选词条。"
 
           (when output2
             (setq str (mapconcat
-                       #'(lambda (code)
-                           (car (pyim-dcache-get code)))
+                       (lambda (code)
+                         (car (pyim-dcache-get code)))
                        output2 "")))
           (setq output3
-                (remove "" (or (mapcar #'(lambda (x)
-                                           (concat str x))
+                (remove "" (or (mapcar (lambda (x)
+                                         (concat str x))
                                        (pyim-dcache-get output1 '(code2word shortcode2word icode2word)))
                                (list str))))
           (setq result (append result output3))))

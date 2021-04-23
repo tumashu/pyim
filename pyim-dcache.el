@@ -167,8 +167,8 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
 (defun pyim-dcache-create-dicts-md5 (dict-files)
   (let* ((version "v1") ;当需要强制更新 dict 缓存时，更改这个字符串。
          (dicts-md5 (md5 (prin1-to-string
-                          (mapcar #'(lambda (file)
-                                      (list version file (nth 5 (file-attributes file 'string))))
+                          (mapcar (lambda (file)
+                                    (list version file (nth 5 (file-attributes file 'string))))
                                   dict-files)))))
     dicts-md5))
 
@@ -179,9 +179,9 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
 词库缓冲文件，然后加载词库缓存。
 
 如果 FORCE 为真，强制加载。"
-  (let* ((dict-files (mapcar #'(lambda (x)
-                                 (unless (plist-get x :disable)
-                                   (plist-get x :file)))
+  (let* ((dict-files (mapcar (lambda (x)
+                               (unless (plist-get x :disable)
+                                 (plist-get x :file)))
                              `(,@pyim-dicts ,@pyim-extra-dicts)))
          (dicts-md5 (pyim-dcache-create-dicts-md5 dict-files)))
     (pyim-dcache-call-api 'update-code2word dict-files dicts-md5 force)))

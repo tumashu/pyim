@@ -456,7 +456,7 @@ E-Neo 同学编写了一个词库转换工具: [[https://github.com/E-Neo/scel2p
 
 #+begin_example
 (add-hook 'emacs-startup-hook
-          #'(lambda () (pyim-restart-1 t)))
+          (lambda () (pyim-restart-1 t)))
 #+end_example
 
 *** 将汉字字符串转换为拼音字符串

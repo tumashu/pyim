@@ -92,8 +92,8 @@
        ;; isearch 启动的时候，会设置一个 buffer variable: `isearch-mode'
        ;; 检测所有 buffer 中 `isearch-mode' 的取值，如果任何一个
        ;; 取值为 t, 就说明 isearch 已经启动。
-       (cl-some #'(lambda (buf)
-                    (buffer-local-value 'isearch-mode buf))
+       (cl-some (lambda (buf)
+                  (buffer-local-value 'isearch-mode buf))
                 (buffer-list))))
 
 (defun pyim-probe-org-structure-template ()

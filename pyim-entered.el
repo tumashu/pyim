@@ -195,10 +195,10 @@ TYPE 取值为 point-after, 返回 entered buffer 中 point 之后的字符
                (pyim-candidates-create-timer-function)))))
     ;; 自动上屏功能
     (let ((autoselector-results
-           (mapcar #'(lambda (x)
-                       (when (functionp x)
-                         (ignore-errors
-                           (funcall x))))
+           (mapcar (lambda (x)
+                     (when (functionp x)
+                       (ignore-errors
+                         (funcall x))))
                    (cl-remove-duplicates pyim-autoselector :from-end t)))
           result)
       (cond

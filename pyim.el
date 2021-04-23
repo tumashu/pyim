@@ -573,10 +573,10 @@ Return the input string.
   "判断是否 *根据环境自动切换* 为英文输入模式，这个函数处理变量：
 `pyim-english-input-switch-functions'"
   (let* ((func-or-list pyim-english-input-switch-functions))
-    (and (cl-some #'(lambda (x)
-                      (if (functionp x)
-                          (funcall x)
-                        nil))
+    (and (cl-some (lambda (x)
+                    (if (functionp x)
+                        (funcall x)
+                      nil))
                   (cond ((functionp func-or-list) (list func-or-list))
                         ((listp func-or-list) func-or-list)
                         (t nil)))
@@ -699,8 +699,8 @@ Return the input string.
          ;; to-be-translated.
          (to-be-translated (mapconcat #'identity
                                       (mapcar
-                                       #'(lambda (w)
-                                           (concat (nth 2 w) (nth 3 w)))
+                                       (lambda (w)
+                                         (concat (nth 2 w) (nth 3 w)))
                                        (nthcdr length-selected-word imobj))
                                       "")))
     ;; 大体来说，entered 字符串可以分解为三个部分：

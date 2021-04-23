@@ -85,13 +85,13 @@
           (count 0))
       (concat (if match-beginning "^" "")
               (mapconcat
-               #'(lambda (x)
-                   (setq count (+ count 1))
-                   (if (or (not first-equal) (> count 1))
-                       (if all-equal
-                           x
-                         (concat x "[a-z]*"))
-                     x))
+               (lambda (x)
+                 (setq count (+ count 1))
+                 (if (or (not first-equal) (> count 1))
+                     (if all-equal
+                         x
+                       (concat x "[a-z]*"))
+                   x))
                pinyin-list "-")))))
 
 ;; 分解拼音的相关函数
@@ -118,10 +118,10 @@
     (cl-flet ((pinyin-valid-p
                (shenmu yunmu)
                (cl-some
-                #'(lambda (char-pinyin)
-                    (pyim-pymap-py2cchar-get char-pinyin t))
-                (mapcar #'(lambda (x)
-                            (concat (nth 0 x) (nth 1 x)))
+                (lambda (char-pinyin)
+                  (pyim-pymap-py2cchar-get char-pinyin t))
+                (mapcar (lambda (x)
+                          (concat (nth 0 x) (nth 1 x)))
                         (pyim-imobjs-find-fuzzy:quanpin-1
                          (list shenmu yunmu shenmu yunmu))))))
       (while (> i 0)

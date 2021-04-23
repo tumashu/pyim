@@ -253,10 +253,10 @@ alist 列表。"
 
      ;; 当 `pyim-punctuation-half-width-functions' 中
      ;; 任意一个函数返回值为 t 时，插入英文标点。
-     ((cl-some #'(lambda (x)
-                   (if (functionp x)
-                       (funcall x char)
-                     nil))
+     ((cl-some (lambda (x)
+                 (if (functionp x)
+                     (funcall x char)
+                   nil))
                pyim-punctuation-half-width-functions)
       str)
 
