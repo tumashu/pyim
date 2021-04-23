@@ -412,7 +412,7 @@
 ;; (define-key pyim-mode-map ";"
 ;;   (lambda ()
 ;;     (interactive)
-;;     (pyim-page-select-word-by-number 2)))
+;;     (pyim-select-word-by-number 2)))
 ;; #+END_EXAMPLE
 
 ;; *** 如何添加自定义拼音词库
@@ -667,11 +667,13 @@ pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。当待输
 光标前面的文字内容。"
   :type 'function)
 
-(defcustom pyim-page-select-finish-hook nil
+(define-obsolete-variable-alias 'pyim-page-select-finish-hook 'pyim-select-finish-hook "3.0")
+(defcustom pyim-select-finish-hook nil
   "Pyim 选词完成时运行的 hook."
   :type 'hook)
 
-(defcustom pyim-page-select-word-by-number t
+(define-obsolete-variable-alias 'pyim-page-select-word-by-number 'pyim-select-word-by-number "3.0")
+(defcustom pyim-select-word-by-number t
   "使用数字键来选择词条.
 
 如果设置为 nil, 将直接输入数字，适用于使用数字做为
@@ -740,9 +742,9 @@ pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。当待输
       (define-key map (vector i) #'pyim-self-insert-command)
       (setq i (1+ i)))
     (dolist (i (number-sequence ?0 ?9))
-      (define-key map (char-to-string i) #'pyim-page-select-word-by-number))
-    (define-key map " " #'pyim-page-select-word)
-    (define-key map (kbd "C-SPC") #'pyim-page-select-word-simple)
+      (define-key map (char-to-string i) #'pyim-select-word-by-number))
+    (define-key map " " #'pyim-select-word)
+    (define-key map (kbd "C-SPC") #'pyim-select-word-simple)
     (define-key map [backspace] #'pyim-entered-delete-backward-char)
     (define-key map [delete] #'pyim-entered-delete-forward-char)
     (define-key map "\C-d" #'pyim-entered-delete-forward-char)
@@ -1338,9 +1340,10 @@ Return the input string.
          (push (pyim-entered-get 'point-before) pyim-outcome-history))
         (t (error "Pyim: invalid outcome"))))
 
-(defun pyim-page-select-word-simple ()
+(define-obsolete-function-alias 'pyim-page-select-word-simple 'pyim-select-word-simple "3.0")
+(defun pyim-select-word-simple ()
   "从选词框中选择当前词条.
-这个函数与 `pyim-page-select-word' 的区别是：
+这个函数与 `pyim-select-word' 的区别是：
 这个函数不会将选择的词条加入个人词库，主要的使用场景是：
 当用户需要输入一个生僻字时，输入包含该字的一个词条，
 然后再删除不需要的字，由于这个词条不是常用词条，所以
@@ -1351,7 +1354,8 @@ Return the input string.
     (pyim-outcome-handle 'candidate))
   (pyim-terminate-translation))
 
-(defun pyim-page-select-word ()
+(define-obsolete-function-alias 'pyim-page-select-word 'pyim-select-word "3.0")
+(defun pyim-select-word ()
   "从选词框中选择当前词条，然后删除该词条对应拼音。"
   (interactive)
   (if (null pyim-candidates)  ; 如果没有选项，输入空格
@@ -1359,12 +1363,12 @@ Return the input string.
         (pyim-outcome-handle 'last-char)
         (pyim-terminate-translation))
     (let* ((class (pyim-scheme-get-option (pyim-scheme-name) :class))
-           (func (intern (format "pyim-page-select-word:%S" class))))
+           (func (intern (format "pyim-select-word:%S" class))))
       (if (and class (functionp func))
           (funcall func)
-        (call-interactively #'pyim-page-select-word:pinyin)))))
+        (call-interactively #'pyim-select-word:pinyin)))))
 
-(defun pyim-page-select-word:pinyin ()
+(defun pyim-select-word:pinyin ()
   "从选词框中选择当前词条，然后删除该词条对应拼音。"
   (interactive)
   (pyim-outcome-handle 'candidate)
@@ -1432,9 +1436,9 @@ Return the input string.
 
       (pyim-terminate-translation)
       ;; pyim 使用这个 hook 来处理联想词。
-      (run-hooks 'pyim-page-select-finish-hook))))
+      (run-hooks 'pyim-select-finish-hook))))
 
-(defun pyim-page-select-word:xingma ()
+(defun pyim-select-word:xingma ()
   "从选词框中选择当前词条，然后删除该词条对应编码。"
   (interactive)
   (pyim-outcome-handle 'candidate)
@@ -1452,12 +1456,13 @@ Return the input string.
       (pyim-create-pyim-word (pyim-outcome-get) t))
     (pyim-terminate-translation)
     ;; pyim 使用这个 hook 来处理联想词。
-    (run-hooks 'pyim-page-select-finish-hook)))
+    (run-hooks 'pyim-select-finish-hook)))
 
-(defun pyim-page-select-word-by-number (&optional n)
+(define-obsolete-function-alias 'pyim-page-select-word-by-number 'pyim-select-word-by-number "3.0")
+(defun pyim-select-word-by-number (&optional n)
   "使用数字编号来选择对应的词条。"
   (interactive)
-  (if (or pyim-page-select-word-by-number n)
+  (if (or pyim-select-word-by-number n)
       (if (null pyim-candidates)
           (progn
             (pyim-outcome-handle 'last-char)
@@ -1471,7 +1476,7 @@ Return the input string.
               (pyim-page-refresh)
             (setq pyim-candidate-position
                   (+ (pyim-page-start) index))
-            (pyim-page-select-word))))
+            (pyim-select-word))))
     ;; 有些输入法使用数字键编码，这种情况下，数字键就
     ;; 不能用来选词了。
     (call-interactively #'pyim-self-insert-command)))
