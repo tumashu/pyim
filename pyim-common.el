@@ -112,14 +112,6 @@
     (when (char-after point-after)
       (char-to-string (char-after point-after)))))
 
-(defun pyim-posframe-valid-p ()
-  "Test posframe's status."
-  (and (>= emacs-major-version 26)
-       (featurep 'posframe)
-       (not (or noninteractive
-                emacs-basic-display
-                (not (display-graphic-p))))))
-
 (defun pyim-exwm-enable-p ()
   "测试当前是否是 exwm 环境。"
   (string-match-p " \\*temp\\*" (buffer-name)))
