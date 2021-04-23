@@ -1440,17 +1440,6 @@ pyim 会使用 Emacs overlay 机制在 *待输入buffer* 光标处高亮显示�
                      (overlay-end pyim-preview-overlay))))
 
 ;; ** 选词框相关函数
-(defun pyim-candidate-parse (candidate)
-  (let ((output
-         (if (consp candidate)
-             (car candidate)
-           candidate)))
-    (if (stringp output)
-        ;; 注：五笔支持 comments 遗留下来的代码，现在作为兼容而保留，
-        ;; 等用户的 dcache 都升级之后，这个就可以删除了。
-        (car (split-string output ":"))
-      output)))
-
 (defun pyim-outcome-get (&optional n)
   "获取 outcome"
   (nth (or n 0) pyim-outcome-history))
