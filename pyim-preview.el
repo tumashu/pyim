@@ -57,6 +57,8 @@
   (if (and (overlayp pyim-preview-overlay) (overlay-start pyim-preview-overlay))
       (delete-overlay pyim-preview-overlay)))
 
+(declare-function pyim-magic-convert "pyim")
+
 (defun pyim-preview-refresh ()
   "刷新光标处预览.
 

@@ -29,6 +29,62 @@
 ;; * 代码                                                           :code:
 (require 'cl-lib)
 
+(defcustom pyim-translate-trigger-char "v"
+  "用于触发特殊操作的字符，相当与单字快捷键.
+
+输入中文的时候，我们需要快速频繁的执行一些特定的命令，最直接的方
+法就是将上述命令绑定到一个容易按的快捷键上，但遗憾的是 emacs 大多
+数容易按的快捷键都 *名花有主* 了，甚至找一个 “Ctrl＋单字符”的快
+捷键都不太容易，特殊功能触发字符，可以帮助我们实现“单字符”快捷
+键，类似 org-mode 的 speed key。
+
+默认情况下，我们可以使用特殊功能触发字符执行下面几个操作（假设触
+发字符为 v）：
+
+1. 快速切换中英文标点符号的样式：当光标前的字符是一个标点符号时，
+   按 \"v\" 可以切换这个标点的样式。比如：光标在A处的时候，按
+   \"v\" 可以将A前面的全角逗号转换为半角逗号。
+
+        你好，-A-
+
+   按 \"v\" 后
+
+        你好,-A-
+
+2. 快速将光标前的词条添加到词库：当光标前的字符是中文字符时，按
+   \"num\" + \"v\" 可以将光标前 num 个中文汉字组成的词条添加到个
+   人词频文件中，比如：当光标在A处时，按\"4v\"可以将“的红烧肉”
+   这个词条加入个人词频文件，默认num不超过9。
+
+        我爱吃美味的红烧肉-A-
+
+值得注意的是，这种方式如果添加的功能太多，会造成许多潜在的冲突。
+
+用户可以使用变量 `pyim-translate-trigger-char' 来设置触发字符，默
+认的触发字符是：\"v\", 选择这个字符的理由基于全拼输入法的：
+
+1. \"v\" 不是有效的声母，不会对中文输入造成太大的影响。
+2. \"v\" 字符很容易按。
+
+pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。当待输入的
+字符是触发字符时，`pyim-translate' 根据光标前的字符的不同来调用不
+同的功能，具体见 `pyim-translate' ：
+
+单字快捷键受到输入法方案的限制，比如：全拼输入法可以将其设置为v,
+但双拼输入法下设置 v 可能就不行，所以，pyim 首先会检查当前输入法
+方案下，这个快捷键设置是否合理有效，如果不是一个合理的设置，则使
+用拼音方案默认的 :prefer-trigger-chars 。
+
+具体请参考 `pyim-translate-get-trigger-char' 。"
+  :type '(choice (const nil) string))
+
+(defcustom pyim-wash-function 'pyim-wash-current-line-function
+  "清洗光标前面的文字内容.
+这个函数与『单字快捷键配合使用』，当光标前面的字符为汉字字符时，
+按 `pyim-translate-trigger-char' 对应字符，可以调用这个函数来清洗
+光标前面的文字内容。"
+  :type 'function)
+
 (defvar pyim-outcome-history nil
   "记录 pyim outcome 的变化的历史
 
@@ -113,6 +169,9 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
           ;;          prefer-trigger-chars)
           prefer-trigger-chars)
       user-trigger-char)))
+
+(declare-function pyim-create-word-at-point "pyim")
+(declare-function pyim-delete-word-at-point "pyim")
 
 (defun pyim-translate (char)
   "Pyim 字符转换函数，主要用于处理标点符号.
@@ -222,6 +281,33 @@ alist 列表。"
 
      ;; 当输入的字符不是标点符号时，原样插入。
      (t str))))
+
+(defun pyim-wash-current-line-function ()
+  "清理当前行的内容，比如：删除不必要的空格，等。"
+  (interactive)
+  (let* ((begin (line-beginning-position))
+         (end (point))
+         (string (buffer-substring-no-properties begin end))
+         new-string)
+    (when (> (length string) 0)
+      (delete-region begin end)
+      (setq new-string
+            (with-temp-buffer
+              (insert string)
+              (goto-char (point-min))
+              (while (re-search-forward "\\([，。；？！；、）】]\\)  +\\([[:ascii:]]\\)" nil t)
+                (replace-match (concat (match-string 1) (match-string 2))  nil t))
+              (goto-char (point-min))
+              (while (re-search-forward "\\([[:ascii:]]\\)  +\\([（【]\\)" nil t)
+                (replace-match (concat (match-string 1) (match-string 2))  nil t))
+              (goto-char (point-min))
+              (while (re-search-forward "\\([[:ascii:]]\\)  +\\(\\cc\\)" nil t)
+                (replace-match (concat (match-string 1) " " (match-string 2))  nil t))
+              (goto-char (point-min))
+              (while (re-search-forward "\\(\\cc\\)  +\\([[:ascii:]]\\)" nil t)
+                (replace-match (concat (match-string 1) " " (match-string 2))  nil t))
+              (buffer-string)))
+      (insert new-string))))
 
 ;; * Footer
 (provide 'pyim-outcome)

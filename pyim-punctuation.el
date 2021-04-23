@@ -89,6 +89,9 @@ pyim 输入半角标点，函数列表中每个函数都有一个参数：char �
 
 If you don't like this function, set the variable to nil")
 
+(defvar pyim-input-ascii)
+(declare-function pyim-auto-switch-english-input-p "pyim")
+
 ;; ** 切换中英文标点符号
 (defun pyim-punctuation-full-width-p ()
   "判断是否需要切换到全角标点输入模式

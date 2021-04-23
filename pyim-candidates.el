@@ -28,6 +28,11 @@
 ;;; Code:
 ;; * 代码                                                           :code:
 (require 'cl-lib)
+(require 'pyim-common)
+(require 'pyim-dcache)
+(require 'pyim-imobjs-codes)
+(require 'pyim-page)
+(require 'pyim-preview)
 
 (defvar pyim-candidates nil
   "所有备选词条组成的列表.")
@@ -88,6 +93,8 @@ IMOBJS 获得候选词条。"
           (setq result (append result output3))))
       (when (car result)
         result))))
+
+(defvar pyim-enable-shortcode)
 
 (defun pyim-candidates-create:quanpin (imobjs scheme-name &optional async)
   "`pyim-candidates-create' 处理全拼输入法的函数."

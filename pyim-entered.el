@@ -29,6 +29,14 @@
 ;; * 代码                                                           :code:
 (require 'cl-lib)
 
+(defcustom pyim-exhibit-delay-ms 0
+  "输入或者删除拼音字符后等待多少毫秒后才显示可选词
+当用户快速输入连续的拼音时可提升用户体验.
+如果为 0 或者 nil, 则不等待立刻显示可选词."
+  :type 'integer)
+
+(defvar pyim-entered--exhibit-timer nil)
+
 (defvar pyim-entered-buffer " *pyim-entered-buffer*"
   "一个 buffer，用来处理用户已经输入的字符串： entered。
 
@@ -155,6 +163,9 @@ TYPE 取值为 point-after, 返回 entered buffer 中 point 之后的字符
               (cl-decf pos)))))
       end-position)))
 
+(declare-function pyim-terminate-translation "pyim")
+(declare-function pyim-convert-string-at-point "pyim")
+
 (defun pyim-entered-refresh-1 ()
   "查询 `pyim-entered-buffer' 光标前的拼音字符串（如果光标在行首则为光标后的）, 显示备选词等待用户选择。"
   (let* ((scheme-name (pyim-scheme-name))
@@ -239,14 +250,14 @@ TYPE 取值为 point-after, 返回 entered buffer 中 point 之后的字符
   "延迟 `pyim-exhibit-delay-ms' 显示备选词等待用户选择。"
   (if (= (length (pyim-entered-get 'point-before)) 0)
       (pyim-terminate-translation)
-    (when pyim--exhibit-timer
-      (cancel-timer pyim--exhibit-timer))
+    (when pyim-entered--exhibit-timer
+      (cancel-timer pyim-entered--exhibit-timer))
     (cond
      ((or no-delay
           (not pyim-exhibit-delay-ms)
           (eq pyim-exhibit-delay-ms 0))
       (pyim-entered-refresh-1))
-     (t (setq pyim--exhibit-timer
+     (t (setq pyim-entered--exhibit-timer
               (run-with-timer (/ pyim-exhibit-delay-ms 1000.0)
                               nil
                               #'pyim-entered-refresh-1))))))

@@ -48,14 +48,6 @@ plist 来表示，比如：
 ;; ** pyim 词库管理工具
 (defvar pyim-dm-buffer "*pyim-dict-manager*")
 
-(defun pyim-create-dicts-md5 (dict-files)
-  (let* ((version "v1") ;当需要强制更新 dict 缓存时，更改这个字符串。
-         (dicts-md5 (md5 (prin1-to-string
-                          (mapcar #'(lambda (file)
-                                      (list version file (nth 5 (file-attributes file 'string))))
-                                  dict-files)))))
-    dicts-md5))
-
 (defun pyim-dm-refresh ()
   "Refresh the contents of the *pyim-dict-manager* buffer."
   (interactive)
@@ -184,6 +176,8 @@ plist 来表示，比如：
       (pyim-dm-refresh)
       (goto-char (point-min))
       (forward-line (- line 1)))))
+
+(declare-function pyim-restart "pyim")
 
 (define-derived-mode pyim-dm-mode special-mode "pyim-dicts-manager"
   "Major mode for managing pyim dicts"

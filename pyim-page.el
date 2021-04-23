@@ -211,6 +211,8 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
              (overlay-start pyim-preview-overlay)))
            (t (message (pyim-page-style:minibuffer page-info)))))))))
 
+(declare-function pyim-terminate-translation "pyim")
+
 (defun pyim-page-next-page (arg)
   "Pyim page 翻页命令.
 

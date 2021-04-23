@@ -28,6 +28,9 @@
 ;;; Code:
 ;; * 代码                                                           :code:
 (require 'cl-lib)
+(require 'pyim-scheme)
+(require 'pyim-entered)
+(require 'pyim-candidates)
 
 (defcustom pyim-autoselector '(pyim-autoselector-xingma)
   "已经启用的自动上屏器.
