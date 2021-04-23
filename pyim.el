@@ -1842,6 +1842,9 @@ alist 列表。"
 ;; ** pyim 中文字符串工具
 (require 'pyim-cstring)
 
+;; ** pyim 中文
+(require 'pyim-cregexp)
+
 ;; ** pyim 探针程序
 (require 'pyim-probe)
 
