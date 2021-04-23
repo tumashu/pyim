@@ -113,7 +113,11 @@
       (char-to-string (char-after point-after)))))
 
 (defun pyim-exwm-enable-p ()
-  "测试当前是否是 exwm 环境。"
+  "测试当前是否是 exwm 环境。
+
+FIXME: This seem to be not a good approach, the
+better way is let exwm provide a test function.
+for example: https://github.com/ch11ng/exwm/pull/831"
   (string-match-p " \\*temp\\*" (buffer-name)))
 
 
