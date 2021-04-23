@@ -256,17 +256,17 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
       (setq word (match-string-no-properties 1 content))
       (when word
         (cond
-          ((string-match "^[^ ]+$" word)
-           ;; 单个词
-           (push word output))
-          (t
-           ;; 多个字
-           (setq output (append (nreverse (split-string word " +")) output)))))
+         ((string-match "^[^ ]+$" word)
+          ;; 单个词
+          (push word output))
+         (t
+          ;; 多个字
+          (setq output (append (nreverse (split-string word " +")) output)))))
       ;; 继续搜索
       (setq start (+ start 2 (length code) (length word))))
     output))
 
-(declare-function pyim-pinyin2cchar-get "pyim" (pinyin &optional equal-match return-list include-seperator))
+(declare-function pyim-pymap-py2cchar-get "pyim-pymap" (pinyin &optional equal-match return-list include-seperator))
 
 (defun pyim-dregcache-get (code &optional from)
   "从 `pyim-dregcache-cache' 搜索 CODE, 得到对应的词条."
@@ -284,7 +284,7 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
       ;; `push' plus `nreverse' is more efficient than `add-to-list'
       ;; Many examples exist in Emacs' own code
       (setq result (nreverse result))
-      `(,@result ,@(pyim-pinyin2cchar-get code t t)))))
+      `(,@result ,@(pyim-pymap-py2cchar-get code t t)))))
 
 (defun pyim-dregcache-get-icode2word-ishortcode2word (code)
   "以 CODE 搜索个人词和个人联想词.  正则表达式搜索词库,不需要为联想词开单独缓存."

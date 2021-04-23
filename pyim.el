@@ -195,7 +195,7 @@
 
 pyim 是使用 `pyim-start' 来启动输入法，这个命令主要做如下工作：
 1. 重置 `pyim-local-variable-list' 中所有的 local 变量。
-2. 使用 `pyim-cchar2pinyin-create-cache' 创建汉字到拼音的 hash table 对应表。
+2. 使用 `pyim-pymap-cchar2py-create-cache' 创建汉字到拼音的 hash table 对应表。
 3. 运行hook： `pyim-load-hook'。
 4. 将 `pyim-dcache-save-caches' 命令添加到 `kill-emacs-hook' , emacs 关闭
 之前将用户选择过的词生成的缓存和词频缓存保存到文件，供以后使用。
@@ -222,8 +222,8 @@ pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
   (when pyim-dcache-auto-update
     (pyim-dcache-call-api 'update-personal-words restart))
 
-  (pyim-cchar2pinyin-cache-create)
-  (pyim-pinyin2cchar-cache-create)
+  (pyim-pymap-cchar2py-cache-create)
+  (pyim-pymap-py2cchar-cache-create)
   (run-hooks 'pyim-load-hook)
 
   (when pyim-dcache-auto-update

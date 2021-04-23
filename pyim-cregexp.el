@@ -155,7 +155,7 @@
                                      (mapconcat #'identity
                                                 (cl-subseq (split-string x "|") 0 char-level-num)
                                                 ""))
-                                 (pyim-pinyin2cchar-get py equal-match nil t) "")))
+                                 (pyim-pymap-py2cchar-get py equal-match nil t) "")))
                 (push cchars results))
               (setq n (+ 1 n)))
             (nreverse results)))

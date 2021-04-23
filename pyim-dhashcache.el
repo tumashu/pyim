@@ -308,7 +308,7 @@ DCACHE 是一个 code -> words 的 hashtable.
      dcache)
     (pyim-dcache-write-file file confirm)))
 
-(declare-function pyim-pinyin2cchar-get "pyim" (pinyin &optional equal-match return-list include-seperator))
+(declare-function pyim-pymap-py2cchar-get "pyim-pymap" (pinyin &optional equal-match return-list include-seperator))
 
 (defun pyim-dhashcache-get (code &optional from)
   "从 FROM 对应的 dcaches 中搜索 CODE, 得到对应的词条.
@@ -331,7 +331,7 @@ code 对应的中文词条了。
              (value (and cache (gethash code cache))))
         (when value
           (setq result (append result value)))))
-    `(,@result ,@(pyim-pinyin2cchar-get code t t))))
+    `(,@result ,@(pyim-pymap-py2cchar-get code t t))))
 
 (defun pyim-dhashcache-update-icode2word (&optional force)
   "对 personal 缓存中的词条进行排序，加载排序后的结果.

@@ -41,16 +41,16 @@
 ;; * 代码                                                                 :code:
 (require 'pyim-common)
 
-(defvar pyim-pinyin2cchar-cache1 nil
+(defvar pyim-pymap-py2cchar-cache1 nil
   "拼音查汉字功能需要的变量.")
 
-(defvar pyim-pinyin2cchar-cache2 nil
+(defvar pyim-pymap-py2cchar-cache2 nil
   "拼音查汉字功能需要的变量.")
 
-(defvar pyim-pinyin2cchar-cache3 nil
+(defvar pyim-pymap-py2cchar-cache3 nil
   "拼音查汉字功能需要的变量.")
 
-(defvar pyim-cchar2pinyin-cache nil
+(defvar pyim-pymap-cchar2py-cache nil
   "汉字转拼音功能需要的变量.")
 
 (defvar pyim-pymap
@@ -728,33 +728,33 @@
   "常用汉字")
 
 ;; ** "汉字 -> 拼音" 以及 "拼音 -> 汉字" 的转换函数
-(defun pyim-pinyin2cchar-cache-create (&optional force)
+(defun pyim-pymap-py2cchar-cache-create (&optional force)
   "构建 pinyin 到 chinese char 的缓存.
 
-用于加快搜索速度，这个函数将缓存保存到 `pyim-pinyin2cchar-cache' 变量中，
+用于加快搜索速度，这个函数将缓存保存到 `pyim-pymap-py2cchar-cache' 变量中，
 如果 FORCE 设置为 t, 强制更新索引。"
-  (when (or force (or (not pyim-pinyin2cchar-cache1)
-                      (not pyim-pinyin2cchar-cache2)))
-    (setq pyim-pinyin2cchar-cache1
+  (when (or force (or (not pyim-pymap-py2cchar-cache1)
+                      (not pyim-pymap-py2cchar-cache2)))
+    (setq pyim-pymap-py2cchar-cache1
           (make-hash-table :size 50000 :test #'equal))
-    (setq pyim-pinyin2cchar-cache2
+    (setq pyim-pymap-py2cchar-cache2
           (make-hash-table :size 50000 :test #'equal))
-    (setq pyim-pinyin2cchar-cache3
+    (setq pyim-pymap-py2cchar-cache3
           (make-hash-table :size 50000 :test #'equal))
     (dolist (x pyim-pymap)
       (let* ((py (car x))
              (cchars (cdr x))
              (n (min (length py) 7)))
-        (puthash py cchars pyim-pinyin2cchar-cache1)
+        (puthash py cchars pyim-pymap-py2cchar-cache1)
         (puthash py (cdr (split-string (car cchars) ""))
-                 pyim-pinyin2cchar-cache2)
+                 pyim-pymap-py2cchar-cache2)
         (dotimes (i n)
           (let* ((key (substring py 0 (+ i 1)))
-                 (orig-value (gethash key pyim-pinyin2cchar-cache3)))
+                 (orig-value (gethash key pyim-pymap-py2cchar-cache3)))
             (puthash key (delete-dups `(,@orig-value ,@cchars))
-                     pyim-pinyin2cchar-cache3)))))))
+                     pyim-pymap-py2cchar-cache3)))))))
 
-(defun pyim-pinyin2cchar-get (pinyin &optional equal-match return-list include-seperator)
+(defun pyim-pymap-py2cchar-get (pinyin &optional equal-match return-list include-seperator)
   "获取拼音与 PINYIN 想匹配的所有汉字.
 
 比如：
@@ -768,53 +768,53 @@
 
 如果 INCLUDE-SEPERATOR 是 non-nil, 返回的列表包含一个 ‘|’ 号，pyim 用这个分隔符
 来区分 3500 个常用汉字和生僻字。"
-  (pyim-pinyin2cchar-cache-create)
+  (pyim-pymap-py2cchar-cache-create)
   (when (and pinyin (stringp pinyin))
     (let ((output
            (if equal-match
                (if return-list
-                   (gethash pinyin pyim-pinyin2cchar-cache2)
-                 (gethash pinyin pyim-pinyin2cchar-cache1))
-             (gethash pinyin pyim-pinyin2cchar-cache3))))
+                   (gethash pinyin pyim-pymap-py2cchar-cache2)
+                 (gethash pinyin pyim-pymap-py2cchar-cache1))
+             (gethash pinyin pyim-pymap-py2cchar-cache3))))
       (delete "" output)
       (if include-seperator
           output
         (delete "|" output)))))
 
-(defun pyim-cchar2pinyin-get (char-or-str)
+(defun pyim-pymap-cchar2py-get (char-or-str)
   "获取字符或者字符串 CHAR-OR-STR 对应的拼音 code.
 
 pyim 在特定的时候需要读取一个汉字的拼音，这个工作由此完成，函数
-从 `pyim-cchar2pinyin-cache' 查询得到一个汉字字符的拼音， 例如：
+从 `pyim-pymap-cchar2py-cache' 查询得到一个汉字字符的拼音， 例如：
 
-(pyim-cchar2pinyin-get ?我)
+(pyim-pymap-cchar2py-get ?我)
 
 结果为:
 
 (\"wo\")"
-  (pyim-cchar2pinyin-cache-create)
+  (pyim-pymap-cchar2py-cache-create)
   (let ((key (if (characterp char-or-str)
                  (char-to-string char-or-str)
                char-or-str)))
     (when (= (length key) 1)
-      (gethash key pyim-cchar2pinyin-cache))))
+      (gethash key pyim-pymap-cchar2py-cache))))
 
-(defun pyim-cchar2pinyin-cache-create (&optional force)
+(defun pyim-pymap-cchar2py-cache-create (&optional force)
   "Build pinyin cchar->pinyin hashtable from `pyim-pymap'.
 
 If FORCE is non-nil, FORCE build."
-  (when (or force (not pyim-cchar2pinyin-cache))
-    (setq pyim-cchar2pinyin-cache
+  (when (or force (not pyim-pymap-cchar2py-cache))
+    (setq pyim-pymap-cchar2py-cache
           (make-hash-table :size 50000 :test #'equal))
     (dolist (x pyim-pymap)
       (let ((py (car x))
             (cchar-list (string-to-list (car (cdr x)))))
         (dolist (cchar cchar-list)
           (let* ((key (char-to-string cchar))
-                 (cache (gethash key pyim-cchar2pinyin-cache)))
+                 (cache (gethash key pyim-pymap-cchar2py-cache)))
             (if cache
-                (puthash key (append (list py) cache) pyim-cchar2pinyin-cache)
-              (puthash key (list py) pyim-cchar2pinyin-cache))))))))
+                (puthash key (append (list py) cache) pyim-pymap-cchar2py-cache)
+              (puthash key (list py) pyim-pymap-cchar2py-cache))))))))
 
 (defun pyim-pymap-cchar< (a b)
   "如果汉字 A 的使用频率大于汉字 B 的使用频率时，返回 non-nil"

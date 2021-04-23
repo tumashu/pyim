@@ -28,6 +28,7 @@
 ;;; Code:
 ;; * 代码                                                           :code:
 (require 'cl-lib)
+(require 'pyim-pymap)
 
 (defgroup pyim-pinyin nil
   "Pinyin libs for pyim."
@@ -118,7 +119,7 @@
                (shenmu yunmu)
                (cl-some
                 #'(lambda (char-pinyin)
-                    (pyim-pinyin2cchar-get char-pinyin t))
+                    (pyim-pymap-py2cchar-get char-pinyin t))
                 (mapcar #'(lambda (x)
                             (concat (nth 0 x) (nth 1 x)))
                         (pyim-imobjs-find-fuzzy:quanpin-1
