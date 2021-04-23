@@ -576,8 +576,6 @@
 (require 'subr-x)
 (require 'cl-lib)
 (require 'help-mode)
-(require 'popup nil t)
-(require 'posframe nil t)
 (require 'pyim-pymap)
 (require 'pyim-common)
 (require 'pyim-pinyin)

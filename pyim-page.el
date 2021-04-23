@@ -29,6 +29,8 @@
 ;;; Code:
 ;; * 代码                                                           :code:
 (require 'cl-lib)
+(require 'posframe nil t)
+(require 'popup nil t)
 
 (defcustom pyim-page-length 5
   "每页显示的词条数目.
