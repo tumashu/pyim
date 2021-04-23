@@ -83,6 +83,13 @@
 这个功能可以实现“简转繁”，“输入中文得到英文”之类的功能。"
   :type 'boolean)
 
+(defcustom pyim-wash-function 'pyim-wash-current-line-function
+  "清洗光标前面的文字内容.
+这个函数与『单字快捷键配合使用』，当光标前面的字符为汉字字符时，
+按 `pyim-outcome-trigger-char' 对应字符，可以调用这个函数来清洗
+光标前面的文字内容。"
+  :type 'function)
+
 ;;;###autoload
 (defvar pyim-titles '("PYIM " "PYIM-EN " "PYIM-AU ") "Pyim 在 mode-line 中显示的名称.")
 
@@ -457,6 +464,33 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
                   `((,str . ,result)))
             result))
     str))
+
+(defun pyim-wash-current-line-function ()
+  "清理当前行的内容，比如：删除不必要的空格，等。"
+  (interactive)
+  (let* ((begin (line-beginning-position))
+         (end (point))
+         (string (buffer-substring-no-properties begin end))
+         new-string)
+    (when (> (length string) 0)
+      (delete-region begin end)
+      (setq new-string
+            (with-temp-buffer
+              (insert string)
+              (goto-char (point-min))
+              (while (re-search-forward "\\([，。；？！；、）】]\\)  +\\([[:ascii:]]\\)" nil t)
+                (replace-match (concat (match-string 1) (match-string 2))  nil t))
+              (goto-char (point-min))
+              (while (re-search-forward "\\([[:ascii:]]\\)  +\\([（【]\\)" nil t)
+                (replace-match (concat (match-string 1) (match-string 2))  nil t))
+              (goto-char (point-min))
+              (while (re-search-forward "\\([[:ascii:]]\\)  +\\(\\cc\\)" nil t)
+                (replace-match (concat (match-string 1) " " (match-string 2))  nil t))
+              (goto-char (point-min))
+              (while (re-search-forward "\\(\\cc\\)  +\\([[:ascii:]]\\)" nil t)
+                (replace-match (concat (match-string 1) " " (match-string 2))  nil t))
+              (buffer-string)))
+      (insert new-string))))
 
 (defun pyim-start-translation (key)
   "Start translation of the typed character KEY-OR-STRING by pyim.

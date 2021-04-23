@@ -83,13 +83,6 @@ pyim 使用函数 `pyim-outcome-handle-char' 来处理特殊功能触发字符�
 具体请参考 `pyim-outcome-get-trigger-char' 。"
   :type '(choice (const nil) string))
 
-(defcustom pyim-wash-function 'pyim-wash-current-line-function
-  "清洗光标前面的文字内容.
-这个函数与『单字快捷键配合使用』，当光标前面的字符为汉字字符时，
-按 `pyim-outcome-trigger-char' 对应字符，可以调用这个函数来清洗
-光标前面的文字内容。"
-  :type 'function)
-
 (defvar pyim-outcome-history nil
   "记录 pyim outcome 的变化的历史
 
@@ -175,8 +168,10 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
           prefer-trigger-chars)
       user-trigger-char)))
 
+;; Fix compile warn.
 (declare-function pyim-create-word-at-point "pyim")
 (declare-function pyim-delete-word-at-point "pyim")
+(defvar pyim-wash-function)
 
 (defun pyim-outcome-handle-char (char)
   "Pyim 字符转换函数，主要用于处理标点符号.
@@ -232,7 +227,8 @@ alist 列表。"
      ;; 光标前面的字符为中文字符时，按 v 清洗当前行的内容。
      ((and (not (numberp punc-posit-before-1))
            (pyim-string-match-p "\\cc" str-before-1)
-           (equal str trigger-str))
+           (equal str trigger-str)
+           (functionp (bound-and-true-p pyim-wash-function)))
       (funcall pyim-wash-function)
       "")
 
@@ -286,33 +282,6 @@ alist 列表。"
 
      ;; 当输入的字符不是标点符号时，原样插入。
      (t str))))
-
-(defun pyim-wash-current-line-function ()
-  "清理当前行的内容，比如：删除不必要的空格，等。"
-  (interactive)
-  (let* ((begin (line-beginning-position))
-         (end (point))
-         (string (buffer-substring-no-properties begin end))
-         new-string)
-    (when (> (length string) 0)
-      (delete-region begin end)
-      (setq new-string
-            (with-temp-buffer
-              (insert string)
-              (goto-char (point-min))
-              (while (re-search-forward "\\([，。；？！；、）】]\\)  +\\([[:ascii:]]\\)" nil t)
-                (replace-match (concat (match-string 1) (match-string 2))  nil t))
-              (goto-char (point-min))
-              (while (re-search-forward "\\([[:ascii:]]\\)  +\\([（【]\\)" nil t)
-                (replace-match (concat (match-string 1) (match-string 2))  nil t))
-              (goto-char (point-min))
-              (while (re-search-forward "\\([[:ascii:]]\\)  +\\(\\cc\\)" nil t)
-                (replace-match (concat (match-string 1) " " (match-string 2))  nil t))
-              (goto-char (point-min))
-              (while (re-search-forward "\\(\\cc\\)  +\\([[:ascii:]]\\)" nil t)
-                (replace-match (concat (match-string 1) " " (match-string 2))  nil t))
-              (buffer-string)))
-      (insert new-string))))
 
 ;; * Footer
 (provide 'pyim-outcome)
