@@ -55,7 +55,7 @@
 
 (defun pyim-permutate-list (list)
   "使用排列组合的方式重新排列 LIST.
-这个函数由 ‘二中’ 提供，`pyim-hanzi2pinyin' 没有使用这个函数
+这个函数由 ‘二中’ 提供，`pyim-cstring-to-pinyin' 没有使用这个函数
 (速度稍微有点慢)。"
   (let ((list-head (car list))
         (list-tail (cdr list)))
@@ -68,7 +68,7 @@
 
 (defun pyim-permutate-list2 (list)
   "使用排列组合的方式重新排列 LIST.
-这个函数由 ’翀/ty‘ 提供，`pyim-hanzi2pinyin' 默认使用这个函数。"
+这个函数由 ’翀/ty‘ 提供，`pyim-cstring-to-pinyin' 默认使用这个函数。"
   (if (= (length list) 1)
       (mapcar #'list (car list))
     (pyim-permutate-list2-internal (car list) (cdr list))))

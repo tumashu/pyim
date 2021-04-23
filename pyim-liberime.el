@@ -225,7 +225,7 @@
 ONlY works with quanpin."
   ;; 判断当前 rime 环境是否支持全拼，如果支持，就添加词条。
   (ignore-errors
-    (let ((codes (pyim-hanzi2pinyin word nil "-" t nil t)))
+    (let ((codes (pyim-cstring-to-pinyin word nil "-" t nil t)))
       (when (member "你好" (liberime-search "nihao" 10))
         (dolist (code codes)
           (unless (pyim-string-match-p "[^ a-z-]" code)

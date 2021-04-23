@@ -107,7 +107,7 @@
             1))
           result)
       (dolist (string-list string-alist)
-        (let ((pinyin-list (pyim-hanzi2pinyin (car string-list) nil "-" t)))
+        (let ((pinyin-list (pyim-cstring-to-pinyin (car string-list) nil "-" t)))
           (dolist (pinyin pinyin-list)
             (let ((words (pyim-dcache-get pinyin '(code2word)))) ; 忽略个人词库可以提高速度
               (dolist (word words)
