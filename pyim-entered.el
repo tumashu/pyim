@@ -33,7 +33,8 @@
   "Entered tools for pyim."
   :group 'pyim)
 
-(defcustom pyim-exhibit-delay-ms 0
+(define-obsolete-variable-alias 'pyim-exhibit-delay-ms 'pyim-entered-exhibit-delay-ms "")
+(defcustom pyim-entered-exhibit-delay-ms 0
   "输入或者删除拼音字符后等待多少毫秒后才显示可选词
 当用户快速输入连续的拼音时可提升用户体验.
 如果为 0 或者 nil, 则不等待立刻显示可选词."
@@ -251,18 +252,18 @@ TYPE 取值为 point-after, 返回 entered buffer 中 point 之后的字符
           (pyim-page-refresh))))))
 
 (defun pyim-entered-refresh (&optional no-delay)
-  "延迟 `pyim-exhibit-delay-ms' 显示备选词等待用户选择。"
+  "延迟 `pyim-entered-exhibit-delay-ms' 显示备选词等待用户选择。"
   (if (= (length (pyim-entered-get 'point-before)) 0)
       (pyim-terminate-translation)
     (when pyim-entered--exhibit-timer
       (cancel-timer pyim-entered--exhibit-timer))
     (cond
      ((or no-delay
-          (not pyim-exhibit-delay-ms)
-          (eq pyim-exhibit-delay-ms 0))
+          (not pyim-entered-exhibit-delay-ms)
+          (eq pyim-entered-exhibit-delay-ms 0))
       (pyim-entered-refresh-1))
      (t (setq pyim-entered--exhibit-timer
-              (run-with-timer (/ pyim-exhibit-delay-ms 1000.0)
+              (run-with-timer (/ pyim-entered-exhibit-delay-ms 1000.0)
                               nil
                               #'pyim-entered-refresh-1))))))
 
