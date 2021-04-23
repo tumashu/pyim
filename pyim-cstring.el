@@ -199,6 +199,213 @@
   (goto-char (point-min))
   (message "分词完成！"))
 
+;; ** 中文字符串到拼音的转换工具
+;;;###autoload
+(defalias 'pyim-hanzi2pinyin 'pyim-cstring-to-pinyin)
+(defun pyim-cstring-to-pinyin (string &optional shou-zi-mu separator
+                                      return-list ignore-duo-yin-zi adjust-duo-yin-zi)
+  "将汉字字符串转换为对应的拼音字符串的工具.
+
+如果 SHOU-ZI-MU 设置为 t, 转换仅得到拼音首字母字符串。当
+RETURN-LIST 设置为 t 时，返回一个拼音列表，这个列表包含词条的一个
+或者多个拼音（词条包含多音字时）；如果 IGNORE-DUO-YIN-ZI 设置为
+t, 遇到多音字时，只使用第一个拼音，其它拼音忽略；当
+ADJUST-DUO-YIN-Zi 设置为 t 时, `pyim-cstring-to-pinyin' 会使用 pyim 已
+安装的词库来校正多音字，但这个功能有一定的限制:
+
+1. pyim 普通词库中不存在的词条不能较正
+2. 多音字校正速度比较慢，实时转换会产生卡顿。
+
+BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结果会
+包含多余的连接符：比如： '你=好' --> 'ni-=-hao'"
+  (if (not (pyim-string-match-p "\\cc" string))
+      (if return-list
+          (list string)
+        string)
+    (let (string-list pinyins-list pinyins-list-permutated pinyins-list-adjusted)
+
+      ;; 将汉字字符串转换为字符list，英文原样输出。
+      ;; 比如： “Hello银行” -> ("Hello" "银" "行")
+      (setq string-list
+            (if (pyim-string-match-p "\\CC" string)
+                ;; 处理中英文混合的情况
+                (split-string
+                 (replace-regexp-in-string
+                  "\\(\\cc\\)" "@@@@\\1@@@@" string)
+                 "@@@@")
+              ;; 如果词条只包含中文，使用`string-to-vector'
+              ;; 这样处理速度比较快。
+              (string-to-vector string)))
+
+      ;; 将上述汉字字符串里面的所有汉字转换为与之对应的拼音list。
+      ;; 比如： ("Hello" "银" "行") -> (("Hello") ("yin") ("hang" "xing"))
+      (mapc
+       #'(lambda (str)
+           ;; `string-to-vector' 得到的是 char vector, 需要将其转换为 string。
+           (when (numberp str)
+             (setq str (char-to-string str)))
+           (cond
+            ((> (length str) 1)
+             (push (list str) pinyins-list))
+            ((and (> (length str) 0)
+                  (pyim-string-match-p "\\cc" str))
+             (push (pyim-cchar2pinyin-get (string-to-char str))
+                   pinyins-list))
+            ((> (length str) 0)
+             (push (list str) pinyins-list))))
+       string-list)
+      (setq pinyins-list (nreverse pinyins-list))
+
+      ;; 通过排列组合的方式, 重排 pinyins-list。
+      ;; 比如：(("Hello") ("yin") ("hang" "xing")) -> (("Hello" "yin" "hang") ("Hello" "yin" "xing"))
+      (setq pinyins-list-permutated (pyim-permutate-list2 pinyins-list))
+
+      ;; 使用 pyim 的安装的词库来校正多音字。
+      (when adjust-duo-yin-zi
+        ;; 确保 pyim 词库加载
+        (pyim-dcache-init-variables)
+        (dolist (pinyin-list pinyins-list-permutated)
+          (let* ((py-str (mapconcat #'identity pinyin-list "-"))
+                 (words-from-dicts
+                  ;; pyim-buffer-list 中第一个 buffer 对应的是个人词库文件
+                  ;; 个人词库文件中的词条，极有可能存在 *多音字污染*。
+                  ;; 这是由 pyim 保存词条的机制决定的。
+                  (pyim-dcache-get py-str '(code2word))))
+            (when (member string words-from-dicts)
+              (push pinyin-list pinyins-list-adjusted))))
+        (setq pinyins-list-adjusted
+              (nreverse pinyins-list-adjusted)))
+
+      ;; 返回拼音字符串或者拼音列表
+      (let* ((pinyins-list
+              (or pinyins-list-adjusted
+                  pinyins-list-permutated))
+             (list (mapcar
+                    #'(lambda (x)
+                        (mapconcat
+                         #'(lambda (str)
+                             (if shou-zi-mu
+                                 (substring str 0 1)
+                               str))
+                         x separator))
+                    (if ignore-duo-yin-zi
+                        (list (car pinyins-list))
+                      pinyins-list))))
+        (if return-list
+            list
+          (mapconcat #'identity list " "))))))
+
+;;;###autoload
+(defalias 'pyim-hanzi2pinyin-simple 'pyim-cstring-to-pinyin-simple)
+(defun pyim-cstring-to-pinyin-simple (string &optional shou-zi-mu separator return-list)
+  "简化版的 `pyim-cstring-to-pinyin', 不处理多音字。"
+  (pyim-cstring-to-pinyin string shou-zi-mu separator return-list t))
+
+(defalias 'pyim-cwords-at-point 'pyim-cstring-words-at-point)
+(defun pyim-cstring-words-at-point (&optional end-of-point)
+  "获取光标当前的词条列表，当 END-OF-POINT 设置为 t 时，获取光标后的词条列表。
+词条列表的每一个元素都是列表，这些列表的第一个元素为词条，第二个元素为光标处到词条
+头部的距离，第三个元素为光标处到词条尾部的距离。
+
+其工作原理是：
+
+1. 使用 `thing-at-point' 获取当前光标处的一个字符串，一般而言：英文会得到
+   一个单词，中文会得到一个句子。
+2. 英文单词直接返回这个单词的列表。
+3. 中文句子首先用 `pyim-cstring-split-to-list' 分词，然后根据光标在中文句子
+   中的位置，筛选出符合要求的中文词条。得到并返回 *一个* 或者 *多个* 词条
+   的列表。"
+  ;;
+  ;;                                光标到词 光标到词
+  ;;                                首的距离 尾的距离
+  ;;                                       | |
+  ;; 获取光标当前的词<I>条列表 -> (("的词" 2 0) ("词条" 1 1))
+  ;;
+  (let* ((case-fold-search t)
+         (current-pos (point))
+         (current-char
+          (if end-of-point
+              (string (following-char))
+            (string (preceding-char))))
+         (str (thing-at-point 'word t))
+         (str-length (length str))
+         (str-boundary (bounds-of-thing-at-point 'word))
+         (str-beginning-pos (when str-boundary
+                              (car str-boundary)))
+         (str-end-pos (when str-boundary
+                        (cdr str-boundary)))
+         (str-offset
+          (when (and str-beginning-pos str-end-pos)
+            (if (= current-pos str-end-pos)
+                (1+ (- str-end-pos str-beginning-pos))
+              (1+ (- current-pos str-beginning-pos)))))
+         str-offset-adjusted words-alist results)
+
+    ;; 当字符串长度太长时， `pyim-cstring-split-to-list'
+    ;; 的速度比较慢，这里确保待分词的字符串长度不超过10.
+    (when (and str (not (pyim-string-match-p "\\CC" str)))
+      (if (> str-offset 5)
+          (progn (setq str-offset-adjusted 5)
+                 (setq str (substring str
+                                      (- str-offset 5)
+                                      (min (+ str-offset 5) str-length))))
+        (setq str-offset-adjusted str-offset)
+        (setq str (substring str 0 (min 9 str-length)))))
+
+    (cond
+     ((and str (not (pyim-string-match-p "\\CC" str)))
+      (setq words-alist
+            (pyim-cstring-split-to-list str))
+      (dolist (word-list words-alist)
+        (let ((word-begin (nth 1 word-list))
+              (word-end (nth 2 word-list)))
+          (if (if end-of-point
+                  (and (< str-offset-adjusted word-end)
+                       (>= str-offset-adjusted word-begin))
+                (and (<= str-offset-adjusted word-end)
+                     (> str-offset-adjusted word-begin)))
+              (push (list (car word-list)
+                          (- str-offset-adjusted word-begin) ;; 例如： ("你好" 1 1)
+                          (- word-end str-offset-adjusted))
+                    results))))
+      (or results
+          (list (if end-of-point
+                    (list current-char 0 1)
+                  (list current-char 1 0)))))
+     (str (list (list str
+                      (- current-pos str-beginning-pos)
+                      (- str-end-pos current-pos)))))))
+
+;; ** 让 forward/backward 支持中文
+(defalias 'pyim-forward-word 'pyim-cstring-forward-word)
+(defun pyim-cstring-forward-word (&optional arg)
+  "向前移动 ARG 英文或者中文词，向前移动时基于 *最长* 的词移动。"
+  (interactive "P")
+  (or arg (setq arg 1))
+  (dotimes (_ arg)
+    (let* ((words (pyim-cstring-words-at-point t))
+           (max-length
+            (cl-reduce #'max
+                       (cons 0 (mapcar #'(lambda (word)
+                                           (nth 2 word))
+                                       words))))
+           (max-length (max (or max-length 1) 1)))
+      (forward-char max-length))))
+
+(defalias 'pyim-backward-word 'pyim-cstring-backward-word)
+(defun pyim-cstring-backward-word (&optional arg)
+  "向后移动 ARG 个英文或者中文词，向后移动时基于 *最长* 的词移动。"
+  (interactive "P")
+  (or arg (setq arg 1))
+  (dotimes (_ arg)
+    (let* ((words (pyim-cstring-words-at-point))
+           (max-length
+            (cl-reduce #'max
+                       (cons 0 (mapcar #'(lambda (word)
+                                           (nth 1 word))
+                                       words))))
+           (max-length (max (or max-length 1) 1)))
+      (backward-char max-length))))
 
 ;; * Footer
 (provide 'pyim-cstring)
