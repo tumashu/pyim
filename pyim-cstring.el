@@ -301,6 +301,43 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
   "简化版的 `pyim-cstring-to-pinyin', 不处理多音字。"
   (pyim-cstring-to-pinyin string shou-zi-mu separator return-list t))
 
+(defalias 'pyim-hanzi2xingma 'pyim-cstring-to-xingma)
+(defun pyim-cstring-to-xingma (string scheme-name &optional return-list)
+  "返回汉字 STRING 对应形码方案 SCHEME-NAME 的 code (不包括
+code-prefix)。当RETURN-LIST 设置为 t 时，返回一个 code list。"
+  (let* ((fun (intern (concat "pyim-cstring-to-xingma:" (symbol-name scheme-name))))
+         (code (and fun (funcall fun string))))
+    (when code
+      (if return-list
+          (list code)
+        code))))
+
+(defun pyim-cstring-to-xingma:wubi (string)
+  "返回汉字 STRING 的五笔编码(不包括 code-prefix)。当RETURN-LIST
+设置为 t 时，返回一个编码列表。"
+  (when (string-match-p "^\\cc+\\'" string)
+    (let ((code (pyim-code-search string 'wubi))
+          (len (length string)))
+      (when (string-empty-p code)
+        (when (= len 1)
+          (error "No code found for %s" string))
+        (setq string (split-string string "" t)
+              code
+              (cl-case len
+                ;; 双字词，分别取两个字的前两个编码
+                (2 (concat (substring (pyim-cstring-to-xingma:wubi (nth 0 string)) 0 2)
+                           (substring (pyim-cstring-to-xingma:wubi (nth 1 string)) 0 2)))
+                ;; 三字词，取前二字的首编码，及第三个字的前两个编码
+                (3 (concat (substring (pyim-cstring-to-xingma:wubi (nth 0 string)) 0 1)
+                           (substring (pyim-cstring-to-xingma:wubi (nth 1 string)) 0 1)
+                           (substring (pyim-cstring-to-xingma:wubi (nth 2 string)) 0 2)))
+                ;; 四字词及以上，分别前三个字及最后一个字的首编码
+                (t (concat (substring (pyim-cstring-to-xingma:wubi (nth 0 string)) 0 1)
+                           (substring (pyim-cstring-to-xingma:wubi (nth 1 string)) 0 1)
+                           (substring (pyim-cstring-to-xingma:wubi (nth 2 string)) 0 1)
+                           (substring (pyim-cstring-to-xingma:wubi (nth (1- len) string)) 0 1))))))
+      code)))
+
 (defalias 'pyim-cwords-at-point 'pyim-cstring-words-at-point)
 (defun pyim-cstring-words-at-point (&optional end-of-point)
   "获取光标当前的词条列表，当 END-OF-POINT 设置为 t 时，获取光标后的词条列表。

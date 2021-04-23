@@ -1029,42 +1029,6 @@ BUG：拼音无法有效地处理多音字。"
       ;; TODO, 排序个人词库?
       )))
 
-(defun pyim-hanzi2xingma (string scheme-name &optional return-list)
-  "返回汉字 STRING 对应形码方案 SCHEME-NAME 的 code (不包括
-code-prefix)。当RETURN-LIST 设置为 t 时，返回一个 code list。"
-  (let* ((fun (intern (concat "pyim-hanzi2xingma:" (symbol-name scheme-name))))
-         (code (and fun (funcall fun string))))
-    (when code
-      (if return-list
-          (list code)
-        code))))
-
-(defun pyim-hanzi2xingma:wubi (string)
-  "返回汉字 STRING 的五笔编码(不包括 code-prefix)。当RETURN-LIST
-设置为 t 时，返回一个编码列表。"
-  (when (string-match-p "^\\cc+\\'" string)
-    (let ((code (pyim-code-search string 'wubi))
-          (len (length string)))
-      (when (string-empty-p code)
-        (when (= len 1)
-          (error "No code found for %s" string))
-        (setq string (split-string string "" t)
-              code
-              (cl-case len
-                ;; 双字词，分别取两个字的前两个编码
-                (2 (concat (substring (pyim-hanzi2xingma:wubi (nth 0 string)) 0 2)
-                           (substring (pyim-hanzi2xingma:wubi (nth 1 string)) 0 2)))
-                ;; 三字词，取前二字的首编码，及第三个字的前两个编码
-                (3 (concat (substring (pyim-hanzi2xingma:wubi (nth 0 string)) 0 1)
-                           (substring (pyim-hanzi2xingma:wubi (nth 1 string)) 0 1)
-                           (substring (pyim-hanzi2xingma:wubi (nth 2 string)) 0 2)))
-                ;; 四字词及以上，分别前三个字及最后一个字的首编码
-                (t (concat (substring (pyim-hanzi2xingma:wubi (nth 0 string)) 0 1)
-                           (substring (pyim-hanzi2xingma:wubi (nth 1 string)) 0 1)
-                           (substring (pyim-hanzi2xingma:wubi (nth 2 string)) 0 1)
-                           (substring (pyim-hanzi2xingma:wubi (nth (1- len) string)) 0 1))))))
-      code)))
-
 (defun pyim-create-word-at-point (&optional number silent)
   "将光标前字符数为 NUMBER 的中文字符串添加到个人词库中
 当 SILENT 设置为 t 是，不显示提醒信息。"
