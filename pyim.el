@@ -588,6 +588,7 @@
 (require 'pyim-entered)
 (require 'pyim-candidates)
 (require 'pyim-preview)
+(require 'pyim-autoselector)
 
 (defgroup pyim nil
   "Pyim is a Chinese input method support quanpin, shuangpin, wubi and cangjie."
@@ -681,24 +682,6 @@ pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。当待输
   "将 “待选词条” 在 “上屏” 之前自动转换为其他字符串.
 这个功能可以实现“简转繁”，“输入中文得到英文”之类的功能。"
   :type 'boolean)
-
-(defcustom pyim-autoselector '(pyim-autoselector-xingma)
-  "已经启用的自动上屏器.
-
-自动上屏器是一个函数。假设用户已经输入 \"nihao\", 并按下 \"m\" 键，
-那么当前entered 就是 \"nihaom\". 上次 entered 是 \"nihao\". 那么
-返回值有3种情况（优先级按照下面的顺序）：
-
-1. (:select last :replace-with \"xxx\")    自动上屏上次 entered (nihao) 的第一个候选词，m 键下一轮处理。
-3. (:select current :replace-with \"xxx\") 自动上屏当前 entered (nihaom) 的第一个候选词。
-4. nil                                     不自动上屏。
-
-如果 :replace-with 设置为一个字符串，则选择最终会被这个字符串替代。
-
-注意：多个 autoselector 函数运行时，最好不要相互影响，如果相互有
-影响，需要用户自己管理。"
-  :type '(choice (const nil)
-                 (repeat function)))
 
 ;;;###autoload
 (defvar pyim-titles '("PYIM " "PYIM-EN " "PYIM-AU ") "Pyim 在 mode-line 中显示的名称.")
@@ -1262,23 +1245,6 @@ Return the input string.
            (member last-command-event
                    (mapcar #'identity rest-chars)))
          (setq current-input-method-title (nth 0 pyim-titles)))))
-
-(defun pyim-autoselector-xingma (&rest _args)
-  "适用于型码输入法的自动上屏器.
-
-比如：五笔等型码输入法，重码率很低，90%以上的情况都是选择第一个词
-条，自动选择可以减少按空格强制选词的机会。"
-  (let* ((scheme-name (pyim-scheme-name))
-         (class (pyim-scheme-get-option scheme-name :class))
-         (n (pyim-scheme-get-option scheme-name :code-split-length)))
-    (when (eq class 'xingma)
-      (cond
-       ((and (= (length (pyim-entered-get 'point-before)) n)
-             (= (length pyim-candidates) 1))
-        '(:select current))
-       ((> (length (pyim-entered-get 'point-before)) n)
-        '(:select last))
-       (t nil)))))
 
 (defun pyim-self-insert-command ()
   "Pyim 版本的 self-insert-command."
