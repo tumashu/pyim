@@ -30,6 +30,7 @@
 (require 'cl-lib)
 (require 'posframe nil t)
 (require 'popup nil t)
+(require 'pyim-common)
 
 (defgroup pyim-page nil
   "Page tools for pyim."
