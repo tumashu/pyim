@@ -46,12 +46,12 @@ plist 来表示，比如：
 (defvar pyim-extra-dicts nil "与 `pyim-dicts' 类似, 用于和 elpa 格式的词库包集成。.")
 
 ;; ** pyim 词库管理工具
-(defvar pyim-dm-buffer "*pyim-dict-manager*")
+(defvar pyim-dict-manager-buffer "*pyim-dict-manager*")
 
-(defun pyim-dm-refresh ()
+(defun pyim-dict-manager-refresh ()
   "Refresh the contents of the *pyim-dict-manager* buffer."
   (interactive)
-  (with-current-buffer pyim-dm-buffer
+  (with-current-buffer pyim-dict-manager-buffer
     (let ((inhibit-read-only t)
           (dicts-list pyim-dicts)
           (format-string "%-4s %-4s %-60s\n")
@@ -94,10 +94,10 @@ plist 来表示，比如：
           [s] 保存配置  [R] 重启输入法 [C-c C-c] 禁用/启用当前词库"
                           'face face-attr)))))
 
-(defun pyim-dm-toggle-dict (&optional _enable)
+(defun pyim-dict-manager-toggle-dict (&optional _enable)
   "启用当前行对应的词库。"
   (interactive)
-  (when (equal (buffer-name) pyim-dm-buffer)
+  (when (equal (buffer-name) pyim-dict-manager-buffer)
     (let* ((id (get-text-property (point) 'id))
            (dict (cl-copy-list (nth (1- id) pyim-dicts)))
            (disable (plist-get dict :disable))
@@ -106,26 +106,26 @@ plist 来表示，比如：
       (if (not disable)
           (message "禁用当前词库")
         (message "启用当前词库"))
-      (pyim-dm-refresh)
+      (pyim-dict-manager-refresh)
       (goto-char (point-min))
       (forward-line (- line 1)))))
 
-(defun pyim-dm-delete-dict ()
+(defun pyim-dict-manager-delete-dict ()
   "从 `pyim-dicts' 中删除当前行对应的词库信息。"
   (interactive)
-  (when (equal (buffer-name) pyim-dm-buffer)
+  (when (equal (buffer-name) pyim-dict-manager-buffer)
     (let ((id (get-text-property (point) 'id))
           (line (line-number-at-pos)))
       (when (yes-or-no-p "确定要删除这条词库信息吗? ")
         (setq pyim-dicts (delq (nth (1- id) pyim-dicts) pyim-dicts))
-        (pyim-dm-refresh)
+        (pyim-dict-manager-refresh)
         (goto-char (point-min))
         (forward-line (- line 1))))))
 
-(defun pyim-dm-dict-position-up ()
+(defun pyim-dict-manager-dict-position-up ()
   "向上移动词库。"
   (interactive)
-  (when (equal (buffer-name) pyim-dm-buffer)
+  (when (equal (buffer-name) pyim-dict-manager-buffer)
     (let* ((id (get-text-property (point) 'id))
            (dict1 (nth (- id 1) pyim-dicts))
            (dict2 (nth (- id 2) pyim-dicts))
@@ -133,14 +133,14 @@ plist 来表示，比如：
       (when (> id 1)
         (setf (nth (- id 1) pyim-dicts) dict2)
         (setf (nth (- id 2) pyim-dicts) dict1)
-        (pyim-dm-refresh)
+        (pyim-dict-manager-refresh)
         (goto-char (point-min))
         (forward-line (- line 2))))))
 
-(defun pyim-dm-dict-position-down ()
+(defun pyim-dict-manager-dict-position-down ()
   "向下移动词库。"
   (interactive)
-  (when (equal (buffer-name) pyim-dm-buffer)
+  (when (equal (buffer-name) pyim-dict-manager-buffer)
     (let* ((id (get-text-property (point) 'id))
            (dict1 (nth (- id 1) pyim-dicts))
            (dict2 (nth id pyim-dicts))
@@ -149,21 +149,21 @@ plist 来表示，比如：
       (when (< id length)
         (setf (nth (1- id) pyim-dicts) dict2)
         (setf (nth id pyim-dicts) dict1)
-        (pyim-dm-refresh)
+        (pyim-dict-manager-refresh)
         (goto-char (point-min))
         (forward-line line)))))
 
-(defun pyim-dm-save-dict-info ()
+(defun pyim-dict-manager-save-dict-info ()
   "使用 `customize-save-variable' 函数将 `pyim-dicts' 保存到 '~/.emacs' 文件中。"
   (interactive)
   ;; 将`pyim-dict'的设置保存到emacs配置文件中。
   (customize-save-variable 'pyim-dicts pyim-dicts)
   (message "将 pyim 词库配置信息保存到 ~/.emacs 文件。"))
 
-(defun pyim-dm-add-dict ()
+(defun pyim-dict-manager-add-dict ()
   "为 `pyim-dicts' 添加词库信息。"
   (interactive)
-  (when (equal (buffer-name) pyim-dm-buffer)
+  (when (equal (buffer-name) pyim-dict-manager-buffer)
     (let ((line (line-number-at-pos))
           dict name file first-used)
       (setq name (read-from-minibuffer "请输入词库名称： "))
@@ -173,23 +173,23 @@ plist 来表示，比如：
       (if first-used
           (add-to-list 'pyim-dicts dict)
         (add-to-list 'pyim-dicts dict t))
-      (pyim-dm-refresh)
+      (pyim-dict-manager-refresh)
       (goto-char (point-min))
       (forward-line (- line 1)))))
 
 (declare-function pyim-restart "pyim")
 
-(define-derived-mode pyim-dm-mode special-mode "pyim-dicts-manager"
+(define-derived-mode pyim-dict-manager-mode special-mode "pyim-dicts-manager"
   "Major mode for managing pyim dicts"
   (read-only-mode)
-  (define-key pyim-dm-mode-map (kbd "D") #'pyim-dm-delete-dict)
-  (define-key pyim-dm-mode-map (kbd "g") #'pyim-dm-refresh)
-  (define-key pyim-dm-mode-map (kbd "A") #'pyim-dm-add-dict)
-  (define-key pyim-dm-mode-map (kbd "N") #'pyim-dm-dict-position-down)
-  (define-key pyim-dm-mode-map (kbd "P") #'pyim-dm-dict-position-up)
-  (define-key pyim-dm-mode-map (kbd "s") #'pyim-dm-save-dict-info)
-  (define-key pyim-dm-mode-map (kbd "C-c C-c") #'pyim-dm-toggle-dict)
-  (define-key pyim-dm-mode-map (kbd "R") #'pyim-restart))
+  (define-key pyim-dict-manager-mode-map (kbd "D") #'pyim-dict-manager-delete-dict)
+  (define-key pyim-dict-manager-mode-map (kbd "g") #'pyim-dict-manager-refresh)
+  (define-key pyim-dict-manager-mode-map (kbd "A") #'pyim-dict-manager-add-dict)
+  (define-key pyim-dict-manager-mode-map (kbd "N") #'pyim-dict-manager-dict-position-down)
+  (define-key pyim-dict-manager-mode-map (kbd "P") #'pyim-dict-manager-dict-position-up)
+  (define-key pyim-dict-manager-mode-map (kbd "s") #'pyim-dict-manager-save-dict-info)
+  (define-key pyim-dict-manager-mode-map (kbd "C-c C-c") #'pyim-dict-manager-toggle-dict)
+  (define-key pyim-dict-manager-mode-map (kbd "R") #'pyim-restart))
 
 ;;;###autoload
 (defun pyim-dicts-manager ()
@@ -202,10 +202,10 @@ plist 来表示，比如：
 4. 保存词库设置。
 5. 重启输入法。"
   (interactive)
-  (let ((buffer (get-buffer-create pyim-dm-buffer)))
-    (pyim-dm-refresh)
+  (let ((buffer (get-buffer-create pyim-dict-manager-buffer)))
+    (pyim-dict-manager-refresh)
     (switch-to-buffer buffer)
-    (pyim-dm-mode)
+    (pyim-dict-manager-mode)
     (setq truncate-lines t)))
 
 (defun pyim-extra-dicts-add-dict (new-dict)
