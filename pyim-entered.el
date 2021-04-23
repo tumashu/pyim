@@ -29,6 +29,10 @@
 ;; * 代码                                                           :code:
 (require 'cl-lib)
 
+(defgroup pyim-entered nil
+  "Entered tools for pyim."
+  :group 'pyim)
+
 (defcustom pyim-exhibit-delay-ms 0
   "输入或者删除拼音字符后等待多少毫秒后才显示可选词
 当用户快速输入连续的拼音时可提升用户体验.

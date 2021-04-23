@@ -29,6 +29,10 @@
 ;; * 代码                                                           :code:
 (require 'cl-lib)
 
+(defgroup pyim-cstring nil
+  "Chinese string tools for pyim."
+  :group 'pyim)
+
 (defun pyim-cstring-at-point (&optional number)
   "获取光标一个中文字符串，字符数量为：NUMBER."
   (save-excursion

@@ -32,6 +32,10 @@
 (require 'pyim-entered)
 (require 'pyim-candidates)
 
+(defgroup pyim-autoselector nil
+  "Autoselector for pyim."
+  :group 'pyim)
+
 (defcustom pyim-autoselector '(pyim-autoselector-xingma)
   "已经启用的自动上屏器.
 

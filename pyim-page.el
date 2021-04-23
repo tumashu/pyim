@@ -31,6 +31,10 @@
 (require 'posframe nil t)
 (require 'popup nil t)
 
+(defgroup pyim-page nil
+  "Page tools for pyim."
+  :group 'pyim)
+
 (defcustom pyim-page-length 5
   "每页显示的词条数目.
 

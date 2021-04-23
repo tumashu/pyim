@@ -29,6 +29,10 @@
 ;; * 代码                                                           :code:
 (require 'cl-lib)
 
+(defgroup pyim-pinyin nil
+  "Pinyin libs for pyim."
+  :group 'pyim)
+
 (defvar pyim-pinyin-shenmu
   '("b" "p" "m" "f" "d" "t" "n" "l" "g" "k" "h"
     "j" "q" "x" "z" "c" "s" "zh" "ch" "sh" "r" "y" "w"))

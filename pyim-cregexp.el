@@ -32,6 +32,10 @@
 (require 'xr)
 (require 'rx)
 
+(defgroup pyim-cregexp nil
+  "Chinese regexp tools for pyim."
+  :group 'pyim)
+
 (defcustom pyim-cregexp-fallback-scheme 'quanpin
   "`pyim-cregexp-build' 使用的 Fallback scheme.
 

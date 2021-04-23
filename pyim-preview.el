@@ -29,6 +29,10 @@
 ;; * 代码                                                           :code:
 (require 'cl-lib)
 
+(defgroup pyim-preview nil
+  "Preview libs for pyim."
+  :group 'pyim)
+
 (defface pyim-preview-face '((t (:underline t)))
   "设置光标处预览字符串的 face.")
 

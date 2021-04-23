@@ -31,6 +31,10 @@
 ;;; Code:
 ;; * 代码                                                                 :code:
 
+(defgroup pyim-common nil
+  "pyim common."
+  :group 'pyim)
+
 (defvar pyim-debug nil)
 
 (defun pyim-string-match-p (regexp string &optional start)

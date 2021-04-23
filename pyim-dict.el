@@ -27,6 +27,11 @@
 
 ;;; Code:
 ;; * 代码                                                           :code:
+
+(defgroup pyim-dict nil
+  "Dict tools for pyim."
+  :group 'pyim)
+
 (defcustom pyim-dicts nil
   "一个列表，用于保存 `pyim' 的词库信息.
 每一个 element 都代表一条词库的信息, 用户可以使用词库管理命令

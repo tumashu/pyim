@@ -29,6 +29,10 @@
 ;; * 代码                                                           :code:
 (require 'cl-lib)
 
+(defgroup pyim-imobjs-codes nil
+  "Imobjs and codes tools for pyim."
+  :group 'pyim)
+
 (defvar pyim-imobjs nil
   "Imobj (Input method object) 组成的 list.
 

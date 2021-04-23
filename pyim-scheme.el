@@ -29,6 +29,10 @@
 ;; * 代码                                                           :code:
 (require 'cl-lib)
 
+(defgroup pyim-scheme nil
+  "Scheme tools for pyim."
+  :group 'pyim)
+
 (defcustom pyim-default-scheme 'quanpin
   "设置 pyim 使用哪一种输入法方案，默认使用全拼输入."
   :type 'symbol)

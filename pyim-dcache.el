@@ -30,6 +30,10 @@
 (require 'cl-lib)
 (require 'pyim-common)
 
+(defgroup pyim-dcache nil
+  "Dcache for pyim."
+  :group 'pyim)
+
 (defcustom pyim-dcache-backend 'pyim-dhashcache
   "词库后端引擎.负责缓冲词库并提供搜索词的算法.
 可选项为 `pyim-dhashcache' 或 `pyim-dregcache'.

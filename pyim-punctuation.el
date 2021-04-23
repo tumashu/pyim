@@ -29,6 +29,10 @@
 ;; * 代码                                                           :code:
 (require 'cl-lib)
 
+(defgroup pyim-punctuation nil
+  "Punctuation libs for pyim."
+  :group 'pyim)
+
 (defcustom pyim-punctuation-dict
   '(("'" "‘" "’")
     ("\"" "“" "”")

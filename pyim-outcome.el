@@ -29,6 +29,10 @@
 ;; * 代码                                                           :code:
 (require 'cl-lib)
 
+(defgroup pyim-outcome nil
+  "Outcome tools for pyim."
+  :group 'pyim)
+
 (defcustom pyim-translate-trigger-char "v"
   "用于触发特殊操作的字符，相当与单字快捷键.
 
