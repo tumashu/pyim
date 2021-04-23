@@ -34,6 +34,7 @@
 ;;; Code:
 ;; * 代码                                                                 :code:
 (require 'pyim-common)
+(require 'pyim-dcache)
 (require 'async nil t)
 
 ;; Pyim 词库缓存文件，注意：变量名称中不能出现 ":" 等，不能作为文件名称的字符。
@@ -79,7 +80,7 @@
 如果 FORCE 为真，强制加载缓存。"
   (interactive)
   (when (or force (not pyim-dhashcache-update-ishortcode2word))
-    (if (pyim-use-emacs-thread-p)
+    (if (pyim-dcache-use-emacs-thread-p)
         (make-thread
          `(lambda ()
             (maphash
@@ -141,7 +142,7 @@
 如果 FORCE 为真，强制运行。"
   (interactive)
   (when (or force (not pyim-dhashcache-update-shortcode2word))
-    (if (pyim-use-emacs-thread-p)
+    (if (pyim-dcache-use-emacs-thread-p)
         (make-thread
          `(lambda ()
             (maphash
@@ -269,7 +270,7 @@ DCACHE 是一个 code -> words 的 hashtable.
          (code2word-md5-file (pyim-dhashcache-get-path 'pyim-dhashcache-code2word-md5)))
     (when (or force (not (equal dicts-md5 (pyim-dcache-get-value-from-file code2word-md5-file))))
       ;; use hashtable
-      (if (pyim-use-emacs-thread-p)
+      (if (pyim-dcache-use-emacs-thread-p)
           (make-thread
            `(lambda ()
               (let ((dcache (pyim-dhashcache-generate-dcache-file ',dict-files ,code2word-file)))
@@ -339,7 +340,7 @@ code 对应的中文词条了。
 如果 FORCE 为真，强制排序。"
   (interactive)
   (when (or force (not pyim-dhashcache-update-icode2word-p))
-    (if (pyim-use-emacs-thread-p)
+    (if (pyim-dcache-use-emacs-thread-p)
         (make-thread
          `(lambda ()
             (maphash
