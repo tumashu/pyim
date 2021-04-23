@@ -858,7 +858,7 @@ Return the input string.
 ;; ** pyim 中文字符串工具
 (require 'pyim-cstring)
 
-;; ** pyim 中文
+;; ** pyim 中文 regexp 工具
 (require 'pyim-cregexp)
 
 ;; ** pyim 探针程序
