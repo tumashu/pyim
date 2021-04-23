@@ -75,7 +75,7 @@ TYPE 取值为 point-after, 返回 entered buffer 中 point 之后的字符
 串。"
   (pyim-with-entered-buffer
     (cond
-     ((equal 1 (point))
+     ((equal (point-min) (point))
       (buffer-string))
      ((eq type 'point-before)
       (buffer-substring-no-properties 1 (point)))
