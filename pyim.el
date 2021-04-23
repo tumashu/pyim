@@ -270,65 +270,6 @@ pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
   (pyim-start "pyim" nil t
               save-personal-dcache refresh-common-dcache))
 
-(defun pyim-export (file &optional confirm)
-  "将个人词条以及词条对应的词频信息导出到文件 FILE.
-
-  如果 FILE 为 nil, 提示用户指定导出文件位置, 如果 CONFIRM 为 non-nil，
-  文件存在时将会提示用户是否覆盖，默认为覆盖模式"
-  (interactive "F将词条相关信息导出到文件: ")
-  (with-temp-buffer
-    (insert ";;; -*- coding: utf-8-unix -*-\n")
-    (pyim-dcache-call-api 'insert-export-content)
-    (pyim-dcache-write-file file confirm)))
-
-(defun pyim-export-personal-words (file &optional confirm)
-  "将用户选择过的词生成的缓存导出为 pyim 词库文件.
-
-如果 FILE 为 nil, 提示用户指定导出文件位置, 如果 CONFIRM 为 non-nil，
-文件存在时将会提示用户是否覆盖，默认为覆盖模式。
-
-注： 这个函数的用途是制作 pyim 词库，个人词条导入导出建议使用：
-`pyim-import' 和 `pyim-export' ."
-  (interactive "F将个人缓存中的词条导出到文件：")
-  (pyim-dcache-call-api 'export-personal-words file confirm)
-  (message "Pyim export finished."))
-
-(defun pyim-import (file &optional merge-method)
-  "从 FILE 中导入词条以及词条对应的词频信息。
-
-MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表
-词条在词频缓存中的词频和待导入文件中的词频，函数返回值做为合并后的词频使用，
-默认方式是：取两个词频的最大值。"
-  (interactive "F导入词条相关信息文件: ")
-  (with-temp-buffer
-    (let ((coding-system-for-read 'utf-8-unix))
-      (insert-file-contents file))
-    (goto-char (point-min))
-    (forward-line 1)
-    (while (not (eobp))
-      (let* ((content (pyim-dline-parse))
-             (word (car content))
-             (count (string-to-number
-                     (or (car (cdr content)) "0"))))
-        (pyim-create-word
-         word nil
-         (lambda (x)
-           (funcall (or merge-method #'max)
-                    (or x 0)
-                    count))))
-      (forward-line 1)))
-  ;; 保存一下用户选择过的词生成的缓存和词频缓存，
-  ;; 因为使用 async 机制更新 dcache 时，需要从 dcache 文件
-  ;; 中读取变量值, 然后再对用户选择过的词生成的缓存排序，如果没
-  ;; 有这一步骤，导入的词条就会被覆盖，使用 emacs-thread 机制来更新 dcache
-  ;; 不存在此问题。
-  (unless pyim-dcache-prefer-emacs-thread
-    (pyim-dcache-save-caches))
-  ;; 更新相关的 dcache
-  (pyim-dcache-call-api 'update-personal-words t)
-
-  (message "pyim: 词条相关信息导入完成！"))
-
 (defun pyim-insert-word-into-icode2word (word pinyin prepend)
   (pyim-dcache-call-api 'insert-word-into-icode2word word pinyin prepend))
 
@@ -346,7 +287,7 @@ MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表
 
 WORDCOUNT-HANDLER 可以是一个数字，代表将此数字设置为 WORD 的新词频，
 WORDCOUNT-HANDLER 也可以是一个函数，其返回值将设置为 WORD 的新词频，
-而这个函数的参数则表示 WORD 当前词频，这个功能用于：`pyim-import',
+而这个函数的参数则表示 WORD 当前词频，这个功能用于：`pyim-dcache-import',
 如果 WORDCOUNT-HANDLER 设置为其他, 则表示让 WORD 当前词频加1.
 
 BUG：拼音无法有效地处理多音字。"
@@ -431,7 +372,7 @@ BUG：拼音无法有效地处理多音字。"
 (defun pyim-delete-words-in-file (file)
   "从个人词库缓存中批量删除 FILE 文件中列出的词条.
 
-FILE 的格式与 `pyim-export' 生成的文件格式相同，
+FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
 另外这个命令也可以识别没有词频的行，比如：
 
    ;;; -*- coding: utf-8-unix -*-

@@ -381,8 +381,8 @@ pyim 的 tooltip 选词框默认使用 *双行显示* 的样式，在一些特
 
 *** 如何将个人词条相关信息导入和导出？
 
-1. 导入使用命令： pyim-import
-2. 导出使用命令： pyim-export
+1. 导入使用命令： pyim-dcache-import
+2. 导出使用命令： pyim-dcache-export
 
 *** pyim 出现错误时，如何开启 debug 模式
 
