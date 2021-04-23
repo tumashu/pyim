@@ -243,7 +243,7 @@ pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
     (add-hook 'minibuffer-exit-hook #'pyim-exit-from-minibuffer))
   (run-hooks 'pyim-active-hook)
   (when (and (eq pyim-page-tooltip 'posframe)
-             (not (pyim-posframe-valid-p)))
+             (not (pyim-page-posframe-workable-p)))
     (message "PYIM: posframe 没有正确安装或者当前 Emacs 版本不支持 posframe。"))
   (when restart
     (message "pyim 重启完成。"))
