@@ -297,10 +297,6 @@ TYPE 取值为 point-after, 返回 entered buffer 中 point 之后的字符
   (interactive)
   (pyim-entered-delete-backward-imelem t))
 
-(define-obsolete-function-alias
-  'pyim-convert-code-at-point #'pyim-convert-string-at-point "2.0")
-
-
 ;; * Footer
 (provide 'pyim-entered)
 
