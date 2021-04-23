@@ -587,6 +587,7 @@
 (require 'pyim-page)
 (require 'pyim-entered)
 (require 'pyim-candidates)
+(require 'pyim-preview)
 
 (defgroup pyim nil
   "Pyim is a Chinese input method support quanpin, shuangpin, wubi and cangjie."
@@ -651,9 +652,6 @@ pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。当待输
 如果为 0 或者 nil, 则不等待立刻显示可选词."
   :type 'integer)
 
-(defface pyim-preview-face '((t (:underline t)))
-  "设置光标处预览字符串的 face.")
-
 (defcustom pyim-english-input-switch-functions nil
   "让 pyim 开启英文输入功能.
 
@@ -704,9 +702,6 @@ pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。当待输
 
 ;;;###autoload
 (defvar pyim-titles '("PYIM " "PYIM-EN " "PYIM-AU ") "Pyim 在 mode-line 中显示的名称.")
-
-(defvar pyim-preview-overlay nil
-  "用于保存光标处预览字符串的 overlay.")
 
 (defvar pyim-outcome-history nil
   "记录 pyim outcome 的变化的历史
@@ -1336,63 +1331,6 @@ Return the input string.
     (setq pyim-assistant-scheme-enable
           (not pyim-assistant-scheme-enable))
     (pyim-entered-refresh)))
-
-;; ** 待输入字符串预览
-(defun pyim-preview-setup-overlay ()
-  "设置 pyim 光标处实时预览功能所需要的 overlay.
-
-这个函数会在 `pyim-input-method' 中调用，用于创建 overlay ，并将
-其保存到 `pyim-preview-overlay' 变量，overlay 的 face 属性设置为
-`pyim-preview-face' ，用户可以使用这个变量来自定义 face"
-  (let ((pos (point)))
-    (if (overlayp pyim-preview-overlay)
-        (move-overlay pyim-preview-overlay pos pos)
-      (setq pyim-preview-overlay (make-overlay pos pos))
-      (if input-method-highlight-flag
-          (overlay-put pyim-preview-overlay 'face 'pyim-preview-face)))))
-
-(defun pyim-preview-delete-overlay ()
-  "删除 pyim 光标处实时预览功能所需要的 overlay.
-
-这个函数会在 `pyim-input-method' 中调用，用于删除
-`pyim-preview-overlay' 中保存的 overlay。"
-  (if (and (overlayp pyim-preview-overlay) (overlay-start pyim-preview-overlay))
-      (delete-overlay pyim-preview-overlay)))
-
-(defun pyim-preview-refresh ()
-  "刷新光标处预览.
-
-pyim 会使用 Emacs overlay 机制在 *待输入buffer* 光标处高亮显示一
-个预览字符串，让用户可以查看将要输入的字符串，这个函数用于更新这
-个字符串的内容。"
-  (let* ((class (pyim-scheme-get-option (pyim-scheme-name) :class))
-         (candidates pyim-candidates)
-         (pos (1- (min pyim-candidate-position (length candidates))))
-         (preview
-          (concat (pyim-outcome-get)
-                  (pyim-candidate-parse (nth pos candidates)))))
-    (when (memq class '(quanpin))
-      (let ((rest (mapconcat
-                   #'(lambda (py)
-                       (concat (nth 0 py) (nth 1 py)))
-                   (nthcdr (length preview) (car pyim-imobjs))
-                   "'")))
-        (when (string< "" rest)
-          (setq preview (concat preview rest)))))
-    (setq preview (pyim-magic-convert preview))
-    ;; Delete old preview string.
-    (pyim-preview-delete-string)
-    ;; Insert new preview string.
-    (insert preview)
-    ;; Highlight new preview string.
-    (move-overlay pyim-preview-overlay
-                  (overlay-start pyim-preview-overlay) (point))))
-
-(defun pyim-preview-delete-string ()
-  "删除已经插入 buffer 的 preview 预览字符串。"
-  (if (overlay-start pyim-preview-overlay)
-      (delete-region (overlay-start pyim-preview-overlay)
-                     (overlay-end pyim-preview-overlay))))
 
 ;; ** 选词框相关函数
 (defun pyim-outcome-get (&optional n)
