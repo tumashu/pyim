@@ -474,8 +474,8 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                           :min-width pyim-page-posframe-min-width
                           :background-color (face-attribute 'pyim-page :background)
                           :foreground-color (face-attribute 'pyim-page :foreground)
-                          :internal-border-width pyim-page-posframe-border-width
-                          :internal-border-color (face-attribute 'pyim-page-border :background)))
+                          :border-width pyim-page-posframe-border-width
+                          :border-color (face-attribute 'pyim-page-border :background)))
           ((and (eq tooltip 'popup)
                 (functionp 'popup-tip))
            (popup-tip string :point position :margin 1))
