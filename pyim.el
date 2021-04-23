@@ -691,11 +691,6 @@ pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。当待输
 这个功能可以实现“简转繁”，“输入中文得到英文”之类的功能。"
   :type 'boolean)
 
-(defcustom pyim-posframe-border-width 0
-  "posframe的内间距。
-只有当用户使用 posframe 来显示候选词时才有效。"
-  :type 'integer)
-
 (defcustom pyim-autoselector '(pyim-autoselector-xingma)
   "已经启用的自动上屏器.
 
@@ -713,10 +708,6 @@ pyim 使用函数 `pyim-translate' 来处理特殊功能触发字符。当待输
 影响，需要用户自己管理。"
   :type '(choice (const nil)
                  (repeat function)))
-
-(defcustom pyim-posframe-min-width (* pyim-page-length 7)
-  "使用 posframe 做为选词框时，设置选词框的最小宽度."
-  :type 'integer)
 
 ;;;###autoload
 (defvar pyim-titles '("PYIM " "PYIM-EN " "PYIM-AU ") "Pyim 在 mode-line 中显示的名称.")

@@ -58,6 +58,17 @@ pyim 内建的有三种选词框格式：
 3. vertical  垂直选词框"
   :type 'symbol)
 
+(define-obsolete-variable-alias 'pyim-posframe-border-width 'pyim-page-posframe-border-width "3.0")
+(defcustom pyim-page-posframe-border-width 0
+  "posframe的内间距。
+只有当用户使用 posframe 来显示候选词时才有效。"
+  :type 'integer)
+
+(define-obsolete-variable-alias 'pyim-posframe-min-width 'pyim-page-posframe-min-width "3.0")
+(defcustom pyim-page-posframe-min-width (* pyim-page-length 7)
+  "使用 posframe 做为选词框时，设置选词框的最小宽度."
+  :type 'integer)
+
 (defface pyim-page
   '((t (:inherit default :background "#333333" :foreground "#dcdccc")))
   "Face used for the pyim page.")
@@ -447,10 +458,10 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
            (posframe-show pyim-page-tooltip-posframe-buffer
                           :string string
                           :position position
-                          :min-width pyim-posframe-min-width
+                          :min-width pyim-page-posframe-min-width
                           :background-color (face-attribute 'pyim-page :background)
                           :foreground-color (face-attribute 'pyim-page :foreground)
-                          :internal-border-width pyim-posframe-border-width
+                          :internal-border-width pyim-page-posframe-border-width
                           :internal-border-color (face-attribute 'pyim-page-border :background)))
           ((and (eq tooltip 'popup)
                 (functionp 'popup-tip))
