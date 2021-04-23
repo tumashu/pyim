@@ -39,6 +39,8 @@
 
 ;;; Code:
 ;; * 代码                                                                 :code:
+(require 'pyim-common)
+
 (defvar pyim-pinyin2cchar-cache1 nil
   "拼音查汉字功能需要的变量.")
 
@@ -830,8 +832,6 @@ If FORCE is non-nil, FORCE build."
                              ""))
             pymap))
     (reverse pymap)))
-
-(declare-function 'pyim-dline-parse "pyim")
 
 (defun pyim-pymap-build-pymap ()
   "使用 libpinyin 自带的 data 文件创建 `pyim-pymap'."
