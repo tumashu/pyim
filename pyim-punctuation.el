@@ -163,7 +163,7 @@ If you don't like this function, set the variable to nil")
 当 PUNCT-STYLE 设置为 'full-width 时，所有的标点符号转换为全角符
 号，设置为 'half-width 时，转换为半角符号。"
   (interactive)
-  (let ((punc-list (pyim-flatten-list pyim-punctuation-dict))
+  (let ((punc-list (flatten-tree pyim-punctuation-dict))
         (punct-style
          (or punct-style
              (intern (completing-read
