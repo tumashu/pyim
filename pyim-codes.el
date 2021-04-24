@@ -30,7 +30,6 @@
 (require 'cl-lib)
 (require 'pyim-scheme)
 (require 'pyim-imobjs)
-(require 'pyim-dcache)
 
 (defun pyim-codes-create (imobj scheme-name &optional first-n)
   "按照 SCHEME-NAME 对应的输入法方案，从一个 IMOBJ 创建一个列表 codes, 这个列表
