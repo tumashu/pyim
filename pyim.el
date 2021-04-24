@@ -260,9 +260,6 @@ pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
   (pyim-start "pyim" nil t
               save-personal-dcache refresh-common-dcache))
 
-(defun pyim-insert-word-into-icode2word (word pinyin prepend)
-  (pyim-dcache-call-api 'insert-word-into-icode2word word pinyin prepend))
-
 (defun pyim-create-word (word &optional prepend wordcount-handler)
   (pyim-create-pyim-word word prepend wordcount-handler))
 
@@ -303,9 +300,10 @@ BUG：拼音无法有效地处理多音字。"
       ;; 添加词条到个人缓存
       (dolist (code codes)
         (unless (pyim-string-match-p "[^ a-z-]" code)
-          (pyim-insert-word-into-icode2word word
-                                            (concat (or code-prefix "") code)
-                                            prepend)))
+          (pyim-dcache-call-api 'insert-word-into-icode2word
+                                word
+                                (concat (or code-prefix "") code)
+                                prepend)))
       ;; TODO, 排序个人词库?
       )))
 
