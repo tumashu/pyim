@@ -291,18 +291,12 @@ BUG：拼音无法有效地处理多音字。"
                         (t (pyim-cstring-to-pinyin word nil "-" t nil t)))))
       ;; 保存对应词条的词频
       (when (> (length word) 0)
-        (pyim-dcache-call-api
-         'update-iword2count
-         word
-         prepend
-         wordcount-handler))
+        (pyim-dcache-update-iword2count word prepend wordcount-handler))
       ;; 添加词条到个人缓存
       (dolist (code codes)
         (unless (pyim-string-match-p "[^ a-z-]" code)
-          (pyim-dcache-call-api 'insert-word-into-icode2word
-                                word
-                                (concat (or code-prefix "") code)
-                                prepend)))
+          (pyim-dcache-insert-icode2word
+           word (concat (or code-prefix "") code) prepend)))
       ;; TODO, 排序个人词库?
       )))
 

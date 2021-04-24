@@ -200,6 +200,10 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
   (when pyim-dcache-auto-update
     (pyim-dcache-call-api 'update-shortcode2word force)))
 
+(defun pyim-dcache-update-iword2count (word &optional prepend wordcount-handler)
+  "保存词频到缓存."
+  (pyim-dcache-call-api 'update-iword2count word prepend wordcount-handler))
+
 (defun pyim-dcache-init-variables ()
   "初始化 dcache 缓存相关变量."
   (pyim-dcache-call-api 'init-variables))
@@ -294,6 +298,10 @@ MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表
 (defun pyim-dcache-delete-word (word)
   "将中文词条 WORD 从个人词库中删除"
   (pyim-dcache-call-api 'delete-word word))
+
+(defun pyim-dcache-insert-icode2word (word pinyin prepend)
+  "保存个人词到缓存."
+  (pyim-dcache-call-api 'insert-word-into-icode2word word pinyin prepend))
 
 ;; * Footer
 (provide 'pyim-dcache)
