@@ -186,6 +186,12 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
          (dicts-md5 (pyim-dcache-create-dicts-md5 dict-files)))
     (pyim-dcache-call-api 'update-code2word dict-files dicts-md5 force)))
 
+(defun pyim-dcache-update-personal-words (&optional force)
+  "更新个人缓存词库。
+如果 FORCE non-nil, 则强制更新。"
+  (when pyim-dcache-auto-update
+    (pyim-dcache-call-api 'update-personal-words force)))
+
 (defun pyim-dcache-init-variables ()
   "初始化 dcache 缓存相关变量."
   (pyim-dcache-call-api 'init-variables))
