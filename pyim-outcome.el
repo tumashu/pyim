@@ -29,6 +29,10 @@
 ;; * 代码                                                           :code:
 (require 'cl-lib)
 (require 'pyim-common)
+(require 'pyim-scheme)
+(require 'pyim-entered)
+(require 'pyim-candidates)
+(require 'pyim-punctuation)
 
 (defgroup pyim-outcome nil
   "Outcome tools for pyim."
