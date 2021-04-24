@@ -42,6 +42,9 @@
 
 (defvar pyim-entered--exhibit-timer nil)
 
+(defvar pyim-entered-refresh-timer nil
+  "异步处理 intered 时时，使用的 timer.")
+
 (defvar pyim-entered-buffer " *pyim-entered-buffer*"
   "一个 buffer，用来处理用户已经输入的字符串： entered。
 
@@ -170,6 +173,22 @@ TYPE 取值为 point-after, 返回 entered buffer 中 point 之后的字符
 (declare-function pyim-terminate-translation "pyim")
 (declare-function pyim-convert-string-at-point "pyim")
 
+(defun pyim-entered-refresh (&optional no-delay)
+  "延迟 `pyim-entered-exhibit-delay-ms' 显示备选词等待用户选择。"
+  (if (= (length (pyim-entered-get 'point-before)) 0)
+      (pyim-terminate-translation)
+    (when pyim-entered--exhibit-timer
+      (cancel-timer pyim-entered--exhibit-timer))
+    (cond
+     ((or no-delay
+          (not pyim-entered-exhibit-delay-ms)
+          (eq pyim-entered-exhibit-delay-ms 0))
+      (pyim-entered-refresh-1))
+     (t (setq pyim-entered--exhibit-timer
+              (run-with-timer (/ pyim-entered-exhibit-delay-ms 1000.0)
+                              nil
+                              #'pyim-entered-refresh-1))))))
+
 (defun pyim-entered-refresh-1 ()
   "查询 `pyim-entered-buffer' 光标前的拼音字符串（如果光标在行首则为光标后的）, 显示备选词等待用户选择。"
   (let* ((scheme-name (pyim-scheme-name))
@@ -180,18 +199,18 @@ TYPE 取值为 point-after, 返回 entered buffer 中 point 之后的字符
     (setq pyim-candidates
           (or (delete-dups (pyim-candidates-create pyim-imobjs scheme-name))
               (list entered-to-translate)))
-    (when pyim-candidates-create-timer
-      (cancel-timer pyim-candidates-create-timer))
-    ;; 延迟1秒异步获取 candidates, pyim 内置的输入法目前不使用异步获取
+    (when pyim-entered-refresh-timer
+      (cancel-timer pyim-entered-refresh-timer))
+    ;; 延迟1秒异步处理 entered, pyim 内置的输入法目前不使用异步获取
     ;; 词条的方式，主要用于 pyim-liberime 支持。
-    (setq pyim-candidates-create-timer
+    (setq pyim-entered-refresh-timer
           (run-with-timer
            1 nil
            (lambda ()
              (if (functionp 'make-thread)
-                 (make-thread #'pyim-candidates-create-timer-function
-                              "pyim-candidates-create")
-               (pyim-candidates-create-timer-function)))))
+                 (make-thread #'pyim-entered-refresh-with-thread
+                              "pyim-entered-refresh-with-thread")
+               (pyim-entered-refresh-with-thread)))))
     ;; 自动上屏功能
     (let ((autoselector-results
            (mapcar (lambda (x)
@@ -250,21 +269,17 @@ TYPE 取值为 point-after, 返回 entered buffer 中 point 之后的字符
           (pyim-preview-refresh)
           (pyim-page-refresh))))))
 
-(defun pyim-entered-refresh (&optional no-delay)
-  "延迟 `pyim-entered-exhibit-delay-ms' 显示备选词等待用户选择。"
-  (if (= (length (pyim-entered-get 'point-before)) 0)
-      (pyim-terminate-translation)
-    (when pyim-entered--exhibit-timer
-      (cancel-timer pyim-entered--exhibit-timer))
-    (cond
-     ((or no-delay
-          (not pyim-entered-exhibit-delay-ms)
-          (eq pyim-entered-exhibit-delay-ms 0))
-      (pyim-entered-refresh-1))
-     (t (setq pyim-entered--exhibit-timer
-              (run-with-timer (/ pyim-entered-exhibit-delay-ms 1000.0)
-                              nil
-                              #'pyim-entered-refresh-1))))))
+(defun pyim-entered-refresh-with-thread ()
+  "Function used by `pyim-entered-refresh-timer'"
+  (let* ((scheme-name (pyim-scheme-name))
+         (words (delete-dups (pyim-candidates-create pyim-imobjs scheme-name t))))
+    (when words
+      (setq pyim-candidates words)
+      (pyim-preview-refresh)
+      ;; NEED HELP: 目前只有 posframe 和 minibufer 可以正确处理异步刷新 page
+      (when (and (member pyim-page-tooltip '(posframe minibuffer))
+                 (not (eq (selected-window) (minibuffer-window))))
+        (pyim-page-refresh)))))
 
 ;; ** 与拼音输入相关的用户命令
 (defun pyim-entered-delete-backward-char (&optional n)
