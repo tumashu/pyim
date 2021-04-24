@@ -179,12 +179,13 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
 词库缓冲文件，然后加载词库缓存。
 
 如果 FORCE 为真，强制加载。"
-  (let* ((dict-files (mapcar (lambda (x)
-                               (unless (plist-get x :disable)
-                                 (plist-get x :file)))
-                             `(,@pyim-dicts ,@pyim-extra-dicts)))
-         (dicts-md5 (pyim-dcache-create-dicts-md5 dict-files)))
-    (pyim-dcache-call-api 'update-code2word dict-files dicts-md5 force)))
+  (when pyim-dcache-auto-update
+    (let* ((dict-files (mapcar (lambda (x)
+                                 (unless (plist-get x :disable)
+                                   (plist-get x :file)))
+                               `(,@pyim-dicts ,@pyim-extra-dicts)))
+           (dicts-md5 (pyim-dcache-create-dicts-md5 dict-files)))
+      (pyim-dcache-call-api 'update-code2word dict-files dicts-md5 force))))
 
 (defun pyim-dcache-update-personal-words (&optional force)
   "更新个人缓存词库。

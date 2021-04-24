@@ -208,10 +208,10 @@ pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
   (pyim-pymap-py2cchar-cache-create)
   (run-hooks 'pyim-load-hook)
 
-  (when pyim-dcache-auto-update
-    (pyim-dcache-update-code2word refresh-common-dcache)
-    ;; 这个命令 *当前* 主要用于五笔输入法。
-    (pyim-dcache-update-shortcode2word restart))
+  (pyim-dcache-update-code2word refresh-common-dcache)
+
+  ;; 这个命令 *当前* 主要用于五笔输入法。
+  (pyim-dcache-update-shortcode2word restart))
 
   ;; Make sure personal or other dcache are saved to file before kill emacs.
   (add-hook 'kill-emacs-hook #'pyim-dcache-save-caches)
