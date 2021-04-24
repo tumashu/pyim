@@ -29,7 +29,6 @@
 ;; * 代码                                                           :code:
 (require 'cl-lib)
 (require 'pyim-common)
-(require 'pyim-scheme)
 
 (defgroup pyim-imobjs nil
   "Imobjs lib for pyim."
