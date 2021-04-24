@@ -30,10 +30,7 @@
 (require 'cl-lib)
 (require 'pyim-common)
 (require 'pyim-dcache)
-(require 'pyim-imobjs)
 (require 'pyim-codes)
-(require 'pyim-page)
-(require 'pyim-preview)
 
 (defgroup pyim-candidates nil
   "Candidates of pyim."
