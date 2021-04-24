@@ -28,6 +28,11 @@
 ;;; Code:
 ;; * 代码                                                           :code:
 (require 'cl-lib)
+(require 'pyim-common)
+(require 'pyim-imobjs)
+(require 'pyim-candidates)
+(require 'pyim-page)
+(require 'pyim-preview)
 
 (defgroup pyim-entered nil
   "Entered tools for pyim."
