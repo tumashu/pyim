@@ -866,7 +866,7 @@ Return the input string.
 (defun pyim-inactivate ()
   "取消 pyim 的激活状态."
   (interactive)
-  (mapc #'kill-local-variable pyim-local-variable-list)
+  (pyim-kill-local-variables)
   (run-hooks 'pyim-inactive-hook))
 
 (defun pyim-toggle-input-ascii ()

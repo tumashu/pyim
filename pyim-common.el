@@ -48,6 +48,10 @@
     (put var 'permanent-local t))
   pyim-local-variable-list)
 
+(defun pyim-kill-local-variables ()
+  "Kill all local variables in `pyim-local-variable-list'."
+  (mapc #'kill-local-variable pyim-local-variable-list))
+
 (defun pyim-recreate-local-variables ()
   "Kill then make all variables in `pyim-local-variable-list'."
   (mapc #'kill-local-variable pyim-local-variable-list)
