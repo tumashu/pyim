@@ -42,8 +42,7 @@
 (defvar pyim-preview-overlay nil
   "用于保存光标处预览字符串的 overlay.")
 
-(pyim-register-local-variables
- '(pyim-preview-overlay pyim-local-variable-list))
+(pyim-register-local-variables '(pyim-preview-overlay))
 
 ;; ** 待输入字符串预览
 (defun pyim-preview-setup-overlay ()
