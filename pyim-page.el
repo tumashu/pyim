@@ -31,6 +31,8 @@
 (require 'posframe nil t)
 (require 'popup nil t)
 (require 'pyim-common)
+(require 'pyim-candidates)
+(require 'pyim-outcome)
 
 (defgroup pyim-page nil
   "Page tools for pyim."
