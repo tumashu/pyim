@@ -192,6 +192,13 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
   (when pyim-dcache-auto-update
     (pyim-dcache-call-api 'update-personal-words force)))
 
+(defun pyim-dcache-update-shortcode2word (&optional force)
+  "更新 shortcode2word 缓存。
+
+如果 FORCE non-nil, 则强制更新。"
+  (when pyim-dcache-auto-update
+    (pyim-dcache-call-api 'update-shortcode2word force)))
+
 (defun pyim-dcache-init-variables ()
   "初始化 dcache 缓存相关变量."
   (pyim-dcache-call-api 'init-variables))
