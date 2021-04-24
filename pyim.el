@@ -377,7 +377,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
     (while (not (eobp))
       (let ((word (car (pyim-dline-parse))))
         (when (and word (not (pyim-string-match-p "\\CC" word)))
-          (pyim-delete-word-1 word)))
+          (pyim-dcache-delete-word word)))
       (forward-line 1)))
   (message "pyim: 批量删词完成！"))
 
@@ -385,7 +385,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   "从个人词库中删除最新创建的词条。"
   (interactive)
   (when pyim-last-created-word
-    (pyim-delete-word-1 pyim-last-created-word)
+    (pyim-dcache-delete-word pyim-last-created-word)
     (message "pyim: 从个人词库中删除词条 “%s” !" pyim-last-created-word)))
 
 (defun pyim-delete-word-at-point (&optional number silent)
@@ -393,7 +393,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
 当 SILENT 设置为 t 是，不显示提醒信息。"
   (let* ((string (pyim-cstring-at-point (or number 2))))
     (when string
-      (pyim-delete-word-1 string)
+      (pyim-dcache-delete-word string)
       (unless silent
         (message "词条: \"%s\" 已经从个人词库缓冲中删除。" string)))))
 
@@ -405,13 +405,9 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
                      (region-beginning) (region-end))))
         (when (and (< (length string) 6)
                    (> (length string) 0))
-          (pyim-delete-word-1 string)
+          (pyim-dcache-delete-word string)
           (message "将词条: %S 从 personal 缓冲中删除。" string)))
     (message "请首先高亮选择需要删除的词条。")))
-
-(defun pyim-delete-word-1 (word)
-  "将中文词条 WORD 从个人词库中删除"
-  (pyim-dcache-call-api 'delete-word word))
 
 ;; ** 处理用户输入字符的相关函数
 (defun pyim-input-method (key)

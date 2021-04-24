@@ -273,6 +273,10 @@ MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表
 
   (message "pyim: 词条相关信息导入完成！"))
 
+(defun pyim-dcache-delete-word (word)
+  "将中文词条 WORD 从个人词库中删除"
+  (pyim-dcache-call-api 'delete-word word))
+
 ;; * Footer
 (provide 'pyim-dcache)
 
