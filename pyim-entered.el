@@ -199,8 +199,7 @@ TYPE 取值为 point-after, 返回 entered buffer 中 point 之后的字符
     (setq pyim-candidates
           (or (delete-dups (pyim-candidates-create pyim-imobjs scheme-name))
               (list entered-to-translate)))
-    (when pyim-entered-refresh-timer
-      (cancel-timer pyim-entered-refresh-timer))
+    (pyim-entered-refresh-timer-reset)
     ;; 延迟1秒异步处理 entered, pyim 内置的输入法目前不使用异步获取
     ;; 词条的方式，主要用于 pyim-liberime 支持。
     (setq pyim-entered-refresh-timer
@@ -280,6 +279,12 @@ TYPE 取值为 point-after, 返回 entered buffer 中 point 之后的字符
       (when (and (member pyim-page-tooltip '(posframe minibuffer))
                  (not (eq (selected-window) (minibuffer-window))))
         (pyim-page-refresh)))))
+
+(defun pyim-entered-refresh-timer-reset ()
+  "Reset `pyim-entered-refresh-timer'."
+  (when pyim-entered-refresh-timer
+    (cancel-timer pyim-entered-refresh-timer)
+    (setq pyim-entered-refresh-timer nil)))
 
 ;; ** 与拼音输入相关的用户命令
 (defun pyim-entered-delete-backward-char (&optional n)
