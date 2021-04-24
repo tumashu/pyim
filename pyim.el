@@ -351,7 +351,7 @@ BUG：拼音无法有效地处理多音字。"
            code)
       (if (not (string-match-p "^\\cc+\\'" string))
           (error "不是纯中文字符串")
-        (setq code (pyim-dcache-call-api 'search-word-code string))
+        (setq code (pyim-dcache-search-word-code string))
         (if code
             (message "%S -> %S " string code)
           (message "没有找到 %S 对应的编码。" string))))))
