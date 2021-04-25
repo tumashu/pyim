@@ -230,7 +230,7 @@
                (window-minibuffer-p))
       (exit-minibuffer))))
 
-(defun pyim-isearch-search-fun ()
+(defun pyim-cregexp-isearch-search-fun ()
   "这个函数为 isearch 相关命令添加中文拼音搜索功能，
 做为 `isearch-search-fun' 函数的 advice 使用。"
   (funcall
@@ -249,9 +249,9 @@
   :lighter " pyim-isearch"
   (if pyim-isearch-mode
       (progn
-        (advice-add 'isearch-search-fun :override #'pyim-isearch-search-fun)
+        (advice-add 'isearch-search-fun :override #'pyim-cregexp-isearch-search-fun)
         (message "PYIM: `pyim-isearch-mode' 已经激活，激活后，一些 isearch 扩展包有可能失效。"))
-    (advice-remove 'isearch-search-fun #'pyim-isearch-search-fun)))
+    (advice-remove 'isearch-search-fun #'pyim-cregexp-isearch-search-fun)))
 
 (declare-function ivy--regex-plus "ivy")
 
