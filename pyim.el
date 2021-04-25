@@ -71,6 +71,14 @@
   "Pyim 选词完成时运行的 hook."
   :type 'hook)
 
+(defcustom pyim-convert-string-at-point-hook nil
+  "Hook of `pyim-convert-string-at-point'.
+
+这个 hook 运行时机：
+1. 获取并删除光标处 code 字符串之后。
+2. code 转换得到的中文字符串插入之前。"
+  :type 'hook)
+
 (define-obsolete-variable-alias 'pyim-page-select-word-by-number 'pyim-select-word-by-number "4.0")
 (defcustom pyim-select-word-by-number t
   "使用数字键来选择词条.
@@ -778,6 +786,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
                 (region-beginning) (region-end)))
              (when (and (not mark-active) (> length 0))
                (delete-char (- 0 length)))
+             (run-hooks 'pyim-convert-string-at-point-hook)
              (when (> length 0)
                (setq unread-command-events
                      (append (listify-key-sequence code)
