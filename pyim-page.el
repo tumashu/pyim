@@ -279,6 +279,8 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
     (when class
       (funcall (intern (format "pyim-page-preview-create:%S" class)) separator))))
 
+(declare-function 'pyim-with-entered-buffer "pyim-entered")
+
 (defun pyim-page-preview-create:quanpin (&optional separator)
   (let* ((separator (or separator " "))
          (translated (mapconcat #'identity
