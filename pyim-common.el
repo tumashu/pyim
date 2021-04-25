@@ -140,11 +140,6 @@ better way is let exwm provide a test function.
 for example: https://github.com/ch11ng/exwm/pull/831"
   (string-match-p " \\*temp\\*" (buffer-name)))
 
-(defun pyim-posframe-workable-p ()
-  "Test posframe's workable status."
-  (and (functionp 'posframe-workable-p)
-       (posframe-workable-p)))
-
 ;; * Footer
 (provide 'pyim-common)
 
