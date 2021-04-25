@@ -224,10 +224,9 @@ pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
 
 (defun pyim-exit-from-minibuffer ()
   "Pyim 从 minibuffer 退出."
-  ;; FIXME: `quail-exit-from-minibuffer' removes itself from
-  ;; `minibuffer-exit-hook' but it won't remove `pyim-exit-from-minibuffer' from
-  ;; that hook.  Is that indeed what we want here?
-  (quail-exit-from-minibuffer))
+  (quail-exit-from-minibuffer)
+  (when (<= (minibuffer-depth) 1)
+    (remove-hook 'minibuffer-exit-hook 'pyim-exit-from-minibuffer)))
 
 (defun pyim-restart ()
   "重启 pyim，不建议用于编程环境.
