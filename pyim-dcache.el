@@ -172,6 +172,16 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
                                   dict-files)))))
     dicts-md5))
 
+(defun pyim-dcache-update (&optional force)
+  "读取并加载所有相关词库 dcache.
+
+如果 FORCE 为真，强制加载。"
+  (pyim-dcache-init-variables)
+  (pyim-dcache-update-personal-words force)
+  (pyim-dcache-update-code2word force)
+  ;; 这个命令 *当前* 主要用于五笔输入法。
+  (pyim-dcache-update-shortcode2word force))
+
 (defun pyim-dcache-update-code2word (&optional force)
   "读取并加载词库.
 
