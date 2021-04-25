@@ -201,8 +201,7 @@ pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
   (when (and restart save-personal-dcache)
     (pyim-dcache-save-caches))
 
-  (pyim-pymap-cchar2py-cache-create)
-  (pyim-pymap-py2cchar-cache-create)
+  (pyim-pymap-cache-create)
 
   (pyim-dcache-init-variables)
   (pyim-dcache-update-personal-words restart)

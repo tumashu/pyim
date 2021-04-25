@@ -728,6 +728,11 @@
   "常用汉字")
 
 ;; ** "汉字 -> 拼音" 以及 "拼音 -> 汉字" 的转换函数
+(defun pyim-pymap-cache-create (&optional force)
+  "创建 pymap 相关的 cache."
+  (pyim-pymap-cchar2py-cache-create force)
+  (pyim-pymap-py2cchar-cache-create force))
+
 (defun pyim-pymap-py2cchar-cache-create (&optional force)
   "构建 pinyin 到 chinese char 的缓存.
 
