@@ -325,6 +325,7 @@ pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
     (message "pyim 重启完成。"))
   nil)
 
+;; ** pyim 从 minibuffer 退出功能
 (declare-function quail-exit-from-minibuffer "quail" ())
 
 (defun pyim-exit-from-minibuffer ()
@@ -830,7 +831,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
 ;; ** pyim 中文 regexp 工具
 (require 'pyim-cregexp)
 
-;; ** pyim 探针程序
+;; ** pyim 探针
 (require 'pyim-probe)
 
 ;; * Footer
