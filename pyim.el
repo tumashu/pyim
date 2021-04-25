@@ -197,21 +197,20 @@ pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
 数`pyim-start-translation'."
   (interactive)
   (pyim-recreate-local-variables)
+
   (when (and restart save-personal-dcache)
     (pyim-dcache-save-caches))
 
-  (pyim-dcache-init-variables)
-
-  (pyim-dcache-update-personal-words restart)
-
   (pyim-pymap-cchar2py-cache-create)
   (pyim-pymap-py2cchar-cache-create)
-  (run-hooks 'pyim-load-hook)
 
+  (pyim-dcache-init-variables)
+  (pyim-dcache-update-personal-words restart)
   (pyim-dcache-update-code2word refresh-common-dcache)
-
   ;; 这个命令 *当前* 主要用于五笔输入法。
   (pyim-dcache-update-shortcode2word restart)
+
+  (run-hooks 'pyim-load-hook)
 
   ;; Make sure personal or other dcache are saved to file before kill emacs.
   (add-hook 'kill-emacs-hook #'pyim-dcache-save-caches)
