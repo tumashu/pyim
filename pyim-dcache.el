@@ -35,6 +35,11 @@
   "Dcache for pyim."
   :group 'pyim)
 
+(defcustom pyim-dcache-directory (locate-user-emacs-file "pyim/dcache/")
+  "一个目录，用于保存 pyim 词库对应的 cache 文件."
+  :type 'directory
+  :group 'pyim)
+
 (defcustom pyim-dcache-backend 'pyim-dhashcache
   "词库后端引擎.负责缓冲词库并提供搜索词的算法.
 可选项为 `pyim-dhashcache' 或 `pyim-dregcache'.
@@ -43,17 +48,6 @@
 `pyim-dregcache' 速度和词库大小成正比.  当词库接近100M大小时,
 在六年历史的笔记本上会有一秒的延迟. 这时建议换用 `pyim-dhashcache'."
   :type 'symbol)
-
-(define-obsolete-variable-alias 'pyim-prefer-emacs-thread 'pyim-dcache-prefer-emacs-thread "4.0")
-(defvar pyim-dcache-prefer-emacs-thread nil
-  "是否优先使用 emacs thread 功能来生成 dcache.
-
-如果这个变量设置为 t, 那么当 emacs thread 功能可以使用时，
-pyim 优先使用 emacs thread 功能来生成 dcache, 如果设置为 nil,
-pyim 总是使用 emacs-async 包来生成 dcache.
-
-不过这个选项开启之后，会显著的减慢词库加载速度，特别是
-五笔等形码输入法。")
 
 (defvar pyim-dcache-auto-update t
   "是否自动创建和更新词库对应的 dcache 文件.
@@ -68,30 +62,42 @@ pyim 对资源的消耗。
 2. 自动更新功能无法正常工作，用户通过手工从其他机器上拷贝
 dcache 文件的方法让 pyim 正常工作。")
 
-(defcustom pyim-dcache-directory (locate-user-emacs-file "pyim/dcache/")
-  "一个目录，用于保存 pyim 词库对应的 cache 文件."
-  :type 'directory
-  :group 'pyim)
+(define-obsolete-variable-alias 'pyim-prefer-emacs-thread 'pyim-dcache-prefer-emacs-thread "4.0")
+(defvar pyim-dcache-prefer-emacs-thread nil
+  "是否优先使用 emacs thread 功能来生成 dcache.
 
+如果这个变量设置为 t, 那么当 emacs thread 功能可以使用时，
+pyim 优先使用 emacs thread 功能来生成 dcache, 如果设置为 nil,
+pyim 总是使用 emacs-async 包来生成 dcache.
+
+不过这个选项开启之后，会显著的减慢词库加载速度，特别是
+五笔等形码输入法。")
+
+;; ** Dcache 通用工具
 (defun pyim-dcache-use-emacs-thread-p ()
   "判断是否使用 emacs thread 功能来生成 thread."
   (and pyim-dcache-prefer-emacs-thread
        (>= emacs-major-version 26)))
 
-(defun pyim-dcache-get-value-from-file (file)
-  "读取保存到 FILE 里面的 value."
-  (when (file-exists-p file)
-    (with-temp-buffer
-      (insert-file-contents file)
-      (let ((output
-             (condition-case nil
-                 (read (current-buffer))
-               (error nil))))
-        (unless output
-          ;; 有时候词库缓存会发生错误，这时候，就将词库缓存转存到一个
-          ;; 带时间戳的文件中，方便用户手动修复。
-          (write-file (concat file "-dump-" (format-time-string "%Y%m%d%H%M%S"))))
-        output))))
+;; ** Dcache API 调用功能
+(defun pyim-dcache-call-api (api-name &rest api-args)
+  "Get backend API named API-NAME then call it with arguments API-ARGS."
+  ;; make sure the backend is load
+  (unless (featurep pyim-dcache-backend)
+    (require pyim-dcache-backend))
+  (let ((func (intern (concat (symbol-name pyim-dcache-backend)
+                              "-" (symbol-name api-name)))))
+    (if (functionp func)
+        (apply func api-args)
+      (when pyim-debug
+        (message "%S 不是一个有效的 dcache api 函数." (symbol-name func))
+        ;; Need to return nil
+        nil))))
+
+;; ** Dcache 变量处理相关功能
+(defun pyim-dcache-init-variables ()
+  "初始化 dcache 缓存相关变量."
+  (pyim-dcache-call-api 'init-variables))
 
 (defun pyim-dcache-get-variable (variable)
   "从 `pyim-dcache-directory' 中读取与 VARIABLE 对应的文件中保存的值."
@@ -112,6 +118,13 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
                         fallback-value
                         (make-hash-table :test #'equal))))))
 
+(defun pyim-dcache-save-variable (variable)
+  "将 VARIABLE 变量的取值保存到 `pyim-dcache-directory' 中对应文件中."
+  (let ((file (expand-file-name (symbol-name variable)
+                                pyim-dcache-directory))
+        (value (symbol-value variable)))
+    (pyim-dcache-save-value-to-file value file)))
+
 (defun pyim-dcache-save-value-to-file (value file)
   "将 VALUE 保存到 FILE 文件中."
   (when value
@@ -128,13 +141,22 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
       (let ((save-silently t))
         (pyim-dcache-write-file file)))))
 
-(defun pyim-dcache-save-variable (variable)
-  "将 VARIABLE 变量的取值保存到 `pyim-dcache-directory' 中对应文件中."
-  (let ((file (expand-file-name (symbol-name variable)
-                                pyim-dcache-directory))
-        (value (symbol-value variable)))
-    (pyim-dcache-save-value-to-file value file)))
+(defun pyim-dcache-get-value-from-file (file)
+  "读取保存到 FILE 里面的 value."
+  (when (file-exists-p file)
+    (with-temp-buffer
+      (insert-file-contents file)
+      (let ((output
+             (condition-case nil
+                 (read (current-buffer))
+               (error nil))))
+        (unless output
+          ;; 有时候词库缓存会发生错误，这时候，就将词库缓存转存到一个
+          ;; 带时间戳的文件中，方便用户手动修复。
+          (write-file (concat file "-dump-" (format-time-string "%Y%m%d%H%M%S"))))
+        output))))
 
+;; ** Dcache 文件处理功能
 (defun pyim-dcache-write-file (filename &optional confirm)
   "A helper function to write dcache files."
   (let ((coding-system-for-write 'utf-8-unix))
@@ -150,74 +172,6 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
     (write-region (point-min) (point-max) filename nil :silent)
     (message "Saving file %s..." filename)))
 
-(defun pyim-dcache-call-api (api-name &rest api-args)
-  "Get backend API named API-NAME then call it with arguments API-ARGS."
-  ;; make sure the backend is load
-  (unless (featurep pyim-dcache-backend)
-    (require pyim-dcache-backend))
-  (let ((func (intern (concat (symbol-name pyim-dcache-backend)
-                              "-" (symbol-name api-name)))))
-    (if (functionp func)
-        (apply func api-args)
-      (when pyim-debug
-        (message "%S 不是一个有效的 dcache api 函数." (symbol-name func))
-        ;; Need to return nil
-        nil))))
-
-(defun pyim-dcache-create-dicts-md5 (dict-files)
-  (let* ((version "v1") ;当需要强制更新 dict 缓存时，更改这个字符串。
-         (dicts-md5 (md5 (prin1-to-string
-                          (mapcar (lambda (file)
-                                    (list version file (nth 5 (file-attributes file 'string))))
-                                  dict-files)))))
-    dicts-md5))
-
-(defun pyim-dcache-update (&optional force)
-  "读取并加载所有相关词库 dcache.
-
-如果 FORCE 为真，强制加载。"
-  (pyim-dcache-init-variables)
-  (pyim-dcache-update-personal-words force)
-  (pyim-dcache-update-code2word force)
-  ;; 这个命令 *当前* 主要用于五笔输入法。
-  (pyim-dcache-update-shortcode2word force))
-
-(defun pyim-dcache-update-code2word (&optional force)
-  "读取并加载词库.
-
-读取 `pyim-dicts' 和 `pyim-extra-dicts' 里面的词库文件，生成对应的
-词库缓冲文件，然后加载词库缓存。
-
-如果 FORCE 为真，强制加载。"
-  (when pyim-dcache-auto-update
-    (let* ((dict-files (mapcar (lambda (x)
-                                 (unless (plist-get x :disable)
-                                   (plist-get x :file)))
-                               `(,@pyim-dicts ,@pyim-extra-dicts)))
-           (dicts-md5 (pyim-dcache-create-dicts-md5 dict-files)))
-      (pyim-dcache-call-api 'update-code2word dict-files dicts-md5 force))))
-
-(defun pyim-dcache-update-personal-words (&optional force)
-  "更新个人缓存词库。
-如果 FORCE non-nil, 则强制更新。"
-  (when pyim-dcache-auto-update
-    (pyim-dcache-call-api 'update-personal-words force)))
-
-(defun pyim-dcache-update-shortcode2word (&optional force)
-  "更新 shortcode2word 缓存。
-
-如果 FORCE non-nil, 则强制更新。"
-  (when pyim-dcache-auto-update
-    (pyim-dcache-call-api 'update-shortcode2word force)))
-
-(defun pyim-dcache-update-iword2count (word &optional prepend wordcount-handler)
-  "保存词频到缓存."
-  (pyim-dcache-call-api 'update-iword2count word prepend wordcount-handler))
-
-(defun pyim-dcache-init-variables ()
-  "初始化 dcache 缓存相关变量."
-  (pyim-dcache-call-api 'init-variables))
-
 (defun pyim-dcache-save-caches ()
   "保存 dcache.
 
@@ -229,14 +183,7 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
   (pyim-dcache-call-api 'save-personal-dcache-to-file)
   t)
 
-;; ** 从词库中搜索中文词条
-(defun pyim-dcache-get (code &optional from)
-  "从 FROM 对应的 dcache 中搜索 CODE, 得到对应的词条.
-
-当词库文件加载完成后，pyim 就可以用这个函数从词库缓存中搜索某个
-code 对应的中文词条了."
-  (pyim-dcache-call-api 'get code from))
-
+;; ** Dcache 导出功能
 (defalias 'pyim-export 'pyim-dcache-export)
 (defun pyim-dcache-export (file &optional confirm)
   "将个人词条以及词条对应的词频信息导出到文件 FILE.
@@ -262,6 +209,7 @@ code 对应的中文词条了."
   (pyim-dcache-call-api 'export-personal-words file confirm)
   (message "Pyim export finished."))
 
+;; ** Dcache 导入功能
 (declare-function pyim-create-word "pyim")
 
 (defalias 'pyim-import 'pyim-dcache-import)
@@ -301,17 +249,78 @@ MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表
 
   (message "pyim: 词条相关信息导入完成！"))
 
+;; ** Dcache 更新功能
+(defun pyim-dcache-update (&optional force)
+  "读取并加载所有相关词库 dcache.
+
+如果 FORCE 为真，强制加载。"
+  (pyim-dcache-init-variables)
+  (pyim-dcache-update-personal-words force)
+  (pyim-dcache-update-code2word force)
+  ;; 这个命令 *当前* 主要用于五笔输入法。
+  (pyim-dcache-update-shortcode2word force))
+
+(defun pyim-dcache-update-code2word (&optional force)
+  "读取并加载词库.
+
+读取 `pyim-dicts' 和 `pyim-extra-dicts' 里面的词库文件，生成对应的
+词库缓冲文件，然后加载词库缓存。
+
+如果 FORCE 为真，强制加载。"
+  (when pyim-dcache-auto-update
+    (let* ((dict-files (mapcar (lambda (x)
+                                 (unless (plist-get x :disable)
+                                   (plist-get x :file)))
+                               `(,@pyim-dicts ,@pyim-extra-dicts)))
+           (dicts-md5 (pyim-dcache-create-dicts-md5 dict-files)))
+      (pyim-dcache-call-api 'update-code2word dict-files dicts-md5 force))))
+
+(defun pyim-dcache-create-dicts-md5 (dict-files)
+  (let* ((version "v1") ;当需要强制更新 dict 缓存时，更改这个字符串。
+         (dicts-md5 (md5 (prin1-to-string
+                          (mapcar (lambda (file)
+                                    (list version file (nth 5 (file-attributes file 'string))))
+                                  dict-files)))))
+    dicts-md5))
+
+(defun pyim-dcache-update-personal-words (&optional force)
+  "更新个人缓存词库。
+如果 FORCE non-nil, 则强制更新。"
+  (when pyim-dcache-auto-update
+    (pyim-dcache-call-api 'update-personal-words force)))
+
+(defun pyim-dcache-update-shortcode2word (&optional force)
+  "更新 shortcode2word 缓存。
+
+如果 FORCE non-nil, 则强制更新。"
+  (when pyim-dcache-auto-update
+    (pyim-dcache-call-api 'update-shortcode2word force)))
+
+(defun pyim-dcache-update-iword2count (word &optional prepend wordcount-handler)
+  "保存词频到缓存."
+  (pyim-dcache-call-api 'update-iword2count word prepend wordcount-handler))
+
 (defun pyim-dcache-search-word-code (word)
   "搜素中文词条 WORD 对应的 code."
   (pyim-dcache-call-api 'search-word-code word))
 
+;; ** Dcache 加词功能
+(defun pyim-dcache-insert-icode2word (word pinyin prepend)
+  "保存个人词到缓存."
+  (pyim-dcache-call-api 'insert-word-into-icode2word word pinyin prepend))
+
+;; ** Dcache 删词功能
 (defun pyim-dcache-delete-word (word)
   "将中文词条 WORD 从个人词库中删除"
   (pyim-dcache-call-api 'delete-word word))
 
-(defun pyim-dcache-insert-icode2word (word pinyin prepend)
-  "保存个人词到缓存."
-  (pyim-dcache-call-api 'insert-word-into-icode2word word pinyin prepend))
+;; ** Dcache 检索功能
+(defun pyim-dcache-get (code &optional from)
+  "从 FROM 对应的 dcache 中搜索 CODE, 得到对应的词条.
+
+当词库文件加载完成后，pyim 就可以用这个函数从词库缓存中搜索某个
+code 对应的中文词条了."
+  (pyim-dcache-call-api 'get code from))
 
 ;; * Footer
 (provide 'pyim-dcache)
