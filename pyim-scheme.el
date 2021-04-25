@@ -96,7 +96,7 @@
    :class quanpin
    :first-chars "abcdefghijklmnopqrstuwxyz"
    :rest-chars "vmpfwckzyjqdltxuognbhsrei'-a"
-   :prefer-trigger-chars "v"))
+   :prefer-triggers ("v")))
 
 (pyim-scheme-add
  '(wubi
@@ -107,7 +107,7 @@
    :code-prefix "." ;五笔词库中所有的 code 都以 "." 开头，防止和拼音词库冲突。
    :code-split-length 4 ;默认将用户输入切成 4 个字符长的 code 列表（不计算 code-prefix）
    :code-maximum-length 4 ;五笔词库中，code 的最大长度（不计算 code-prefix）
-   :prefer-trigger-chars nil))
+   :prefer-triggers nil))
 
 (pyim-scheme-add
  '(cangjie
@@ -118,7 +118,7 @@
    :code-prefix "@" ;仓颉输入法词库中所有的 code 都以 "@" 开头，防止词库冲突。
    :code-split-length 5 ;默认将用户输入切成 5 个字符长的 code 列表（不计算 code-prefix）
    :code-maximum-length 5 ;仓颉词库中，code 的最大长度（不计算 code-prefix）
-   :prefer-trigger-chars nil))
+   :prefer-triggers nil))
 
 (pyim-scheme-add
  '(pyim-shuangpin
@@ -126,7 +126,7 @@
    :class shuangpin
    :first-chars "abcdefghijklmnpqrstuvwxyz"
    :rest-chars "abcdefghijklmnopqrstuvwxyz"
-   :prefer-trigger-chars "o"
+   :prefer-triggers ("o")
    :keymaps
    (("a" "a" "a")
     ("b" "b" "in")
@@ -174,7 +174,7 @@
    :class shuangpin
    :first-chars "abcdefghijklmnopqrstuvwxyz"
    :rest-chars "abcdefghijklmnopqrstuvwxyz;"
-   :prefer-trigger-chars nil
+   :prefer-triggers nil
    :keymaps
    (("a" "a" "a")
     ("b" "b" "ou")
@@ -222,7 +222,7 @@
    :class shuangpin
    :first-chars "abcdefghjklmnopqrstvwxyz"
    :rest-chars "abcdefghijklmnopqrstuvwxyz"
-   :prefer-trigger-chars nil
+   :prefer-triggers nil
    :keymaps
    (("q" "q" "ei")
     ("w" "w" "ian")
@@ -269,7 +269,7 @@
    :class shuangpin
    :first-chars "abcdefghijklmnopqrstuvwxyz"
    :rest-chars "abcdefghijklmnopqrstuvwxyz"
-   :prefer-trigger-chars nil
+   :prefer-triggers nil
    :keymaps
    (("a" "a" "a")
     ("b" "b" "in")

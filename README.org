@@ -149,7 +149,7 @@ pyim 支持双拼输入模式，用户可以通过变量 `pyim-default-scheme' �
 注意：
 1. pyim 支持微软双拼（microsoft-shuangpin）和小鹤双拼（xiaohe-shuangpin）。
 2. 用户可以使用函数 `pyim-scheme-add' 添加自定义双拼方案。
-3. 用户可能需要重新设置 `pyim-outcome-trigger-char'。
+3. 用户可能需要重新设置 `pyim-outcome-trigger'。
 
 *** 使用 rime 输入法
 具体安装和使用方式请查看 pyim-liberime 包的 Commentary 部分。
@@ -270,14 +270,14 @@ pyim 的 tooltip 选词框默认使用 *双行显示* 的样式，在一些特
    #+end_example
 2. 第二种方法：使用命令 `pyim-punctuation-translate-at-point' 只切换光
    标处标点的样式。
-3. 第三种方法：设置变量 `pyim-outcome-trigger-char' ，输入变量设定的
+3. 第三种方法：设置变量 `pyim-outcome-trigger' ，输入变量设定的
    字符会切换光标处标点的样式。
 
 *** 手动加词和删词
 
 1. `pyim-create-Ncchar-word-at-point 这是一组命令，从光标前提取N个汉
    字字符组成字符串，并将其加入个人词库。
-2. `pyim-outcome-trigger-char' 以默认设置为例：在“我爱吃红烧肉”后输
+2. `pyim-outcome-trigger' 以默认设置为例：在“我爱吃红烧肉”后输
    入“5v” 可以将“爱吃红烧肉”这个词条保存到用户个人词库。
 3. `pyim-create-word-from-selection', 选择一个词条，运行这个命令后，就
    可以将这个词条添加到个人词库。

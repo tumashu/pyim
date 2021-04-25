@@ -52,25 +52,25 @@
    "rime 输入法。
 
 这个 scheme 适用于 librime 支持的所有输入法，通用性较好，但无法支
-持 trigger-chars, 所以类似 pyim 全拼支持的v快捷键将无法使用。"
+持 trigger, 所以类似 pyim 全拼支持的v快捷键将无法使用。"
    :class rime
    :code-prefix "&"
    :first-chars "abcdefghijklmnopqrstuvwxyz"
    :rest-chars "abcdefghijklmnopqrstuvwxyz'-a"
-   :prefer-trigger-chars nil))
+   :prefer-triggers nil))
 
 (pyim-scheme-add
  '(rime-quanpin
    :document
    "rime 全拼输入法。
 
-这个 scheme 专门用于 librime 全拼输入法，同时支持 trigger-chars,
-也就是v快捷键，使用 rime 全拼的朋友建议使用这个 scheme。"
+这个 scheme 专门用于 librime 全拼输入法，同时支持 trigger,
+也就是 v 快捷键，使用 rime 全拼的朋友建议使用这个 scheme。"
    :class rime
    :code-prefix "&"
    :first-chars "abcdefghjklmnopqrstwxyz"
    :rest-chars "vmpfwckzyjqdltxuognbhsrei'-a"
-   :prefer-trigger-chars "v"))
+   :prefer-triggers ("v")))
 
 (pyim-scheme-add
  '(rime-microsoft-shuangpin
@@ -79,7 +79,7 @@
    :code-prefix "&"
    :first-chars "abcdefghijklmnopqrstuvwxyz"
    :rest-chars "abcdefghijklmnopqrstuvwxyz;"
-   :prefer-trigger-chars nil))
+   :prefer-triggers nil))
 
 (declare-function liberime-get-commit "liberime")
 (declare-function liberime-get-context "liberime")
