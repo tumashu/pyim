@@ -300,7 +300,7 @@ alist 列表。"
      (t str))))
 
 (define-obsolete-function-alias 'pyim-wash-current-line-function 'pyim-outcome-trigger-function-default "4.0")
-(defun pyim-outcome-trigger-function-default ()
+(defun pyim-outcome-trigger-function-default (&optional no-space)
   "默认的 `pyim-outcome-trigger-function'.
 
 这个函数可以清理当前行的内容，比如：删除不必要的空格，等。"
@@ -308,6 +308,7 @@ alist 列表。"
   (let* ((begin (line-beginning-position))
          (end (point))
          (string (buffer-substring-no-properties begin end))
+         (sep (if no-space "" " "))
          new-string)
     (when (> (length string) 0)
       (delete-region begin end)
@@ -315,17 +316,17 @@ alist 列表。"
             (with-temp-buffer
               (insert string)
               (goto-char (point-min))
-              (while (re-search-forward "\\([，。；？！；、）】]\\)  +\\([[:ascii:]]\\)" nil t)
+              (while (re-search-forward "\\([，。；？！；、）】]\\) +\\([[:ascii:]]\\)" nil t)
                 (replace-match (concat (match-string 1) (match-string 2))  nil t))
               (goto-char (point-min))
-              (while (re-search-forward "\\([[:ascii:]]\\)  +\\([（【]\\)" nil t)
+              (while (re-search-forward "\\([[:ascii:]]\\) +\\([（【]\\)" nil t)
                 (replace-match (concat (match-string 1) (match-string 2))  nil t))
               (goto-char (point-min))
-              (while (re-search-forward "\\([[:ascii:]]\\)  +\\(\\cc\\)" nil t)
-                (replace-match (concat (match-string 1) " " (match-string 2))  nil t))
+              (while (re-search-forward "\\([[:ascii:]]\\) +\\(\\cc\\)" nil t)
+                (replace-match (concat (match-string 1) sep (match-string 2))  nil t))
               (goto-char (point-min))
-              (while (re-search-forward "\\(\\cc\\)  +\\([[:ascii:]]\\)" nil t)
-                (replace-match (concat (match-string 1) " " (match-string 2))  nil t))
+              (while (re-search-forward "\\(\\cc\\) +\\([[:ascii:]]\\)" nil t)
+                (replace-match (concat (match-string 1) sep (match-string 2))  nil t))
               (buffer-string)))
       (insert new-string))))
 
