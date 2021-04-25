@@ -530,7 +530,7 @@ pyim 安装后，可以通过下面的设置开启拼音搜索功能：
 *** 让 ivy 支持拼音搜索候选项功能
 #+begin_example
 (setq ivy-re-builders-alist
-      '((t . pyim-ivy-cregexp)))
+      '((t . pyim-cregexp-ivy)))
 #+end_example
 
 *** 让 vertico, selectrum 等补全框架，通过 orderless 支持拼音搜索候选项功能。

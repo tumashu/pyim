@@ -254,7 +254,9 @@
     (advice-remove 'isearch-search-fun #'pyim-isearch-search-fun)))
 
 (declare-function ivy--regex-plus "ivy")
-(defun pyim-ivy-cregexp (str)
+
+(define-obsolete-function-alias 'pyim-ivy-cregexp 'pyim-cregexp-ivy "4.0")
+(defun pyim-cregexp-ivy (str)
   "Let ivy support search Chinese with pinyin feature."
   (let ((x (ivy--regex-plus str))
         (case-fold-search nil))
