@@ -290,7 +290,7 @@ BUG：拼音无法有效地处理多音字。"
 (defun pyim-create-word-at-point (&optional number silent)
   "将光标前字符数为 NUMBER 的中文字符串添加到个人词库中
 当 SILENT 设置为 t 是，不显示提醒信息。"
-  (let* ((string (pyim-cstring-at-point (or number 2))))
+  (let ((string (pyim-cstring-at-point (or number 2))))
     (when string
       (pyim-create-word string)
       (unless silent
