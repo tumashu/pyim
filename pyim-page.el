@@ -32,6 +32,9 @@
 (require 'popup nil t)
 (require 'pyim-common)
 
+(eval-when-compile
+  (require 'pyim-entered))
+
 (defgroup pyim-page nil
   "Page tools for pyim."
   :group 'pyim)
