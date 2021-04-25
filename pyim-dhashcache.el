@@ -375,24 +375,12 @@ code 对应的中文词条了。
 
 (defun pyim-dhashcache-init-variables ()
   "初始化 dcache 缓存相关变量."
-  (pyim-dcache-set-variable
-   'pyim-dhashcache-iword2count nil
-   ;; 添加 dregcache 后端之后， 原来的 dcache 更名为 dhashcache,
-   ;; 升级迁移
-   (pyim-dcache-get-variable 'pyim-dcache-iword2count))
+  (pyim-dcache-set-variable 'pyim-dhashcache-iword2count)
   (pyim-dcache-set-variable 'pyim-dhashcache-code2word)
   (pyim-dcache-set-variable 'pyim-dhashcache-word2code)
   (pyim-dcache-set-variable 'pyim-dhashcache-shortcode2word)
-  (pyim-dcache-set-variable
-   'pyim-dhashcache-icode2word nil
-   ;; 添加 dregcache 后端之后， 原来的 dcache 更名为 dhashcache,
-   ;; 升级迁移
-   (pyim-dcache-get-variable 'pyim-dcache-icode2word))
-  (pyim-dcache-set-variable
-   'pyim-dhashcache-ishortcode2word nil
-   ;; 添加 dregcache 后端之后， 原来的 dcache 更名为 dhashcache,
-   ;; 升级迁移
-   (pyim-dcache-get-variable 'pyim-dcache-ishortcode2word)))
+  (pyim-dcache-set-variable 'pyim-dhashcache-icode2word)
+  (pyim-dcache-set-variable 'pyim-dhashcache-ishortcode2word))
 
 (defun pyim-dhashcache-save-personal-dcache-to-file ()
   ;; 用户选择过的词
