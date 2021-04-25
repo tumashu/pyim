@@ -188,7 +188,6 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
 ;; Fix compile warn.
 (declare-function pyim-create-word-at-point "pyim")
 (declare-function pyim-delete-word-at-point "pyim")
-(defvar pyim-wash-function)
 
 (defun pyim-outcome-handle-char (char)
   "Pyim 字符转换函数，主要用于处理标点符号.
@@ -245,8 +244,8 @@ alist 列表。"
      ((and (not (numberp punc-posit-before-1))
            (pyim-string-match-p "\\cc" str-before-1)
            (equal str trigger)
-           (functionp (bound-and-true-p pyim-wash-function)))
-      (funcall pyim-wash-function)
+           (functionp pyim-outcome-trigger-function))
+      (funcall pyim-outcome-trigger-function)
       "")
 
      ;; 关闭标点转换功能时，只插入英文标点。
