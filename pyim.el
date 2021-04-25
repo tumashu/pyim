@@ -168,226 +168,7 @@
    ;;pyim-english-input-switch-functions
    describe-current-input-method-function))
 
-;; ** 注册 Pyim 输入法
-;;;###autoload
-(register-input-method "pyim" "euc-cn" 'pyim-start (nth 0 pyim-titles))
-
-;;;###autoload
-(defun pyim-start (_name &optional _active-func restart save-personal-dcache _refresh-common-dcache)
-  "pyim 启动函数.
-  TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE
-
-pyim 是使用 `pyim-start' 来启动输入法，这个命令主要做如下工作：
-1. 重置所有的 local 变量。
-2. 创建汉字到拼音和拼音到汉字的 hash table。
-3. 创建词库缓存 dcache.
-4. 运行 hook： `pyim-load-hook'。
-5. 将 `pyim-dcache-save-caches' 命令添加到 `kill-emacs-hook' , emacs 关闭
-之前将用户选择过的词生成的缓存和词频缓存保存到文件，供以后使用。
-6. 设定变量：
-   1. `input-method-function'
-   2. `deactivate-current-input-method-function'
-7. 运行 `pyim-active-hook'
-
-pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
-`input-method-function' 设置为 `pyim-input-method' ，这个变量会影
-响 `read-event' 的行为。
-
-当输入字符时，`read-event' 会被调用，`read-event' 调用的过程中，
-会执行 `pyim-input-method' 这个函数。`pyim-input-method' 又调用函
-数`pyim-start-translation'."
-  (interactive)
-  (pyim-recreate-local-variables)
-
-  (when (and restart save-personal-dcache)
-    (pyim-dcache-save-caches))
-
-  (pyim-pymap-cache-create)
-  (pyim-dcache-update restart)
-
-  (run-hooks 'pyim-load-hook)
-  ;; Make sure personal or other dcache are saved to file before kill emacs.
-  (add-hook 'kill-emacs-hook #'pyim-dcache-save-caches)
-  (setq input-method-function #'pyim-input-method)
-  (setq deactivate-current-input-method-function #'pyim-inactivate)
-  ;; (setq describe-current-input-method-function 'pyim-help)
-  ;; If we are in minibuffer, turn off the current input method
-  ;; before exiting.
-  (when (eq (selected-window) (minibuffer-window))
-    (add-hook 'minibuffer-exit-hook #'pyim-exit-from-minibuffer))
-  (run-hooks 'pyim-active-hook)
-  (when restart
-    (message "pyim 重启完成。"))
-  nil)
-
-(declare-function quail-exit-from-minibuffer "quail" ())
-
-(defun pyim-exit-from-minibuffer ()
-  "Pyim 从 minibuffer 退出."
-  (quail-exit-from-minibuffer)
-  (when (<= (minibuffer-depth) 1)
-    (remove-hook 'minibuffer-exit-hook 'pyim-exit-from-minibuffer)))
-
-(defun pyim-restart ()
-  "重启 pyim，不建议用于编程环境.
-
-这个函数用于重启 pyim，其过程和 `pyim-start' 类似，只是在输入法重
-启之前，询问用户，是否保存个人词频信息。"
-  (interactive
-   (let ((save-personal-dcache
-          (yes-or-no-p "重启 pyim 前，需要保存个人词频信息吗？ ")))
-     (pyim-restart-1 save-personal-dcache))))
-
-(defun pyim-restart-1 (&optional save-personal-dcache _refresh-common-dcache)
-  "重启 pyim，用于编程环境.
-
-当 SAVE-PERSONAL-DCACHE 是 non-nil 时，保存个人词库文件。
-
-REFRESH-COMMON-DCACHE 已经废弃，不要再使用了。"
-  (pyim-start "pyim" nil t save-personal-dcache))
-
-(defun pyim-create-word (word &optional prepend wordcount-handler)
-  (pyim-create-pyim-word word prepend wordcount-handler))
-
-(defun pyim-create-pyim-word (word &optional prepend wordcount-handler)
-  "将中文词条 WORD 添加编码后，保存到用户选择过的词生成的缓存中。
-
-词条 WORD 默认会追加到已有词条的后面，如果 PREPEND 设置为 t,
-词条就会放到已有词条的最前面。
-
-根据当前输入法，决定是调用 `pyim-cstring-to-pinyin' 还是
-`pyim-hanzi2xingma' 来获取中文词条的编码。
-
-WORDCOUNT-HANDLER 可以是一个数字，代表将此数字设置为 WORD 的新词频，
-WORDCOUNT-HANDLER 也可以是一个函数，其返回值将设置为 WORD 的新词频，
-而这个函数的参数则表示 WORD 当前词频，这个功能用于：`pyim-dcache-import',
-如果 WORDCOUNT-HANDLER 设置为其他, 则表示让 WORD 当前词频加1.
-
-BUG：拼音无法有效地处理多音字。"
-  (when (and (> (length word) 0)
-             (< (length word) 11) ;十个汉字以上的词条，加到个人词库里面用处不大，忽略。
-             (not (pyim-string-match-p "\\CC" word)))
-    ;; 记录最近创建的词条，用于快速删词功能。
-    (setq pyim-last-created-word word)
-    (let* ((scheme-name (pyim-scheme-name))
-           (class (pyim-scheme-get-option scheme-name :class))
-           (code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
-           (codes (cond ((eq class 'xingma)
-                         (pyim-hanzi2xingma word scheme-name t))
-                        ;;拼音使用了多音字校正
-                        (t (pyim-cstring-to-pinyin word nil "-" t nil t)))))
-      ;; 保存对应词条的词频
-      (when (> (length word) 0)
-        (pyim-dcache-update-iword2count word prepend wordcount-handler))
-      ;; 添加词条到个人缓存
-      (dolist (code codes)
-        (unless (pyim-string-match-p "[^ a-z-]" code)
-          (pyim-dcache-insert-icode2word
-           word (concat (or code-prefix "") code) prepend)))
-      ;; TODO, 排序个人词库?
-      )))
-
-(defun pyim-create-word-at-point (&optional number silent)
-  "将光标前字符数为 NUMBER 的中文字符串添加到个人词库中
-当 SILENT 设置为 t 是，不显示提醒信息。"
-  (let ((string (pyim-cstring-at-point (or number 2))))
-    (when string
-      (pyim-create-word string)
-      (unless silent
-        (message "将词条: \"%s\" 加入 personal 缓冲。" string)))))
-
-(defun pyim-create-2cchar-word-at-point ()
-  "将光标前2个中文字符组成的字符串加入个人词库。"
-  (interactive)
-  (pyim-create-word-at-point 2))
-
-(defun pyim-create-3cchar-word-at-point ()
-  "将光标前3个中文字符组成的字符串加入个人词库。"
-  (interactive)
-  (pyim-create-word-at-point 3))
-
-(defun pyim-create-4cchar-word-at-point ()
-  "将光标前4个中文字符组成的字符串加入个人词库。"
-  (interactive)
-  (pyim-create-word-at-point 4))
-
-;; ** 删词功能
-(defun pyim-create-word-from-selection ()
-  "Add the selected text as a Chinese word into the personal dictionary."
-  (interactive)
-  (when (region-active-p)
-    (let ((string (buffer-substring-no-properties (region-beginning) (region-end))))
-      (if (> (length string) 6)
-          (error "词条太长")
-        (if (not (string-match-p "^\\cc+\\'" string))
-            (error "不是纯中文字符串")
-          (pyim-create-word string)
-          (message "将词条: %S 插入 personal file。" string))))))
-
-(defun pyim-search-word-code ()
-  "选择词条，然后反查它的 code. 这个功能对五笔用户有用。"
-  (interactive)
-  (when (region-active-p)
-    (let* ((string (buffer-substring-no-properties (region-beginning) (region-end)))
-           code)
-      (if (not (string-match-p "^\\cc+\\'" string))
-          (error "不是纯中文字符串")
-        (setq code (pyim-dcache-search-word-code string))
-        (if code
-            (message "%S -> %S " string code)
-          (message "没有找到 %S 对应的编码。" string))))))
-
-(defun pyim-delete-words-in-file (file)
-  "从个人词库缓存中批量删除 FILE 文件中列出的词条.
-
-FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
-另外这个命令也可以识别没有词频的行，比如：
-
-   ;;; -*- coding: utf-8-unix -*-
-   词条1
-   词条2"
-  (interactive "F记录待删词条的文件: ")
-  (with-temp-buffer
-    (let ((coding-system-for-read 'utf-8-unix))
-      (insert-file-contents file))
-    (goto-char (point-min))
-    (forward-line 1)
-    (while (not (eobp))
-      (let ((word (car (pyim-dline-parse))))
-        (when (and word (not (pyim-string-match-p "\\CC" word)))
-          (pyim-dcache-delete-word word)))
-      (forward-line 1)))
-  (message "pyim: 批量删词完成！"))
-
-(defun pyim-delete-last-word ()
-  "从个人词库中删除最新创建的词条。"
-  (interactive)
-  (when pyim-last-created-word
-    (pyim-dcache-delete-word pyim-last-created-word)
-    (message "pyim: 从个人词库中删除词条 “%s” !" pyim-last-created-word)))
-
-(defun pyim-delete-word-at-point (&optional number silent)
-  "将光标前字符数为 NUMBER 的中文字符串从个人词库中删除
-当 SILENT 设置为 t 是，不显示提醒信息。"
-  (let* ((string (pyim-cstring-at-point (or number 2))))
-    (when string
-      (pyim-dcache-delete-word string)
-      (unless silent
-        (message "词条: \"%s\" 已经从个人词库缓冲中删除。" string)))))
-
-(defun pyim-delete-word ()
-  "将高亮选择的词条从个人词库中删除。"
-  (interactive)
-  (if mark-active
-      (let ((string (buffer-substring-no-properties
-                     (region-beginning) (region-end))))
-        (when (and (< (length string) 6)
-                   (> (length string) 0))
-          (pyim-dcache-delete-word string)
-          (message "将词条: %S 从 personal 缓冲中删除。" string)))
-    (message "请首先高亮选择需要删除的词条。")))
-
-;; ** 处理用户输入字符的相关函数
+;; ** pyim 输入法定义
 (defun pyim-input-method (key)
   "得到需要插入到 buffer 的字符串, 并将其插入到待输入 buffer.
 
@@ -411,43 +192,6 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
                 (mapcar #'identity input-string))))
         (pyim-preview-delete-overlay)
         (pyim-entered-erase-buffer)))))
-
-(defun pyim-magic-convert (str)
-  "用于处理 `pyim-magic-convert' 的函数。"
-  (if (functionp pyim-magic-converter)
-      (or (cdr (assoc str pyim-magic-convert-cache))
-          (let ((result (funcall pyim-magic-converter str)))
-            (setq pyim-magic-convert-cache
-                  `((,str . ,result)))
-            result))
-    str))
-
-(defun pyim-wash-current-line-function ()
-  "清理当前行的内容，比如：删除不必要的空格，等。"
-  (interactive)
-  (let* ((begin (line-beginning-position))
-         (end (point))
-         (string (buffer-substring-no-properties begin end))
-         new-string)
-    (when (> (length string) 0)
-      (delete-region begin end)
-      (setq new-string
-            (with-temp-buffer
-              (insert string)
-              (goto-char (point-min))
-              (while (re-search-forward "\\([，。；？！；、）】]\\)  +\\([[:ascii:]]\\)" nil t)
-                (replace-match (concat (match-string 1) (match-string 2))  nil t))
-              (goto-char (point-min))
-              (while (re-search-forward "\\([[:ascii:]]\\)  +\\([（【]\\)" nil t)
-                (replace-match (concat (match-string 1) (match-string 2))  nil t))
-              (goto-char (point-min))
-              (while (re-search-forward "\\([[:ascii:]]\\)  +\\(\\cc\\)" nil t)
-                (replace-match (concat (match-string 1) " " (match-string 2))  nil t))
-              (goto-char (point-min))
-              (while (re-search-forward "\\(\\cc\\)  +\\([[:ascii:]]\\)" nil t)
-                (replace-match (concat (match-string 1) " " (match-string 2))  nil t))
-              (buffer-string)))
-      (insert new-string))))
 
 (defun pyim-start-translation (key)
   "Start translation of the typed character KEY-OR-STRING by pyim.
@@ -525,6 +269,142 @@ Return the input string.
     ;; But translate KEY if necessary.
     (char-to-string key)))
 
+(defun pyim-magic-convert (str)
+  "用于处理 `pyim-magic-convert' 的函数。"
+  (if (functionp pyim-magic-converter)
+      (or (cdr (assoc str pyim-magic-convert-cache))
+          (let ((result (funcall pyim-magic-converter str)))
+            (setq pyim-magic-convert-cache
+                  `((,str . ,result)))
+            result))
+    str))
+
+(defun pyim-wash-current-line-function ()
+  "清理当前行的内容，比如：删除不必要的空格，等。"
+  (interactive)
+  (let* ((begin (line-beginning-position))
+         (end (point))
+         (string (buffer-substring-no-properties begin end))
+         new-string)
+    (when (> (length string) 0)
+      (delete-region begin end)
+      (setq new-string
+            (with-temp-buffer
+              (insert string)
+              (goto-char (point-min))
+              (while (re-search-forward "\\([，。；？！；、）】]\\)  +\\([[:ascii:]]\\)" nil t)
+                (replace-match (concat (match-string 1) (match-string 2))  nil t))
+              (goto-char (point-min))
+              (while (re-search-forward "\\([[:ascii:]]\\)  +\\([（【]\\)" nil t)
+                (replace-match (concat (match-string 1) (match-string 2))  nil t))
+              (goto-char (point-min))
+              (while (re-search-forward "\\([[:ascii:]]\\)  +\\(\\cc\\)" nil t)
+                (replace-match (concat (match-string 1) " " (match-string 2))  nil t))
+              (goto-char (point-min))
+              (while (re-search-forward "\\(\\cc\\)  +\\([[:ascii:]]\\)" nil t)
+                (replace-match (concat (match-string 1) " " (match-string 2))  nil t))
+              (buffer-string)))
+      (insert new-string))))
+
+;; ** Pyim 输入法注册
+;;;###autoload
+(register-input-method "pyim" "euc-cn" 'pyim-start (nth 0 pyim-titles))
+
+;; ** PYim 输入法启动功能
+;;;###autoload
+(defun pyim-start (_name &optional _active-func restart save-personal-dcache _refresh-common-dcache)
+  "pyim 启动函数.
+  TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE
+
+pyim 是使用 `pyim-start' 来启动输入法，这个命令主要做如下工作：
+1. 重置所有的 local 变量。
+2. 创建汉字到拼音和拼音到汉字的 hash table。
+3. 创建词库缓存 dcache.
+4. 运行 hook： `pyim-load-hook'。
+5. 将 `pyim-dcache-save-caches' 命令添加到 `kill-emacs-hook' , emacs 关闭
+之前将用户选择过的词生成的缓存和词频缓存保存到文件，供以后使用。
+6. 设定变量：
+   1. `input-method-function'
+   2. `deactivate-current-input-method-function'
+7. 运行 `pyim-active-hook'
+
+pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
+`input-method-function' 设置为 `pyim-input-method' ，这个变量会影
+响 `read-event' 的行为。
+
+当输入字符时，`read-event' 会被调用，`read-event' 调用的过程中，
+会执行 `pyim-input-method' 这个函数。`pyim-input-method' 又调用函
+数`pyim-start-translation'."
+  (interactive)
+  (pyim-recreate-local-variables)
+
+  (when (and restart save-personal-dcache)
+    (pyim-dcache-save-caches))
+
+  (pyim-pymap-cache-create)
+  (pyim-dcache-update restart)
+
+  (run-hooks 'pyim-load-hook)
+  ;; Make sure personal or other dcache are saved to file before kill emacs.
+  (add-hook 'kill-emacs-hook #'pyim-dcache-save-caches)
+  (setq input-method-function #'pyim-input-method)
+  (setq deactivate-current-input-method-function #'pyim-inactivate)
+  ;; (setq describe-current-input-method-function 'pyim-help)
+  ;; If we are in minibuffer, turn off the current input method
+  ;; before exiting.
+  (when (eq (selected-window) (minibuffer-window))
+    (add-hook 'minibuffer-exit-hook #'pyim-exit-from-minibuffer))
+  (run-hooks 'pyim-active-hook)
+  (when restart
+    (message "pyim 重启完成。"))
+  nil)
+
+(declare-function quail-exit-from-minibuffer "quail" ())
+
+(defun pyim-exit-from-minibuffer ()
+  "Pyim 从 minibuffer 退出."
+  (quail-exit-from-minibuffer)
+  (when (<= (minibuffer-depth) 1)
+    (remove-hook 'minibuffer-exit-hook 'pyim-exit-from-minibuffer)))
+
+;; ** pyim 重启功能
+(defun pyim-restart ()
+  "重启 pyim，不建议用于编程环境.
+
+这个函数用于重启 pyim，其过程和 `pyim-start' 类似，只是在输入法重
+启之前，询问用户，是否保存个人词频信息。"
+  (interactive
+   (let ((save-personal-dcache
+          (yes-or-no-p "重启 pyim 前，需要保存个人词频信息吗？ ")))
+     (pyim-restart-1 save-personal-dcache))))
+
+(defun pyim-restart-1 (&optional save-personal-dcache _refresh-common-dcache)
+  "重启 pyim，用于编程环境.
+
+当 SAVE-PERSONAL-DCACHE 是 non-nil 时，保存个人词库文件。
+
+REFRESH-COMMON-DCACHE 已经废弃，不要再使用了。"
+  (pyim-start "pyim" nil t save-personal-dcache))
+
+;; ** 键盘输入处理功能
+(defun pyim-self-insert-command ()
+  "Pyim 版本的 self-insert-command."
+  (interactive "*")
+  (setq pyim-candidates-last pyim-candidates)
+  (cond
+   ((pyim-input-chinese-p)
+    (pyim-with-entered-buffer
+      ;; 一定要注意，point 可能不在 point-min, 或者 point-max. 因为用
+      ;; 户可能通过命令移动了 entered 中的 point。
+      (insert (char-to-string last-command-event)))
+    (pyim-entered-refresh))
+   (pyim-candidates
+    (pyim-outcome-handle 'candidate-and-last-char)
+    (pyim-terminate-translation))
+   (t
+    (pyim-outcome-handle 'last-char)
+    (pyim-terminate-translation))))
+
 (defun pyim-auto-switch-english-input-p ()
   "判断是否 *根据环境自动切换* 为英文输入模式，这个函数处理变量：
 `pyim-english-input-switch-functions'"
@@ -556,24 +436,7 @@ Return the input string.
                    (mapcar #'identity rest-chars)))
          (setq current-input-method-title (nth 0 pyim-titles)))))
 
-(defun pyim-self-insert-command ()
-  "Pyim 版本的 self-insert-command."
-  (interactive "*")
-  (setq pyim-candidates-last pyim-candidates)
-  (cond
-   ((pyim-input-chinese-p)
-    (pyim-with-entered-buffer
-      ;; 一定要注意，point 可能不在 point-min, 或者 point-max. 因为用
-      ;; 户可能通过命令移动了 entered 中的 point。
-      (insert (char-to-string last-command-event)))
-    (pyim-entered-refresh))
-   (pyim-candidates
-    (pyim-outcome-handle 'candidate-and-last-char)
-    (pyim-terminate-translation))
-   (t
-    (pyim-outcome-handle 'last-char)
-    (pyim-terminate-translation))))
-
+;; ** 键盘输入停止功能
 (defun pyim-terminate-translation ()
   "Terminate the translation of the current key."
   (setq pyim-translating nil)
@@ -590,20 +453,136 @@ Return the input string.
     (when (and class (functionp func))
       (funcall func))))
 
-(defun pyim-toggle-assistant-scheme ()
-  "临时切换到辅助输入法.
+;; ** 加词功能
+(defun pyim-create-word (word &optional prepend wordcount-handler)
+  (pyim-create-pyim-word word prepend wordcount-handler))
 
-这个功能一般用于五笔等形码输入法，在忘记编码的时候临时用拼音输入
-中文。"
+(defun pyim-create-pyim-word (word &optional prepend wordcount-handler)
+  "将中文词条 WORD 添加编码后，保存到用户选择过的词生成的缓存中。
+
+词条 WORD 默认会追加到已有词条的后面，如果 PREPEND 设置为 t,
+词条就会放到已有词条的最前面。
+
+根据当前输入法，决定是调用 `pyim-cstring-to-pinyin' 还是
+`pyim-hanzi2xingma' 来获取中文词条的编码。
+
+WORDCOUNT-HANDLER 可以是一个数字，代表将此数字设置为 WORD 的新词频，
+WORDCOUNT-HANDLER 也可以是一个函数，其返回值将设置为 WORD 的新词频，
+而这个函数的参数则表示 WORD 当前词频，这个功能用于：`pyim-dcache-import',
+如果 WORDCOUNT-HANDLER 设置为其他, 则表示让 WORD 当前词频加1.
+
+BUG：拼音无法有效地处理多音字。"
+  (when (and (> (length word) 0)
+             (< (length word) 11) ;十个汉字以上的词条，加到个人词库里面用处不大，忽略。
+             (not (pyim-string-match-p "\\CC" word)))
+    ;; 记录最近创建的词条，用于快速删词功能。
+    (setq pyim-last-created-word word)
+    (let* ((scheme-name (pyim-scheme-name))
+           (class (pyim-scheme-get-option scheme-name :class))
+           (code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
+           (codes (cond ((eq class 'xingma)
+                         (pyim-hanzi2xingma word scheme-name t))
+                        ;;拼音使用了多音字校正
+                        (t (pyim-cstring-to-pinyin word nil "-" t nil t)))))
+      ;; 保存对应词条的词频
+      (when (> (length word) 0)
+        (pyim-dcache-update-iword2count word prepend wordcount-handler))
+      ;; 添加词条到个人缓存
+      (dolist (code codes)
+        (unless (pyim-string-match-p "[^ a-z-]" code)
+          (pyim-dcache-insert-icode2word
+           word (concat (or code-prefix "") code) prepend)))
+      ;; TODO, 排序个人词库?
+      )))
+
+(defun pyim-create-word-at-point (&optional number silent)
+  "将光标前字符数为 NUMBER 的中文字符串添加到个人词库中
+当 SILENT 设置为 t 是，不显示提醒信息。"
+  (let ((string (pyim-cstring-at-point (or number 2))))
+    (when string
+      (pyim-create-word string)
+      (unless silent
+        (message "将词条: \"%s\" 加入 personal 缓冲。" string)))))
+
+(defun pyim-create-2cchar-word-at-point ()
+  "将光标前2个中文字符组成的字符串加入个人词库。"
   (interactive)
-  (if (= (length (pyim-entered-get 'point-before)) 0)
-      (progn
-        (pyim-outcome-handle 'last-char)
-        (pyim-terminate-translation))
-    (setq pyim-assistant-scheme-enable
-          (not pyim-assistant-scheme-enable))
-    (pyim-entered-refresh)))
+  (pyim-create-word-at-point 2))
 
+(defun pyim-create-3cchar-word-at-point ()
+  "将光标前3个中文字符组成的字符串加入个人词库。"
+  (interactive)
+  (pyim-create-word-at-point 3))
+
+(defun pyim-create-4cchar-word-at-point ()
+  "将光标前4个中文字符组成的字符串加入个人词库。"
+  (interactive)
+  (pyim-create-word-at-point 4))
+
+(defun pyim-create-word-from-selection ()
+  "Add the selected text as a Chinese word into the personal dictionary."
+  (interactive)
+  (when (region-active-p)
+    (let ((string (buffer-substring-no-properties (region-beginning) (region-end))))
+      (if (> (length string) 6)
+          (error "词条太长")
+        (if (not (string-match-p "^\\cc+\\'" string))
+            (error "不是纯中文字符串")
+          (pyim-create-word string)
+          (message "将词条: %S 插入 personal file。" string))))))
+
+;; ** 删词功能
+(defun pyim-delete-words-in-file (file)
+  "从个人词库缓存中批量删除 FILE 文件中列出的词条.
+
+FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
+另外这个命令也可以识别没有词频的行，比如：
+
+   ;;; -*- coding: utf-8-unix -*-
+   词条1
+   词条2"
+  (interactive "F记录待删词条的文件: ")
+  (with-temp-buffer
+    (let ((coding-system-for-read 'utf-8-unix))
+      (insert-file-contents file))
+    (goto-char (point-min))
+    (forward-line 1)
+    (while (not (eobp))
+      (let ((word (car (pyim-dline-parse))))
+        (when (and word (not (pyim-string-match-p "\\CC" word)))
+          (pyim-dcache-delete-word word)))
+      (forward-line 1)))
+  (message "pyim: 批量删词完成！"))
+
+(defun pyim-delete-last-word ()
+  "从个人词库中删除最新创建的词条。"
+  (interactive)
+  (when pyim-last-created-word
+    (pyim-dcache-delete-word pyim-last-created-word)
+    (message "pyim: 从个人词库中删除词条 “%s” !" pyim-last-created-word)))
+
+(defun pyim-delete-word-at-point (&optional number silent)
+  "将光标前字符数为 NUMBER 的中文字符串从个人词库中删除
+当 SILENT 设置为 t 是，不显示提醒信息。"
+  (let* ((string (pyim-cstring-at-point (or number 2))))
+    (when string
+      (pyim-dcache-delete-word string)
+      (unless silent
+        (message "词条: \"%s\" 已经从个人词库缓冲中删除。" string)))))
+
+(defun pyim-delete-word ()
+  "将高亮选择的词条从个人词库中删除。"
+  (interactive)
+  (if mark-active
+      (let ((string (buffer-substring-no-properties
+                     (region-beginning) (region-end))))
+        (when (and (< (length string) 6)
+                   (> (length string) 0))
+          (pyim-dcache-delete-word string)
+          (message "将词条: %S 从 personal 缓冲中删除。" string)))
+    (message "请首先高亮选择需要删除的词条。")))
+
+;; ** 选词功能
 (define-obsolete-function-alias 'pyim-page-select-word-simple 'pyim-select-word-simple "4.0")
 (defun pyim-select-word-simple ()
   "从选词框中选择当前词条.
@@ -745,6 +724,50 @@ Return the input string.
     ;; 不能用来选词了。
     (call-interactively #'pyim-self-insert-command)))
 
+;; ** 取消当前输入功能
+(defun pyim-quit-clear ()
+  "取消当前输入的命令."
+  (interactive)
+  (pyim-outcome-handle "")
+  (pyim-terminate-translation))
+
+;; ** 字母上屏功能
+(defun pyim-quit-no-clear ()
+  "字母上屏命令."
+  (interactive)
+  (pyim-outcome-handle 'pyim-entered)
+  (pyim-terminate-translation))
+
+;; ** 取消激活功能
+(defun pyim-inactivate ()
+  "取消 pyim 的激活状态."
+  (interactive)
+  (pyim-kill-local-variables)
+  (run-hooks 'pyim-inactive-hook))
+
+;; ** 中英文输入模式切换
+(defun pyim-toggle-input-ascii ()
+  "pyim 切换中英文输入模式。同时调整标点符号样式。"
+  (interactive)
+  (setq pyim-input-ascii
+        (not pyim-input-ascii)))
+
+;; ** 主辅输入法切换功能
+(defun pyim-toggle-assistant-scheme ()
+  "临时切换到辅助输入法.
+
+这个功能一般用于五笔等形码输入法，在忘记编码的时候临时用拼音输入
+中文。"
+  (interactive)
+  (if (= (length (pyim-entered-get 'point-before)) 0)
+      (progn
+        (pyim-outcome-handle 'last-char)
+        (pyim-terminate-translation))
+    (setq pyim-assistant-scheme-enable
+          (not pyim-assistant-scheme-enable))
+    (pyim-entered-refresh)))
+
+;; ** 金手指功能
 ;;;###autoload
 (define-obsolete-function-alias
   'pyim-convert-code-at-point #'pyim-convert-string-at-point "2.0")
@@ -821,29 +844,19 @@ Return the input string.
                (setq pyim-force-input-chinese t)))
             (t (message "Pyim: pyim-convert-string-at-point do noting."))))))
 
-(defun pyim-quit-clear ()
-  "取消当前输入的命令."
+;; ** 编码反查功能
+(defun pyim-search-word-code ()
+  "选择词条，然后反查它的 code. 这个功能对五笔用户有用。"
   (interactive)
-  (pyim-outcome-handle "")
-  (pyim-terminate-translation))
-
-(defun pyim-quit-no-clear ()
-  "字母上屏命令."
-  (interactive)
-  (pyim-outcome-handle 'pyim-entered)
-  (pyim-terminate-translation))
-
-(defun pyim-inactivate ()
-  "取消 pyim 的激活状态."
-  (interactive)
-  (pyim-kill-local-variables)
-  (run-hooks 'pyim-inactive-hook))
-
-(defun pyim-toggle-input-ascii ()
-  "pyim 切换中英文输入模式。同时调整标点符号样式。"
-  (interactive)
-  (setq pyim-input-ascii
-        (not pyim-input-ascii)))
+  (when (region-active-p)
+    (let* ((string (buffer-substring-no-properties (region-beginning) (region-end)))
+           code)
+      (if (not (string-match-p "^\\cc+\\'" string))
+          (error "不是纯中文字符串")
+        (setq code (pyim-dcache-search-word-code string))
+        (if code
+            (message "%S -> %S " string code)
+          (message "没有找到 %S 对应的编码。" string))))))
 
 ;; ** pyim 中文字符串工具
 (require 'pyim-cstring)
