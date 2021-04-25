@@ -451,8 +451,6 @@ code 对应的中文词条了。
    pyim-dhashcache-icode2word)
   (remhash word pyim-dhashcache-iword2count))
 
-(declare-function pyim-list-merge "pyim" (a b))
-
 (defun pyim-dhashcache-insert-word-into-icode2word (word pinyin prepend)
   "保存个人词到缓存."
   (pyim-dhashcache-put pyim-dhashcache-icode2word
