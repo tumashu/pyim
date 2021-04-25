@@ -33,21 +33,7 @@
   "Chinese string tools for pyim."
   :group 'pyim)
 
-(defun pyim-cstring-at-point (&optional number)
-  "获取光标一个中文字符串，字符数量为：NUMBER."
-  (save-excursion
-    (let* ((point (point))
-           (begin (- point number))
-           (begin (if (> begin 0)
-                      begin
-                    (point-min)))
-           (string (buffer-substring-no-properties
-                    point begin)))
-      (when (and (stringp string)
-                 (= (length string) number)
-                 (not (pyim-string-match-p "\\CC" string)))
-        string))))
-
+;; ** 中文字符串分词相关功能
 (defun pyim-cstring-split-to-list (chinese-string &optional max-word-length delete-dups prefer-short-word)
   "一个基于 pyim 的中文分词函数。这个函数可以将中文字符
 串 CHINESE-STRING 分词，得到一个词条 alist，这个 alist 的元素
@@ -304,6 +290,7 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
   "简化版的 `pyim-cstring-to-pinyin', 不处理多音字。"
   (pyim-cstring-to-pinyin string shou-zi-mu separator return-list t))
 
+;; ** 中文字符串到形码的转换工具
 (defalias 'pyim-hanzi2xingma 'pyim-cstring-to-xingma)
 (defun pyim-cstring-to-xingma (string scheme-name &optional return-list)
   "返回汉字 STRING 对应形码方案 SCHEME-NAME 的 code (不包括
@@ -340,6 +327,22 @@ code-prefix)。当RETURN-LIST 设置为 t 时，返回一个 code list。"
                            (substring (pyim-cstring-to-xingma:wubi (nth 2 string)) 0 1)
                            (substring (pyim-cstring-to-xingma:wubi (nth (1- len) string)) 0 1))))))
       code)))
+
+;; ** 获取光标处中文字符串或者中文词条的功能
+(defun pyim-cstring-at-point (&optional number)
+  "获取光标一个中文字符串，字符数量为：NUMBER."
+  (save-excursion
+    (let* ((point (point))
+           (begin (- point number))
+           (begin (if (> begin 0)
+                      begin
+                    (point-min)))
+           (string (buffer-substring-no-properties
+                    point begin)))
+      (when (and (stringp string)
+                 (= (length string) number)
+                 (not (pyim-string-match-p "\\CC" string)))
+        string))))
 
 (defalias 'pyim-cwords-at-point 'pyim-cstring-words-at-point)
 (defun pyim-cstring-words-at-point (&optional end-of-point)
