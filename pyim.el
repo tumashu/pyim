@@ -757,7 +757,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   (unless (equal input-method-function 'pyim-input-method)
     (activate-input-method 'pyim))
   (if return-cregexp
-      (pyim-convert-cregexp-at-point t)
+      (pyim-cregexp-convert-at-point t)
     (let* ((case-fold-search nil)
            (scheme-name (pyim-scheme-name))
            (first-chars (pyim-scheme-get-option scheme-name :first-chars))

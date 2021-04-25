@@ -197,7 +197,8 @@
       (unless (equal regexp "")
         (concat (if match-beginning "^" "") regexp)))))
 
-(defun pyim-convert-cregexp-at-point (&optional insert-only)
+(define-obsolete-function-alias 'pyim-convert-cregexp-at-point 'pyim-cregexp-convert-at-point "4.0")
+(defun pyim-cregexp-convert-at-point (&optional insert-only)
   "将光标前的字符串按拼音的规则转换为一个搜索中文的 regexp.
 用于实现拼音搜索中文的功能。
 
