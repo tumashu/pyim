@@ -312,22 +312,27 @@ alist 列表。"
          new-string)
     (when (> (length string) 0)
       (delete-region begin end)
-      (setq new-string
-            (with-temp-buffer
-              (insert string)
-              (goto-char (point-min))
-              (while (re-search-forward "\\([，。；？！；、）】]\\) +\\([[:ascii:]]\\)" nil t)
-                (replace-match (concat (match-string 1) (match-string 2))  nil t))
-              (goto-char (point-min))
-              (while (re-search-forward "\\([[:ascii:]]\\) +\\([（【]\\)" nil t)
-                (replace-match (concat (match-string 1) (match-string 2))  nil t))
-              (goto-char (point-min))
-              (while (re-search-forward "\\([[:ascii:]]\\) +\\(\\cc\\)" nil t)
-                (replace-match (concat (match-string 1) sep (match-string 2))  nil t))
-              (goto-char (point-min))
-              (while (re-search-forward "\\(\\cc\\) +\\([[:ascii:]]\\)" nil t)
-                (replace-match (concat (match-string 1) sep (match-string 2))  nil t))
-              (buffer-string)))
+      (with-temp-buffer
+        (insert string)
+        (dotimes (_ 3) ;NOTE: 数字3是一个经验数字。
+          (dolist (x `(;; 中文标点与英文之间的空格
+                       ("\\([，。；？！；、）】]\\) +\\([[:ascii:]]\\)" . "")
+                       ;; 英文与中文标点之间的空格
+                       ("\\([[:ascii:]]\\) +\\([（【]\\)" . "")
+                       ;; 汉字与汉字之间的空格
+                       ("\\(\\cc\\) +\\(\\cc\\)" . "")
+                       ;; 英文与汉字之间的空格
+                       ("\\([[:ascii:]]\\) +\\(\\cc\\)" . ,sep)
+                       ;; 汉字与英文之间的空格
+                       ("\\(\\cc\\) +\\([[:ascii:]]\\)" . ,sep)))
+            (goto-char (point-min))
+            (while (re-search-forward (car x) nil t)
+              (replace-match
+               (concat (match-string 1)
+                       (cdr x)
+                       (match-string 2))
+               nil t))))
+        (setq new-string (buffer-string)))
       (insert new-string))))
 
 ;; * Footer
