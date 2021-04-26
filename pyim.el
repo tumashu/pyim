@@ -76,7 +76,10 @@
 
 这个 hook 运行时机：
 1. 获取并删除光标处 code 字符串之后。
-2. code 转换得到的中文字符串插入之前。"
+2. code 转换得到的中文字符串插入之前。
+
+Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
+来构建适合自己的 hook 函数。"
   :type 'hook)
 
 (define-obsolete-variable-alias 'pyim-page-select-word-by-number 'pyim-select-word-by-number "4.0")
