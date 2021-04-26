@@ -90,7 +90,7 @@ pyim 使用函数 `pyim-outcome-handle-char' 来处理特殊功能触发字符�
   "可以使用 `pyim-outcome-trigger' 激活的函数。
 
 这个函数与『单字快捷键配合使用』，当光标前面的字符为汉字字符时，
-按 `pyim-outcome-trigger' 对应字符，可以调用这个函数来清洗
+按 `pyim-outcome-trigger' 对应字符，可以调用这个函数来处理
 光标前面的文字内容。"
   :type 'function)
 
