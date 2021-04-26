@@ -75,6 +75,12 @@ entered (nihaom) 的第一个候选词。
              ;; 因为这种情况往往是用户输入有误，自动上屏之后，调整输入就变得麻烦了。
              (not (equal entered (car pyim-candidates))))
         '(:select current))
+       ((and (> (length entered) n)
+             (equal (substring entered 0 n)
+                    (car pyim-candidates-last)))
+        ;; 自动清除错误输入模式，类似微软五笔：敲第五个字母的时候，前面四个字母自
+        ;; 动清除。
+        '(:select last :replace-with ""))
        ((> (length entered) n)
         '(:select last))
        (t nil)))))
