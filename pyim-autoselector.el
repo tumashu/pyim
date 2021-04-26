@@ -65,13 +65,17 @@ entered (nihaom) 的第一个候选词。
 条，自动选择可以减少按空格强制选词的机会。"
   (let* ((scheme-name (pyim-scheme-name))
          (class (pyim-scheme-get-option scheme-name :class))
-         (n (pyim-scheme-get-option scheme-name :code-split-length)))
+         (n (pyim-scheme-get-option scheme-name :code-split-length))
+         (entered (pyim-entered-get 'point-before)))
     (when (eq class 'xingma)
       (cond
-       ((and (= (length (pyim-entered-get 'point-before)) n)
-             (= (length pyim-candidates) 1))
+       ((and (= (length entered) n)
+             (= (length pyim-candidates) 1)
+             ;; 如果没有候选词，pyim 默认将用户输入当做候选词，这时不能自动上屏，
+             ;; 因为这种情况往往是用户输入有误，自动上屏之后，调整输入就变得麻烦了。
+             (not (equal entered (car pyim-candidates))))
         '(:select current))
-       ((> (length (pyim-entered-get 'point-before)) n)
+       ((> (length entered) n)
         '(:select last))
        (t nil)))))
 
