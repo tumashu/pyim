@@ -321,6 +321,9 @@ pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
   (pyim-pymap-cache-create)
   (pyim-dcache-update restart)
 
+  ;; 启动或者重启的时候，退出辅助输入法。
+  (setq pyim-assistant-scheme-enable nil)
+
   (run-hooks 'pyim-load-hook)
   ;; Make sure personal or other dcache are saved to file before kill emacs.
   (add-hook 'kill-emacs-hook #'pyim-dcache-save-caches)
