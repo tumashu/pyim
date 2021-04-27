@@ -749,9 +749,6 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
 
 ;; ** 金手指功能
 ;;;###autoload
-(define-obsolete-function-alias
-  'pyim-convert-code-at-point #'pyim-convert-string-at-point "2.0")
-
 (defun pyim-convert-string-at-point (&optional return-cregexp)
   "将光标前的用户输入的字符串转换为中文.
 
