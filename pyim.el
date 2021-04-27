@@ -232,7 +232,7 @@ Return the input string.
              ;; 插入 preview string, pyim *强制* 将其设置为 nil
              (input-method-use-echo-area nil)
              (modified-p (buffer-modified-p))
-             last-command-event last-command this-command)
+             last-command-event last-command this-command inhibit-record)
 
         (setq pyim-translating t)
         (pyim-entered-erase-buffer)
@@ -240,12 +240,18 @@ Return the input string.
 
         (when key
           (setq unread-command-events
-                (cons key unread-command-events)))
+                (cons key unread-command-events)
+                inhibit-record t))
 
         (while pyim-translating
           (set-buffer-modified-p modified-p)
-          (let* ((keyseq (read-key-sequence nil nil nil t))
+          (let* (;; We inhibit record_char only for the first key,
+                 ;; because it was already recorded before read_char
+                 ;; called quail-input-method.
+                 (inhibit--record-char inhibit-record)
+                 (keyseq (read-key-sequence nil nil nil t))
                  (cmd (lookup-key pyim-mode-map keyseq)))
+            (setq inhibit-record nil)
             ;; (message "key: %s, cmd:%s\nlcmd: %s, lcmdv: %s, tcmd: %s"
             ;;          key cmd last-command last-command-event this-command)
             (if (if key
