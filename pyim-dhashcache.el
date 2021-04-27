@@ -74,6 +74,12 @@
           (push (concat prefix (substring code1 0 i)) results)))
       results)))
 
+(defun pyim-dhashcache-async-inject-variables ()
+  "pyim's async-inject-variables."
+  (list (async-inject-variables "^load-path$")
+        (async-inject-variables "^exec-path$")
+        (async-inject-variables "^pyim-.+?directory$")))
+
 (defun pyim-dhashcache-update-ishortcode2word (&optional force)
   "读取 ‘pyim-dhashcache-icode2word’ 中的词库，创建 *简拼* 缓存，然后加载这个缓存.
 
@@ -82,9 +88,7 @@
   (when (or force (not pyim-dhashcache-update-ishortcode2word))
     (async-start
      `(lambda ()
-        ,(async-inject-variables "^load-path$")
-        ,(async-inject-variables "^exec-path$")
-        ,(async-inject-variables "^pyim-.+?directory$")
+        ,@(pyim-dhashcache-async-inject-variables)
         (require 'pyim-dhashcache)
         (pyim-dcache-set-variable 'pyim-dhashcache-icode2word)
         (pyim-dcache-set-variable 'pyim-dhashcache-iword2count)
@@ -122,9 +126,7 @@
   (when (or force (not pyim-dhashcache-update-shortcode2word))
     (async-start
      `(lambda ()
-        ,(async-inject-variables "^load-path$")
-        ,(async-inject-variables "^exec-path$")
-        ,(async-inject-variables "^pyim-.+?directory$")
+        ,@(pyim-dhashcache-async-inject-variables)
         (require 'pyim-dhashcache)
         (pyim-dcache-set-variable 'pyim-dhashcache-code2word)
         (pyim-dcache-set-variable 'pyim-dhashcache-iword2count)
@@ -228,9 +230,7 @@ DCACHE 是一个 code -> words 的 hashtable.
       ;; use hashtable
       (async-start
        `(lambda ()
-          ,(async-inject-variables "^load-path$")
-          ,(async-inject-variables "^exec-path$")
-          ,(async-inject-variables "^pyim-.+?directory$")
+          ,@(pyim-dhashcache-async-inject-variables)
           (require 'pyim-dhashcache)
           (let ((dcache (pyim-dhashcache-generate-dcache-file ',dict-files ,code2word-file)))
             (pyim-dhashcache-generate-word2code-dcache-file dcache ,word2code-file))
@@ -290,9 +290,7 @@ code 对应的中文词条了。
   (when (or force (not pyim-dhashcache-update-icode2word-p))
     (async-start
      `(lambda ()
-        ,(async-inject-variables "^load-path$")
-        ,(async-inject-variables "^exec-path$")
-        ,(async-inject-variables "^pyim-.+?directory$")
+        ,@(pyim-dhashcache-async-inject-variables)
         (require 'pyim-dhashcache)
         (pyim-dcache-set-variable 'pyim-dhashcache-icode2word)
         (pyim-dcache-set-variable 'pyim-dhashcache-iword2count)
