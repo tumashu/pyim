@@ -62,23 +62,6 @@ pyim 对资源的消耗。
 2. 自动更新功能无法正常工作，用户通过手工从其他机器上拷贝
 dcache 文件的方法让 pyim 正常工作。")
 
-(define-obsolete-variable-alias 'pyim-prefer-emacs-thread 'pyim-dcache-prefer-emacs-thread "4.0")
-(defvar pyim-dcache-prefer-emacs-thread nil
-  "是否优先使用 emacs thread 功能来生成 dcache.
-
-如果这个变量设置为 t, 那么当 emacs thread 功能可以使用时，
-pyim 优先使用 emacs thread 功能来生成 dcache, 如果设置为 nil,
-pyim 总是使用 emacs-async 包来生成 dcache.
-
-不过这个选项开启之后，会显著的减慢词库加载速度，特别是
-五笔等形码输入法。")
-
-;; ** Dcache 通用工具
-(defun pyim-dcache-use-emacs-thread-p ()
-  "判断是否使用 emacs thread 功能来生成 thread."
-  (and pyim-dcache-prefer-emacs-thread
-       (>= emacs-major-version 26)))
-
 ;; ** Dcache API 调用功能
 (defun pyim-dcache-call-api (api-name &rest api-args)
   "Get backend API named API-NAME then call it with arguments API-ARGS."
@@ -240,10 +223,8 @@ MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表
   ;; 保存一下用户选择过的词生成的缓存和词频缓存，
   ;; 因为使用 async 机制更新 dcache 时，需要从 dcache 文件
   ;; 中读取变量值, 然后再对用户选择过的词生成的缓存排序，如果没
-  ;; 有这一步骤，导入的词条就会被覆盖，使用 emacs-thread 机制来更新 dcache
-  ;; 不存在此问题。
-  (unless pyim-dcache-prefer-emacs-thread
-    (pyim-dcache-save-caches))
+  ;; 有这一步骤，导入的词条就会被覆盖。
+  (pyim-dcache-save-caches)
   ;; 更新相关的 dcache
   (pyim-dcache-call-api 'update-personal-words t)
 
