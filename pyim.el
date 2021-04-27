@@ -800,29 +800,6 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
             ((pyim-string-match-p "[[:punct:]：－]" (pyim-char-before-to-string 0))
              ;; 当光标前的一个字符是标点符号时，半角/全角切换。
              (call-interactively 'pyim-punctuation-translate-at-point))
-            ((and nil ;; 暂时还没有准备启用这个功能
-                  (eq pyim-default-scheme 'quanpin)
-                  (string-match "\\cc *$" string))
-             ;; 如果光标处是汉字，就用汉字的拼音来重新启动输入法
-             (setq string
-                   (if mark-active
-                       string
-                     (match-string 0 string)))
-             (setq length (length string))
-             (when mark-active
-               (delete-region
-                (region-beginning) (region-end)))
-             (when (and (not mark-active) (> length 0))
-               (delete-char (- 0 length)))
-             (setq code (pyim-cstring-to-pinyin
-                         (replace-regexp-in-string " " "" string)
-                         nil "-" nil t))
-             (when (and (> code 0)
-                        (> length 0))
-               (setq unread-command-events
-                     (append (listify-key-sequence code)
-                             unread-command-events))
-               (setq pyim-force-input-chinese t)))
             (t (message "Pyim: pyim-convert-string-at-point do noting."))))))
 
 ;; ** 编码反查功能
