@@ -128,9 +128,12 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
               (setq output nil)
             (when (> i 0)
               ;; 将强制分割符号附加到封分割符后面的声母开头，
-              ;; 类似： ("'n" "i" "n" "i"), 用于 `pyim-page-preview-create' 函数。
-              (setf (caar x)
-                    (concat "'" (caar x))))
+              ;; 类似： ("'n" "i" "'n" "i"), 用于 `pyim-page-preview-create' 函数,
+              ;; 和多次选词之后的，用户手动输入的分隔符的保护。
+              (setf (nth 0 (car x))
+                    (concat "'" (nth 0 (car x))))
+              (setf (nth 2 (car x))
+                    (concat "'" (nth 2 (car x)))))
             (setq output (append output x)))))
       (when output
         (pyim-imobjs-find-fuzzy:quanpin (list output))))))
