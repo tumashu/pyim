@@ -28,6 +28,7 @@
 ;;; Code:
 ;; * 代码                                                           :code:
 (require 'cl-lib)
+(require 'pyim-common)
 
 (defgroup pyim-scheme nil
   "Scheme tools for pyim."
@@ -46,6 +47,8 @@
 
 (defvar pyim-assistant-scheme-enable nil
   "设置临时 scheme, 用于五笔等形码输入法临时拼音输入。")
+
+(pyim-register-local-variables '(pyim-assistant-scheme-enable))
 
 (defvar pyim-schemes nil
   "Pyim 支持的所有拼音方案.")

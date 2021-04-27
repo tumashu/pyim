@@ -421,7 +421,6 @@ REFRESH-COMMON-DCACHE 已经废弃，不要再使用了。"
   (pyim-preview-delete-string)
   (setq pyim-candidates nil)
   (setq pyim-candidates-last nil)
-  (setq pyim-assistant-scheme-enable nil)
   (setq pyim-force-input-chinese nil)
   (pyim-page-hide)
   (pyim-entered-erase-buffer)
