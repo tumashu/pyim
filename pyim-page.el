@@ -308,8 +308,8 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                           pyim-candidates))
                     (pyim-scheme-name 'default))))
          (if (> (length code) 0)
-             (format " [%s](A)" code)
-           " (A)"))))))
+             (format " [%s](辅)" code)
+           " (辅)"))))))
 
 (defun pyim-page-preview-create:shuangpin (&optional separator)
   (let ((keymaps (pyim-scheme-get-option (pyim-scheme-name) :keymaps))
