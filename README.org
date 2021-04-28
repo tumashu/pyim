@@ -153,7 +153,7 @@ pyim 支持双拼输入模式，用户可以通过变量 `pyim-default-scheme' �
 具体安装和使用方式请查看 pyim-liberime 包的 Commentary 部分。
 
 *** 使用型码输入法
-1. 五笔输入法可以参考： https://github.com/yefeiyu/pyim-wbdict
+1. 五笔输入法可以参考： https://github.com/tumashu/pyim-wbdict
 2. 仓颉输入法可以参考：https://github.com/p1uxtar/pyim-cangjie5dict
 3. 三码郑码（至至郑码）输入法可以参考： https://github.com/p1uxtar/pyim-smzmdict
 
