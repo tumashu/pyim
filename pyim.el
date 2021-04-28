@@ -828,6 +828,16 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
 ;; ** pyim 探针
 (require 'pyim-probe)
 
+;; ** Evil hack
+(defun pyim-hack-deactivate-input-method (orig_func)
+  (let ((deactivate-current-input-method-function
+         (or deactivate-current-input-method-function #'ignore)))
+    (funcall orig_func)))
+
+(with-eval-after-load
+    (advice-add 'deactivate-input-method :around #'pyim-hack-deactivate-input-method))
+
+
 ;; * Footer
 (provide 'pyim)
 
