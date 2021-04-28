@@ -189,6 +189,10 @@ TYPE 取值为 point-after, 返回 entered buffer 中 point 之后的字符
                               nil
                               #'pyim-entered-refresh-1))))))
 
+;; 没有这一行，native-compilation 会出现奇怪的问题，pyim-outcome-handle 会获取到
+;; 错误的 pyim-candidates 取值。原因未知。
+(defvar pyim-candidates)
+
 (defun pyim-entered-refresh-1 ()
   "查询 `pyim-entered-buffer' 光标前的拼音字符串（如果光标在行首则为光标后的）, 显示备选词等待用户选择。"
   (let* ((scheme-name (pyim-scheme-name))
