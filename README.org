@@ -2,6 +2,29 @@
 #+TITLE: PYIM 是一个 Emacs 中文输入法，支持全拼，双拼，五笔，仓颉 和 Rime 等
 #+AUTHOR: Feng Shu
 
+* Changlog
+
+** <2021-04-28 Wed> 五笔输入法和仓颉输入法的不兼容更新
+
+五笔输入法和仓颉输入法的 code-prefix 原来是使用一个标点符号作为 code-prefix, 现
+在使用 "wubi/" 和 "cangjie/" 这种形式的 code-prefix, 减少不同输入法误用相同
+code-prefix 带来的词库冲突。
+
+五笔输入法的 scheme 设置已经移到 pyim-wbdict 包，仓颉输入法的 scheme 设置已经移
+动到 pyim-cangjie5dict 包。
+
+对于使用上述两个包的用户，此次变更不受影响，因为我已经更新两个包，让其使用新的
+code-prefix.
+
+受影响的是自己维护词库的五笔和仓颉用户，需要做以下更新：
+1. 五笔用户
+   1. 需要 (require 'pyim-wbdict), 加载五笔 scheme 设置。
+   2. 需要将自己的五笔词库文件中的 code-prefix "." 替换为 "wubi/".
+2. 仓颉用户
+   1. 需要 (require 'pyim-cangjie5dict), 加载仓颉 scheme 设置。
+   2. 需要将自己的五笔词库文件中的 code-prefix "@" 替换为 "cangjie/".
+
+
 * 截图
 [[file:./snapshots/pyim-linux-x-with-toolkit.png]]
 
