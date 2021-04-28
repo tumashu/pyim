@@ -102,17 +102,6 @@
    :prefer-triggers ("v")))
 
 (pyim-scheme-add
- '(wubi
-   :document "五笔输入法。"
-   :class xingma
-   :first-chars "abcdefghijklmnopqrstuvwxyz"
-   :rest-chars "abcdefghijklmnopqrstuvwxyz'"
-   :code-prefix "." ;五笔词库中所有的 code 都以 "." 开头，防止和拼音词库冲突。
-   :code-split-length 4 ;默认将用户输入切成 4 个字符长的 code 列表（不计算 code-prefix）
-   :code-maximum-length 4 ;五笔词库中，code 的最大长度（不计算 code-prefix）
-   :prefer-triggers nil))
-
-(pyim-scheme-add
  '(cangjie
    :document "倉頡输入法。"
    :class xingma
