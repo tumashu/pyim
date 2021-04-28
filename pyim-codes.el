@@ -30,6 +30,7 @@
 (require 'cl-lib)
 (require 'pyim-scheme)
 (require 'pyim-imobjs)
+(require 'pyim-dcache)
 
 (defun pyim-codes-create (imobj scheme-name &optional first-n)
   "按照 SCHEME-NAME 对应的输入法方案，从一个 IMOBJ 创建一个列表 codes, 这个列表
@@ -80,14 +81,14 @@
   (when (and (stringp word)
              (> (length word) 0))
     (let* ((prefix (pyim-scheme-get-option scheme-name :code-prefix))
-           (code
-            (cl-find-if
-             (lambda (x)
-               (equal (substring (or x " ") 0 1) prefix))
-             (sort
-              (cl-copy-list (pyim-dcache-call-api 'search-word-code word))
-              (lambda (a b) (> (length a) (length b)))))))
-      (substring (or code " ") 1))))
+           (code (cl-find-if
+                  (lambda (x)
+                    (equal (nth 0 (pyim-dcache-code-split (or x " ")))
+                           prefix))
+                  (sort
+                   (cl-copy-list (pyim-dcache-call-api 'search-word-code word))
+                   (lambda (a b) (> (length a) (length b)))))))
+      (nth 1 (pyim-dcache-code-split (or code " "))))))
 
 ;; * Footer
 (provide 'pyim-codes)

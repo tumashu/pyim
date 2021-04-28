@@ -58,15 +58,29 @@
           (> (or (gethash a pyim-dhashcache-iword2count) 0)
              (or (gethash b pyim-dhashcache-iword2count) 0)))))
 
+(defun pyim-dcache-code-split (code)
+  "将 CODE 分成 code-prefix 和 rest code."
+  (cond
+   ;; 兼容性代码：旧版本的 pyim 使用一个标点符号作为 code-prefix
+   ((pyim-string-match-p "^[[:punct:]]" code)
+    (list (substring code 0 1) (substring code 1)))
+   ;; 拼音输入法不使用 code-prefix.
+   ((not (pyim-string-match-p "[[:punct:]]" code))
+    (list "" code))
+   ;; 新 code-prefix 使用类似 "wubi/" 的格式。
+   (t (let ((x (split-string code "/")))
+        (list (concat (nth 0 x) "/")
+              (nth 1 x))))))
+
 (defun pyim-dhashcache-get-shortcode (code)
   "获取一个 CODE 的所有简写.
 
 比如：.nihao -> .nihao .niha .nih .ni .n"
   (when (and (> (length code) 0)
-             (not (string-match-p "-" code))
-             (pyim-string-match-p "^[[:punct:]]" code))
-    (let* ((code1 (substring code 1))
-           (prefix (substring code 0 1))
+             (not (string-match-p "-" code)))
+    (let* ((x (pyim-dcache-code-split code))
+           (prefix (nth 0 x))
+           (code1 (nth 1 x))
            (n (length code1))
            results)
       (dotimes (i n)

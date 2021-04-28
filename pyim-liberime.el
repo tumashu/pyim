@@ -54,7 +54,7 @@
 这个 scheme 适用于 librime 支持的所有输入法，通用性较好，但无法支
 持 trigger, 所以类似 pyim 全拼支持的v快捷键将无法使用。"
    :class rime
-   :code-prefix "&"
+   :code-prefix "rime/"
    :first-chars "abcdefghijklmnopqrstuvwxyz"
    :rest-chars "abcdefghijklmnopqrstuvwxyz'-a"
    :prefer-triggers nil))
@@ -67,7 +67,7 @@
 这个 scheme 专门用于 librime 全拼输入法，同时支持 trigger,
 也就是 v 快捷键，使用 rime 全拼的朋友建议使用这个 scheme。"
    :class rime
-   :code-prefix "&"
+   :code-prefix "rime/"
    :first-chars "abcdefghjklmnopqrstwxyz"
    :rest-chars "vmpfwckzyjqdltxuognbhsrei'-a"
    :prefer-triggers ("v")))
@@ -76,7 +76,7 @@
  '(rime-microsoft-shuangpin
    :document "rime 微软双拼输入法。"
    :class rime
-   :code-prefix "&"
+   :code-prefix "rime/"
    :first-chars "abcdefghijklmnopqrstuvwxyz"
    :rest-chars "abcdefghijklmnopqrstuvwxyz;"
    :prefer-triggers nil))
@@ -115,7 +115,9 @@
          (code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
          (s (replace-regexp-in-string "-" "" code))
          ;; `liberime-search' 搜索的时候不需要 code-prefix, 去除。
-         (s (if code-prefix (substring s 1) s))
+         (s (if code-prefix
+                (string-remove-prefix code-prefix s)
+              s))
          (words (liberime-search s (if async
                                        nil
                                      (* pyim-page-length 2)))))
