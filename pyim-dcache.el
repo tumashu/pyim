@@ -46,7 +46,9 @@
 前者搜索单词速度很快,消耗内存多.  后者搜索单词速度较快,消耗内存少.
 
 `pyim-dregcache' 速度和词库大小成正比.  当词库接近100M大小时,
-在六年历史的笔记本上会有一秒的延迟. 这时建议换用 `pyim-dhashcache'."
+在六年历史的笔记本上会有一秒的延迟. 这时建议换用 `pyim-dhashcache'.
+
+注意：`pyim-dregcache' 只支持全拼和双拼输入法，不支持其它型码输入法."
   :type 'symbol)
 
 (defvar pyim-dcache-auto-update t
