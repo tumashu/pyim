@@ -160,6 +160,7 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
     (define-key map "\C-m" #'pyim-quit-no-clear)
     (define-key map [return] #'pyim-quit-no-clear)
     (define-key map "\C-c" #'pyim-quit-clear)
+    (define-key map "\C-g" #'pyim-quit-clear)
     map)
   "Pyim 的 Keymap.")
 
