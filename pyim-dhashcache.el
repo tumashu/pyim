@@ -326,7 +326,8 @@ code 对应的中文词条了。
 
 (defun pyim-dhashcache-upgrade-icode2word ()
   "升级 icode2word 缓存。"
-  (let ((ruler-list (delete-dups
+  (let ((delete-old-key-p (yes-or-no-p "Delete old key after upgrade? "))
+        (ruler-list (delete-dups
                      (remove nil
                              (mapcar
                               (lambda (scheme)
@@ -345,9 +346,12 @@ code 对应的中文词条了。
                (let* ((key-words (gethash key pyim-dhashcache-icode2word))
                       (new-key (concat new-prefix (string-remove-prefix old-prefix key)))
                       (new-key-words (gethash new-key pyim-dhashcache-icode2word))
-                      (merged-value (delete-dups `(,@key-words ,@new-key-words))))
+                      (merged-value (delete-dups `(,@new-key-words ,@key-words))))
                  (puthash new-key merged-value pyim-dhashcache-icode2word)
-                 (message "PYIM icode2word upgrade: %S %S -> %S %S\n" key key-words new-key new-key-words))))
+                 (message "PYIM icode2word upgrade: %S %S -> %S %S" key key-words new-key new-key-words)
+                 (when delete-old-key-p
+                   (remhash key pyim-dhashcache-icode2word)
+                   (message "PYIM icode2word upgrade: %S has been deleted." key)))))
            pyim-dhashcache-icode2word))))))
 
 (defun pyim-dhashcache-update-personal-words (&optional force)
