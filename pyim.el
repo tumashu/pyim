@@ -451,7 +451,7 @@ REFRESH-COMMON-DCACHE 已经废弃，不要再使用了。"
 词条就会放到已有词条的最前面。
 
 根据当前输入法，决定是调用 `pyim-cstring-to-pinyin' 还是
-`pyim-hanzi2xingma' 来获取中文词条的编码。
+`pyim-cstring-to-xingma' 来获取中文词条的编码。
 
 WORDCOUNT-HANDLER 可以是一个数字，代表将此数字设置为 WORD 的新词频，
 WORDCOUNT-HANDLER 也可以是一个函数，其返回值将设置为 WORD 的新词频，
@@ -468,7 +468,7 @@ BUG：拼音无法有效地处理多音字。"
            (class (pyim-scheme-get-option scheme-name :class))
            (code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
            (codes (cond ((eq class 'xingma)
-                         (pyim-hanzi2xingma word scheme-name t))
+                         (pyim-cstring-to-xingma word scheme-name t))
                         ;;拼音使用了多音字校正
                         (t (pyim-cstring-to-pinyin word nil "-" t nil t)))))
       ;; 保存对应词条的词频
