@@ -292,6 +292,15 @@ MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表
   "保存个人词到缓存."
   (pyim-dcache-call-api 'insert-word-into-icode2word word pinyin prepend))
 
+;; ** Dcache 升级功能
+(defun pyim-dcache-upgrade-icode2word ()
+  "升级个人词库缓存.
+
+主要是将个人词库中旧的 code-prefix 升级为新的 code-prefix. 用到
+scheme 中的 :code-prefix-history 信息。"
+  (interactive)
+  (pyim-dcache-call-api 'upgrade-icode2word))
+
 ;; ** Dcache 删词功能
 (defun pyim-dcache-delete-word (word)
   "将中文词条 WORD 从个人词库中删除"
