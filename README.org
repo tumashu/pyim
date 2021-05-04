@@ -178,7 +178,7 @@ pyim 支持双拼输入模式，用户可以通过变量 `pyim-default-scheme' �
 
 ** 使用型码输入法
 1. 五笔输入法可以参考： https://github.com/tumashu/pyim-wbdict
-2. 仓颉输入法可以参考：https://github.com/p1uxtar/pyim-cangjie5dict
+2. 仓颉输入法可以参考：https://github.com/p1uxtar/pyim-cangjiedict
 3. 三码郑码（至至郑码）输入法可以参考： https://github.com/p1uxtar/pyim-smzmdict
 
 如果用户在使用型码输入法的过程中，忘记了某个字的编码，可以按 TAB 键临时切换到辅
