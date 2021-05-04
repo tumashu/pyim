@@ -303,12 +303,12 @@ code-prefix)。当RETURN-LIST 设置为 t 时，返回一个 code list。"
         code))))
 
 (defun pyim-cstring-to-xingma:wubi (string)
-  "返回汉字 STRING 的五笔编码(不包括 code-prefix)。当RETURN-LIST
+  "返回汉字 STRING 的五笔编码(不包括 code-prefix)。当 RETURN-LIST
 设置为 t 时，返回一个编码列表。"
   (when (string-match-p "^\\cc+\\'" string)
     (let ((code (pyim-code-search string 'wubi))
           (len (length string)))
-      (when (string-empty-p code)
+      (unless code
         (when (= len 1)
           (error "No code found for %s" string))
         (setq string (split-string string "" t)

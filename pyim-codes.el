@@ -83,12 +83,12 @@
     (let* ((prefix (pyim-scheme-get-option scheme-name :code-prefix))
            (code (cl-find-if
                   (lambda (x)
-                    (equal (nth 0 (pyim-dcache-code-split (or x " ")))
+                    (equal (nth 0 (pyim-dcache-code-split x))
                            prefix))
                   (sort
                    (cl-copy-list (pyim-dcache-call-api 'search-word-code word))
                    (lambda (a b) (> (length a) (length b)))))))
-      (nth 1 (pyim-dcache-code-split (or code " "))))))
+      (nth 1 (pyim-dcache-code-split code)))))
 
 ;; * Footer
 (provide 'pyim-codes)
