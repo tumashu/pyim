@@ -415,8 +415,10 @@ code 对应的中文词条了。
   (maphash
    (lambda (key value)
      (when (member word value)
-       (puthash key (remove word value)
-                pyim-dhashcache-icode2word)))
+       (let ((new-value (remove word value)))
+         (if new-value
+             (puthash key new-value pyim-dhashcache-icode2word)
+           (remhash key pyim-dhashcache-icode2word)))))
    pyim-dhashcache-icode2word)
   (remhash word pyim-dhashcache-iword2count))
 
