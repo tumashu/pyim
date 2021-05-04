@@ -55,6 +55,7 @@
 持 trigger, 所以类似 pyim 全拼支持的v快捷键将无法使用。"
    :class rime
    :code-prefix "rime/"
+   :code-prefix-history ("&")
    :first-chars "abcdefghijklmnopqrstuvwxyz"
    :rest-chars "abcdefghijklmnopqrstuvwxyz'-a"
    :prefer-triggers nil))
@@ -68,6 +69,7 @@
 也就是 v 快捷键，使用 rime 全拼的朋友建议使用这个 scheme。"
    :class rime
    :code-prefix "rime/"
+   :code-prefix-history ("&")
    :first-chars "abcdefghjklmnopqrstwxyz"
    :rest-chars "vmpfwckzyjqdltxuognbhsrei'-a"
    :prefer-triggers ("v")))
@@ -77,6 +79,7 @@
    :document "rime 微软双拼输入法。"
    :class rime
    :code-prefix "rime/"
+   :code-prefix-history ("&")
    :first-chars "abcdefghijklmnopqrstuvwxyz"
    :rest-chars "abcdefghijklmnopqrstuvwxyz;"
    :prefer-triggers nil))
