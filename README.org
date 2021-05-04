@@ -386,6 +386,10 @@ E-Neo 同学编写了一个词库转换工具: [[https://github.com/E-Neo/scel2p
 2. 下载地址： https://github.com/E-Neo/scel2pyim
 3. 编写语言： C语言
 
+*** 第三种方式
+
+可以了解：https://github.com/redguardtoo/pyim-tsinghua-dict
+
 ** 如何手动安装和管理词库
 这里假设有两个词库文件：
 
