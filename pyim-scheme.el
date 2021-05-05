@@ -102,6 +102,30 @@
    :prefer-triggers ("v")))
 
 (pyim-scheme-add
+ '(wubi
+   :document "五笔输入法。"
+   :class xingma
+   :first-chars "abcdefghijklmnopqrstuvwxyz"
+   :rest-chars "abcdefghijklmnopqrstuvwxyz'"
+   :code-prefix "wubi/" ;五笔词库中所有的 code 都以 "wubi/" 开头，防止和其它词库冲突。
+   :code-prefix-history (".") ;五笔词库以前使用 "." 做为 code-prefix.
+   :code-split-length 4 ;默认将用户输入切成 4 个字符长的 code 列表（不计算 code-prefix）
+   :code-maximum-length 4 ;五笔词库中，code 的最大长度（不计算 code-prefix）
+   :prefer-triggers nil))
+
+(pyim-scheme-add
+ '(cangjie
+   :document "倉頡输入法。"
+   :class xingma
+   :first-chars "abcdefghijklmnopqrstuvwxyz"
+   :rest-chars "abcdefghijklmnopqrstuvwxyz"
+   :code-prefix "cangjie/" ;仓颉输入法词库中所有的 code 都以 "cangjie/" 开头，防止词库冲突。
+   :code-prefix-history ("@") ;仓颉输入法词库曾经使用过的 code-prefix
+   :code-split-length 5 ;默认将用户输入切成 5 个字符长的 code 列表（不计算 code-prefix）
+   :code-maximum-length 5 ;仓颉词库中，code 的最大长度（不计算 code-prefix）
+   :prefer-triggers nil))
+
+(pyim-scheme-add
  '(pyim-shuangpin
    :document "与 pyim 配合良好的双拼输入法方案，源自小鹤双拼方案。"
    :class shuangpin
