@@ -480,16 +480,20 @@ BUG：拼音无法有效地处理多音字。"
           (pyim-dcache-insert-icode2word
            word (concat (or code-prefix "") code) prepend)))
       ;; TODO, 排序个人词库?
-      )))
+      ;; 返回 codes 和 word, 用于 message 命令。
+      (mapconcat (lambda (code)
+                   (format "%s -> %s" (concat (or code-prefix "") code) word))
+                 codes "; "))))
 
 (defun pyim-create-word-at-point (&optional number silent)
-  "将光标前字符数为 NUMBER 的中文字符串添加到个人词库中
-当 SILENT 设置为 t 是，不显示提醒信息。"
-  (let ((string (pyim-cstring-at-point (or number 2))))
+  "将光标前字符数为 NUMBER 的中文字符串添加到个人词库中，当
+SILENT 设置为 t 是，不显示提醒信息。"
+  (let ((string (pyim-cstring-at-point (or number 2)))
+        output)
     (when string
-      (pyim-create-word string)
+      (setq output (pyim-create-word string))
       (unless silent
-        (message "将词条: \"%s\" 加入 personal 缓冲。" string)))))
+        (message "将词条: %S 加入 personal 缓冲。" output)))))
 
 (defun pyim-create-2cchar-word-at-point ()
   "将光标前2个中文字符组成的字符串加入个人词库。"
@@ -510,13 +514,14 @@ BUG：拼音无法有效地处理多音字。"
   "Add the selected text as a Chinese word into the personal dictionary."
   (interactive)
   (when (region-active-p)
-    (let ((string (buffer-substring-no-properties (region-beginning) (region-end))))
+    (let ((string (buffer-substring-no-properties (region-beginning) (region-end)))
+          output)
       (if (> (length string) 6)
           (error "词条太长")
         (if (not (string-match-p "^\\cc+\\'" string))
             (error "不是纯中文字符串")
-          (pyim-create-word string)
-          (message "将词条: %S 插入 personal file。" string))))))
+          (setq output (pyim-create-word string))
+          (message "将词条: %S 插入 personal file。" output))))))
 
 ;; ** 删词功能
 (defun pyim-delete-words-in-file (file)
