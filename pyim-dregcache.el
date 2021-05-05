@@ -420,6 +420,13 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
     (setq pyim-dregcache-icode2word
           (buffer-string))))
 
+(defun pyim-dregcache-upgrade-icode2word ()
+  "升级 icode2word 缓存。
+
+dregcache 只支持全拼和双拼，不能用于五笔之类的型码输入法，而
+update-icode2word 目前只要是用于更新型码输入法的 code-prefix, 所
+以不需要具体实现细节。")
+
 (defun pyim-dregcache-search-word-code-1 (word content)
   (let* ((case-fold-search t)
          (regexp (concat "^\\([a-z-]+\\)\\(.*\\) " "\\(" word " \\|" word "$\\)")))
