@@ -243,13 +243,17 @@ pyim 的选词框默认使用 *双行显示* 的样式，在一些特殊的情�
 
 ** 手动加词和删词
 
-1. `pyim-create-Ncchar-word-at-point 这是一组命令，从光标前提取N个汉字字符组成字
+1. `pyim-convert-string-at-point' 金手指命令，可以比较方便的添加和删除词条，比如：
+   在 "你好" 后面输入2, 然后运行金手指命令，可以将 “你好” 加入个人词库，在 “你好”
+   后面输入2-, 然后运行金手指命令，可以将 “你好” 从个人词库删除，如果用户选择了
+   一个词条，则运行金手指命令可以将选择的词条加入个人词库。
+2. `pyim-create-Ncchar-word-at-point' 这是一组命令，从光标前提取N个汉字字符组成字
    符串，并将其加入个人词库。
-2. `pyim-outcome-trigger' 以默认设置为例：在 “我爱吃红烧肉” 后输入 “5v”，可以将
+3. `pyim-outcome-trigger' 以默认设置为例：在 “我爱吃红烧肉” 后输入 “5v”，可以将
    “爱吃红烧肉”这个词条保存到用户个人词库。
-3. `pyim-create-word-from-selection', 选择一个词条，运行这个命令后，就可以将这个
+4. `pyim-create-word-from-selection', 选择一个词条，运行这个命令后，就可以将这个
    词条添加到个人词库。
-4. `pyim-delete-word' 从个人词库中删除当前高亮选择的词条。
+5. `pyim-delete-word' 从个人词库中删除当前高亮选择的词条。
 
 ** pyim 高级功能
 1. 根据环境自动切换到英文输入模式，使用 pyim-english-input-switch-functions 配置。
