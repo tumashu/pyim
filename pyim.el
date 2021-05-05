@@ -775,36 +775,59 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
                        (buffer-substring-no-properties
                         (region-beginning) (region-end))
                      (buffer-substring (point) (line-beginning-position))))
+           (str-before-1 (pyim-char-before-to-string 0))
+           (str-before-2 (pyim-char-before-to-string 1))
+           (str-before-3 (pyim-char-before-to-string 2))
            code length)
-      (cond ((string-match
-              ;; 创建一个 regexp, 用于提取出光标处一个适合
-              ;; 转换的字符串。
-              (format "[%s]+ *$"
-                      (cl-delete-duplicates
-                       (concat first-chars rest-chars "'-")))
-              string)
-             (setq code
-                   ;; 一些编程语言使用单引号 ' 做为字符串的标记，这里需要特殊处理。
-                   (replace-regexp-in-string
-                    "^[-']" ""
-                    (match-string 0 string)))
-             (setq length (length code))
-             (setq code (replace-regexp-in-string " +" "" code))
-             (when mark-active
-               (delete-region
-                (region-beginning) (region-end)))
-             (when (and (not mark-active) (> length 0))
-               (delete-char (- 0 length)))
-             (run-hooks 'pyim-convert-string-at-point-hook)
-             (when (> length 0)
-               (setq unread-command-events
-                     (append (listify-key-sequence code)
-                             unread-command-events))
-               (setq pyim-force-input-chinese t)))
-            ((pyim-string-match-p "[[:punct:]：－]" (pyim-char-before-to-string 0))
-             ;; 当光标前的一个字符是标点符号时，半角/全角切换。
-             (call-interactively 'pyim-punctuation-translate-at-point))
-            (t (message "Pyim: pyim-convert-string-at-point do noting."))))))
+      (cond
+       ;; 如果用户已经选择词条，就将此词条添加到个人词库。
+       ((region-active-p)
+        (pyim-create-word-from-selection))
+       ;; 删除用户自定义词条。比如：在一个中文字符串后输入 2-，运行此命令可以将
+       ;; 光标前两个中文字符组成的字符串，从个人词库删除。
+       ((and (eq (char-before) ?-)
+             (pyim-string-match-p "[0-9]" str-before-2)
+             (pyim-string-match-p "\\cc" str-before-3))
+        (delete-char -2)
+        (pyim-delete-word-at-point
+         (string-to-number str-before-2)))
+       ;; 快速保存用户自定义词条。比如：在一个中文字符串后输入 2，运行此命令可以
+       ;; 将光标前两个中文字符组成的字符串，保存到个人词库。
+       ((and (member (char-before) (number-sequence ?2 ?9))
+             (pyim-string-match-p "\\cc" str-before-2))
+        (delete-char -1)
+        (pyim-create-word-at-point
+         (string-to-number str-before-1)))
+       ;; 金手指功能
+       ((string-match
+         ;; 创建一个 regexp, 用于提取出光标处一个适合
+         ;; 转换的字符串。
+         (format "[%s]+ *$"
+                 (cl-delete-duplicates
+                  (concat first-chars rest-chars "'-")))
+         string)
+        (setq code
+              ;; 一些编程语言使用单引号 ' 做为字符串的标记，这里需要特殊处理。
+              (replace-regexp-in-string
+               "^[-']" ""
+               (match-string 0 string)))
+        (setq length (length code))
+        (setq code (replace-regexp-in-string " +" "" code))
+        (when mark-active
+          (delete-region
+           (region-beginning) (region-end)))
+        (when (and (not mark-active) (> length 0))
+          (delete-char (- 0 length)))
+        (run-hooks 'pyim-convert-string-at-point-hook)
+        (when (> length 0)
+          (setq unread-command-events
+                (append (listify-key-sequence code)
+                        unread-command-events))
+          (setq pyim-force-input-chinese t)))
+       ;; 当光标前的一个字符是标点符号时，半角/全角切换。
+       ((pyim-string-match-p "[[:punct:]：－]" (pyim-char-before-to-string 0))
+        (call-interactively 'pyim-punctuation-translate-at-point))
+       (t (message "Pyim: pyim-convert-string-at-point do noting."))))))
 
 ;; ** 编码反查功能
 (defun pyim-search-word-code ()
