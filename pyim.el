@@ -791,6 +791,11 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
         (delete-char -2)
         (pyim-delete-word-at-point
          (string-to-number str-before-2)))
+       ;; 输入"-"然后运行此命令，可以快速删除最近一次创建的词条。
+       ((and (eq (char-before) ?-)
+             (pyim-string-match-p "\\cc" str-before-2))
+        (delete-char -1)
+        (pyim-delete-last-word))
        ;; 快速保存用户自定义词条。比如：在一个中文字符串后输入 2，运行此命令可以
        ;; 将光标前两个中文字符组成的字符串，保存到个人词库。
        ((and (member (char-before) (number-sequence ?2 ?9))
