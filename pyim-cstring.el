@@ -298,26 +298,26 @@ code-prefix)。当RETURN-LIST 设置为 t 时，返回一个 code list。"
   (when (string-match-p "^\\cc+\\'" string)
     (let* ((prefix (pyim-scheme-get-option scheme-name :code-prefix))
            (func (intern (concat "pyim-cstring-to-xingma:" (symbol-name scheme-name))))
-           ;; 从 Dcache 中搜索 string 对应的型码 code.
-           ;; FIXME: 这里只找最长的 code, 这样处理可能在某些情况下是有问题的。
-           (dcache-code (cl-find-if
-                         (lambda (x)
-                           (equal (nth 0 (pyim-dcache-code-split x))
-                                  prefix))
-                         (sort
-                          (cl-copy-list (pyim-dcache-call-api 'search-word-code string))
-                          (lambda (a b) (> (length a) (length b))))))
-           (code (or (nth 1 (pyim-dcache-code-split dcache-code))
-                     (and (functionp func)
-                          (funcall func string scheme-name)))))
-      (when code
+           (dcache-codes (cl-remove-if-not
+                          (lambda (x)
+                            (equal (nth 0 (pyim-dcache-code-split x))
+                                   prefix))
+                          (sort (cl-copy-list (pyim-dcache-call-api 'search-word-code string))
+                                (lambda (a b) (> (length a) (length b))))))
+           (codes (or (mapcar
+                       (lambda (x)
+                         (nth 1 (pyim-dcache-code-split x)))
+                       dcache-codes)
+                      (and (functionp func)
+                           (funcall func string scheme-name)))))
+      (when codes
         (if return-list
-            (list code)
-          code)))))
+            codes
+          ;; 如果要返回一个字符串，那就返回第一个，也就是最长的那个编码。
+          (car codes))))))
 
 (defun pyim-cstring-to-xingma:wubi (string &optional scheme-name)
-  "返回汉字 STRING 的五笔编码(不包括 code-prefix)。当 RETURN-LIST
-设置为 t 时，返回一个编码列表。"
+  "返回汉字 STRING 的五笔编码 (不包括 code-prefix) 编码列表。"
   (let ((length (length string))
         (string (split-string string "" t)))
     (cond
@@ -326,17 +326,17 @@ code-prefix)。当RETURN-LIST 设置为 t 时，返回一个 code list。"
       (let ((s1 (pyim-cstring-to-xingma (nth 0 string) scheme-name))
             (s2 (pyim-cstring-to-xingma (nth 1 string) scheme-name)))
         (when (and s1 s2)
-          (concat (substring s1 0 2)
-                  (substring s2 0 2)))))
+          (list (concat (substring s1 0 2)
+                        (substring s2 0 2))))))
      ;; 三字词，取前二字的首编码，及第三个字的前两个编码
      ((eq length 3)
       (let ((s1 (pyim-cstring-to-xingma (nth 0 string) scheme-name))
             (s2 (pyim-cstring-to-xingma (nth 1 string) scheme-name))
             (s3 (pyim-cstring-to-xingma (nth 2 string) scheme-name)))
         (when (and s1 s2 s3)
-          (concat (substring s1 0 1)
-                  (substring s2 0 1)
-                  (substring s3 0 2)))))
+          (list (concat (substring s1 0 1)
+                        (substring s2 0 1)
+                        (substring s3 0 2))))))
      ;; 四字词及以上，分别前三个字及最后一个字的首编码
      ((> length 3)
       (let ((s1 (pyim-cstring-to-xingma (nth 0 string) scheme-name))
@@ -344,10 +344,10 @@ code-prefix)。当RETURN-LIST 设置为 t 时，返回一个 code list。"
             (s3 (pyim-cstring-to-xingma (nth 2 string) scheme-name))
             (s4 (pyim-cstring-to-xingma (nth (1- length) string) scheme-name)))
         (when (and s1 s2 s3 s4)
-          (concat (substring s1 0 1)
-                  (substring s2 0 1)
-                  (substring s3 0 1)
-                  (substring s4 0 1)))))
+          (list (concat (substring s1 0 1)
+                        (substring s2 0 1)
+                        (substring s3 0 1)
+                        (substring s4 0 1))))))
      (t nil))))
 
 ;; ** 获取光标处中文字符串或者中文词条的功能
