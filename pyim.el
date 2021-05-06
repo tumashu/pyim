@@ -838,17 +838,18 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
 
 ;; ** 编码反查功能
 (defun pyim-search-word-code ()
-  "选择词条，然后反查它的 code. 这个功能对五笔用户有用。"
+  "选择词条，然后反查它的 code。"
   (interactive)
   (when (region-active-p)
     (let* ((string (buffer-substring-no-properties (region-beginning) (region-end)))
            code)
       (if (not (string-match-p "^\\cc+\\'" string))
-          (error "不是纯中文字符串")
-        (setq code (pyim-dcache-search-word-code string))
-        (if code
-            (message "%S -> %S " string code)
-          (message "没有找到 %S 对应的编码。" string))))))
+          (error "PYIM: 不是纯中文字符串。")
+        (setq codes (pyim-cstring-to-codes string pyim-default-scheme))
+        (if codes
+            (message "PYIM (%S): %S -> %S" pyim-default-scheme string codes)
+          (message "PYIM: 没有找到 %S 对应的编码。" string)))
+      (deactivate-mark))))
 
 ;; ** pyim 中文字符串工具
 (require 'pyim-cstring)
