@@ -787,7 +787,8 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
       (cond
        ;; 如果用户已经选择词条，就将此词条添加到个人词库。
        ((region-active-p)
-        (pyim-create-word-from-selection))
+        (pyim-create-word-from-selection)
+        (deactivate-mark))
        ;; 删除用户自定义词条。比如：在一个中文字符串后输入 2-，运行此命令可以将
        ;; 光标前两个中文字符组成的字符串，从个人词库删除。
        ((and (eq (char-before) ?-)
