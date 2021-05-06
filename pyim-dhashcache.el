@@ -348,7 +348,7 @@ code 对应的中文词条了。
                       (new-key-words (gethash new-key pyim-dhashcache-icode2word))
                       (merged-value (delete-dups `(,@new-key-words ,@key-words))))
                  (puthash new-key merged-value pyim-dhashcache-icode2word)
-                 (message "PYIM icode2word upgrade: %S %S -> %S %S" key key-words new-key new-key-words)
+                 (message "PYIM icode2word upgrade: %S %S -> %S %S" key key-words new-key merged-value)
                  (when delete-old-key-p
                    (remhash key pyim-dhashcache-icode2word)
                    (message "PYIM icode2word upgrade: %S has been deleted." key)))))
