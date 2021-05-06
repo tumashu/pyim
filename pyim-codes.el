@@ -74,22 +74,6 @@
                    x)))
        imobj))))
 
-(defun pyim-code-search (word scheme-name)
-  "从 SCHEME-NAME 对应的输入法词库中，搜索 WORD 对应的 code.
-
-返回最长的 code."
-  (when (and (stringp word)
-             (> (length word) 0))
-    (let* ((prefix (pyim-scheme-get-option scheme-name :code-prefix))
-           (code (cl-find-if
-                  (lambda (x)
-                    (equal (nth 0 (pyim-dcache-code-split x))
-                           prefix))
-                  (sort
-                   (cl-copy-list (pyim-dcache-call-api 'search-word-code word))
-                   (lambda (a b) (> (length a) (length b)))))))
-      (nth 1 (pyim-dcache-code-split code)))))
-
 ;; * Footer
 (provide 'pyim-codes)
 

@@ -296,17 +296,33 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
   "返回汉字 STRING 对应形码方案 SCHEME-NAME 的 code (不包括
 code-prefix)。当RETURN-LIST 设置为 t 时，返回一个 code list。"
   (let* ((fun (intern (concat "pyim-cstring-to-xingma:" (symbol-name scheme-name))))
-         (code (and fun (funcall fun string))))
+         (code (and fun (funcall fun string scheme-name))))
     (when code
       (if return-list
           (list code)
         code))))
 
-(defun pyim-cstring-to-xingma:wubi (string)
+(defun pyim-cstring-search-xingma (word scheme-name)
+  "从 SCHEME-NAME 对应的输入法词库中，搜索 WORD 对应的 code.
+
+返回最长的 code."
+  (when (and (stringp word)
+             (> (length word) 0))
+    (let* ((prefix (pyim-scheme-get-option scheme-name :code-prefix))
+           (code (cl-find-if
+                  (lambda (x)
+                    (equal (nth 0 (pyim-dcache-code-split x))
+                           prefix))
+                  (sort
+                   (cl-copy-list (pyim-dcache-call-api 'search-word-code word))
+                   (lambda (a b) (> (length a) (length b)))))))
+      (nth 1 (pyim-dcache-code-split code)))))
+
+(defun pyim-cstring-to-xingma:wubi (string &optional scheme-name)
   "返回汉字 STRING 的五笔编码(不包括 code-prefix)。当 RETURN-LIST
 设置为 t 时，返回一个编码列表。"
   (when (string-match-p "^\\cc+\\'" string)
-    (let ((code (pyim-code-search string 'wubi))
+    (let ((code (pyim-cstring-search-xingma string (or scheme-name 'wubi)))
           (len (length string)))
       (unless code
         (when (= len 1)

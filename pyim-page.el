@@ -302,7 +302,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
      ;; 用于标记辅助输入法
      (when (and (eq pyim-assistant-scheme 'quanpin)
                 (eq pyim-assistant-scheme-enable t))
-       (let ((code (pyim-code-search
+       (let ((code (pyim-cstring-to-xingma
                     (pyim-candidate-parse
                      (nth (1- pyim-candidate-position)
                           pyim-candidates))
