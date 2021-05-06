@@ -350,6 +350,14 @@ code-prefix)。当RETURN-LIST 设置为 t 时，返回一个 code list。"
                         (substring s4 0 1))))))
      (t nil))))
 
+(defun pyim-cstring-to-codes (string scheme-name)
+  "将 STRING 转换为 SCHEME-NAME 对应的 codes."
+  (let ((class (pyim-scheme-get-option scheme-name :class)))
+    (cond ((eq class 'xingma)
+           (pyim-cstring-to-xingma string scheme-name t))
+          ;;拼音使用了多音字校正
+          (t (pyim-cstring-to-pinyin string nil "-" t nil t)))))
+
 ;; ** 获取光标处中文字符串或者中文词条的功能
 (defun pyim-cstring-at-point (&optional number)
   "获取光标一个中文字符串，字符数量为：NUMBER."
