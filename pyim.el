@@ -434,7 +434,7 @@ REFRESH-COMMON-DCACHE 已经废弃，不要再使用了。"
   (setq pyim-force-input-chinese nil)
   (pyim-page-hide)
   (pyim-entered-erase-buffer)
-  (setq pyim-entered-longest nil)
+  (setq pyim-cstring-to-code-criteria nil)
   (pyim-entered-refresh-timer-reset)
   (let* ((class (pyim-scheme-get-option (pyim-scheme-name) :class))
          (func (intern (format "pyim-terminate-translation:%S" class))))
@@ -467,7 +467,7 @@ BUG：拼音无法有效地处理多音字。"
     (let* ((scheme-name (pyim-scheme-name))
            (class (pyim-scheme-get-option scheme-name :class))
            (code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
-           (codes (pyim-cstring-to-codes word scheme-name pyim-entered-longest)))
+           (codes (pyim-cstring-to-codes word scheme-name pyim-cstring-to-code-criteria)))
       ;; 保存对应词条的词频
       (when (> (length word) 0)
         (pyim-dcache-update-iword2count word prepend wordcount-handler))
@@ -590,13 +590,14 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
 (defun pyim-select-word ()
   "从选词框中选择当前词条，然后删除该词条对应拼音。"
   (interactive)
-  ;; 记录用户在没有多次选词前的输入，用于多音字矫正。
-  (setq pyim-entered-longest
-        (let ((entered (pyim-entered-get 'point-before)))
-          (if (> (length pyim-entered-longest)
-                 (length entered))
-              pyim-entered-longest
-            entered)))
+  (setq pyim-cstring-to-code-criteria
+        (let ((str (mapconcat #'identity
+                              (pyim-codes-create (car pyim-imobjs) (pyim-scheme-name))
+                              "")))
+          (if (> (length pyim-cstring-to-code-criteria)
+                 (length str))
+              pyim-cstring-to-code-criteria
+            str)))
   (if (null pyim-candidates)  ; 如果没有选项，输入空格
       (progn
         (pyim-outcome-handle 'last-char)

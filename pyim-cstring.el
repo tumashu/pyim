@@ -33,6 +33,15 @@
   "Chinese string tools for pyim."
   :group 'pyim)
 
+(defvar pyim-cstring-to-code-criteria nil
+  "用于 code 选取的基准字符串。
+
+`pyim-cstring-to-codes' 获取到一个词条的多个 codes 时，会将所有的
+codes 与这个字符串进行比较，然后选择一个最相似的 code 输出.
+
+这个字符串主要用于全拼和双拼输入法的多音字矫正，一般使用用户输入
+生成的 imobjs 转换得到，保留了用户原始输入的许多信息。")
+
 ;; ** 中文字符串分词相关功能
 (defun pyim-cstring-split-to-list (chinese-string &optional max-word-length delete-dups prefer-short-word)
   "一个基于 pyim 的中文分词函数。这个函数可以将中文字符
@@ -350,7 +359,7 @@ code-prefix)。当RETURN-LIST 设置为 t 时，返回一个 code list。"
                         (substring s4 0 1))))))
      (t nil))))
 
-(defun pyim-cstring-to-codes (string scheme-name &optional entered)
+(defun pyim-cstring-to-codes (string scheme-name &optional criteria)
   "将 STRING 转换为 SCHEME-NAME 对应的 codes."
   (let ((class (pyim-scheme-get-option scheme-name :class)))
     (cond ((eq class 'xingma)
@@ -358,15 +367,15 @@ code-prefix)。当RETURN-LIST 设置为 t 时，返回一个 code list。"
           ;;拼音使用了多音字校正
           (t (let ((codes (pyim-cstring-to-pinyin string nil "-" t nil t))
                    codes-sorted)
-               (if (< (length entered) 1)
+               (if (< (length criteria) 1)
                    codes
-                 ;; 将 code 与用户输入 entered 比对，选取一个与用户输入最类似的
+                 ;; 将 所有 codes 与 criteria 字符串比对，选取相似度最高的一个
                  ;; code. 这种处理方式适合拼音输入法。
                  (setq codes-sorted
                        (sort codes
                              (lambda (a b)
-                               (< (string-distance a entered)
-                                  (string-distance b entered)))))
+                               (< (string-distance a criteria)
+                                  (string-distance b criteria)))))
                  (list (car codes-sorted))))))))
 
 ;; ** 获取光标处中文字符串或者中文词条的功能
