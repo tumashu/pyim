@@ -465,8 +465,9 @@ BUG：拼音无法有效地处理多音字。"
     (setq pyim-last-created-word word)
     (let* ((scheme-name (pyim-scheme-name))
            (class (pyim-scheme-get-option scheme-name :class))
+           (entered (pyim-entered-get 'point-before))
            (code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
-           (codes (pyim-cstring-to-codes word scheme-name)))
+           (codes (pyim-cstring-to-codes word scheme-name entered)))
       ;; 保存对应词条的词频
       (when (> (length word) 0)
         (pyim-dcache-update-iword2count word prepend wordcount-handler))

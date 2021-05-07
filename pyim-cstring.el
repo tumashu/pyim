@@ -350,13 +350,22 @@ code-prefix)。当RETURN-LIST 设置为 t 时，返回一个 code list。"
                         (substring s4 0 1))))))
      (t nil))))
 
-(defun pyim-cstring-to-codes (string scheme-name)
+(defun pyim-cstring-to-codes (string scheme-name &optional entered)
   "将 STRING 转换为 SCHEME-NAME 对应的 codes."
   (let ((class (pyim-scheme-get-option scheme-name :class)))
     (cond ((eq class 'xingma)
            (pyim-cstring-to-xingma string scheme-name t))
           ;;拼音使用了多音字校正
-          (t (pyim-cstring-to-pinyin string nil "-" t nil t)))))
+          (t (let* ((entered (or entered ""))
+                    (codes (pyim-cstring-to-pinyin string nil "-" t nil t))
+                    (codes-sorted
+                     (sort codes
+                           (lambda (a b)
+                             (< (string-distance a entered)
+                                (string-distance b entered))))))
+               ;; 将 code 与用户输入 entered 比对，选取一个与用户输入最类似的
+               ;; code. 这种处理方式适合拼音输入法。
+               (list (car codes-sorted)))))))
 
 ;; ** 获取光标处中文字符串或者中文词条的功能
 (defun pyim-cstring-at-point (&optional number)
