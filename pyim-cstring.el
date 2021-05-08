@@ -367,7 +367,9 @@ code-prefix)。当RETURN-LIST 设置为 t 时，返回一个 code list。"
           ;;拼音使用了多音字校正
           (t (let ((codes (pyim-cstring-to-pinyin string nil "-" t nil t))
                    codes-sorted)
-               (if (< (length criteria) 1)
+               (if (or (< (length criteria) 1)
+                       ;; Emacs 27.1 include `string-distance'.
+                       (not (functionp 'string-distance)))
                    codes
                  ;; 将 所有 codes 与 criteria 字符串比对，选取相似度最高的一个
                  ;; code. 这种处理方式适合拼音输入法。
