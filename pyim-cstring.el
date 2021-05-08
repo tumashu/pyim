@@ -360,7 +360,14 @@ code-prefix)。当RETURN-LIST 设置为 t 时，返回一个 code list。"
      (t nil))))
 
 (defun pyim-cstring-to-codes (string scheme-name &optional criteria)
-  "将 STRING 转换为 SCHEME-NAME 对应的 codes."
+  "将 STRING 转换为 SCHEME-NAME 对应的 codes.
+
+当 pyim class 为拼音，并且提供 CRITERIA 字符串时，检索到的所有
+codes 会和这个字符串进行比较，然后选择一个相似度最高的 code 作为
+输出，这种处理方式适合拼音输入法，形码输入法一般不需要类似的操作。
+
+CRITERIA 字符串一般是通过 imobjs 构建的，它保留了用户原始的输入信
+息。"
   (let ((class (pyim-scheme-get-option scheme-name :class)))
     (cond ((eq class 'xingma)
            (pyim-cstring-to-xingma string scheme-name t))
