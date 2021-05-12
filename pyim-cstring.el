@@ -28,6 +28,7 @@
 ;;; Code:
 ;; * 代码                                                           :code:
 (require 'cl-lib)
+(require 'pyim-common)
 
 (defgroup pyim-cstring nil
   "Chinese string tools for pyim."
@@ -374,17 +375,15 @@ CRITERIA 字符串一般是通过 imobjs 构建的，它保留了用户原始的
           ;;拼音使用了多音字校正
           (t (let ((codes (pyim-cstring-to-pinyin string nil "-" t nil t))
                    codes-sorted)
-               (if (or (< (length criteria) 1)
-                       ;; Emacs 27.1 include `string-distance'.
-                       (not (functionp 'string-distance)))
+               (if (< (length criteria) 1)
                    codes
                  ;; 将 所有 codes 与 criteria 字符串比对，选取相似度最高的一个
                  ;; code. 这种处理方式适合拼音输入法。
                  (setq codes-sorted
                        (sort codes
                              (lambda (a b)
-                               (< (string-distance a criteria)
-                                  (string-distance b criteria)))))
+                               (< (pyim-string-distance a criteria)
+                                  (pyim-string-distance b criteria)))))
                  (list (car codes-sorted))))))))
 
 ;; ** 获取光标处中文字符串或者中文词条的功能
