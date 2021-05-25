@@ -108,6 +108,8 @@
     (cons shenmu
           (substring pinyin (length shenmu)))))
 
+(declare-function 'pyim-imobjs-find-fuzzy:quanpin-1 "pyim-imobj")
+
 (defun pyim-pinyin-get-charpy (pinyin)
   "将拼音字符串 PINYIN 分解成声母，韵母和剩余部分."
   (let* ((x (pyim-pinyin-get-shenmu pinyin))
