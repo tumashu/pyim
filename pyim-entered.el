@@ -174,7 +174,6 @@ TYPE 取值为 point-after, 返回 entered buffer 中 point 之后的字符
       end-position)))
 
 (declare-function pyim-terminate-translation "pyim")
-(declare-function pyim-convert-string-at-point "pyim")
 
 (defun pyim-entered-refresh (&optional no-delay)
   "延迟 `pyim-entered-exhibit-delay-ms' 显示备选词等待用户选择。"

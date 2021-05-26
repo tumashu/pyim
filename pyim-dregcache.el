@@ -266,8 +266,6 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
       (setq start (+ start 2 (length code) (length word))))
     output))
 
-(declare-function pyim-pymap-py2cchar-get "pyim-pymap" (pinyin &optional equal-match return-list include-seperator))
-
 (defun pyim-dregcache-get (code &optional from)
   "从 `pyim-dregcache-cache' 搜索 CODE, 得到对应的词条."
   (if (or (memq 'icode2word from)

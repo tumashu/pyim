@@ -173,8 +173,7 @@
                    (mapcar #'car pyim-punctuation-dict))
            (string-match "^[ \t]*$" line-string)))))
 
-(declare-function pyim-char-before-to-string "pyim" (num))
-(declare-function pyim-entered-get "pyim" (&optional type))
+(declare-function pyim-entered-get "pyim-entered" (&optional type))
 (declare-function org-inside-LaTeX-fragment-p "org")
 (declare-function org-inside-latex-macro-p "org")
 

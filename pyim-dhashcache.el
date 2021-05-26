@@ -34,6 +34,7 @@
 ;;; Code:
 ;; * 代码                                                                 :code:
 (require 'pyim-common)
+(require 'pyim-pymap)
 (require 'pyim-dcache)
 (require 'pyim-scheme)
 (require 'async nil t)
@@ -256,8 +257,6 @@ DCACHE 是一个 code -> words 的 hashtable.
                          value))))
      dcache)
     (pyim-dcache-write-file file confirm)))
-
-(declare-function pyim-pymap-py2cchar-get "pyim-pymap" (pinyin &optional equal-match return-list include-seperator))
 
 (defun pyim-dhashcache-get (code &optional from)
   "从 FROM 对应的 dcaches 中搜索 CODE, 得到对应的词条.
