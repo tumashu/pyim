@@ -173,6 +173,9 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
    ;;pyim-english-input-switch-functions
    describe-current-input-method-function))
 
+;; Fix warn
+(defvar pyim-cstring-to-code-criteria)
+
 ;; ** pyim 输入法定义
 (defun pyim-input-method (key)
   "得到需要插入到 buffer 的字符串, 并将其插入到待输入 buffer.
@@ -465,7 +468,6 @@ BUG：拼音无法有效地处理多音字。"
     ;; 记录最近创建的词条，用于快速删词功能。
     (setq pyim-last-created-word word)
     (let* ((scheme-name (pyim-scheme-name))
-           (class (pyim-scheme-get-option scheme-name :class))
            (code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
            (codes (pyim-cstring-to-codes word scheme-name pyim-cstring-to-code-criteria)))
       ;; 保存对应词条的词频
@@ -853,7 +855,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   (interactive)
   (when (region-active-p)
     (let* ((string (buffer-substring-no-properties (region-beginning) (region-end)))
-           code)
+           codes)
       (if (not (string-match-p "^\\cc+\\'" string))
           (error "PYIM: 不是纯中文字符串。")
         (setq codes (pyim-cstring-to-codes string pyim-default-scheme))

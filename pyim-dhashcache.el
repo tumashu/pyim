@@ -59,24 +59,6 @@
           (> (or (gethash a pyim-dhashcache-iword2count) 0)
              (or (gethash b pyim-dhashcache-iword2count) 0)))))
 
-(defun pyim-dcache-code-split (code)
-  "将 CODE 分成 code-prefix 和 rest code."
-  (cond
-   ;; 处理 nil
-   ((not code) nil)
-   ;; 兼容性代码：旧版本的 pyim 使用一个标点符号作为 code-prefix
-   ((pyim-string-match-p "^[[:punct:]]" code)
-    (list (substring code 0 1) (substring code 1)))
-   ;; 拼音输入法不使用 code-prefix, 并且包含 -
-   ((pyim-string-match-p "-" code)
-    (list "" code))
-   ((not (pyim-string-match-p "[[:punct:]]" code))
-    (list "" code))
-   ;; 新 code-prefix 使用类似 "wubi/" 的格式。
-   (t (let ((x (split-string code "/")))
-        (list (concat (nth 0 x) "/")
-              (nth 1 x))))))
-
 (defun pyim-dhashcache-get-shortcode (code)
   "获取一个 CODE 的所有简写.
 
@@ -341,7 +323,7 @@ code 对应的中文词条了。
             (new-prefix (cdr ruler)))
         (dolist (old-prefix old-prefix-list)
           (maphash
-           (lambda (key value)
+           (lambda (key _value)
              (when (string-prefix-p old-prefix key)
                (let* ((key-words (gethash key pyim-dhashcache-icode2word))
                       (new-key (concat new-prefix (string-remove-prefix old-prefix key)))
