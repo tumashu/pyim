@@ -185,31 +185,10 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
     (dolist (imobj imobjs)
       (setq fuzzy-imobjs
             (pyim-permutate-list
-             (mapcar #'pyim-imobjs-find-fuzzy:quanpin-1 imobj)))
+             (mapcar #'pyim-pinyin-find-fuzzy imobj)))
       (push (car fuzzy-imobjs) result1)
       (setq result2 (append result2 (cdr fuzzy-imobjs))))
     (append result1 result2)))
-
-;; (\"f\" \"en\" \"f\" \"en\") -> ((\"f\" \"en\" \"f\" \"en\") (\"f\" \"eng\" \"f\" \"en\"))
-(defun pyim-imobjs-find-fuzzy:quanpin-1 (imelem)
-  "Find all fuzzy pinyins."
-  (cl-labels ((find-list (str list)
-                         (let (result)
-                           (dolist (x list)
-                             (when (member str x)
-                               (setq list nil)
-                               (setq result
-                                     (delete-dups
-                                      `(,str ,@(cl-copy-list x))))))
-                           (or result (list str)))))
-    (let* ((fuzzy-alist pyim-pinyin-fuzzy-alist)
-           (sm-list (find-list (nth 0 imelem) fuzzy-alist))
-           (ym-list (find-list (nth 1 imelem) fuzzy-alist))
-           result)
-      (dolist (a sm-list)
-        (dolist (b ym-list)
-          (push `(,a ,b ,@(nthcdr 2 imelem)) result)))
-      (reverse result))))
 
 ;; * Footer
 (provide 'pyim-imobjs)

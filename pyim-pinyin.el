@@ -108,8 +108,6 @@
     (cons shenmu
           (substring pinyin (length shenmu)))))
 
-(declare-function 'pyim-imobjs-find-fuzzy:quanpin-1 "pyim-imobjs")
-
 (defun pyim-pinyin-get-charpy (pinyin)
   "将拼音字符串 PINYIN 分解成声母，韵母和剩余部分."
   (let* ((x (pyim-pinyin-get-shenmu pinyin))
@@ -124,7 +122,7 @@
                   (pyim-pymap-py2cchar-get char-pinyin t))
                 (mapcar (lambda (x)
                           (concat (nth 0 x) (nth 1 x)))
-                        (pyim-imobjs-find-fuzzy:quanpin-1
+                        (pyim-pinyin-find-fuzzy
                          (list shenmu yunmu shenmu yunmu))))))
       (while (> i 0)
         (setq yunmu (substring yunmu-and-rest 0 i))
@@ -153,6 +151,29 @@
           (setq yunmu ""))))
     (cons (list shenmu yunmu shenmu yunmu)
           (substring yunmu-and-rest (length yunmu)))))
+
+;; (\"f\" \"en\" \"f\" \"en\") -> ((\"f\" \"en\" \"f\" \"en\") (\"f\" \"eng\" \"f\" \"en\"))
+(defun pyim-pinyin-find-fuzzy (info)
+  "Find all fuzzy pinyins.
+
+INFO is a list like: (shenmu yunmu shenmu yunmu)"
+  (cl-labels ((find-list (str list)
+                         (let (result)
+                           (dolist (x list)
+                             (when (member str x)
+                               (setq list nil)
+                               (setq result
+                                     (delete-dups
+                                      `(,str ,@(cl-copy-list x))))))
+                           (or result (list str)))))
+    (let* ((fuzzy-alist pyim-pinyin-fuzzy-alist)
+           (sm-list (find-list (nth 0 info) fuzzy-alist))
+           (ym-list (find-list (nth 1 info) fuzzy-alist))
+           result)
+      (dolist (a sm-list)
+        (dolist (b ym-list)
+          (push `(,a ,b ,@(nthcdr 2 info)) result)))
+      (reverse result))))
 
 (defun pyim-pinyin-split (pinyin)
   "将一个代表拼音的字符串 PINYIN, 分解为声母韵母对组成的列表.
