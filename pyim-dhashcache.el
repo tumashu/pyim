@@ -33,11 +33,12 @@
 
 ;;; Code:
 ;; * 代码                                                                 :code:
+(require 'cl-lib)
+(require 'async nil t)
 (require 'pyim-common)
 (require 'pyim-pymap)
 (require 'pyim-dcache)
 (require 'pyim-scheme)
-(require 'async nil t)
 
 ;; Pyim 词库缓存文件，注意：变量名称中不能出现 ":" 等，不能作为文件名称的字符。
 (defvar pyim-dhashcache-code2word nil)
