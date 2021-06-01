@@ -236,26 +236,19 @@ Return the input string.
              ;; 插入 preview string, pyim *强制* 将其设置为 nil
              (input-method-use-echo-area nil)
              (modified-p (buffer-modified-p))
-             last-command-event last-command this-command inhibit-record)
+             last-command-event last-command this-command)
 
         (setq pyim-translating t)
         (pyim-entered-erase-buffer)
         (pyim-outcome-handle "")
 
         (when key
-          (setq unread-command-events
-                (cons key unread-command-events)
-                inhibit-record t))
+          (pyim-add-unread-command-events key))
 
         (while pyim-translating
           (set-buffer-modified-p modified-p)
-          (let* (;; We inhibit record_char only for the first key,
-                 ;; because it was already recorded before read_char
-                 ;; called quail-input-method.
-                 (inhibit--record-char inhibit-record)
-                 (keyseq (read-key-sequence nil nil nil t))
+          (let* ((keyseq (read-key-sequence nil nil nil t))
                  (cmd (lookup-key pyim-mode-map keyseq)))
-            (setq inhibit-record nil)
             ;; (message "key: %s, cmd:%s\nlcmd: %s, lcmdv: %s, tcmd: %s"
             ;;          key cmd last-command last-command-event this-command)
             (if (if key
@@ -273,8 +266,7 @@ Return the input string.
                            (beep))))
               ;; KEYSEQ is not defined in the translation keymap.
               ;; Let's return the event(s) to the caller.
-              (setq unread-command-events
-                    (string-to-list (this-single-command-raw-keys)))
+              (pyim-add-unread-command-events (this-single-command-raw-keys) t)
               ;; (message "unread-command-events: %s" unread-command-events)
               (pyim-terminate-translation))))
         ;; (message "return: %s" (pyim-outcome-get))
@@ -840,9 +832,8 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
           (delete-char (- 0 length)))
         (run-hooks 'pyim-convert-string-at-point-hook)
         (when (> length 0)
-          (setq unread-command-events
-                (append (listify-key-sequence code)
-                        unread-command-events))
+          (pyim-add-unread-command-events
+           (listify-key-sequence code))
           (setq pyim-force-input-chinese t)))
        ;; 当光标前的一个字符是标点符号时，半角/全角切换。
        ((pyim-string-match-p "[[:punct:]：－]" (pyim-char-before-to-string 0))

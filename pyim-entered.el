@@ -28,6 +28,7 @@
 ;;; Code:
 ;; * 代码                                                           :code:
 (require 'cl-lib)
+(require 'pyim-common)
 
 (defgroup pyim-entered nil
   "Entered tools for pyim."
@@ -246,10 +247,9 @@ TYPE 取值为 point-after, 返回 entered buffer 中 point 之后的字符
         ;; autoselector 机制已经触发的时候，如果发现 entered buffer 中
         ;; point 后面还有未处理的输入，就将其转到下一轮处理，这种情况
         ;; 很少出现，一般是型码输入法，entered 编辑的时候有可能触发。
-        (setq unread-command-events
-              (append (listify-key-sequence (pyim-entered-get 'point-after))
-                      unread-command-events))
-        (push last-command-event unread-command-events)
+        (pyim-add-unread-command-events
+         (listify-key-sequence (pyim-entered-get 'point-after)))
+        (pyim-add-unread-command-events last-command-event)
         (pyim-terminate-translation))
        ;; 假设用户已经输入 "niha", 然后按了 "o" 键，那么，当前
        ;; entered 就是 "nihao". 如果 autoselector 函数返回一个 list:
@@ -266,9 +266,8 @@ TYPE 取值为 point-after, 返回 entered buffer 中 point 之后的字符
                     (list str)
                   pyim-candidates)))
           (pyim-outcome-handle 'candidate))
-        (setq unread-command-events
-              (append (listify-key-sequence (pyim-entered-get 'point-after))
-                      unread-command-events))
+        (pyim-add-unread-command-events
+         (listify-key-sequence (pyim-entered-get 'point-after)))
         (pyim-terminate-translation))
        (t (setq pyim-candidate-position 1)
           (pyim-preview-refresh)
