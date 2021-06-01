@@ -163,28 +163,31 @@ for example: https://github.com/ch11ng/exwm/pull/831"
 		            (funcall in (1- i) (1- j)))))))
       (funcall in l1 l2))))
 
-(if (fboundp 'quail-add-unread-command-events)
-    (defalias 'pyim-add-unread-command-events 'quail-add-unread-command-events)
-  (defun pyim-add-unread-command-events (key &optional reset)
-    "Add KEY to `unread-command-events', ensuring that it is not recorded.
-If KEY is a character, it is prepended to `unread-command-events' as
-a cons cell of the form (no-record . KEY).
-If KEY is a vector of events, the events in the vector are prepended
-to `unread-command-events', after converting each event to a cons cell
-of the form (no-record . EVENT).
-Quail puts keys back in `unread-command-events' to be handled again,
-and when it does this these keys have already been recorded in the
-recent keys and in the keyboard macro being defined, which means that
-recording them again creates duplicates.
-When RESET is non-nil, the events in `unread-command-events' are first
-discarded."
-    (if reset (setq unread-command-events nil))
-    (setq unread-command-events
-          (if (characterp key)
-              (cons (cons 'no-record key) unread-command-events)
-            (append (mapcan (lambda (e) (list (cons 'no-record e)))
-                            (append key nil))
-                    unread-command-events)))))
+(defun pyim-add-unread-command-events (key &optional reset)
+  "Add KEY to `unread-command-events', ensuring that it is not recorded.
+
+If KEY is a character, it is prepended to `unread-command-events'
+as a cons cell of the form (no-record . KEY).
+
+If KEY is a vector of events, the events in the vector are
+prepended to `unread-command-events', after converting each event
+to a cons cell of the form (no-record . EVENT).
+
+Pyim puts keys back in `unread-command-events' to be handled
+again, and when it does this these keys have already been
+recorded in the recent keys and in the keyboard macro being
+defined, which means that recording them again creates
+duplicates.  When RESET is non-nil, the events in
+`unread-command-events' are first discarded.
+
+This function is a fork of `quail-add-unread-command-events'."
+  (if reset (setq unread-command-events nil))
+  (setq unread-command-events
+        (if (characterp key)
+            (cons (cons 'no-record key) unread-command-events)
+          (append (mapcan (lambda (e) (list (cons 'no-record e)))
+                          (append key nil))
+                  unread-command-events))))
 
 ;; * Footer
 (provide 'pyim-common)
