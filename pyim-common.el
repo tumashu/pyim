@@ -181,7 +181,8 @@ duplicates.  When RESET is non-nil, the events in
 `unread-command-events' are first discarded.
 
 This function is a fork of `quail-add-unread-command-events'."
-  (if reset (setq unread-command-events nil))
+  (when reset
+    (setq unread-command-events nil))
   (setq unread-command-events
         (if (characterp key)
             (cons (cons 'no-record key) unread-command-events)
