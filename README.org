@@ -3,6 +3,8 @@
 #+AUTHOR: Feng Shu
 
 #+html: <a href="http://elpa.gnu.org/packages/pyim.html"><img alt="GNU ELPA" src="https://elpa.gnu.org/packages/pyim.svg"/></a>
+#+html: <a href="http://elpa.gnu.org/devel/pyim.html"><img alt="GNU-devel ELPA" src="https://elpa.gnu.org/devel/pyim.svg"/></a>
+#+html: <a href="https://melpa.org/#/pyim"><img alt="MELPA" src="https://melpa.org/packages/pyim-badge.svg"/></a>
 
 * Changlog
 
