@@ -219,7 +219,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
              (overlay-start pyim-preview-overlay)))
            (t (message (pyim-page-style:minibuffer page-info)))))))))
 
-(declare-function pyim-terminate-translation "pyim")
+(declare-function pyim-refresh-terminate "pyim-refresh")
 
 (defun pyim-page-next-page (arg)
   "Pyim page 翻页命令.
@@ -236,7 +236,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
   (if (= (length (pyim-entered-get 'point-before)) 0)
       (progn
         (pyim-outcome-handle 'last-char)
-        (pyim-terminate-translation))
+        (pyim-refresh-terminate))
     (let ((new (+ pyim-candidate-position (* pyim-page-length arg) 1))
           maxpos)
       (setq maxpos (+ 1 (length pyim-candidates)))
@@ -257,7 +257,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
   (if (= (length (pyim-entered-get 'point-before)) 0)
       (progn
         (pyim-outcome-handle 'last-char)
-        (pyim-terminate-translation))
+        (pyim-refresh-terminate))
     (let ((new (+ pyim-candidate-position arg))
           len)
       (setq len (length pyim-candidates))

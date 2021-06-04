@@ -268,7 +268,7 @@ Return the input string.
               ;; Let's return the event(s) to the caller.
               (pyim-add-unread-command-events (this-single-command-raw-keys) t)
               ;; (message "unread-command-events: %s" unread-command-events)
-              (pyim-terminate-translation))))
+              (pyim-refresh-terminate))))
         ;; (message "return: %s" (pyim-outcome-get))
         (pyim-magic-convert (pyim-outcome-get)))
     ;; Since KEY doesn't start any translation, just return it.
@@ -383,10 +383,10 @@ REFRESH-COMMON-DCACHE 已经废弃，不要再使用了。"
     (pyim-refresh))
    (pyim-candidates
     (pyim-outcome-handle 'candidate-and-last-char)
-    (pyim-terminate-translation))
+    (pyim-refresh-terminate))
    (t
     (pyim-outcome-handle 'last-char)
-    (pyim-terminate-translation))))
+    (pyim-refresh-terminate))))
 
 (defun pyim-auto-switch-english-input-p ()
   "判断是否 *根据环境自动切换* 为英文输入模式，这个函数处理变量：
@@ -418,23 +418,6 @@ REFRESH-COMMON-DCACHE 已经废弃，不要再使用了。"
            (member last-command-event
                    (mapcar #'identity rest-chars)))
          (setq current-input-method-title (nth 0 pyim-titles)))))
-
-;; ** 键盘输入停止功能
-(defun pyim-terminate-translation ()
-  "Terminate the translation of the current key."
-  (setq pyim-translating nil)
-  (pyim-preview-delete-string)
-  (setq pyim-candidates nil)
-  (setq pyim-candidates-last nil)
-  (setq pyim-force-input-chinese nil)
-  (pyim-page-hide)
-  (pyim-entered-erase-buffer)
-  (setq pyim-cstring-to-code-criteria nil)
-  (pyim-refresh-timer-reset)
-  (let* ((class (pyim-scheme-get-option (pyim-scheme-name) :class))
-         (func (intern (format "pyim-terminate-translation:%S" class))))
-    (when (and class (functionp func))
-      (funcall func))))
 
 ;; ** 加词功能
 (defun pyim-create-word (word &optional prepend wordcount-handler)
@@ -578,7 +561,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   (if (null pyim-candidates)
       (pyim-outcome-handle 'last-char)
     (pyim-outcome-handle 'candidate))
-  (pyim-terminate-translation))
+  (pyim-refresh-terminate))
 
 (define-obsolete-function-alias 'pyim-page-select-word 'pyim-select-word "4.0")
 (defun pyim-select-word ()
@@ -595,7 +578,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   (if (null pyim-candidates)  ; 如果没有选项，输入空格
       (progn
         (pyim-outcome-handle 'last-char)
-        (pyim-terminate-translation))
+        (pyim-refresh-terminate))
     (let* ((class (pyim-scheme-get-option (pyim-scheme-name) :class))
            (func (intern (format "pyim-select-word:%S" class))))
       (if (and class (functionp func))
@@ -668,7 +651,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
           (pyim-create-pyim-word (pyim-outcome-get) t)
         (pyim-create-pyim-word (pyim-outcome-get)))
 
-      (pyim-terminate-translation)
+      (pyim-refresh-terminate)
       ;; pyim 使用这个 hook 来处理联想词。
       (run-hooks 'pyim-select-finish-hook))))
 
@@ -690,7 +673,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
       (if (member (pyim-outcome-get) pyim-candidates)
           (pyim-create-pyim-word (pyim-outcome-get) t)
         (pyim-create-pyim-word (pyim-outcome-get))))
-    (pyim-terminate-translation)
+    (pyim-refresh-terminate)
     ;; pyim 使用这个 hook 来处理联想词。
     (run-hooks 'pyim-select-finish-hook)))
 
@@ -702,7 +685,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
       (if (null pyim-candidates)
           (progn
             (pyim-outcome-handle 'last-char)
-            (pyim-terminate-translation))
+            (pyim-refresh-terminate))
         (let ((index (if (numberp n)
                          (- n 1)
                        (- last-command-event ?1)))
@@ -722,14 +705,14 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   "取消当前输入的命令."
   (interactive)
   (pyim-outcome-handle "")
-  (pyim-terminate-translation))
+  (pyim-refresh-terminate))
 
 ;; ** 字母上屏功能
 (defun pyim-quit-no-clear ()
   "字母上屏命令."
   (interactive)
   (pyim-outcome-handle 'pyim-entered)
-  (pyim-terminate-translation))
+  (pyim-refresh-terminate))
 
 ;; ** 取消激活功能
 (defun pyim-inactivate ()
@@ -755,7 +738,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   (if (= (length (pyim-entered-get 'point-before)) 0)
       (progn
         (pyim-outcome-handle 'last-char)
-        (pyim-terminate-translation))
+        (pyim-refresh-terminate))
     (setq pyim-assistant-scheme-enable
           (not pyim-assistant-scheme-enable))
     (pyim-refresh)))
@@ -815,7 +798,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   (if (> (length (pyim-entered-get 'point-before)) 0)
       (pyim-refresh t)
     (pyim-outcome-handle "")
-    (pyim-terminate-translation)))
+    (pyim-refresh-terminate)))
 
 (defun pyim-entered-delete-forward-char ()
   "在pyim-entered-buffer中向前删除1个字符"

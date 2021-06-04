@@ -33,12 +33,10 @@
 (defvar pyim-refresh-timer nil
   "异步处理 intered 时时，使用的 timer.")
 
-(declare-function pyim-terminate-translation "pyim")
-
 (defun pyim-refresh (&optional no-delay)
   "延迟 `pyim-entered-exhibit-delay-ms' 显示备选词等待用户选择。"
   (if (= (length (pyim-entered-get 'point-before)) 0)
-      (pyim-terminate-translation)
+      (pyim-refresh-terminate)
     (when pyim-entered--exhibit-timer
       (cancel-timer pyim-entered--exhibit-timer))
     (cond
@@ -109,7 +107,7 @@
         (pyim-add-unread-command-events
          (listify-key-sequence (pyim-entered-get 'point-after)))
         (pyim-add-unread-command-events last-command-event)
-        (pyim-terminate-translation))
+        (pyim-refresh-terminate))
        ;; 假设用户已经输入 "niha", 然后按了 "o" 键，那么，当前
        ;; entered 就是 "nihao". 如果 autoselector 函数返回一个 list:
        ;; (:select current), 那么就直接将 "nihao" 对应的第一个候选词
@@ -127,7 +125,7 @@
           (pyim-outcome-handle 'candidate))
         (pyim-add-unread-command-events
          (listify-key-sequence (pyim-entered-get 'point-after)))
-        (pyim-terminate-translation))
+        (pyim-refresh-terminate))
        (t (setq pyim-candidate-position 1)
           (pyim-preview-refresh)
           (pyim-page-refresh))))))
@@ -149,6 +147,23 @@
   (when pyim-refresh-timer
     (cancel-timer pyim-refresh-timer)
     (setq pyim-refresh-timer nil)))
+
+(defalias 'pyim-terminate-translation #'pyim-refresh-terminate)
+(defun pyim-refresh-terminate ()
+  "Terminate the translation of the current key."
+  (setq pyim-translating nil)
+  (pyim-preview-delete-string)
+  (setq pyim-candidates nil)
+  (setq pyim-candidates-last nil)
+  (setq pyim-force-input-chinese nil)
+  (pyim-page-hide)
+  (pyim-entered-erase-buffer)
+  (setq pyim-cstring-to-code-criteria nil)
+  (pyim-refresh-timer-reset)
+  (let* ((class (pyim-scheme-get-option (pyim-scheme-name) :class))
+         (func (intern (format "pyim-refresh-terminate:%S" class))))
+    (when (and class (functionp func))
+      (funcall func))))
 
 ;; * Footer
 (provide 'pyim-refresh)
