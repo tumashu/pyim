@@ -891,8 +891,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
           (delete-char (- 0 length)))
         (run-hooks 'pyim-convert-string-at-point-hook)
         (when (> length 0)
-          (pyim-add-unread-command-events
-           (listify-key-sequence code))
+          (pyim-add-unread-command-events code)
           (setq pyim-force-input-chinese t)))
        ;; 当光标前的一个字符是标点符号时，半角/全角切换。
        ((pyim-string-match-p "[[:punct:]：－]" (pyim-char-before-to-string 0))

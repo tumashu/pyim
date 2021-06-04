@@ -105,7 +105,7 @@
         ;; point 后面还有未处理的输入，就将其转到下一轮处理，这种情况
         ;; 很少出现，一般是型码输入法，entered 编辑的时候有可能触发。
         (pyim-add-unread-command-events
-         (listify-key-sequence (pyim-entered-get 'point-after)))
+         (pyim-entered-get 'point-after))
         (pyim-add-unread-command-events last-command-event)
         (pyim-refresh-terminate))
        ;; 假设用户已经输入 "niha", 然后按了 "o" 键，那么，当前
@@ -124,7 +124,7 @@
                   pyim-candidates)))
           (pyim-outcome-handle 'candidate))
         (pyim-add-unread-command-events
-         (listify-key-sequence (pyim-entered-get 'point-after)))
+         (pyim-entered-get 'point-after))
         (pyim-refresh-terminate))
        (t (setq pyim-candidate-position 1)
           (pyim-preview-refresh)
