@@ -161,9 +161,14 @@
   (setq pyim-cstring-to-code-criteria nil)
   (pyim-refresh-timer-reset)
   (let* ((class (pyim-scheme-get-option (pyim-scheme-name) :class))
-         (func (intern (format "pyim-refresh-terminate:%S" class))))
-    (when (and class (functionp func))
-      (funcall func))))
+         (func (intern (format "pyim-refresh-terminate:%S" class)))
+         ;; `pyim-refresh-terminate' 以前叫 pyim-terminate-translation, 兼容以前的名称。
+         (func-old (intern (format "pyim-terminate-translation:%S" class))))
+    (cond ((and class (functionp func))
+           (funcall func))
+          ((and class (functionp func-old))
+           (funcall func))
+          (t nil))))
 
 ;; * Footer
 (provide 'pyim-refresh)
