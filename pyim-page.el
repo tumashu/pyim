@@ -506,8 +506,9 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
       (setq point-1 (point)))
     (sit-for 1000000)
     (delete-region (point) point-1)
-    (setq quit-flag nil)
-    (pyim-add-unread-command-events 7 t)))
+    (when quit-flag
+      (setq quit-flag nil)
+      (pyim-add-unread-command-events 7 t))))
 
 (defun pyim-page-hide ()
   "Hide pyim page."
