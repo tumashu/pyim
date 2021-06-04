@@ -48,6 +48,7 @@
 (require 'pyim-entered)
 (require 'pyim-candidates)
 (require 'pyim-preview)
+(require 'pyim-refresh)
 (require 'pyim-outcome)
 (require 'pyim-autoselector)
 
