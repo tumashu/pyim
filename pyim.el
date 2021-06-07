@@ -192,7 +192,7 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
     (pyim-preview-setup-overlay)
     (with-silent-modifications
       (unwind-protect
-          (let ((input-string (pyim-start-translation key)))
+          (let ((input-string (pyim-input-method-1 key)))
             ;; (message "input-string: %s" input-string)
             (when (and (stringp input-string)
                        (> (length input-string) 0))
@@ -202,18 +202,15 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
         (pyim-preview-delete-overlay)
         (pyim-entered-erase-buffer)))))
 
-(defun pyim-start-translation (key)
-  "Start translation of the typed character KEY-OR-STRING by pyim.
-Return the input string.
+(defun pyim-input-method-1 (key)
+  "`pyim-input-method-1' 是 `pyim-input-method' 内部使用的函数。
 
-`pyim-start-translation' 这个函数较复杂，作许多低层工作，但它的一
-个重要流程是：
+这个函数比较复杂，作许多低层工作，但它的一个重要流程是：
 
 1. 使用函数 `read-key-sequence' 得到 key-sequence
 2. 使用函数 `lookup-key' 查询 `pyim-mode-map' 中，与上述 key-sequence 对应
    的命令。
-3. 如果查询得到的命令是 `pyim-self-insert-command' 时，
-   `pyim-start-translation' 会调用这个函数。
+3. 如果查询得到的命令是 self-insert-command 时，调用这个函数。
 4. 这个函数最终会返回需要插入到 buffer 的字符串。
 
 这个部份的代码涉及许多 emacs 低层函数，相对复杂，不容易理解，有兴
@@ -254,7 +251,7 @@ Return the input string.
             ;;          key cmd last-command last-command-event this-command)
             (if (if key
                     (commandp cmd)
-                  (eq cmd 'pyim-self-insert-command))
+                  (pyim-self-insert-command-p cmd))
                 (progn
                   ;; (message "keyseq: %s" keyseq)
                   (setq last-command-event (aref keyseq (1- (length keyseq)))
@@ -288,15 +285,15 @@ Return the input string.
 
 ;; ** Pyim 输入法注册
 ;;;###autoload
-(register-input-method "pyim" "euc-cn" 'pyim-start (nth 0 pyim-titles))
+(register-input-method "pyim" "euc-cn" 'pyim-active (nth 0 pyim-titles))
 
 ;; ** PYim 输入法启动功能
 ;;;###autoload
-(defun pyim-start (_name &optional _active-func restart save-personal-dcache _refresh-common-dcache)
+(defun pyim-active (_name &optional _active-func restart save-personal-dcache _refresh-common-dcache)
   "pyim 启动函数.
   TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE
 
-pyim 是使用 `pyim-start' 来启动输入法，这个命令主要做如下工作：
+pyim 是使用 `pyim-active' 来启动输入法，这个命令主要做如下工作：
 1. 重置所有的 local 变量。
 2. 创建汉字到拼音和拼音到汉字的 hash table。
 3. 创建词库缓存 dcache.
@@ -308,13 +305,12 @@ pyim 是使用 `pyim-start' 来启动输入法，这个命令主要做如下工�
    2. `deactivate-current-input-method-function'
 7. 运行 `pyim-active-hook'
 
-pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
+pyim 使用函数 `pyim-active' 启动输入法的时候，会将变量
 `input-method-function' 设置为 `pyim-input-method' ，这个变量会影
 响 `read-event' 的行为。
 
 当输入字符时，`read-event' 会被调用，`read-event' 调用的过程中，
-会执行 `pyim-input-method' 这个函数。`pyim-input-method' 又调用函
-数`pyim-start-translation'."
+会执行 `pyim-input-method' 这个函数。"
   (interactive)
   (pyim-recreate-local-variables)
 
@@ -355,7 +351,7 @@ pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
 (defun pyim-restart ()
   "重启 pyim，不建议用于编程环境.
 
-这个函数用于重启 pyim，其过程和 `pyim-start' 类似，只是在输入法重
+这个函数用于重启 pyim，其过程和 `pyim-active' 类似，只是在输入法重
 启之前，询问用户，是否保存个人词频信息。"
   (interactive
    (let ((save-personal-dcache
@@ -368,11 +364,17 @@ pyim 使用函数 `pyim-start' 启动输入法的时候，会将变量
 当 SAVE-PERSONAL-DCACHE 是 non-nil 时，保存个人词库文件。
 
 REFRESH-COMMON-DCACHE 已经废弃，不要再使用了。"
-  (pyim-start "pyim" nil t save-personal-dcache))
+  (pyim-active "pyim" nil t save-personal-dcache))
 
 ;; ** 键盘输入处理功能
 (defun pyim-self-insert-command ()
-  "Pyim 版本的 self-insert-command."
+  "Call `pyim-self-insert-command'."
+  (interactive "*")
+  (when (functionp pyim-self-insert-command)
+    (call-interactively pyim-self-insert-command)))
+
+(defun pyim-self-insert-command-default ()
+  "Pyim 默认的 self-insert-command."
   (interactive "*")
   (setq pyim-candidates-last pyim-candidates)
   (cond
@@ -388,6 +390,8 @@ REFRESH-COMMON-DCACHE 已经废弃，不要再使用了。"
    (t
     (pyim-outcome-handle 'last-char)
     (pyim-refresh-terminate))))
+
+(setq pyim-self-insert-command #'pyim-self-insert-command-default)
 
 (defun pyim-auto-switch-english-input-p ()
   "判断是否 *根据环境自动切换* 为英文输入模式，这个函数处理变量：

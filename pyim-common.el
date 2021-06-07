@@ -40,6 +40,9 @@
 (defvar pyim-local-variable-list nil
   "A list of buffer local variable.")
 
+(defvar pyim-self-insert-command nil
+  "Self insert command used by pyim.")
+
 (defun pyim-register-local-variables (vars)
   "Recode variables VARS to `pyim-local-variable-list'."
   (dolist (var vars)
@@ -56,6 +59,10 @@
   "Kill then make all variables in `pyim-local-variable-list'."
   (mapc #'kill-local-variable pyim-local-variable-list)
   (mapc #'make-local-variable pyim-local-variable-list))
+
+(defun pyim-self-insert-command-p (cmd)
+  "Test a command is a self insert command or not."
+  (eq cmd pyim-self-insert-command))
 
 (defun pyim-string-match-p (regexp string &optional start)
   "与 `string-match-p' 类似，如果 REGEXP 和 STRING 是非字符串时，
