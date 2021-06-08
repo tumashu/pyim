@@ -60,7 +60,7 @@
 (defvar pyim-process-input-ascii nil
   "是否开启 pyim 英文输入模式.")
 
-(defvar pyim-force-input-chinese nil
+(defvar pyim-process-force-input-chinese nil
   "是否强制开启中文输入模式.
 
 这个变量只用于 `pyim-convert-string-at-point', 不要
@@ -163,7 +163,7 @@
   (let* ((scheme-name (pyim-scheme-name))
          (first-chars (pyim-scheme-get-option scheme-name :first-chars))
          (rest-chars (pyim-scheme-get-option scheme-name :rest-chars)))
-    (and (or pyim-force-input-chinese
+    (and (or pyim-process-force-input-chinese
              (and (not pyim-process-input-ascii)
                   (not (pyim-process-auto-switch-english-input-p))))
          (if (not (string< "" (pyim-entered-get 'point-before)))
@@ -511,7 +511,7 @@ BUG：拼音无法有效地处理多音字。"
   "Terminate the translation of the current key."
   (setq pyim-process-translating nil)
   (pyim-entered-erase-buffer)
-  (setq pyim-force-input-chinese nil)
+  (setq pyim-process-force-input-chinese nil)
   (setq pyim-candidates nil)
   (setq pyim-candidates-last nil)
   (pyim-preview-delete-string)
