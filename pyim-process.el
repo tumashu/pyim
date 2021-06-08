@@ -45,6 +45,13 @@
 (require 'pyim-autoselector)
 (require 'pyim-cstring)
 
+(defcustom pyim-english-input-switch-functions nil
+  "让 pyim 开启英文输入功能.
+
+这个变量的取值为一个函数列表，这个函数列表中的任意一个函数的
+运行结果为 t 时，pyim 开启英文输入功能。"
+  :type 'symbol)
+
 (defvar pyim-process-translating nil
   "记录是否在转换状态.")
 
@@ -115,8 +122,6 @@
                 (setq end-position pos)
               (cl-decf pos)))))
       end-position)))
-
-(defvar pyim-english-input-switch-functions)
 
 (defun pyim-process-auto-switch-english-input-p ()
   "判断是否 *根据环境自动切换* 为英文输入模式，这个函数处理变量：

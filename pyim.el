@@ -49,13 +49,6 @@
   "启用输入联想词功能."
   :type 'boolean)
 
-(defcustom pyim-english-input-switch-functions nil
-  "让 pyim 开启英文输入功能.
-
-这个变量的取值为一个函数列表，这个函数列表中的任意一个函数的
-运行结果为 t 时，pyim 开启英文输入功能。"
-  :type 'symbol)
-
 (define-obsolete-variable-alias 'pyim-page-select-finish-hook 'pyim-select-finish-hook "4.0")
 (defcustom pyim-select-finish-hook nil
   "Pyim 选词完成时运行的 hook."
@@ -150,7 +143,6 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
    pyim-process-last-created-word
    input-method-function
    inactivate-current-input-method-function
-   ;;pyim-english-input-switch-functions
    describe-current-input-method-function))
 
 ;; ** pyim 输入法定义
