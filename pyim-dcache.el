@@ -195,7 +195,7 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
   (message "Pyim export finished."))
 
 ;; ** Dcache 导入功能
-(declare-function pyim-create-word "pyim")
+(declare-function pyim-process-create-word "pyim-process")
 
 (defalias 'pyim-import 'pyim-dcache-import)
 (defun pyim-dcache-import (file &optional merge-method)
@@ -215,7 +215,7 @@ MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表
              (word (car content))
              (count (string-to-number
                      (or (car (cdr content)) "0"))))
-        (pyim-create-word
+        (pyim-process-create-word
          word nil
          (lambda (x)
            (funcall (or merge-method #'max)

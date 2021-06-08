@@ -64,7 +64,7 @@
   (if (and (overlayp pyim-preview-overlay) (overlay-start pyim-preview-overlay))
       (delete-overlay pyim-preview-overlay)))
 
-(declare-function pyim-magic-convert "pyim")
+(declare-function pyim-process-magic-convert "pyim")
 
 (defun pyim-preview-refresh ()
   "刷新光标处预览.
@@ -86,7 +86,7 @@ pyim 会使用 Emacs overlay 机制在 *待输入buffer* 光标处高亮显示�
                    "'")))
         (when (string< "" rest)
           (setq preview (concat preview rest)))))
-    (setq preview (pyim-magic-convert preview))
+    (setq preview (pyim-process-magic-convert preview))
     ;; Delete old preview string.
     (pyim-preview-delete-string)
     ;; Insert new preview string.

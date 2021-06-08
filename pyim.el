@@ -36,21 +36,10 @@
 (require 'cl-lib)
 (require 'help-mode)
 (require 'pyim-common)
-(require 'pyim-pymap)
-(require 'pyim-pinyin)
-(require 'pyim-punctuation)
-(require 'pyim-dict)
-(require 'pyim-dcache)
 (require 'pyim-scheme)
-(require 'pyim-imobjs)
-(require 'pyim-codes)
 (require 'pyim-page)
-(require 'pyim-entered)
-(require 'pyim-candidates)
-(require 'pyim-preview)
-(require 'pyim-refresh)
-(require 'pyim-outcome)
-(require 'pyim-autoselector)
+(require 'pyim-process)
+(require 'pyim-cstring)
 
 (defgroup pyim nil
   "Pyim is a Chinese input method support quanpin, shuangpin, wubi and cangjie."
@@ -108,16 +97,6 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
 这个变量只用于 `pyim-convert-string-at-point', 不要
 在其它地方使用。")
 
-(defvar pyim-last-created-word nil
-  "记录最近一次创建的词条， 用于实现快捷删词功能： `pyim-delete-last-word' .")
-
-(defvar pyim-translating nil
-  "记录是否在转换状态.")
-
-(defvar pyim-magic-convert-cache nil
-  "用来临时保存 `pyim-magic-convert' 的结果.
-从而加快同一个字符串第二次的转换速度。")
-
 (defvar pyim-load-hook nil)
 (defvar pyim-active-hook nil)
 (defvar pyim-inactive-hook nil)
@@ -167,15 +146,12 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
 
 (pyim-register-local-variables
  '(pyim-input-ascii
-   pyim-translating
-   pyim-last-created-word
+   pyim-process-translating
+   pyim-process-last-created-word
    input-method-function
    inactivate-current-input-method-function
    ;;pyim-english-input-switch-functions
    describe-current-input-method-function))
-
-;; Fix warn
-(defvar pyim-cstring-to-code-criteria)
 
 ;; ** pyim 输入法定义
 (defun pyim-input-method (key)
@@ -189,7 +165,7 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
           overriding-local-map)
       (list key)
     ;; (message "call with key: %S" key-or-string)
-    (pyim-preview-setup-overlay)
+    (pyim-process-init-ui)
     (with-silent-modifications
       (unwind-protect
           (let ((input-string (pyim-input-method-1 key)))
@@ -199,8 +175,7 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
               (if input-method-exit-on-first-char
                   (list (aref input-string 0))
                 (mapcar #'identity input-string))))
-        (pyim-preview-delete-overlay)
-        (pyim-entered-erase-buffer)))))
+        (pyim-process-terminate)))))
 
 (defun pyim-input-method-1 (key)
   "`pyim-input-method-1' 是 `pyim-input-method' 内部使用的函数。
@@ -236,14 +211,13 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
              (modified-p (buffer-modified-p))
              last-command-event last-command this-command)
 
-        (setq pyim-translating t)
-        (pyim-entered-erase-buffer)
-        (pyim-outcome-handle "")
+        (setq pyim-process-translating t)
+        (pyim-process-cleanup-input-output)
 
         (when key
           (pyim-add-unread-command-events key))
 
-        (while pyim-translating
+        (while pyim-process-translating
           (set-buffer-modified-p modified-p)
           (let* ((keyseq (read-key-sequence nil nil nil t))
                  (cmd (lookup-key pyim-mode-map keyseq)))
@@ -266,22 +240,12 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
               ;; Let's return the event(s) to the caller.
               (pyim-add-unread-command-events (this-single-command-raw-keys) t)
               ;; (message "unread-command-events: %s" unread-command-events)
-              (pyim-refresh-terminate))))
-        ;; (message "return: %s" (pyim-outcome-get))
-        (pyim-magic-convert (pyim-outcome-get)))
+              (pyim-process-terminate))))
+        ;; (message "return: %s" (pyim-process-get-outcome))
+        (pyim-process-magic-convert (pyim-process-get-outcome)))
     ;; Since KEY doesn't start any translation, just return it.
     ;; But translate KEY if necessary.
     (char-to-string key)))
-
-(defun pyim-magic-convert (str)
-  "用于处理 `pyim-magic-convert' 的函数。"
-  (if (functionp pyim-magic-converter)
-      (or (cdr (assoc str pyim-magic-convert-cache))
-          (let ((result (funcall pyim-magic-converter str)))
-            (setq pyim-magic-convert-cache
-                  `((,str . ,result)))
-            result))
-    str))
 
 ;; ** Pyim 输入法注册
 ;;;###autoload
@@ -289,9 +253,8 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
 
 ;; ** PYim 输入法启动功能
 ;;;###autoload
-(defun pyim-active (_name &optional _active-func restart save-personal-dcache _refresh-common-dcache)
+(defun pyim-active (_name &optional _active-func)
   "pyim 启动函数.
-  TODO: Document NAME ACTIVE-FUNC RESTART SAVE-PERSONAL-DCACHE
 
 pyim 是使用 `pyim-active' 来启动输入法，这个命令主要做如下工作：
 1. 重置所有的 local 变量。
@@ -312,20 +275,18 @@ pyim 使用函数 `pyim-active' 启动输入法的时候，会将变量
 当输入字符时，`read-event' 会被调用，`read-event' 调用的过程中，
 会执行 `pyim-input-method' 这个函数。"
   (interactive)
-  (pyim-recreate-local-variables)
 
-  (when (and restart save-personal-dcache)
-    (pyim-dcache-save-caches))
-
-  (pyim-pymap-cache-create)
-  (pyim-dcache-update restart)
+  ;; 初始化 dcache.
+  (pyim-process-init-dcaches)
 
   ;; 启动或者重启的时候，退出辅助输入法。
   (setq pyim-assistant-scheme-enable nil)
 
   (run-hooks 'pyim-load-hook)
   ;; Make sure personal or other dcache are saved to file before kill emacs.
-  (add-hook 'kill-emacs-hook #'pyim-dcache-save-caches)
+  (add-hook 'kill-emacs-hook
+            (lambda ()
+              (pyim-process-save-dcaches t)))
   (setq input-method-function #'pyim-input-method)
   (setq deactivate-current-input-method-function #'pyim-inactivate)
   ;; (setq describe-current-input-method-function 'pyim-help)
@@ -334,8 +295,6 @@ pyim 使用函数 `pyim-active' 启动输入法的时候，会将变量
   (when (eq (selected-window) (minibuffer-window))
     (add-hook 'minibuffer-exit-hook #'pyim-exit-from-minibuffer))
   (run-hooks 'pyim-active-hook)
-  (when restart
-    (message "pyim 重启完成。"))
   nil)
 
 ;; ** pyim 从 minibuffer 退出功能
@@ -353,10 +312,10 @@ pyim 使用函数 `pyim-active' 启动输入法的时候，会将变量
 
 这个函数用于重启 pyim，其过程和 `pyim-active' 类似，只是在输入法重
 启之前，询问用户，是否保存个人词频信息。"
-  (interactive
-   (let ((save-personal-dcache
-          (yes-or-no-p "重启 pyim 前，需要保存个人词频信息吗？ ")))
-     (pyim-restart-1 save-personal-dcache))))
+  (interactive)
+  (let ((save-personal-dcache
+         (yes-or-no-p "重启 pyim 前，需要保存个人词频信息吗？ ")))
+    (pyim-restart-1 save-personal-dcache)))
 
 (defun pyim-restart-1 (&optional save-personal-dcache _refresh-common-dcache)
   "重启 pyim，用于编程环境.
@@ -364,7 +323,8 @@ pyim 使用函数 `pyim-active' 启动输入法的时候，会将变量
 当 SAVE-PERSONAL-DCACHE 是 non-nil 时，保存个人词库文件。
 
 REFRESH-COMMON-DCACHE 已经废弃，不要再使用了。"
-  (pyim-active "pyim" nil t save-personal-dcache))
+  (pyim-process-save-dcaches save-personal-dcache)
+  (pyim-process-init-dcaches :force))
 
 ;; ** 键盘输入处理功能
 (defun pyim-self-insert-command ()
@@ -378,99 +338,29 @@ REFRESH-COMMON-DCACHE 已经废弃，不要再使用了。"
   (interactive "*")
   (setq pyim-candidates-last pyim-candidates)
   (cond
-   ((pyim-input-chinese-p)
-    (pyim-with-entered-buffer
+   ((pyim-process-input-chinese-p)
+    (pyim-process-with-entered-buffer
       ;; 一定要注意，point 可能不在 point-min, 或者 point-max. 因为用
       ;; 户可能通过命令移动了 entered 中的 point。
       (insert (char-to-string last-command-event)))
-    (pyim-refresh))
-   (pyim-candidates
-    (pyim-outcome-handle 'candidate-and-last-char)
-    (pyim-refresh-terminate))
+    (pyim-process-run))
+   ((pyim-process-get-candidates)
+    (pyim-process-outcome-handle 'candidate-and-last-char)
+    (pyim-process-terminate))
    (t
-    (pyim-outcome-handle 'last-char)
-    (pyim-refresh-terminate))))
+    (pyim-process-outcome-handle 'last-char)
+    (pyim-process-terminate))))
 
 (setq pyim-self-insert-command #'pyim-self-insert-command-default)
 
-(defun pyim-auto-switch-english-input-p ()
-  "判断是否 *根据环境自动切换* 为英文输入模式，这个函数处理变量：
-`pyim-english-input-switch-functions'"
-  (let* ((func-or-list pyim-english-input-switch-functions))
-    (and (cl-some (lambda (x)
-                    (if (functionp x)
-                        (funcall x)
-                      nil))
-                  (cond ((functionp func-or-list) (list func-or-list))
-                        ((listp func-or-list) func-or-list)
-                        (t nil)))
-         (setq current-input-method-title
-               (if pyim-input-ascii
-                   (nth 1 pyim-titles)
-                 (nth 2 pyim-titles))))))
-
-(defun pyim-input-chinese-p ()
-  "确定 pyim 是否需要启动中文输入模式."
-  (let* ((scheme-name (pyim-scheme-name))
-         (first-chars (pyim-scheme-get-option scheme-name :first-chars))
-         (rest-chars (pyim-scheme-get-option scheme-name :rest-chars)))
-    (and (or pyim-force-input-chinese
-             (and (not pyim-input-ascii)
-                  (not (pyim-auto-switch-english-input-p))))
-         (if (not (string< "" (pyim-entered-get 'point-before)))
-             (member last-command-event
-                     (mapcar #'identity first-chars))
-           (member last-command-event
-                   (mapcar #'identity rest-chars)))
-         (setq current-input-method-title (nth 0 pyim-titles)))))
-
 ;; ** 加词功能
-(defun pyim-create-word (word &optional prepend wordcount-handler)
-  (pyim-create-pyim-word word prepend wordcount-handler))
-
-(defun pyim-create-pyim-word (word &optional prepend wordcount-handler)
-  "将中文词条 WORD 添加编码后，保存到用户选择过的词生成的缓存中。
-
-词条 WORD 默认会追加到已有词条的后面，如果 PREPEND 设置为 t,
-词条就会放到已有词条的最前面。
-
-这是函数会调用 `pyim-cstring-to-codes' 来获取中文词条对应的编码。
-
-WORDCOUNT-HANDLER 可以是一个数字，代表将此数字设置为 WORD 的新词频，
-WORDCOUNT-HANDLER 也可以是一个函数，其返回值将设置为 WORD 的新词频，
-而这个函数的参数则表示 WORD 当前词频，这个功能用于：`pyim-dcache-import',
-如果 WORDCOUNT-HANDLER 设置为其他, 则表示让 WORD 当前词频加1.
-
-BUG：拼音无法有效地处理多音字。"
-  (when (and (> (length word) 0)
-             (< (length word) 11) ;十个汉字以上的词条，加到个人词库里面用处不大，忽略。
-             (not (pyim-string-match-p "\\CC" word)))
-    ;; 记录最近创建的词条，用于快速删词功能。
-    (setq pyim-last-created-word word)
-    (let* ((scheme-name (pyim-scheme-name))
-           (code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
-           (codes (pyim-cstring-to-codes word scheme-name pyim-cstring-to-code-criteria)))
-      ;; 保存对应词条的词频
-      (when (> (length word) 0)
-        (pyim-dcache-update-iword2count word prepend wordcount-handler))
-      ;; 添加词条到个人缓存
-      (dolist (code codes)
-        (unless (pyim-string-match-p "[^ a-z-]" code)
-          (pyim-dcache-insert-icode2word
-           word (concat (or code-prefix "") code) prepend)))
-      ;; TODO, 排序个人词库?
-      ;; 返回 codes 和 word, 用于 message 命令。
-      (mapconcat (lambda (code)
-                   (format "%s -> %s" (concat (or code-prefix "") code) word))
-                 codes "; "))))
-
 (defun pyim-create-word-at-point (&optional number silent)
   "将光标前字符数为 NUMBER 的中文字符串添加到个人词库中，当
 SILENT 设置为 t 是，不显示提醒信息。"
   (let ((string (pyim-cstring-at-point (or number 2)))
         output)
     (when string
-      (setq output (pyim-create-word string))
+      (setq output (pyim-process-create-word string))
       (unless silent
         (message "将词条: %S 加入 personal 缓冲。" output)))))
 
@@ -499,7 +389,7 @@ SILENT 设置为 t 是，不显示提醒信息。"
           (error "词条太长")
         (if (not (string-match-p "^\\cc+\\'" string))
             (error "不是纯中文字符串")
-          (setq output (pyim-create-word string))
+          (setq output (pyim-process-create-word string))
           (message "将词条: %S 插入 personal file。" output))))))
 
 ;; ** 删词功能
@@ -521,23 +411,23 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
     (while (not (eobp))
       (let ((word (car (pyim-dline-parse))))
         (when (and word (not (pyim-string-match-p "\\CC" word)))
-          (pyim-dcache-delete-word word)))
+          (pyim-process-delete-word word)))
       (forward-line 1)))
   (message "pyim: 批量删词完成！"))
 
 (defun pyim-delete-last-word ()
   "从个人词库中删除最新创建的词条。"
   (interactive)
-  (when pyim-last-created-word
-    (pyim-dcache-delete-word pyim-last-created-word)
-    (message "pyim: 从个人词库中删除词条 “%s” !" pyim-last-created-word)))
+  (when pyim-process-last-created-word
+    (pyim-process-delete-word pyim-process-last-created-word)
+    (message "pyim: 从个人词库中删除词条 “%s” !" pyim-process-last-created-word)))
 
 (defun pyim-delete-word-at-point (&optional number silent)
   "将光标前字符数为 NUMBER 的中文字符串从个人词库中删除
 当 SILENT 设置为 t 是，不显示提醒信息。"
-  (let* ((string (pyim-cstring-at-point (or number 2))))
+  (let ((string (pyim-cstring-at-point (or number 2))))
     (when string
-      (pyim-dcache-delete-word string)
+      (pyim-process-delete-word string)
       (unless silent
         (message "词条: \"%s\" 已经从个人词库缓冲中删除。" string)))))
 
@@ -549,7 +439,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
                      (region-beginning) (region-end))))
         (when (and (< (length string) 6)
                    (> (length string) 0))
-          (pyim-dcache-delete-word string)
+          (pyim-process-delete-word string)
           (message "将词条: %S 从 personal 缓冲中删除。" string)))
     (message "请首先高亮选择需要删除的词条。")))
 
@@ -563,27 +453,20 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
 然后再删除不需要的字，由于这个词条不是常用词条，所以
 不需要保存到个人词库。"
   (interactive)
-  (if (null pyim-candidates)
-      (pyim-outcome-handle 'last-char)
-    (pyim-outcome-handle 'candidate))
-  (pyim-refresh-terminate))
+  (if (null (pyim-process-get-candidates))
+      (pyim-process-outcome-handle 'last-char)
+    (pyim-process-outcome-handle 'candidate))
+  (pyim-process-terminate))
 
 (define-obsolete-function-alias 'pyim-page-select-word 'pyim-select-word "4.0")
 (defun pyim-select-word ()
   "从选词框中选择当前词条，然后删除该词条对应拼音。"
   (interactive)
-  (setq pyim-cstring-to-code-criteria
-        (let ((str (mapconcat #'identity
-                              (pyim-codes-create (car pyim-imobjs) (pyim-scheme-name))
-                              "")))
-          (if (> (length pyim-cstring-to-code-criteria)
-                 (length str))
-              pyim-cstring-to-code-criteria
-            str)))
-  (if (null pyim-candidates)  ; 如果没有选项，输入空格
+  (pyim-process-create-code-criteria)
+  (if (null (pyim-process-get-candidates))  ; 如果没有选项，输入空格
       (progn
-        (pyim-outcome-handle 'last-char)
-        (pyim-refresh-terminate))
+        (pyim-process-outcome-handle 'last-char)
+        (pyim-process-terminate))
     (let* ((class (pyim-scheme-get-option (pyim-scheme-name) :class))
            (func (intern (format "pyim-select-word:%S" class))))
       (if (and class (functionp func))
@@ -593,17 +476,17 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
 (defun pyim-select-word:pinyin ()
   "从选词框中选择当前词条，然后删除该词条对应拼音。"
   (interactive)
-  (pyim-outcome-handle 'candidate)
-  (let* ((imobj (car pyim-imobjs))
+  (pyim-process-outcome-handle 'candidate)
+  (let* ((imobj (car (pyim-process-get-imobjs)))
          (length-selected-word
           ;; 获取 *这一次* 选择词条的长度， 在“多次选择词条才能上屏”的情况下，
-          ;; 一定要和 outcome 的概念作区别。
+          ;; 一定要和 output 的概念作区别。
           ;; 比如： xiaolifeidao
-          ;; 第一次选择：小李， outcome = 小李
-          ;; 第二次选择：飞，   outcome = 小李飞
-          ;; 第三次选择：刀，   outcome = 小李飞刀
-          (- (length (pyim-outcome-get))
-             (length (pyim-outcome-get 1))))
+          ;; 第一次选择：小李， output = 小李
+          ;; 第二次选择：飞，   output = 小李飞
+          ;; 第三次选择：刀，   output = 小李飞刀
+          (- (length (pyim-process-get-outcome))
+             (length (pyim-process-get-outcome 1))))
          ;; pyim-imobjs 包含 *pyim-entered-buffer* 里面光标前面的字符
          ;; 串，通过与 selected-word 做比较，获取光标前未转换的字符串。
          ;; to-be-translated.
@@ -632,9 +515,9 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
     ;; 中，比如五笔输入法，就不成立，好在型码输入法一般不需要多次
     ;; 选择。
     (if (or (< length-selected-word (length imobj)) ;是否有未转换的光标前字符串
-            (> (length (pyim-entered-get 'point-after)) 0)) ;是否有光标后字符串
+            (> (length (pyim-process-get-entered 'point-after)) 0)) ;是否有光标后字符串
         (progn
-          (pyim-with-entered-buffer
+          (pyim-process-with-entered-buffer
             ;; 把光标前已转换的 entered 字符串, 从 entered字符串里面剪
             ;; 掉，保留未转换的字符串和光标之后的字符串。
             (delete-region (point-min) (point))
@@ -643,8 +526,8 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
             ;; 个汉字，所以这里光标向前移动不超过20个 imelem. 从而让下
             ;; 一轮处理时的“光标前字符串”比较长，这种方式可能比逐字选
             ;; 择更加好用。
-            (goto-char (pyim-entered-next-imelem-position 20 t 1)))
-          (pyim-refresh))
+            (goto-char (pyim-process-next-imelem-position 20 t 1)))
+          (pyim-process-run))
       ;; pyim 词频调整策略：
       ;; 1. 如果一个词条是用户在输入过程中，自己新建的词条，那么就将这个词条
       ;;    添加到个人词库的后面（不放置前面是为了减少误输词条的影响）。
@@ -652,33 +535,33 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
       ;;    这样的话，一个新词要输入两遍之后才可能出现在第一位。
       ;; 3. pyim 在启动的时候，会使用词频信息，对个人词库作一次排序。
       ;;    用作 pyim 下一次使用。
-      (if (member (pyim-outcome-get) pyim-candidates)
-          (pyim-create-pyim-word (pyim-outcome-get) t)
-        (pyim-create-pyim-word (pyim-outcome-get)))
+      (if (member (pyim-process-get-outcome) (pyim-process-get-candidates))
+          (pyim-process-create-pyim-word (pyim-process-get-outcome) t)
+        (pyim-process-create-pyim-word (pyim-process-get-outcome)))
 
-      (pyim-refresh-terminate)
+      (pyim-process-terminate)
       ;; pyim 使用这个 hook 来处理联想词。
       (run-hooks 'pyim-select-finish-hook))))
 
 (defun pyim-select-word:xingma ()
   "从选词框中选择当前词条，然后删除该词条对应编码。"
   (interactive)
-  (pyim-outcome-handle 'candidate)
-  (if (pyim-with-entered-buffer
+  (pyim-process-outcome-handle 'candidate)
+  (if (pyim-process-with-entered-buffer
         (and (> (point) 1)
              (< (point) (point-max))))
       (progn
-        (pyim-with-entered-buffer
+        (pyim-process-with-entered-buffer
           ;; 把本次已经选择的词条对应的子 entered, 从 entered
           ;; 字符串里面剪掉。
           (delete-region (point-min) (point)))
-        (pyim-refresh))
+        (pyim-process-run))
     ;; 型码输入法，只考虑将词条保存到个人词库，用于调整词频，单字不保存。
-    (when (> (length (pyim-outcome-get)) 1)
-      (if (member (pyim-outcome-get) pyim-candidates)
-          (pyim-create-pyim-word (pyim-outcome-get) t)
-        (pyim-create-pyim-word (pyim-outcome-get))))
-    (pyim-refresh-terminate)
+    (when (> (length (pyim-process-get-outcome)) 1)
+      (if (member (pyim-process-get-outcome) (pyim-process-get-candidates))
+          (pyim-process-create-pyim-word (pyim-process-get-outcome) t)
+        (pyim-process-create-pyim-word (pyim-process-get-outcome))))
+    (pyim-process-terminate)
     ;; pyim 使用这个 hook 来处理联想词。
     (run-hooks 'pyim-select-finish-hook)))
 
@@ -687,10 +570,10 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   "使用数字编号来选择对应的词条。"
   (interactive)
   (if (or pyim-select-word-by-number n)
-      (if (null pyim-candidates)
+      (if (null (pyim-process-get-candidates))
           (progn
-            (pyim-outcome-handle 'last-char)
-            (pyim-refresh-terminate))
+            (pyim-process-outcome-handle 'last-char)
+            (pyim-process-terminate))
         (let ((index (if (numberp n)
                          (- n 1)
                        (- last-command-event ?1)))
@@ -698,8 +581,8 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
           (if (= index -1) (setq index 9) nil)
           (if (> (+ index (pyim-page-start)) end)
               (pyim-page-refresh)
-            (setq pyim-candidate-position
-                  (+ (pyim-page-start) index))
+            (pyim-process-set-candidate-position
+             (+ (pyim-page-start) index))
             (pyim-select-word))))
     ;; 有些输入法使用数字键编码，这种情况下，数字键就
     ;; 不能用来选词了。
@@ -709,15 +592,15 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
 (defun pyim-quit-clear ()
   "取消当前输入的命令."
   (interactive)
-  (pyim-outcome-handle "")
-  (pyim-refresh-terminate))
+  (pyim-process-outcome-handle "")
+  (pyim-process-terminate))
 
 ;; ** 字母上屏功能
 (defun pyim-quit-no-clear ()
   "字母上屏命令."
   (interactive)
-  (pyim-outcome-handle 'pyim-entered)
-  (pyim-refresh-terminate))
+  (pyim-process-outcome-handle 'pyim-entered)
+  (pyim-process-terminate))
 
 ;; ** 取消激活功能
 (defun pyim-inactivate ()
@@ -740,40 +623,40 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
 这个功能一般用于五笔等形码输入法，在忘记编码的时候临时用拼音输入
 中文。"
   (interactive)
-  (if (= (length (pyim-entered-get 'point-before)) 0)
+  (if (= (length (pyim-process-get-entered 'point-before)) 0)
       (progn
-        (pyim-outcome-handle 'last-char)
-        (pyim-refresh-terminate))
+        (pyim-process-outcome-handle 'last-char)
+        (pyim-process-terminate))
     (setq pyim-assistant-scheme-enable
           (not pyim-assistant-scheme-enable))
-    (pyim-refresh)))
+    (pyim-process-run)))
 
 ;; ** 在 entered 中操作的相关命令
 (defun pyim-entered-forward-point ()
   "`pyim-entered-buffer' 中光标前移"
   (interactive)
-  (pyim-with-entered-buffer
+  (pyim-process-with-entered-buffer
     (ignore-errors
       (forward-char)))
-  (pyim-refresh t))
+  (pyim-process-run t))
 
 (defun pyim-entered-backward-point ()
   "`pyim-entered-buffer' 中光标后移"
   (interactive)
-  (pyim-with-entered-buffer
+  (pyim-process-with-entered-buffer
     (ignore-errors
       (backward-char)))
-  (pyim-refresh t))
+  (pyim-process-run t))
 
 (defun pyim-entered-backward-imelem (&optional search-forward)
   "`pyim-entered-buffer’ 中光标向后移动一个 imelem 对应的字符串
 
 在全拼输入法中，就是向前移动一个拼音"
   (interactive)
-  (let* ((position (pyim-entered-next-imelem-position 1 search-forward)))
-    (pyim-with-entered-buffer
+  (let ((position (pyim-process-next-imelem-position 1 search-forward)))
+    (pyim-process-with-entered-buffer
       (goto-char position))
-    (pyim-refresh t)))
+    (pyim-process-run t)))
 
 (defun pyim-entered-forward-imelem ()
   "`pyim-entered-buffer’ 中光标向前移动一个 imelem 对应的字符串"
@@ -783,27 +666,27 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
 (defun pyim-entered-end-of-line ()
   "`pyim-entered-buffer' 中光标移至行尾"
   (interactive)
-  (pyim-with-entered-buffer
+  (pyim-process-with-entered-buffer
     (end-of-line))
-  (pyim-refresh t))
+  (pyim-process-run t))
 
 (defun pyim-entered-beginning-of-line ()
   "`pyim-entered-buffer' 中光标移至行首"
   (interactive)
-  (pyim-with-entered-buffer
+  (pyim-process-with-entered-buffer
     (beginning-of-line))
-  (pyim-refresh t))
+  (pyim-process-run t))
 
 (defun pyim-entered-delete-backward-char (&optional n)
   "在pyim-entered-buffer中向后删除1个字符"
   (interactive)
-  (pyim-with-entered-buffer
+  (pyim-process-with-entered-buffer
     (ignore-errors
       (delete-char (- 0 (or n 1)))))
-  (if (> (length (pyim-entered-get 'point-before)) 0)
-      (pyim-refresh t)
-    (pyim-outcome-handle "")
-    (pyim-refresh-terminate)))
+  (if (> (length (pyim-process-get-entered 'point-before)) 0)
+      (pyim-process-run t)
+    (pyim-process-outcome-handle "")
+    (pyim-process-terminate)))
 
 (defun pyim-entered-delete-forward-char ()
   "在pyim-entered-buffer中向前删除1个字符"
@@ -813,10 +696,10 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
 (defun pyim-entered-delete-backward-imelem (&optional search-forward)
   "`pyim-entered-buffer’ 中向后删除一个 imelem 对应的字符串"
   (interactive)
-  (let ((position (pyim-entered-next-imelem-position 1 search-forward)))
-    (pyim-with-entered-buffer
+  (let ((position (pyim-process-next-imelem-position 1 search-forward)))
+    (pyim-process-with-entered-buffer
       (delete-region (point) position))
-    (pyim-refresh t)))
+    (pyim-process-run t)))
 
 (defun pyim-entered-delete-forward-imelem ()
   "`pyim-entered-buffer’ 中向前删除一个 imelem 对应的字符串"

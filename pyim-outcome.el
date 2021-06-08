@@ -73,9 +73,9 @@
 1. \"v\" 不是有效的声母，不会对中文输入造成太大的影响。
 2. \"v\" 字符很容易按。
 
-pyim 使用函数 `pyim-outcome-handle-char' 来处理特殊功能触发字符。当待输入的
-字符是触发字符时，`pyim-outcome-handle-char' 根据光标前的字符的不同来调用不
-同的功能，具体见 `pyim-outcome-handle-char' ：
+pyim 使用函数 `pyim-process-outcome-handle-char' 来处理特殊功能触发字符。当待输入的
+字符是触发字符时，`pyim-process-outcome-handle-char' 根据光标前的字符的不同来调用不
+同的功能，具体见 `pyim-process-outcome-handle-char' ：
 
 单字快捷键受到输入法方案的限制，比如：全拼输入法可以将其设置为v,
 但双拼输入法下设置 v 可能就不行，所以，pyim 首先会检查当前输入法
@@ -121,41 +121,6 @@ pyim 使用函数 `pyim-outcome-handle-char' 来处理特殊功能触发字符�
   "获取 outcome"
   (nth (or n 0) pyim-outcome-history))
 
-(defun pyim-outcome-handle (type)
-  "依照 TYPE, 获取 pyim 的 outcome，并将其加入 `pyim-outcome-history'."
-  (cond ((not enable-multibyte-characters)
-         (pyim-entered-erase-buffer)
-         (setq pyim-outcome-history nil)
-         (error "Can't input characters in current unibyte buffer"))
-        ((equal type "")
-         (setq pyim-outcome-history nil))
-        ((eq type 'last-char)
-         (push
-          (concat (pyim-outcome-get)
-                  (pyim-outcome-handle-char last-command-event))
-          pyim-outcome-history))
-        ((eq type 'candidate)
-         (let* ((candidate
-                 (pyim-candidate-parse
-                  (nth (1- pyim-candidate-position)
-                       pyim-candidates))))
-           (push
-            (concat (pyim-outcome-get) candidate)
-            pyim-outcome-history)))
-        ((eq type 'candidate-and-last-char)
-         (let* ((candidate
-                 (pyim-candidate-parse
-                  (nth (1- pyim-candidate-position)
-                       pyim-candidates))))
-           (push
-            (concat (pyim-outcome-get)
-                    candidate
-                    (pyim-outcome-handle-char last-command-event))
-            pyim-outcome-history)))
-        ((eq type 'pyim-entered)
-         (push (pyim-entered-get 'point-before) pyim-outcome-history))
-        (t (error "Pyim: invalid outcome"))))
-
 (defun pyim-outcome-get-trigger ()
   "检查 `pyim-outcome-trigger' 是否为一个合理的 trigger char 。
 
@@ -188,116 +153,6 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
 ;; Fix compile warn.
 (declare-function pyim-create-word-at-point "pyim")
 (declare-function pyim-delete-word-at-point "pyim")
-
-(defun pyim-outcome-handle-char (char)
-  "Pyim 字符转换函数，主要用于处理标点符号.
-
-pyim 在运行过程中调用这个函数来进行标点符号格式的转换。
-
-常用的标点符号数量不多，所以 pyim 没有使用文件而是使用一个变量
-`pyim-punctuation-dict' 来设置标点符号对应表，这个变量是一个
-alist 列表。"
-  (let* ((str (char-to-string char))
-         ;; 注意：`str' 是 *待输入* 的字符对应的字符串。
-         (str-before-1 (pyim-char-before-to-string 0))
-         (str-before-2 (pyim-char-before-to-string 1))
-         (str-before-3 (pyim-char-before-to-string 2))
-         ;; 从标点词库中搜索与 `str' 对应的标点列表。
-         (punc-list (assoc str pyim-punctuation-dict))
-         ;; 从标点词库中搜索与 `str-before-1' 对应的标点列表。
-         (punc-list-before-1
-          (cl-some (lambda (x)
-                     (when (member str-before-1 x) x))
-                   pyim-punctuation-dict))
-         ;; `str-before-1' 在其对应的标点列表中的位置。
-         (punc-posit-before-1
-          (cl-position str-before-1 punc-list-before-1
-                       :test #'equal))
-         (trigger (pyim-outcome-get-trigger)))
-    (cond
-     ;; 空格之前的字符什么也不输入。
-     ((< char ? ) "")
-
-     ;; 这个部份与标点符号处理无关，主要用来快速删除用户自定义词条。
-     ;; 比如：在一个中文字符串后输入 2-v，可以将光标前两个中文字符
-     ;; 组成的字符串，从个人词库删除。
-     ((and (eq (char-before) ?-)
-           (pyim-string-match-p "[0-9]" str-before-2)
-           (pyim-string-match-p "\\cc" str-before-3)
-           (equal str trigger))
-      (delete-char -2)
-      (pyim-delete-word-at-point
-       (string-to-number str-before-2))
-      "")
-     ;; 这个部份与标点符号处理无关，主要用来快速保存用户自定义词条。
-     ;; 比如：在一个中文字符串后输入 2v，可以将光标前两个中文字符
-     ;; 组成的字符串，保存到个人词库。
-     ((and (member (char-before) (number-sequence ?2 ?9))
-           (pyim-string-match-p "\\cc" str-before-2)
-           (equal str trigger))
-      (delete-char -1)
-      (pyim-create-word-at-point
-       (string-to-number str-before-1))
-      "")
-
-     ;; 光标前面的字符为中文字符时，按 v 清洗当前行的内容。
-     ((and (not (numberp punc-posit-before-1))
-           (pyim-string-match-p "\\cc" str-before-1)
-           (equal str trigger)
-           (functionp pyim-outcome-trigger-function))
-      (funcall pyim-outcome-trigger-function)
-      "")
-
-     ;; 关闭标点转换功能时，只插入英文标点。
-     ((not (pyim-punctuation-full-width-p))
-      str)
-
-     ;; 当用户使用 org-mode 以及 markdown 等轻量级标记语言撰写文档时，
-     ;; 常常需要输入数字列表，比如：
-
-     ;; 1. item1
-     ;; 2. item2
-     ;; 3. item3
-
-     ;; 在这种情况下，数字后面输入句号必须是半角句号而不是全角句号，
-     ;; pyim 调用 `pyim-outcome-handle-char' 时，会检测光标前面的字符，如果这个
-     ;; 字符属于 `pyim-punctuation-escape-list' ，pyim 将输入半角标点，
-     ;; 具体细节见：`pyim-outcome-handle-char'
-     ((member (char-before)
-              pyim-punctuation-escape-list)
-      str)
-
-     ;; 当 `pyim-punctuation-half-width-functions' 中
-     ;; 任意一个函数返回值为 t 时，插入英文标点。
-     ((cl-some (lambda (x)
-                 (if (functionp x)
-                     (funcall x char)
-                   nil))
-               pyim-punctuation-half-width-functions)
-      str)
-
-     ;; 当光标前面为英文标点时， 按 `pyim-outcome-trigger'
-     ;; 对应的字符后， 自动将其转换为对应的中文标点。
-     ((and (numberp punc-posit-before-1)
-           (= punc-posit-before-1 0)
-           (equal str trigger))
-      (pyim-punctuation-translate 'full-width)
-      "")
-
-     ;; 当光标前面为中文标点时， 按 `pyim-outcome-trigger'
-     ;; 对应的字符后， 自动将其转换为对应的英文标点。
-     ((and (numberp punc-posit-before-1)
-           (> punc-posit-before-1 0)
-           (equal str trigger))
-      (pyim-punctuation-translate 'half-width)
-      "")
-
-     ;; 正常输入标点符号。
-     (punc-list
-      (pyim-punctuation-return-proper-punct punc-list))
-
-     ;; 当输入的字符不是标点符号时，原样插入。
-     (t str))))
 
 (define-obsolete-function-alias 'pyim-wash-current-line-function 'pyim-outcome-trigger-function-default "4.0")
 (defun pyim-outcome-trigger-function-default (&optional no-space)

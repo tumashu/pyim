@@ -91,39 +91,6 @@ TYPE 取值为 point-after, 返回 entered buffer 中 point 之后的字符
   (pyim-with-entered-buffer
     (erase-buffer)))
 
-(defun pyim-entered-next-imelem-position (num &optional search-forward start)
-  "从 `pyim-entered-buffer' 的当前位置，找到下一个或者下 NUM 个 imelem 对应的位置
-
-如果 SEARCH-FORWARD 为 t, 则向前搜索，反之，向后搜索。"
-  (pyim-with-entered-buffer
-    (let* ((scheme-name (pyim-scheme-name))
-           (start (or start (point)))
-           (end-position start)
-           (string (buffer-substring-no-properties (point-min) start))
-           (orig-imobj-len (length (car (pyim-imobjs-create string scheme-name))))
-           imobj pos)
-      (if search-forward
-          ;; "ni|haoshijie" -> "nihao|shijie"
-          (progn
-            (setq pos (point-max))
-            (while (and (> pos start) (= end-position start))
-              (setq string (buffer-substring-no-properties (point-min) pos)
-                    imobj (car (pyim-imobjs-create string scheme-name)))
-              (if (>= (+ orig-imobj-len num) (length imobj))
-                  (setq end-position pos)
-                (cl-decf pos))))
-        ;; "nihao|shijie" -> "ni|haoshijie"
-        (if (<= orig-imobj-len num)
-            (setq end-position (point-min))
-          (setq pos start)
-          (while (and (>= pos (point-min)) (= end-position start))
-            (setq string (buffer-substring-no-properties (point-min) pos)
-                  imobj (car (pyim-imobjs-create string scheme-name)))
-            (if (= (- orig-imobj-len num) (length imobj))
-                (setq end-position pos)
-              (cl-decf pos)))))
-      end-position)))
-
 ;; * Footer
 (provide 'pyim-entered)
 

@@ -4,7 +4,7 @@
 * 整体架构
 #+begin_example
 +----------------------+------------------------------------------------------------------+--------------------------+
-| PYIM Quail 路由层:   | pyim-input-method, pyim-active, pyim-restart,                    |                          |
+| PYIM Quail 路由层:   | pyim-input-method, pyim-active,                                  |                          |
 |                      | pyim-exit-from-minibuffer, pyim-mode-map                         |                          |
 |                      |                                                                  |                          |
 +----------------------+------------------------------------------------------------------|                          |
@@ -12,9 +12,11 @@
 |                      | Cregexp 用户命令，Cstring 用户命令                               |                          |
 |                      | Dict 管理命令，标点用户命令，Pymap 管理命令                      |                          |
 +----------------------+----------------------------+-------------------------------------+                          |
-| PYIM 流程组件层：    | Refresh, Outcome           | PYIM 视图组件层： Page, Preview     |                          |
+| PYIM 流程组件层：    | Process                    | PYIM 视图组件层： Page, Preview     |                          |
+|                      |                            |                                     |                          |
+|                      |                            |                                     |                          |
 +----------------------+----------------------------+-------------------------------------|                          |
-| PYIM 实体组件层：    | Entered, Imobjs, Codes, Candidates, Magic-convert,               |         Scheme           |
+| PYIM 实体组件层：    | Entered, Imobjs, Codes, Candidates, Outcome, Magic-convert,      |         Scheme           |
 |                      | Punctuations, Cregexp, Cstring, Probe,                           |     Assistant-scheme     |
 |                      | Autoselector, Pinyin                                             |         Common           |
 +----------------------+-----------------------------------------+------------------------+                          |

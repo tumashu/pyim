@@ -219,7 +219,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
              (overlay-start pyim-preview-overlay)))
            (t (message (pyim-page-style:minibuffer page-info)))))))))
 
-(declare-function pyim-refresh-terminate "pyim-refresh")
+(declare-function pyim-process-terminate "pyim-process")
 
 (defun pyim-page-next-page (arg)
   "Pyim page 翻页命令.
@@ -235,8 +235,8 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
   (interactive "p")
   (if (= (length (pyim-entered-get 'point-before)) 0)
       (progn
-        (pyim-outcome-handle 'last-char)
-        (pyim-refresh-terminate))
+        (pyim-process-outcome-handle 'last-char)
+        (pyim-process-terminate))
     (let ((new (+ pyim-candidate-position (* pyim-page-length arg) 1))
           maxpos)
       (setq maxpos (+ 1 (length pyim-candidates)))
@@ -256,8 +256,8 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
   (interactive "p")
   (if (= (length (pyim-entered-get 'point-before)) 0)
       (progn
-        (pyim-outcome-handle 'last-char)
-        (pyim-refresh-terminate))
+        (pyim-process-outcome-handle 'last-char)
+        (pyim-process-terminate))
     (let ((new (+ pyim-candidate-position arg))
           len)
       (setq len (length pyim-candidates))
@@ -347,12 +347,12 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                                (split-string x "'")
                                "'")))
       ;; | 显示光标位置的字符
-      (pyim-with-entered-buffer
-        (if (equal (point) (point-max))
-            (fmt (buffer-substring-no-properties (point-min) (point-max)))
-          (concat (fmt (buffer-substring-no-properties (point-min) (point)))
-                  "| "
-                  (fmt (buffer-substring-no-properties (point) (point-max)))))))))
+      (pyim-process-with-entered-buffer
+       (if (equal (point) (point-max))
+           (fmt (buffer-substring-no-properties (point-min) (point-max)))
+         (concat (fmt (buffer-substring-no-properties (point-min) (point)))
+                 "| "
+                 (fmt (buffer-substring-no-properties (point) (point-max)))))))))
 
 (defun pyim-page-menu-create (candidates position &optional separator hightlight-current)
   "这个函数用于创建在 page 中显示的备选词条菜单。"
