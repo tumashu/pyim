@@ -444,9 +444,6 @@ alist 列表。"
             str))))
 
 (defun pyim-process-create-word (word &optional prepend wordcount-handler)
-  (pyim-process-create-pyim-word word prepend wordcount-handler))
-
-(defun pyim-process-create-pyim-word (word &optional prepend wordcount-handler)
   "将中文词条 WORD 添加编码后，保存到用户选择过的词生成的缓存中。
 
 词条 WORD 默认会追加到已有词条的后面，如果 PREPEND 设置为 t,

@@ -164,8 +164,8 @@
       ;; 使用 rime 的同时，也附带的优化 quanpin 的词库。
       (let ((pyim-default-scheme 'quanpin))
         (if (member (pyim-outcome-get) pyim-candidates)
-            (pyim-process-create-pyim-word (pyim-outcome-get) t)
-          (pyim-process-create-pyim-word (pyim-outcome-get))))
+            (pyim-process-create-word (pyim-outcome-get) t)
+          (pyim-process-create-word (pyim-outcome-get))))
       (setq pyim-liberime-code-log nil)
       (setq pyim-liberime-word-log nil)
       (pyim-process-terminate)
@@ -225,7 +225,7 @@
                 (setq words nil))
                (t (liberime-process-key 65366))))))))))
 
-(defun pyim-process-create-rime-word (word &optional _prepend _wordcount-handler)
+(defun pyim-liberime-process-create-word (word &optional _prepend _wordcount-handler)
   "Create WORD at current rime backend.
 ONlY works with quanpin."
   ;; 判断当前 rime 环境是否支持全拼，如果支持，就添加词条。
@@ -239,7 +239,7 @@ ONlY works with quanpin."
              (remove "" (split-string word "")))
             (pyim-process-terminate:rime)))))))
 
-(advice-add 'pyim-process-create-word :after #'pyim-process-create-rime-word)
+(advice-add 'pyim-process-create-word :after #'pyim-liberime-process-create-word)
 
 (defun pyim-liberime-get-code (word input &optional _limit)
   "Get the code of WORD from the beginning of INPUT.

@@ -536,8 +536,8 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
       ;; 3. pyim 在启动的时候，会使用词频信息，对个人词库作一次排序。
       ;;    用作 pyim 下一次使用。
       (if (member (pyim-process-get-outcome) (pyim-process-get-candidates))
-          (pyim-process-create-pyim-word (pyim-process-get-outcome) t)
-        (pyim-process-create-pyim-word (pyim-process-get-outcome)))
+          (pyim-process-create-word (pyim-process-get-outcome) t)
+        (pyim-process-create-word (pyim-process-get-outcome)))
 
       (pyim-process-terminate)
       ;; pyim 使用这个 hook 来处理联想词。
@@ -559,8 +559,8 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
     ;; 型码输入法，只考虑将词条保存到个人词库，用于调整词频，单字不保存。
     (when (> (length (pyim-process-get-outcome)) 1)
       (if (member (pyim-process-get-outcome) (pyim-process-get-candidates))
-          (pyim-process-create-pyim-word (pyim-process-get-outcome) t)
-        (pyim-process-create-pyim-word (pyim-process-get-outcome))))
+          (pyim-process-create-word (pyim-process-get-outcome) t)
+        (pyim-process-create-word (pyim-process-get-outcome))))
     (pyim-process-terminate)
     ;; pyim 使用这个 hook 来处理联想词。
     (run-hooks 'pyim-select-finish-hook)))
