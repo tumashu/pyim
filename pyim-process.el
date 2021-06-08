@@ -43,6 +43,7 @@
 (require 'pyim-preview)
 (require 'pyim-outcome)
 (require 'pyim-autoselector)
+(require 'pyim-cstring)
 
 (defvar pyim-process-translating nil
   "记录是否在转换状态.")
@@ -163,10 +164,6 @@
               (run-with-timer (/ pyim-entered-exhibit-delay-ms 1000.0)
                               nil
                               #'pyim-process-run-1))))))
-
-;; 没有这一行，native-compilation 会出现奇怪的问题，pyim-process-outcome-handle 会获取到
-;; 错误的 pyim-candidates 取值。原因未知。
-(defvar pyim-candidates)
 
 (defun pyim-process-run-1 ()
   "查询 `pyim-entered-buffer' 光标前的拼音字符串（如果光标在行首则为光标后的）, 显示备选词等待用户选择。"
@@ -431,7 +428,6 @@ alist 列表。"
      ;; 当输入的字符不是标点符号时，原样插入。
      (t str))))
 
-(defvar pyim-cstring-to-code-criteria)
 (defun pyim-process-create-code-criteria ()
   "创建 `pyim-cstring-to-code-criteria'."
   (setq pyim-cstring-to-code-criteria
