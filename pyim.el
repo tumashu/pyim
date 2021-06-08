@@ -45,10 +45,6 @@
   "Pyim is a Chinese input method support quanpin, shuangpin, wubi and cangjie."
   :group 'leim)
 
-(defcustom pyim-enable-shortcode t
-  "启用输入联想词功能."
-  :type 'boolean)
-
 (define-obsolete-variable-alias 'pyim-page-select-finish-hook 'pyim-select-finish-hook "4.0")
 (defcustom pyim-select-finish-hook nil
   "Pyim 选词完成时运行的 hook."
@@ -73,22 +69,8 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
 编码的输入法。"
   :type 'boolean)
 
-(defcustom pyim-magic-converter nil
-  "将 “待选词条” 在 “上屏” 之前自动转换为其他字符串.
-这个功能可以实现“简转繁”，“输入中文得到英文”之类的功能。"
-  :type 'boolean)
-
 ;;;###autoload
 (defvar pyim-titles '("PYIM " "PYIM-EN " "PYIM-AU ") "Pyim 在 mode-line 中显示的名称.")
-
-(defvar pyim-input-ascii nil
-  "是否开启 pyim 英文输入模式.")
-
-(defvar pyim-force-input-chinese nil
-  "是否强制开启中文输入模式.
-
-这个变量只用于 `pyim-convert-string-at-point', 不要
-在其它地方使用。")
 
 (defvar pyim-load-hook nil)
 (defvar pyim-active-hook nil)
@@ -138,8 +120,7 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
   "Pyim 的 Keymap.")
 
 (pyim-register-local-variables
- '(pyim-input-ascii
-   input-method-function
+ '(input-method-function
    inactivate-current-input-method-function
    describe-current-input-method-function))
 

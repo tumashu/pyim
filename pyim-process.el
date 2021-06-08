@@ -52,6 +52,20 @@
 运行结果为 t 时，pyim 开启英文输入功能。"
   :type 'symbol)
 
+(defcustom pyim-magic-converter nil
+  "将 “待选词条” 在 “上屏” 之前自动转换为其他字符串.
+这个功能可以实现“简转繁”，“输入中文得到英文”之类的功能。"
+  :type 'boolean)
+
+(defvar pyim-input-ascii nil
+  "是否开启 pyim 英文输入模式.")
+
+(defvar pyim-force-input-chinese nil
+  "是否强制开启中文输入模式.
+
+这个变量只用于 `pyim-convert-string-at-point', 不要
+在其它地方使用。")
+
 (defvar pyim-process-translating nil
   "记录是否在转换状态.")
 
@@ -66,7 +80,8 @@
   "异步处理 intered 时时，使用的 timer.")
 
 (pyim-register-local-variables
- '(pyim-process-translating
+ '(pyim-input-ascii
+   pyim-process-translating
    pyim-process-last-created-word))
 
 (defun pyim-process-init-dcaches (&optional force save-caches)
