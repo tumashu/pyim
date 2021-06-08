@@ -100,7 +100,7 @@ If you don't like this function, set the variable to nil")
    pyim-punctuation-escape-list
    pyim-punctuation-half-width-functions))
 
-(defvar pyim-input-ascii)
+(defvar pyim-process-input-ascii)
 (declare-function pyim-process-auto-switch-english-input-p "pyim-process")
 
 ;; ** 切换中英文标点符号
@@ -123,7 +123,7 @@ If you don't like this function, set the variable to nil")
     (auto
      ;; 如果用户手动或者根据环境自动切换为英文输入模式，
      ;; 那么标点符号也要切换为半角模式。
-     (and (not pyim-input-ascii)
+     (and (not pyim-process-input-ascii)
           (not (pyim-process-auto-switch-english-input-p))))))
 
 (defun pyim-punctuation-toggle ()

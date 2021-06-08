@@ -57,7 +57,7 @@
 这个功能可以实现“简转繁”，“输入中文得到英文”之类的功能。"
   :type 'boolean)
 
-(defvar pyim-input-ascii nil
+(defvar pyim-process-input-ascii nil
   "是否开启 pyim 英文输入模式.")
 
 (defvar pyim-force-input-chinese nil
@@ -80,7 +80,7 @@
   "异步处理 intered 时时，使用的 timer.")
 
 (pyim-register-local-variables
- '(pyim-input-ascii
+ '(pyim-process-input-ascii
    pyim-process-translating
    pyim-process-last-created-word))
 
@@ -154,7 +154,7 @@
                         ((listp func-or-list) func-or-list)
                         (t nil)))
          (setq current-input-method-title
-               (if pyim-input-ascii
+               (if pyim-process-input-ascii
                    (nth 1 pyim-titles)
                  (nth 2 pyim-titles))))))
 
@@ -164,7 +164,7 @@
          (first-chars (pyim-scheme-get-option scheme-name :first-chars))
          (rest-chars (pyim-scheme-get-option scheme-name :rest-chars)))
     (and (or pyim-force-input-chinese
-             (and (not pyim-input-ascii)
+             (and (not pyim-process-input-ascii)
                   (not (pyim-process-auto-switch-english-input-p))))
          (if (not (string< "" (pyim-entered-get 'point-before)))
              (member last-command-event

@@ -584,8 +584,8 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
 (defun pyim-toggle-input-ascii ()
   "pyim 切换中英文输入模式。同时调整标点符号样式。"
   (interactive)
-  (setq pyim-input-ascii
-        (not pyim-input-ascii)))
+  (setq pyim-process-input-ascii
+        (not pyim-process-input-ascii)))
 
 ;; ** 主辅输入法切换功能
 (defun pyim-toggle-assistant-scheme ()
