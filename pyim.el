@@ -139,8 +139,6 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
 
 (pyim-register-local-variables
  '(pyim-input-ascii
-   pyim-process-translating
-   pyim-process-last-created-word
    input-method-function
    inactivate-current-input-method-function
    describe-current-input-method-function))

@@ -65,6 +65,10 @@
 (defvar pyim-process-run-timer nil
   "异步处理 intered 时时，使用的 timer.")
 
+(pyim-register-local-variables
+ '(pyim-process-translating
+   pyim-process-last-created-word))
+
 (defun pyim-process-init-dcaches (&optional force save-caches)
   "PYIM 流程，词库相关的初始化工作。"
   (pyim-recreate-local-variables)
