@@ -63,14 +63,14 @@
   (pyim-pymap-cache-create)
   (pyim-dcache-update force))
 
-(defun pyim-process-init-ui ()
-  "PYIM 流程，用户界面相关的初始化工作。"
-  (pyim-preview-setup-overlay))
-
 (defun pyim-process-save-dcaches (&optional force)
   "PYIM 流程，保存 dcache."
   (when force
     (pyim-dcache-save-caches)))
+
+(defun pyim-process-init-ui ()
+  "PYIM 流程，用户界面相关的初始化工作。"
+  (pyim-preview-setup-overlay))
 
 (defmacro pyim-process-with-entered-buffer (&rest forms)
   "PYIM 流程的输入保存在一个 buffer 中，使用 FORMS 处理这个 buffer
