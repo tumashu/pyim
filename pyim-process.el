@@ -347,6 +347,10 @@
          (push (pyim-entered-get 'point-before) pyim-outcome-history))
         (t (error "Pyim: invalid outcome"))))
 
+;; Fix compile warn.
+(declare-function pyim-create-word-at-point "pyim")
+(declare-function pyim-delete-word-at-point "pyim")
+
 (defun pyim-process-outcome-handle-char (char)
   "Pyim 字符转换函数，主要用于处理标点符号.
 

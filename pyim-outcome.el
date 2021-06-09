@@ -150,10 +150,6 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
           (car prefer-triggers))
       user-trigger)))
 
-;; Fix compile warn.
-(declare-function pyim-create-word-at-point "pyim")
-(declare-function pyim-delete-word-at-point "pyim")
-
 (define-obsolete-function-alias 'pyim-wash-current-line-function 'pyim-outcome-trigger-function-default "4.0")
 (defun pyim-outcome-trigger-function-default (&optional no-space)
   "默认的 `pyim-outcome-trigger-function'.
