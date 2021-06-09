@@ -98,9 +98,9 @@ pyim 的目标是： *尽最大的努力成为一个好用的 Emacs 中文输入
 (define-key minibuffer-local-map (kbd "C-<return>") 'pyim-cregexp-convert-at-point)
 
 ;; 我使用全拼
-(setq pyim-default-scheme 'quanpin)
-;; (setq pyim-default-scheme 'wubi)
-;; (setq pyim-default-scheme 'cangjie)
+(pyim-default-scheme 'quanpin)
+;; (pyim-default-scheme 'wubi)
+;; (pyim-default-scheme 'cangjie)
 
 ;; pyim 探针设置
 ;; 设置 pyim 探针设置，这是 pyim 高级功能设置，可以实现 *无痛* 中英文切换 :-)
@@ -169,7 +169,7 @@ pyim 当前的默认的拼音词库是 pyim-basedict, 这个词库的词条量8�
 pyim 支持双拼输入模式，用户可以通过变量 `pyim-default-scheme' 来设定：
 
 #+begin_example
-(setq pyim-default-scheme 'pyim-shuangpin)
+(pyim-default-scheme 'pyim-shuangpin)
 #+end_example
 
 注意：
