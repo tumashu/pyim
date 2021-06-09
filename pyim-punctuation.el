@@ -100,38 +100,13 @@ If you don't like this function, set the variable to nil")
    pyim-punctuation-escape-list
    pyim-punctuation-half-width-functions))
 
-(defvar pyim-process-input-ascii)
-(declare-function pyim-process-auto-switch-english-input-p "pyim-process")
-
 ;; ** 切换中英文标点符号
-(defun pyim-punctuation-full-width-p ()
-  "判断是否需要切换到全角标点输入模式
-
-输入标点的样式的改变（全角或者半角）受三个方面影响：
-
-1. 用户是否手动切换了标点样式？
-2  用户是否手动切换到英文输入模式？
-3. pyim 是否根据环境自动切换到英文输入模式？
-
-三方面的综合结果为： 只要当前的输入模式是英文输入模式，那么输入的
-标点符号 *必定* 是半角标点，如果当前输入模式是中文输入模式，那么，
-输入标点的样式用户可以使用 `pyim-punctuation-toggle'手动控制，具
-体请参考 `pyim-punctuation-full-width-p'。"
-  (cl-case (car pyim-punctuation-translate-p)
-    (yes t)
-    (no nil)
-    (auto
-     ;; 如果用户手动或者根据环境自动切换为英文输入模式，
-     ;; 那么标点符号也要切换为半角模式。
-     (and (not pyim-process-input-ascii)
-          (not (pyim-process-auto-switch-english-input-p))))))
-
 (defun pyim-punctuation-toggle ()
   "Pyim 标点符号全角半角模式切换命令.
 
 每次运行 `pyim-punctuation-toggle' 命令，都会调整变量
 `pyim-punctuation-translate-p' 的取值，`pyim-process-outcome-handle-char' 根据
-`pyim-punctuation-full-width-p' 函数的返回值，来决定是否转换标点
+`pyim-process-punctuation-full-width-p' 函数的返回值，来决定是否转换标点
 符号：
 
 1. 当返回值为 'yes 时，`pyim-process-outcome-handle-char' 转换标点符号，从而输入全角标点。

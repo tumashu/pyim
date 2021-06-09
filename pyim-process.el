@@ -407,7 +407,7 @@ alist 列表。"
       "")
 
      ;; 关闭标点转换功能时，只插入英文标点。
-     ((not (pyim-punctuation-full-width-p))
+     ((not (pyim-process-punctuation-full-width-p))
       str)
 
      ;; 当用户使用 org-mode 以及 markdown 等轻量级标记语言撰写文档时，
@@ -456,6 +456,28 @@ alist 列表。"
 
      ;; 当输入的字符不是标点符号时，原样插入。
      (t str))))
+
+(defun pyim-process-punctuation-full-width-p ()
+  "判断是否需要切换到全角标点输入模式
+
+输入标点的样式的改变（全角或者半角）受三个方面影响：
+
+1. 用户是否手动切换了标点样式？
+2  用户是否手动切换到英文输入模式？
+3. pyim 是否根据环境自动切换到英文输入模式？
+
+三方面的综合结果为： 只要当前的输入模式是英文输入模式，那么输入的
+标点符号 *必定* 是半角标点，如果当前输入模式是中文输入模式，那么，
+输入标点的样式用户可以使用 `pyim-punctuation-toggle'手动控制，具
+体请参考 `pyim-process-punctuation-full-width-p'。"
+  (cl-case (car pyim-punctuation-translate-p)
+    (yes t)
+    (no nil)
+    (auto
+     ;; 如果用户手动或者根据环境自动切换为英文输入模式，
+     ;; 那么标点符号也要切换为半角模式。
+     (and (not pyim-process-input-ascii)
+          (not (pyim-process-auto-switch-english-input-p))))))
 
 (defun pyim-process-create-code-criteria ()
   "创建 `pyim-cstring-to-code-criteria'."
