@@ -53,9 +53,6 @@ pyim 使用一个 buffer 来处理 entered, 以实现 “用户输入字符串�
    继续处理后面的输入，这种方式方便长词的输入；
 3. 如果光标在行首，则处理整行。")
 
-(defvar pyim-entered-longest nil
-  "记录用户在连续选词之前的最长输入，用于全拼输入法多音字矫正。")
-
 (defmacro pyim-entered-with-entered-buffer (&rest forms)
   (declare (indent 0) (debug t))
   `(with-current-buffer (get-buffer-create pyim-entered-buffer)
