@@ -60,10 +60,13 @@
          (scheme-name
           (or scheme-name
               (intern (completing-read "PYIM: 将 pyim-default-scheme 设置为：" scheme-names)))))
-    (when (memq scheme-name scheme-names)
-      (setq pyim-default-scheme scheme-name)
-      (message "PYIM: `pyim-default-scheme' 已经设置为 %s." scheme-name)
-      scheme-name)))
+    (if (memq scheme-name scheme-names)
+        (progn
+          (setq pyim-default-scheme scheme-name)
+          (message "PYIM: `pyim-default-scheme' 已经设置为 %s." scheme-name)
+          scheme-name)
+      (message "PYIM: %s 不是一个有效的 scheme 名称, 继续使用 %s." scheme-name pyim-default-scheme)
+      nil)))
 
 (defun pyim-scheme-add (scheme)
   "Add SCHEME to `pyim-schemes'"
