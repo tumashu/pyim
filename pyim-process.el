@@ -49,6 +49,12 @@
 运行结果为 t 时，pyim 开启英文输入功能。"
   :type 'symbol)
 
+(defcustom pyim-exhibit-delay-ms 0
+  "输入或者删除拼音字符后等待多少毫秒后才显示可选词
+当用户快速输入连续的拼音时可提升用户体验.
+如果为 0 或者 nil, 则不等待立刻显示可选词."
+  :type 'integer)
+
 (defcustom pyim-magic-converter nil
   "将 “待选词条” 在 “上屏” 之前自动转换为其他字符串.
 这个功能可以实现“简转繁”，“输入中文得到英文”之类的功能。"
@@ -73,8 +79,10 @@
 (defvar pyim-process-last-created-word nil
   "记录最近一次创建的词条， 用于实现快捷删词功能： `pyim-delete-last-word' .")
 
-(defvar pyim-process-run-timer nil
-  "异步处理 intered 时时，使用的 timer.")
+(defvar pyim-process-run-async-timer nil
+  "异步处理 entered 时，使用的 timer.")
+
+(defvar pyim-process-run-exhibit-timer nil)
 
 (pyim-register-local-variables
  '(pyim-process-input-ascii
@@ -171,18 +179,18 @@
          (setq current-input-method-title (nth 0 pyim-titles)))))
 
 (defun pyim-process-run (&optional no-delay)
-  "延迟 `pyim-entered-exhibit-delay-ms' 显示备选词等待用户选择。"
+  "延迟 `pyim-exhibit-delay-ms' 显示备选词等待用户选择。"
   (if (= (length (pyim-entered-get 'point-before)) 0)
       (pyim-process-terminate)
-    (when pyim-entered--exhibit-timer
-      (cancel-timer pyim-entered--exhibit-timer))
+    (when pyim-process-run-exhibit-timer
+      (cancel-timer pyim-process-run-exhibit-timer))
     (cond
      ((or no-delay
-          (not pyim-entered-exhibit-delay-ms)
-          (eq pyim-entered-exhibit-delay-ms 0))
+          (not pyim-exhibit-delay-ms)
+          (eq pyim-exhibit-delay-ms 0))
       (pyim-process-run-1))
-     (t (setq pyim-entered--exhibit-timer
-              (run-with-timer (/ pyim-entered-exhibit-delay-ms 1000.0)
+     (t (setq pyim-process-run-exhibit-timer
+              (run-with-timer (/ pyim-exhibit-delay-ms 1000.0)
                               nil
                               #'pyim-process-run-1))))))
 
@@ -196,10 +204,10 @@
     (setq pyim-candidates
           (or (delete-dups (pyim-candidates-create pyim-imobjs scheme-name))
               (list entered-to-translate)))
-    (pyim-process-run-timer-reset)
+    (pyim-process-run-async-timer-reset)
     ;; 延迟1秒异步处理 entered, pyim 内置的输入法目前不使用异步获取
     ;; 词条的方式，主要用于 pyim-liberime 支持。
-    (setq pyim-process-run-timer
+    (setq pyim-process-run-async-timer
           (run-with-timer
            1 nil
            (lambda ()
@@ -264,7 +272,7 @@
           (pyim-page-refresh))))))
 
 (defun pyim-process-run-with-thread ()
-  "Function used by `pyim-process-run-timer'"
+  "Function used by `pyim-process-run-async-timer'"
   (let* ((scheme-name (pyim-scheme-name))
          (words (delete-dups (pyim-candidates-create pyim-imobjs scheme-name t))))
     (when words
@@ -275,11 +283,11 @@
                  (not (eq (selected-window) (minibuffer-window))))
         (pyim-page-refresh)))))
 
-(defun pyim-process-run-timer-reset ()
-  "Reset `pyim-process-run-timer'."
-  (when pyim-process-run-timer
-    (cancel-timer pyim-process-run-timer)
-    (setq pyim-process-run-timer nil)))
+(defun pyim-process-run-async-timer-reset ()
+  "Reset `pyim-process-run-async-timer'."
+  (when pyim-process-run-async-timer
+    (cancel-timer pyim-process-run-async-timer)
+    (setq pyim-process-run-async-timer nil)))
 
 (defun pyim-process-get-candidates ()
   pyim-candidates)
@@ -514,7 +522,7 @@ BUG：拼音无法有效地处理多音字。"
   (pyim-preview-delete-string)
   (pyim-page-hide)
   (setq pyim-cstring-to-code-criteria nil)
-  (pyim-process-run-timer-reset)
+  (pyim-process-run-async-timer-reset)
   (let* ((class (pyim-scheme-get-option (pyim-scheme-name) :class))
          (func (intern (format "pyim-process-terminate:%S" class)))
          ;; `pyim-process-terminate' 以前叫 pyim-terminate-translation, 兼容以前的名称。

@@ -34,15 +34,6 @@
   "Entered tools for pyim."
   :group 'pyim)
 
-(define-obsolete-variable-alias 'pyim-exhibit-delay-ms 'pyim-entered-exhibit-delay-ms "")
-(defcustom pyim-entered-exhibit-delay-ms 0
-  "输入或者删除拼音字符后等待多少毫秒后才显示可选词
-当用户快速输入连续的拼音时可提升用户体验.
-如果为 0 或者 nil, 则不等待立刻显示可选词."
-  :type 'integer)
-
-(defvar pyim-entered--exhibit-timer nil)
-
 (defvar pyim-entered-buffer " *pyim-entered-buffer*"
   "一个 buffer，用来处理用户已经输入的字符串： entered。
 
