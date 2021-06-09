@@ -53,6 +53,18 @@
 (defvar pyim-schemes nil
   "Pyim 支持的所有拼音方案.")
 
+;;;###autoload
+(defun pyim-default-scheme (&optional scheme-name)
+  (interactive)
+  (let* ((scheme-names (mapcar #'car pyim-schemes))
+         (scheme-name
+          (or scheme-name
+              (intern (completing-read "PYIM: 将 pyim-default-scheme 设置为：" scheme-names)))))
+    (when (memq scheme-name scheme-names)
+      (setq pyim-default-scheme scheme-name)
+      (message "PYIM: `pyim-default-scheme' 已经设置为 %s." scheme-name)
+      scheme-name)))
+
 (defun pyim-scheme-add (scheme)
   "Add SCHEME to `pyim-schemes'"
   (if (listp scheme)

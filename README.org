@@ -325,6 +325,10 @@ pyim 的选词框默认使用 *双行显示* 的样式，在一些特殊的情�
 
 * Tips
 
+** 如何快速切换 scheme
+
+可以试试 pyim-default-scheme 命令。
+
 ** 关闭输入联想词功能 (默认开启)
 
 #+begin_example
