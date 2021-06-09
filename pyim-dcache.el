@@ -194,44 +194,6 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
   (pyim-dcache-call-api 'export-personal-words file confirm)
   (message "Pyim export finished."))
 
-;; ** Dcache 导入功能
-(declare-function pyim-process-create-word "pyim-process")
-
-(defalias 'pyim-import 'pyim-dcache-import)
-(defun pyim-dcache-import (file &optional merge-method)
-  "从 FILE 中导入词条以及词条对应的词频信息。
-
-MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表
-词条在词频缓存中的词频和待导入文件中的词频，函数返回值做为合并后的词频使用，
-默认方式是：取两个词频的最大值。"
-  (interactive "F导入词条相关信息文件: ")
-  (with-temp-buffer
-    (let ((coding-system-for-read 'utf-8-unix))
-      (insert-file-contents file))
-    (goto-char (point-min))
-    (forward-line 1)
-    (while (not (eobp))
-      (let* ((content (pyim-dline-parse))
-             (word (car content))
-             (count (string-to-number
-                     (or (car (cdr content)) "0"))))
-        (pyim-process-create-word
-         word nil
-         (lambda (x)
-           (funcall (or merge-method #'max)
-                    (or x 0)
-                    count))))
-      (forward-line 1)))
-  ;; 保存一下用户选择过的词生成的缓存和词频缓存，
-  ;; 因为使用 async 机制更新 dcache 时，需要从 dcache 文件
-  ;; 中读取变量值, 然后再对用户选择过的词生成的缓存排序，如果没
-  ;; 有这一步骤，导入的词条就会被覆盖。
-  (pyim-dcache-save-caches)
-  ;; 更新相关的 dcache
-  (pyim-dcache-call-api 'update-personal-words t)
-
-  (message "pyim: 词条相关信息导入完成！"))
-
 ;; ** Dcache 更新功能
 (defun pyim-dcache-update (&optional force)
   "读取并加载所有相关词库 dcache.

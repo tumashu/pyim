@@ -100,6 +100,9 @@
   (when force
     (pyim-dcache-save-caches)))
 
+(defun pyim-process-update-personal-words ()
+  (pyim-dcache-call-api 'update-personal-words t))
+
 (defun pyim-process-init-ui ()
   "PYIM 流程，用户界面相关的初始化工作。"
   (pyim-preview-setup-overlay))
