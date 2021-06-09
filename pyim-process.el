@@ -108,7 +108,7 @@
   "PYIM 流程的输入保存在一个 buffer 中，使用 FORMS 处理这个 buffer
 中的信息。"
   (declare (indent 0) (debug t))
-  `(pyim-with-entered-buffer
+  `(pyim-entered-with-entered-buffer
      ,@forms))
 
 (defun pyim-process-get-entered (&optional type)
@@ -118,7 +118,7 @@
   "从 `pyim-entered-buffer' 的当前位置，找到下一个或者下 NUM 个 imelem 对应的位置
 
 如果 SEARCH-FORWARD 为 t, 则向前搜索，反之，向后搜索。"
-  (pyim-with-entered-buffer
+  (pyim-entered-with-entered-buffer
     (let* ((scheme-name (pyim-scheme-name))
            (start (or start (point)))
            (end-position start)

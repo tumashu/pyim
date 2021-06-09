@@ -56,7 +56,7 @@ pyim 使用一个 buffer 来处理 entered, 以实现 “用户输入字符串�
 (defvar pyim-entered-longest nil
   "记录用户在连续选词之前的最长输入，用于全拼输入法多音字矫正。")
 
-(defmacro pyim-with-entered-buffer (&rest forms)
+(defmacro pyim-entered-with-entered-buffer (&rest forms)
   (declare (indent 0) (debug t))
   `(with-current-buffer (get-buffer-create pyim-entered-buffer)
      ,@forms))
@@ -68,7 +68,7 @@ pyim 使用一个 buffer 来处理 entered, 以实现 “用户输入字符串�
 point-before, 返回 entered buffer 中 point 之前的字符串，如果
 TYPE 取值为 point-after, 返回 entered buffer 中 point 之后的字符
 串。"
-  (pyim-with-entered-buffer
+  (pyim-entered-with-entered-buffer
     (cond
      ((bobp) (buffer-string))
      ((eq type 'point-before)
@@ -79,7 +79,7 @@ TYPE 取值为 point-after, 返回 entered buffer 中 point 之后的字符
 
 (defun pyim-entered-erase-buffer ()
   "清除 `pyim-entered-buffer' 的内容"
-  (pyim-with-entered-buffer
+  (pyim-entered-with-entered-buffer
     (erase-buffer)))
 
 ;; * Footer

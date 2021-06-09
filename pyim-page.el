@@ -282,7 +282,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
     (when class
       (funcall (intern (format "pyim-page-preview-create:%S" class)) separator))))
 
-(declare-function 'pyim-with-entered-buffer "pyim-entered")
+(declare-function 'pyim-entered-with-entered-buffer "pyim-entered")
 
 (defun pyim-page-preview-create:quanpin (&optional separator)
   (let* ((separator (or separator " "))
@@ -294,7 +294,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                                 separator)))
     (concat
      ;; | 显示光标位置的字符
-     (pyim-with-entered-buffer
+     (pyim-entered-with-entered-buffer
        (if (equal 1 (point))
            (concat "|" translated)
          (concat (replace-regexp-in-string (concat separator "'") "'" translated)
@@ -348,11 +348,11 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                                "'")))
       ;; | 显示光标位置的字符
       (pyim-process-with-entered-buffer
-       (if (equal (point) (point-max))
-           (fmt (buffer-substring-no-properties (point-min) (point-max)))
-         (concat (fmt (buffer-substring-no-properties (point-min) (point)))
-                 "| "
-                 (fmt (buffer-substring-no-properties (point) (point-max)))))))))
+        (if (equal (point) (point-max))
+            (fmt (buffer-substring-no-properties (point-min) (point-max)))
+          (concat (fmt (buffer-substring-no-properties (point-min) (point)))
+                  "| "
+                  (fmt (buffer-substring-no-properties (point) (point-max)))))))))
 
 (defun pyim-page-menu-create (candidates position &optional separator hightlight-current)
   "这个函数用于创建在 page 中显示的备选词条菜单。"
