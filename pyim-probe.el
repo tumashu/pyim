@@ -52,10 +52,9 @@
 ;; 探针函数。
 
 ;;; Code:
-
+;; * 代码                                                                 :code:
 (require 'pyim-common)
 
-;; * 代码                                                                 :code:
 ;; ** 根据环境自动切换到英文输入模式
 (defun pyim-probe-program-mode ()
   "激活这个 pyim 探针函数后，只能在字符串和 comment 中输入中文。
