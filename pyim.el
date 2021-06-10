@@ -90,22 +90,22 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
       (define-key map (char-to-string i) #'pyim-select-word-by-number))
     (define-key map " " #'pyim-select-word)
     (define-key map (kbd "C-SPC") #'pyim-select-word-simple)
-    (define-key map [backspace] #'pyim-entered-delete-backward-char)
-    (define-key map [delete] #'pyim-entered-delete-forward-char)
-    (define-key map "\C-d" #'pyim-entered-delete-forward-char)
-    (define-key map [M-backspace] #'pyim-entered-delete-backward-imelem)
-    (define-key map [M-delete] #'pyim-entered-delete-forward-imelem)
-    (define-key map [C-backspace] #'pyim-entered-delete-backward-imelem)
-    (define-key map [C-delete] #'pyim-entered-delete-forward-imelem)
+    (define-key map [backspace] #'pyim-delete-backward-char)
+    (define-key map [delete] #'pyim-delete-forward-char)
+    (define-key map "\C-d" #'pyim-delete-forward-char)
+    (define-key map [M-backspace] #'pyim-delete-backward-imelem)
+    (define-key map [M-delete] #'pyim-delete-forward-imelem)
+    (define-key map [C-backspace] #'pyim-delete-backward-imelem)
+    (define-key map [C-delete] #'pyim-delete-forward-imelem)
     (define-key map [?\t]      #'pyim-toggle-assistant-scheme)
     (define-key map (kbd "TAB") #'pyim-toggle-assistant-scheme)
-    (define-key map "\177" #'pyim-entered-delete-backward-char)
-    (define-key map "\C-f" #'pyim-entered-forward-point)
-    (define-key map "\C-b" #'pyim-entered-backward-point)
-    (define-key map "\M-f" #'pyim-entered-forward-imelem)
-    (define-key map "\M-b" #'pyim-entered-backward-imelem)
-    (define-key map "\C-e" #'pyim-entered-end-of-line)
-    (define-key map "\C-a" #'pyim-entered-beginning-of-line)
+    (define-key map "\177" #'pyim-delete-backward-char)
+    (define-key map "\C-f" #'pyim-forward-point)
+    (define-key map "\C-b" #'pyim-backward-point)
+    (define-key map "\M-f" #'pyim-forward-imelem)
+    (define-key map "\M-b" #'pyim-backward-imelem)
+    (define-key map "\C-e" #'pyim-end-of-line)
+    (define-key map "\C-a" #'pyim-beginning-of-line)
     (define-key map "=" #'pyim-page-next-page)
     (define-key map "-" #'pyim-page-previous-page)
     (define-key map "\C-n" #'pyim-page-next-word)
@@ -637,25 +637,38 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
           (not pyim-assistant-scheme-enable))
     (pyim-process-run)))
 
-;; ** 在 entered 中操作的相关命令
-(defun pyim-entered-forward-point ()
-  "`pyim-entered-buffer' 中光标前移"
+;; ** PYIM 输入操作命令
+(define-obsolete-function-alias 'pyim-entered-delete-backward-char 'pyim-delete-backward-char "4.0")
+(define-obsolete-function-alias 'pyim-entered-delete-forward-char 'pyim-delete-forward-char "4.0")
+(define-obsolete-function-alias 'pyim-entered-delete-forward-char 'pyim-delete-forward-char "4.0")
+(define-obsolete-function-alias 'pyim-entered-delete-backward-imelem 'pyim-delete-backward-imelem "4.0")
+(define-obsolete-function-alias 'pyim-entered-delete-forward-imelem 'pyim-delete-forward-imelem "4.0")
+(define-obsolete-function-alias 'pyim-entered-delete-backward-imelem 'pyim-delete-backward-imelem "4.0")
+(define-obsolete-function-alias 'pyim-entered-delete-backward-char 'pyim-delete-backward-char "4.0")
+(define-obsolete-function-alias 'pyim-entered-forward-point 'pyim-forward-point "4.0")
+(define-obsolete-function-alias 'pyim-entered-backward-point 'pyim-backward-point "4.0")
+(define-obsolete-function-alias 'pyim-entered-forward-imelem 'pyim-forward-imelem "4.0")
+(define-obsolete-function-alias 'pyim-entered-backward-imelem 'pyim-backward-imelem "4.0")
+(define-obsolete-function-alias 'pyim-entered-end-of-line 'pyim-end-of-line "4.0")
+
+(defun pyim-forward-point ()
+  "光标前移"
   (interactive)
   (pyim-process-with-entered-buffer
     (ignore-errors
       (forward-char)))
   (pyim-process-run t))
 
-(defun pyim-entered-backward-point ()
-  "`pyim-entered-buffer' 中光标后移"
+(defun pyim-backward-point ()
+  "光标后移"
   (interactive)
   (pyim-process-with-entered-buffer
     (ignore-errors
       (backward-char)))
   (pyim-process-run t))
 
-(defun pyim-entered-backward-imelem (&optional search-forward)
-  "`pyim-entered-buffer’ 中光标向后移动一个 imelem 对应的字符串
+(defun pyim-backward-imelem (&optional search-forward)
+  "光标向后移动一个 imelem 对应的字符串
 
 在全拼输入法中，就是向前移动一个拼音"
   (interactive)
@@ -664,27 +677,27 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
       (goto-char position))
     (pyim-process-run t)))
 
-(defun pyim-entered-forward-imelem ()
-  "`pyim-entered-buffer’ 中光标向前移动一个 imelem 对应的字符串"
+(defun pyim-forward-imelem ()
+  "光标向前移动一个 imelem 对应的字符串"
   (interactive)
-  (pyim-entered-backward-imelem t))
+  (pyim-backward-imelem t))
 
-(defun pyim-entered-end-of-line ()
-  "`pyim-entered-buffer' 中光标移至行尾"
+(defun pyim-end-of-line ()
+  "光标移至行尾"
   (interactive)
   (pyim-process-with-entered-buffer
     (end-of-line))
   (pyim-process-run t))
 
-(defun pyim-entered-beginning-of-line ()
-  "`pyim-entered-buffer' 中光标移至行首"
+(defun pyim-beginning-of-line ()
+  "光标移至行首"
   (interactive)
   (pyim-process-with-entered-buffer
     (beginning-of-line))
   (pyim-process-run t))
 
-(defun pyim-entered-delete-backward-char (&optional n)
-  "在pyim-entered-buffer中向后删除1个字符"
+(defun pyim-delete-backward-char (&optional n)
+  "向后删除1个字符"
   (interactive)
   (pyim-process-with-entered-buffer
     (ignore-errors
@@ -694,23 +707,23 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
     (pyim-process-outcome-handle "")
     (pyim-process-terminate)))
 
-(defun pyim-entered-delete-forward-char ()
-  "在pyim-entered-buffer中向前删除1个字符"
+(defun pyim-delete-forward-char ()
+  "向前删除1个字符"
   (interactive)
-  (pyim-entered-delete-backward-char -1))
+  (pyim-delete-backward-char -1))
 
-(defun pyim-entered-delete-backward-imelem (&optional search-forward)
-  "`pyim-entered-buffer’ 中向后删除一个 imelem 对应的字符串"
+(defun pyim-delete-backward-imelem (&optional search-forward)
+  "向后删除一个 imelem 对应的字符串"
   (interactive)
   (let ((position (pyim-process-next-imelem-position 1 search-forward)))
     (pyim-process-with-entered-buffer
       (delete-region (point) position))
     (pyim-process-run t)))
 
-(defun pyim-entered-delete-forward-imelem ()
-  "`pyim-entered-buffer’ 中向前删除一个 imelem 对应的字符串"
+(defun pyim-delete-forward-imelem ()
+  "向前删除一个 imelem 对应的字符串"
   (interactive)
-  (pyim-entered-delete-backward-imelem t))
+  (pyim-delete-backward-imelem t))
 
 ;; ** 金手指功能
 ;;;###autoload
