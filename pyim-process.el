@@ -41,6 +41,7 @@
 (require 'pyim-punctuation)
 (require 'pyim-autoselector)
 (require 'pyim-cstring)
+(require 'pyim-magic)
 
 (defcustom pyim-english-input-switch-functions nil
   "让 pyim 开启英文输入功能.
@@ -55,11 +56,6 @@
 如果为 0 或者 nil, 则不等待立刻显示可选词."
   :type 'integer)
 
-(defcustom pyim-magic-converter nil
-  "将 “待选词条” 在 “上屏” 之前自动转换为其他字符串.
-这个功能可以实现“简转繁”，“输入中文得到英文”之类的功能。"
-  :type 'boolean)
-
 (defvar pyim-process-input-ascii nil
   "是否开启 pyim 英文输入模式.")
 
@@ -71,10 +67,6 @@
 
 (defvar pyim-process-translating nil
   "记录是否在转换状态.")
-
-(defvar pyim-process-magic-convert-cache nil
-  "用来临时保存 `pyim-magic-convert' 的结果.
-从而加快同一个字符串第二次的转换速度。")
 
 (defvar pyim-process-last-created-word nil
   "记录最近一次创建的词条， 用于实现快捷删词功能： `pyim-delete-last-word' .")
@@ -301,19 +293,11 @@
 (defun pyim-process-get-imobjs ()
   pyim-imobjs)
 
-(defun pyim-process-get-outcome (&optional n)
+(defun pyim-process-get-outcome (&optional n magic-convert)
   "PYIM 流程的输出"
-  (pyim-outcome-get n))
-
-(defun pyim-process-magic-convert (str)
-  "用于处理 `pyim-magic-convert' 的函数。"
-  (if (functionp pyim-magic-converter)
-      (or (cdr (assoc str pyim-process-magic-convert-cache))
-          (let ((result (funcall pyim-magic-converter str)))
-            (setq pyim-process-magic-convert-cache
-                  `((,str . ,result)))
-            result))
-    str))
+  (if magic-convert
+      (pyim-magic-convert (pyim-outcome-get n))
+    (pyim-outcome-get n)))
 
 (defun pyim-process-outcome-handle (type)
   "依照 TYPE, 获取 pyim 的 outcome，并将其加入 `pyim-outcome-history'."

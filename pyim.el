@@ -213,7 +213,7 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
               ;; (message "unread-command-events: %s" unread-command-events)
               (pyim-process-terminate))))
         ;; (message "return: %s" (pyim-process-get-outcome))
-        (pyim-process-magic-convert (pyim-process-get-outcome)))
+        (pyim-process-get-outcome nil t))
     ;; Since KEY doesn't start any translation, just return it.
     ;; But translate KEY if necessary.
     (char-to-string key)))
