@@ -1,4 +1,4 @@
-;;; pyim.el --- A Chinese input method support quanpin, shuangpin, wubi and cangjie.        -*- lexical-binding: t; -*-
+;;; pyim.el --- A Chinese input method support quanpin, shuangpin, wubi, cangjie and rime.        -*- lexical-binding: t; -*-
 
 ;; * Header
 ;; Copyright (C) 2015-2021 Free Software Foundation, Inc.
