@@ -196,7 +196,7 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
             ;;          key cmd last-command last-command-event this-command)
             (if (if key
                     (commandp cmd)
-                  (pyim-self-insert-command-p cmd))
+                  (pyim-process-self-insert-command-p cmd))
                 (progn
                   ;; (message "keyseq: %s" keyseq)
                   (setq last-command-event (aref keyseq (1- (length keyseq)))
@@ -299,12 +299,6 @@ REFRESH-COMMON-DCACHE 已经废弃，不要再使用了。"
 
 ;; ** 键盘输入处理功能
 (defun pyim-self-insert-command ()
-  "Call `pyim-self-insert-command'."
-  (interactive "*")
-  (when (functionp pyim-self-insert-command)
-    (call-interactively pyim-self-insert-command)))
-
-(defun pyim-self-insert-command-default ()
   "Pyim 默认的 self-insert-command."
   (interactive "*")
   (setq pyim-candidates-last pyim-candidates)
@@ -322,7 +316,7 @@ REFRESH-COMMON-DCACHE 已经废弃，不要再使用了。"
     (pyim-process-outcome-handle 'last-char)
     (pyim-process-terminate))))
 
-(setq pyim-self-insert-command #'pyim-self-insert-command-default)
+(cl-pushnew 'pyim-self-insert-command pyim-process-self-insert-commands)
 
 ;; ** 加词功能
 (defun pyim-create-word-at-point (&optional number silent)

@@ -74,6 +74,9 @@
 (defvar pyim-process-run-async-timer nil
   "异步处理 entered 时，使用的 timer.")
 
+(defvar pyim-process-self-insert-commands nil
+  "保存所有的 self insert command.")
+
 (defvar pyim-process-run-exhibit-timer nil)
 
 (pyim-register-local-variables
@@ -226,7 +229,7 @@
        ((and
          ;; autoselector 功能会影响手动连续选择功能，所以这里做了一些限制，
          ;; 只有在输入的时候才能够触发 autoselector 机制。
-         (pyim-self-insert-command-p this-command)
+         (pyim-process-self-insert-command-p this-command)
          (cl-find-if (lambda (x)
                        (setq result x)
                        (equal (plist-get x :select) 'last))
@@ -248,7 +251,7 @@
        ;; entered 就是 "nihao". 如果 autoselector 函数返回一个 list:
        ;; (:select current), 那么就直接将 "nihao" 对应的第一个候选词
        ;; 上屏幕。
-       ((and (pyim-self-insert-command-p this-command)
+       ((and (pyim-process-self-insert-command-p this-command)
              (cl-find-if (lambda (x)
                            (setq result x)
                            (equal (plist-get x :select) 'current))
@@ -265,6 +268,10 @@
        (t (setq pyim-candidate-position 1)
           (pyim-preview-refresh)
           (pyim-page-refresh))))))
+
+(defun pyim-process-self-insert-command-p (cmd)
+  "测试 CMD 是否是一个 pyim self insert command."
+  (member cmd pyim-process-self-insert-commands))
 
 (defun pyim-process-run-with-thread ()
   "Function used by `pyim-process-run-async-timer'"
