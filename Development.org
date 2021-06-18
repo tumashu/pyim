@@ -4,25 +4,21 @@
 * 整体架构
 #+begin_example
 +----------------------+------------------------------------------------------------------+--------------------------+
-| PYIM Quail 路由层:   | pyim-input-method, pyim-active,                                  |                          |
+| PYIM Quail 层:       | pyim-input-method, pyim-active,                                  |                          |
 |                      | pyim-exit-from-minibuffer, pyim-mode-map                         |                          |
 |                      |                                                                  |                          |
 +----------------------+------------------------------------------------------------------|                          |
 | PYIM 用户命令定义层：| Pyim 用户命令，Entered 用户命令                                  |                          |
 |                      | Cregexp 用户命令，Cstring 用户命令                               |                          |
-|                      | Dict 管理命令，标点用户命令，Pymap 管理命令                      |                          |
+|                      | Dict 管理命令，标点用户命令，Pymap 管理命令                      |         Scheme           |
 +----------------------+----------------------------+-------------------------------------+                          |
-| PYIM 流程组件层：    | Process                    | PYIM 视图组件层： Page, Preview     |                          |
-|                      |                            |                                     |                          |
-|                      |                            |                                     |                          |
+| PYIM 流程组件层：    | Process                    | PYIM 视图组件层： Page, Preview     |     Assistant-scheme     |
 +----------------------+----------------------------+-------------------------------------|                          |
-| PYIM 实体组件层：    | Entered, Imobjs, Codes, Candidates, Outcome, Magic-convert,      |         Scheme           |
-|                      | Punctuations, Cregexp, Cstring, Probe,                           |     Assistant-scheme     |
-|                      | Autoselector, Pinyin                                             |         Common           |
+| PYIM 实体组件层：    | Entered, Imobjs, Codes, Candidates, Outcome, Magic-convert,      |         Common           |
+|                      | Punctuations, Cregexp, Cstring, Probe,                           |                          |
+|                      | Autoselector, Pinyin                                             |                          |
 +----------------------+-----------------------------------------+------------------------+                          |
-|                      | 词库缓存接口层： Dcache                                          |                          |
-| PYIM 持久化层        +------------------------------------------------------------------+                          |
-|                      | 词库缓存实现层： Dregcache, Dhashcache                           |                          |
+| PYIM 持久化层        | Dcache (接口), Dregcache (实现), Dhashcache (实现)               |                          |
 +----------------------+------------------------------------------------------------------+                          |
 | 词库文件层：         | Dict, Pymap                                                      |                          |
 +----------------------+------------------------------------------------------------------+--------------------------+
