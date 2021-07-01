@@ -2,6 +2,7 @@
 #+TITLE: PYIM 是一个 Emacs 中文输入法，支持全拼，双拼，五笔，仓颉 和 Rime 等
 #+AUTHOR: Feng Shu
 
+#+html: <a href="https://github.com/tumashu/pyim/actions/workflows/test.yml"><img alt="Github Action" src="https://github.com/tumashu/pyim/workflows/test.yml/badge.svg"/></a>
 #+html: <a href="http://elpa.gnu.org/packages/pyim.html"><img alt="GNU ELPA" src="https://elpa.gnu.org/packages/pyim.svg"/></a>
 #+html: <a href="http://elpa.gnu.org/devel/pyim.html"><img alt="GNU-devel ELPA" src="https://elpa.gnu.org/devel/pyim.svg"/></a>
 #+html: <a href="https://melpa.org/#/pyim"><img alt="MELPA" src="https://melpa.org/packages/pyim-badge.svg"/></a>
