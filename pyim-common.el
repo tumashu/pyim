@@ -185,8 +185,21 @@ This function is a fork of `quail-add-unread-command-events'."
     (setq unread-command-events nil))
   (setq unread-command-events
         (if (characterp key)
-            (cons (cons 'no-record key) unread-command-events)
-          (append (mapcan (lambda (e) (list (cons 'no-record e)))
+            (cons
+             (if window-system
+                 (cons 'no-record key)
+               ;; FIXME: When user use Xshell or MobaXTerm, error "<no-record>
+               ;; is undefined" will be exist, this may be not a pyim's bug.
+               ;; but I do not know how to solve this problem, so I do this ugly
+               ;; hack, and wait others help ...
+               ;; 1. https://github.com/tumashu/pyim/issues/402
+               ;; 2. https://git.savannah.gnu.org/cgit/emacs.git/commit/?id=bd5c7404195e45f11946b4e0933a1f8b697d8b87
+               key)
+             unread-command-events)
+          (append (mapcan (lambda (e)
+                            (list (if window-system
+                                      (cons 'no-record e)
+                                    e)))
                           (append key nil))
                   unread-command-events))))
 
