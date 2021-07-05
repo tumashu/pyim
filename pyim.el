@@ -70,7 +70,7 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
   :type 'boolean)
 
 ;;;###autoload
-(defvar pyim-titles '("PYIM " "PYIM-EN " "PYIM-AU ") "Pyim 在 mode-line 中显示的名称.")
+(defvar pyim-title "PYIM ")
 
 (defvar pyim-load-hook nil)
 (defvar pyim-active-hook nil)
@@ -220,7 +220,7 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
 
 ;; ** Pyim 输入法注册
 ;;;###autoload
-(register-input-method "pyim" "euc-cn" 'pyim-active (nth 0 pyim-titles))
+(register-input-method "pyim" "euc-cn" 'pyim-active pyim-title)
 
 ;; ** PYim 输入法启动功能
 ;;;###autoload

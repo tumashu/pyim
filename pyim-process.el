@@ -37,6 +37,7 @@
 (require 'pyim-page)
 (require 'pyim-candidates)
 (require 'pyim-preview)
+(require 'pyim-indicator)
 (require 'pyim-outcome)
 (require 'pyim-punctuation)
 (require 'pyim-autoselector)
@@ -100,7 +101,8 @@
 
 (defun pyim-process-init-ui ()
   "PYIM 流程，用户界面相关的初始化工作。"
-  (pyim-preview-setup-overlay))
+  (pyim-preview-setup-overlay)
+  (pyim-indicator-daemon #'pyim-process-indicator-function))
 
 (defmacro pyim-process-with-entered-buffer (&rest forms)
   "PYIM 流程的输入保存在一个 buffer 中，使用 FORMS 处理这个 buffer
@@ -155,11 +157,7 @@
                       nil))
                   (cond ((functionp func-or-list) (list func-or-list))
                         ((listp func-or-list) func-or-list)
-                        (t nil)))
-         (setq current-input-method-title
-               (if pyim-process-input-ascii
-                   (nth 1 pyim-titles)
-                 (nth 2 pyim-titles))))))
+                        (t nil))))))
 
 (defun pyim-process-input-chinese-p ()
   "确定 pyim 是否需要启动中文输入模式."
@@ -173,8 +171,13 @@
              (member last-command-event
                      (mapcar #'identity first-chars))
            (member last-command-event
-                   (mapcar #'identity rest-chars)))
-         (setq current-input-method-title (nth 0 pyim-titles)))))
+                   (mapcar #'identity rest-chars))))))
+
+(defun pyim-process-indicator-function ()
+  "Indicator function."
+  (or pyim-process-force-input-chinese
+      (and (not pyim-process-input-ascii)
+           (not (pyim-process-auto-switch-english-input-p)))))
 
 (defun pyim-process-run (&optional no-delay)
   "延迟 `pyim-exhibit-delay-ms' 显示备选词等待用户选择。"
