@@ -45,7 +45,7 @@ Indicator 用于显示输入法当前输入状态（英文还是中文）。"
 这个变量的取值是一个list: (中文输入时的颜色 英文输入时的颜色), 如
 果英文输入时的颜色为 nil, 则使用默认 cursor 颜色。")
 
-(defvar pyim-indicator-modeline-string (list "PYIM-C " "PYIM-E ")
+(defvar pyim-indicator-modeline-string (list "PYIM/C " "PYIM/E ")
   "`pyim-indicator-default' 使用的 modeline 字符串。
 
 这个变量的取值是一个list:
