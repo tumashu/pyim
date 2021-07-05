@@ -85,12 +85,7 @@ Indicator 用于显示输入法当前输入状态（英文还是中文）。"
   (let ((chinese-input-p
          (and (functionp func)
               (funcall func))))
-    (funcall pyim-indicator chinese-input-p)
-    (unless (eq pyim-indicator-last-input-method-title
-                current-input-method-title)
-      (force-mode-line-update)
-      (setq pyim-indicator-last-input-method-title
-            current-input-method-title))))
+    (funcall pyim-indicator chinese-input-p)))
 
 (defun pyim-indicator-default (chinese-input-p)
   "Pyim 默认使用的 indicator, 主要通过光标颜色和 mode-line 来显示输入状态。"
@@ -101,7 +96,12 @@ Indicator 用于显示输入法当前输入状态（英文还是中文）。"
     (setq current-input-method-title (nth 1 pyim-indicator-modeline-string))
     (set-cursor-color
      (or (nth 1 pyim-indicator-cursor-color)
-         pyim-indicator-original-cursor-color))))
+         pyim-indicator-original-cursor-color)))
+  (unless (eq pyim-indicator-last-input-method-title
+              current-input-method-title)
+    (force-mode-line-update)
+    (setq pyim-indicator-last-input-method-title
+          current-input-method-title)))
 
 ;; * Footer
 (provide 'pyim-indicator)
