@@ -15,7 +15,7 @@
 | PYIM 流程组件层：    | Process                    | PYIM 视图组件层： Page, Preview     |     Assistant-scheme     |
 +----------------------+----------------------------+-------------------------------------|                          |
 | PYIM 实体组件层：    | Entered, Imobjs, Codes, Candidates, Outcome, Magic-convert,      |         Common           |
-|                      | Punctuations, Cregexp, Cstring, Probe,                           |                          |
+|                      | Punctuations, Cregexp, Cstring, Probe, Indicator                 |                          |
 |                      | Autoselector, Pinyin                                             |                          |
 +----------------------+-----------------------------------------+------------------------+                          |
 | PYIM 持久化层        | Dcache (接口), Dregcache (实现), Dhashcache (实现)               |                          |
