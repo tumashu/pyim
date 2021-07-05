@@ -58,7 +58,7 @@ Indicator 用于显示输入法当前输入状态（英文还是中文）。"
 (defvar pyim-indicator-timer nil
   "`pyim-indicator-daemon' 使用的 timer.")
 
-(defvar pyim-indicator-timer-repeat 0.2)
+(defvar pyim-indicator-timer-repeat 0.4)
 
 (defvar pyim-indicator-last-input-method-title nil
   "记录上一次 `current-input-method-title' 的取值。")
