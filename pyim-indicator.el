@@ -82,10 +82,11 @@ Indicator 用于显示输入法当前输入状态（英文还是中文）。"
 
 (defun pyim-indicator-daemon-function (func)
   "`pyim-indicator-daemon' 内部使用的函数。"
-  (let ((chinese-input-p
-         (and (functionp func)
-              (funcall func))))
-    (funcall pyim-indicator chinese-input-p)))
+  (ignore-errors
+    (let ((chinese-input-p
+           (and (functionp func)
+                (funcall func))))
+      (funcall pyim-indicator chinese-input-p))))
 
 (defun pyim-indicator-default (chinese-input-p)
   "Pyim 默认使用的 indicator, 主要通过光标颜色和 mode-line 来显示输入状态。"
