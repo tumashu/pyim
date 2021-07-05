@@ -45,7 +45,7 @@ Indicator 用于显示输入法当前输入状态（英文还是中文）。"
 这个变量的取值是一个list: (中文输入时的颜色 英文输入时的颜色), 如
 果英文输入时的颜色为 nil, 则使用默认 cursor 颜色。")
 
-(defvar pyim-indicator-modeline-string (list "PYIM " "PYIM-EN ")
+(defvar pyim-indicator-modeline-string (list "PYIM-C " "PYIM-E ")
   "`pyim-indicator-default' 使用的 modeline 字符串。
 
 这个变量的取值是一个list:
@@ -59,6 +59,9 @@ Indicator 用于显示输入法当前输入状态（英文还是中文）。"
   "`pyim-indicator-daemon' 使用的 timer.")
 
 (defvar pyim-indicator-timer-repeat 0.2)
+
+(defvar pyim-indicator-last-input-method-title nil
+  "记录上一次 `current-input-method-title' 的取值。")
 
 (defun pyim-indicator-daemon (func)
   "Indicator daemon, 用于实时显示输入法当前输入状态。"
@@ -83,7 +86,11 @@ Indicator 用于显示输入法当前输入状态（英文还是中文）。"
          (and (functionp func)
               (funcall func))))
     (funcall pyim-indicator chinese-input-p)
-    (force-mode-line-update)))
+    (unless (eq pyim-indicator-last-input-method-title
+                current-input-method-title)
+      (force-mode-line-update)
+      (setq pyim-indicator-last-input-method-title
+            current-input-method-title))))
 
 (defun pyim-indicator-default (chinese-input-p)
   "Pyim 默认使用的 indicator, 主要通过光标颜色和 mode-line 来显示输入状态。"
