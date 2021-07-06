@@ -78,17 +78,24 @@ Indicator 用于显示输入法当前输入状态（英文还是中文）。"
   (interactive)
   (when (timerp pyim-indicator-timer)
     (cancel-timer pyim-indicator-timer))
-  (when pyim-indicator-original-cursor-color
-    (set-cursor-color pyim-indicator-original-cursor-color)))
+  (pyim-indicator-revert-cursor-color))
 
 (defun pyim-indicator-daemon-function (func)
   "`pyim-indicator-daemon' 内部使用的函数。"
-  (when (equal current-input-method "pyim")
-    (ignore-errors
-      (let ((chinese-input-p
-             (and (functionp func)
-                  (funcall func))))
-        (funcall pyim-indicator chinese-input-p)))))
+  (if (equal current-input-method "pyim")
+      (ignore-errors
+        (let ((chinese-input-p
+               (and (functionp func)
+                    (funcall func))))
+          (funcall pyim-indicator chinese-input-p)))
+    ;; 大多数情况是因为用户切换 buffer, 新 buffer 中
+    ;; pyim 没有启动，重置 cursor 颜色。
+    (pyim-indicator-revert-cursor-color)))
+
+(defun pyim-indicator-revert-cursor-color ()
+  "将 cursor 颜色重置到 pyim 启动之前的状态。"
+  (when pyim-indicator-original-cursor-color
+    (set-cursor-color pyim-indicator-original-cursor-color)))
 
 (defun pyim-indicator-default (chinese-input-p)
   "Pyim 默认使用的 indicator, 主要通过光标颜色和 mode-line 来显示输入状态。"
