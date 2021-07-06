@@ -247,6 +247,9 @@ pyim 使用函数 `pyim-active' 启动输入法的时候，会将变量
 会执行 `pyim-input-method' 这个函数。"
   (interactive)
 
+  ;; 启动 pyim 需要的 daemon
+  (pyim-process-start-daemon)
+
   ;; 初始化 dcache.
   (pyim-process-init-dcaches)
 
@@ -607,6 +610,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   "取消 pyim 的激活状态."
   (interactive)
   (pyim-kill-local-variables)
+  (pyim-process-stop-daemon)
   (run-hooks 'pyim-inactive-hook))
 
 ;; ** 中英文输入模式切换

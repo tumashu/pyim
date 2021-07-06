@@ -68,7 +68,6 @@ Indicator 用于显示输入法当前输入状态（英文还是中文）。"
   (unless pyim-indicator-original-cursor-color
     (setq pyim-indicator-original-cursor-color
           (face-attribute 'cursor :background)))
-  (pyim-indicator-daemon-stop)
   (setq pyim-indicator-timer
         (run-with-timer
          nil pyim-indicator-timer-repeat
@@ -78,7 +77,9 @@ Indicator 用于显示输入法当前输入状态（英文还是中文）。"
   "Stop indicator daemon."
   (interactive)
   (when (timerp pyim-indicator-timer)
-    (cancel-timer pyim-indicator-timer)))
+    (cancel-timer pyim-indicator-timer))
+  (when pyim-indicator-original-cursor-color
+    (set-cursor-color pyim-indicator-original-cursor-color)))
 
 (defun pyim-indicator-daemon-function (func)
   "`pyim-indicator-daemon' 内部使用的函数。"
