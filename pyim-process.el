@@ -105,11 +105,11 @@
 
 (defun pyim-process-start-daemon ()
   "启动 pyim 流程需要的相关 daemon."
-  (pyim-indicator-daemon #'pyim-process-indicator-function))
+  (pyim-indicator-start-daemon #'pyim-process-indicator-function))
 
 (defun pyim-process-stop-daemon ()
   "关闭 pyim 流程已经启动的 daemon."
-  (pyim-indicator-daemon-stop))
+  (pyim-indicator-stop-daemon))
 
 (defmacro pyim-process-with-entered-buffer (&rest forms)
   "PYIM 流程的输入保存在一个 buffer 中，使用 FORMS 处理这个 buffer

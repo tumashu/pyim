@@ -63,7 +63,7 @@ Indicator 用于显示输入法当前输入状态（英文还是中文）。"
 (defvar pyim-indicator-last-input-method-title nil
   "记录上一次 `current-input-method-title' 的取值。")
 
-(defun pyim-indicator-daemon (func)
+(defun pyim-indicator-start-daemon (func)
   "Indicator daemon, 用于实时显示输入法当前输入状态。"
   (unless pyim-indicator-original-cursor-color
     (setq pyim-indicator-original-cursor-color
@@ -73,7 +73,7 @@ Indicator 用于显示输入法当前输入状态（英文还是中文）。"
          nil pyim-indicator-timer-repeat
          #'pyim-indicator-daemon-function func)))
 
-(defun pyim-indicator-daemon-stop ()
+(defun pyim-indicator-stop-daemon ()
   "Stop indicator daemon."
   (interactive)
   (when (timerp pyim-indicator-timer)
