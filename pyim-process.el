@@ -109,7 +109,14 @@
 
 (defun pyim-process-stop-daemon ()
   "关闭 pyim 流程已经启动的 daemon."
-  (pyim-indicator-stop-daemon))
+  (interactive)
+  ;; 只有其它的 buffer 中没有启动 pyim 时，才停止 daemon.
+  ;; 因为 daemon 是服务所有 buffer 的。
+  (unless (cl-find-if
+           (lambda (buf)
+             (buffer-local-value 'current-input-method buf))
+           (remove (current-buffer) (buffer-list)))
+    (pyim-indicator-stop-daemon)))
 
 (defmacro pyim-process-with-entered-buffer (&rest forms)
   "PYIM 流程的输入保存在一个 buffer 中，使用 FORMS 处理这个 buffer

@@ -610,6 +610,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   "取消 pyim 的激活状态."
   (interactive)
   (pyim-kill-local-variables)
+  (pyim-process-stop-daemon)
   (run-hooks 'pyim-inactive-hook))
 
 ;; ** 中英文输入模式切换

@@ -78,7 +78,8 @@ Indicator 用于显示输入法当前输入状态（英文还是中文）。"
   "Stop indicator daemon."
   (interactive)
   (when (timerp pyim-indicator-timer)
-    (cancel-timer pyim-indicator-timer))
+    (cancel-timer pyim-indicator-timer)
+    (setq pyim-indicator-timer nil))
   (pyim-indicator-revert-cursor-color))
 
 (defun pyim-indicator-daemon-function (func)
