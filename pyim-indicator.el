@@ -29,6 +29,7 @@
 ;; * 代码                                                           :code:
 (require 'cl-lib)
 (require 'pyim-common)
+(require 'posframe nil t)
 
 (defgroup pyim-indicator nil
   "Indicator for pyim."
@@ -125,6 +126,20 @@ Indicator 用于显示输入法当前输入状态（英文还是中文）。"
         (setq current-input-method-title (nth 0 pyim-indicator-modeline-string))
       (setq current-input-method-title (nth 1 pyim-indicator-modeline-string))))
   (pyim-indicator-update-mode-line))
+
+(defun pyim-indicator-with-posframe (current-input-method chinese-input-p)
+  "Pyim 自带的 indicator, 通过 posframe 来显示输入状态。"
+  (let ((buffer " *pyim-indicator*")
+        (posframe-mouse-banish nil))
+    (if (not (equal current-input-method "pyim"))
+        (posframe-hide buffer)
+      (if chinese-input-p
+          (posframe-show buffer
+                         :string "##"
+                         :font "Monospace-2"
+                         :poshandler #'posframe-poshandler-point-top-left-corner
+                         :background-color "green")
+        (posframe-hide buffer)))))
 
 ;; * Footer
 (provide 'pyim-indicator)
