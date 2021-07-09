@@ -41,7 +41,7 @@ Indicator 用于显示输入法当前输入状态（英文还是中文）。"
   :type '(choice (const :tag "Off" nil)
                  (repeat :tag "Indicator functions" function)))
 
-(defvar pyim-indicator-cursor-color (list "green")
+(defvar pyim-indicator-cursor-color (list "orange")
   "`pyim-indicator-default' 使用的 cursor 颜色。
 
 这个变量的取值是一个list: (中文输入时的颜色 英文输入时的颜色), 如
@@ -139,7 +139,7 @@ Indicator 用于显示输入法当前输入状态（英文还是中文）。"
                            :string "##"
                            :font "Monospace-2"
                            :poshandler #'posframe-poshandler-point-top-left-corner
-                           :background-color "green")
+                           :background-color "orange")
           (posframe-hide buffer))))))
 
 ;; * Footer
