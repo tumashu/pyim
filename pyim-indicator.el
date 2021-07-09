@@ -57,6 +57,9 @@ Indicator 用于显示输入法当前输入状态（英文还是中文）。"
 (defvar pyim-indicator-original-cursor-color nil
   "记录 cursor 的原始颜色。")
 
+(defvar pyim-indicator-original-background-color nil
+  "记录原始的背景颜色。")
+
 (defvar pyim-indicator-timer nil
   "`pyim-indicator-daemon' 使用的 timer.")
 
@@ -69,7 +72,10 @@ Indicator 用于显示输入法当前输入状态（英文还是中文）。"
   "Indicator daemon, 用于实时显示输入法当前输入状态。"
   (unless pyim-indicator-original-cursor-color
     (setq pyim-indicator-original-cursor-color
-          (face-attribute 'cursor :background)))
+          (frame-parameter nil 'cursor-color)))
+  (unless pyim-indicator-original-background-color
+    (setq pyim-indicator-original-background-color
+          (frame-parameter nil 'background-color)))
   (unless (timerp pyim-indicator-timer)
     (setq pyim-indicator-timer
           (run-with-timer
@@ -117,7 +123,11 @@ Indicator 用于显示输入法当前输入状态（英文还是中文）。"
         (set-cursor-color (nth 0 pyim-indicator-cursor-color))
       (set-cursor-color
        (or (nth 1 pyim-indicator-cursor-color)
-           pyim-indicator-original-cursor-color)))))
+           (if (equal pyim-indicator-original-background-color
+                      (frame-parameter nil 'background-color))
+               pyim-indicator-original-cursor-color
+             (message "Pyim-indicator: 用户更改了背景颜色，将光标颜色设置为蓝色，便于区别。")
+             "blue"))))))
 
 (defun pyim-indicator-with-modeline (current-input-method chinese-input-p)
   "Pyim 自带的 indicator, 使用 mode-line 来显示输入状态。"
