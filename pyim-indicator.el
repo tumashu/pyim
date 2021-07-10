@@ -117,15 +117,24 @@ Indicator 用于显示输入法当前输入状态（英文还是中文）。"
         (set-cursor-color (nth 0 pyim-indicator-cursor-color))
       (set-cursor-color
        (or (nth 1 pyim-indicator-cursor-color)
-           (let ((background (frame-parameter nil 'background-color))
-                 (colors (list "black" "white")))
-             (if (> (color-distance pyim-indicator-original-cursor-color background)
-                    (/ (color-distance "black" "white") 2))
-                 pyim-indicator-original-cursor-color
-               (car (sort colors
-                          (lambda (a b)
-                            (> (color-distance a background)
-                               (color-distance b background))))))))))))
+           (pyim-indicator-select-color
+            (list "black" "white")
+            pyim-indicator-original-cursor-color))))))
+
+(defun pyim-indicator-select-color (colors &optional prefer-color)
+  "根据背景，选择一个比较显眼的颜色。
+
+如果 PREFER-COLOR 和背景颜色差异比较大，就使用 PREFER-COLOR.
+否则从 COLORS 中选择一个。"
+  (let ((background (frame-parameter nil 'background-color)))
+    (if (and prefer-color
+             (> (color-distance prefer-color background)
+                (/ (color-distance "black" "white") 2)))
+        prefer-color
+      (car (sort colors
+                 (lambda (a b)
+                   (> (color-distance a background)
+                      (color-distance b background))))))))
 
 (defun pyim-indicator-with-modeline (input-method chinese-input-p)
   "Pyim 自带的 indicator, 使用 mode-line 来显示输入状态。"
