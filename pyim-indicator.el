@@ -156,7 +156,7 @@ Indicator 用于显示输入法当前输入状态（英文还是中文）。"
                            :string ".."
                            :font "Monospace-2"
                            :poshandler #'posframe-poshandler-point-top-left-corner
-                           :background-color "orange")
+                           :background-color (pyim-indicator-select-color (list "red" "green" "blue" "orange")))
           (posframe-hide buffer))))))
 
 ;; * Footer
