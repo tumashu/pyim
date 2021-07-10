@@ -261,6 +261,25 @@ pyim 的选词框默认使用 *双行显示* 的样式，在一些特殊的情�
    词条添加到个人词库。
 5. `pyim-delete-word' 从个人词库中删除当前高亮选择的词条。
 
+** pyim 输入状态指示器
+pyim 输入状态指示器可以帮助用户快速了解当前 pyim 是处于英文输入状态还是中文输入
+状态，因为 pyim probe 探针功能可以让中英文输入状态动态切换，所以快速了解当前中英
+文输入状态有时候显得很重要。
+
+pyim 当前内置三种指示器实现方式：
+1. 改变光标颜色： pyim-indicator-with-cursor-color, 用户可以使用变量
+   pyim-indicator-cursor-color 来配置两种输入状态对应的光标颜色。
+2. 使用 modeline 显示状态字符串：pyim-indicator-with-mode-line, 用户可以使用变量
+   pyim-indicator-modeline-string 来配置两种状态对应的显示字符串。
+3. 使用 posframe 来显示一个带颜色小点：pyim-indicator-with-posframe
+
+设置默认启用的指示器有两个，用户可以使用下面的变量调整：
+#+begin_example
+(setq pyim-indicator-list (list #'pyim-indicator-with-cursor-color #'pyim-indicator-with-modeline))
+#+end_example
+
+注意：用户切换 emacs 主题之后，最好重启 pyim 一下。
+
 ** pyim 高级功能
 1. 根据环境自动切换到英文输入模式，使用 pyim-english-input-switch-functions 配置。
 2. 根据环境自动切换到半角标点输入模式，使用 pyim-punctuation-half-width-functions 配置。
@@ -313,6 +332,7 @@ pyim 的选词框默认使用 *双行显示* 的样式，在一些特殊的情�
 #+end_example
 
 注：上述函数列表中，任意一个函数的返回值为 t 时，pyim 切换到半角标点输入模式。
+
 
 * 开发
 请参考 [[file:Development.org][Development.org]] 文档
