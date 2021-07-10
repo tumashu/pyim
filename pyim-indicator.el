@@ -141,10 +141,10 @@ Indicator 用于显示输入法当前输入状态（英文还是中文）。"
     (let ((buffer " *pyim-indicator*")
           (posframe-mouse-banish nil))
       (if (not (equal input-method "pyim"))
-          (posframe-hide buffer)
+          (posframe-delete buffer)
         (if chinese-input-p
             (posframe-show buffer
-                           :string "##"
+                           :string ".."
                            :font "Monospace-2"
                            :poshandler #'posframe-poshandler-point-top-left-corner
                            :background-color "orange")
