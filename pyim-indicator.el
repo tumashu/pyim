@@ -41,6 +41,13 @@ Indicator 用于显示输入法当前输入状态（英文还是中文）。"
   :type '(choice (const :tag "Off" nil)
                  (repeat :tag "Indicator functions" function)))
 
+(defcustom pyim-indicator-use-post-command-hook t
+  "pyim-indicator daemon 是否使用 `post-command-hook' 实现。
+
+如果设置为 t, 则使用 post-command-hook 实现, 设置为 nil, 则使用
+timer 实现。"
+  :type 'boolean)
+
 (defvar pyim-indicator-cursor-color (list "orange")
   "`pyim-indicator-default' 使用的 cursor 颜色。
 
@@ -62,6 +69,10 @@ Indicator 用于显示输入法当前输入状态（英文还是中文）。"
 
 (defvar pyim-indicator-timer-repeat 0.4)
 
+(defvar pyim-indicator-daemon-function-argument nil
+  "实现 `pyim-indicator-daemon-function' 时，用于传递参数，主要原因
+是由于 `post-command-hook' 不支持参数。")
+
 (defvar pyim-indicator-last-input-method-title nil
   "记录上一次 `current-input-method-title' 的取值。")
 
@@ -70,29 +81,36 @@ Indicator 用于显示输入法当前输入状态（英文还是中文）。"
   (unless pyim-indicator-original-cursor-color
     (setq pyim-indicator-original-cursor-color
           (frame-parameter nil 'cursor-color)))
-  (unless (timerp pyim-indicator-timer)
-    (setq pyim-indicator-timer
-          (run-with-timer
-           nil pyim-indicator-timer-repeat
-           #'pyim-indicator-daemon-function func))))
+  (setq pyim-indicator-daemon-function-argument func)
+  (if pyim-indicator-use-post-command-hook
+      (add-hook 'post-command-hook #'pyim-indicator-daemon-function)
+    (unless (timerp pyim-indicator-timer)
+      (setq pyim-indicator-timer
+            (run-with-timer
+             nil pyim-indicator-timer-repeat
+             #'pyim-indicator-daemon-function)))))
 
 (defun pyim-indicator-stop-daemon ()
   "Stop indicator daemon."
   (interactive)
+  (setq pyim-indicator-daemon-function-argument nil)
+  (remove-hook 'post-command-hook #'pyim-indicator-daemon-function)
   (when (timerp pyim-indicator-timer)
     (cancel-timer pyim-indicator-timer)
     (setq pyim-indicator-timer nil))
   (pyim-indicator-revert-cursor-color))
 
-(defun pyim-indicator-daemon-function (func)
+(defun pyim-indicator-daemon-function ()
   "`pyim-indicator-daemon' 内部使用的函数。"
-  (ignore-errors
-    (let ((chinese-input-p
-           (and (functionp func)
-                (funcall func))))
-      (dolist (indicator pyim-indicator-list)
-        (when (functionp indicator)
-          (funcall indicator current-input-method chinese-input-p))))))
+  (while-no-input
+    (redisplay)
+    (ignore-errors
+      (let ((chinese-input-p
+             (and (functionp pyim-indicator-daemon-function-argument)
+                  (funcall pyim-indicator-daemon-function-argument))))
+        (dolist (indicator pyim-indicator-list)
+          (when (functionp indicator)
+            (funcall indicator current-input-method chinese-input-p)))))))
 
 (defun pyim-indicator-revert-cursor-color ()
   "将 cursor 颜色重置到 pyim 启动之前的状态。"
