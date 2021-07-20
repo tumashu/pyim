@@ -278,7 +278,26 @@ pyim 当前内置三种指示器实现方式：
 (setq pyim-indicator-list (list #'pyim-indicator-with-cursor-color #'pyim-indicator-with-modeline))
 #+end_example
 
-注意：用户切换 emacs 主题之后，最好重启 pyim 一下。
+注意事项：
+1. 用户切换 emacs 主题之后，最好重启 pyim 一下。
+2. pyim-indicator-with-cursor-color 这个 indicator 很容易和其它设置 cursor 颜色
+   的包冲突，因为都调用 set-cursor-color，遇到这种情况后，用户需要自己解决冲突，
+   pyim-indicator 提供了一个简单的机制：
+   #+begin_example
+   (setq pyim-indicator-list (list #'my-pyim-indicator-with-cursor-color #'pyim-indicator-with-modeline))
+
+   (defun my-pyim-indicator-with-cursor-color (input-method chinese-input-p)
+     (if (not (equal input-method "pyim"))
+         (progn
+           ;; 用户在这里定义 pyim 未激活时的光标颜色设置语句
+           (set-cursor-color "red"))
+       (if chinese-input-p
+           (progn
+             ;; 用户在这里定义 pyim 输入中文时的光标颜色设置语句
+             (set-cursor-color "green"))
+         ;; 用户在这里定义 pyim 输入英文时的光标颜色设置语句
+         (set-cursor-color "blue"))))
+   #+end_example
 
 ** pyim 高级功能
 1. 根据环境自动切换到英文输入模式，使用 pyim-english-input-switch-functions 配置。
