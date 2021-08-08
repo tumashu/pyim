@@ -738,8 +738,14 @@
 
 用于加快搜索速度，这个函数将缓存保存到 `pyim-pymap-py2cchar-cache' 变量中，
 如果 FORCE 设置为 t, 强制更新索引。"
-  (when (or force (or (not pyim-pymap-py2cchar-cache1)
-                      (not pyim-pymap-py2cchar-cache2)))
+  (when (or force
+            (not pyim-pymap-py2cchar-cache1)
+            (not pyim-pymap-py2cchar-cache2)
+            ;; FIXME: 我偶尔会遇到一个奇怪的问题，创建的缓存没有包含所有的汉字拼
+            ;; 音，原因未知，所以这里测试一下，看排在最后面的一个汉字拼音是否包
+            ;; 含在缓存中，如果不包含，就重新创建缓存。
+            (and pyim-pymap-py2cchar-cache1
+                 (not (gethash "zuo" pyim-pymap-py2cchar-cache1))))
     (setq pyim-pymap-py2cchar-cache1
           (make-hash-table :size 50000 :test #'equal))
     (setq pyim-pymap-py2cchar-cache2
