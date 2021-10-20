@@ -31,12 +31,16 @@
 ;;; Code:
 ;; * 代码                                                                 :code:
 
-;; ** Evil hack
+;; ** Hack for Evil
 (defun pyim-hacks-deactivate-input-method (orig_func)
   (let ((deactivate-current-input-method-function
          (or deactivate-current-input-method-function #'ignore)))
     (funcall orig_func)))
 
+(with-eval-after-load "evil"
+  (advice-add 'deactivate-input-method :around #'pyim-hacks-deactivate-input-method))
+
+;; ** Hack for xshell or MobaXTerm.
 (defvar pyim-hacks-for-ssh nil
   "Hack of [<no-record> is undefined #402](https://github.com/tumashu/pyim/issues/402)
 
@@ -59,9 +63,7 @@ problem, so I do this ugly hack, and wait others help ...
                     (append key nil))
             unread-command-events))))
 
-(with-eval-after-load "pyim"
-  (advice-add 'deactivate-input-method :around #'pyim-hacks-deactivate-input-method)
-  (advice-add 'pyim-add-unread-command-events :around #'pyim-hacks-add-unread-command-events))
+(advice-add 'pyim-add-unread-command-events :around #'pyim-hacks-add-unread-command-events)
 
 ;; * Footer
 (provide 'pyim-hacks)
