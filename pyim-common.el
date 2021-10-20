@@ -164,46 +164,15 @@ for example: https://github.com/ch11ng/exwm/pull/831"
       (funcall in l1 l2))))
 
 (defun pyim-add-unread-command-events (key &optional reset)
-  "Add KEY to `unread-command-events', ensuring that it is not recorded.
-
-If KEY is a character, it is prepended to `unread-command-events'
-as a cons cell of the form (no-record . KEY).
-
-If KEY is a vector of events, the events in the vector are
-prepended to `unread-command-events', after converting each event
-to a cons cell of the form (no-record . EVENT).
-
-Pyim puts keys back in `unread-command-events' to be handled
-again, and when it does this these keys have already been
-recorded in the recent keys and in the keyboard macro being
-defined, which means that recording them again creates
-duplicates.  When RESET is non-nil, the events in
-`unread-command-events' are first discarded.
-
-This function is a fork of `quail-add-unread-command-events'."
-  (let ((ssh-run-p (or (getenv "SSH_CLIENT")
-                       (getenv "SSH_TTY"))))
-    (when reset
-      (setq unread-command-events nil))
-    (setq unread-command-events
-          (if (characterp key)
-              (cons
-               (if ssh-run-p
-                   ;; FIXME: When user use Xshell or MobaXTerm, error "<no-record>
-                   ;; is undefined" will be exist, this may be not a pyim's bug.
-                   ;; but I do not know how to solve this problem, so I do this ugly
-                   ;; hack, and wait others help ...
-                   ;; 1. https://github.com/tumashu/pyim/issues/402
-                   ;; 2. https://git.savannah.gnu.org/cgit/emacs.git/commit/?id=bd5c7404195e45f11946b4e0933a1f8b697d8b87x
-                   key
-                 (cons 'no-record key))
-               unread-command-events)
-            (append (mapcan (lambda (e)
-                              (list (if ssh-run-p
-                                        e
-                                      (cons 'no-record e))))
-                            (append key nil))
-                    unread-command-events)))))
+  "This function is a fork of `quail-add-unread-command-events'."
+  (when reset
+    (setq unread-command-events nil))
+  (setq unread-command-events
+        (if (characterp key)
+            (cons (cons 'no-record key) unread-command-events)
+          (append (mapcan (lambda (e) (list (cons 'no-record e)))
+                          (append key nil))
+                  unread-command-events))))
 
 ;; * Footer
 (provide 'pyim-common)
