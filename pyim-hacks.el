@@ -26,7 +26,7 @@
 ;;; Commentary:
 
 ;; * 说明文档                                                              :doc:
-;; This file has common utilities used by pyim
+;; This file has hacks of pyim
 
 ;;; Code:
 ;; * 代码                                                                 :code:
