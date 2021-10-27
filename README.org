@@ -236,9 +236,9 @@ pyim 的选词框默认使用 *双行显示* 的样式，在一些特殊的情�
    置变量： `pyim-punctuation-translate-p', 用户也可以手动设置这个变量， 比如：
    
    #+begin_example
-   (setq pyim-punctuation-translate-p '(yes no auto))   ;使用全角标点。
-   (setq pyim-punctuation-translate-p '(no yes auto))   ;使用半角标点。
-   (setq pyim-punctuation-translate-p '(auto yes no))   ;中文使用全角标点，英文使用半角标点。
+   (setq-default pyim-punctuation-translate-p '(yes no auto))   ;使用全角标点。
+   (setq-default pyim-punctuation-translate-p '(no yes auto))   ;使用半角标点。
+   (setq-default pyim-punctuation-translate-p '(auto yes no))   ;中文使用全角标点，英文使用半角标点。
    #+end_example
    
 2. 第二种方法：使用命令 `pyim-punctuation-translate-at-point' 只切换光标处标点的
