@@ -552,6 +552,14 @@ pyim 安装后，可以通过下面的设置开启拼音搜索功能：
       '((t . pyim-cregexp-ivy)))
 #+end_example
 
+** 让 avy 支持拼音搜索
+#+begin_src emacs-lisp
+(with-eval-after-load 'avy
+  (defun my-avy--regex-candidates (fun regex &optional beg end pred group)
+    (let ((regex (pyim-cregexp-build regex)))
+      (funcall fun regex beg end pred group)))
+  (advice-add 'avy--regex-candidates :around #'my-avy--regex-candidates))
+#+end_src
 ** 让 vertico, selectrum 等补全框架，通过 orderless 支持拼音搜索候选项功能。
 
 #+begin_example
