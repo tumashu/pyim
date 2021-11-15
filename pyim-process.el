@@ -244,13 +244,7 @@
     ;; 延迟1秒异步处理 entered, pyim 内置的输入法目前不使用异步获取
     ;; 词条的方式，主要用于 pyim-liberime 支持。
     (setq pyim-process-run-async-timer
-          (run-with-timer
-           1 nil
-           (lambda ()
-             (if (functionp 'make-thread)
-                 (make-thread #'pyim-process-run-with-thread
-                              "pyim-process-run-with-thread")
-               (pyim-process-run-with-thread)))))
+          (run-with-timer 1 nil #'pyim-process-async-ui-refresh))
     ;; 自动上屏功能
     (let ((autoselector-results
            (mapcar (lambda (x)
@@ -311,7 +305,7 @@
   "测试 CMD 是否是一个 pyim self insert command."
   (member cmd pyim-process-self-insert-commands))
 
-(defun pyim-process-run-with-thread ()
+(defun pyim-process-async-ui-refresh ()
   "Function used by `pyim-process-run-async-timer'"
   (let* ((scheme-name (pyim-scheme-name))
          (words (delete-dups (pyim-candidates-create pyim-imobjs scheme-name t))))
