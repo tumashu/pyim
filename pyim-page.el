@@ -443,15 +443,18 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 +------------------------------------+
 | [ni hao]: 1.你好 2.你号 ...  (1/9) |
 +------------------------------------+"
-  (format "[%-15s]: %s(%s/%s)"
-          (pyim-page-preview-create)
-          (pyim-page-menu-create
-           (gethash :candidates page-info)
-           (gethash :position page-info)
-           nil
-           (gethash :hightlight-current page-info))
-          (gethash :current-page page-info)
-          (gethash :total-page page-info)))
+  (let* ((width (string-width (buffer-string)))
+         (n (+ (* (+ (/ width 20) 1) 20) 5)))
+    (format "%s[%-15s]:%s(%s/%s)"
+            (propertize " " 'display (list 'space :align-to n))
+            (pyim-page-preview-create)
+            (pyim-page-menu-create
+             (gethash :candidates page-info)
+             (gethash :position page-info)
+             nil
+             (gethash :hightlight-current page-info))
+            (gethash :current-page page-info)
+            (gethash :total-page page-info))))
 
 (defun pyim-page-style:exwm (page-info)
   "专门用于 exwm 环境的 page style."
@@ -504,11 +507,8 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
   (let ((inhibit-quit t)
         point-1)
     (save-excursion
-      (let* ((str (replace-regexp-in-string
-                   "\\CC" "" (buffer-string)))
-             (n (max 2 (- 15 (string-width str)))))
-        (insert (make-string n ?\ ) string)
-        (setq point-1 (point))))
+      (insert string)
+      (setq point-1 (point)))
     (sit-for 1000000)
     (delete-region (point) point-1)
     (when quit-flag
