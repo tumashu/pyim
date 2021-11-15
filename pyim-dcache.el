@@ -124,7 +124,7 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
       (insert ";; End:")
       (make-directory (file-name-directory file) t)
       (let ((save-silently t))
-        (pyim-dcache-write-file file)))))
+        (pyim-dcache-write-file file nil t)))))
 
 (defun pyim-dcache-get-value-from-file (file)
   "读取保存到 FILE 里面的 value."
@@ -142,7 +142,7 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
         output))))
 
 ;; ** Dcache 文件处理功能
-(defun pyim-dcache-write-file (filename &optional confirm)
+(defun pyim-dcache-write-file (filename &optional confirm silent)
   "A helper function to write dcache files."
   (let ((coding-system-for-write 'utf-8-unix))
     (when (and confirm
@@ -155,7 +155,8 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
                               "File `%s' exists; overwrite? " filename))
                    (user-error "Canceled"))))
     (write-region (point-min) (point-max) filename nil :silent)
-    (message "Saving file %s..." filename)))
+    (unless silent
+      (message "Saving file %s..." filename))))
 
 (defun pyim-dcache-save-caches ()
   "保存 dcache.
