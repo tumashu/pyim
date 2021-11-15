@@ -302,6 +302,8 @@ pyim 当前内置三种指示器实现方式：
 ** pyim 高级功能
 1. 根据环境自动切换到英文输入模式，使用 pyim-english-input-switch-functions 配置。
 2. 根据环境自动切换到半角标点输入模式，使用 pyim-punctuation-half-width-functions 配置。
+3. 如果想在某种环境下强制输入中文，可以使用 pyim-force-input-chinese-functions
+   来配置，这个设置可以屏蔽掉 pyim-english-input-switch-functions 的设置。
 
 注意：上述两个功能使用不同的变量设置， *千万不要搞错* 。
 

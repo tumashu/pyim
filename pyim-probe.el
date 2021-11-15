@@ -121,18 +121,17 @@
                 (cl-search non-digit-str-before-1 "0123456789"))
       (cl-incf offset)
       (setq non-digit-str-before-1 (pyim-char-before-to-string offset)))
-    (unless (pyim-exwm-enable-p)
-      (if (<= (point) (save-excursion (back-to-indentation)
-                                      (point)))
-          (not (or (pyim-string-match-p
-                    "\\cc"
-                    (save-excursion
-                      ;; 查找前一个非空格字符。
-                      (if (re-search-backward "[^[:space:]\n]" nil t)
-                          (char-to-string (char-after (point))))))
-                   (> (length (pyim-entered-get 'point-before)) 0)))
-        (not (or (pyim-string-match-p "\\cc" non-digit-str-before-1)
-                 (> (length (pyim-entered-get 'point-before)) 0)))))))
+    (if (<= (point) (save-excursion (back-to-indentation)
+                                    (point)))
+        (not (or (pyim-string-match-p
+                  "\\cc"
+                  (save-excursion
+                    ;; 查找前一个非空格字符。
+                    (if (re-search-backward "[^[:space:]\n]" nil t)
+                        (char-to-string (char-after (point))))))
+                 (> (length (pyim-entered-get 'point-before)) 0)))
+      (not (or (pyim-string-match-p "\\cc" non-digit-str-before-1)
+               (> (length (pyim-entered-get 'point-before)) 0))))))
 
 (defun pyim-probe-auto-english ()
   "激活这个 pyim 探针函数后，使用下面的规则自动切换中英文输入：
@@ -145,13 +144,12 @@
 这个函数用于：`pyim-english-input-switch-functions' 。"
   (let ((str-before-1 (pyim-char-before-to-string 0))
         (str-before-2 (pyim-char-before-to-string 1)))
-    (unless (pyim-exwm-enable-p)
-      (if (> (point) (save-excursion (back-to-indentation)
-                                     (point)))
-          (or (if (pyim-string-match-p " " str-before-1)
-                  (pyim-string-match-p "\\cc" str-before-2)
-                (and (not (pyim-string-match-p "\\cc" str-before-1))
-                     (= (length (pyim-entered-get 'point-before)) 0))))))))
+    (if (> (point) (save-excursion (back-to-indentation)
+                                   (point)))
+        (or (if (pyim-string-match-p " " str-before-1)
+                (pyim-string-match-p "\\cc" str-before-2)
+              (and (not (pyim-string-match-p "\\cc" str-before-1))
+                   (= (length (pyim-entered-get 'point-before)) 0)))))))
 
 (declare-function evil-normal-state-p "evil")
 (defun pyim-probe-evil-normal-mode ()
@@ -167,10 +165,9 @@
 
 用于：`pyim-punctuation-half-width-functions' 。"
   (let ((line-string (buffer-substring (point-at-bol) (point))))
-    (unless (pyim-exwm-enable-p)
-      (and (member (char-to-string char)
-                   (mapcar #'car pyim-punctuation-dict))
-           (string-match "^[ \t]*$" line-string)))))
+    (and (member (char-to-string char)
+                 (mapcar #'car pyim-punctuation-dict))
+         (string-match "^[ \t]*$" line-string))))
 
 (declare-function pyim-entered-get "pyim-entered" (&optional type))
 (declare-function org-inside-LaTeX-fragment-p "org")
@@ -190,6 +187,21 @@
   (when (eq major-mode 'org-mode)
     (or (not (eq (org-inside-LaTeX-fragment-p) nil))
         (not (eq (org-inside-latex-macro-p) nil)))))
+
+(defvar exwm-xim-buffer-p)
+(defun pyim-probe-exwm-environment ()
+  "测试当前是否是 exwm 输入法环境。
+
+这个探针主要用于： `pyim-force-input-chinese-functions'"
+  (bound-and-true-p exwm-xim-buffer-p))
+
+(defvar xwidget-webkit-isearch--read-string-buffer)
+(defun pyim-probe-xwidget-webkit-environment ()
+  "测试当前是否是 xwidget-webkit 运行环境。
+
+这个探针主要用于： `pyim-force-input-chinese-functions'."
+  (bound-and-true-p xwidget-webkit-isearch--read-string-buffer))
+
 
 ;; * Footer
 (provide 'pyim-probe)

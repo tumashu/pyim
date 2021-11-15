@@ -51,6 +51,16 @@
 运行结果为 t 时，pyim 开启英文输入功能。"
   :type 'symbol)
 
+(defcustom pyim-force-input-chinese-functions
+  (list 'pyim-probe-exwm-environment
+        'pyim-probe-xwidget-webkit-environment)
+  "让 pyim 强制输入中文.
+
+这个变量的取值为一个函数列表，这个函数列表中的任意一个函数的运行
+结果为 t 时，pyim 将强制输入中文功能,无视
+`pyim-english-input-switch-functions' 的设置."
+  :type 'symbol)
+
 (defcustom pyim-exhibit-delay-ms 0
   "输入或者删除拼音字符后等待多少毫秒后才显示可选词
 当用户快速输入连续的拼音时可提升用户体验.
@@ -173,12 +183,25 @@
                         ((listp func-or-list) func-or-list)
                         (t nil))))))
 
+(defun pyim-process-force-input-chinese-p ()
+  "判断是否强制输入中文，这个函数主要处理变量：
+`pyim-force-input-chinese-functions'."
+  (let ((func-or-list pyim-force-input-chinese-functions))
+    (or pyim-process-force-input-chinese
+        (cl-some (lambda (x)
+                   (if (functionp x)
+                       (funcall x)
+                     nil))
+                 (cond ((functionp func-or-list) (list func-or-list))
+                       ((listp func-or-list) func-or-list)
+                       (t nil))))))
+
 (defun pyim-process-input-chinese-p ()
   "确定 pyim 是否需要启动中文输入模式."
   (let* ((scheme-name (pyim-scheme-name))
          (first-chars (pyim-scheme-get-option scheme-name :first-chars))
          (rest-chars (pyim-scheme-get-option scheme-name :rest-chars)))
-    (and (or pyim-process-force-input-chinese
+    (and (or (pyim-process-force-input-chinese-p)
              (and (not pyim-process-input-ascii)
                   (not (pyim-process-auto-switch-english-input-p))))
          (if (not (string< "" (pyim-entered-get 'point-before)))
@@ -189,7 +212,7 @@
 
 (defun pyim-process-indicator-function ()
   "Indicator function."
-  (or pyim-process-force-input-chinese
+  (or (pyim-process-force-input-chinese-p)
       (and (not pyim-process-input-ascii)
            (not (pyim-process-auto-switch-english-input-p)))))
 

@@ -132,6 +132,8 @@ non-nil，说明，补全已经用完了.
           whole
         (pyim-page-end t)))))
 
+(declare-function pyim-probe-exwm-environment "pyim-probe")
+
 (defun pyim-page-refresh (&optional hightlight-current)
   "刷新 page 页面的函数.
 
@@ -206,7 +208,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
         ;; 指定的方式来显示候选词。
         (let ((message-log-max nil))
           (cond
-           ((pyim-exwm-enable-p)
+           ((pyim-probe-exwm-environment)
             ;; when exwm-xim is used, page should be showed
             ;; in minibuffer.
             (message (pyim-page-style:exwm page-info)))
