@@ -188,9 +188,8 @@
   (let ((func-or-list pyim-force-input-chinese-functions))
     (or pyim-process-force-input-chinese
         (cl-some (lambda (x)
-                   (if (functionp x)
-                       (funcall x)
-                     nil))
+                   (when (functionp x)
+                     (funcall x)))
                  (cond ((functionp func-or-list) (list func-or-list))
                        ((listp func-or-list) func-or-list)
                        (t nil))))))
