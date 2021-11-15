@@ -174,14 +174,13 @@
 (defun pyim-process-auto-switch-english-input-p ()
   "判断是否 *根据环境自动切换* 为英文输入模式，这个函数处理变量：
 `pyim-english-input-switch-functions'"
-  (let* ((func-or-list pyim-english-input-switch-functions))
-    (and (cl-some (lambda (x)
-                    (if (functionp x)
-                        (funcall x)
-                      nil))
-                  (cond ((functionp func-or-list) (list func-or-list))
-                        ((listp func-or-list) func-or-list)
-                        (t nil))))))
+  (let ((func-or-list pyim-english-input-switch-functions))
+    (cl-some (lambda (x)
+               (when (functionp x)
+                 (funcall x)))
+             (cond ((functionp func-or-list) (list func-or-list))
+                   ((listp func-or-list) func-or-list)
+                   (t nil)))))
 
 (defun pyim-process-force-input-chinese-p ()
   "判断是否强制输入中文，这个函数主要处理变量：
