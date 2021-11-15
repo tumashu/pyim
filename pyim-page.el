@@ -203,7 +203,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
           ;; 在 minibuffer 中输入中文时，使用当前输入的
           ;; 下一行来显示候选词。
           (pyim-page-minibuffer-message
-           (concat "\n" (pyim-page-style:minibuffer page-info)))
+           (pyim-page-style:minibuffer page-info))
         ;; 在普通 buffer 中输入中文时，使用 `pyim-page-tooltip'
         ;; 指定的方式来显示候选词。
         (let ((message-log-max nil))
@@ -443,7 +443,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 +------------------------------------+
 | [ni hao]: 1.你好 2.你号 ...  (1/9) |
 +------------------------------------+"
-  (format "[%s]: %s(%s/%s)"
+  (format "[%-15s]: %s(%s/%s)"
           (pyim-page-preview-create)
           (pyim-page-menu-create
            (gethash :candidates page-info)
@@ -504,8 +504,11 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
   (let ((inhibit-quit t)
         point-1)
     (save-excursion
-      (insert string)
-      (setq point-1 (point)))
+      (let* ((str (replace-regexp-in-string
+                   "\\CC" "" (buffer-string)))
+             (n (max 2 (- 15 (string-width str)))))
+        (insert (make-string n ?\ ) string)
+        (setq point-1 (point))))
     (sit-for 1000000)
     (delete-region (point) point-1)
     (when quit-flag
