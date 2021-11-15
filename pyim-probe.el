@@ -200,7 +200,9 @@
   "测试当前是否是 xwidget-webkit 运行环境。
 
 这个探针主要用于： `pyim-force-input-chinese-functions'."
-  (bound-and-true-p xwidget-webkit-isearch--read-string-buffer))
+  (or (eq this-original-command
+          'xwidget-webkit-pass-command-event-with-input-method)
+      (bound-and-true-p xwidget-webkit-isearch--read-string-buffer)))
 
 
 ;; * Footer
