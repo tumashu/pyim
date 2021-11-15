@@ -443,18 +443,15 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 +------------------------------------+
 | [ni hao]: 1.你好 2.你号 ...  (1/9) |
 +------------------------------------+"
-  (let* ((width (string-width (buffer-string)))
-         (n (+ (* (+ (/ width 20) 1) 20) 5)))
-    (format "%s[%-15s]:%s(%s/%s)"
-            (propertize " " 'display (list 'space :align-to n))
-            (pyim-page-preview-create)
-            (pyim-page-menu-create
-             (gethash :candidates page-info)
-             (gethash :position page-info)
-             nil
-             (gethash :hightlight-current page-info))
-            (gethash :current-page page-info)
-            (gethash :total-page page-info))))
+  (format " \t[%-15s]:%s(%s/%s)"
+          (pyim-page-preview-create)
+          (pyim-page-menu-create
+           (gethash :candidates page-info)
+           (gethash :position page-info)
+           nil
+           (gethash :hightlight-current page-info))
+          (gethash :current-page page-info)
+          (gethash :total-page page-info)))
 
 (defun pyim-page-style:exwm (page-info)
   "专门用于 exwm 环境的 page style."
