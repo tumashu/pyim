@@ -78,6 +78,10 @@ pyim 内建的有三种选词框格式：
   "使用 posframe 做为选词框时，设置选词框的最小宽度."
   :type 'integer)
 
+(defcustom pyim-page-minibuffer-separator "  \t"
+  "在 minibuffer 中使用 pyim 时，preview 和 page 之间的分割字符串。"
+  :type 'string)
+
 (defface pyim-page
   '((t (:inherit default :background "#333333" :foreground "#dcdccc")))
   "Face used for the pyim page.")
@@ -203,7 +207,8 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
           ;; 在 minibuffer 中输入中文时，使用当前输入的
           ;; 下一行来显示候选词。
           (pyim-page-minibuffer-message
-           (pyim-page-style:minibuffer page-info))
+           (concat pyim-page-minibuffer-separator
+                   (pyim-page-style:minibuffer page-info)))
         ;; 在普通 buffer 中输入中文时，使用 `pyim-page-tooltip'
         ;; 指定的方式来显示候选词。
         (let ((message-log-max nil))
@@ -443,7 +448,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 +------------------------------------+
 | [ni hao]: 1.你好 2.你号 ...  (1/9) |
 +------------------------------------+"
-  (format " \t[%-15s]:%s(%s/%s)"
+  (format "[%-15s]:%s(%s/%s)"
           (pyim-page-preview-create)
           (pyim-page-menu-create
            (gethash :candidates page-info)
