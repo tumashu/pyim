@@ -51,6 +51,7 @@
 (defvar pyim-dhashcache-update-shortcode2word nil)
 (defvar pyim-dhashcache-update-ishortcode2word nil)
 (defvar pyim-dhashcache-update-icode2word-p nil)
+(defvar pyim-dhashcache-update-code2word-running-p nil)
 
 (defun pyim-dhashcache-sort-words (words-list)
   "对 WORDS-LIST 排序，词频大的排在前面.
@@ -233,7 +234,9 @@ DCACHE 是一个 code -> words 的 hashtable.
   (let* ((code2word-file (pyim-dhashcache-get-path 'pyim-dhashcache-code2word))
          (word2code-file (pyim-dhashcache-get-path 'pyim-dhashcache-word2code))
          (code2word-md5-file (pyim-dhashcache-get-path 'pyim-dhashcache-code2word-md5)))
-    (when (or force (not (equal dicts-md5 (pyim-dcache-get-value-from-file code2word-md5-file))))
+    (when (and (or force (not (equal dicts-md5 (pyim-dcache-get-value-from-file code2word-md5-file))))
+               (not pyim-dhashcache-update-code2word-running-p))
+      (setq pyim-dhashcache-update-code2word-running-p t)
       ;; use hashtable
       (async-start
        `(lambda ()
@@ -242,9 +245,10 @@ DCACHE 是一个 code -> words 的 hashtable.
           (let ((dcache (pyim-dhashcache-generate-dcache-file ',dict-files ,code2word-file)))
             (pyim-dhashcache-generate-word2code-dcache-file dcache ,word2code-file))
           (pyim-dcache-save-value-to-file ',dicts-md5 ,code2word-md5-file))
-       `(lambda (result)
-          (pyim-dcache-set-variable 'pyim-dhashcache-code2word t)
-          (pyim-dcache-set-variable 'pyim-dhashcache-word2code t))))))
+       (lambda (result)
+         (pyim-dcache-set-variable 'pyim-dhashcache-code2word t)
+         (pyim-dcache-set-variable 'pyim-dhashcache-word2code t)
+         (setq pyim-dhashcache-update-code2word-running-p nil))))))
 
 (defun pyim-dhashcache-export (dcache file &optional confirm)
   "将一个 pyim DCACHE 导出为文件 FILE.
