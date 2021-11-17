@@ -89,6 +89,9 @@
 如果 FORCE 为真，强制加载缓存。"
   (interactive)
   (when (or force (not pyim-dhashcache-update-ishortcode2word))
+    ;; NOTE: 这个变量按理说应该在回调函数里面设置，但 async 在某些情况下会卡死，
+    ;; 这个变量无法设置为 t, 导致后续产生大量的 emacs 进程，极其影响性能。
+    (setq pyim-dhashcache-update-ishortcode2word t)
     (async-start
      `(lambda ()
         ,@(pyim-dhashcache-async-inject-variables)
@@ -117,9 +120,8 @@
                     pyim-dhashcache-ishortcode2word))
          pyim-dhashcache-ishortcode2word)
         (pyim-dcache-save-variable 'pyim-dhashcache-ishortcode2word))
-     `(lambda (result)
-        (setq pyim-dhashcache-update-ishortcode2word t)
-        (pyim-dcache-set-variable 'pyim-dhashcache-ishortcode2word t)))))
+     (lambda (result)
+       (pyim-dcache-set-variable 'pyim-dhashcache-ishortcode2word t)))))
 
 (defun pyim-dhashcache-update-shortcode2word (&optional force)
   "使用 `pyim-dhashcache-code2word' 中的词条，创建简写 code 词库缓存并加载.
@@ -127,6 +129,9 @@
 如果 FORCE 为真，强制运行。"
   (interactive)
   (when (or force (not pyim-dhashcache-update-shortcode2word))
+    ;; NOTE: 这个变量按理说应该在回调函数里面设置，但 async 在某些情况下会卡死，
+    ;; 这个变量无法设置为 t, 导致后续产生大量的 emacs 进程，极其影响性能。
+    (setq pyim-dhashcache-update-shortcode2word t)
     (async-start
      `(lambda ()
         ,@(pyim-dhashcache-async-inject-variables)
@@ -159,9 +164,8 @@
          pyim-dhashcache-shortcode2word)
         (pyim-dcache-save-variable 'pyim-dhashcache-shortcode2word)
         nil)
-     `(lambda (result)
-        (setq pyim-dhashcache-update-shortcode2word t)
-        (pyim-dcache-set-variable 'pyim-dhashcache-shortcode2word t)))))
+     (lambda (result)
+       (pyim-dcache-set-variable 'pyim-dhashcache-shortcode2word t)))))
 
 (defun pyim-dhashcache-get-path (variable)
   "获取保存 VARIABLE 取值的文件的路径."
@@ -289,6 +293,9 @@ code 对应的中文词条了。
 如果 FORCE 为真，强制排序。"
   (interactive)
   (when (or force (not pyim-dhashcache-update-icode2word-p))
+    ;; NOTE: 这个变量按理说应该在回调函数里面设置，但 async 在某些情况下会卡死，
+    ;; 这个变量无法设置为 t, 导致后续产生大量的 emacs 进程，极其影响性能。
+    (setq pyim-dhashcache-update-icode2word-p t)
     (async-start
      `(lambda ()
         ,@(pyim-dhashcache-async-inject-variables)
@@ -302,9 +309,8 @@ code 对应的中文词条了。
          pyim-dhashcache-icode2word)
         (pyim-dcache-save-variable 'pyim-dhashcache-icode2word)
         nil)
-     `(lambda (result)
-        (setq pyim-dhashcache-update-icode2word-p t)
-        (pyim-dcache-set-variable 'pyim-dhashcache-icode2word t)))))
+     (lambda (result)
+       (pyim-dcache-set-variable 'pyim-dhashcache-icode2word t)))))
 
 (defun pyim-dhashcache-upgrade-icode2word ()
   "升级 icode2word 缓存。"
