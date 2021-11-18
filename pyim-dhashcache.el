@@ -48,8 +48,8 @@
 (defvar pyim-dhashcache-shortcode2word nil)
 (defvar pyim-dhashcache-icode2word nil)
 (defvar pyim-dhashcache-ishortcode2word nil)
-(defvar pyim-dhashcache-update-shortcode2word nil)
-(defvar pyim-dhashcache-update-ishortcode2word nil)
+(defvar pyim-dhashcache-update-shortcode2word-p nil)
+(defvar pyim-dhashcache-update-ishortcode2word-p nil)
 (defvar pyim-dhashcache-update-icode2word-p nil)
 (defvar pyim-dhashcache-update-code2word-running-p nil)
 
@@ -89,10 +89,10 @@
 
 如果 FORCE 为真，强制加载缓存。"
   (interactive)
-  (when (or force (not pyim-dhashcache-update-ishortcode2word))
+  (when (or force (not pyim-dhashcache-update-ishortcode2word-p))
     ;; NOTE: 这个变量按理说应该在回调函数里面设置，但 async 在某些情况下会卡死，
     ;; 这个变量无法设置为 t, 导致后续产生大量的 emacs 进程，极其影响性能。
-    (setq pyim-dhashcache-update-ishortcode2word t)
+    (setq pyim-dhashcache-update-ishortcode2word-p t)
     (async-start
      `(lambda ()
         ,@(pyim-dhashcache-async-inject-variables)
@@ -129,10 +129,10 @@
 
 如果 FORCE 为真，强制运行。"
   (interactive)
-  (when (or force (not pyim-dhashcache-update-shortcode2word))
+  (when (or force (not pyim-dhashcache-update-shortcode2word-p))
     ;; NOTE: 这个变量按理说应该在回调函数里面设置，但 async 在某些情况下会卡死，
     ;; 这个变量无法设置为 t, 导致后续产生大量的 emacs 进程，极其影响性能。
-    (setq pyim-dhashcache-update-shortcode2word t)
+    (setq pyim-dhashcache-update-shortcode2word-p t)
     (async-start
      `(lambda ()
         ,@(pyim-dhashcache-async-inject-variables)
