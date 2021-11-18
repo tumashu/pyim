@@ -121,7 +121,7 @@
                     pyim-dhashcache-ishortcode2word))
          pyim-dhashcache-ishortcode2word)
         (pyim-dcache-save-variable 'pyim-dhashcache-ishortcode2word))
-     (lambda (result)
+     (lambda (_)
        (pyim-dcache-set-variable 'pyim-dhashcache-ishortcode2word t)))))
 
 (defun pyim-dhashcache-update-shortcode2word (&optional force)
@@ -165,7 +165,7 @@
          pyim-dhashcache-shortcode2word)
         (pyim-dcache-save-variable 'pyim-dhashcache-shortcode2word)
         nil)
-     (lambda (result)
+     (lambda (_)
        (pyim-dcache-set-variable 'pyim-dhashcache-shortcode2word t)))))
 
 (defun pyim-dhashcache-get-path (variable)
@@ -245,7 +245,7 @@ DCACHE 是一个 code -> words 的 hashtable.
           (let ((dcache (pyim-dhashcache-generate-dcache-file ',dict-files ,code2word-file)))
             (pyim-dhashcache-generate-word2code-dcache-file dcache ,word2code-file))
           (pyim-dcache-save-value-to-file ',dicts-md5 ,code2word-md5-file))
-       (lambda (result)
+       (lambda (_)
          (pyim-dcache-set-variable 'pyim-dhashcache-code2word t)
          (pyim-dcache-set-variable 'pyim-dhashcache-word2code t)
          (setq pyim-dhashcache-update-code2word-running-p nil))))))
@@ -313,7 +313,7 @@ code 对应的中文词条了。
          pyim-dhashcache-icode2word)
         (pyim-dcache-save-variable 'pyim-dhashcache-icode2word)
         nil)
-     (lambda (result)
+     (lambda (_)
        (pyim-dcache-set-variable 'pyim-dhashcache-icode2word t)))))
 
 (defun pyim-dhashcache-upgrade-icode2word ()
