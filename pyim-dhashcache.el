@@ -234,8 +234,8 @@ DCACHE 是一个 code -> words 的 hashtable.
   (let* ((code2word-file (pyim-dhashcache-get-path 'pyim-dhashcache-code2word))
          (word2code-file (pyim-dhashcache-get-path 'pyim-dhashcache-word2code))
          (code2word-md5-file (pyim-dhashcache-get-path 'pyim-dhashcache-code2word-md5)))
-    (when (and (or force (not (equal dicts-md5 (pyim-dcache-get-value-from-file code2word-md5-file))))
-               (not pyim-dhashcache-update-code2word-running-p))
+    (when (or force (and (not (equal dicts-md5 (pyim-dcache-get-value-from-file code2word-md5-file)))
+                         (not pyim-dhashcache-update-code2word-running-p)))
       (setq pyim-dhashcache-update-code2word-running-p t)
       ;; use hashtable
       (async-start
