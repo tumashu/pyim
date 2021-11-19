@@ -800,7 +800,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
        ;; 当光标前的一个字符是标点符号时，半角/全角切换。
        ((pyim-string-match-p "[[:punct:]：－]" (pyim-char-before-to-string 0))
         (call-interactively 'pyim-punctuation-translate-at-point))
-       (t (message "Pyim: pyim-convert-string-at-point do nothing."))))))
+       (t (message "Pyim: pyim-convert-string-at-point did nothing."))))))
 
 ;; ** 编码反查功能
 (defun pyim-search-word-code ()
