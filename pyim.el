@@ -73,8 +73,17 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
 (defvar pyim-title "PYIM ")
 
 (defvar pyim-load-hook nil)
-(defvar pyim-active-hook nil)
-(defvar pyim-inactive-hook nil)
+
+(define-obsolete-variable-alias
+  'pyim-active-hook
+  'pyim-activate-hook "4.0.0")
+
+(define-obsolete-variable-alias
+  'pyim-inactive-hook
+  'pyim-deactivate-hook "4.0.0")
+
+(defvar pyim-activate-hook nil)
+(defvar pyim-deactivate-hook nil)
 
 (defvar pyim-mode-map
   (let ((map (make-sparse-keymap))
@@ -215,14 +224,16 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
 
 ;; ** Pyim 输入法注册
 ;;;###autoload
-(register-input-method "pyim" "UTF-8" #'pyim-active pyim-title)
+(register-input-method "pyim" "UTF-8" #'pyim-activate pyim-title)
 
 ;; ** PYim 输入法启动功能
+(define-obsolete-function-alias 'pyim-active 'pyim-activate "4.0.0")
+
 ;;;###autoload
-(defun pyim-active (&optional _args)
+(defun pyim-activate (&optional _args)
   "pyim 启动函数.
 
-pyim 是使用 `pyim-active' 来启动输入法，这个命令主要做如下工作：
+pyim 是使用 `pyim-activate' 来启动输入法，这个命令主要做如下工作：
 1. 重置所有的 local 变量。
 2. 创建汉字到拼音和拼音到汉字的 hash table。
 3. 创建词库缓存 dcache.
@@ -232,9 +243,9 @@ pyim 是使用 `pyim-active' 来启动输入法，这个命令主要做如下工
 6. 设定变量：
    1. `input-method-function'
    2. `deactivate-current-input-method-function'
-7. 运行 `pyim-active-hook'
+7. 运行 `pyim-activate-hook'
 
-pyim 使用函数 `pyim-active' 启动输入法的时候，会将变量
+pyim 使用函数 `pyim-activate' 启动输入法的时候，会将变量
 `input-method-function' 设置为 `pyim-input-method' ，这个变量会影
 响 `read-event' 的行为。
 
@@ -256,12 +267,12 @@ pyim 使用函数 `pyim-active' 启动输入法的时候，会将变量
   (add-hook 'kill-emacs-hook
             (lambda ()
               (pyim-process-save-dcaches t)))
-  (setq deactivate-current-input-method-function #'pyim-inactivate)
+  (setq deactivate-current-input-method-function #'pyim-deactivate)
   ;; If we are in minibuffer, turn off the current input method
   ;; before exiting.
   (when (eq (selected-window) (minibuffer-window))
     (add-hook 'minibuffer-exit-hook #'pyim-exit-from-minibuffer))
-  (run-hooks 'pyim-active-hook)
+  (run-hooks 'pyim-activate-hook)
   (setq-local input-method-function #'pyim-input-method)
   nil)
 
@@ -278,7 +289,7 @@ pyim 使用函数 `pyim-active' 启动输入法的时候，会将变量
 (defun pyim-restart ()
   "重启 pyim，不建议用于编程环境.
 
-这个函数用于重启 pyim，其过程和 `pyim-active' 类似，只是在输入法重
+这个函数用于重启 pyim，其过程和 `pyim-activate' 类似，只是在输入法重
 启之前，询问用户，是否保存个人词频信息。"
   (interactive)
   (let ((save-personal-dcache
@@ -600,13 +611,14 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   (pyim-process-terminate))
 
 ;; ** 取消激活功能
-(defun pyim-inactivate ()
+(define-obsolete-function-alias 'pyim-inactivate 'pyim-deactivate "4.0.0")
+(defun pyim-deactivate ()
   "取消 pyim 的激活状态."
   (interactive)
   (pyim-kill-local-variables)
   (kill-local-variable 'input-method-function)
   (pyim-process-stop-daemon)
-  (run-hooks 'pyim-inactive-hook))
+  (run-hooks 'pyim-deactivate-hook))
 
 ;; ** 中英文输入模式切换
 (defun pyim-toggle-input-ascii ()
