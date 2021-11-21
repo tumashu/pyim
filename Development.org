@@ -4,8 +4,8 @@
 * 整体架构
 #+begin_example
 +----------------------+------------------------------------------------------------------+--------------------------+
-| PYIM Quail 层:       | pyim-input-method, pyim-active,                                  |                          |
-|                      | pyim-exit-from-minibuffer, pyim-mode-map                         |                          |
+| Emacs IM 接口        | pyim-input-method, pyim-activate, pyim-deactivate                |                          |
+| PYIM 实现层:         | pyim-exit-from-minibuffer, pyim-mode-map                         |                          |
 |                      |                                                                  |                          |
 +----------------------+------------------------------------------------------------------|                          |
 | PYIM 用户命令定义层：| Pyim 用户命令，Entered 用户命令                                  |                          |
