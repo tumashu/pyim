@@ -119,11 +119,6 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
     map)
   "Pyim 的 Keymap.")
 
-(pyim-register-local-variables
- '(input-method-function
-   inactivate-current-input-method-function
-   describe-current-input-method-function))
-
 ;; ** pyim 输入法定义
 (defun pyim-input-method (key)
   "得到需要插入到 buffer 的字符串, 并将其插入到待输入 buffer.
@@ -220,11 +215,11 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
 
 ;; ** Pyim 输入法注册
 ;;;###autoload
-(register-input-method "pyim" "euc-cn" 'pyim-active pyim-title)
+(register-input-method "pyim" "UTF-8" #'pyim-active pyim-title)
 
 ;; ** PYim 输入法启动功能
 ;;;###autoload
-(defun pyim-active (_name &optional _active-func)
+(defun pyim-active (&optional _args)
   "pyim 启动函数.
 
 pyim 是使用 `pyim-active' 来启动输入法，这个命令主要做如下工作：
@@ -261,14 +256,13 @@ pyim 使用函数 `pyim-active' 启动输入法的时候，会将变量
   (add-hook 'kill-emacs-hook
             (lambda ()
               (pyim-process-save-dcaches t)))
-  (setq input-method-function #'pyim-input-method)
   (setq deactivate-current-input-method-function #'pyim-inactivate)
-  ;; (setq describe-current-input-method-function 'pyim-help)
   ;; If we are in minibuffer, turn off the current input method
   ;; before exiting.
   (when (eq (selected-window) (minibuffer-window))
     (add-hook 'minibuffer-exit-hook #'pyim-exit-from-minibuffer))
   (run-hooks 'pyim-active-hook)
+  (setq-local input-method-function #'pyim-input-method)
   nil)
 
 ;; ** pyim 从 minibuffer 退出功能
@@ -610,6 +604,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   "取消 pyim 的激活状态."
   (interactive)
   (pyim-kill-local-variables)
+  (kill-local-variable 'input-method-function)
   (pyim-process-stop-daemon)
   (run-hooks 'pyim-inactive-hook))
 
