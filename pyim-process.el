@@ -563,7 +563,6 @@ BUG：拼音无法有效地处理多音字。"
   (pyim-entered-erase-buffer)
   (pyim-process-outcome-handle ""))
 
-(defalias 'pyim-terminate-translation #'pyim-process-terminate)
 (defun pyim-process-terminate ()
   "Terminate the translation of the current key."
   (setq pyim-process-translating nil)
@@ -576,14 +575,9 @@ BUG：拼音无法有效地处理多音字。"
   (setq pyim-cstring-to-code-criteria nil)
   (pyim-process-run-async-timer-reset)
   (let* ((class (pyim-scheme-get-option (pyim-scheme-name) :class))
-         (func (intern (format "pyim-process-terminate:%S" class)))
-         ;; `pyim-process-terminate' 以前叫 pyim-terminate-translation, 兼容以前的名称。
-         (func-old (intern (format "pyim-terminate-translation:%S" class))))
-    (cond ((and class (functionp func))
-           (funcall func))
-          ((and class (functionp func-old))
-           (funcall func))
-          (t nil))))
+         (func (intern (format "pyim-process-terminate:%S" class))))
+    (when (and class (functionp func))
+      (funcall func))))
 
 ;; * Footer
 (provide 'pyim-process)
