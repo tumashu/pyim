@@ -260,7 +260,7 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
 
       ;; 通过排列组合的方式, 重排 pinyins-list。
       ;; 比如：(("Hello") ("yin") ("hang" "xing")) -> (("Hello" "yin" "hang") ("Hello" "yin" "xing"))
-      (setq pinyins-list-permutated (pyim-permutate-list2 pinyins-list))
+      (setq pinyins-list-permutated (pyim-permutate-list pinyins-list))
 
       ;; 使用 pyim 的安装的词库来校正多音字。
       (when adjust-duo-yin-zi

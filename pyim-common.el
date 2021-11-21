@@ -75,8 +75,7 @@
 
 (defun pyim-permutate-list (list)
   "使用排列组合的方式重新排列 LIST.
-这个函数由 ‘二中’ 提供，`pyim-cstring-to-pinyin' 没有使用这个函数
-(速度稍微有点慢)。"
+这个函数由 ‘二中’ 提供。"
   (let ((list-head (car list))
         (list-tail (cdr list)))
     (cond ((null list-tail)
@@ -85,27 +84,6 @@
           (t (cl-loop for element in list-head
                       append (mapcar (lambda (l) (cons element l))
                                      (pyim-permutate-list list-tail)))))))
-
-(defun pyim-permutate-list2 (list)
-  "使用排列组合的方式重新排列 LIST.
-这个函数由 ’翀/ty‘ 提供，`pyim-cstring-to-pinyin' 默认使用这个函数。"
-  (if (= (length list) 1)
-      (mapcar #'list (car list))
-    (pyim-permutate-list2-internal (car list) (cdr list))))
-
-(defun pyim-permutate-list2-internal (one two)
-  "`pyim-permutate-list2' 的内部函数。"
-  (let (return)
-    (if (null (car two))
-        one
-      (dolist (x1 one)
-        (dolist (x2 (car two))
-          (push (if (listp x1)
-                    (append x1 (list x2))
-                  (list x1 x2))
-                return)))
-      (setq one return)
-      (pyim-permutate-list2-internal one (cdr two)))))
 
 (defun pyim-list-merge (a b)
   "Join list A and B to a new list, then delete dups."
