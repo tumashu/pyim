@@ -470,23 +470,12 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
           (gethash :current-page page-info)
           (gethash :total-page page-info)))
 
-(defvar pyim-pyim-posframe-warn nil)
-
-(defun pyim-page-posframe-workable-p ()
-  "Test posframe's workable status."
-  (if (and (functionp 'posframe-workable-p)
-           (posframe-workable-p))
-      t
-    (unless pyim-pyim-posframe-warn
-      (setq pyim-pyim-posframe-warn
-            (message "PYIM: posframe 没有正确安装或者当前 Emacs 版本不支持 posframe。")))
-    nil))
-
 (defun pyim-page-tooltip-show (string position)
   "在 POSITION 位置，使用 posframe 或者 popup 显示字符串 STRING."
   (let ((tooltip pyim-page-tooltip))
     (cond ((and (eq tooltip 'posframe)
-                (pyim-page-posframe-workable-p))
+                (functionp 'posframe-workable-p)
+                (posframe-workable-p))
            (posframe-show pyim-page-tooltip-posframe-buffer
                           :string string
                           :position position
@@ -520,7 +509,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
 (defun pyim-page-hide ()
   "Hide pyim page."
   (when (and (eq pyim-page-tooltip 'posframe)
-             (pyim-page-posframe-workable-p))
+             (functionp 'posframe-hide))
     (posframe-hide pyim-page-tooltip-posframe-buffer)))
 
 ;; * Footer
