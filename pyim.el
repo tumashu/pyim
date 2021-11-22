@@ -164,13 +164,11 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
 4. 这个函数最终会返回需要插入到 buffer 的字符串。
 
 这个部份的代码涉及许多 emacs 低层函数，相对复杂，不容易理解，有兴
-趣的朋友可以参考：
-1. `quail-input-method' 相关函数。
-2. elisp 手册相关章节:
-   1. Invoking the Input Method
-   2. Input Methods
-   3. Miscellaneous Event Input Features
-   4. Reading One Event"
+趣的朋友可以参考 elisp 手册相关章节:
+1. Invoking the Input Method
+2. Input Methods
+3. Miscellaneous Event Input Features
+4. Reading One Event"
   ;; Check the possibility of translating KEY.
   ;; If KEY is nil, we can anyway start translation.
   (if (or (integerp key) (null key))
@@ -178,10 +176,7 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
       (let* ((echo-keystrokes 0)
              (help-char nil)
              (overriding-terminal-local-map pyim-mode-map)
-             ;; (generated-events nil)
              (input-method-function nil)
-             ;; Quail package 用这个变量来控制是否在 buffer 中
-             ;; 插入 preview string, pyim *强制* 将其设置为 nil
              (input-method-use-echo-area nil)
              (modified-p (buffer-modified-p))
              last-command-event last-command this-command)
