@@ -372,8 +372,14 @@ SILENT 设置为 t 是，不显示提醒信息。"
 (defun pyim-import (file &optional merge-method)
   "从 FILE 中导入词条以及词条对应的词频信息。
 
-MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表
-词条在词频缓存中的词频和待导入文件中的词频，函数返回值做为合并后的词频使用，
+导入的文件结构类似：
+
+  ;;; -*- coding: utf-8-unix -*-
+  你好 247
+  这是 312
+
+MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表词条在词频
+缓存中的词频和待导入文件中的词频，函数返回值做为合并后的词频使用，
 默认方式是：取两个词频的最大值。"
   (interactive "F导入词条相关信息文件: ")
   (with-temp-buffer
