@@ -382,7 +382,7 @@ SILENT 设置为 t 是，不显示提醒信息。"
 MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表词条在词频
 缓存中的词频和待导入文件中的词频，函数返回值做为合并后的词频使用，
 默认方式是：取两个词频的最大值。"
-  (interactive "F导入词条相关信息文件: ")
+  (interactive "F导入词条和词频信息文件: ")
   (with-temp-buffer
     (let ((coding-system-for-read 'utf-8-unix))
       (insert-file-contents file))
@@ -408,7 +408,7 @@ MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表词�
   ;; 更新相关的 dcache
   (pyim-process-update-personal-words)
 
-  (message "pyim: 词条相关信息导入完成！"))
+  (message "PYIM: 词条和词频信息导入完成！"))
 
 ;; ** 删词功能
 (defun pyim-delete-words-in-file (file)
