@@ -287,11 +287,9 @@ pyim 使用函数 `pyim-activate' 启动输入法的时候，会将变量
   (run-hooks 'pyim-deactivate-hook))
 
 ;; ** pyim 从 minibuffer 退出功能
-(declare-function quail-exit-from-minibuffer "quail" ())
-
 (defun pyim-exit-from-minibuffer ()
   "Pyim 从 minibuffer 退出."
-  (quail-exit-from-minibuffer)
+  (deactivate-input-method)
   (when (<= (minibuffer-depth) 1)
     (remove-hook 'minibuffer-exit-hook 'pyim-exit-from-minibuffer)))
 
