@@ -276,6 +276,16 @@ pyim 使用函数 `pyim-activate' 启动输入法的时候，会将变量
   (setq-local input-method-function #'pyim-input-method)
   nil)
 
+;; ** 取消激活功能
+(define-obsolete-function-alias 'pyim-inactivate 'pyim-deactivate "4.0.0")
+(defun pyim-deactivate ()
+  "取消 pyim 的激活状态."
+  (interactive)
+  (pyim-kill-local-variables)
+  (kill-local-variable 'input-method-function)
+  (pyim-process-stop-daemon)
+  (run-hooks 'pyim-deactivate-hook))
+
 ;; ** pyim 从 minibuffer 退出功能
 (declare-function quail-exit-from-minibuffer "quail" ())
 
@@ -609,16 +619,6 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   (interactive)
   (pyim-process-outcome-handle 'pyim-entered)
   (pyim-process-terminate))
-
-;; ** 取消激活功能
-(define-obsolete-function-alias 'pyim-inactivate 'pyim-deactivate "4.0.0")
-(defun pyim-deactivate ()
-  "取消 pyim 的激活状态."
-  (interactive)
-  (pyim-kill-local-variables)
-  (kill-local-variable 'input-method-function)
-  (pyim-process-stop-daemon)
-  (run-hooks 'pyim-deactivate-hook))
 
 ;; ** 中英文输入模式切换
 (defun pyim-toggle-input-ascii ()
