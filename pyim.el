@@ -369,7 +369,8 @@ SILENT 设置为 t 是，不显示提醒信息。"
           (message "将词条: %S 插入 personal file。" output))))))
 
 ;; ** 导入词条功能
-(defun pyim-import (file &optional merge-method)
+(define-obsolete-face-alias 'pyim-import 'pyim-import-words-and-counts "4.0")
+(defun pyim-import-words-and-counts (file &optional merge-method)
   "从 FILE 中导入词条以及词条对应的词频信息。
 
 导入的文件结构类似：
