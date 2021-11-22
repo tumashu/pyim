@@ -74,9 +74,8 @@ pyim 会使用 Emacs overlay 机制在 *待输入buffer* 光标处高亮显示�
   (let* ((class (pyim-scheme-get-option (pyim-scheme-name) :class))
          (candidates pyim-candidates)
          (pos (1- (min pyim-candidate-position (length candidates))))
-         (preview
-          (concat (pyim-outcome-get)
-                  (pyim-candidate-parse (nth pos candidates)))))
+         (preview (concat (pyim-outcome-get)
+                          (nth pos candidates))))
     (when (memq class '(quanpin))
       (let ((rest (mapconcat
                    (lambda (py)

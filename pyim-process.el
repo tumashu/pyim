@@ -352,18 +352,16 @@
                   (pyim-process-outcome-handle-char last-command-event))
           pyim-outcome-history))
         ((eq type 'candidate)
-         (let* ((candidate
-                 (pyim-candidate-parse
-                  (nth (1- pyim-candidate-position)
-                       pyim-candidates))))
+         (let ((candidate
+                (nth (1- pyim-candidate-position)
+                     pyim-candidates)))
            (push
             (concat (pyim-outcome-get) candidate)
             pyim-outcome-history)))
         ((eq type 'candidate-and-last-char)
-         (let* ((candidate
-                 (pyim-candidate-parse
-                  (nth (1- pyim-candidate-position)
-                       pyim-candidates))))
+         (let ((candidate
+                (nth (1- pyim-candidate-position)
+                     pyim-candidates)))
            (push
             (concat (pyim-outcome-get)
                     candidate

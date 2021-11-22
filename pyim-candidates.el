@@ -195,17 +195,6 @@ IMOBJS 获得候选词条。"
   "`pyim-candidates-create' 处理双拼输入法的函数."
   (pyim-candidates-create:quanpin imobjs 'quanpin async))
 
-(defun pyim-candidate-parse (candidate)
-  (let ((output
-         (if (consp candidate)
-             (car candidate)
-           candidate)))
-    (if (stringp output)
-        ;; 注：五笔支持 comments 遗留下来的代码，现在作为兼容而保留，
-        ;; 等用户的 dcache 都升级之后，这个就可以删除了。
-        (car (split-string output ":"))
-      output)))
-
 ;; * Footer
 (provide 'pyim-candidates)
 

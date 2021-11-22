@@ -310,9 +310,8 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
      (when (and (eq pyim-assistant-scheme 'quanpin)
                 (eq pyim-assistant-scheme-enable t))
        (let ((code (pyim-cstring-to-xingma
-                    (pyim-candidate-parse
-                     (nth (1- pyim-candidate-position)
-                          pyim-candidates))
+                    (nth (1- pyim-candidate-position)
+                         pyim-candidates)
                     (pyim-scheme-name 'default))))
          (if (> (length code) 0)
              (format " [%s](辅)" code)
