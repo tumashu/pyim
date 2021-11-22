@@ -190,16 +190,13 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
 
 (defalias 'pyim-export-personal-words 'pyim-dcache-export-personal-words)
 (defun pyim-dcache-export-personal-words (file &optional confirm)
-  "将用户选择过的词生成的缓存导出为 pyim 词库文件.
+  "将用户的个人词条导出为 pyim 词库文件.
 
 如果 FILE 为 nil, 提示用户指定导出文件位置, 如果 CONFIRM 为 non-nil，
-文件存在时将会提示用户是否覆盖，默认为覆盖模式。
-
-注： 这个函数的用途是制作 pyim 词库，个人词条导入导出建议使用：
-`pyim-dcache-import' 和 `pyim-dcache-export' ."
-  (interactive "F将个人缓存中的词条导出到文件：")
+文件存在时将会提示用户是否覆盖，默认为覆盖模式。"
+  (interactive "F将个人词条导出到文件：")
   (pyim-dcache-call-api 'export-personal-words file confirm)
-  (message "Pyim export finished."))
+  (message "PYIM: 个人词条导出完成。"))
 
 ;; ** Dcache 更新功能
 (defun pyim-dcache-update (&optional force)
