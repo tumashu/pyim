@@ -365,22 +365,6 @@ code 对应的中文词条了。
   ;; 词频
   (pyim-dcache-save-variable 'pyim-dhashcache-iword2count))
 
-(defun pyim-dhashcache-insert-export-content ()
-  (maphash
-   (lambda (key value)
-     (insert (format "%s %s\n" key value)))
-   pyim-dhashcache-iword2count)
-  ;; 在默认情况下，用户选择过的词生成的缓存中存在的词条，
-  ;; `pyim-dhashcache-iword2count' 中也一定存在，但如果用户
-  ;; 使用了特殊的方式给用户选择过的词生成的缓存中添加了
-  ;; 词条，那么就需要将这些词条也导出，且设置词频为 0
-  (maphash
-   (lambda (_ words)
-     (dolist (word words)
-       (unless (gethash word pyim-dhashcache-iword2count)
-         (insert (format "%s %s\n" word 0)))))
-   pyim-dhashcache-icode2word))
-
 (defmacro pyim-dhashcache-put (cache code &rest body)
   "这个用于保存词条，删除词条以及调整词条位置."
   (declare (indent 0))
@@ -431,6 +415,25 @@ code 对应的中文词条了。
 (defun pyim-dhashcache-export-personal-words (file &optional confirm)
   "导出个人词库到 FILE."
   (pyim-dhashcache-export pyim-dhashcache-icode2word file confirm))
+
+(defun pyim-dhashcache-export-words-and-counts (file &optional confirm)
+  (with-temp-buffer
+    (insert ";;; -*- coding: utf-8-unix -*-\n")
+    (maphash
+     (lambda (key value)
+       (insert (format "%s %s\n" key value)))
+     pyim-dhashcache-iword2count)
+    ;; 在默认情况下，用户选择过的词生成的缓存中存在的词条，
+    ;; `pyim-dhashcache-iword2count' 中也一定存在，但如果用户
+    ;; 使用了特殊的方式给用户选择过的词生成的缓存中添加了
+    ;; 词条，那么就需要将这些词条也导出，且设置词频为 0
+    (maphash
+     (lambda (_ words)
+       (dolist (word words)
+         (unless (gethash word pyim-dhashcache-iword2count)
+           (insert (format "%s %s\n" word 0)))))
+     pyim-dhashcache-icode2word)
+    (pyim-dcache-write-file file confirm)))
 
 ;; * Footer
 

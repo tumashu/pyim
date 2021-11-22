@@ -176,17 +176,17 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
   t)
 
 ;; ** Dcache 导出功能
-(defalias 'pyim-export 'pyim-dcache-export)
-(defun pyim-dcache-export (file &optional confirm)
+(define-obsolete-function-alias 'pyim-export 'pyim-export-words-and-counts "4.0")
+
+(defalias 'pyim-export-words-and-counts 'pyim-dcache-export-words-and-counts)
+(defun pyim-dcache-export-words-and-counts (file &optional confirm)
   "将个人词条以及词条对应的词频信息导出到文件 FILE.
 
-  如果 FILE 为 nil, 提示用户指定导出文件位置, 如果 CONFIRM 为 non-nil，
-  文件存在时将会提示用户是否覆盖，默认为覆盖模式"
-  (interactive "F将词条相关信息导出到文件: ")
-  (with-temp-buffer
-    (insert ";;; -*- coding: utf-8-unix -*-\n")
-    (pyim-dcache-call-api 'insert-export-content)
-    (pyim-dcache-write-file file confirm)))
+如果 FILE 为 nil, 提示用户指定导出文件位置, 如果 CONFIRM 为
+non-nil，文件存在时将会提示用户是否覆盖，默认为覆盖模式"
+  (interactive "F将词条和词频信息导出到文件: ")
+  (pyim-dcache-call-api 'export-words-and-counts file confirm)
+  (message "PYIM: 词条和词频信息导出完成。"))
 
 (defalias 'pyim-export-personal-words 'pyim-dcache-export-personal-words)
 (defun pyim-dcache-export-personal-words (file &optional confirm)

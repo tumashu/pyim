@@ -349,7 +349,7 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
   ;; 词频
   (pyim-dcache-save-variable 'pyim-dregcache-iword2count))
 
-(defun pyim-dregcache-insert-export-content ()
+(defun pyim-dregcache-export-words-and-counts ()
   "TODO"
   )
 
