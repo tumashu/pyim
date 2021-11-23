@@ -383,6 +383,8 @@ MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表词�
 缓存中的词频和待导入文件中的词频，函数返回值做为合并后的词频使用，
 默认方式是：取两个词频的最大值。"
   (interactive "F导入词条和词频信息文件: ")
+  ;; 导入词条和词频之前需要加载 dcaches.
+  (pyim-process-init-dcaches)
   (with-temp-buffer
     (let ((coding-system-for-read 'utf-8-unix))
       (insert-file-contents file))
