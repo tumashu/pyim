@@ -185,6 +185,7 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
 如果 FILE 为 nil, 提示用户指定导出文件位置, 如果 CONFIRM 为
 non-nil，文件存在时将会提示用户是否覆盖，默认为覆盖模式"
   (interactive "F将词条和词频信息导出到文件: ")
+  (pyim-dcache-init-variables)
   (pyim-dcache-call-api 'export-words-and-counts file confirm)
   (message "PYIM: 词条和词频信息导出完成。"))
 
@@ -195,6 +196,7 @@ non-nil，文件存在时将会提示用户是否覆盖，默认为覆盖模式"
 如果 FILE 为 nil, 提示用户指定导出文件位置, 如果 CONFIRM 为 non-nil，
 文件存在时将会提示用户是否覆盖，默认为覆盖模式。"
   (interactive "F将个人词条导出到文件：")
+  (pyim-dcache-init-variables)
   (pyim-dcache-call-api 'export-personal-words file confirm)
   (message "PYIM: 个人词条导出完成。"))
 
