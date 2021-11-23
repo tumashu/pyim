@@ -370,7 +370,7 @@ SILENT 设置为 t 是，不显示提醒信息。"
 
 ;; ** 导入词条功能
 (define-obsolete-function-alias 'pyim-import 'pyim-import-words-and-counts "4.0")
-(defun pyim-import-words-and-counts (file &optional merge-method)
+(defun pyim-import-words-and-counts (file &optional merge-method silent)
   "从 FILE 中导入词条以及词条对应的词频信息。
 
 导入的文件结构类似：
@@ -384,33 +384,42 @@ MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表词�
 默认方式是：取两个词频的最大值。"
   (interactive "F导入词条和词频信息文件: ")
   ;; 导入词条和词频之前需要加载 dcaches.
-  (pyim-process-init-dcaches)
-  (with-temp-buffer
-    (let ((coding-system-for-read 'utf-8-unix))
-      (insert-file-contents file))
-    (goto-char (point-min))
-    (forward-line 1)
-    (while (not (eobp))
-      (let* ((content (pyim-dline-parse))
-             (word (car content))
-             (count (string-to-number
-                     (or (car (cdr content)) "0"))))
-        (pyim-process-create-word
-         word nil
-         (lambda (x)
-           (funcall (or merge-method #'max)
-                    (or x 0)
-                    count))))
-      (forward-line 1)))
-  ;; 保存一下用户选择过的词生成的缓存和词频缓存，
-  ;; 因为使用 async 机制更新 dcache 时，需要从 dcache 文件
-  ;; 中读取变量值, 然后再对用户选择过的词生成的缓存排序，如果没
-  ;; 有这一步骤，导入的词条就会被覆盖。
-  (pyim-process-save-dcaches t)
-  ;; 更新相关的 dcache
-  (pyim-process-update-personal-words)
+  (when (or silent
+            (yes-or-no-p "PYIM: 导入词条的时候，由于无法处理多音字，导入命令会在个人词库缓
+存中添加一些不合理的词条，比如：
 
-  (message "PYIM: 词条和词频信息导入完成！"))
+   ying-xing 银行
+
+这个一般不会影响输入法的正常使用，但会让用户的个人词库显得不够整洁。
+
+=> 确定继续导入吗？"))
+    (pyim-process-init-dcaches)
+    (with-temp-buffer
+      (let ((coding-system-for-read 'utf-8-unix))
+        (insert-file-contents file))
+      (goto-char (point-min))
+      (forward-line 1)
+      (while (not (eobp))
+        (let* ((content (pyim-dline-parse))
+               (word (car content))
+               (count (string-to-number
+                       (or (car (cdr content)) "0"))))
+          (pyim-process-create-word
+           word nil
+           (lambda (x)
+             (funcall (or merge-method #'max)
+                      (or x 0)
+                      count))))
+        (forward-line 1)))
+    ;; 保存一下用户选择过的词生成的缓存和词频缓存，
+    ;; 因为使用 async 机制更新 dcache 时，需要从 dcache 文件
+    ;; 中读取变量值, 然后再对用户选择过的词生成的缓存排序，如果没
+    ;; 有这一步骤，导入的词条就会被覆盖。
+    (pyim-process-save-dcaches t)
+    ;; 更新相关的 dcache
+    (pyim-process-update-personal-words)
+
+    (message "PYIM: 词条和词频信息导入完成！")))
 
 ;; ** 删词功能
 (defun pyim-delete-words-in-file (file)
