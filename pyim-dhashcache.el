@@ -259,11 +259,17 @@ DCACHE 是一个 code -> words 的 hashtable.
     (insert ";;; -*- coding: utf-8-unix -*-\n")
     (maphash
      (lambda (key value)
-       (insert (format "%s %s\n"
-                       key
-                       (if (listp value)
-                           (mapconcat #'identity value " ")
-                         value))))
+       (let ((value (cl-remove-if
+                     (lambda (x)
+                       ;; 如果某个词条的 text 属性 :noexport 设置为 t, 在导出的
+                       ;; 时候自动忽略这个词条。
+                       (and (stringp x)
+                            (get-text-property 0 :noexport x)))
+                     (if (listp value)
+                         value
+                       (list value)))))
+         (when value
+           (insert (format "%s %s\n" key (mapconcat #'identity value " "))))))
      dcache)
     (pyim-dcache-write-file file confirm)))
 
@@ -404,10 +410,11 @@ code 对应的中文词条了。
 
 (defun pyim-dhashcache-insert-word-into-icode2word (word pinyin prepend)
   "保存个人词到缓存."
-  (pyim-dhashcache-put pyim-dhashcache-icode2word
-                       pinyin
-                       (if prepend (pyim-list-merge word orig-value)
-                         (pyim-list-merge orig-value word))))
+  (pyim-dhashcache-put
+    pyim-dhashcache-icode2word pinyin
+    (if prepend
+        `(,word ,@(remove word orig-value))
+      `(,@(remove word orig-value) ,word))))
 
 (defun pyim-dhashcache-search-word-code (string)
   (gethash string pyim-dhashcache-word2code))

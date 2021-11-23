@@ -547,7 +547,14 @@ BUG：拼音无法有效地处理多音字。"
       (dolist (code codes)
         (unless (pyim-string-match-p "[^ a-z-]" code)
           (pyim-dcache-insert-icode2word
-           word (concat (or code-prefix "") code) prepend)))
+           (if (and (> (length word) 1)
+                    (> (length codes) 1))
+               ;; 如果 word 超过一个汉字，并且得到多个 codes，那么大概率说明没有
+               ;; 正确处理多音字，这里设置一下 :noexport 属性，在导出词条的时候
+               ;; 不导出这些带标记的词。
+               (propertize word :noexport t)
+             (substring-no-properties word))
+           (concat (or code-prefix "") code) prepend)))
       ;; TODO, 排序个人词库?
       ;; 返回 codes 和 word, 用于 message 命令。
       (mapconcat (lambda (code)

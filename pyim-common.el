@@ -85,16 +85,6 @@
                       append (mapcar (lambda (l) (cons element l))
                                      (pyim-permutate-list list-tail)))))))
 
-(defun pyim-list-merge (a b)
-  "Join list A and B to a new list, then delete dups."
-  (let ((a (if (listp a)
-               a
-             (list a)))
-        (b (if (listp b)
-               b
-             (list b))))
-    (delete-dups `(,@a ,@b))))
-
 (defun pyim-char-before-to-string (num)
   "得到光标前第 `num' 个字符，并将其转换为字符串。"
   (let* ((point (point))
