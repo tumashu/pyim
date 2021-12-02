@@ -203,28 +203,33 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
     ;; Show page.
     (when (and (null unread-command-events)
                (null unread-post-input-method-events))
-      (if (eq (selected-window) (minibuffer-window))
+      (let ((message-log-max nil))
+        (cond
+         ((and (eq (selected-window) (minibuffer-window))
+               ;; posframe 可以用到 minibuffer 中，效果良好，popup 效果不好，
+               ;; 会导致 minibuffer 莫名其妙的变大。
+               (not (and (eq pyim-page-tooltip 'posframe)
+                         (functionp 'posframe-workable-p)
+                         (posframe-workable-p))))
           ;; 在 minibuffer 中输入中文时，使用当前输入的
           ;; 下一行来显示候选词。
           (pyim-page-minibuffer-message
            (concat pyim-page-minibuffer-separator
-                   (pyim-page-style:minibuffer page-info)))
-        ;; 在普通 buffer 中输入中文时，使用 `pyim-page-tooltip'
-        ;; 指定的方式来显示候选词。
-        (let ((message-log-max nil))
-          (cond
-           ((pyim-probe-exwm-environment)
-            ;; when exwm-xim is used, page should be showed
-            ;; in minibuffer.
-            (message (pyim-page-style:exwm page-info)))
-           (pyim-page-tooltip
-            (pyim-page-tooltip-show
-             (let ((func (intern (format "pyim-page-style:%S" pyim-page-style))))
-               (if (functionp func)
-                   (funcall func page-info)
-                 (pyim-page-style:two-lines page-info)))
-             (overlay-start pyim-preview-overlay)))
-           (t (message (pyim-page-style:minibuffer page-info)))))))))
+                   (pyim-page-style:minibuffer page-info))))
+         ((pyim-probe-exwm-environment)
+          ;; when exwm-xim is used, page should be showed
+          ;; in minibuffer.
+          (message (pyim-page-style:exwm page-info)))
+         ;; 在普通 buffer 中输入中文时，使用 `pyim-page-tooltip'
+         ;; 指定的方式来显示候选词。
+         (pyim-page-tooltip
+          (pyim-page-tooltip-show
+           (let ((func (intern (format "pyim-page-style:%S" pyim-page-style))))
+             (if (functionp func)
+                 (funcall func page-info)
+               (pyim-page-style:two-lines page-info)))
+           (overlay-start pyim-preview-overlay)))
+         (t (message (pyim-page-style:minibuffer page-info))))))))
 
 (declare-function pyim-process-terminate "pyim-process")
 
