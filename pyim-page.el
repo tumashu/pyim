@@ -78,9 +78,9 @@ pyim 内建的有三种选词框格式：
   "使用 posframe 做为选词框时，设置选词框的最小宽度."
   :type 'integer)
 
-(defcustom pyim-page-minibuffer-separator "  \t"
+(defcustom pyim-page-minibuffer-separator nil
   "在 minibuffer 中使用 pyim 时，preview 和 page 之间的分割字符串。"
-  :type 'string)
+  :type '(choice (const :tag "No user defined separator" nil) string))
 
 (defface pyim-page
   '((t (:inherit default :background "#333333" :foreground "#dcdccc")))
@@ -210,7 +210,10 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
        ;; windows 环境下，似乎有很严重的性能问题，原因未知。
        ((eq (selected-window) (minibuffer-window))
         (pyim-page-minibuffer-message
-         (concat pyim-page-minibuffer-separator
+         (concat (or pyim-page-minibuffer-separator
+                     (let* ((width (string-width (buffer-string)))
+                            (n (- (* 20 (+ 1 (/ width 20))) width)))
+                       (make-string n ?\ )))
                  (pyim-page-style:minibuffer page-info))))
        ;; 在 exwm 环境下使用 exwm-xim 输入中文时，使用 minibuffer 来显示 page。
        ((pyim-probe-exwm-environment)
