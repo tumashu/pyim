@@ -95,9 +95,9 @@ pyim 会使用 Emacs overlay 机制在 *待输入buffer* 光标处高亮显示�
 
 (defun pyim-preview-delete-string ()
   "删除已经插入 buffer 的 preview 预览字符串。"
-  (if (overlay-start pyim-preview-overlay)
-      (delete-region (overlay-start pyim-preview-overlay)
-                     (overlay-end pyim-preview-overlay))))
+  (when (overlay-start pyim-preview-overlay)
+    (delete-region (overlay-start pyim-preview-overlay)
+                   (overlay-end pyim-preview-overlay))))
 
 
 ;; * Footer
