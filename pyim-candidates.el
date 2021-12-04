@@ -91,23 +91,8 @@ IMOBJS 获得候选词条。"
 (defun pyim-candidates-create:quanpin (imobjs scheme-name &optional async)
   "`pyim-candidates-create' 处理全拼输入法的函数."
   (unless async
-    (let* (;; 如果输入 "ni-hao" ，搜索 code 为 "n-h" 的词条做为联想词。
-           ;; 搜索首字母得到的联想词太多，这里限制联想词要大于两个汉字并且只搜索
-           ;; 个人文件。
-           (jianpin-words
-            (when (and (> (length (car imobjs)) 1) pyim-enable-shortcode)
-              (pyim-dcache-get
-               (mapconcat #'identity
-                          (pyim-codes-create (car imobjs) scheme-name 1)
-                          "-")
-               '(ishortcode2word))))
-           znabc-words
-           pinyin-chars
-           personal-words
-           common-words)
-
-      ;; 智能ABC模式，得到尽可能的拼音组合，查询这些组合，得到的词条做
-      ;; 为联想词。
+    (let (znabc-words pinyin-chars personal-words common-words)
+      ;; 智能ABC模式，得到尽可能的拼音组合，查询这些组合，得到的词条做为联想词。
       (let* ((codes (pyim-codes-create (car imobjs) scheme-name))
              (n (- (length codes) 1))
              output)
@@ -179,7 +164,6 @@ IMOBJS 获得候选词条。"
         (princ (list :imobjs imobjs
                      :personal-words personal-words
                      :common-words common-words
-                     :jianpin-words jianpin-words
                      :znabc-words znabc-words
                      :pinyin-chars pinyin-chars)))
 
@@ -187,7 +171,6 @@ IMOBJS 获得候选词条。"
        (delq nil
              `(,@personal-words
                ,@common-words
-               ,@jianpin-words
                ,@znabc-words
                ,@pinyin-chars))))))
 
