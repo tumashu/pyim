@@ -160,10 +160,11 @@ IMOBJS 获得候选词条。"
 如果 list1 = (a b), list2 = (c d e),
 那么结果为: (a c b d e)."
   (let (result)
-    (while (or list1 list2)
+    (while (and list1 list2)
       (push (pop list1) result)
       (push (pop list2) result))
-    (remove nil (nreverse result))))
+    (remove nil `(,@(nreverse result)
+                  ,@(or list1 list2)))))
 
 (defun pyim-candidates-create:shuangpin (imobjs _scheme-name &optional async)
   "`pyim-candidates-create' 处理双拼输入法的函数."
