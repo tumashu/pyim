@@ -103,57 +103,37 @@ IMOBJS 获得候选词条。"
           (setq znabc-words (append znabc-words (pyim-dcache-get code)))))
 
       (dolist (imobj imobjs)
-        (setq personal-words
-              (append personal-words
-                      (pyim-dcache-get
-                       (mapconcat #'identity
-                                  (pyim-codes-create imobj scheme-name)
-                                  "-")
-                       (if pyim-enable-shortcode
-                           '(icode2word ishortcode2word)
-                         '(icode2word)))))
+        (let ((w (pyim-dcache-get
+                  (mapconcat #'identity
+                             (pyim-codes-create imobj scheme-name)
+                             "-")
+                  (if pyim-enable-shortcode
+                      '(icode2word ishortcode2word)
+                    '(icode2word)))))
+          (setq personal-words (append personal-words w)))
 
-        (setq common-words (delete-dups common-words))
-        (setq common-words
-              (let* ((cands (pyim-dcache-get
-                             (mapconcat #'identity
-                                        (pyim-codes-create imobj scheme-name)
-                                        "-")
-                             (if pyim-enable-shortcode
-                                 '(code2word shortcode2word)
-                               '(code2word)))))
-                (cond
-                 ((and (> (length cands) 0)
-                       (> (length common-words) 0)
-                       (or (eq 1 (length imobj))
-                           (eq 2 (length imobj))))
-                  ;; 两个单字或者两字词序列合并,确保常用字词在前面
-                  (let* ((size (min (length cands) (length common-words)))
-                         new-common-words
-                         (i 0))
-                    ;; 两个序列轮流取出一个元素输入新序列
-                    (while (< i size)
-                      (push (nth i common-words) new-common-words)
-                      (push (nth i cands) new-common-words)
-                      (setq i (1+ i)))
-                    ;; 较长序列的剩余元素加入新序列
-                    (append (nreverse new-common-words)
-                            (nthcdr size (cond
-                                          ((< size (length cands))
-                                           cands)
-                                          ((< size (length common-words))
-                                           common-words))))))
-                 (t
-                  (append common-words cands)))))
+        (let ((w1 (delete-dups common-words))
+              (w2 (pyim-dcache-get
+                   (mapconcat #'identity
+                              (pyim-codes-create imobj scheme-name)
+                              "-")
+                   (if pyim-enable-shortcode
+                       '(code2word shortcode2word)
+                     '(code2word)))))
+          (if (and (> (length w1) 0)
+                   (> (length w2) 0)
+                   (or (eq 1 (length imobj))
+                       (eq 2 (length imobj))))
+              ;; 两个单字或者两字词序列合并, 确保常用字词在前面。
+              (setq common-words (pyim-candidates-merge w1 w2))
+            (setq common-words (append w1 w2))))
 
-        (setq pinyin-chars
-              (append pinyin-chars
-                      (pyim-dcache-get
-                       (car (pyim-codes-create imobj scheme-name))))))
+        (let ((w (pyim-dcache-get
+                  (car (pyim-codes-create imobj scheme-name)))))
+          (setq pinyin-chars (append pinyin-chars w))))
 
-      ;; 使用词频信息，对个人词库得到的候选词排序，
-      ;; 第一个词的位置比较特殊，不参与排序，
-      ;; 具体原因请参考 `pyim-page-select-word' 中的 comment.
+      ;; 使用词频信息对个人词库得到的候选词排序，第一个词条的位置比较特殊，不参
+      ;; 与排序，具体原因请参考 `pyim-page-select-word' 中的 comment.
       (setq personal-words
             `(,(car personal-words)
               ,@(pyim-dcache-call-api
@@ -161,7 +141,7 @@ IMOBJS 获得候选词条。"
 
       ;; Debug
       (when pyim-debug
-        (princ (list :imobjs imobjs
+        (print (list :imobjs imobjs
                      :personal-words personal-words
                      :common-words common-words
                      :znabc-words znabc-words
@@ -173,6 +153,17 @@ IMOBJS 获得候选词条。"
                ,@common-words
                ,@znabc-words
                ,@pinyin-chars))))))
+
+(defun pyim-candidates-merge (list1 list2)
+  "将 LIST1 和 LIST2 合并。
+
+如果 list1 = (a b), list2 = (c d e),
+那么结果为: (a c b d e)."
+  (let (result)
+    (while (or list1 list2)
+      (push (pop list1) result)
+      (push (pop list2) result))
+    (remove nil (nreverse result))))
 
 (defun pyim-candidates-create:shuangpin (imobjs _scheme-name &optional async)
   "`pyim-candidates-create' 处理双拼输入法的函数."
