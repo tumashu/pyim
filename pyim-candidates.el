@@ -93,6 +93,9 @@ IMOBJS 获得候选词条。"
   (unless async
     (let (znabc-words pinyin-chars personal-words common-words)
       ;; 智能ABC模式，得到尽可能的拼音组合，查询这些组合，得到的词条做为联想词。
+      ;;
+      ;; NOTE: 智能ABC模式 *目前* 不处理模糊音，因为这个模式会进行大量的搜索，如
+      ;; 果再处理模糊音的话，有可能导致性能下降。
       (let* ((codes (pyim-codes-create (car imobjs) scheme-name))
              (n (- (length codes) 1))
              output)
@@ -102,50 +105,48 @@ IMOBJS 获得候选词条。"
         (dolist (code (reverse output))
           (setq znabc-words (append znabc-words (pyim-dcache-get code)))))
 
+      ;; 获取个人词条，词库词条和第一汉字列表。
       (dolist (imobj imobjs)
-        (let ((w (pyim-dcache-get
-                  (mapconcat #'identity
-                             (pyim-codes-create imobj scheme-name)
-                             "-")
-                  (if pyim-enable-shortcode
-                      '(icode2word ishortcode2word)
-                    '(icode2word)))))
-          (setq personal-words (append personal-words w)))
+        (let* (;; 个人词条
+               (w1 (pyim-dcache-get
+                    (mapconcat #'identity
+                               (pyim-codes-create imobj scheme-name)
+                               "-")
+                    (if pyim-enable-shortcode
+                        '(icode2word ishortcode2word)
+                      '(icode2word))))
+               ;; 词库词条
+               (w2 (pyim-dcache-get
+                    (mapconcat #'identity
+                               (pyim-codes-create imobj scheme-name)
+                               "-")
+                    (if pyim-enable-shortcode
+                        '(code2word shortcode2word)
+                      '(code2word))))
+               ;; 第一个汉字
+               (w3 (pyim-dcache-get
+                    (car (pyim-codes-create imobj scheme-name)))))
+          (setq personal-words (pyim-candidates-merge personal-words w1))
+          (setq common-words (pyim-candidates-merge common-words w2))
+          (setq pinyin-chars (pyim-candidates-merge pinyin-chars w3))))
 
-        (let ((w1 (delete-dups common-words))
-              (w2 (pyim-dcache-get
-                   (mapconcat #'identity
-                              (pyim-codes-create imobj scheme-name)
-                              "-")
-                   (if pyim-enable-shortcode
-                       '(code2word shortcode2word)
-                     '(code2word)))))
-          (if (and (> (length w1) 0)
-                   (> (length w2) 0)
-                   (or (eq 1 (length imobj))
-                       (eq 2 (length imobj))))
-              ;; 两个单字或者两字词序列合并, 确保常用字词在前面。
-              (setq common-words (pyim-candidates-merge w1 w2))
-            (setq common-words (append w1 w2))))
-
-        (let ((w (pyim-dcache-get
-                  (car (pyim-codes-create imobj scheme-name)))))
-          (setq pinyin-chars (append pinyin-chars w))))
-
-      ;; 使用词频信息对个人词库得到的候选词排序，第一个词条的位置比较特殊，不参
-      ;; 与排序，具体原因请参考 `pyim-page-select-word' 中的 comment.
+      ;; 个人词条排序：使用词频信息对个人词库得到的候选词排序，第一个词条的位置
+      ;; 比较特殊，不参与排序，具体原因请参考 `pyim-page-select-word' 中的
+      ;; comment.
       (setq personal-words
             `(,(car personal-words)
               ,@(pyim-dcache-call-api
                  'sort-words (cdr personal-words))))
 
-      ;; Debug
+      ;; 调试输出
       (when pyim-debug
         (print (list :imobjs imobjs
                      :personal-words personal-words
                      :common-words common-words
                      :znabc-words znabc-words
-                     :pinyin-chars pinyin-chars)))
+                     :pinyin-chars
+                     (cl-subseq pinyin-chars
+                                0 (min (length pinyin-chars) 5)))))
 
       (delete-dups
        (delq nil
@@ -159,12 +160,16 @@ IMOBJS 获得候选词条。"
 
 如果 list1 = (a b), list2 = (c d e),
 那么结果为: (a c b d e)."
-  (let (result)
+  (let ((list1 (delete-dups list1))
+        (list2 (delete-dups list2))
+        result)
     (while (and list1 list2)
       (push (pop list1) result)
       (push (pop list2) result))
-    (remove nil `(,@(nreverse result)
-                  ,@(or list1 list2)))))
+    (if (or list1 list2)
+        `(,@(nreverse result)
+          ,@(or list1 list2))
+      (nreverse result))))
 
 (defun pyim-candidates-create:shuangpin (imobjs _scheme-name &optional async)
   "`pyim-candidates-create' 处理双拼输入法的函数."
