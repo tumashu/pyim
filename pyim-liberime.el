@@ -225,22 +225,6 @@
                 (setq words nil))
                (t (liberime-process-key 65366))))))))))
 
-(defun pyim-liberime-process-create-word (word &optional _prepend _wordcount-handler)
-  "Create WORD at current rime backend.
-ONlY works with quanpin."
-  ;; 判断当前 rime 环境是否支持全拼，如果支持，就添加词条。
-  (ignore-errors
-    (let ((codes (pyim-cstring-to-codes word 'quanpin)))
-      (when (member "你好" (liberime-search "nihao" 10))
-        (dolist (code codes)
-          (unless (pyim-string-match-p "[^ a-z-]" code)
-            (pyim-liberime-create-word
-             (split-string code "-")
-             (remove "" (split-string word "")))
-            (pyim-process-terminate:rime)))))))
-
-(advice-add 'pyim-process-create-word :after #'pyim-liberime-process-create-word)
-
 (defun pyim-liberime-get-code (word input &optional _limit)
   "Get the code of WORD from the beginning of INPUT.
 `liberime-search' with LIMIT argument is used internal.
