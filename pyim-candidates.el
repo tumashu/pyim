@@ -93,17 +93,14 @@ IMOBJS 获得候选词条。"
   (unless async
     (let (znabc-words pinyin-chars personal-words common-words)
       ;; 智能ABC模式，得到尽可能的拼音组合，查询这些组合，得到的词条做为联想词。
-      ;;
-      ;; NOTE: 智能ABC模式 *目前* 不处理模糊音，因为这个模式会进行大量的搜索，如
-      ;; 果再处理模糊音的话，有可能导致性能下降。
-      (let* ((codes (pyim-codes-create (car imobjs) scheme-name))
-             (n (- (length codes) 1))
-             output)
-        (dotimes (i (- n 1))
-          (let ((lst (cl-subseq codes 0 (- n i))))
-            (push (mapconcat #'identity lst "-") output)))
-        (dolist (code (reverse output))
-          (setq znabc-words (append znabc-words (pyim-dcache-get code)))))
+      (let ((codes (mapcar (lambda (x)
+                             (pyim-subconcat x "-"))
+                           (mapcar (lambda (imobj)
+                                     (pyim-codes-create imobj scheme-name))
+                                   imobjs))))
+        (setq znabc-words
+              (pyim-zip (mapcar #'pyim-dcache-get
+                                (pyim-zip codes)))))
 
       ;; 获取个人词条，词库词条和第一汉字列表。
       (dolist (imobj imobjs)
