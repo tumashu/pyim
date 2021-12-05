@@ -126,9 +126,13 @@ IMOBJS 获得候选词条。"
                ;; 第一个汉字
                (w3 (pyim-dcache-get
                     (car (pyim-codes-create imobj scheme-name)))))
-          (setq personal-words (pyim-candidates-merge personal-words w1))
-          (setq common-words (pyim-candidates-merge common-words w2))
-          (setq pinyin-chars (pyim-candidates-merge pinyin-chars w3))))
+          (push w1 personal-words)
+          (push w2 common-words)
+          (push w3 pinyin-chars)))
+
+      (setq personal-words (pyim-zip (nreverse personal-words)))
+      (setq common-words (pyim-zip (nreverse common-words)))
+      (setq pinyin-chars (pyim-zip (nreverse pinyin-chars)))
 
       ;; 个人词条排序：使用词频信息对个人词库得到的候选词排序，第一个词条的位置
       ;; 比较特殊，不参与排序，具体原因请参考 `pyim-page-select-word' 中的
@@ -154,22 +158,6 @@ IMOBJS 获得候选词条。"
                ,@common-words
                ,@znabc-words
                ,@pinyin-chars))))))
-
-(defun pyim-candidates-merge (list1 list2)
-  "将 LIST1 和 LIST2 合并。
-
-如果 list1 = (a b), list2 = (c d e),
-那么结果为: (a c b d e)."
-  (let ((list1 (delete-dups list1))
-        (list2 (delete-dups list2))
-        result)
-    (while (and list1 list2)
-      (push (pop list1) result)
-      (push (pop list2) result))
-    (if (or list1 list2)
-        `(,@(nreverse result)
-          ,@(or list1 list2))
-      (nreverse result))))
 
 (defun pyim-candidates-create:shuangpin (imobjs _scheme-name &optional async)
   "`pyim-candidates-create' 处理双拼输入法的函数."
