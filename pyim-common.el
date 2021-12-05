@@ -107,7 +107,7 @@ When CARE-FIRST-ONE is no-nil, ((a b c) (d e)) => (a d)."
                #'list lists))))))
 
 (defun pyim-subconcat (list &optional sep)
-  "Concat sublist of LIST with SEP: (a b c d) => (a-b-c-d a-b-c a-b)."
+  "Concat sublist of LIST with SEP: (a b c d) => (abcd abc ab)."
   (let ((n (length list))
         output)
     (dotimes (i (- n 1))
