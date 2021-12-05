@@ -85,8 +85,14 @@
                       append (mapcar (lambda (l) (cons element l))
                                      (pyim-permutate-list list-tail)))))))
 
-(defun pyim-zip (lists)
-  "Zip LISTS and delete dups: ((a b c) (d e)) => (a d b e c)."
+(defun pyim-zip (lists &optional care-first-one)
+  "Zip LISTS and delete dups: ((a b c) (d e)) => (a d b e c).
+When CARE-FIRST-ONE is no-nil, ((a b c) (d e)) => (a d)."
+  (when care-first-one
+    (setq lists
+          (mapcar (lambda (x)
+                    (list (car x)))
+                  lists)))
   (setq lists (remove nil lists))
   (if (< (length lists) 2)
       (car lists)

@@ -91,70 +91,91 @@ IMOBJS 获得候选词条。"
 (defun pyim-candidates-create:quanpin (imobjs scheme-name &optional async)
   "`pyim-candidates-create' 处理全拼输入法的函数."
   (unless async
-    (let (znabc-words pinyin-chars personal-words common-words)
-      ;; 智能ABC模式，得到尽可能的拼音组合，查询这些组合，得到的词条做为联想词。
-      (let ((codes (mapcar (lambda (x)
-                             (pyim-subconcat x "-"))
-                           (mapcar (lambda (imobj)
-                                     (pyim-codes-create imobj scheme-name))
-                                   imobjs))))
-        (setq znabc-words
-              (pyim-zip (mapcar #'pyim-dcache-get
-                                (pyim-zip codes)))))
+    ;; 这段代码主要实现以下功能：假如用户输入 nihaomazheshi, 但词库里面找不到对
+    ;; 应的词条，那么输入法自动用 nihaoma 和 zheshi 的第一个词条："你好吗" 和 "
+    ;; 这是" 连接成一个新的字符串 "你好吗这是" 做为第一个候选词。
+    (let* ((candidates (pyim-candidates-create-quanpin imobjs scheme-name))
+           (n (length (car candidates)))
+           output)
+      (push (car candidates) output)
+      (while (and (> n 0)
+                  (car (setq imobjs
+                             (mapcar (lambda (imobj)
+                                       (nthcdr n imobj))
+                                     imobjs))))
+        (let ((candidates (pyim-candidates-create-quanpin imobjs scheme-name)))
+          (push (car (pyim-candidates-create-quanpin imobjs scheme-name t)) output)
+          (setq n (length (car candidates)))))
+      `(,(mapconcat #'identity (nreverse output) "")
+        ,@candidates))))
 
-      ;; 获取个人词条，词库词条和第一汉字列表。
-      (dolist (imobj imobjs)
-        (let* (;; 个人词条
-               (w1 (pyim-dcache-get
-                    (mapconcat #'identity
-                               (pyim-codes-create imobj scheme-name)
-                               "-")
-                    (if pyim-enable-shortcode
-                        '(icode2word ishortcode2word)
-                      '(icode2word))))
-               ;; 词库词条
-               (w2 (pyim-dcache-get
-                    (mapconcat #'identity
-                               (pyim-codes-create imobj scheme-name)
-                               "-")
-                    (if pyim-enable-shortcode
-                        '(code2word shortcode2word)
-                      '(code2word))))
-               ;; 第一个汉字
-               (w3 (pyim-dcache-get
-                    (car (pyim-codes-create imobj scheme-name)))))
-          (push w1 personal-words)
-          (push w2 common-words)
-          (push w3 pinyin-chars)))
+(defun pyim-candidates-create-quanpin (imobjs scheme-name &optional fast-search)
+  "`pyim-candidates-create:quanpin' 内部使用的函数。"
+  (let (znabc-words pinyin-chars personal-words common-words)
+    ;; 智能ABC模式，得到尽可能的拼音组合，查询这些组合，得到的词条做为联想词。
+    (let ((codes (mapcar (lambda (x)
+                           (pyim-subconcat x "-"))
+                         (mapcar (lambda (imobj)
+                                   (pyim-codes-create imobj scheme-name))
+                                 imobjs))))
+      (setq znabc-words
+            (pyim-zip (mapcar #'pyim-dcache-get
+                              (pyim-zip codes))
+                      fast-search)))
 
-      (setq personal-words (pyim-zip (nreverse personal-words)))
-      (setq common-words (pyim-zip (nreverse common-words)))
-      (setq pinyin-chars (pyim-zip (nreverse pinyin-chars)))
+    ;; 获取个人词条，词库词条和第一汉字列表。
+    (dolist (imobj imobjs)
+      (let* (;; 个人词条
+             (w1 (pyim-dcache-get
+                  (mapconcat #'identity
+                             (pyim-codes-create imobj scheme-name)
+                             "-")
+                  (if pyim-enable-shortcode
+                      '(icode2word ishortcode2word)
+                    '(icode2word))))
+             ;; 词库词条
+             (w2 (pyim-dcache-get
+                  (mapconcat #'identity
+                             (pyim-codes-create imobj scheme-name)
+                             "-")
+                  (if pyim-enable-shortcode
+                      '(code2word shortcode2word)
+                    '(code2word))))
+             ;; 第一个汉字
+             (w3 (pyim-dcache-get
+                  (car (pyim-codes-create imobj scheme-name)))))
+        (push w1 personal-words)
+        (push w2 common-words)
+        (push w3 pinyin-chars)))
 
-      ;; 个人词条排序：使用词频信息对个人词库得到的候选词排序，第一个词条的位置
-      ;; 比较特殊，不参与排序，具体原因请参考 `pyim-page-select-word' 中的
-      ;; comment.
-      (setq personal-words
-            `(,(car personal-words)
-              ,@(pyim-dcache-call-api
-                 'sort-words (cdr personal-words))))
+    (setq personal-words (pyim-zip (nreverse personal-words) fast-search))
+    (setq common-words (pyim-zip (nreverse common-words) fast-search))
+    (setq pinyin-chars (pyim-zip (nreverse pinyin-chars) fast-search))
 
-      ;; 调试输出
-      (when pyim-debug
-        (print (list :imobjs imobjs
-                     :personal-words personal-words
-                     :common-words common-words
-                     :znabc-words znabc-words
-                     :pinyin-chars
-                     (cl-subseq pinyin-chars
-                                0 (min (length pinyin-chars) 5)))))
+    ;; 个人词条排序：使用词频信息对个人词库得到的候选词排序，第一个词条的位置
+    ;; 比较特殊，不参与排序，具体原因请参考 `pyim-page-select-word' 中的
+    ;; comment.
+    (setq personal-words
+          `(,(car personal-words)
+            ,@(pyim-dcache-call-api
+               'sort-words (cdr personal-words))))
 
-      (delete-dups
-       (delq nil
-             `(,@personal-words
-               ,@common-words
-               ,@znabc-words
-               ,@pinyin-chars))))))
+    ;; 调试输出
+    (when pyim-debug
+      (print (list :imobjs imobjs
+                   :personal-words personal-words
+                   :common-words common-words
+                   :znabc-words znabc-words
+                   :pinyin-chars
+                   (cl-subseq pinyin-chars
+                              0 (min (length pinyin-chars) 5)))))
+
+    (delete-dups
+     (delq nil
+           `(,@personal-words
+             ,@common-words
+             ,@znabc-words
+             ,@pinyin-chars)))))
 
 (defun pyim-candidates-create:shuangpin (imobjs _scheme-name &optional async)
   "`pyim-candidates-create' 处理双拼输入法的函数."
