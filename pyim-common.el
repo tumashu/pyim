@@ -107,12 +107,12 @@ When CARE-FIRST-ONE is no-nil, ((a b c) (d e)) => (a d)."
                #'list lists))))))
 
 (defun pyim-subconcat (list &optional sep)
-  "Concat sublist of LIST with SEP: (a b c d) => (a-b-c a-b)."
-  (let ((n (- (length list) 1))
+  "Concat sublist of LIST with SEP: (a b c d) => (a-b-c-d a-b-c a-b)."
+  (let ((n (length list))
         output)
     (dotimes (i (- n 1))
       (let ((list (cl-subseq list 0 (- n i))))
-        (push (mapconcat #'identity list (or sep "-")) output)))
+        (push (mapconcat #'identity list (or sep "")) output)))
     (nreverse output)))
 
 (defun pyim-char-before-to-string (num)

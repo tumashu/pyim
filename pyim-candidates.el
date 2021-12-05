@@ -106,7 +106,8 @@ IMOBJS 获得候选词条。"
         (let ((candidates (pyim-candidates-create-quanpin imobjs scheme-name)))
           (push (car (pyim-candidates-create-quanpin imobjs scheme-name t)) output)
           (setq n (length (car candidates)))))
-      (cons (mapconcat #'identity (nreverse output) "") candidates))))
+      (append (pyim-subconcat (nreverse output) "")
+              candidates))))
 
 (defun pyim-candidates-create-quanpin (imobjs scheme-name &optional fast-search)
   "`pyim-candidates-create:quanpin' 内部使用的函数。"
