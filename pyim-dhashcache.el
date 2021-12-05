@@ -372,7 +372,10 @@ code 对应的中文词条了。
   (pyim-dcache-save-variable 'pyim-dhashcache-iword2count))
 
 (defmacro pyim-dhashcache-put (cache code &rest body)
-  "这个用于保存词条，删除词条以及调整词条位置."
+  "将 BODY 的返回值保存到 CACHE 对应的 CODE 中。
+
+注意事项：这个宏是一个指代宏，其中 orig-value 在这个宏中有特殊含
+义，代表原来 code 对应的取值。"
   (declare (indent 0))
   (let ((key (make-symbol "key"))
         (table (make-symbol "table"))
@@ -382,8 +385,7 @@ code 对应的中文词条了。
             (orig-value (gethash ,key ,table))
             ,new-value)
        (setq ,new-value (progn ,@body))
-       (unless (equal orig-value ,new-value)
-         (puthash ,key ,new-value ,table)))))
+       (puthash ,key ,new-value ,table))))
 
 (defun pyim-dhashcache-update-iword2count (word &optional _prepend wordcount-handler)
   "保存词频到缓存."
