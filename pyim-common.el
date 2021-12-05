@@ -87,7 +87,8 @@
 
 (defun pyim-zip (lists)
   "Zip LISTS and delete dups: ((a b c) (d e)) => (a d b e c)."
-  (when lists
+  (if (< (length lists) 2)
+      (car lists)
     (let* ((n (apply #'max (mapcar #'length lists)))
            (lists (mapcar
                    (lambda (x)
