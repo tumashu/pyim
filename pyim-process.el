@@ -533,10 +533,9 @@ WORDCOUNT-HANDLER 也可以是一个函数，其返回值将设置为 WORD 的�
 
 BUG：拼音无法有效地处理多音字。"
   (when (and (> (length word) 0)
-             ;; 8个汉字以上的词条不加入个人缓存，原因有：
-             ;; 1. 比较长的词一般用的比较少。
-             ;; 2. 由于 criteria 比较长的原因，会出现严重卡顿。
-             (< (length word) 8)
+             ;; NOTE: 十二个汉字及以上的词条，加到个人词库里面用处不大，这是很主
+             ;; 观的一个数字，也许应该添加一个配置选项？
+             (< (length word) 12)
              (not (pyim-string-match-p "\\CC" word)))
     ;; 记录最近创建的词条，用于快速删词功能。
     (setq pyim-process-last-created-word word)
