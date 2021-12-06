@@ -548,7 +548,7 @@ BUG：拼音无法有效地处理多音字。"
       ;; 添加词条到个人缓存
       (dolist (code codes)
         (unless (pyim-string-match-p "[^ a-z-]" code)
-          (pyim-dcache-insert-icode2word
+          (pyim-dcache-insert-word
            (if (and (> (length word) 1)
                     (> (length codes) 1))
                ;; 如果 word 超过一个汉字，并且得到多个 codes，那么大概率说明没有
