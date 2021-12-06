@@ -150,8 +150,13 @@ IMOBJS 获得候选词条。"
              ;; 更多的词条。
              (w4 (unless w3
                    (mapcar #'char-to-string
-                           (pyim-zip (pyim-pymap-py2cchar-get
-                                      (car (pyim-codes-create imobj scheme-name))))))))
+                           (pyim-zip
+                            (mapcar (lambda (x)
+                                      ;; NOTE: 这里只取最常用的汉字，太多的汉字会带来后续处理压力，可能拖慢输入法。不过
+                                      ;; 这个结论只是猜测。
+                                      (car (split-string x "|")))
+                                    (pyim-pymap-py2cchar-get
+                                     (car (pyim-codes-create imobj scheme-name)))))))))
         (push w1 personal-words)
         (push w2 common-words)
         (push w3 pinyin-chars-1)
