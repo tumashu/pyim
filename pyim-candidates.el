@@ -112,7 +112,7 @@ IMOBJS 获得候选词条。"
 
 (defun pyim-candidates-create-quanpin (imobjs scheme-name &optional fast-search)
   "`pyim-candidates-create:quanpin' 内部使用的函数。"
-  (let (znabc-words personal-words common-words pinyin-chars-1 pinyin-chars-2)
+  (let (jianpin-words znabc-words personal-words common-words pinyin-chars-1 pinyin-chars-2)
     ;; 智能ABC模式，得到尽可能的拼音组合，查询这些组合，得到的词条做为联想词。
     (let ((codes (mapcar (lambda (x)
                            (pyim-subconcat x "-"))
@@ -123,6 +123,31 @@ IMOBJS 获得候选词条。"
             (pyim-zip (mapcar #'pyim-dcache-get
                               (pyim-zip codes))
                       fast-search)))
+
+    ;; 假如输入 "ni-h" ，那么搜索 code 为 "n-h" 的词条，然后筛选出所有拼音匹配
+    ;; "ni-h" 或者 "ni[^-]*-h" 的词条。
+    (dolist (imobj imobjs)
+      (when (and (> (length imobj) 1) pyim-enable-shortcode)
+        (let* ((w (pyim-dcache-get
+                   (mapconcat #'identity
+                              (pyim-codes-create imobj scheme-name 1)
+                              "-")
+                   '(ishortcode2word)))
+               (regexp1 (mapconcat #'identity
+                                   (pyim-codes-create imobj scheme-name)
+                                   "-"))
+               (regexp2 (mapconcat #'identity
+                                   (pyim-codes-create imobj scheme-name)
+                                   "[^-]*-"))
+               (w1 (cl-remove-if-not
+                    (lambda (cstr)
+                      (string-match-p regexp1 (pyim-cstring-to-pinyin cstr nil "-")))
+                    w))
+               (w2 (cl-remove-if-not
+                    (lambda (cstr)
+                      (string-match-p regexp2 (pyim-cstring-to-pinyin cstr nil "-")))
+                    w)))
+          (push (append w1 w2) jianpin-words))))
 
     ;; 获取个人词条，词库词条和第一汉字列表。
     (dolist (imobj imobjs)
@@ -162,6 +187,7 @@ IMOBJS 获得候选词条。"
         (push w3 pinyin-chars-1)
         (push w4 pinyin-chars-2)))
 
+    (setq jianpin-words (pyim-zip (nreverse jianpin-words) fast-search))
     (setq personal-words (pyim-zip (nreverse personal-words) fast-search))
     (setq common-words (pyim-zip (nreverse common-words) fast-search))
     (setq pinyin-chars-1 (pyim-zip (nreverse pinyin-chars-1) fast-search))
@@ -180,6 +206,7 @@ IMOBJS 获得候选词条。"
       (print (list :imobjs imobjs
                    :personal-words personal-words
                    :common-words common-words
+                   :jianpin-words jianpin-words
                    :znabc-words znabc-words
                    :pinyin-chars-1
                    (cl-subseq pinyin-chars-1
@@ -191,6 +218,7 @@ IMOBJS 获得候选词条。"
     (delete-dups
      (delq nil
            `(,@personal-words
+             ,@jianpin-words
              ,@common-words
              ,@znabc-words
              ,@pinyin-chars-1
