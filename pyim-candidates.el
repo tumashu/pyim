@@ -141,13 +141,15 @@ IMOBJS 获得候选词条。"
                                    "[^-]*-"))
                (w1 (cl-remove-if-not
                     (lambda (cstr)
-                      (string-match-p regexp1 (pyim-cstring-to-pinyin cstr nil "-")))
+                      (let ((py (pyim-cstring-to-pinyin cstr nil "-")))
+                        (or (string-match-p regexp1 py)
+                            (string-match-p regexp2 py))))
                     w))
                (w2 (cl-remove-if-not
                     (lambda (cstr)
-                      (string-match-p regexp2 (pyim-cstring-to-pinyin cstr nil "-")))
-                    w)))
-          (push (append w1 w2) jianpin-words))))
+                      (string-match-p regexp1 (pyim-cstring-to-pinyin cstr nil "-")))
+                    w1)))
+          (push (append w2 w1) jianpin-words))))
 
     ;; 获取个人词条，词库词条和第一汉字列表。
     (dolist (imobj imobjs)
