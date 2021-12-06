@@ -416,7 +416,20 @@ code 对应的中文词条了。
     pyim-dhashcache-icode2word pinyin
     (if prepend
         `(,word ,@(remove word orig-value))
-      `(,@(remove word orig-value) ,word))))
+      `(,@(remove word orig-value) ,word)))
+  ;; NOTE: 保存词条到 icode2word 词库缓存的同时，也在 ishortcode2word 词库缓存中
+  ;; 临时写入一份，供当前 Emacs session 使用，但退出时 pyim 不会保存
+  ;; ishortcode2word 词库缓存到文件，因为下次启动 Emacs 的时候，ishortcode2word
+  ;; 词库缓存会从 icode2word 再次重建。
+  (when (string-match-p "-" pinyin)
+    (pyim-dhashcache-put
+      pyim-dhashcache-ishortcode2word
+      ;; ni-hao -> n-h
+      (mapconcat (lambda (x)
+                   (char-to-string (elt x 0)))
+                 (split-string pinyin "-")
+                 "-")
+      `(,word ,@(remove word orig-value)))))
 
 (defun pyim-dhashcache-search-word-code (string)
   (gethash string pyim-dhashcache-word2code))
