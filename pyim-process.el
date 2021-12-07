@@ -518,7 +518,7 @@ alist 列表。"
               pyim-cstring-to-code-criteria
             str))))
 
-(defun pyim-process-create-word (word &optional prepend wordcount-handler)
+(defun pyim-process-create-word (word &optional prepend wordcount-handler criteria)
   "将中文词条 WORD 添加编码后，保存到用户选择过的词生成的缓存中。
 
 词条 WORD 默认会追加到已有词条的后面，如果 PREPEND 设置为 t,
@@ -531,6 +531,9 @@ WORDCOUNT-HANDLER 也可以是一个函数，其返回值将设置为 WORD 的�
 而这个函数的参数则表示 WORD 当前词频，这个功能用于：`pyim-dcache-import',
 如果 WORDCOUNT-HANDLER 设置为其他, 则表示让 WORD 当前词频加1.
 
+如果 CRITERIA 是一个字符串，在多音字矫正时，将使用这个字符串来矫
+正多音字。
+
 BUG：拼音无法有效地处理多音字。"
   (when (and (> (length word) 0)
              ;; NOTE: 十二个汉字及以上的词条，加到个人词库里面用处不大，这是很主
@@ -541,7 +544,9 @@ BUG：拼音无法有效地处理多音字。"
     (setq pyim-process-last-created-word word)
     (let* ((scheme-name (pyim-scheme-name))
            (code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
-           (codes (pyim-cstring-to-codes word scheme-name pyim-cstring-to-code-criteria)))
+           (codes (pyim-cstring-to-codes
+                   word scheme-name
+                   (or criteria pyim-cstring-to-code-criteria))))
       ;; 保存对应词条的词频
       (when (> (length word) 0)
         (pyim-dcache-update-iword2count word prepend wordcount-handler))
