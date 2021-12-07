@@ -124,10 +124,11 @@ IMOBJS 获得候选词条。"
                               (pyim-zip codes))
                       fast-search)))
 
-    ;; 假如输入 "ni-h" ，那么搜索 code 为 "n-h" 的词条，然后筛选出所有拼音匹配
+    ;; 假如输入 "nih" ，那么搜索 code 为 "n-h" 的词条，然后筛选出所有拼音匹配
     ;; "ni-h" 或者 "ni[^-]*-h" 的词条。
-    (dolist (imobj imobjs)
-      (when (and (> (length imobj) 1) pyim-enable-shortcode)
+    (when (and pyim-enable-shortcode
+               (> (length (car imobjs)) 1))
+      (dolist (imobj imobjs)
         (let* ((w (pyim-dcache-get
                    (mapconcat #'identity
                               (pyim-codes-create imobj scheme-name 1)
