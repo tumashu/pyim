@@ -421,8 +421,11 @@ code 对应的中文词条了。
         `(,word ,@(remove word orig-value))
       `(,@(remove word orig-value) ,word))))
 
-(defun pyim-dhashcache-insert-word-into-ishortcode2word (word code)
-  "将词条 WORD 插入到 ishortcode2word 词库缓存 CODE 首字母字符串对应的位置."
+(defun pyim-dhashcache-insert-word-into-ishortcode2word (word code prepend)
+  "将词条 WORD 插入到 ishortcode2word 词库缓存 CODE 首字母字符串对应的位置.
+
+默认 WORD 放到已有词条的最后，如果 PREPEND 为 non-nil, WORD 将放
+到已有词条的最前面。"
   (when (string-match-p "-" code)
     (pyim-dhashcache-put
       pyim-dhashcache-ishortcode2word
@@ -431,7 +434,9 @@ code 对应的中文词条了。
                    (substring x 0 1))
                  (split-string code "-")
                  "-")
-      `(,word ,@(remove word orig-value)))))
+      (if prepend
+          `(,word ,@(remove word orig-value))
+        `(,@(remove word orig-value) ,word)))))
 
 (defun pyim-dhashcache-search-word-code (string)
   (gethash string pyim-dhashcache-word2code))

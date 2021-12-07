@@ -266,7 +266,7 @@ non-nil，文件存在时将会提示用户是否覆盖，默认为覆盖模式"
   ;; 临时写入一份，供当前 Emacs session 使用，但退出时 pyim 不会保存
   ;; ishortcode2word 词库缓存到文件，因为下次启动 Emacs 的时候，ishortcode2word
   ;; 词库缓存会从 icode2word 再次重建。
-  (pyim-dcache-call-api 'insert-word-into-ishortcode2word word code))
+  (pyim-dcache-call-api 'insert-word-into-ishortcode2word word code prepend))
 
 ;; ** Dcache 升级功能
 (defun pyim-dcache-upgrade-icode2word ()
