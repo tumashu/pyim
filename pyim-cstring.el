@@ -64,94 +64,77 @@ codes 与这个字符串进行比较，然后选择一个最相似的 code 输�
           (cl-mapcar #'char-to-string string)
         (list string)))))
 
+(defun pyim-cstring-substrings (cstring &optional max-length number)
+  "找出 CSTRING 中所有长度不超过 MAX-LENGTH 的子字符串，生成一个 alist。
+
+这个 alist 中的每个元素为：(子字符串 开始位置 结束位置), 参数
+NUMBER 用于递归，表示子字符串在 CSTRING 中的位置。"
+  (let ((number (or number 0)))
+    (cond
+     ((= (length cstring) 0) nil)
+     (t (append (pyim-cstring-substrings-1 cstring max-length number)
+                (pyim-cstring-substrings (substring cstring 1)
+                                         max-length (1+ number)))))))
+
+(defun pyim-cstring-substrings-1 (cstring max-length number)
+  "`pyim-cstring-substrings' 的内部函数。"
+  (cond
+   ((< (length cstring) 2) nil)
+   (t (append
+       (let ((length (length cstring)))
+         (when (<= length (or max-length 6))
+           (list (list cstring number (+ number length)))))
+       (pyim-cstring-substrings-1
+        (substring cstring 0 -1)
+        max-length number)))))
+
 ;; ** 中文字符串分词相关功能
 (defun pyim-cstring-split-to-list (chinese-string &optional max-word-length delete-dups prefer-short-word)
-  "一个基于 pyim 的中文分词函数。这个函数可以将中文字符
-串 CHINESE-STRING 分词，得到一个词条 alist，这个 alist 的元素
-都是列表，其中第一个元素为分词得到的词条，第二个元素为词条相对于
-字符串中的起始位置，第三个元素为结束位置。分词时，默认词条不超过
-6个字符，用户可以通过 MAX-WORD-LENGTH 来自定义，但值得注意的是：
-这个值设置越大，分词速度越慢。
+  "一个基于 pyim 的中文分词函数。这个函数可以将中文字符串
+CHINESE-STRING 分词，得到一个词条 alist，这个 alist 的元素都是列
+表，其中第一个元素为分词得到的词条，第二个元素为词条相对于字符串
+中的起始位置，第三个元素为结束位置。分词时，默认词条不超过6个字符，
+用户可以通过 MAX-WORD-LENGTH 来自定义，但值得注意的是：这个值设置
+越大，分词速度越慢。
 
 如果 DELETE-DUPS 设置为 non-nil, 一个中文字符串只保留一种分割方式。
 比如：
 
-  我爱北京天安门 => 我爱 北京 天安门
+     我爱北京天安门 => 我爱 北京 天安门
 
 如果 PREFER-SHORT-WORD 为 non-nil, 去重的时候则优先保留较短的词。
 
 注意事项：
 1. 这个工具使用暴力匹配模式来分词，*不能检测出* pyim 词库中不存在
-   的中文词条。
-2. 这个函数的分词速度比较慢，仅仅适用于中文短句的分词，不适用于
-   文章分词。根据评估，20个汉字组成的字符串需要大约0.3s， 40个
-   汉字消耗1s，随着字符串长度的增大消耗的时间呈几何倍数增加。"
-  ;;                   (("天安" 5 7)
-  ;; 我爱北京天安门 ->  ("天安门" 5 8)
-  ;;                    ("北京" 3 5)
-  ;;                    ("我爱" 1 3))
-  (cl-labels
-      ((get-possible-words-internal
-         ;; 内部函数，功能类似：
-         ;; ("a" "b" "c" "d") -> ("abcd" "abc" "ab")
-         (my-list number)
-         (cond
-          ((< (length my-list) 2) nil)
-          (t (append
-              (let* ((str (mapconcat #'identity my-list ""))
-                     (length (length str)))
-                (when (<= length (or max-word-length 6))
-                  (list (list str number (+ number length)))))
-              (get-possible-words-internal
-               (reverse (cdr (reverse my-list))) number)))))
-       (get-possible-words
-         ;; 内部函数，功能类似：
-         ;; ("a" "b" "c" "d") -> ("abcd" "abc" "ab" "bcd" "bc" "cd")
-         (my-list number)
-         (cond
-          ((null my-list) nil)
-          (t (append (get-possible-words-internal my-list number)
-                     (get-possible-words (cdr my-list) (1+ number)))))))
+的中文词条。
+2. 这个函数的分词速度比较慢，仅仅适用于中文短句的分词，不适用于文
+章分词。根据评估，20个汉字组成的字符串需要大约0.3s， 40个汉字消耗
+1s，随着字符串长度的增大消耗的时间呈几何倍数增加。"
+  ;; 如果 pyim 词库没有加载，加载 pyim 词库，确保 `pyim-dcache-get' 可以正常运行。
+  (pyim-dcache-init-variables)
 
-    ;; 如果 pyim 词库没有加载，加载 pyim 词库，
-    ;; 确保 `pyim-dcache-get' 可以正常运行。
-    (pyim-dcache-init-variables)
+  (let (result)
+    (dolist (string-list (pyim-cstring-substrings chinese-string))
+      (let ((pinyin-list (pyim-cstring-to-pinyin (car string-list) nil "-" t)))
+        (dolist (pinyin pinyin-list)
+          (let ((words (pyim-dcache-get pinyin '(code2word)))) ; 忽略个人词库可以提高速度
+            (dolist (word words)
+              (when (equal word (car string-list))
+                (push string-list result)))))))
 
-    (let ((string-alist
-           (get-possible-words
-            (mapcar #'char-to-string
-                    (string-to-vector chinese-string))
-            1))
-          result)
-      (dolist (string-list string-alist)
-        (let ((pinyin-list (pyim-cstring-to-pinyin (car string-list) nil "-" t)))
-          (dolist (pinyin pinyin-list)
-            (let ((words (pyim-dcache-get pinyin '(code2word)))) ; 忽略个人词库可以提高速度
-              (dolist (word words)
-                (when (equal word (car string-list))
-                  (push string-list result)))))))
-
-      (if delete-dups
-          (cl-delete-duplicates
-           ;;  判断两个词条在字符串中的位置
-           ;;  是否冲突，如果冲突，仅保留一个，
-           ;;  删除其它。
-           result
-           :test (lambda (x1 x2)
-                   (let ((begin1 (nth 1 x1))
-                         (begin2 (nth 1 x2))
-                         (end1 (nth 2 x1))
-                         (end2 (nth 2 x2)))
-                     (not (or (<= end1 begin2)
-                              (<= end2 begin1)))))
-           :from-end prefer-short-word)
-        result))))
-
-;; (let ((str "医生随时都有可能被患者及其家属反咬一口"))
-;;   (benchmark 1 '(pyim-cstring-split-to-list str)))
-
-;; (let ((str "医生随时都有可能被患者及其家属反咬一口"))
-;;   (pyim-cstring-split-to-list str))
+    (if delete-dups
+        ;;  判断两个词条在字符串中的位置是否冲突，如果冲突，仅保留一个。
+        (cl-delete-duplicates
+         result
+         :test (lambda (x1 x2)
+                 (let ((begin1 (nth 1 x1))
+                       (begin2 (nth 1 x2))
+                       (end1 (nth 2 x1))
+                       (end2 (nth 2 x2)))
+                   (not (or (<= end1 begin2)
+                            (<= end2 begin1)))))
+         :from-end prefer-short-word)
+      result)))
 
 (defun pyim-cstring-split-to-string (string &optional prefer-short-word
                                             separator max-word-length)
