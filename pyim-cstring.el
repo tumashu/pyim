@@ -232,8 +232,8 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
             (pyim-permutate-list pinyins-list))
 
       ;; 使用 pyim 的安装的词库来校正多音字。
+      ;; FIXME：如果 string 包含非中文的字符，那么多音字矫正将不起作用。
       (when adjust-duo-yin-zi
-        ;; 确保 pyim 词库加载
         (pyim-dcache-init-variables)
         (dolist (pylist pinyins-list)
           (let* ((py-str (mapconcat #'identity pylist "-"))

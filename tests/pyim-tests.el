@@ -42,6 +42,7 @@
 
 (setq default-input-method "pyim")
 (setq pyim-dicts (pyim-test-get-dicts))
+(pyim-dcache-init-variables)
 
 (ert-deftest pyim-test-pyim-permutate-list ()
   (should (equal (pyim-permutate-list '((a b) (c d e) (f)))
@@ -101,7 +102,6 @@
     (should (equal (substring str (car pos) (cadr pos)) key))))
 
 (ert-deftest pyim-test-pyim-cstring-split ()
-  (pyim-dcache-init-variables)
   (let ((pyim-dhashcache-code2word (make-hash-table :test #'equal))
         (str "我爱北京天安门"))
 
@@ -166,7 +166,16 @@
     (should (equal (pyim-cstring-to-pinyin "银行很行" nil "-" t t)
                    '("yin-xing-hen-xing")))
     (should (equal (pyim-cstring-to-pinyin "银行很行" nil "-" nil nil t)
-                   "yin-hang-hen-xing"))))
+                   "yin-hang-hen-xing"))
+    (should (equal (pyim-cstring-to-pinyin "Hello 银行很行 Hi" nil "-" nil t)
+                   "Hello -yin-xing-hen-xing- Hi"))
+    ;; FIXME: 这个 test 是不合理的，不过暂时找不到简单的修复方式。
+    (should (equal (pyim-cstring-to-pinyin "Hello 银行很行 Hi" nil "-" nil nil t)
+                   (concat "Hello -yin-xing-hen-xing- Hi Hello -yin-xing-hen-heng- Hi "
+                           "Hello -yin-xing-hen-hang- Hi Hello -yin-heng-hen-xing- Hi "
+                           "Hello -yin-heng-hen-heng- Hi Hello -yin-heng-hen-hang- Hi "
+                           "Hello -yin-hang-hen-xing- Hi Hello -yin-hang-hen-heng- Hi "
+                           "Hello -yin-hang-hen-hang- Hi"))))
 
 (ert-deftest pyim-test-pyim-general ()
   (let ((pyim-dcache-backend 'pyim-dregcache))
