@@ -233,6 +233,48 @@
       (should (equal (pyim-cstring-words-at-point)
                      '(("天安门" 3 0) ("安门" 2 0)))))))
 
+;; ** pyim-cregexp 相关单元测试
+(ert-deftest pyim-test-pyim-cregexp ()
+  (let ((regexp (pyim-cregexp-build "nihao")))
+    (should (string-match-p regexp "nihao"))
+    (should (string-match-p regexp "anihaob"))
+    (should (string-match-p regexp "你好"))
+    (should (string-match-p regexp "哈哈你好吗")))
+
+  (let ((regexp (pyim-cregexp-build "ni.*ma")))
+    (should (string-match-p regexp "nihaoma"))
+    (should (string-match-p regexp "nima"))
+    (should (string-match-p regexp "你好吗"))
+    (should (string-match-p regexp "你不好吗"))
+    (should (string-match-p regexp "哈哈你不好吗")))
+
+  (let ((regexp (pyim-cregexp-build "nh")))
+    (should (string-match-p regexp "nh"))
+    (should (string-match-p regexp "anhb"))
+    (should (string-match-p regexp "你好"))
+    (should (string-match-p regexp "牛哈"))
+    (should (string-match-p regexp "摄和")))
+
+  (let ((regexp (pyim-cregexp-build "nha")))
+    (should (string-match-p regexp "nha"))
+    (should (string-match-p regexp "anhab"))
+    (should (string-match-p regexp "你哈"))
+    (should (string-match-p regexp "牛蛤")))
+
+  (let* ((str (nth 2 (split-string (car (pyim-pymap-py2cchar-get "wang" t)) "|")))
+         (regexp1 (pyim-cregexp-build-1 "wang" 3))
+         (regexp2 (pyim-cregexp-build-1 "wang" 2)))
+    (should (string-match-p regexp1 str))
+    (should-not (string-match-p regexp2 str)))
+
+  (let* ((imobj '(("d" "a" "d" "a") ("w" "ang" "w" "ang")))
+         (regexp1 (pyim-cregexp-build:quanpin imobj))
+         (regexp2 (pyim-cregexp-build:quanpin imobj nil nil t)))
+    (should (string-match-p regexp1 "大王"))
+    (should (string-match-p regexp1 "当王"))
+    (should (string-match-p regexp2 "大王"))
+    (should-not (string-match-p regexp2 "当王"))))
+
 ;; ** pyim-dregcache 相关单元测试
 (ert-deftest pyim-test-pyim-general ()
   (let ((pyim-dcache-backend 'pyim-dregcache))
