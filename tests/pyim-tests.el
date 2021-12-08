@@ -175,7 +175,7 @@
                            "Hello -yin-xing-hen-hang- Hi Hello -yin-heng-hen-xing- Hi "
                            "Hello -yin-heng-hen-heng- Hi Hello -yin-heng-hen-hang- Hi "
                            "Hello -yin-hang-hen-xing- Hi Hello -yin-hang-hen-heng- Hi "
-                           "Hello -yin-hang-hen-hang- Hi"))))
+                           "Hello -yin-hang-hen-hang- Hi")))))
 
 (ert-deftest pyim-test-pyim-general ()
   (let ((pyim-dcache-backend 'pyim-dregcache))
