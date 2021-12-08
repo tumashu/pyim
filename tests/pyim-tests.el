@@ -177,6 +177,32 @@
                            "Hello -yin-hang-hen-xing- Hi Hello -yin-hang-hen-heng- Hi "
                            "Hello -yin-hang-hen-hang- Hi")))))
 
+(ert-deftest pyim-test-pyim-pyim-cstring-words-at-point ()
+  (let ((pyim-dhashcache-code2word (make-hash-table :test #'equal)))
+    (puthash "tian-an" (list "天安") pyim-dhashcache-code2word)
+    (puthash "an-men" (list "安门") pyim-dhashcache-code2word)
+    (puthash "tian-an-men" (list "天安门") pyim-dhashcache-code2word)
+    (with-temp-buffer
+      (insert "天安门abc\n天安门")
+      ;; <I>天安门abc
+      (goto-char (point-min))
+      (should (equal (pyim-cstring-words-at-point) nil))
+      ;; 天<I>安门abc
+      (forward-char 1)
+      (should (equal (pyim-cstring-words-at-point)
+                     '(("天安门" 1 2) ("天安" 1 1))))
+      ;; 天安门abc<I>
+      (forward-char 5)
+      (should (equal (pyim-cstring-words-at-point)
+                     '(("abc" 3 0))))
+      ;; <I>天安门
+      (forward-char 1)
+      (should (equal (pyim-cstring-words-at-point) nil))
+      ;; 天安门<I>
+      (goto-char (point-max))
+      (should (equal (pyim-cstring-words-at-point)
+                     '(("天安门" 3 0) ("安门" 2 0)))))))
+
 (ert-deftest pyim-test-pyim-general ()
   (let ((pyim-dcache-backend 'pyim-dregcache))
     (with-temp-buffer

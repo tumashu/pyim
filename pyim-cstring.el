@@ -405,8 +405,8 @@ CRITERIA 字符串一般是通过 imobjs 构建的，它保留了用户原始的
          (str-offset
           (when (and str-beginning-pos str-end-pos)
             (if (= current-pos str-end-pos)
-                (1+ (- str-end-pos str-beginning-pos))
-              (1+ (- current-pos str-beginning-pos)))))
+                (- str-end-pos str-beginning-pos)
+              (- current-pos str-beginning-pos))))
          str-offset-adjusted words-alist results)
 
     ;; 当字符串长度太长时， `pyim-cstring-split-to-list'
@@ -421,6 +421,7 @@ CRITERIA 字符串一般是通过 imobjs 构建的，它保留了用户原始的
         (setq str (substring str 0 (min 9 str-length)))))
 
     (cond
+     ((or (bobp) (eq (point) (line-beginning-position))) nil)
      ((and str (not (pyim-string-match-p "\\CC" str)))
       (setq words-alist
             (pyim-cstring-split-to-list str))
