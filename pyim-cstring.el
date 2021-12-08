@@ -150,8 +150,8 @@ CHINESE-STRING 分词，得到一个词条 alist，这个 alist 的元素都是�
                  (if (not (pyim-string-match-p "\\CC" str))
                      (pyim-cstring-split-to-string-1
                       str prefer-short-word separator max-word-length)
-                   (concat " " str " "))))
-             (pyim-cstring-partition string) ""))
+                   str)))
+             (pyim-cstring-partition string) (or separator " ")))
 
 (defun pyim-cstring-split-to-string-1 (chinese-string &optional prefer-short-word
                                                       separator max-word-length)
