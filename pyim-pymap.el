@@ -787,10 +787,10 @@
                    (gethash pinyin pyim-pymap-py2cchar-cache2)
                  (gethash pinyin pyim-pymap-py2cchar-cache1))
              (gethash pinyin pyim-pymap-py2cchar-cache3))))
-      (delete "" output)
+      (setq output (remove "" output))
       (if include-seperator
           output
-        (delete "|" output)))))
+        (remove "|" output)))))
 
 (defun pyim-pymap-cchar2py-get (char-or-str)
   "获取字符或者字符串 CHAR-OR-STR 对应的拼音 code.

@@ -33,6 +33,7 @@
 (require 'pyim)
 (require 'pyim-dregcache)
 
+;; ** 单元测试前的准备工作
 (defun pyim-test-get-dicts ()
   "当前目录下的词库."
   (let* ((files (directory-files-recursively default-directory "\.pyim$")))
@@ -44,6 +45,7 @@
 (setq pyim-dicts (pyim-test-get-dicts))
 (pyim-dcache-init-variables)
 
+;; ** pyim-common 相关单元测试
 (ert-deftest pyim-test-pyim-permutate-list ()
   (should (equal (pyim-permutate-list '((a b) (c d e) (f)))
                  '((a c f)
@@ -67,6 +69,34 @@
                  '("a-b-c-d" "a-b-c" "a-b")))
   (should (equal (pyim-subconcat nil) nil)))
 
+;; ** pyim-pymap 相关单元测试
+(ert-deftest pyim-test-pyim-pymap ()
+  (should (equal (pyim-pymap-cchar< "的" "成") t))
+  (should (equal (pyim-pymap-cchar2py-get "阿")
+                 '("e" "a")))
+  (should (equal (pyim-pymap-cchar2py-get ?阿)
+                 '("e" "a")))
+  (should (equal (pyim-pymap-cchar2py-get "你")
+                 '("ni")))
+  (should (equal (pyim-pymap-cchar2py-get "作")
+                 '("zuo")))
+  (should (equal (pyim-pymap-py2cchar-get "a" t)
+                 '("阿啊呵腌|嗄吖锕||錒")))
+  (should (equal (pyim-pymap-py2cchar-get "a" t t)
+                 '("阿" "啊" "呵" "腌" "嗄" "吖" "锕" "錒")))
+  (should (equal (pyim-pymap-py2cchar-get "a" t t t)
+                 '("阿" "啊" "呵" "腌" "|" "嗄" "吖" "锕" "|" "|" "錒")))
+  (should (equal (pyim-pymap-py2cchar-get "zhua" t)
+                 '("抓挝爪||髽|膼撾檛簻")))
+  (should (equal (mapcar (lambda (x)
+                           (concat (substring x 0 1)
+                                   (substring x -1)))
+                         (pyim-pymap-py2cchar-get "a"))
+                 '("阿錒" "爱溾" "厂馣" "昂䇦" "奥泑")))
+  (should (equal (length (pyim-pymap-py2cchar-get "a")) 5))
+  (should (equal (length (pyim-pymap-py2cchar-get "z")) 36)))
+
+;; ** pyim-cstring 相关单元测试
 (ert-deftest pyim-test-pyim-cstring-partition ()
   (should (equal (pyim-cstring-partition "你好 hello 你好")
                  '("你好" " hello " "你好")))
@@ -203,6 +233,7 @@
       (should (equal (pyim-cstring-words-at-point)
                      '(("天安门" 3 0) ("安门" 2 0)))))))
 
+;; ** pyim-dregcache 相关单元测试
 (ert-deftest pyim-test-pyim-general ()
   (let ((pyim-dcache-backend 'pyim-dregcache))
     (with-temp-buffer
