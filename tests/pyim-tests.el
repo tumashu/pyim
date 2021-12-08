@@ -43,12 +43,6 @@
 (setq default-input-method "pyim")
 (setq pyim-dicts (pyim-test-get-dicts))
 
-(ert-deftest pyim-test-generic ()
-  (let* ((pyim-dcache-backend 'pyim-dregcache))
-    (with-temp-buffer
-      (should (not toggle-input-method-active))
-      (call-interactively #'toggle-input-method))))
-
 (ert-deftest pyim-test-pyim-permutate-list ()
   (should (equal (pyim-permutate-list '((a b) (c d e) (f)))
                  '((a c f)
@@ -57,7 +51,7 @@
                    (b c f)
                    (b d f)
                    (b e f))))
-  (should (equal (pyim-permutate-list nil) t))
+  (should (equal (pyim-permutate-list nil) nil))
   (should (equal (pyim-permutate-list '((a))) '((a)))))
 
 (ert-deftest pyim-test-pyim-zip ()
@@ -107,6 +101,7 @@
     (should (equal (substring str (car pos) (cadr pos)) key))))
 
 (ert-deftest pyim-test-pyim-cstring-split ()
+  (pyim-dcache-init-variables)
   (let ((pyim-dhashcache-code2word (make-hash-table :test #'equal))
         (str "我爱北京天安门"))
 
@@ -173,9 +168,15 @@
     (should (equal (pyim-cstring-to-pinyin "银行很行" nil "-" nil nil t)
                    "yin-hang-hen-xing"))))
 
+(ert-deftest pyim-test-pyim-general ()
+  (let ((pyim-dcache-backend 'pyim-dregcache))
+    (with-temp-buffer
+      (should (not toggle-input-method-active))
+      (call-interactively #'toggle-input-method))))
+
 (ert-deftest pyim-test-dregcache-backend ()
-  (let* ((pyim-dcache-backend 'pyim-dregcache)
-         words)
+  (let ((pyim-dcache-backend 'pyim-dregcache)
+        words)
     (should (eq (length pyim-dregcache-cache) 0))
     ;; load dictionary
     (pyim-dcache-update-code2word t)
