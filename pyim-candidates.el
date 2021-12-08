@@ -107,7 +107,7 @@ IMOBJS 获得候选词条。"
         (let ((candidates (pyim-candidates-create-quanpin imobjs scheme-name)))
           (push (car (pyim-candidates-create-quanpin imobjs scheme-name t)) output)
           (setq n (length (car candidates)))))
-      (append (pyim-subconcat (nreverse output) "")
+      (append (pyim-sublists-concat (nreverse output) t 2 "")
               candidates))))
 
 (defun pyim-candidates-create-quanpin (imobjs scheme-name &optional fast-search)
@@ -115,7 +115,7 @@ IMOBJS 获得候选词条。"
   (let (jianpin-words znabc-words personal-words common-words pinyin-chars-1 pinyin-chars-2)
     ;; 智能ABC模式，得到尽可能的拼音组合，查询这些组合，得到的词条做为联想词。
     (let ((codes (mapcar (lambda (x)
-                           (pyim-subconcat x "-"))
+                           (pyim-sublists-concat x t 2 "-"))
                          (mapcar (lambda (imobj)
                                    (pyim-codes-create imobj scheme-name))
                                  imobjs))))

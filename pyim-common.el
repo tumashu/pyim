@@ -106,14 +106,46 @@ When CARE-FIRST-ONE is no-nil, ((a b c) (d e)) => (a d)."
         (apply #'cl-mapcar
                #'list lists))))))
 
-(defun pyim-subconcat (list &optional sep)
-  "Concat sublist of LIST with SEP: (a b c d) => (abcd abc ab)."
-  (let ((n (length list))
-        output)
-    (dotimes (i (- n 1))
-      (let ((list (cl-subseq list 0 (- n i))))
-        (push (mapconcat #'identity list (or sep "")) output)))
-    (nreverse output)))
+(defun pyim-sublists (list &optional include-car min-length)
+  "获取到 LIST 的所有长度不小于 MIN-LENGTH 的子列表。
+
+如果 INCLUDE-CAR 为真，获取到的列表中必须包含 LIST 的第一个元素。"
+  (let (output)
+    (if include-car
+        (setq output (pyim-sublists-1 list))
+      (while list
+        (setq output (append output (pyim-sublists-1 list)))
+        (setq list (cdr list)))
+      (cl-remove-if
+       (lambda (x)
+         (< (length x) (or min-length 1)))
+       output))))
+
+(defun pyim-sublists-1 (list)
+  "`pyim-sublists' 的内部函数.
+
+例如： (a b c) -> ((a b c) (a b) (a) (b c) (b) (c))"
+  (when list
+    (let ((n (length list))
+          output)
+      (dotimes (i n)
+        (let ((list (cl-subseq list 0 (- n i))))
+          (push (cons i list) output)))
+      (nreverse output))))
+
+(pyim-sublists '(a b c d e))
+
+(defun pyim-sublists-concat (list &optional include-car min-length sep)
+  "获取 LIST 的所有长度不小于 MIN-LENGTH 的子列表，然后用 SEP 连接。
+
+如果 INCLUDE-CAR 为真，字符串中必须包含 LIST 的第一个元素。"
+  (remove nil
+          (mapcar (lambda (x)
+                    (when (>= (length x) (or min-length 1))
+                      (mapconcat (lambda (y)
+                                   (format "%s" y))
+                                 x (or sep ""))))
+                  (pyim-sublists list include-car min-length))))
 
 (defun pyim-char-before-to-string (num)
   "得到光标前第 `num' 个字符，并将其转换为字符串。"

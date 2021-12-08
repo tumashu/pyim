@@ -89,68 +89,41 @@ codes 与这个字符串进行比较，然后选择一个最相似的 code 输�
   ;; 我爱北京天安门 ->  ("天安门" 5 8)
   ;;                    ("北京" 3 5)
   ;;                    ("我爱" 1 3))
-  (cl-labels
-      ((get-possible-words-internal
-        ;; 内部函数，功能类似：
-        ;; ("a" "b" "c" "d") -> ("abcd" "abc" "ab")
-        (my-list number)
-        (cond
-         ((< (length my-list) 2) nil)
-         (t (append
-             (let* ((str (mapconcat #'identity my-list ""))
-                    (length (length str)))
-               (when (<= length (or max-word-length 6))
-                 (list (list str number (+ number length)))))
-             (get-possible-words-internal
-              (reverse (cdr (reverse my-list))) number)))))
-       (get-possible-words
-        ;; 内部函数，功能类似：
-        ;; ("a" "b" "c" "d") -> ("abcd" "abc" "ab" "bcd" "bc" "cd")
-        (my-list number)
-        (cond
-         ((null my-list) nil)
-         (t (append (get-possible-words-internal my-list number)
-                    (get-possible-words (cdr my-list) (1+ number)))))))
 
-    ;; 如果 pyim 词库没有加载，加载 pyim 词库，
-    ;; 确保 `pyim-dcache-get' 可以正常运行。
-    (pyim-dcache-init-variables)
+  ;; 如果 pyim 词库没有加载，加载 pyim 词库，
+  ;; 确保 `pyim-dcache-get' 可以正常运行。
+  (pyim-dcache-init-variables)
 
-    (let ((string-alist
-           (get-possible-words
-            (mapcar #'char-to-string
-                    (string-to-vector chinese-string))
-            1))
-          result)
-      (dolist (string-list string-alist)
-        (let ((pinyin-list (pyim-cstring-to-pinyin (car string-list) nil "-" t)))
-          (dolist (pinyin pinyin-list)
-            (let ((words (pyim-dcache-get pinyin '(code2word)))) ; 忽略个人词库可以提高速度
-              (dolist (word words)
-                (when (equal word (car string-list))
-                  (push string-list result)))))))
+  (let ((string-alist (pyim-sublists-concat
+                       (mapcar #'char-to-string
+                               (string-to-vector chinese-string))
+                       nil 2 ""))
+        result)
+    (dolist (string-list string-alist)
+      (let ((pinyin-list (pyim-cstring-to-pinyin (car string-list) nil "-" t)))
+        (dolist (pinyin pinyin-list)
+          (let ((words (pyim-dcache-get pinyin '(code2word)))) ; 忽略个人词库可以提高速度
+            (dolist (word words)
+              (when (equal word (car string-list))
+                (push string-list result)))))))
 
-      (if delete-dups
-          (cl-delete-duplicates
-           ;;  判断两个词条在字符串中的位置
-           ;;  是否冲突，如果冲突，仅保留一个，
-           ;;  删除其它。
-           result
-           :test (lambda (x1 x2)
-                   (let ((begin1 (nth 1 x1))
-                         (begin2 (nth 1 x2))
-                         (end1 (nth 2 x1))
-                         (end2 (nth 2 x2)))
-                     (not (or (<= end1 begin2)
-                              (<= end2 begin1)))))
-           :from-end prefer-short-word)
-        result))))
+    (if delete-dups
+        (cl-delete-duplicates
+         ;;  判断两个词条在字符串中的位置
+         ;;  是否冲突，如果冲突，仅保留一个，
+         ;;  删除其它。
+         result
+         :test (lambda (x1 x2)
+                 (let ((begin1 (nth 1 x1))
+                       (begin2 (nth 1 x2))
+                       (end1 (nth 2 x1))
+                       (end2 (nth 2 x2)))
+                   (not (or (<= end1 begin2)
+                            (<= end2 begin1)))))
+         :from-end prefer-short-word)
+      result)))
 
-;; (let ((str "医生随时都有可能被患者及其家属反咬一口"))
-;;   (benchmark 1 '(pyim-cstring-split-to-list str)))
-
-;; (let ((str "医生随时都有可能被患者及其家属反咬一口"))
-;;   (pyim-cstring-split-to-list str))
+(pyim-cstring-split-to-list "我爱北京天安门")
 
 (defun pyim-cstring-split-to-string (string &optional prefer-short-word
                                             separator max-word-length)
