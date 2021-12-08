@@ -172,9 +172,9 @@ CHINESE-STRING 分词，得到一个词条 alist，这个 alist 的元素都是�
 
     ;; 在分词的位置插入空格或者用户指定的分隔符。
     (dotimes (i str-length)
-      (when (member (1+ i) position-list)
+      (when (and (> i 0) (member i position-list))
         (push (or separator " ") result))
-      (push (substring chinese-string i (1+ i))  result))
+      (push (substring chinese-string i (1+ i)) result))
     (setq result (nreverse result))
     (mapconcat #'identity result "")))
 
