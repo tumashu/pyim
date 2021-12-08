@@ -102,9 +102,23 @@ When CARE-FIRST-ONE is no-nil, ((a b c) (d e)) => (a d)."
                      (append x (make-list (- n (length x)) nil)))
                    lists)))
       (delete-dups
-       (flatten-tree
+       (pyim-flatten-tree
         (apply #'cl-mapcar
                #'list lists))))))
+
+(if (fboundp 'flatten-tree)
+    (defalias 'pyim-flatten-tree 'flatten-tree)
+  (defun pyim-flatten-tree (tree)
+    "Take TREE and \"flatten\" it."
+    (let (elems)
+      (while (consp tree)
+        (let ((elem (pop tree)))
+          (while (consp elem)
+            (push (cdr elem) tree)
+            (setq elem (car elem)))
+          (if elem (push elem elems))))
+      (if tree (push tree elems))
+      (nreverse elems))))
 
 (defun pyim-subconcat (list &optional sep)
   "Concat sublist of LIST with SEP: (a b c d) => (abcd abc ab)."
