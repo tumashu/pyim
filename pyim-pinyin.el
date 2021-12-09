@@ -162,11 +162,9 @@
  (\"f\" \"en\" \"f\" \"en\") -> ((\"f\" \"en\" \"f\" \"en\")
                                  (\"f\" \"eng\" \"f\" \"en\"))"
   (let* ((fuzzy-alist pyim-pinyin-fuzzy-alist)
-         (sm-list (or (assoc (nth 0 info)
-                             fuzzy-alist #'equal)
+         (sm-list (or (cl-assoc (nth 0 info) fuzzy-alist :test #'equal)
                       (list (nth 0 info))))
-         (ym-list (or (assoc (nth 1 info)
-                             fuzzy-alist #'equal)
+         (ym-list (or (cl-assoc (nth 1 info) fuzzy-alist :test #'equal)
                       (list (nth 1 info))))
          result)
     (dolist (a sm-list)
