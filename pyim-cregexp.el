@@ -45,7 +45,12 @@
 
 (defun pyim-cregexp-build (string &optional char-level-num)
   "根据 STRING 构建一个中文 regexp, 用于 \"拼音搜索汉字\".
-比如：\"nihao\" -> \"[你呢...][好号...] \\| nihao\""
+
+比如：\"nihao\" -> \"[你呢...][好号...] \\| nihao\"
+
+注意事项：这个函数生成的 regexp 只支持常用的汉字（大概8000左右），
+生僻汉字是不支持的，因为添加生僻字后这会导致生成的 regexp 长度超
+出 Emacs 可处理范围。"
   ;; NOTE: (rx-to-string "") will return "\\(?:\\)",
   ;; While I want (pyim-cregexp-build "") return just "".
   (if (equal string "")
