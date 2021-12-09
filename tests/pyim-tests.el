@@ -140,6 +140,10 @@
                  '(("x" "ian" "x" "ian"))))
   (should (equal (pyim-pinyin-split "xi'an")
                  '(("" "xi'an" "" "xi'an"))))
+  (should (equal (pyim-pinyin-split "ide")
+                 '(("" "ide" "" "ide"))))
+  (should (equal (pyim-pinyin-split "ude")
+                 '(("" "ude" "" "ude"))))
 
   ;; pyim-pinyin-find-fuzzy
   (let ((pyim-pinyin-fuzzy-alist
