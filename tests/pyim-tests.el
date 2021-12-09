@@ -166,6 +166,54 @@
   (should (equal (pyim-pinyin-build-regexp "ni-hao" t t)
                  "^ni-hao[a-z]*")))
 
+;; ** pyim-impobjs 相关单元测试
+(ert-deftest pyim-test-pyim-imobjs ()
+  (let ((pyim-pinyin-fuzzy-alist '(("en" "eng")
+                                   ("in" "ing")
+                                   ("un" "ong"))))
+    (should (equal (pyim-imobjs-create "nihao" 'quanpin)
+                   '((("n" "i" "n" "i") ("h" "ao" "h" "ao")))))
+    (should (equal (pyim-imobjs-create "nh" 'quanpin)
+                   '((("n" "" "n" "") ("h" nil "h" nil)))))
+    (should (equal (pyim-imobjs-create "xi'an" 'quanpin)
+                   '((("x" "i" "x" "i") ("'" "an" "'" "an")))))
+    (should (equal (pyim-imobjs-create "xian" 'quanpin)
+                   '((("x" "ian" "x" "ian")))))
+    (should (equal (pyim-imobjs-create "fenyun" 'quanpin)
+                   '((("f" "en" "f" "en") ("y" "un" "y" "un"))
+                     (("f" "en" "f" "en") ("y" "ong" "y" "un"))
+                     (("f" "eng" "f" "en") ("y" "un" "y" "un"))
+                     (("f" "eng" "f" "en") ("y" "ong" "y" "un")))))
+    (should (equal (pyim-imobjs-create "xian" 'wubi)
+                   '(("xian"))))
+    (should (equal (pyim-imobjs-create "xian" 'cangjie)
+                   '(("xian"))))
+    (should (equal (pyim-imobjs-create "nihc" 'pyim-shuangpin)
+                   '((("n" "i" "n" "i") ("h" "ao" "h" "c")))))))
+
+;; ** pyim-codes 相关单元测试
+(ert-deftest pyim-test-pyim-codes ()
+  (should (equal (pyim-codes-create
+                  (car (pyim-imobjs-create "nihao" 'quanpin))
+                  'quanpin)
+                 '("ni" "hao")))
+  (should (equal (pyim-codes-create
+                  (car (pyim-imobjs-create "aaaa" 'wubi))
+                  'wubi)
+                 '("wubi/aaaa")))
+  (should (equal (pyim-codes-create
+                  (car (pyim-imobjs-create "aaaa" 'wubi))
+                  'wubi 2)
+                 '("wubi/aa")))
+  (should (equal (pyim-codes-create
+                  (car (pyim-imobjs-create "aaaa" 'wubi))
+                  'wubi 1)
+                 '("wubi/a")))
+  (should (equal (pyim-codes-create
+                  (car (pyim-imobjs-create "aaaa" 'cangjie))
+                  'cangjie)
+                 '("cangjie/aaaa"))))
+
 ;; ** pyim-cstring 相关单元测试
 (ert-deftest pyim-test-pyim-cstring-partition ()
   (should (equal (pyim-cstring-partition "你好 hello 你好")
