@@ -78,8 +78,10 @@
 
 (defun pyim-pinyin-build-regexp (pinyin &optional match-beginning first-equal all-equal)
   "从 PINYIN 构建一个 regexp，用于搜索联想词，
-比如：ni-hao-si-j --> ^ni-hao[a-z]*-si[a-z]*-j[a-z]* , when FIRST-EQUAL set to `t'
-                  --> ^ni[a-z]*-hao[a-z]*-si[a-z]*-j[a-z]* , when FIRST-EQUAL set to `nil'"
+
+比如：ni-hao:
+1. ^ni-hao[a-z]* , when FIRST-EQUAL set to `t'
+2. ^ni[a-z]*-hao[a-z]* , when FIRST-EQUAL set to `nil'"
   (when (and pinyin (stringp pinyin))
     (let ((pinyin-list (split-string pinyin "-"))
           (count 0))
@@ -108,6 +110,17 @@
     (cons shenmu
           (substring pinyin (length shenmu)))))
 
+(defun pyim-pinyin-valid-charpy-p (shenmu yunmu)
+  "测试由 SHENMU 和 YUNMU 组成的拼音，是否是一个有效的汉字拼音。
+这个函数尊重 `pyim-pinyin-fuzzy-alist' 模糊音设置。"
+  (cl-some
+   (lambda (char-pinyin)
+     (pyim-pymap-py2cchar-get char-pinyin t))
+   (mapcar (lambda (x)
+             (concat (nth 0 x) (nth 1 x)))
+           (pyim-pinyin-find-fuzzy
+            (list shenmu yunmu shenmu yunmu)))))
+
 (defun pyim-pinyin-get-charpy (pinyin)
   "将拼音字符串 PINYIN 分解成声母，韵母和剩余部分."
   (let* ((x (pyim-pinyin-get-shenmu pinyin))
@@ -115,40 +128,31 @@
          (yunmu-and-rest (cdr x))
          (i (min (length yunmu-and-rest) 5))
          yunmu rest)
-    (cl-flet ((pinyin-valid-p
-               (shenmu yunmu)
-               (cl-some
-                (lambda (char-pinyin)
-                  (pyim-pymap-py2cchar-get char-pinyin t))
-                (mapcar (lambda (x)
-                          (concat (nth 0 x) (nth 1 x)))
-                        (pyim-pinyin-find-fuzzy
-                         (list shenmu yunmu shenmu yunmu))))))
-      (while (> i 0)
-        (setq yunmu (substring yunmu-and-rest 0 i))
-        (setq rest (substring yunmu-and-rest i))
-        (if (member yunmu pyim-pinyin-yunmu)
-            (cond (;; 如果声母和韵母组成的拼音不是一个有效的拼音，
-                   ;; 就继续缩短，如果是，就进一步检测。
-                   (not (pinyin-valid-p shenmu yunmu))
+    (while (> i 0)
+      (setq yunmu (substring yunmu-and-rest 0 i))
+      (setq rest (substring yunmu-and-rest i))
+      (if (member yunmu pyim-pinyin-yunmu)
+          (cond (;; 如果声母和韵母组成的拼音不是一个有效的拼音，
+                 ;; 就继续缩短，如果是，就进一步检测。
+                 (not (pyim-pinyin-valid-charpy-p shenmu yunmu))
+                 (setq i (1- i))
+                 (setq yunmu ""))
+                ((and (string< "" rest)
+                      ;; 截取后剩余的字符串 rest 找不出声母
+                      (equal (car (pyim-pinyin-get-shenmu rest)) "")
+                      ;; 截取后的韵母最后一个字符是一个有效声母
+                      (member (substring yunmu -1) pyim-pinyin-shenmu)
+                      ;; 截取得到的韵母如果去掉最后一个字符，还是有效的韵母
+                      (member (substring yunmu 0 -1) pyim-pinyin-yunmu))
+                 (if (not (pyim-pinyin-valid-charpy-p shenmu (substring yunmu 0 -1)))
+                     ;; 如果去掉韵母最后一个字符后，无法组成一个有效的拼音。
+                     ;; 就不要缩短了。
+                     (setq i 0)
                    (setq i (1- i))
-                   (setq yunmu ""))
-                  ((and (string< "" rest)
-                        ;; 截取后剩余的字符串 rest 找不出声母
-                        (equal (car (pyim-pinyin-get-shenmu rest)) "")
-                        ;; 截取后的韵母最后一个字符是一个有效声母
-                        (member (substring yunmu -1) pyim-pinyin-shenmu)
-                        ;; 截取得到的韵母如果去掉最后一个字符，还是有效的韵母
-                        (member (substring yunmu 0 -1) pyim-pinyin-yunmu))
-                   (if (not (pinyin-valid-p shenmu (substring yunmu 0 -1)))
-                       ;; 如果去掉韵母最后一个字符后，无法组成一个有效的拼音。
-                       ;; 就不要缩短了。
-                       (setq i 0)
-                     (setq i (1- i))
-                     (setq yunmu "")))
-                  (t (setq i 0)))
-          (setq i (1- i))
-          (setq yunmu ""))))
+                   (setq yunmu "")))
+                (t (setq i 0)))
+        (setq i (1- i))
+        (setq yunmu "")))
     (cons (list shenmu yunmu shenmu yunmu)
           (substring yunmu-and-rest (length yunmu)))))
 

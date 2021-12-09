@@ -96,6 +96,72 @@
   (should (equal (length (pyim-pymap-py2cchar-get "a")) 5))
   (should (equal (length (pyim-pymap-py2cchar-get "z")) 36)))
 
+;; ** pyim-pinyin 相关单元测试
+(ert-deftest pyim-test-pyim-pinyin ()
+  ;; pyim-pinyin-get-shenmu
+  (should (equal (pyim-pinyin-get-shenmu "nihao")
+                 '("n" . "ihao")))
+  (should (equal (pyim-pinyin-get-shenmu "ao")
+                 '("" . "ao")))
+  (should (equal (pyim-pinyin-get-shenmu "")
+                 '(nil . "")))
+
+  ;; pyim-pinyin-valid-charpy-p
+  (should (pyim-pinyin-valid-charpy-p "n" "i"))
+  (should (pyim-pinyin-valid-charpy-p "" "a"))
+  (should (pyim-pinyin-valid-charpy-p "" "ao"))
+  (should-not (pyim-pinyin-valid-charpy-p "n" "k"))
+  (should-not (pyim-pinyin-valid-charpy-p "a" "k"))
+
+  ;; pyim-pinyin-get-charpy
+  (should (equal (pyim-pinyin-get-charpy "nihao")
+                 '(("n" "i" "n" "i") . "hao")))
+  (should (equal (pyim-pinyin-get-charpy "ao")
+                 '(("" "ao" "" "ao") . "")))
+  (should (equal (pyim-pinyin-get-charpy "nh")
+                 '(("n" "" "n" "") . "h")))
+
+  ;; pyim-pinyin-split
+  (should (equal (pyim-pinyin-split "n")
+                 '(("n" nil "n" nil))))
+  (should (equal (pyim-pinyin-split "ni")
+                 '(("n" "i" "n" "i"))))
+  (should (equal (pyim-pinyin-split "nih")
+                 '(("n" "i" "n" "i")
+                   ("h" nil "h" nil))))
+  (should (equal (pyim-pinyin-split "nihao")
+                 '(("n" "i" "n" "i")
+                   ("h" "ao" "h" "ao"))))
+  (should (equal (pyim-pinyin-split "a")
+                 '(("" "a" "" "a"))))
+  (should (equal (pyim-pinyin-split "a")
+                 '(("" "a" "" "a"))))
+  (should (equal (pyim-pinyin-split "xian")
+                 '(("x" "ian" "x" "ian"))))
+  (should (equal (pyim-pinyin-split "xi'an")
+                 '(("" "xi'an" "" "xi'an"))))
+
+  ;; pyim-pinyin-find-fuzzy
+  (let ((pyim-pinyin-fuzzy-alist
+         '(("en" "eng")
+           ("f" "h"))))
+    (should (equal (pyim-pinyin-find-fuzzy '("f" "en" "f" "en"))
+                   '(("f" "en" "f" "en")
+                     ("f" "eng" "f" "en")
+                     ("h" "en" "f" "en")
+                     ("h" "eng" "f" "en")))))
+  ;; pyim-pinyin-build-regexp
+  (should (equal (pyim-pinyin-build-regexp "ni-hao")
+                 "ni[a-z]*-hao[a-z]*"))
+  (should (equal (pyim-pinyin-build-regexp "ni-hao" t)
+                 "^ni[a-z]*-hao[a-z]*"))
+  (should (equal (pyim-pinyin-build-regexp "ni-hao" nil t)
+                 "ni-hao[a-z]*"))
+  (should (equal (pyim-pinyin-build-regexp "ni-hao" nil nil t)
+                 "ni-hao"))
+  (should (equal (pyim-pinyin-build-regexp "ni-hao" t t)
+                 "^ni-hao[a-z]*")))
+
 ;; ** pyim-cstring 相关单元测试
 (ert-deftest pyim-test-pyim-cstring-partition ()
   (should (equal (pyim-cstring-partition "你好 hello 你好")
