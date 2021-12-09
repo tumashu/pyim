@@ -311,6 +311,12 @@
     (should (string-match-p regexp "你好"))
     (should (string-match-p regexp "哈哈你好吗")))
 
+  (let ((regexp (pyim-cregexp-build "beng")))
+    (should (string-match-p regexp "痭"))
+    (should (string-match-p regexp "泵"))
+    (should (string-match-p regexp "堋"))
+    (should (string-match-p regexp "洴")))
+
   (let ((regexp (pyim-cregexp-build "ni.*ma")))
     (should (string-match-p regexp "nihaoma"))
     (should (string-match-p regexp "nima"))

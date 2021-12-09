@@ -43,35 +43,40 @@
 将使用这个 scheme."
   :type 'symbol)
 
+(defun pyim-cregexp-char-level-num (num)
+  "根据 NUM 返回一个有效的常用汉字级别。"
+  (if (numberp num)
+      (max (min num 4) 1)
+    4))
+
 (defun pyim-cregexp-build (string &optional char-level-num)
   "根据 STRING 构建一个中文 regexp, 用于 \"拼音搜索汉字\".
 
 比如：\"nihao\" -> \"[你呢...][好号...] \\| nihao\"
 
-注意事项：这个函数生成的 regexp 只支持常用的汉字（大概8000左右），
-生僻汉字是不支持的，因为添加生僻字后这会导致生成的 regexp 长度超
-出 Emacs 可处理范围。"
+注意事项：如果生成的 regexp 太长，Emacs 无法处理，那么，这个命令
+会抛弃一些不常用的汉字，重新生成，知道生成一个 Emacs 可以处理的
+regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子的时候，
+就无法搜索生僻字了。"
   ;; NOTE: (rx-to-string "") will return "\\(?:\\)",
   ;; While I want (pyim-cregexp-build "") return just "".
   (if (equal string "")
       string
-    (let* ((char-level-num (or char-level-num 3))
-           (rx-string
-            (if (= char-level-num 0)
-                string
-              (ignore-errors
-                (rx-to-string
-                 (pyim-cregexp-build-from-rx
-                  (lambda (x)
-                    (if (stringp x)
-                        (xr (pyim-cregexp-build-1 x char-level-num))
-                      x))
-                  (xr string)))))))
-      (if (and rx-string (stringp rx-string))
-          (if (pyim-cregexp-valid-p rx-string)
-              rx-string
-            (pyim-cregexp-build string (- char-level-num 1)))
-        string))))
+    (let ((num (pyim-cregexp-char-level-num char-level-num))
+          rx-string)
+      (while (not (pyim-cregexp-valid-p rx-string))
+        (setq rx-string
+              (or (ignore-errors
+                    (rx-to-string
+                     (pyim-cregexp-build-from-rx
+                      (lambda (x)
+                        (if (stringp x)
+                            (xr (pyim-cregexp-build-1 x num))
+                          x))
+                      (xr string))))
+                  string))
+        (setq num (1- num)))
+      rx-string)))
 
 (defun pyim-cregexp-valid-p (cregexp)
   "Return t when cregexp is a valid regexp."
@@ -94,19 +99,15 @@
     (_ (funcall fn rx-form))))
 
 (defun pyim-cregexp-build-1 (str &optional char-level-num)
-  (let* ((scheme-name (pyim-scheme-name))
+  (let* ((num (pyim-cregexp-char-level-num char-level-num))
+         (scheme-name (pyim-scheme-name))
          (class (pyim-scheme-get-option scheme-name :class))
          (code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
          (sep "#####&&&&#####")
          (lst (remove "" (split-string
                           (replace-regexp-in-string
                            "\\([a-z]+'*\\)" (concat sep "\\1" sep) str)
-                          sep)))
-         (char-level-num
-          (cond
-           ((and char-level-num (> char-level-num 3)) 3)
-           ((and char-level-num (< char-level-num 1)) 1)
-           (t char-level-num))))
+                          sep))))
     ;; 确保 pyim 词库加载
     (pyim-dcache-init-variables)
     ;; pyim 暂时只支持全拼和双拼搜索
@@ -124,7 +125,7 @@
                   (lambda (imobj)
                     (if (eq class 'xingma)
                         (pyim-cregexp-build:xingma imobj nil nil nil code-prefix)
-                      (pyim-cregexp-build:quanpin imobj nil nil nil char-level-num)))
+                      (pyim-cregexp-build:quanpin imobj nil nil nil num)))
                   imobjs))
                 (regexp
                  (when regexp-list
@@ -143,10 +144,10 @@
 (defun pyim-cregexp-build:quanpin (imobj &optional match-beginning
                                          first-equal all-equal char-level-num)
   "从 IMOBJ 创建一个搜索中文的 regexp."
-  (let* ((imobj
-          (mapcar (lambda (x)
-                    (concat (nth 0 x) (nth 1 x)))
-                  imobj))
+  (let* ((num (pyim-cregexp-char-level-num char-level-num))
+         (imobj (mapcar (lambda (x)
+                          (concat (nth 0 x) (nth 1 x)))
+                        imobj))
          (cchar-list
           (let ((n 0) results)
             (dolist (py imobj)
@@ -154,11 +155,11 @@
                       (or all-equal
                           (and first-equal (= n 0))))
                      (cchars
-                      ;; 只取常用字，不常用的汉字忽略，防止生成的
-                      ;; regexp 太长而无法搜索
                       (mapconcat (lambda (x)
                                    (mapconcat #'identity
-                                              (cl-subseq (split-string x "|") 0 char-level-num)
+                                              (let* ((list (split-string x "|"))
+                                                     (length (length list)))
+                                                (cl-subseq list 0 (min num length)))
                                               ""))
                                  (pyim-pymap-py2cchar-get py equal-match nil t) "")))
                 (push cchars results))
