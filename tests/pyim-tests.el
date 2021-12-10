@@ -475,10 +475,13 @@
   :expected-result :failed
   (let ((file (make-temp-file "pyim-tests-import")))
     ;; 删除测试用词条
-    (puthash "ce-ai" nil pyim-dhashcache-icode2word)
-    (puthash "测㤅"  nil pyim-dhashcache-iword2count)
-    (puthash "测嘊" nil pyim-dhashcache-iword2count)
-    (puthash "测伌" nil pyim-dhashcache-iword2count)
+    (dolist (x '("测㤅" "测嘊" "测伌"))
+      (pyim-process-delete-word x))
+    (dolist (x '("测㤅" "测嘊" "测伌"))
+      (should-not (member x (pyim-dcache-get "ce-ai" '(icode2word)))))
+    (should-not (equal (gethash "测㤅" pyim-dhashcache-iword2count) 76543))
+    (should-not (equal (gethash "测嘊" pyim-dhashcache-iword2count) 34567))
+    (should-not (equal (gethash "测伌" pyim-dhashcache-iword2count) 0))
 
     ;; 导入测试用词条
     (with-temp-buffer
