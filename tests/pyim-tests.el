@@ -35,10 +35,19 @@
 (require 'pyim-dhashcache)
 
 ;; ** 单元测试前的准备工作
-(setq default-input-method "pyim")
-(require 'pyim-basedict nil t)
-(with-eval-after-load "pyim-basedict"
-  (pyim-basedict-enable))
+(defun pyim-test-get-pyim-basedict ()
+  "获取到 pyim-basedict.pyim 的信息."
+  (let* ((files (ignore-errors
+                  (directory-files-recursively
+                   (expand-file-name (concat default-directory "/deps/"))
+                   "pyim-basedict\.pyim$"))))
+    (when files
+      (mapcar (lambda (f)
+                (list :name (file-name-base f) :file f))
+              files))))
+
+(when-let ((dicts (pyim-test-get-pyim-basedict)))
+  (setq pyim-dicts dicts))
 
 (pyim-dcache-init-variables)
 
