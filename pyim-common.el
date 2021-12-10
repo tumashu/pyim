@@ -178,6 +178,19 @@ When CARE-FIRST-ONE is no-nil, ((a b c) (d e)) => (a d)."
                           (append key nil))
                   unread-command-events))))
 
+;; Fork from `company-dabbrev--time-limit-while' in company-mode."
+(defmacro pyim-time-limit-while (test start limit freq &rest body)
+  (declare (indent 3) (debug t))
+  `(let ((pyim-time-limit-while-counter 0))
+     (catch 'done
+       (while ,test
+         ,@body
+         (and ,limit
+              (= (cl-incf pyim-time-limit-while-counter) ,freq)
+              (setq pyim-time-limit-while-counter 0)
+              (> (float-time (time-since ,start)) ,limit)
+              (throw 'done 'pyim-time-out))))))
+
 ;; * Footer
 (provide 'pyim-common)
 

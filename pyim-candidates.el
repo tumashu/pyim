@@ -91,7 +91,17 @@ IMOBJS 获得候选词条。"
 
 (defun pyim-candidates-create:quanpin (imobjs scheme-name &optional async)
   "`pyim-candidates-create' 处理全拼输入法的函数."
-  (unless async
+  (if async
+      ;; 使用当前的 entered 构建一个搜索中文的正则表达式, 然后使用这个正则表达式
+      ;; 在当前 buffer 中搜索词条。
+      (let ((str (pyim-entered-get)))
+        (if (< (length str) 1)
+            pyim-candidates
+          ;; NOTE: 让第一个词保持不变是不是合理，有待进一步的观察。
+          `(,(car pyim-candidates)
+            ,@(pyim-candidates-search-buffer
+               (pyim-cregexp-build str 3 t))
+            ,@(cdr pyim-candidates))))
     ;; 这段代码主要实现以下功能：假如用户输入 nihaomazheshi, 但词库里面找不到对
     ;; 应的词条，那么输入法自动用 nihaoma 和 zheshi 的第一个词条："你好吗" 和 "
     ;; 这是" 连接成一个新的字符串 "你好吗这是" 做为第一个候选词。
@@ -109,6 +119,22 @@ IMOBJS 获得候选词条。"
           (setq n (length (car candidates)))))
       (append (pyim-subconcat (nreverse output) "")
               candidates))))
+
+(defun pyim-candidates-search-buffer (regexp)
+  "在当前 buffer 中使用 REGEXP 搜索词条。"
+  (save-excursion
+    (let ((start (current-time))
+          words)
+      (goto-char (point-min))
+      ;; Search after pos.
+      (pyim-time-limit-while (and (not (input-pending-p))
+                                  (re-search-forward regexp nil t))
+          start 0.1 25
+          (let ((match (match-string-no-properties 0)))
+            ;; NOTE: 单个汉字我觉得不值得收集。
+            (when (>= (length match) 2)
+              (cl-pushnew match words :test #'equal))))
+      words)))
 
 (defun pyim-candidates-create-quanpin (imobjs scheme-name &optional fast-search)
   "`pyim-candidates-create:quanpin' 内部使用的函数。"

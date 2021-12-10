@@ -49,7 +49,7 @@
       (max (min num 4) 1)
     4))
 
-(defun pyim-cregexp-build (string &optional char-level-num)
+(defun pyim-cregexp-build (string &optional char-level-num chinese-only)
   "根据 STRING 构建一个中文 regexp, 用于 \"拼音搜索汉字\".
 
 比如：\"nihao\" -> \"[你呢...][好号...] \\| nihao\"
@@ -59,6 +59,8 @@ CHAR-LEVEL-NUM 代表汉字常用级别，pyim 中根据汉字的使用频率，
 字分为4个级别：1级最常用，4级别最不常用，1-3级汉字大概8000左右，
 如果这个参数设置为3, 那么代表在构建 regexp 是，只使用常用级别小于
 等于3的汉字。
+
+如果 CHINESE-ONLY 为真，那么生成的 regexp 只能搜索汉字。
 
 注意事项：如果生成的 regexp 太长，Emacs 无法处理，那么，这个命令
 会抛弃一些不常用的汉字，重新生成，知道生成一个 Emacs 可以处理的
@@ -77,7 +79,7 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
                      (pyim-cregexp-build-from-rx
                       (lambda (x)
                         (if (stringp x)
-                            (xr (pyim-cregexp-build-1 x num))
+                            (xr (pyim-cregexp-build-1 x num chinese-only))
                           x))
                       (xr string))))
                   string))
@@ -104,7 +106,7 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
              rx-form))
     (_ (funcall fn rx-form))))
 
-(defun pyim-cregexp-build-1 (str &optional char-level-num)
+(defun pyim-cregexp-build-1 (str &optional char-level-num chinese-only)
   (let* ((num (pyim-cregexp-char-level-num char-level-num))
          (scheme-name (pyim-scheme-name))
          (class (pyim-scheme-get-option scheme-name :class))
@@ -139,11 +141,13 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
                               (delq nil regexp-list)
                               "\\|")))
                 (regexp
-                 (if (> (length regexp) 0)
-                     (if (equal string string1)
-                         (concat string "\\|" regexp)
-                       (concat string "\\|" string1 "\\|" regexp))
-                   string)))
+                 (if chinese-only
+                     regexp
+                   (if (> (length regexp) 0)
+                       (if (equal string string1)
+                           (concat string "\\|" regexp)
+                         (concat string "\\|" string1 "\\|" regexp))
+                     string))))
            (format "\\(?:%s\\)" regexp))))
      lst "")))
 
