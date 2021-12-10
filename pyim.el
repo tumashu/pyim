@@ -405,8 +405,8 @@ MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表词�
                (content (pyim-dline-parse))
                (word (car content))
                (count (string-to-number
-                       (or (car (car content)) "0")))
-               (criteria (car (car car content))))
+                       (or (car (cdr content)) "0")))
+               (criteria (car (cdr (cdr content)))))
           (pyim-process-create-word
            word nil
            (lambda (x)
