@@ -91,7 +91,18 @@ IMOBJS 获得候选词条。"
 
 (defun pyim-candidates-create:quanpin (imobjs scheme-name &optional async)
   "`pyim-candidates-create' 处理全拼输入法的函数."
-  (unless async
+  (if async
+      (let ((str (pyim-entered-get))
+            words)
+        (if (< (length str) 3)
+            pyim-candidates-last
+          (save-excursion
+            (goto-char (point-min))
+            (while (re-search-forward (pyim-cregexp-build str 1) nil t)
+              (cl-pushnew (substring-no-properties (match-string 0)) words
+                          :test #'equal))
+            (append (nreverse words)
+                    pyim-candidates-last))))
     ;; 这段代码主要实现以下功能：假如用户输入 nihaomazheshi, 但词库里面找不到对
     ;; 应的词条，那么输入法自动用 nihaoma 和 zheshi 的第一个词条："你好吗" 和 "
     ;; 这是" 连接成一个新的字符串 "你好吗这是" 做为第一个候选词。
