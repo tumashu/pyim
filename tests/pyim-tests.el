@@ -194,6 +194,48 @@
   (should (equal (pyim-pinyin-build-regexp "ni-hao" t t)
                  "^ni-hao[a-z]*")))
 
+;; ** pyim-punctuation 相关单元测试
+(ert-deftest pyim-test-pyim-punctuation ()
+  (with-temp-buffer
+    (insert ",")
+    (pyim-punctuation-translate 'full-width)
+    (should (equal (buffer-string) "，"))
+    (pyim-punctuation-translate 'half-width)
+    (should (equal (buffer-string) ",")))
+
+  (with-temp-buffer
+    (insert "[]")
+    (backward-char 1)
+    (pyim-punctuation-translate 'full-width)
+    (should (equal (buffer-string) "【】"))
+    (pyim-punctuation-translate 'half-width)
+    (should (equal (buffer-string) "[]")))
+
+  (with-temp-buffer
+    (let ((pyim-punctuation-pair-status
+           '(("\"" nil) ("'" nil))))
+      (insert "[{''}]")
+      (backward-char 3)
+      (pyim-punctuation-translate 'full-width)
+      (should (equal (buffer-string) "【『‘’』】"))
+      (pyim-punctuation-translate 'half-width)
+      (should (equal (buffer-string) "[{''}]"))))
+
+  (with-temp-buffer
+    (let ((pyim-punctuation-pair-status
+           '(("\"" nil) ("'" nil))))
+      (insert "[{''}]")
+      (backward-char 3)
+      (pyim-punctuation-translate-at-point)
+      (should (equal (buffer-string) "【『‘’』】"))
+      (pyim-punctuation-translate-at-point)
+      (should (equal (buffer-string) "[{''}]"))))
+
+  (let ((pyim-punctuation-pair-status
+         '(("\"" nil) ("'" nil))))
+    (should (equal (pyim-punctuation-return-proper-punct '("'" "‘" "’")) "‘"))
+    (should (equal (pyim-punctuation-return-proper-punct '("'" "‘" "’")) "’"))))
+
 ;; ** pyim-impobjs 相关单元测试
 (ert-deftest pyim-test-pyim-imobjs ()
   (let ((pyim-pinyin-fuzzy-alist '(("en" "eng")
