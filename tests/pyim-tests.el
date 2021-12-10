@@ -46,9 +46,9 @@
                 (list :name (file-name-base f) :file f))
               files))))
 
+(setq default-input-method "pyim")
 (when-let ((dicts (pyim-test-get-pyim-basedict)))
   (setq pyim-dicts dicts))
-
 (pyim-dcache-init-variables)
 
 ;; ** pyim-common 相关单元测试
