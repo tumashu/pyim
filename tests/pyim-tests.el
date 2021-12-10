@@ -35,7 +35,7 @@
 (require 'pyim-dhashcache)
 
 ;; ** 单元测试前的准备工作
-(defun pyim-test-add-dict (file-name)
+(defun pyim-tests-add-dict (file-name)
   "搜索文件名称为 FILE-NAME 的词库，并添加到 `pyim-dicts'."
   (let ((file (expand-file-name (concat default-directory "/deps/" file-name))))
     (if (file-exists-p file)
@@ -45,11 +45,11 @@
       (message "pyim-test: fail to find dict file: '%s'." file))))
 
 (setq default-input-method "pyim")
-(pyim-test-add-dict "pyim-basedict.pyim")
+(pyim-tests-add-dict "pyim-basedict.pyim")
 (pyim-dcache-init-variables)
 
 ;; ** pyim-schemes 相关单元测试
-(ert-deftest pyim-test-pyim-schemes ()
+(ert-deftest pyim-tests-pyim-schemes ()
   (let ((pyim-default-scheme 'wubi))
     (should (equal (pyim-scheme-name) 'wubi)))
 
@@ -70,7 +70,7 @@
   (should (equal (pyim-scheme-get-option 'wubi :class) 'xingma)))
 
 ;; ** pyim-common 相关单元测试
-(ert-deftest pyim-test-pyim-permutate-list ()
+(ert-deftest pyim-tests-pyim-permutate-list ()
   (should (equal (pyim-permutate-list '((a b) (c d e) (f)))
                  '((a c f)
                    (a d f)
@@ -81,12 +81,12 @@
   (should (equal (pyim-permutate-list nil) nil))
   (should (equal (pyim-permutate-list '((a))) '((a)))))
 
-(ert-deftest pyim-test-pyim-zip ()
+(ert-deftest pyim-tests-pyim-zip ()
   (should (equal (pyim-zip '((a b "d") nil (1 d) (f) nil))
                  '(a 1 f b d "d")))
   (should (equal (pyim-zip nil) nil)))
 
-(ert-deftest pyim-test-pyim-subconcat ()
+(ert-deftest pyim-tests-pyim-subconcat ()
   (should (equal (pyim-subconcat '("a" "b" "c" "d"))
                  '("abcd" "abc" "ab")))
   (should (equal (pyim-subconcat '("a" "b" "c" "d") "-")
@@ -94,7 +94,7 @@
   (should (equal (pyim-subconcat nil) nil)))
 
 ;; ** pyim-pymap 相关单元测试
-(ert-deftest pyim-test-pyim-pymap ()
+(ert-deftest pyim-tests-pyim-pymap ()
   (should-not (cl-find-if-not
                (lambda (x)
                  (= (length (split-string (cadr x) "|")) 4))
@@ -125,7 +125,7 @@
   (should (equal (length (pyim-pymap-py2cchar-get "z")) 36)))
 
 ;; ** pyim-pinyin 相关单元测试
-(ert-deftest pyim-test-pyim-pinyin ()
+(ert-deftest pyim-tests-pyim-pinyin ()
   ;; pyim-pinyin-get-shenmu
   (should (equal (pyim-pinyin-get-shenmu "nihao")
                  '("n" . "ihao")))
@@ -195,7 +195,7 @@
                  "^ni-hao[a-z]*")))
 
 ;; ** pyim-punctuation 相关单元测试
-(ert-deftest pyim-test-pyim-punctuation ()
+(ert-deftest pyim-tests-pyim-punctuation ()
   (with-temp-buffer
     (insert ",")
     (pyim-punctuation-translate 'full-width)
@@ -237,7 +237,7 @@
     (should (equal (pyim-punctuation-return-proper-punct '("'" "‘" "’")) "’"))))
 
 ;; ** pyim-impobjs 相关单元测试
-(ert-deftest pyim-test-pyim-imobjs ()
+(ert-deftest pyim-tests-pyim-imobjs ()
   (let ((pyim-pinyin-fuzzy-alist '(("en" "eng")
                                    ("in" "ing")
                                    ("un" "ong"))))
@@ -262,7 +262,7 @@
                    '((("n" "i" "n" "i") ("h" "ao" "h" "c")))))))
 
 ;; ** pyim-codes 相关单元测试
-(ert-deftest pyim-test-pyim-codes ()
+(ert-deftest pyim-tests-pyim-codes ()
   (should (equal (pyim-codes-create
                   (car (pyim-imobjs-create "nihao" 'quanpin))
                   'quanpin)
@@ -285,7 +285,7 @@
                  '("cangjie/aaaa"))))
 
 ;; ** pyim-cstring 相关单元测试
-(ert-deftest pyim-test-pyim-cstring-partition ()
+(ert-deftest pyim-tests-pyim-cstring-partition ()
   (should (equal (pyim-cstring-partition "你好 hello 你好")
                  '("你好" " hello " "你好")))
   (should (equal (pyim-cstring-partition "你好 hello 你好" t)
@@ -299,7 +299,7 @@
   (should (equal (pyim-cstring-partition "hello" t)
                  '("hello"))))
 
-(ert-deftest pyim-test-pyim-cstring-substrings ()
+(ert-deftest pyim-tests-pyim-cstring-substrings ()
   (should (equal (pyim-cstring-substrings "我爱北京")
                  '(("我爱北京" 0 4)
                    ("我爱北" 0 3)
@@ -319,7 +319,7 @@
          (pos (cdr (nth 1 alist))))
     (should (equal (substring str (car pos) (cadr pos)) key))))
 
-(ert-deftest pyim-test-pyim-cstring-split ()
+(ert-deftest pyim-tests-pyim-cstring-split ()
   (let ((pyim-dhashcache-code2word (make-hash-table :test #'equal))
         (str "我爱北京天安门"))
 
@@ -361,7 +361,7 @@
     (should (equal (pyim-cstring-split-to-string "我爱北京天安门" nil "-" 2)
                    "我爱-北京-天安-门"))))
 
-(ert-deftest pyim-test-pyim-cstring-to-pinyin ()
+(ert-deftest pyim-tests-pyim-cstring-to-pinyin ()
   (let ((pyim-dhashcache-code2word (make-hash-table :test #'equal))
         (str "银行很行"))
     ;; Create code2word dcache.
@@ -395,7 +395,7 @@
                            "Hello -yin-hang-hen-xing- Hi Hello -yin-hang-hen-heng- Hi "
                            "Hello -yin-hang-hen-hang- Hi")))))
 
-(ert-deftest pyim-test-pyim-pyim-cstring-words-at-point ()
+(ert-deftest pyim-tests-pyim-cstring-words-at-point ()
   (let ((pyim-dhashcache-code2word (make-hash-table :test #'equal)))
     (puthash "tian-an" (list "天安") pyim-dhashcache-code2word)
     (puthash "an-men" (list "安门") pyim-dhashcache-code2word)
@@ -422,7 +422,7 @@
                      '(("天安门" 3 0) ("安门" 2 0)))))))
 
 ;; ** pyim-cregexp 相关单元测试
-(ert-deftest pyim-test-pyim-cregexp ()
+(ert-deftest pyim-tests-pyim-cregexp ()
   (let ((regexp (pyim-cregexp-build "nihao")))
     (should (string-match-p regexp "nihao"))
     (should (string-match-p regexp "anihaob"))
@@ -470,13 +470,13 @@
     (should-not (string-match-p regexp2 "当王"))))
 
 ;; ** pyim-dregcache 相关单元测试
-(ert-deftest pyim-test-pyim-general ()
+(ert-deftest pyim-tests-pyim-general ()
   (let ((pyim-dcache-backend 'pyim-dregcache))
     (with-temp-buffer
       (should (not toggle-input-method-active))
       (call-interactively #'toggle-input-method))))
 
-(ert-deftest pyim-test-dregcache-backend ()
+(ert-deftest pyim-tests-pyim-dregcache-backend ()
   (let ((pyim-dcache-backend 'pyim-dregcache)
         words)
     (should (eq (length pyim-dregcache-cache) 0))
