@@ -35,20 +35,17 @@
 (require 'pyim-dhashcache)
 
 ;; ** 单元测试前的准备工作
-(defun pyim-test-get-pyim-basedict ()
-  "获取到 pyim-basedict.pyim 的信息."
-  (let* ((files (ignore-errors
-                  (directory-files-recursively
-                   (expand-file-name (concat default-directory "/deps/"))
-                   "pyim-basedict\.pyim$"))))
-    (when files
-      (mapcar (lambda (f)
-                (list :name (file-name-base f) :file f))
-              files))))
+(defun pyim-test-add-dict (file-name)
+  "搜索文件名称为 FILE-NAME 的词库，并添加到 `pyim-dicts'."
+  (let ((file (expand-file-name (concat default-directory "/deps/" file-name))))
+    (if (file-exists-p file)
+        (cl-pushnew
+         (list :name (file-name-base file) :file file)
+         pyim-dicts)
+      (message "pyim-test: fail to find dict file: '%s'." file))))
 
 (setq default-input-method "pyim")
-(when-let ((dicts (pyim-test-get-pyim-basedict)))
-  (setq pyim-dicts dicts))
+(pyim-test-add-dict "pyim-basedict.pyim")
 (pyim-dcache-init-variables)
 
 ;; ** pyim-common 相关单元测试
