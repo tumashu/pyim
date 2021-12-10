@@ -424,7 +424,7 @@
     (setq words (pyim-dcache-get "zun"))
     (should (string= (nth 0 words) "尊"))
     ;; `pyim-dregcache-get' calls `pyim-pymap-py2cchar-get' before return result
-    (should (eq (length words) 44))))
+    (should (eq (length words) 51))))
 
 (ert-run-tests-batch-and-exit)
 ;; * Footer
