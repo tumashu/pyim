@@ -469,6 +469,36 @@
     (should (string-match-p regexp2 "大王"))
     (should-not (string-match-p regexp2 "当王"))))
 
+;; ** pyim-import 相关单元测试
+(ert-deftest pyim-tests-pyim-import-words-and-counts ()
+  (let ((file (make-temp-file "pyim-tests-import")))
+    ;; 删除测试用词条
+    (dolist (x '("测㤅" "测嘊" "测伌"))
+      (pyim-process-delete-word x))
+    (dolist (x '("测㤅" "测嘊" "测伌"))
+      (should-not (member x (pyim-dcache-get "ce-ai" '(icode2word)))))
+    (should-not (equal (gethash "测㤅" pyim-dhashcache-iword2count) 76543))
+    (should-not (equal (gethash "测嘊" pyim-dhashcache-iword2count) 34567))
+    (should-not (equal (gethash "测伌" pyim-dhashcache-iword2count) 0))
+
+    ;; 导入测试用词条
+    (with-temp-buffer
+      (insert
+       ";;; -*- coding: utf-8-unix -*-
+测㤅 76543 ce-ai
+测嘊 34567
+测伌")
+      (write-file file))
+    (pyim-import-words-and-counts file (lambda (orig-count new-count) new-count) t)
+    (pyim-delete-word)
+
+    ;; 测试词条是否存在
+    (dolist (x '("测㤅" "测嘊" "测伌"))
+      (should (member x (pyim-dcache-get "ce-ai" '(icode2word)))))
+    (should (equal (gethash "测㤅" pyim-dhashcache-iword2count) 76543))
+    (should (equal (gethash "测嘊" pyim-dhashcache-iword2count) 34567))
+    (should (equal (gethash "测伌" pyim-dhashcache-iword2count) 0))))
+
 ;; ** pyim-dregcache 相关单元测试
 (ert-deftest pyim-tests-pyim-general ()
   (let ((pyim-dcache-backend 'pyim-dregcache))
