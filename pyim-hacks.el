@@ -50,9 +50,9 @@ problem, so I do this ugly hack, and wait others help ...
     (setq unread-command-events
           (if (characterp key)
               (cons key unread-command-events)
-            (append (mapcan (lambda (e) (list e)))
-                    (append key nil))
-            unread-command-events))))
+            (append (mapcan (lambda (e) (list e))
+                            (append key nil))
+                    unread-command-events)))))
 
 (advice-add 'pyim-add-unread-command-events :around #'pyim-hacks-add-unread-command-events)
 
