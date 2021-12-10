@@ -48,6 +48,27 @@
 (pyim-test-add-dict "pyim-basedict.pyim")
 (pyim-dcache-init-variables)
 
+;; ** pyim-schemes 相关单元测试
+(ert-deftest pyim-test-pyim-schemes ()
+  (let ((pyim-default-scheme 'wubi))
+    (should (equal (pyim-scheme-name) 'wubi)))
+
+  (let ((pyim-default-scheme 'wuci))
+    (should (equal (pyim-scheme-name) 'quanpin)))
+
+  (let ((pyim-default-scheme 'wubi)
+        (pyim-assistant-scheme 'cangjie)
+        (pyim-assistant-scheme-enable t))
+    (should (equal (pyim-scheme-name) 'cangjie)))
+
+  (let ((pyim-default-scheme 'wubi)
+        (pyim-assistant-scheme 'cangjie)
+        (pyim-assistant-scheme-enable nil))
+    (should (equal (pyim-scheme-name) 'wubi)))
+
+  (should (equal (pyim-scheme-get-option 'quanpin :class) 'quanpin))
+  (should (equal (pyim-scheme-get-option 'wubi :class) 'xingma)))
+
 ;; ** pyim-common 相关单元测试
 (ert-deftest pyim-test-pyim-permutate-list ()
   (should (equal (pyim-permutate-list '((a b) (c d e) (f)))
