@@ -32,17 +32,14 @@
 (require 'ert)
 (require 'pyim)
 (require 'pyim-dregcache)
+(require 'pyim-dhashcache)
 
 ;; ** 单元测试前的准备工作
-(defun pyim-test-get-dicts ()
-  "当前目录下的词库."
-  (let* ((files (directory-files-recursively default-directory "\.pyim$")))
-    (mapcar (lambda (f)
-              (list :name (file-name-base f) :file f))
-            files)))
-
 (setq default-input-method "pyim")
-(setq pyim-dicts (pyim-test-get-dicts))
+(require 'pyim-basedict nil t)
+(with-eval-after-load "pyim-basedict"
+  (pyim-basedict-enable))
+
 (pyim-dcache-init-variables)
 
 ;; ** pyim-common 相关单元测试
