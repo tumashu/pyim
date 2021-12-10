@@ -44,6 +44,10 @@
 (require 'pyim-cstring)
 (require 'pyim-magic)
 
+(defgroup pyim-process nil
+  "Process for pyim."
+  :group 'pyim)
+
 (defcustom pyim-english-input-switch-functions nil
   "让 pyim 开启英文输入功能.
 
@@ -95,7 +99,7 @@
    pyim-process-translating
    pyim-process-last-created-word))
 
-(defun pyim-process-init-dcaches (&optional force save-caches)
+(defun pyim-process-init-dcaches (&optional force)
   "PYIM 流程，词库相关的初始化工作。"
   (pyim-recreate-local-variables)
   (pyim-pymap-cache-create)

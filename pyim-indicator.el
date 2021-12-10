@@ -165,8 +165,7 @@ timer 实现。"
 (defun pyim-indicator-with-posframe (input-method chinese-input-p)
   "Pyim 自带的 indicator, 通过 posframe 来显示输入状态。"
   (when (posframe-workable-p)
-    (let ((buffer " *pyim-indicator*")
-          (posframe-mouse-banish nil))
+    (let ((buffer " *pyim-indicator*"))
       (if (not (equal input-method "pyim"))
           (posframe-delete buffer)
         (if chinese-input-p
