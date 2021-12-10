@@ -18,4 +18,4 @@ deps:
 
 .PHONY: test
 test: deps clean
-	@$(EMACS) -batch -Q -L . -l deps/xr.el -l deps/async.el -l deps/popup.el -l deps/pyim-basedict.el -l pyim.el -l tests/pyim-tests.el
+	@$(EMACS) -batch -Q -L . -l deps/xr.el -l deps/async.el -l deps/popup.el -l pyim.el -l deps/pyim-basedict.el -l tests/pyim-tests.el
