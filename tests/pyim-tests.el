@@ -98,7 +98,7 @@
         (limit 0.1))
     (pyim-time-limit-while t limit
       t)
-    (should (< (float-time (time-since time)) (* limit 1.5)))))
+    (should (< (float-time (time-since time)) (* limit 2)))))
 
 ;; ** pyim-pymap 相关单元测试
 (ert-deftest pyim-tests-pyim-pymap ()
