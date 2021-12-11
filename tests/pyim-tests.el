@@ -70,6 +70,17 @@
   (should (equal (pyim-scheme-get-option 'wubi :class) 'xingma)))
 
 ;; ** pyim-common 相关单元测试
+(ert-deftest pyim-tests-pyim-dline-parse ()
+  (with-temp-buffer
+    (insert "ni-hao 你好")
+    (should (equal (pyim-dline-parse) '("ni-hao" "你好"))))
+  (with-temp-buffer
+    (insert "a-b-c-d")
+    (should (equal (pyim-dline-parse "-") '("a" "b" "c" "d"))))
+  (with-temp-buffer
+    (insert "你好 2")
+    (should (equal (pyim-dline-parse) '("你好" "2")))))
+
 (ert-deftest pyim-tests-pyim-permutate-list ()
   (should (equal (pyim-permutate-list '((a b) (c d e) (f)))
                  '((a c f)
