@@ -116,6 +116,15 @@
                  '("a-b-c-d" "a-b-c" "a-b")))
   (should (equal (pyim-subconcat nil) nil)))
 
+(ert-deftest pyim-tests-pyim-string-distance ()
+  (should (equal (pyim-string-distance "nihaoma" "nihaoma") 0))
+  (should (equal (pyim-string-distance "nihaoma" "nhm") 4))
+  (should (equal (pyim-string-distance "nihaoma" "niham") 2))
+  (should (equal (pyim-string-distance "nihaoma" "nbm") 5))
+  (should (equal (pyim-string-distance "nihaoma" "wbc") 7))
+  (should (equal (pyim-string-distance "nihaoma" "ni") 5))
+  (should (equal (pyim-string-distance "nihaoma" "ci") 6)))
+
 (ert-deftest pyim-tests-pyim-add-unread-command-events ()
   (let ((unread-command-events nil))
     (pyim-add-unread-command-events ?a)
