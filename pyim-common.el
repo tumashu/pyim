@@ -174,8 +174,8 @@ When CARE-FIRST-ONE is no-nil, ((a b c) (d e)) => (a d)."
   (setq unread-command-events
         (if (characterp key)
             (cons (cons 'no-record key) unread-command-events)
-          (append (mapcan (lambda (e) (list (cons 'no-record e)))
-                          (append key nil))
+          (append (cl-mapcan (lambda (e) (list (cons 'no-record e)))
+                             (append key nil))
                   unread-command-events))))
 
 ;; Fork from `company-dabbrev--time-limit-while' in company-mode."
