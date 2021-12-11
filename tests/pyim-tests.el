@@ -70,6 +70,18 @@
   (should (equal (pyim-scheme-get-option 'wubi :class) 'xingma)))
 
 ;; ** pyim-common 相关单元测试
+(ert-deftest pyim-tests-pyim-char-before/after-to-string ()
+  (with-temp-buffer
+    (insert "你好世界abc")
+    (print (pyim-char-before-to-string 0))
+    (should (equal (pyim-char-before-to-string 0) "c"))
+    (should (equal (pyim-char-before-to-string 1) "b"))
+    (backward-char 5)
+    (should (equal (pyim-char-before-to-string 0) "好"))
+    (should (equal (pyim-char-before-to-string 1) "你"))
+    (should (equal (pyim-char-after-to-string 0) "世"))
+    (should (equal (pyim-char-after-to-string 1) "界"))))
+
 (ert-deftest pyim-tests-pyim-dline-parse ()
   (with-temp-buffer
     (insert "ni-hao 你好")
