@@ -612,6 +612,33 @@
     (should (equal (pyim-dhashcache-get-path 'hello) "/tmp/dcache/hello"))
     (should (equal (pyim-dhashcache-get-path "hello") nil))))
 
+(ert-deftest pyim-tests-pyim-dhashcache-generate-file ()
+  (let ((dist-file (make-temp-file "pyim-dist-"))
+        (dcache-file (make-temp-file "pyim-dcache-"))
+        (word2code-dcache-file (make-temp-file "pyim-word2code-dcache-"))
+        output1 output2)
+    (with-temp-buffer
+      (insert ";; -*- coding: utf-8 -*--
+a 阿 啊 呵 腌 吖 嗄 锕 錒
+a-a 啊啊
+zuo-zuo-ye 做作业
+zuo-zuo-you-mang 作作有芒")
+      (write-region (point-min) (point-max) dist-file))
+    (pyim-dhashcache-generate-dcache-file (list dist-file) dcache-file)
+    (with-temp-buffer
+      (insert-file-contents dcache-file)
+      (setq output1 (read (current-buffer)))
+      (pyim-dhashcache-generate-word2code-dcache-file output1 word2code-dcache-file))
+    (with-temp-buffer
+      (insert-file-contents word2code-dcache-file)
+      (setq output2 (read (current-buffer))))
+
+    (should (equal (gethash "a" output1) '("阿" "啊" "呵" "腌" "吖" "嗄" "锕" "錒")))
+    (should (equal (gethash "a-a" output1) '("啊啊")))
+    (should (equal (gethash "zuo-zuo-you-mang" output1) '("作作有芒")))
+    (should (equal (gethash "啊" output2) '("a")))
+    (should (equal (gethash "啊啊" output2) nil))))
+
 ;; ** pyim-dregcache 相关单元测试
 (ert-deftest pyim-tests-pyim-general ()
   (let ((pyim-dcache-backend 'pyim-dregcache))
