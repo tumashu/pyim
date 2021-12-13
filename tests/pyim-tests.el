@@ -596,6 +596,17 @@
     (should (equal (gethash "测嘊" pyim-dhashcache-iword2count) 34567))
     (should (equal (gethash "测伌" pyim-dhashcache-iword2count) 0))))
 
+;; ** pyim-dhashcache 相关单元测试
+(ert-deftest pyim-tests-pyim-dhashcache-get-shortcode ()
+  (should (equal (pyim-dhashcache-get-shortcode ".abcde")
+                 '(".abcd" ".abc" ".ab")))
+  (should (equal (pyim-dhashcache-get-shortcode "wubi/abcde")
+                 '("wubi/abcd" "wubi/abc" "wubi/ab")))
+  (should (equal (pyim-dhashcache-get-shortcode "abcde")
+                 '("abcd" "abc" "ab")))
+  (should (equal (pyim-dhashcache-get-shortcode "ni-hao") nil))
+  (should (equal (pyim-dhashcache-get-shortcode "") nil)))
+
 ;; ** pyim-dregcache 相关单元测试
 (ert-deftest pyim-tests-pyim-general ()
   (let ((pyim-dcache-backend 'pyim-dregcache))
