@@ -566,9 +566,9 @@
 
 ;; ** pyim-import 相关单元测试
 (ert-deftest pyim-tests-pyim-import-words-and-counts ()
-  ;; 这个测试目前主要用于手工测试，在 github 上这个测试无法通过的。
-  :expected-result :failed
-  (let ((file (make-temp-file "pyim-tests-import")))
+  (let ((pyim-dcache-directory
+         (file-name-as-directory (make-temp-name "pyim-dcache-")))
+        (file (make-temp-file "pyim-tests-import")))
     ;; 删除测试用词条
     (dolist (x '("测㤅" "测嘊" "测伌"))
       (pyim-process-delete-word x))
