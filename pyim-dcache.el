@@ -288,7 +288,8 @@ scheme 中的 :code-prefix-history 信息。"
 
 当词库文件加载完成后，pyim 就可以用这个函数从词库缓存中搜索某个
 code 对应的中文词条了."
-  (pyim-dcache-call-api 'get code from))
+  `(,@(pyim-dcache-call-api 'get code from)
+    ,@(pyim-pymap-py2cchar-get code t t)))
 
 ;; ** 分割 code
 (defun pyim-dcache-code-split (code)

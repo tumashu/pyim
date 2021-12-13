@@ -731,6 +731,18 @@ zuo-zuo-you-mang 作作有芒")
 yin-xing 因行
 ")))))
 
+(ert-deftest pyim-tests-pyim-dhashcache-get ()
+  (let ((pyim-dhashcache-code2word (make-hash-table :test #'equal))
+        (pyim-dhashcache-icode2word (make-hash-table :test #'equal)))
+
+    (puthash "ni-hao" '("呢耗") pyim-dhashcache-icode2word)
+    (puthash "ni-hao" '("你好") pyim-dhashcache-code2word)
+
+    (should (equal (pyim-dhashcache-get "ni-hao" '(code2word)) '("你好")))
+    (should (equal (pyim-dhashcache-get "ni-hao" '(icode2word)) '("呢耗")))
+    (should (equal (pyim-dhashcache-get "ni-hao" '(code2word icode2word)) '("你好" "呢耗")))
+    (should (equal (pyim-dhashcache-get "ni-hao") '("呢耗" "你好")))))
+
 ;; ** pyim-dregcache 相关单元测试
 (ert-deftest pyim-tests-pyim-general ()
   (let ((pyim-dcache-backend 'pyim-dregcache))

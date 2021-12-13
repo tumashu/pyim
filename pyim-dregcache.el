@@ -281,8 +281,7 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
             (setq result (append (pyim-dregcache-get-1 content code) result)))))
       ;; `push' plus `nreverse' is more efficient than `add-to-list'
       ;; Many examples exist in Emacs' own code
-      (setq result (nreverse result))
-      `(,@result ,@(pyim-pymap-py2cchar-get code t t)))))
+      (nreverse result))))
 
 (defun pyim-dregcache-get-icode2word-ishortcode2word (code)
   "以 CODE 搜索个人词和个人联想词.  正则表达式搜索词库,不需要为联想词开单独缓存."

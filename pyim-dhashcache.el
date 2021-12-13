@@ -302,7 +302,7 @@ code 对应的中文词条了。
              (value (and cache (gethash code cache))))
         (when value
           (setq result (append result value)))))
-    `(,@result ,@(pyim-pymap-py2cchar-get code t t))))
+    result))
 
 (defun pyim-dhashcache-update-icode2word (&optional force)
   "对 personal 缓存中的词条进行排序，加载排序后的结果.
