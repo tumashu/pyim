@@ -66,10 +66,10 @@
   "获取一个 CODE 的所有简写.
 
 比如：.nihao -> .nihao .niha .nih .ni .n"
-  (when (and (> (length code) 0)
-             (not (string-match-p "-" code)))
-    (let* ((x (pyim-dcache-code-split code))
-           (prefix (nth 0 x))
+  (when (and (pyim-string-match-p "/" code)
+             (not (pyim-string-match-p "-" code)))
+    (let* ((x (split-string code "/"))
+           (prefix (concat (nth 0 x) "/"))
            (code1 (nth 1 x))
            (n (length code1))
            results)
@@ -256,6 +256,7 @@ DCACHE 是一个 code -> words 的 hashtable.
        (lambda (_)
          (pyim-dcache-set-variable 'pyim-dhashcache-code2word t)
          (pyim-dcache-set-variable 'pyim-dhashcache-word2code t)
+         (pyim-dhashcache-update-shortcode2word force)
          (setq pyim-dhashcache-update-code2word-running-p nil))))))
 
 (defun pyim-dhashcache-export (dcache file &optional confirm)
@@ -328,7 +329,8 @@ code 对应的中文词条了。
         (pyim-dcache-save-variable 'pyim-dhashcache-icode2word)
         nil)
      (lambda (_)
-       (pyim-dcache-set-variable 'pyim-dhashcache-icode2word t)))))
+       (pyim-dcache-set-variable 'pyim-dhashcache-icode2word t)
+       (pyim-dhashcache-update-ishortcode2word force)))))
 
 (defun pyim-dhashcache-upgrade-icode2word ()
   "升级 icode2word 缓存。"
@@ -361,8 +363,7 @@ code 对应的中文词条了。
            pyim-dhashcache-icode2word))))))
 
 (defun pyim-dhashcache-update-personal-words (&optional force)
-  (pyim-dhashcache-update-icode2word force)
-  (pyim-dhashcache-update-ishortcode2word force))
+  (pyim-dhashcache-update-icode2word force))
 
 (defun pyim-dhashcache-init-variables ()
   "初始化 dcache 缓存相关变量."

@@ -598,12 +598,10 @@
 
 ;; ** pyim-dhashcache 相关单元测试
 (ert-deftest pyim-tests-pyim-dhashcache-get-shortcode ()
-  (should (equal (pyim-dhashcache-get-shortcode ".abcde")
-                 '(".abcd" ".abc" ".ab")))
+  (should (equal (pyim-dhashcache-get-shortcode ".abcde") nil))
   (should (equal (pyim-dhashcache-get-shortcode "wubi/abcde")
                  '("wubi/abcd" "wubi/abc" "wubi/ab")))
-  (should (equal (pyim-dhashcache-get-shortcode "abcde")
-                 '("abcd" "abc" "ab")))
+  (should (equal (pyim-dhashcache-get-shortcode "abcde") nil))
   (should (equal (pyim-dhashcache-get-shortcode "ni-hao") nil))
   (should (equal (pyim-dhashcache-get-shortcode "") nil)))
 

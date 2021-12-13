@@ -207,9 +207,7 @@ non-nil，文件存在时将会提示用户是否覆盖，默认为覆盖模式"
 如果 FORCE 为真，强制加载。"
   (pyim-dcache-init-variables)
   (pyim-dcache-update-personal-words force)
-  (pyim-dcache-update-code2word force)
-  ;; 这个命令 *当前* 主要用于五笔输入法。
-  (pyim-dcache-update-shortcode2word force))
+  (pyim-dcache-update-code2word force))
 
 (defun pyim-dcache-update-code2word (&optional force)
   "读取并加载词库.
@@ -290,25 +288,6 @@ scheme 中的 :code-prefix-history 信息。"
 code 对应的中文词条了."
   `(,@(pyim-dcache-call-api 'get code from)
     ,@(pyim-pymap-py2cchar-get code t t)))
-
-;; ** 分割 code
-(defun pyim-dcache-code-split (code)
-  "将 CODE 分成 code-prefix 和 rest code."
-  (cond
-   ;; 处理 nil
-   ((not code) nil)
-   ;; 兼容性代码：旧版本的 pyim 使用一个标点符号作为 code-prefix
-   ((pyim-string-match-p "^[[:punct:]]" code)
-    (list (substring code 0 1) (substring code 1)))
-   ;; 拼音输入法不使用 code-prefix, 并且包含 -
-   ((pyim-string-match-p "-" code)
-    (list "" code))
-   ((not (pyim-string-match-p "[[:punct:]]" code))
-    (list "" code))
-   ;; 新 code-prefix 使用类似 "wubi/" 的格式。
-   (t (let ((x (split-string code "/")))
-        (list (concat (nth 0 x) "/")
-              (nth 1 x))))))
 
 ;; * Footer
 (provide 'pyim-dcache)
