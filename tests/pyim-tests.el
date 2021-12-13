@@ -607,6 +607,11 @@
   (should (equal (pyim-dhashcache-get-shortcode "ni-hao") nil))
   (should (equal (pyim-dhashcache-get-shortcode "") nil)))
 
+(ert-deftest pyim-tests-pyim-dhashcache-get-path ()
+  (let ((pyim-dcache-directory "/tmp/dcache"))
+    (should (equal (pyim-dhashcache-get-path 'hello) "/tmp/dcache/hello"))
+    (should (equal (pyim-dhashcache-get-path "hello") nil))))
+
 ;; ** pyim-dregcache 相关单元测试
 (ert-deftest pyim-tests-pyim-general ()
   (let ((pyim-dcache-backend 'pyim-dregcache))
