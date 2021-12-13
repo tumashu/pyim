@@ -10,3 +10,5 @@ deps/
 *.elc
 /pyim-autoloads.el
 /pyim-pkg.el
+/pyim-dcache-*
+/tests/pyim-dcache-*

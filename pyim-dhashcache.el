@@ -139,34 +139,38 @@
         (require 'pyim-dhashcache)
         (pyim-dcache-set-variable 'pyim-dhashcache-code2word)
         (pyim-dcache-set-variable 'pyim-dhashcache-iword2count)
-        (setq pyim-dhashcache-shortcode2word
-              (make-hash-table :test #'equal))
-        (maphash
-         (lambda (key value)
-           (dolist (x (pyim-dhashcache-get-shortcode key))
-             (puthash x
-                      (mapcar
-                       (lambda (word)
-                         ;; 这个地方的代码用于实现五笔 code 自动提示功能，
-                         ;; 比如输入 'aa' 后得到选词框：
-                         ;; ----------------------
-                         ;; | 1. 莁aa 2.匶wv ... |
-                         ;; ----------------------
-                         (if (get-text-property 0 :comment word)
-                             word
-                           (propertize word :comment (substring key (length x)))))
-                       (delete-dups `(,@value ,@(gethash x pyim-dhashcache-shortcode2word))))
-                      pyim-dhashcache-shortcode2word)))
-         pyim-dhashcache-code2word)
-        (maphash
-         (lambda (key value)
-           (puthash key (pyim-dhashcache-sort-words value)
-                    pyim-dhashcache-shortcode2word))
-         pyim-dhashcache-shortcode2word)
-        (pyim-dcache-save-variable 'pyim-dhashcache-shortcode2word)
-        nil)
+        (pyim-dhashcache-update-shortcode2word-1))
      (lambda (_)
        (pyim-dcache-set-variable 'pyim-dhashcache-shortcode2word t)))))
+
+(defun pyim-dhashcache-update-shortcode2word-1 ()
+  "`pyim-dhashcache-update-shortcode2word' 的内部函数"
+  (setq pyim-dhashcache-shortcode2word
+        (make-hash-table :test #'equal))
+  (maphash
+   (lambda (key value)
+     (dolist (x (pyim-dhashcache-get-shortcode key))
+       (puthash x
+                (mapcar
+                 (lambda (word)
+                   ;; 这个地方的代码用于实现五笔 code 自动提示功能，
+                   ;; 比如输入 'aa' 后得到选词框：
+                   ;; ----------------------
+                   ;; | 1. 莁aa 2.匶wv ... |
+                   ;; ----------------------
+                   (if (get-text-property 0 :comment word)
+                       word
+                     (propertize word :comment (substring key (length x)))))
+                 (delete-dups `(,@(gethash x pyim-dhashcache-shortcode2word) ,@value)))
+                pyim-dhashcache-shortcode2word)))
+   pyim-dhashcache-code2word)
+  (maphash
+   (lambda (key value)
+     (puthash key (pyim-dhashcache-sort-words value)
+              pyim-dhashcache-shortcode2word))
+   pyim-dhashcache-shortcode2word)
+  (pyim-dcache-save-variable 'pyim-dhashcache-shortcode2word)
+  nil)
 
 (defun pyim-dhashcache-get-path (variable)
   "获取保存 VARIABLE 取值的文件的路径."

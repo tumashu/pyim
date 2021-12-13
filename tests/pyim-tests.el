@@ -639,6 +639,37 @@ zuo-zuo-you-mang 作作有芒")
     (should (equal (gethash "啊" output2) '("a")))
     (should (equal (gethash "啊啊" output2) nil))))
 
+(ert-deftest pyim-tests-pyim-dhashcache-update-shortcode2word ()
+  (let ((pyim-dcache-directory (file-name-as-directory (make-temp-name "pyim-dcache-")))
+        (pyim-dhashcache-code2word (make-hash-table :test #'equal))
+        (pyim-dhashcache-iword2count (make-hash-table :test #'equal))
+        (pyim-dhashcache-shortcode2word (make-hash-table :test #'equal))
+        output)
+
+    (puthash "wubi/a" '("戈") pyim-dhashcache-code2word)
+    (puthash "wubi/aa" '("式" "藏") pyim-dhashcache-code2word)
+    (puthash "wubi/aaa" '("工") pyim-dhashcache-code2word)
+    (puthash "wubi/aaaa" '("工" "㠭") pyim-dhashcache-code2word)
+    (puthash "wubi/aaab" '("㐂") pyim-dhashcache-code2word)
+    (puthash "wubi/aaae" '("𧝣") pyim-dhashcache-code2word)
+
+    (pyim-dhashcache-update-shortcode2word-1)
+
+    (with-temp-buffer
+      (insert-file-contents (concat pyim-dcache-directory "pyim-dhashcache-shortcode2word"))
+      (setq output (read (current-buffer))))
+
+    (should (equal (gethash "wubi/aa" output)
+                   '(#("工" 0 1 (:comment "a"))
+                     #("㠭" 0 1 (:comment "aa"))
+                     #("㐂" 0 1 (:comment "ab"))
+                     #("𧝣" 0 1 (:comment "ae")))))
+    (should (equal (gethash "wubi/aaa" output)
+                   '(#("工" 0 1 (:comment "a"))
+                     #("㠭" 0 1 (:comment "a"))
+                     #("㐂" 0 1 (:comment "b"))
+                     #("𧝣" 0 1 (:comment "e")))))))
+
 ;; ** pyim-dregcache 相关单元测试
 (ert-deftest pyim-tests-pyim-general ()
   (let ((pyim-dcache-backend 'pyim-dregcache))
