@@ -692,6 +692,22 @@ zuo-zuo-you-mang 作作有芒")
     (should (equal (gethash "n" output)
                    '("你" "呢")))))
 
+(ert-deftest pyim-tests-pyim-dhashcache-put/delete ()
+  (let ((pyim-dhashcache-icode2word (make-hash-table :test #'equal)))
+    (puthash "ni-hao" '("你好" "呢耗") pyim-dhashcache-icode2word)
+    (pyim-dhashcache-put
+      pyim-dhashcache-icode2word "ni-hao"
+      (cons "呢毫" orig-value))
+    (pyim-dhashcache-put
+      pyim-dhashcache-icode2word "ni-bu-hao"
+      (list "你不好"))
+    (should (equal (gethash "ni-hao" pyim-dhashcache-icode2word) '("呢毫" "你好" "呢耗")))
+    (should (equal (gethash "ni-bu-hao" pyim-dhashcache-icode2word) '("你不好")))
+    (pyim-dhashcache-delete-word "你不好")
+    (should (equal (gethash "ni-bu-hao" pyim-dhashcache-icode2word) nil))
+    (pyim-dhashcache-delete-word "你好")
+    (should (equal (gethash "ni-hao" pyim-dhashcache-icode2word) '("呢毫" "呢耗")))))
+
 ;; ** pyim-dregcache 相关单元测试
 (ert-deftest pyim-tests-pyim-general ()
   (let ((pyim-dcache-backend 'pyim-dregcache))
