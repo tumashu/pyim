@@ -48,6 +48,8 @@
 (pyim-tests-add-dict "pyim-basedict.pyim")
 (pyim-dcache-init-variables)
 
+(defalias 'pyim-kill-emacs-hook-function #'ignore)
+
 ;; ** pyim-schemes 相关单元测试
 (ert-deftest pyim-tests-pyim-schemes ()
   (let ((pyim-default-scheme 'wubi))

@@ -233,7 +233,7 @@ pyim 是使用 `pyim-activate' 来启动输入法，这个命令主要做如下�
 2. 创建汉字到拼音和拼音到汉字的 hash table。
 3. 创建词库缓存 dcache.
 4. 运行 hook： `pyim-load-hook'。
-5. 将 `pyim-dcache-save-caches' 命令添加到 `kill-emacs-hook' , emacs 关闭
+5. 将 `pyim-kill-emacs-hook-function' 命令添加到 `kill-emacs-hook' , emacs 关闭
 之前将用户选择过的词生成的缓存和词频缓存保存到文件，供以后使用。
 6. 设定变量：
    1. `input-method-function'
@@ -259,9 +259,8 @@ pyim 使用函数 `pyim-activate' 启动输入法的时候，会将变量
 
   (run-hooks 'pyim-load-hook)
   ;; Make sure personal or other dcache are saved to file before kill emacs.
-  (add-hook 'kill-emacs-hook
-            (lambda ()
-              (pyim-process-save-dcaches t)))
+  (add-hook 'kill-emacs-hook #'pyim-kill-emacs-hook-function)
+
   (setq deactivate-current-input-method-function #'pyim-deactivate)
   ;; If we are in minibuffer, turn off the current input method
   ;; before exiting.
@@ -270,6 +269,10 @@ pyim 使用函数 `pyim-activate' 启动输入法的时候，会将变量
   (run-hooks 'pyim-activate-hook)
   (setq-local input-method-function #'pyim-input-method)
   nil)
+
+(defun pyim-kill-emacs-hook-function ()
+  "Pyim function which is used in `kill-emacs-hook'."
+  (pyim-process-save-dcaches t))
 
 ;; ** 取消激活功能
 (define-obsolete-function-alias 'pyim-inactivate 'pyim-deactivate "4.0.0")
