@@ -670,6 +670,28 @@ zuo-zuo-you-mang 作作有芒")
                      #("㐂" 0 1 (:comment "b"))
                      #("𧝣" 0 1 (:comment "e")))))))
 
+(ert-deftest pyim-tests-pyim-dhashcache-update-ishortcode2word ()
+  (let ((pyim-dcache-directory (file-name-as-directory (make-temp-name "pyim-dcache-")))
+        (pyim-dhashcache-icode2word (make-hash-table :test #'equal))
+        (pyim-dhashcache-iword2count (make-hash-table :test #'equal))
+        (pyim-dhashcache-ishortcode2word (make-hash-table :test #'equal))
+        output)
+
+    (puthash "ni" '("你" "呢") pyim-dhashcache-icode2word)
+    (puthash "ni-hao" '("你好" "呢耗") pyim-dhashcache-icode2word)
+    (puthash "ni-huai" '("你坏") pyim-dhashcache-icode2word)
+
+    (pyim-dhashcache-update-ishortcode2word-1)
+
+    (with-temp-buffer
+      (insert-file-contents (concat pyim-dcache-directory "pyim-dhashcache-ishortcode2word"))
+      (setq output (read (current-buffer))))
+
+    (should (equal (gethash "n-h" output)
+                   '("你好" "呢耗" "你坏")))
+    (should (equal (gethash "n" output)
+                   '("你" "呢")))))
+
 ;; ** pyim-dregcache 相关单元测试
 (ert-deftest pyim-tests-pyim-general ()
   (let ((pyim-dcache-backend 'pyim-dregcache))

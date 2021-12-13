@@ -99,30 +99,34 @@
         (require 'pyim-dhashcache)
         (pyim-dcache-set-variable 'pyim-dhashcache-icode2word)
         (pyim-dcache-set-variable 'pyim-dhashcache-iword2count)
-        (setq pyim-dhashcache-ishortcode2word
-              (make-hash-table :test #'equal))
-        (maphash
-         (lambda (key value)
-           (when (and (> (length key) 0)
-                      (not (string-match-p "[^a-z-]" key)))
-             (let* ((newkey (mapconcat
-                             (lambda (x)
-                               (substring x 0 1))
-                             (split-string key "-") "-")))
-               (puthash newkey
-                        (delete-dups
-                         `(,@value
-                           ,@(gethash newkey pyim-dhashcache-ishortcode2word)))
-                        pyim-dhashcache-ishortcode2word))))
-         pyim-dhashcache-icode2word)
-        (maphash
-         (lambda (key value)
-           (puthash key (pyim-dhashcache-sort-words value)
-                    pyim-dhashcache-ishortcode2word))
-         pyim-dhashcache-ishortcode2word)
-        (pyim-dcache-save-variable 'pyim-dhashcache-ishortcode2word))
+        (pyim-dhashcache-update-ishortcode2word-1))
      (lambda (_)
        (pyim-dcache-set-variable 'pyim-dhashcache-ishortcode2word t)))))
+
+(defun pyim-dhashcache-update-ishortcode2word-1 ()
+  "`pyim-dhashcache-update-ishortcode2word' 内部函数."
+  (setq pyim-dhashcache-ishortcode2word
+        (make-hash-table :test #'equal))
+  (maphash
+   (lambda (key value)
+     (when (and (> (length key) 0)
+                (not (string-match-p "[^a-z-]" key)))
+       (let* ((newkey (mapconcat
+                       (lambda (x)
+                         (substring x 0 1))
+                       (split-string key "-") "-")))
+         (puthash newkey
+                  (delete-dups
+                   `(,@(gethash newkey pyim-dhashcache-ishortcode2word)
+                     ,@value))
+                  pyim-dhashcache-ishortcode2word))))
+   pyim-dhashcache-icode2word)
+  (maphash
+   (lambda (key value)
+     (puthash key (pyim-dhashcache-sort-words value)
+              pyim-dhashcache-ishortcode2word))
+   pyim-dhashcache-ishortcode2word)
+  (pyim-dcache-save-variable 'pyim-dhashcache-ishortcode2word))
 
 (defun pyim-dhashcache-update-shortcode2word (&optional force)
   "使用 `pyim-dhashcache-code2word' 中的词条，创建简写 code 词库缓存并加载.
