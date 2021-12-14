@@ -126,19 +126,18 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
         (insert ";; Local\sVariables:\n") ;Use \s to avoid a false positive!
         (insert ";; coding: utf-8-unix\n")
         (insert ";; End:")
+        ;; 使用 read 读取一下当前 buffer，读取没问题后再保存到 dcache 文件，因
+        ;; 为我发现保存的词库文件偶尔会出现 "..." 这样的字符串，可能是 print1
+        ;; abbreviating 导致的，但暂时没有发现原因，这个问题非常严重，会导致词
+        ;; 库损坏，用户自定义词条丢失。
         (goto-char (point-min))
-        (let ((save-silently t))
-          ;; 使用 read 读取一下当前 buffer，读取没问题后再保存到 dcache 文件，因
-          ;; 为我发现保存的词库文件偶尔会出现 "..." 这样的字符串，可能是 print1
-          ;; abbreviating 导致的，但暂时没有发现原因，这个问题非常严重，会导致词
-          ;; 库损坏，用户自定义词条丢失。
-          (if (ignore-errors (read (current-buffer)))
-              (pyim-dcache-write-file file)
-            ;; 如果词库内容有问题，就保存到 dump 文件，这样用户可以通过 dump 文
-            ;; 件发现问题原因，需要注意的是，这个操作会丢失当前 sesson 的自定义
-            ;; 词条内容。
-            (message "PYIM: %S 保存出错，执行 dump 操作！" file)
-            (pyim-dcache-write-file dump-file)))))))
+        (if (ignore-errors (read (current-buffer)))
+            (pyim-dcache-write-file file)
+          ;; 如果词库内容有问题，就保存到 dump 文件，这样用户可以通过 dump 文
+          ;; 件发现问题原因，需要注意的是，这个操作会丢失当前 sesson 的自定义
+          ;; 词条内容。
+          (message "PYIM: %S 保存出错，执行 dump 操作！" file)
+          (pyim-dcache-write-file dump-file))))))
 
 (defun pyim-dcache-get-value-from-file (file)
   "读取保存到 FILE 里面的 value."
