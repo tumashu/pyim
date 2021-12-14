@@ -742,6 +742,22 @@ yin-xing 因行
     (should (equal (pyim-dhashcache-get "ni-hao" '(code2word icode2word)) '("你好" "呢耗")))
     (should (equal (pyim-dhashcache-get "ni-hao") '("呢耗" "你好")))))
 
+(ert-deftest pyim-tests-pyim-dhashcache-insert-word-into-icode2word ()
+  (let ((pyim-dhashcache-icode2word (make-hash-table :test #'equal)))
+    (pyim-dhashcache-insert-word-into-icode2word "你好" "ni-hao" t)
+    (pyim-dhashcache-insert-word-into-icode2word "你耗" "ni-hao" t)
+    (pyim-dhashcache-insert-word-into-icode2word "你豪" "ni-hao" nil)
+    (should (equal (gethash "ni-hao" pyim-dhashcache-icode2word)
+                   '("你耗" "你好" "你豪")))))
+
+(ert-deftest pyim-tests-pyim-dhashcache-insert-word-into-ishortcode2word ()
+  (let ((pyim-dhashcache-ishortcode2word (make-hash-table :test #'equal)))
+    (pyim-dhashcache-insert-word-into-ishortcode2word "你好" "ni-hao" t)
+    (pyim-dhashcache-insert-word-into-ishortcode2word "你慌" "ni-huang" t)
+    (pyim-dhashcache-insert-word-into-ishortcode2word "你坏" "ni-huai" nil)
+    (should (equal (gethash "n-h" pyim-dhashcache-ishortcode2word)
+                   '("你慌" "你好" "你坏")))))
+
 ;; ** pyim-dregcache 相关单元测试
 (ert-deftest pyim-tests-pyim-general ()
   (let ((pyim-dcache-backend 'pyim-dregcache))
