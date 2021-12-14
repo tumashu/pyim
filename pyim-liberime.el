@@ -205,7 +205,7 @@
              (not (cl-find-if-not #'stringp codes))
              (not (cl-find-if-not #'stringp words)))
     (liberime-clear-composition)
-    (dolist (key (string-to-list (mapconcat #'identity codes "")))
+    (dolist (key (string-to-list (string-join codes)))
       (liberime-process-key key))
     (let (word)
       (while (setq word (pop words))
@@ -236,13 +236,12 @@ Please see: https://github.com/rime/librime/issues/349"
   (cond
    ;; 处理基于语音的输入法，比如：拼音，这类输入法 preedit 一般用空格
    ;; 分隔，与汉字一一对应。
-   ((string-match-p
-     (mapconcat #'identity
-                '("pinyin" "luna" "terra" "bopomofo" "stenotype"
-                  "jyut6ping3" "wugniu" "soutzoe" "zyenpheng"
-                  "sampheng" "clover")
-                "\\|")
-     (alist-get 'schema_id (liberime-get-status)))
+   ((string-match-p (string-join
+                     '("pinyin" "luna" "terra" "bopomofo" "stenotype"
+                       "jyut6ping3" "wugniu" "soutzoe" "zyenpheng"
+                       "sampheng" "clover")
+                     "\\|")
+                    (alist-get 'schema_id (liberime-get-status)))
     (unless (liberime-get-preedit)
       (liberime-search input 1))
     (let* ((n (length word))
@@ -257,11 +256,8 @@ Please see: https://github.com/rime/librime/issues/349"
             (setq i 0)
           (setq i (- i 1))))
       str))
-   ((string-match-p
-     (mapconcat #'identity
-                '("wubi86" "wubi98")
-                "\\|")
-     (alist-get 'schema_id (liberime-get-status)))
+   ((string-match-p (string-join '("wubi86" "wubi98") "\\|")
+                    (alist-get 'schema_id (liberime-get-status)))
     (let ((lst (split-string (liberime-get-preedit) "[ ']+"))
           (str "")
           words)

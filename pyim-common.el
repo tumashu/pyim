@@ -126,7 +126,7 @@ When CARE-FIRST-ONE is no-nil, ((a b c) (d e)) => (a d)."
         output)
     (dotimes (i (- n 1))
       (let ((list (cl-subseq list 0 (- n i))))
-        (push (mapconcat #'identity list (or sep "")) output)))
+        (push (string-join list (or sep "")) output)))
     (nreverse output)))
 
 (defun pyim-char-before-to-string (num)

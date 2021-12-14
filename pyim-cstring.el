@@ -176,7 +176,7 @@ CHINESE-STRING 分词，得到一个词条 alist，这个 alist 的元素都是�
         (push (or separator " ") result))
       (push (substring chinese-string i (1+ i)) result))
     (setq result (nreverse result))
-    (mapconcat #'identity result "")))
+    (string-join result)))
 
 (defun pyim-cstring-split-buffer ()
   "将一个 buffer 中的中文文章，进行分词操作。"
@@ -259,7 +259,7 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
                              pinyins-list))))
         (if return-list
             list
-          (mapconcat #'identity list " "))))))
+          (string-join list " "))))))
 
 ;;;###autoload
 (defalias 'pyim-hanzi2pinyin-simple 'pyim-cstring-to-pinyin-simple)

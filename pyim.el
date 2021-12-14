@@ -526,12 +526,10 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
          ;; pyim-imobjs 包含 *pyim-entered-buffer* 里面光标前面的字符
          ;; 串，通过与 selected-word 做比较，获取光标前未转换的字符串。
          ;; to-be-translated.
-         (to-be-translated (mapconcat #'identity
-                                      (mapcar
-                                       (lambda (w)
-                                         (concat (nth 2 w) (nth 3 w)))
-                                       (nthcdr length-selected-word imobj))
-                                      "")))
+         (to-be-translated
+          (string-join (mapcar (lambda (w)
+                                 (concat (nth 2 w) (nth 3 w)))
+                               (nthcdr length-selected-word imobj)))))
     ;; 大体来说，entered 字符串可以分解为三个部分：
 
     ;; 1. 光标前字符串

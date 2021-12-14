@@ -58,20 +58,20 @@
 
 (defconst pyim-pinyin-shuangpin-invalid-pinyin-regexp
   (format "^\\(%s\\)$"
-          (mapconcat #'identity
-                     '("[qtghkzcsdn]o"
-                       "[ypfbmw]uo"
-                       "[qj]ong"
-                       "[rtysdghklzcn]iong"
-                       "[qtypdjlxbnm]uai"
-                       "[ghk]ing?"
-                       "[qjlxn]uang"
-                       "[dgh]iang"
-                       "[qjlx]ua"
-                       "[hkg]ia"
-                       "[rtsdghkzc]v"
-                       "[jl]ui")
-                     "\\|"))
+          (string-join
+           '("[qtghkzcsdn]o"
+             "[ypfbmw]uo"
+             "[qj]ong"
+             "[rtysdghklzcn]iong"
+             "[qtypdjlxbnm]uai"
+             "[ghk]ing?"
+             "[qjlxn]uang"
+             "[dgh]iang"
+             "[qjlx]ua"
+             "[hkg]ia"
+             "[rtsdghkzc]v"
+             "[jl]ui")
+           "\\|"))
   "双拼可能自动产生的无效拼音. 例如输入 kk 得到有效拼音 kuai .
 但同时产生了无效拼音 king .  用户手动输入的无效拼音无需考虑.
 因为用户有即时界面反馈,不可能连续输入无效拼音.")

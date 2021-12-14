@@ -137,9 +137,7 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
                   imobjs))
                 (regexp
                  (when regexp-list
-                   (mapconcat #'identity
-                              (delq nil regexp-list)
-                              "\\|")))
+                   (string-join (delq nil regexp-list) "\\|")))
                 (regexp
                  (if chinese-only
                      regexp
@@ -187,21 +185,21 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
                                         first-equal _all-equal code-prefix)
   "从 IMOBJ 创建一个搜索中文的 regexp."
   (cl-flet ((build-regexp
-             (list)
-             (let* ((n (apply #'max (mapcar #'length list)))
-                    results)
-               (dotimes (i n)
-                 (push (format "[%s]%s"
-                               (mapconcat
-                                (lambda (x)
-                                  (if (> i (- (length x) 1))
-                                      ""
-                                    (char-to-string
-                                     (elt x i))))
-                                list "")
-                               (if (> i 0) "?" ""))
-                       results))
-               (mapconcat #'identity (reverse results) ""))))
+              (list)
+              (let* ((n (apply #'max (mapcar #'length list)))
+                     results)
+                (dotimes (i n)
+                  (push (format "[%s]%s"
+                                (mapconcat
+                                 (lambda (x)
+                                   (if (> i (- (length x) 1))
+                                       ""
+                                     (char-to-string
+                                      (elt x i))))
+                                 list "")
+                                (if (> i 0) "?" ""))
+                        results))
+                (string-join (reverse results)))))
     (let ((regexp (mapconcat
                    (lambda (x)
                      (let ((code (concat (or code-prefix "")

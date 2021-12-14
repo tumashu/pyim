@@ -843,10 +843,9 @@ If FORCE is non-nil, FORCE build."
   (let (pymap)
     (dolist (py pyim-pymap)
       (push (list (car py)
-                  (mapconcat #'identity
-                             (sort (split-string (cadr py) "")
-                                   #'pyim-pymap-cchar<)
-                             ""))
+                  (string-join
+                   (sort (split-string (cadr py) "")
+                         #'pyim-pymap-cchar<)))
             pymap))
     (reverse pymap)))
 
@@ -886,13 +885,12 @@ If FORCE is non-nil, FORCE build."
                                       'sep t))
                         (list 4000 7000 n)))
                  (string
-                  (mapconcat #'identity
-                             (mapcar (lambda (str)
-                                       (if (get-text-property 0 'sep str)
-                                           "|"
-                                         str))
-                                     (sort (append seps value) #'pyim-pymap-cchar<))
-                             "")))
+                  (string-join
+                   (mapcar (lambda (str)
+                             (if (get-text-property 0 'sep str)
+                                 "|"
+                               str))
+                           (sort (append seps value) #'pyim-pymap-cchar<)))))
             (insert (format "(%S %S)\n" key string))))
         hash-table)
        (sort-lines nil (point-min) (point-max))

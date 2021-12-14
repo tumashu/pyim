@@ -89,7 +89,7 @@
         ;; ((string-match "^\\([a-z]+ \\|[a-z]+-[a-z]+ \\|[a-z]+-[a-z]+-[a-z]+ \\)\\(.*\\)" l)
         (let* ((pinyin (match-string 1 l))
                (words (pyim-dregcache-sort-words (split-string (match-string 2 l) " "))))
-          (insert (format "%s\n" (concat pinyin (mapconcat #'identity words " "))))))
+          (insert (format "%s\n" (concat pinyin (string-join words " "))))))
        ;; 其他词
        ((string= l "")
         ;; skip empty line

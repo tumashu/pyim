@@ -186,7 +186,7 @@ If you don't like this function, set the variable to nil")
               (if (= position 0)
                   (push punct result)
                 (push (car puncts) result))))))))
-    (insert (mapconcat #'identity (reverse result) ""))
+    (insert (string-join (reverse result)))
     (backward-char rnum)))
 
 (defun pyim-punctuation-return-proper-punct (punc-list &optional before)

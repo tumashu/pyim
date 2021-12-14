@@ -518,9 +518,9 @@ alist 列表。"
 (defun pyim-process-create-code-criteria ()
   "创建 `pyim-cstring-to-code-criteria'."
   (setq pyim-cstring-to-code-criteria
-        (let ((str (mapconcat #'identity
-                              (pyim-codes-create (car (pyim-process-get-imobjs)) (pyim-scheme-name))
-                              "")))
+        (let ((str (string-join
+                    (pyim-codes-create (car (pyim-process-get-imobjs))
+                                       (pyim-scheme-name)))))
           (if (> (length pyim-cstring-to-code-criteria)
                  (length str))
               pyim-cstring-to-code-criteria

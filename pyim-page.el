@@ -295,12 +295,10 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 
 (defun pyim-page-preview-create:quanpin (&optional separator)
   (let* ((separator (or separator " "))
-         (translated (mapconcat #'identity
-                                (mapcar
-                                 (lambda (w)
-                                   (concat (nth 0 w) (nth 1 w)))
-                                 (car pyim-imobjs))
-                                separator)))
+         (translated (string-join (mapcar (lambda (w)
+                                            (concat (nth 0 w) (nth 1 w)))
+                                          (car pyim-imobjs))
+                                  separator)))
     (concat
      ;; | 显示光标位置的字符
      (pyim-entered-with-entered-buffer
@@ -340,20 +338,18 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                         (car x)))
                     keymaps))
            result))))
-    (mapconcat #'identity
-               (reverse result)
-               (or separator " "))))
+    (string-join (reverse result) (or separator " "))))
 
 (defun pyim-page-preview-create:xingma (&optional separator)
   (let* ((scheme-name (pyim-scheme-name)))
     (cl-flet* ((segment (x)
-                        (mapconcat #'identity
-                                   (car (pyim-imobjs-create x scheme-name))
-                                   (or separator " ")))
+                 (string-join
+                  (car (pyim-imobjs-create x scheme-name))
+                  (or separator " ")))
                (fmt (x)
-                    (mapconcat #'segment
-                               (split-string x "'")
-                               "'")))
+                 (mapconcat #'segment
+                            (split-string x "'")
+                            "'")))
       ;; | 显示光标位置的字符
       (pyim-process-with-entered-buffer
         (if (equal (point) (point-max))
@@ -380,9 +376,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                       'face 'pyim-page-selection))
            (format "%d.%s " i str))
          result)))
-    (mapconcat #'identity
-               (nreverse result)
-               (or separator ""))))
+    (string-join (nreverse result) (or separator ""))))
 
 (defun pyim-page-style:two-lines (page-info)
   "将 PAGE-INFO 格式化为选词框中显示的字符串.
