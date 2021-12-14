@@ -274,8 +274,8 @@ DCACHE 是一个 code -> words 的 hashtable.
             (pyim-dhashcache-generate-word2code-dcache-file dcache ,word2code-file))
           (pyim-dcache-save-value-to-file ',dicts-md5 ,code2word-md5-file))
        (lambda (_)
-         (pyim-dcache-init-variable 'pyim-dhashcache-code2word t)
-         (pyim-dcache-init-variable 'pyim-dhashcache-word2code t)
+         (pyim-dcache-update-variable 'pyim-dhashcache-code2word)
+         (pyim-dcache-update-variable 'pyim-dhashcache-word2code)
          (pyim-dhashcache-update-shortcode2word force)
          (setq pyim-dhashcache-update-code2word-running-p nil))))))
 
