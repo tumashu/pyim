@@ -416,7 +416,7 @@ code 对应的中文词条了。
        (setq ,new-value (progn ,@body))
        (puthash ,key ,new-value ,table))))
 
-(defun pyim-dhashcache-update-iword2count (word &optional _prepend wordcount-handler)
+(defun pyim-dhashcache-update-iword2count (word &optional wordcount-handler)
   "保存词频到缓存."
   (pyim-dhashcache-put
     pyim-dhashcache-iword2count word
@@ -425,7 +425,7 @@ code 对应的中文词条了。
       (funcall wordcount-handler orig-value))
      ((numberp wordcount-handler)
       wordcount-handler)
-     (t (+ (or orig-value 0) 1)))))
+     (t orig-value))))
 
 (defun pyim-dhashcache-delete-word (word)
   "将中文词条 WORD 从个人词库中删除"

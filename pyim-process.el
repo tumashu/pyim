@@ -557,7 +557,7 @@ BUG：拼音无法有效地处理多音字。"
                    (or criteria pyim-cstring-to-code-criteria))))
       ;; 保存对应词条的词频
       (when (> (length word) 0)
-        (pyim-dcache-update-wordcount word prepend wordcount-handler))
+        (pyim-dcache-update-wordcount word (or wordcount-handler #'1+)))
       ;; 添加词条到个人缓存
       (dolist (code codes)
         (unless (pyim-string-match-p "[^ a-z-]" code)
