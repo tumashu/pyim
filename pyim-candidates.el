@@ -92,9 +92,11 @@ IMOBJS 获得候选词条。"
 (defun pyim-candidates-create:quanpin (imobjs scheme-name &optional async)
   "`pyim-candidates-create' 处理全拼输入法的函数."
   (if async
-      ;; 使用当前的 entered 构建一个搜索中文的正则表达式, 然后使用这个正则表达式
-      ;; 在当前 buffer 中搜索词条。
-      (let ((str (pyim-entered-get)))
+      ;; 构建一个搜索中文的正则表达式, 然后使用这个正则表达式在当前 buffer 中搜
+      ;; 索词条。
+      (let ((str (mapconcat #'identity
+                            (pyim-codes-create (car imobjs) scheme-name)
+                            "")))
         (if (< (length str) 1)
             pyim-candidates
           ;; NOTE: 让第一个词保持不变是不是合理，有待进一步的观察。
