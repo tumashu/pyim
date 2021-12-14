@@ -84,6 +84,20 @@
           (push (concat prefix (substring code1 0 i)) results)))
       results)))
 
+(defun pyim-dhashcache-get-ishortcodes (code)
+  "获取CODE 所有的简写 ishortcodes.
+
+比如: ni-hao -> (n-h)
+
+注意事项：这个函数用于全拼输入法。"
+  (when (and (> (length code) 0)
+             (not (pyim-string-match-p "/" code))
+             (not (pyim-string-match-p "[^a-z-]" code)))
+    (list (mapconcat
+           (lambda (x)
+             (substring x 0 1))
+           (split-string code "-") "-"))))
+
 (defun pyim-dhashcache-async-inject-variables ()
   "pyim's async-inject-variables."
   (list (async-inject-variables "^load-path$")
@@ -118,17 +132,12 @@
   (let ((ishortcode2word (make-hash-table :test #'equal)))
     (maphash
      (lambda (key value)
-       (when (and (> (length key) 0)
-                  (not (string-match-p "[^a-z-]" key)))
-         (let* ((newkey (mapconcat
-                         (lambda (x)
-                           (substring x 0 1))
-                         (split-string key "-") "-")))
-           (puthash newkey
-                    (delete-dups
-                     `(,@(gethash newkey ishortcode2word)
-                       ,@value))
-                    ishortcode2word))))
+       (dolist (newkey (pyim-dhashcache-get-ishortcodes key))
+         (puthash newkey
+                  (delete-dups
+                   `(,@(gethash newkey ishortcode2word)
+                     ,@value))
+                  ishortcode2word)))
      icode2word)
     (maphash
      (lambda (key value)
@@ -446,14 +455,10 @@ code 对应的中文词条了。
 
 默认 WORD 放到已有词条的最后，如果 PREPEND 为 non-nil, WORD 将放
 到已有词条的最前面。"
-  (when (string-match-p "-" code)
+  (dolist (newcode (pyim-dhashcache-get-ishortcodes code))
     (pyim-dhashcache-put
       pyim-dhashcache-ishortcode2word
-      ;; ni-hao -> n-h
-      (mapconcat (lambda (x)
-                   (substring x 0 1))
-                 (split-string code "-")
-                 "-")
+      newcode
       (if prepend
           `(,word ,@(remove word orig-value))
         `(,@(remove word orig-value) ,word)))))

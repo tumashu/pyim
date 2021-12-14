@@ -608,6 +608,12 @@
   (should (equal (pyim-dhashcache-get-shortcodes "ni-hao") nil))
   (should (equal (pyim-dhashcache-get-shortcodes "") nil)))
 
+(ert-deftest pyim-tests-pyim-dhashcache-get-ishortcodes ()
+  (should (equal (pyim-dhashcache-get-ishortcodes "ni-hao") '("n-h")))
+  (should (equal (pyim-dhashcache-get-ishortcodes "wubi/aaaa") nil))
+  (should (equal (pyim-dhashcache-get-ishortcodes "ni") '("n")))
+  (should (equal (pyim-dhashcache-get-ishortcodes "") nil)))
+
 (ert-deftest pyim-tests-pyim-dhashcache-get-path ()
   (let ((pyim-dcache-directory "/tmp/dcache"))
     (should (equal (pyim-dhashcache-get-path 'hello) "/tmp/dcache/hello"))
