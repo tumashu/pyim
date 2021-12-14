@@ -770,7 +770,7 @@ yin-xing 因行
         words)
     (should (eq (length pyim-dregcache-cache) 0))
     ;; load dictionary
-    (pyim-dcache-update-code2word t)
+    (pyim-dcache-update t)
     ;; cache is filled
     (should (> (length pyim-dregcache-cache) 0))
 

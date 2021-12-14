@@ -206,17 +206,8 @@ non-nil，文件存在时将会提示用户是否覆盖，默认为覆盖模式"
 
 如果 FORCE 为真，强制加载。"
   (pyim-dcache-init-variables)
-  (pyim-dcache-update-personal-words force)
-  (pyim-dcache-update-code2word force))
-
-(defun pyim-dcache-update-code2word (&optional force)
-  "读取并加载词库.
-
-读取 `pyim-dicts' 和 `pyim-extra-dicts' 里面的词库文件，生成对应的
-词库缓冲文件，然后加载词库缓存。
-
-如果 FORCE 为真，强制加载。"
   (when pyim-dcache-auto-update
+    (pyim-dcache-call-api 'update-personal-words force)
     (let* ((dict-files (mapcar (lambda (x)
                                  (unless (plist-get x :disable)
                                    (plist-get x :file)))
@@ -231,12 +222,6 @@ non-nil，文件存在时将会提示用户是否覆盖，默认为覆盖模式"
                                     (list version file (nth 5 (file-attributes file 'string))))
                                   dict-files)))))
     dicts-md5))
-
-(defun pyim-dcache-update-personal-words (&optional force)
-  "更新个人缓存词库。
-如果 FORCE non-nil, 则强制更新。"
-  (when pyim-dcache-auto-update
-    (pyim-dcache-call-api 'update-personal-words force)))
 
 (defun pyim-dcache-update-iword2count (word &optional prepend wordcount-handler)
   "保存词频到缓存."
