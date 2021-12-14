@@ -216,12 +216,13 @@ non-nil，文件存在时将会提示用户是否覆盖，默认为覆盖模式"
       (pyim-dcache-call-api 'update-code2word dict-files dicts-md5 force))))
 
 (defun pyim-dcache-create-dicts-md5 (dict-files)
-  (let* ((version "v1") ;当需要强制更新 dict 缓存时，更改这个字符串。
-         (dicts-md5 (md5 (prin1-to-string
-                          (mapcar (lambda (file)
-                                    (list version file (nth 5 (file-attributes file 'string))))
-                                  dict-files)))))
-    dicts-md5))
+  "为 DICT-FILES 生成 md5 字符串。"
+  ;;当需要强制更新 dict 缓存时，更改这个字符串。
+  (let ((version "v1"))
+    (md5 (prin1-to-string
+          (mapcar (lambda (file)
+                    (list version file (nth 5 (file-attributes file 'string))))
+                  dict-files)))))
 
 (defun pyim-dcache-update-wordcount (word &optional prepend wordcount-handler)
   "保存词频到缓存."
