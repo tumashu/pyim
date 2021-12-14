@@ -223,7 +223,7 @@ non-nil，文件存在时将会提示用户是否覆盖，默认为覆盖模式"
                                   dict-files)))))
     dicts-md5))
 
-(defun pyim-dcache-update-iword2count (word &optional prepend wordcount-handler)
+(defun pyim-dcache-update-wordcount (word &optional prepend wordcount-handler)
   "保存词频到缓存."
   (pyim-dcache-call-api 'update-iword2count word prepend wordcount-handler))
 
