@@ -275,16 +275,12 @@ code-prefix)。当RETURN-LIST 设置为 t 时，返回一个 code list。"
   (when (string-match-p "^\\cc+\\'" string)
     (let* ((prefix (pyim-scheme-get-option scheme-name :code-prefix))
            (func (intern (concat "pyim-cstring-to-xingma:" (symbol-name scheme-name))))
-           (dcache-codes (cl-remove-if-not
-                          (lambda (x)
-                            (equal (nth 0 (pyim-dcache-code-split x))
-                                   prefix))
-                          (sort (cl-copy-list (pyim-dcache-call-api 'search-word-code string))
-                                (lambda (a b) (> (length a) (length b))))))
-           (codes (or (mapcar
-                       (lambda (x)
-                         (nth 1 (pyim-dcache-code-split x)))
-                       dcache-codes)
+           (dcache-codes (mapcar (lambda (x)
+                                   (when (string-prefix-p prefix x)
+                                     (string-remove-prefix prefix x)))
+                                 (sort (cl-copy-list (pyim-dcache-call-api 'search-word-code string))
+                                       (lambda (a b) (> (length a) (length b))))))
+           (codes (or (remove nil dcache-codes)
                       (and (functionp func)
                            (funcall func string scheme-name)))))
       (when codes
