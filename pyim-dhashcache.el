@@ -64,10 +64,14 @@
             (> (or (gethash a iword2count) 0)
                (or (gethash b iword2count) 0))))))
 
-(defun pyim-dhashcache-get-shortcode (code)
-  "获取一个 CODE 的所有简写.
+(defun pyim-dhashcache-get-shortcodes (code)
+  "获取 CODE 所有的 shortcodes.
 
-比如：.nihao -> .nihao .niha .nih .ni .n"
+比如：wubi/aaaa -> (wubi/aaa wubi/aa)
+
+注意事项：这个函数目前只用于五笔等型码输入法，不用于拼音输入法，
+因为拼音输入法词库太大，这样处理之后，会生成一个特别大的哈希表，
+占用太多内存资源，拼音输入法使用 ishortcode 机制。"
   (when (and (pyim-string-match-p "/" code)
              (not (pyim-string-match-p "-" code)))
     (let* ((x (split-string code "/"))
@@ -161,7 +165,7 @@
   (let ((shortcode2word (make-hash-table :test #'equal)))
     (maphash
      (lambda (key value)
-       (dolist (x (pyim-dhashcache-get-shortcode key))
+       (dolist (x (pyim-dhashcache-get-shortcodes key))
          (puthash x
                   (mapcar
                    (lambda (word)

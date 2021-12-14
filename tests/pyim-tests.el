@@ -600,13 +600,13 @@
     (should (equal (gethash "测伌" pyim-dhashcache-iword2count) 0))))
 
 ;; ** pyim-dhashcache 相关单元测试
-(ert-deftest pyim-tests-pyim-dhashcache-get-shortcode ()
-  (should (equal (pyim-dhashcache-get-shortcode ".abcde") nil))
-  (should (equal (pyim-dhashcache-get-shortcode "wubi/abcde")
+(ert-deftest pyim-tests-pyim-dhashcache-get-shortcodes ()
+  (should (equal (pyim-dhashcache-get-shortcodes ".abcde") nil))
+  (should (equal (pyim-dhashcache-get-shortcodes "wubi/abcde")
                  '("wubi/abcd" "wubi/abc" "wubi/ab")))
-  (should (equal (pyim-dhashcache-get-shortcode "abcde") nil))
-  (should (equal (pyim-dhashcache-get-shortcode "ni-hao") nil))
-  (should (equal (pyim-dhashcache-get-shortcode "") nil)))
+  (should (equal (pyim-dhashcache-get-shortcodes "abcde") nil))
+  (should (equal (pyim-dhashcache-get-shortcodes "ni-hao") nil))
+  (should (equal (pyim-dhashcache-get-shortcodes "") nil)))
 
 (ert-deftest pyim-tests-pyim-dhashcache-get-path ()
   (let ((pyim-dcache-directory "/tmp/dcache"))
