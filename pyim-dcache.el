@@ -238,13 +238,6 @@ non-nil，文件存在时将会提示用户是否覆盖，默认为覆盖模式"
   (when pyim-dcache-auto-update
     (pyim-dcache-call-api 'update-personal-words force)))
 
-(defun pyim-dcache-update-shortcode2word (&optional force)
-  "更新 shortcode2word 缓存。
-
-如果 FORCE non-nil, 则强制更新。"
-  (when pyim-dcache-auto-update
-    (pyim-dcache-call-api 'update-shortcode2word force)))
-
 (defun pyim-dcache-update-iword2count (word &optional prepend wordcount-handler)
   "保存词频到缓存."
   (pyim-dcache-call-api 'update-iword2count word prepend wordcount-handler))
