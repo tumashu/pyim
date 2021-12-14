@@ -227,10 +227,6 @@ non-nil，文件存在时将会提示用户是否覆盖，默认为覆盖模式"
   "保存词频到缓存."
   (pyim-dcache-call-api 'update-iword2count word prepend wordcount-handler))
 
-(defun pyim-dcache-search-word-code (word)
-  "搜素中文词条 WORD 对应的 code."
-  (pyim-dcache-call-api 'search-word-code word))
-
 ;; ** Dcache 加词功能
 (defun pyim-dcache-insert-word (word code prepend)
   "将词条 WORD 插入到 dcache 中。
