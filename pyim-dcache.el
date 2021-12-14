@@ -152,7 +152,8 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
 ;; ** Dcache 文件处理功能
 (defun pyim-dcache-write-file (filename &optional confirm)
   "A helper function to write dcache files."
-  (let ((coding-system-for-write 'utf-8-unix))
+  (let ((coding-system-for-write 'utf-8-unix)
+        (create-lockfiles nil))
     (when (and confirm
                (file-exists-p filename)
                ;; NS does its own confirm dialog.
