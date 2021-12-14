@@ -103,11 +103,10 @@ VARIABLE 变量，FORCE-RESTORE 设置为 t 时，强制恢复，变量原来的
                         fallback-value
                         (make-hash-table :test #'equal))))))
 
-(defun pyim-dcache-save-variable (variable &optional value)
+(defun pyim-dcache-save-variable (variable value)
   "将 VARIABLE 变量的取值保存到 `pyim-dcache-directory' 中对应文件中."
   (let ((file (expand-file-name (symbol-name variable)
-                                pyim-dcache-directory))
-        (value (or value (symbol-value variable))))
+                                pyim-dcache-directory)))
     (pyim-dcache-save-value-to-file value file)))
 
 (defun pyim-dcache-save-value-to-file (value file)

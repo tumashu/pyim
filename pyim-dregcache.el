@@ -343,10 +343,13 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
   (when pyim-debug (message "pyim-dregcache-save-personal-dcache-to-file called"))
   ;; 用户选择过的词存为标准辞典格式保存
   (when pyim-dregcache-icode2word
-    (pyim-dregcache-save-variable 'pyim-dregcache-icode2word
-                                  pyim-dregcache-icode2word))
+    (pyim-dregcache-save-variable
+     'pyim-dregcache-icode2word
+     pyim-dregcache-icode2word))
   ;; 词频
-  (pyim-dcache-save-variable 'pyim-dregcache-iword2count))
+  (pyim-dcache-save-variable
+   'pyim-dregcache-iword2count
+   pyim-dregcache-iword2count))
 
 (defun pyim-dregcache-export-words-and-counts ()
   "TODO"

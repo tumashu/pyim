@@ -346,7 +346,9 @@ code 对应的中文词条了。
            (puthash key (pyim-dhashcache-sort-words value pyim-dhashcache-iword2count)
                     pyim-dhashcache-icode2word))
          pyim-dhashcache-icode2word)
-        (pyim-dcache-save-variable 'pyim-dhashcache-icode2word)
+        (pyim-dcache-save-variable
+         'pyim-dhashcache-icode2word
+         pyim-dhashcache-icode2word)
         nil)
      (lambda (_)
        (pyim-dcache-set-variable 'pyim-dhashcache-icode2word t)
@@ -396,9 +398,13 @@ code 对应的中文词条了。
 
 (defun pyim-dhashcache-save-personal-dcache-to-file ()
   ;; 用户选择过的词
-  (pyim-dcache-save-variable 'pyim-dhashcache-icode2word)
+  (pyim-dcache-save-variable
+   'pyim-dhashcache-icode2word
+   pyim-dhashcache-icode2word)
   ;; 词频
-  (pyim-dcache-save-variable 'pyim-dhashcache-iword2count))
+  (pyim-dcache-save-variable
+   'pyim-dhashcache-iword2count
+   pyim-dhashcache-iword2count))
 
 (defmacro pyim-dhashcache-put (cache code &rest body)
   "将 BODY 的返回值保存到 CACHE 对应的 CODE 中。
