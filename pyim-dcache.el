@@ -241,11 +241,11 @@ non-nil，文件存在时将会提示用户是否覆盖，默认为覆盖模式"
   (pyim-dcache-call-api 'insert-word-into-ishortcode2word word code prepend))
 
 ;; ** Dcache 升级功能
-(defun pyim-dcache-upgrade-icode2word ()
-  "升级个人词库缓存.
+(defun pyim-dcache-upgrade ()
+  "升级词库缓存.
 
-主要是将个人词库中旧的 code-prefix 升级为新的 code-prefix. 用到
-scheme 中的 :code-prefix-history 信息。"
+当前已有的功能：
+1. 基于 :code-prefix-history 信息，升级为新的 code-prefix。"
   (interactive)
   (pyim-dcache-call-api 'upgrade-icode2word))
 
