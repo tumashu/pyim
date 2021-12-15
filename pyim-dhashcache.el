@@ -40,7 +40,6 @@
 (require 'pyim-dcache)
 (require 'pyim-scheme)
 
-;; Pyim 词库缓存文件，注意：变量名称中不能出现 ":" 等，不能作为文件名称的字符。
 (defvar pyim-dhashcache-code2word nil)
 (defvar pyim-dhashcache-code2word-md5 nil)
 (defvar pyim-dhashcache-word2code nil)

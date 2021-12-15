@@ -30,6 +30,7 @@
 (require 'cl-lib)
 (require 'pyim-common)
 (require 'pyim-dict)
+(require 'url-util)
 
 (defgroup pyim-dcache nil
   "Dcache for pyim."
@@ -102,13 +103,13 @@ dcache 文件的方法让 pyim 正常工作。")
 
 (defun pyim-dcache-get-value (variable)
   "从 `pyim-dcache-directory' 中读取与 VARIABLE 对应的文件中保存的值."
-  (let ((file (expand-file-name (symbol-name variable)
+  (let ((file (expand-file-name (url-hexify-string (symbol-name variable))
                                 pyim-dcache-directory)))
     (pyim-dcache-get-value-from-file file)))
 
 (defun pyim-dcache-save-variable (variable value)
   "将 VARIABLE 变量的取值保存到 `pyim-dcache-directory' 中对应文件中."
-  (let ((file (expand-file-name (symbol-name variable)
+  (let ((file (expand-file-name (url-hexify-string (symbol-name variable))
                                 pyim-dcache-directory)))
     (pyim-dcache-save-value-to-file value file)))
 
