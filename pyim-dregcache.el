@@ -329,7 +329,7 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
 (defun pyim-dregcache-init-variables ()
   "初始化 cache 缓存相关变量."
   (pyim-dcache-init-variable
-   'pyim-dregcache-iword2count
+   pyim-dregcache-iword2count
    ;; dregcache 引擎也需要词频信息，第一次使用 dregcache 引擎的时候，
    ;; 自动导入 dhashcache 引擎的词频信息，以后两个引擎的词频信息就
    ;; 完全分开了。

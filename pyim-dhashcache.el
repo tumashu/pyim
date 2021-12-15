@@ -116,15 +116,15 @@
      `(lambda ()
         ,@(pyim-dhashcache-async-inject-variables)
         (require 'pyim-dhashcache)
-        (pyim-dcache-init-variable 'pyim-dhashcache-icode2word)
-        (pyim-dcache-init-variable 'pyim-dhashcache-iword2count)
+        (pyim-dcache-init-variable pyim-dhashcache-icode2word)
+        (pyim-dcache-init-variable pyim-dhashcache-iword2count)
         (pyim-dcache-save-variable
          'pyim-dhashcache-ishortcode2word
          (pyim-dhashcache-update-ishortcode2word-1
           pyim-dhashcache-icode2word
           pyim-dhashcache-iword2count)))
      (lambda (_)
-       (pyim-dcache-reload-variable 'pyim-dhashcache-ishortcode2word)))))
+       (pyim-dcache-reload-variable pyim-dhashcache-ishortcode2word)))))
 
 (defun pyim-dhashcache-update-ishortcode2word-1 (icode2word iword2count)
   "`pyim-dhashcache-update-ishortcode2word' 内部函数."
@@ -158,15 +158,15 @@
      `(lambda ()
         ,@(pyim-dhashcache-async-inject-variables)
         (require 'pyim-dhashcache)
-        (pyim-dcache-init-variable 'pyim-dhashcache-code2word)
-        (pyim-dcache-init-variable 'pyim-dhashcache-iword2count)
+        (pyim-dcache-init-variable pyim-dhashcache-code2word)
+        (pyim-dcache-init-variable pyim-dhashcache-iword2count)
         (pyim-dcache-save-variable
          'pyim-dhashcache-shortcode2word
          (pyim-dhashcache-update-shortcode2word-1
           pyim-dhashcache-code2word
           pyim-dhashcache-iword2count)))
      (lambda (_)
-       (pyim-dcache-reload-variable 'pyim-dhashcache-shortcode2word)))))
+       (pyim-dcache-reload-variable pyim-dhashcache-shortcode2word)))))
 
 (defun pyim-dhashcache-update-shortcode2word-1 (code2word iword2count)
   "`pyim-dhashcache-update-shortcode2word' 的内部函数"
@@ -273,8 +273,8 @@ DCACHE 是一个 code -> words 的 hashtable.
             (pyim-dhashcache-generate-word2code-dcache-file dcache ,word2code-file))
           (pyim-dcache-save-value-to-file ',dicts-md5 ,code2word-md5-file))
        (lambda (_)
-         (pyim-dcache-reload-variable 'pyim-dhashcache-code2word)
-         (pyim-dcache-reload-variable 'pyim-dhashcache-word2code)
+         (pyim-dcache-reload-variable pyim-dhashcache-code2word)
+         (pyim-dcache-reload-variable pyim-dhashcache-word2code)
          (pyim-dhashcache-update-shortcode2word force)
          (setq pyim-dhashcache-update-code2word-running-p nil))))))
 
@@ -338,8 +338,8 @@ code 对应的中文词条了。
      `(lambda ()
         ,@(pyim-dhashcache-async-inject-variables)
         (require 'pyim-dhashcache)
-        (pyim-dcache-init-variable 'pyim-dhashcache-icode2word)
-        (pyim-dcache-init-variable 'pyim-dhashcache-iword2count)
+        (pyim-dcache-init-variable pyim-dhashcache-icode2word)
+        (pyim-dcache-init-variable pyim-dhashcache-iword2count)
         (maphash
          (lambda (key value)
            (puthash key (pyim-dhashcache-sort-words value pyim-dhashcache-iword2count)
@@ -350,7 +350,7 @@ code 对应的中文词条了。
          pyim-dhashcache-icode2word)
         nil)
      (lambda (_)
-       (pyim-dcache-reload-variable 'pyim-dhashcache-icode2word)
+       (pyim-dcache-reload-variable pyim-dhashcache-icode2word)
        (pyim-dhashcache-update-ishortcode2word force)))))
 
 (defun pyim-dhashcache-upgrade-icode2word ()
@@ -388,12 +388,12 @@ code 对应的中文词条了。
 
 (defun pyim-dhashcache-init-variables ()
   "初始化 dcache 缓存相关变量."
-  (pyim-dcache-init-variable 'pyim-dhashcache-iword2count)
-  (pyim-dcache-init-variable 'pyim-dhashcache-code2word)
-  (pyim-dcache-init-variable 'pyim-dhashcache-word2code)
-  (pyim-dcache-init-variable 'pyim-dhashcache-shortcode2word)
-  (pyim-dcache-init-variable 'pyim-dhashcache-icode2word)
-  (pyim-dcache-init-variable 'pyim-dhashcache-ishortcode2word))
+  (pyim-dcache-init-variable pyim-dhashcache-iword2count)
+  (pyim-dcache-init-variable pyim-dhashcache-code2word)
+  (pyim-dcache-init-variable pyim-dhashcache-word2code)
+  (pyim-dcache-init-variable pyim-dhashcache-shortcode2word)
+  (pyim-dcache-init-variable pyim-dhashcache-icode2word)
+  (pyim-dcache-init-variable pyim-dhashcache-ishortcode2word))
 
 (defun pyim-dhashcache-save-personal-dcache-to-file ()
   ;; 用户选择过的词

@@ -85,21 +85,21 @@ dcache 文件的方法让 pyim 正常工作。")
   "初始化 dcache 缓存相关变量."
   (pyim-dcache-call-api 'init-variables))
 
-(defun pyim-dcache-init-variable (variable &optional fallback-value)
+(defmacro pyim-dcache-init-variable (variable &optional fallback-value)
   "初始化 VARIABLE.
 
 如果 VARIABLE 的值为 nil, 则使用 ‘pyim-dcache-directory’ 中对应文
 件的内容来设置 VARIABLE 变量, 如果此时 VARIABLE 取值还是 nil, 那
 么就将 VARIABLE 的值设置为 FALLBACK-VALUE."
-  (unless (symbol-value variable)
-    (set variable (or (pyim-dcache-get-value variable)
-                      fallback-value
-                      (make-hash-table :test #'equal)))))
+  `(unless ,variable
+     (setf ,variable (or (pyim-dcache-get-value ',variable)
+                         ,fallback-value
+                         (make-hash-table :test #'equal)))))
 
-(defun pyim-dcache-reload-variable (variable)
+(defmacro pyim-dcache-reload-variable (variable)
   "从 `pyim-dcache-directory' 重新读取并设置 VARIABLE 的值."
-  (set variable (or (pyim-dcache-get-value variable)
-                    (make-hash-table :test #'equal))))
+  `(setf ,variable (or (pyim-dcache-get-value ',variable)
+                       (make-hash-table :test #'equal))))
 
 (defun pyim-dcache-get-value (variable)
   "从 `pyim-dcache-directory' 中读取与 VARIABLE 对应的文件中保存的值."
