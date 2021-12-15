@@ -486,6 +486,17 @@
                            "Hello -yin-hang-hen-xing- Hi Hello -yin-hang-hen-heng- Hi "
                            "Hello -yin-hang-hen-hang- Hi")))))
 
+(ert-deftest pyim-tests-pyim-cstring-to-xingma ()
+  (let ((pyim-dhashcache-word2code (make-hash-table :test #'equal)))
+    (puthash "工" (list "wubi/aaaa" "cangjie/mlm" "gong") pyim-dhashcache-word2code)
+    (puthash "房" (list "wubi/yny") pyim-dhashcache-word2code)
+    (puthash "丛" (list "wubi/wwg") pyim-dhashcache-word2code)
+    (should (equal (pyim-cstring-to-xingma "工" 'wubi) "aaaa"))
+    (should (equal (pyim-cstring-to-xingma "工房" 'wubi) "aayn"))
+    (should (equal (pyim-cstring-to-xingma "工房丛" 'wubi) "ayww"))
+    (should (equal (pyim-cstring-to-xingma "工房丛房" 'wubi) "aywy"))
+    (should (equal (pyim-cstring-to-xingma "工" 'wubi t) '("aaaa")))))
+
 (ert-deftest pyim-tests-pyim-cstring-words-at-point ()
   (let ((pyim-dhashcache-code2word (make-hash-table :test #'equal)))
     (puthash "tian-an" (list "天安") pyim-dhashcache-code2word)
