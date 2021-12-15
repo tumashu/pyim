@@ -626,6 +626,26 @@
     (should (equal (gethash "ni-hao" (pyim-dcache-get-value-from-file file))
                    '("你好")))))
 
+(defvar pyim-tests-dcache-variable nil)
+(ert-deftest pyim-tests-pyim-dcache-handle-variable ()
+  (let ((pyim-dcache-directory
+         (file-name-as-directory (make-temp-name "pyim-dcache-"))))
+
+    (pyim-dcache-save-variable 'pyim-tests-dcache-variable "hello")
+    (should (equal (pyim-dcache-get-value 'pyim-tests-dcache-variable) "hello"))
+
+    (setq pyim-tests-dcache-variable "hi")
+    (pyim-dcache-reload-variable 'pyim-tests-dcache-variable)
+    (should (equal pyim-tests-dcache-variable "hello"))
+
+    (setq pyim-tests-dcache-variable "hi")
+    (pyim-dcache-init-variable 'pyim-tests-dcache-variable)
+    (should (equal pyim-tests-dcache-variable "hi"))
+
+    (setq pyim-tests-dcache-variable nil)
+    (pyim-dcache-init-variable 'pyim-tests-dcache-variable)
+    (should (equal pyim-tests-dcache-variable "hello"))))
+
 ;; ** pyim-dhashcache 相关单元测试
 (ert-deftest pyim-tests-pyim-dhashcache-get-shortcodes ()
   (should (equal (pyim-dhashcache-get-shortcodes ".abcde") nil))
