@@ -575,7 +575,14 @@
     (should (string-match-p regexp1 "大王"))
     (should (string-match-p regexp1 "当王"))
     (should (string-match-p regexp2 "大王"))
-    (should-not (string-match-p regexp2 "当王"))))
+    (should-not (string-match-p regexp2 "当王")))
+
+  (let ((pyim-default-scheme 'wubi)
+        (pyim-dhashcache-code2word (make-hash-table :test #'equal)))
+    (puthash "wubi/aaaa" (list "工" "恭恭敬敬") pyim-dhashcache-code2word)
+    (puthash "wubi/adww" (list "欺" "蒙古人" "其人" "欺人" "斯人" "惹人" "匧" "歁" "莢") pyim-dhashcache-code2word)
+    (should (equal (pyim-cregexp-build "aaaa") "\\(?:aaaa\\|[工恭]恭?敬?敬?\\)"))
+    (should (equal (pyim-cregexp-build "adww") "\\(?:adww\\|[其匧惹斯欺歁莢蒙][人古]?人?\\)"))))
 
 ;; ** pyim-import 相关单元测试
 (ert-deftest pyim-tests-pyim-import-words-and-counts ()
