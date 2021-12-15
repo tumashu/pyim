@@ -617,6 +617,15 @@
     (should (equal (gethash "测嘊" pyim-dhashcache-iword2count) 34567))
     (should (equal (gethash "测伌" pyim-dhashcache-iword2count) 0))))
 
+;; ** pyim-dcache 相关单元测试
+(ert-deftest pyim-tests-pyim-dcache-save/read-variable-value ()
+  (let ((file (make-temp-file "pyim-dcache-"))
+        (value (make-hash-table :test #'equal)))
+    (puthash "ni-hao" (list "你好") value)
+    (pyim-dcache-save-value-to-file value file)
+    (should (equal (gethash "ni-hao" (pyim-dcache-get-value-from-file file))
+                   '("你好")))))
+
 ;; ** pyim-dhashcache 相关单元测试
 (ert-deftest pyim-tests-pyim-dhashcache-get-shortcodes ()
   (should (equal (pyim-dhashcache-get-shortcodes ".abcde") nil))
