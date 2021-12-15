@@ -646,6 +646,29 @@
     (pyim-dcache-init-variable my/test:1)
     (should (equal my/test:1 "hello"))))
 
+(ert-deftest pyim-tests-pyim-dcache-export ()
+  (let ((pyim-dhashcache-iword2count (make-hash-table :test #'equal))
+        (pyim-dhashcache-icode2word (make-hash-table :test #'equal))
+        (file (make-temp-file "pyim-dcache-export-")))
+    (puthash "你好" 10 pyim-dhashcache-iword2count)
+    (puthash "尼耗" 1 pyim-dhashcache-iword2count)
+    (puthash "ni-hao" (list "你好" "尼耗") pyim-dhashcache-icode2word)
+    (pyim-dcache-export-words-and-counts file)
+    (with-temp-buffer
+      (insert-file-contents file)
+      (should (equal (buffer-string)
+                     ";;; -*- coding: utf-8-unix -*-
+你好 10
+尼耗 1
+")))
+    (pyim-dcache-export-personal-words file)
+    (with-temp-buffer
+      (insert-file-contents file)
+      (should (equal (buffer-string)
+                     ";;; -*- coding: utf-8-unix -*-
+ni-hao 你好 尼耗
+")))))
+
 ;; ** pyim-dhashcache 相关单元测试
 (ert-deftest pyim-tests-pyim-dhashcache-get-shortcodes ()
   (should (equal (pyim-dhashcache-get-shortcodes ".abcde") nil))
