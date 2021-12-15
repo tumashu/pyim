@@ -71,6 +71,10 @@
 如果为 0 或者 nil, 则不等待立刻显示可选词."
   :type 'integer)
 
+(defcustom pyim-process-async-delay 0.3
+  "延迟多少秒开始异步获取词条。"
+  :type 'integer)
+
 (defvar pyim-process-input-ascii nil
   "是否开启 pyim 英文输入模式.")
 
@@ -252,7 +256,9 @@
     ;; 注意事项：异步流程对 page tooltip 有要求, 有些 page tooltip 是无法支持异
     ;; 步流程的。
     (setq pyim-process-run-async-timer
-          (run-with-timer 1 nil #'pyim-process-run-async))
+          (run-with-timer
+           pyim-process-async-delay
+           nil #'pyim-process-run-async))
     ;; 自动上屏功能
     (let ((autoselector-results
            (mapcar (lambda (x)
