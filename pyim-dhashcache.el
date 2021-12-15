@@ -125,7 +125,7 @@
           pyim-dhashcache-icode2word
           pyim-dhashcache-iword2count)))
      (lambda (_)
-       (pyim-dcache-update-variable 'pyim-dhashcache-ishortcode2word)))))
+       (pyim-dcache-reload-variable 'pyim-dhashcache-ishortcode2word)))))
 
 (defun pyim-dhashcache-update-ishortcode2word-1 (icode2word iword2count)
   "`pyim-dhashcache-update-ishortcode2word' 内部函数."
@@ -167,7 +167,7 @@
           pyim-dhashcache-code2word
           pyim-dhashcache-iword2count)))
      (lambda (_)
-       (pyim-dcache-update-variable 'pyim-dhashcache-shortcode2word)))))
+       (pyim-dcache-reload-variable 'pyim-dhashcache-shortcode2word)))))
 
 (defun pyim-dhashcache-update-shortcode2word-1 (code2word iword2count)
   "`pyim-dhashcache-update-shortcode2word' 的内部函数"
@@ -274,8 +274,8 @@ DCACHE 是一个 code -> words 的 hashtable.
             (pyim-dhashcache-generate-word2code-dcache-file dcache ,word2code-file))
           (pyim-dcache-save-value-to-file ',dicts-md5 ,code2word-md5-file))
        (lambda (_)
-         (pyim-dcache-update-variable 'pyim-dhashcache-code2word)
-         (pyim-dcache-update-variable 'pyim-dhashcache-word2code)
+         (pyim-dcache-reload-variable 'pyim-dhashcache-code2word)
+         (pyim-dcache-reload-variable 'pyim-dhashcache-word2code)
          (pyim-dhashcache-update-shortcode2word force)
          (setq pyim-dhashcache-update-code2word-running-p nil))))))
 
@@ -351,7 +351,7 @@ code 对应的中文词条了。
          pyim-dhashcache-icode2word)
         nil)
      (lambda (_)
-       (pyim-dcache-update-variable 'pyim-dhashcache-icode2word)
+       (pyim-dcache-reload-variable 'pyim-dhashcache-icode2word)
        (pyim-dhashcache-update-ishortcode2word force)))))
 
 (defun pyim-dhashcache-upgrade-icode2word ()

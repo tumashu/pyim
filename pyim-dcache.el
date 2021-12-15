@@ -95,8 +95,8 @@ dcache 文件的方法让 pyim 正常工作。")
                       fallback-value
                       (make-hash-table :test #'equal)))))
 
-(defun pyim-dcache-update-variable (variable)
-  "更新 VARIABLE"
+(defun pyim-dcache-reload-variable (variable)
+  "从 `pyim-dcache-directory' 重新读取并设置 VARIABLE 的值."
   (set variable (or (pyim-dcache-get-value variable)
                     (make-hash-table :test #'equal))))
 
