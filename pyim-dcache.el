@@ -144,7 +144,8 @@ dcache 文件的方法让 pyim 正常工作。")
 
 (defun pyim-dcache-get-value-from-file (file)
   "读取保存到 FILE 里面的 value."
-  (when (file-exists-p file)
+  (when (and (> (length file) 0)
+             (file-exists-p file))
     (with-temp-buffer
       (insert-file-contents file)
       (ignore-errors
