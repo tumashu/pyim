@@ -365,6 +365,63 @@ CRITERIA 字符串一般是通过 imobjs 构建的，它保留了用户原始的
                  (not (pyim-string-match-p "\\CC" string)))
         string))))
 
+(defun pyim-word-at-point (after)
+  "获取光标前的词，当 AFTER 设置为 non-nil 时，获得光标后的词 .
+默认的 (thing-at-point word) 在中英文边界处返回的始终是光标后的 word,
+本函数使得在中英文混合情况下获取光标处的词的行为更为合理"
+
+  ;; 以下例子，光标在中英文分界处
+  ;; hello|世界 调用 (pyim-word-at-point) 时返回 “hello”，
+  ;;           调用 (pyim-word-at-point t) 时返回 "世界"
+  ;; 世界|hello 调用 (pyim-word-at-point) 时返回 “世界”，
+  ;;           调用 (pyim-word-at-point t) 时返回 "hello"
+
+  (let* ((char-before (pyim-char-before-to-string 0))
+         (char-after (pyim-char-after-to-string 0)))
+    (save-excursion
+      (if (or
+           (and (not after)
+                (not (pyim-string-match-p "\\CC" char-after))
+                (not (pyim-string-match-p "\n" char-before)))
+           (and (not after)
+                (not (pyim-string-match-p "\\CC" char-before))
+                (pyim-string-match-p "\\CC" char-after))
+           )
+          (progn
+            (goto-char (- (point) 1))
+            (thing-at-point 'word t)
+            )
+        (thing-at-point 'word t))
+      )
+    )
+  )
+
+(defun pyim-bounds-of-word-at-point (after)
+  "获取光标前的词的边界坐标，当 AFTER 设置为 t 时，获得光标后的词的边界坐标.
+本函数使得在中英文混合情况下获取光标处的词的边界坐标的行为更为合理，
+可参考 pyim-word-at-point 注释中的例子
+"
+  (let* ((char-before (pyim-char-before-to-string 0))
+         (char-after (pyim-char-after-to-string 0)))
+    (save-excursion
+      (if (or
+           (and (not after)
+                (not (pyim-string-match-p "\\CC" char-after))
+                (not (pyim-string-match-p "\n" char-before)))
+           (and (not after)
+                (not (pyim-string-match-p "\\CC" char-before))
+                (pyim-string-match-p "\\CC" char-after))
+           )
+          (progn
+            (goto-char (- (point) 1))
+
+            (bounds-of-thing-at-point 'word)
+            )
+        (bounds-of-thing-at-point 'word))
+      )
+    )
+  )
+
 (defalias 'pyim-cwords-at-point 'pyim-cstring-words-at-point)
 (defun pyim-cstring-words-at-point (&optional end-of-point)
   "获取光标当前的词条列表，当 END-OF-POINT 设置为 t 时，获取光标后的词条列表。
@@ -391,9 +448,9 @@ CRITERIA 字符串一般是通过 imobjs 构建的，它保留了用户原始的
           (if end-of-point
               (string (following-char))
             (string (preceding-char))))
-         (str (thing-at-point 'word t))
+         (str (pyim-word-at-point end-of-point))
          (str-length (length str))
-         (str-boundary (bounds-of-thing-at-point 'word))
+         (str-boundary (pyim-bounds-of-word-at-point end-of-point))
          (str-beginning-pos (when str-boundary
                               (car str-boundary)))
          (str-end-pos (when str-boundary
