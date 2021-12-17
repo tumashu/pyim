@@ -388,6 +388,10 @@ code 对应的中文词条了。
 
 (defun pyim-dhashcache-init-variables ()
   "初始化 dcache 缓存相关变量."
+  (when (and pyim-dcache-directory
+             (directory-files pyim-dcache-directory nil "-backup-"))
+    (message "PYIM: 在 %S 目录中发现备份文件的存在，可能是词库缓存文件损坏导致，请抓紧检查处理！！！"
+             pyim-dcache-directory))
   (pyim-dcache-init-variable pyim-dhashcache-iword2count)
   (pyim-dcache-init-variable pyim-dhashcache-code2word)
   (pyim-dcache-init-variable pyim-dhashcache-word2code)
