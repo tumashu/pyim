@@ -48,6 +48,7 @@
 (pyim-tests-add-dict "pyim-basedict.pyim")
 (pyim-dcache-init-variables)
 
+;; 做测试的时候不保存词库，防止因为误操作导致个人词库损坏。
 (defalias 'pyim-kill-emacs-hook-function #'ignore)
 
 ;; ** pyim-schemes 相关单元测试
@@ -601,11 +602,17 @@
 
 ;; ** pyim-dcache 相关单元测试
 (ert-deftest pyim-tests-pyim-dcache-save/read-variable-value ()
-  (let ((file (make-temp-file "pyim-dcache-"))
-        (value (make-hash-table :test #'equal)))
+  (let* ((file (make-temp-file "pyim-dcache-"))
+         (backup-file (concat file "-backup-" (format-time-string "%Y%m%d%H%M%S")))
+         (value (make-hash-table :test #'equal)))
     (puthash "ni-hao" (list "你好") value)
     (pyim-dcache-save-value-to-file value file)
     (should (equal (gethash "ni-hao" (pyim-dcache-get-value-from-file file))
+                   '("你好")))
+    (should-not (file-exists-p backup-file))
+    (pyim-dcache-save-value-to-file "" file 0.8)
+    (should (file-exists-p backup-file))
+    (should (equal (gethash "ni-hao" (pyim-dcache-get-value-from-file backup-file))
                    '("你好")))))
 
 (ert-deftest pyim-tests-pyim-dcache-handle-variable ()

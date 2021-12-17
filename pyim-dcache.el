@@ -108,16 +108,38 @@ dcache 文件的方法让 pyim 正常工作。")
                                 pyim-dcache-directory)))
     (pyim-dcache-get-value-from-file file)))
 
-(defun pyim-dcache-save-variable (variable value)
-  "将 VARIABLE 变量的取值保存到 `pyim-dcache-directory' 中对应文件中."
+(defun pyim-dcache-save-variable (variable value &optional auto-backup-threshold)
+  "将 VARIABLE 变量的取值保存到 `pyim-dcache-directory' 中对应文件中.
+
+如果 VALUE 的长度小于先前保存值的长度的 AUTO-BACKUP-THRESHOLD 倍,
+那么先前保存的值将自动备份到相应的备份文件。"
   (let ((file (expand-file-name (url-hexify-string (symbol-name variable))
                                 pyim-dcache-directory)))
-    (pyim-dcache-save-value-to-file value file)))
+    (pyim-dcache-save-value-to-file value file auto-backup-threshold)))
 
-(defun pyim-dcache-save-value-to-file (value file)
-  "将 VALUE 保存到 FILE 文件中."
+(defun pyim-dcache-value-length (value)
+  "获取 VALUE 的某个可以作为长度的值."
+  (or (ignore-errors
+        (if (hash-table-p value)
+            (hash-table-count value)
+          (length value)))
+      0))
+
+(defun pyim-dcache-save-value-to-file (value file &optional auto-backup-threshold)
+  "将 VALUE 保存到 FILE 文件中.
+
+如果 VALUE 的长度小于 FILE 中上次保存值的长度的
+AUTO-BACKUP-THRESHOLD 倍, 那么原值将自动备份到 FILE 对应的备份文
+件。"
   (make-directory (file-name-directory file) t)
-  (let ((dump-file (concat file "-dump-" (format-time-string "%Y%m%d%H%M%S"))))
+  (let* ((backup-file (concat file "-backup-" (format-time-string "%Y%m%d%H%M%S")))
+         (orig-value (pyim-dcache-get-value-from-file file))
+         (orig-length (pyim-dcache-value-length orig-value))
+         (length (pyim-dcache-value-length value)))
+    (when (and (numberp auto-backup-threshold)
+               (< length (* auto-backup-threshold orig-length)))
+      (pyim-dcache-save-value-to-file orig-value backup-file)
+      (message "PYIM: 生成备份文件 %S, 请检查原文件 %S 是否损坏！！！" backup-file file))
     (when value
       (with-temp-buffer
         (insert ";; -*- lisp-data -*-\n")
@@ -131,18 +153,7 @@ dcache 文件的方法让 pyim 正常工作。")
         (insert ";; Local\sVariables:\n") ;Use \s to avoid a false positive!
         (insert ";; coding: utf-8-unix\n")
         (insert ";; End:")
-        ;; 使用 read 读取一下当前 buffer，读取没问题后再保存到 dcache 文件，因
-        ;; 为我发现保存的词库文件偶尔会出现 "..." 这样的字符串，可能是 print1
-        ;; abbreviating 导致的，但暂时没有发现原因，这个问题非常严重，会导致词
-        ;; 库损坏，用户自定义词条丢失。
-        (goto-char (point-min))
-        (if (ignore-errors (read (current-buffer)))
-            (pyim-dcache-write-file file)
-          ;; 如果词库内容有问题，就保存到 dump 文件，这样用户可以通过 dump 文
-          ;; 件发现问题原因，需要注意的是，这个操作会丢失当前 sesson 的自定义
-          ;; 词条内容。
-          (message "PYIM: %S 保存出错，执行 dump 操作！" file)
-          (pyim-dcache-write-file dump-file))))))
+        (pyim-dcache-write-file file)))))
 
 (defun pyim-dcache-get-value-from-file (file)
   "读取保存到 FILE 里面的 value."

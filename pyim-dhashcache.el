@@ -399,11 +399,11 @@ code 对应的中文词条了。
   ;; 用户选择过的词
   (pyim-dcache-save-variable
    'pyim-dhashcache-icode2word
-   pyim-dhashcache-icode2word)
+   pyim-dhashcache-icode2word 0.8)
   ;; 词频
   (pyim-dcache-save-variable
    'pyim-dhashcache-iword2count
-   pyim-dhashcache-iword2count))
+   pyim-dhashcache-iword2count 0.8))
 
 (defmacro pyim-dhashcache-put (cache code &rest body)
   "将 BODY 的返回值保存到 CACHE 对应的 CODE 中。
