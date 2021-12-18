@@ -567,6 +567,9 @@ BUG：拼音无法有效地处理多音字。"
              ;; 观的一个数字，也许应该添加一个配置选项？
              (< (length word) 12)
              (not (pyim-string-match-p "\\CC" word)))
+    ;; PYIM 有些功能（比如：以词定字功能）会用到 text property, 保存词条之前将
+    ;; text property 去除，防止不必要的数据进入 cache.
+    (setq word (substring-no-properties word))
     ;; 记录最近创建的词条，用于快速删词功能。
     (setq pyim-process-last-created-word word)
     (let* ((scheme-name (pyim-scheme-name))
@@ -587,7 +590,7 @@ BUG：拼音无法有效地处理多音字。"
                ;; 正确处理多音字，这里设置一下 :noexport 属性，在导出词条的时候
                ;; 不导出这些带标记的词。
                (propertize word :noexport t)
-             (substring-no-properties word))
+             word)
            (concat (or code-prefix "") code) prepend)))
       ;; TODO, 排序个人词库?
       ;; 返回 codes 和 word, 用于 message 命令。
