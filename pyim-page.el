@@ -97,6 +97,10 @@ Only useful when use posframe.")
 
 注意：当使用 minibuffer 为选词框时，这个选项才有用处。")
 
+(defface pyim-page-subword
+  '((t (:background "gray44")))
+  "使用以词选字功能时，选择的汉字所使用的 face.")
+
 (defvar pyim-page-tooltip-posframe-buffer " *pyim-page-tooltip-posframe-buffer*"
   "这个变量用来保存做为 page tooltip 的 posframe 的 buffer.")
 
@@ -368,7 +372,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                     candidate))))
         (dolist (n pyim-outcome-subword-info)
           (when (<= n (length str))
-            (set-text-properties (- n 1) n '(face highlight) str)))
+            (set-text-properties (- n 1) n '(face pyim-page-subword) str)))
         (setq i (1+ i))
         ;; 高亮当前选择的词条，用于 `pyim-page-next-word'
         (push
