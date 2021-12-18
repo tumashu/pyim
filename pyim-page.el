@@ -362,9 +362,13 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
   "这个函数用于创建在 page 中显示的备选词条菜单。"
   (let ((i 0) result)
     (dolist (candidate candidates)
-      (let ((str (if (consp candidate)
-                     (concat (car candidate) (cdr candidate))
-                   candidate)))
+      (let ((str (substring-no-properties
+                  (if (consp candidate)
+                      (concat (car candidate) (cdr candidate))
+                    candidate))))
+        (dolist (n pyim-outcome-subword-info)
+          (when (<= n (length str))
+            (set-text-properties (- n 1) n '(face highlight) str)))
         (setq i (1+ i))
         ;; 高亮当前选择的词条，用于 `pyim-page-next-word'
         (push

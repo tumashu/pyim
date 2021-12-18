@@ -346,11 +346,24 @@
 (defun pyim-process-get-imobjs ()
   pyim-imobjs)
 
-(defun pyim-process-get-outcome (&optional n magic-convert)
+(defun pyim-process-select-subword-p ()
+  pyim-outcome-subword-info)
+
+(defun pyim-process-toggle-set-subword-info (n)
+  (if (member n pyim-outcome-subword-info)
+      (setq pyim-outcome-subword-info
+            (remove n pyim-outcome-subword-info))
+    (push n pyim-outcome-subword-info)))
+
+(defun pyim-process-get-outcome (&optional n magic-convert use-subword)
   "PYIM 流程的输出"
-  (if magic-convert
-      (pyim-magic-convert (pyim-outcome-get n))
-    (pyim-outcome-get n)))
+  (let ((str (pyim-outcome-get n)))
+    (when use-subword
+      (setq str (pyim-outcome-get-subword str))
+      (setq pyim-outcome-subword-info nil))
+    (when magic-convert
+      (setq str (pyim-magic-convert str)))
+    str))
 
 (defun pyim-process-outcome-handle (type)
   "依照 TYPE, 获取 pyim 的 outcome，并将其加入 `pyim-outcome-history'."

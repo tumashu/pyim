@@ -165,6 +165,7 @@ pyim 当前的默认的拼音词库是 pyim-basedict, 这个词库的词条量8�
 | DEL 或 BACKSPACE      | 删除最后一个字符           |
 | C-DEL 或  C-BACKSPACE | 删除最后一个拼音           |
 | M-DEL 或  M-BACKSPACE | 删除最后一个拼音           |
+| F1,F2,F3,F4           | 以词定字                   |
 
 ** 使用双拼模式
 pyim 支持双拼输入模式，用户可以通过变量 `pyim-default-scheme' 来设定：
