@@ -390,7 +390,7 @@ SILENT 设置为 t 是，不显示提醒信息。"
 导入的文件结构类似：
 
   ;;; -*- coding: utf-8-unix -*-
-  ;; 词条 计数 拼音(可选)
+  ;; 词条 计数 对应编码(可选)
   你好 247
   这是 312
 
@@ -401,12 +401,10 @@ MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表词�
   ;; 导入词条和词频之前需要加载 dcaches.
   (when (or silent
             (yes-or-no-p "PYIM 词条导入注意事项：
-
-如果文件没有提供拼音，导入词条时会自动添加，这时个人词库缓存中会
-添加一些不合理的词条信息，比如：ying-xing 银行，这些词条的文本属
-性 :noexport 会设置为 t, 等用户再次输入这个词条的时候，通过用户的
-输入进行多音字矫正，对应的 :noexport 就会删除。
-
+1. 这个命令对多音字处理比较粗糙，可能会导入一些不合常理的词条记录，
+   (比如：ying-xing 银行），但不影响 PYIM 正常使用。
+2. 这个命令也可以用于形码输入法，比如：五笔，不过需要形码输入法有
+   编码反查功能。
 => 确定继续导入吗？"))
     (pyim-process-init-dcaches)
     (with-temp-buffer
@@ -415,19 +413,21 @@ MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表词�
       (goto-char (point-min))
       (forward-line 1)
       (while (not (eobp))
-        (let* ((pyim-default-scheme 'quanpin)
-               (content (pyim-dline-parse))
+        (let* ((content (pyim-dline-parse))
                (word (car content))
                (count (string-to-number
                        (or (car (cdr content)) "0")))
-               (criteria (car (cdr (cdr content)))))
-          (pyim-process-create-word
-           word nil
-           (lambda (x)
-             (funcall (or merge-method #'max)
-                      (or x 0)
-                      count))
-           criteria))
+               (criteria (car (cdr (cdr content))))
+               output)
+          (setq output
+                (pyim-process-create-word
+                 word nil
+                 (lambda (x)
+                   (funcall (or merge-method #'max)
+                            (or x 0)
+                            count))
+                 criteria))
+          (message "* 导入 %S" output))
         (forward-line 1)))
     ;; 保存一下用户选择过的词生成的缓存和词频缓存，
     ;; 因为使用 async 机制更新 dcache 时，需要从 dcache 文件
