@@ -93,9 +93,7 @@ Only useful when use posframe.")
 
 (defface pyim-page-selection
   '((t (:background "gray44")))
-  "选词框中已选词条的 face
-
-注意：当使用 minibuffer 为选词框时，这个选项才有用处。")
+  "选词框中已选词条的 face.")
 
 (defface pyim-page-subword
   '((t (:background "gray44")))
