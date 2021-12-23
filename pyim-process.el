@@ -42,7 +42,6 @@
 (require 'pyim-punctuation)
 (require 'pyim-autoselector)
 (require 'pyim-cstring)
-(require 'pyim-magic)
 
 (defgroup pyim-process nil
   "Process for pyim."
@@ -362,7 +361,7 @@
       (setq str (pyim-outcome-get-subword str))
       (setq pyim-outcome-subword-info nil))
     (when magic-convert
-      (setq str (pyim-magic-convert str)))
+      (setq str (pyim-outcome-magic-convert str)))
     str))
 
 (defun pyim-process-outcome-handle (type)

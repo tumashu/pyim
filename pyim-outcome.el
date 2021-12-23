@@ -34,6 +34,13 @@
   "Outcome tools for pyim."
   :group 'pyim)
 
+(defcustom pyim-outcome-magic-converter nil
+  "将 “待选词条” 在 “上屏” 之前自动转换为其他字符串.
+这个功能可以实现“简转繁”，“输入中文得到英文”之类的功能。"
+  :type 'function)
+
+(defvaralias 'pyim-magic-converter 'pyim-outcome-magic-converter)
+
 (defcustom pyim-outcome-trigger "v"
   "用于触发特殊操作的字符，相当与单字快捷键.
 
@@ -114,6 +121,10 @@ pyim 使用函数 `pyim-process-outcome-handle-char' 来处理特殊功能触发
 (defvar pyim-outcome-subword-info nil
   "在以词定字功能中，用来保存字的位置。")
 
+(defvar pyim-outcome-magic-convert-cache nil
+  "用来临时保存 `pyim-outcome-magic-convert' 的结果.
+从而加快同一个字符串第二次的转换速度。")
+
 (pyim-register-local-variables '(pyim-outcome-history))
 
 ;; ** 选词框相关函数
@@ -130,6 +141,16 @@ pyim 使用函数 `pyim-process-outcome-handle-char' 来处理特殊功能触发
             (push (substring word (- i 1) i) output)))
         (string-join output))
     word))
+
+(defun pyim-outcome-magic-convert (str)
+  "用于处理 `pyim-outcome-magic-converter' 的函数。"
+  (if (functionp pyim-outcome-magic-converter)
+      (or (cdr (assoc str pyim-outcome-magic-convert-cache))
+          (let ((result (funcall pyim-outcome-magic-converter str)))
+            (setq pyim-outcome-magic-convert-cache
+                  `((,str . ,result)))
+            result))
+    str))
 
 (defun pyim-outcome-get-trigger ()
   "检查 `pyim-outcome-trigger' 是否为一个合理的 trigger char 。

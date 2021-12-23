@@ -14,7 +14,7 @@
 +----------------------+-----------------+------------------------------------------------+                          |
 | PYIM 流程组件层：    | Process         | PYIM 视图组件层： Page, Preview, Indicator     |     Assistant-scheme     |
 +----------------------+-----------------+------------------------------------------------|                          |
-| PYIM 实体组件层：    | Entered, Imobjs, Codes, Candidates, Outcome, Magic-convert,      |         Common           |
+| PYIM 实体组件层：    | Entered, Imobjs, Codes, Candidates, Outcome,                     |         Common           |
 |                      | Punctuations, Cregexp, Cstring, Probe,                           |                          |
 |                      | Autoselector, Pinyin                                             |                          |
 +----------------------+-----------------------------------------+------------------------+                          |
