@@ -479,12 +479,6 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
           (message "将词条: %S 从 personal 缓冲中删除。" string)))
     (message "请首先高亮选择需要删除的词条。")))
 
-;; ** 翻页和翻词功能
-(defalias 'pyim-previous-page #'pyim-page-previous-page)
-(defalias 'pyim-next-page #'pyim-page-next-page)
-(defalias 'pyim-previous-word #'pyim-page-previous-word)
-(defalias 'pyim-next-word #'pyim-page-next-word)
-
 ;; ** 选词功能
 (defun pyim-select-word-simple ()
   "从选词框中选择当前词条.
@@ -633,6 +627,12 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   (interactive)
   (pyim-process-toggle-set-subword-info (or n 1))
   (pyim-process-run t))
+
+;; ** 翻页和翻词功能
+(defalias 'pyim-previous-page #'pyim-page-previous-page)
+(defalias 'pyim-next-page #'pyim-page-next-page)
+(defalias 'pyim-previous-word #'pyim-page-previous-word)
+(defalias 'pyim-next-word #'pyim-page-next-word)
 
 ;; ** 取消当前输入功能
 (defun pyim-quit-clear ()
