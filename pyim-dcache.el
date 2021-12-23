@@ -193,9 +193,6 @@ AUTO-BACKUP-THRESHOLD 倍, 那么原值将自动备份到 FILE 对应的备份�
   t)
 
 ;; ** Dcache 导出功能
-(define-obsolete-function-alias 'pyim-export 'pyim-export-words-and-counts "4.0")
-
-(defalias 'pyim-export-words-and-counts 'pyim-dcache-export-words-and-counts)
 (defun pyim-dcache-export-words-and-counts (file &optional confirm)
   "将个人词条以及词条对应的词频信息导出到文件 FILE.
 
@@ -206,7 +203,6 @@ non-nil，文件存在时将会提示用户是否覆盖，默认为覆盖模式"
   (pyim-dcache-call-api 'export-words-and-counts file confirm)
   (message "PYIM: 词条和词频信息导出完成。"))
 
-(defalias 'pyim-export-personal-words 'pyim-dcache-export-personal-words)
 (defun pyim-dcache-export-personal-words (file &optional confirm)
   "将用户的个人词条导出为 pyim 词库文件.
 

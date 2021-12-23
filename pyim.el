@@ -439,6 +439,11 @@ MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表词�
 
     (message "PYIM: 词条和词频信息导入完成！")))
 
+;; ** 导出功能
+(define-obsolete-function-alias 'pyim-export 'pyim-export-words-and-counts "4.0")
+(defalias 'pyim-export-words-and-counts 'pyim-dcache-export-words-and-counts)
+(defalias 'pyim-export-personal-words 'pyim-dcache-export-personal-words)
+
 ;; ** 删词功能
 (defun pyim-delete-words-in-file (file)
   "从个人词库缓存中批量删除 FILE 文件中列出的词条.
