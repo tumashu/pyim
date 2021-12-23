@@ -29,7 +29,7 @@
 ;; * 代码                                                           :code:
 (require 'cl-lib)
 (require 'pyim-common)
-(require 'pyim-magic)
+(require 'pyim-outcome)
 
 (defgroup pyim-preview nil
   "Preview libs for pyim."
