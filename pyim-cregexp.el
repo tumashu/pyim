@@ -211,7 +211,6 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
       (unless (equal regexp "")
         (concat (if match-beginning "^" "") regexp)))))
 
-(define-obsolete-function-alias 'pyim-convert-cregexp-at-point 'pyim-cregexp-convert-at-point "4.0")
 (defun pyim-cregexp-convert-at-point (&optional insert-only)
   "将光标前的字符串按拼音的规则转换为一个搜索中文的 regexp.
 用于实现拼音搜索中文的功能。
@@ -270,7 +269,6 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
 
 (declare-function ivy--regex-plus "ivy")
 
-(define-obsolete-function-alias 'pyim-ivy-cregexp 'pyim-cregexp-ivy "4.0")
 (defun pyim-cregexp-ivy (str)
   "Let ivy support search Chinese with pinyin feature."
   (let ((x (ivy--regex-plus str))

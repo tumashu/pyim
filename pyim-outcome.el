@@ -34,8 +34,6 @@
   "Outcome tools for pyim."
   :group 'pyim)
 
-(define-obsolete-variable-alias 'pyim-translate-trigger-char 'pyim-outcome-trigger "4.0")
-(define-obsolete-variable-alias 'pyim-outcome-trigger-char 'pyim-outcome-trigger "4.0")
 (defcustom pyim-outcome-trigger "v"
   "用于触发特殊操作的字符，相当与单字快捷键.
 
@@ -85,7 +83,6 @@ pyim 使用函数 `pyim-process-outcome-handle-char' 来处理特殊功能触发
 具体请参考 `pyim-outcome-get-trigger' 。"
   :type '(choice (const nil) string))
 
-(define-obsolete-variable-alias 'pyim-wash-function 'pyim-outcome-trigger-function "4.0")
 (defcustom pyim-outcome-trigger-function 'pyim-outcome-trigger-function-default
   "可以使用 `pyim-outcome-trigger' 激活的函数。
 
@@ -163,7 +160,6 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
           (car prefer-triggers))
       user-trigger)))
 
-(define-obsolete-function-alias 'pyim-wash-current-line-function 'pyim-outcome-trigger-function-default "4.0")
 (defun pyim-outcome-trigger-function-default (&optional no-space)
   "默认的 `pyim-outcome-trigger-function'.
 

@@ -67,13 +67,11 @@ pyim 内建的有三种选词框格式：
 3. vertical  垂直选词框"
   :type 'symbol)
 
-(define-obsolete-variable-alias 'pyim-posframe-border-width 'pyim-page-posframe-border-width "4.0")
 (defcustom pyim-page-posframe-border-width 0
   "posframe的内间距。
 只有当用户使用 posframe 来显示候选词时才有效。"
   :type 'integer)
 
-(define-obsolete-variable-alias 'pyim-posframe-min-width 'pyim-page-posframe-min-width "4.0")
 (defcustom pyim-page-posframe-min-width (* pyim-page-length 7)
   "使用 posframe 做为选词框时，设置选词框的最小宽度."
   :type 'integer)
