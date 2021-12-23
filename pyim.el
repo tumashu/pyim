@@ -841,6 +841,13 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
 
 ;; ** pyim 中文字符串工具
 (require 'pyim-cstring)
+(defalias 'pyim-forward-word 'pyim-cstring-forward-word)
+(defalias 'pyim-backward-word 'pyim-cstring-backward-word)
+;; PYIM 重构以前使用的一些函数名称，alias 一下，便于兼容。
+(defalias 'pyim-hanzi2pinyin-simple 'pyim-cstring-to-pinyin-simple)
+(defalias 'pyim-hanzi2pinyin 'pyim-cstring-to-pinyin)
+(defalias 'pyim-hanzi2xingma 'pyim-cstring-to-xingma)
+(defalias 'pyim-cwords-at-point 'pyim-cstring-words-at-point)
 
 ;; ** pyim 中文 regexp 工具
 (require 'pyim-cregexp)

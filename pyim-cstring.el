@@ -196,7 +196,6 @@ CHINESE-STRING 分词，得到一个词条 alist，这个 alist 的元素都是�
 
 ;; ** 中文字符串到拼音的转换工具
 ;;;###autoload
-(defalias 'pyim-hanzi2pinyin 'pyim-cstring-to-pinyin)
 (defun pyim-cstring-to-pinyin (string &optional shou-zi-mu separator
                                       return-list ignore-duo-yin-zi adjust-duo-yin-zi)
   "将汉字字符串转换为对应的拼音字符串的工具.
@@ -262,13 +261,11 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
           (string-join list " "))))))
 
 ;;;###autoload
-(defalias 'pyim-hanzi2pinyin-simple 'pyim-cstring-to-pinyin-simple)
 (defun pyim-cstring-to-pinyin-simple (string &optional shou-zi-mu separator return-list)
   "简化版的 `pyim-cstring-to-pinyin', 不处理多音字。"
   (pyim-cstring-to-pinyin string shou-zi-mu separator return-list t))
 
 ;; ** 中文字符串到形码的转换工具
-(defalias 'pyim-hanzi2xingma 'pyim-cstring-to-xingma)
 (defun pyim-cstring-to-xingma (string scheme-name &optional return-list)
   "返回汉字 STRING 对应形码方案 SCHEME-NAME 的 code (不包括
 code-prefix)。当RETURN-LIST 设置为 t 时，返回一个 code list。"
@@ -365,7 +362,6 @@ CRITERIA 字符串一般是通过 imobjs 构建的，它保留了用户原始的
                  (not (pyim-string-match-p "\\CC" string)))
         string))))
 
-(defalias 'pyim-cwords-at-point 'pyim-cstring-words-at-point)
 (defun pyim-cstring-words-at-point (&optional end-of-point)
   "获取光标当前的词条列表，当 END-OF-POINT 设置为 t 时，获取光标后的词条列表。
 词条列表的每一个元素都是列表，这些列表的第一个元素为词条，第二个元素为光标处到词条
@@ -442,7 +438,6 @@ CRITERIA 字符串一般是通过 imobjs 构建的，它保留了用户原始的
                       (- str-end-pos current-pos)))))))
 
 ;; ** 让 forward/backward 支持中文
-(defalias 'pyim-forward-word 'pyim-cstring-forward-word)
 (defun pyim-cstring-forward-word (&optional arg)
   "向前移动 ARG 英文或者中文词，向前移动时基于 *最长* 的词移动。"
   (interactive "P")
@@ -457,7 +452,6 @@ CRITERIA 字符串一般是通过 imobjs 构建的，它保留了用户原始的
            (max-length (max (or max-length 1) 1)))
       (forward-char max-length))))
 
-(defalias 'pyim-backward-word 'pyim-cstring-backward-word)
 (defun pyim-cstring-backward-word (&optional arg)
   "向后移动 ARG 个英文或者中文词，向后移动时基于 *最长* 的词移动。"
   (interactive "P")
