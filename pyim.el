@@ -126,12 +126,12 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
     (define-key map "\M-b" #'pyim-backward-imelem)
     (define-key map "\C-e" #'pyim-end-of-line)
     (define-key map "\C-a" #'pyim-beginning-of-line)
-    (define-key map "=" #'pyim-page-next-page)
-    (define-key map "-" #'pyim-page-previous-page)
-    (define-key map "\C-n" #'pyim-page-next-word)
-    (define-key map "\C-p" #'pyim-page-previous-word)
-    (define-key map "\M-n" #'pyim-page-next-page)
-    (define-key map "\M-p" #'pyim-page-previous-page)
+    (define-key map "=" #'pyim-next-page)
+    (define-key map "-" #'pyim-previous-page)
+    (define-key map "\C-n" #'pyim-next-word)
+    (define-key map "\C-p" #'pyim-previous-word)
+    (define-key map "\M-n" #'pyim-next-page)
+    (define-key map "\M-p" #'pyim-previous-page)
     (define-key map "\C-m" #'pyim-quit-no-clear)
     (define-key map [return] #'pyim-quit-no-clear)
     (define-key map "\C-c" #'pyim-quit-clear)
@@ -494,6 +494,12 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
           (pyim-process-delete-word string)
           (message "将词条: %S 从 personal 缓冲中删除。" string)))
     (message "请首先高亮选择需要删除的词条。")))
+
+;; ** 翻页和翻词功能
+(defalias 'pyim-previous-page #'pyim-page-previous-page)
+(defalias 'pyim-next-page #'pyim-page-next-page)
+(defalias 'pyim-previous-word #'pyim-page-previous-word)
+(defalias 'pyim-next-word #'pyim-page-next-word)
 
 ;; ** 选词功能
 (define-obsolete-function-alias 'pyim-page-select-word-simple 'pyim-select-word-simple "4.0")
