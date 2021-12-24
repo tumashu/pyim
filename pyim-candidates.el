@@ -105,7 +105,7 @@ IMOBJS 获得候选词条。"
                     (lambda (perm)
                       (concat (substring rotn 0 1) perm))
                     (pyim-string-permutations (substring rotn 1))))
-                 (list-all-rotated-strings s))))))
+                 (pyim-list-all-rotated-strings s))))))
 
 (defun pyim-candidates-create:xingma (imobjs scheme-name &optional async)
   "`pyim-candidates-create' 处理五笔仓颉等形码输入法的函数."
