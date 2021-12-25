@@ -4,11 +4,11 @@
 /*/*.html
 /*/*.*~
 /*.patch
-deps/
 
 # Files generated during `make packages/pyim`.
 *.elc
 /pyim-autoloads.el
 /pyim-pkg.el
-/pyim-dcache-*
-/tests/pyim-dcache-*
+/tests/pyim-tests-dcache-*
+/tests/deps/
+

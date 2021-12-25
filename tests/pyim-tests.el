@@ -38,6 +38,9 @@
 (setq default-input-method "pyim")
 (setq pyim-dicts nil)
 (setq pyim-extra-dicts nil)
+;; 设置 pyim-dcache-directory, 防止用户个人词库不小心被覆盖掉。
+(setq pyim-dcache-directory
+      (file-name-as-directory (make-temp-name "pyim-tests-dcache-")))
 ;; 做测试的时候不保存词库，防止因为误操作导致个人词库损坏。
 (defalias 'pyim-kill-emacs-hook-function #'ignore)
 
@@ -563,39 +566,39 @@
 ;; ** pyim-import 相关单元测试
 (ert-deftest pyim-tests-pyim-import-words-and-counts ()
   ;; 这个测试目前主要用于手工测试，在 github 上这个测试无法通过的。
-  :expected-result :failed
-  (let ((pyim-dcache-directory
-         (file-name-as-directory (make-temp-name "pyim-dcache-")))
-        (file (make-temp-file "pyim-tests-import")))
-    ;; 删除测试用词条
-    (dolist (x '("测㤅" "测嘊" "测伌"))
-      (pyim-process-delete-word x))
-    (dolist (x '("测㤅" "测嘊" "测伌"))
-      (should-not (member x (pyim-dcache-get "ce-ai" '(icode2word)))))
-    (should-not (equal (gethash "测㤅" pyim-dhashcache-iword2count) 76543))
-    (should-not (equal (gethash "测嘊" pyim-dhashcache-iword2count) 34567))
-    (should-not (equal (gethash "测伌" pyim-dhashcache-iword2count) 0))
+  (when (not noninteractive)
+    (let ((pyim-dcache-directory
+           (file-name-as-directory (make-temp-name "pyim-tests-dcache-")))
+          (file (make-temp-file "pyim-tests-import")))
+      ;; 删除测试用词条
+      (dolist (x '("测㤅" "测嘊" "测伌"))
+        (pyim-process-delete-word x))
+      (dolist (x '("测㤅" "测嘊" "测伌"))
+        (should-not (member x (pyim-dcache-get "ce-ai" '(icode2word)))))
+      (should-not (equal (gethash "测㤅" pyim-dhashcache-iword2count) 76543))
+      (should-not (equal (gethash "测嘊" pyim-dhashcache-iword2count) 34567))
+      (should-not (equal (gethash "测伌" pyim-dhashcache-iword2count) 0))
 
-    ;; 导入测试用词条
-    (with-temp-buffer
-      (insert
-       ";;; -*- coding: utf-8-unix -*-
+      ;; 导入测试用词条
+      (with-temp-buffer
+        (insert
+         ";;; -*- coding: utf-8-unix -*-
 测㤅 76543 ce-ai
 测嘊 34567
 测伌")
-      (write-file file))
-    (pyim-import-words-and-counts file (lambda (orig-count new-count) new-count) t)
+        (write-file file))
+      (pyim-import-words-and-counts file (lambda (orig-count new-count) new-count) t)
 
-    ;; 测试词条是否存在
-    (dolist (x '("测㤅" "测嘊" "测伌"))
-      (should (member x (pyim-dcache-get "ce-ai" '(icode2word)))))
-    (should (equal (gethash "测㤅" pyim-dhashcache-iword2count) 76543))
-    (should (equal (gethash "测嘊" pyim-dhashcache-iword2count) 34567))
-    (should (equal (gethash "测伌" pyim-dhashcache-iword2count) 0))))
+      ;; 测试词条是否存在
+      (dolist (x '("测㤅" "测嘊" "测伌"))
+        (should (member x (pyim-dcache-get "ce-ai" '(icode2word)))))
+      (should (equal (gethash "测㤅" pyim-dhashcache-iword2count) 76543))
+      (should (equal (gethash "测嘊" pyim-dhashcache-iword2count) 34567))
+      (should (equal (gethash "测伌" pyim-dhashcache-iword2count) 0)))))
 
 ;; ** pyim-dcache 相关单元测试
 (ert-deftest pyim-tests-pyim-dcache-save/read-variable-value ()
-  (let* ((file (make-temp-file "pyim-dcache-"))
+  (let* ((file (make-temp-file "pyim-tests-dcache-"))
          (backup-file (concat file "-backup-" (format-time-string "%Y%m%d%H%M%S")))
          (value (make-hash-table :test #'equal)))
     (puthash "ni-hao" (list "你好") value)
@@ -610,7 +613,7 @@
 
 (ert-deftest pyim-tests-pyim-dcache-handle-variable ()
   (let ((pyim-dcache-directory
-         (file-name-as-directory (make-temp-name "pyim-dcache-")))
+         (file-name-as-directory (make-temp-name "pyim-tests-dcache-")))
         my/test:1)
 
     (pyim-dcache-save-variable 'my/test:1 "hello")
@@ -631,7 +634,7 @@
 (ert-deftest pyim-tests-pyim-dcache-export ()
   (let ((pyim-dhashcache-iword2count (make-hash-table :test #'equal))
         (pyim-dhashcache-icode2word (make-hash-table :test #'equal))
-        (file (make-temp-file "pyim-dcache-export-")))
+        (file (make-temp-file "pyim-tests-dcache-export-")))
     (puthash "你好" 10 pyim-dhashcache-iword2count)
     (puthash "尼耗" 1 pyim-dhashcache-iword2count)
     (puthash "ni-hao" (list "你好" "尼耗") pyim-dhashcache-icode2word)
@@ -673,7 +676,7 @@ ni-hao 你好 尼耗
 
 (ert-deftest pyim-tests-pyim-dhashcache-generate-file ()
   (let ((dist-file (make-temp-file "pyim-dist-"))
-        (dcache-file (make-temp-file "pyim-dcache-"))
+        (dcache-file (make-temp-file "pyim-tests-dcache-"))
         (word2code-dcache-file (make-temp-file "pyim-word2code-dcache-"))
         output1 output2)
     (with-temp-buffer
@@ -772,7 +775,7 @@ zuo-zuo-you-mang 作作有芒")
     (should (equal (gethash "你好" pyim-dhashcache-iword2count) 20))))
 
 (ert-deftest pyim-tests-pyim-dhashcache-export ()
-  (let ((file (make-temp-file "pyim-dcache-"))
+  (let ((file (make-temp-file "pyim-tests-dcache-"))
         (icode2word (make-hash-table :test #'equal)))
     (puthash "yin-xing"
              (list (propertize "银行" :noexport t)
