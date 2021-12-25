@@ -31,25 +31,18 @@
 ;; * 代码                                                                 :code:
 (require 'ert)
 (require 'pyim)
+(require 'pyim-basedict)
 (require 'pyim-dregcache)
 (require 'pyim-dhashcache)
 
-;; ** 单元测试前的准备工作
-(defun pyim-tests-add-dict (file-name)
-  "搜索文件名称为 FILE-NAME 的词库，并添加到 `pyim-dicts'."
-  (let ((file (expand-file-name (concat default-directory "/deps/" file-name))))
-    (if (file-exists-p file)
-        (cl-pushnew
-         (list :name (file-name-base file) :file file)
-         pyim-dicts)
-      (message "pyim-test: fail to find dict file: '%s'." file))))
-
 (setq default-input-method "pyim")
-(pyim-tests-add-dict "pyim-basedict.pyim")
-(pyim-dcache-init-variables)
-
+(setq pyim-dicts nil)
+(setq pyim-extra-dicts nil)
 ;; 做测试的时候不保存词库，防止因为误操作导致个人词库损坏。
 (defalias 'pyim-kill-emacs-hook-function #'ignore)
+
+(pyim-basedict-enable)
+(pyim-dcache-init-variables)
 
 ;; ** pyim-schemes 相关单元测试
 (ert-deftest pyim-tests-pyim-schemes ()
