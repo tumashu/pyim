@@ -3,7 +3,7 @@ SHELL = /bin/sh
 EMACS ?= emacs
 
 clean:
-	@rm -rf pyim-tests-dcache-*
+	@rm -rf pyim-tests-temp-*
 
 .PHONY: deps
 deps:
@@ -17,4 +17,4 @@ deps:
 .PHONY: test
 test: deps clean
 	@$(EMACS) --batch --quick --directory .. --directory ./deps --load ./pyim-tests.el
-	@rm -rf pyim-tests-dcache-*
+	@rm -rf pyim-tests-temp-*
