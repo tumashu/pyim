@@ -38,16 +38,20 @@
 (defun pyim-tests-make-temp-file (&optional dir-flag)
   (make-temp-file "pyim-tests-temp-" dir-flag))
 
-(setq default-input-method "pyim")
-(setq pyim-dicts nil)
-(setq pyim-extra-dicts nil)
-;; 设置 pyim-dcache-directory, 防止用户个人词库不小心被覆盖掉。
-(setq pyim-dcache-directory (pyim-tests-make-temp-file t))
-;; 做测试的时候不保存词库，防止因为误操作导致个人词库损坏。
-(defalias 'pyim-kill-emacs-hook-function #'ignore)
+(defun pyim-tests-noninteractive-init ()
+  (setq default-input-method "pyim")
+  (setq pyim-dicts nil)
+  (setq pyim-extra-dicts nil)
+  ;; 设置 pyim-dcache-directory, 防止用户个人词库不小心被覆盖掉。
+  (setq pyim-dcache-directory (pyim-tests-make-temp-file t))
+  ;; 做测试的时候不保存词库，防止因为误操作导致个人词库损坏。
+  (defalias 'pyim-kill-emacs-hook-function #'ignore)
 
-(pyim-basedict-enable)
-(pyim-dcache-init-variables)
+  (pyim-basedict-enable)
+  (pyim-dcache-init-variables))
+
+(when noninteractive
+  (pyim-tests-noninteractive-init))
 
 ;; ** pyim-schemes 相关单元测试
 (ert-deftest pyim-tests-pyim-schemes ()
