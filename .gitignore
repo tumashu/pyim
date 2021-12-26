@@ -9,6 +9,6 @@
 *.elc
 /pyim-autoloads.el
 /pyim-pkg.el
-/tests/pyim-tests-dcache-*
+/tests/pyim-tests-temp-*
 /tests/deps/
 
