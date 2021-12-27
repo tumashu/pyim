@@ -87,7 +87,7 @@ IMOBJS 获得候选词条。"
                                (list str))))
           (setq result (append result output3))))
       (when (car result)
-        result))))
+        (delete-dups result)))))
 
 (defun pyim-candidates-create:quanpin (imobjs scheme-name &optional async)
   "`pyim-candidates-create' 处理全拼输入法的函数."
