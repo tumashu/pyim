@@ -301,6 +301,18 @@
     (should (equal (pyim-punctuation-return-proper-punct '("'" "‘" "’")) "‘"))
     (should (equal (pyim-punctuation-return-proper-punct '("'" "‘" "’")) "’"))))
 
+;; ** pyim-entered 相关单元测试
+(ert-deftest pyim-tests-pyim-entered ()
+  (pyim-entered-with-entered-buffer
+    (erase-buffer)
+    (insert "nihao")
+    (backward-char 3))
+  (should (equal (pyim-entered-get) "nihao"))
+  (should (equal (pyim-entered-get 'point-before) "ni"))
+  (should (equal (pyim-entered-get 'point-after) "hao"))
+  (pyim-entered-erase-buffer)
+  (should (equal (pyim-entered-get) "")))
+
 ;; ** pyim-impobjs 相关单元测试
 (ert-deftest pyim-tests-pyim-imobjs ()
   (let ((pyim-pinyin-fuzzy-alist '(("en" "eng")
