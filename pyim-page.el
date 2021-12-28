@@ -517,8 +517,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
 
 (cl-defun pyim-page-tooltip-popup-show (&key string position)
   "Show STRING at POSITION with the help of popup-el."
-  (let* ((string (popup-replace-displayable string))
-         (width-and-lines (popup-fill-string string))
+  (let* ((width-and-lines (popup-fill-string string))
          (width (car width-and-lines))
          (lines (cdr width-and-lines)))
     (when pyim-page-tooltip-popup
