@@ -100,8 +100,8 @@ Only useful when use posframe.")
 (defvar pyim-page-tooltip-posframe-buffer " *pyim-page-tooltip-posframe-buffer*"
   "这个变量用来保存做为 page tooltip 的 posframe 的 buffer.")
 
-(defvar pyim-page-refresh-run-async-p nil
-  "在异步获取词条的时候，PYIM 会将这个变量设置为 t.")
+(defvar pyim-page-tooltip-popup nil
+  "这个变量用来保存做为 page tooltip 的 popup.")
 
 (defun pyim-page-current-page ()
   "计算当前选择的词条在第几页面.
@@ -486,9 +486,9 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                           :foreground-color (face-attribute 'pyim-page :foreground)
                           :border-width pyim-page-posframe-border-width
                           :border-color (face-attribute 'pyim-page-border :background)))
-          ((and (eq tooltip 'popup)
-                (functionp 'popup-tip))
-           (pyim-popup-show :string string :position position))
+          ((and (eq tooltip 'popup) (featurep 'popup))
+           (pyim-page-tooltip-popup-show :string string
+                                         :position position))
           (t (let ((max-mini-window-height (+ pyim-page-length 2)))
                (message string))))))
 
@@ -513,52 +513,36 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
 (declare-function 'popup-fill-string "popup")
 (declare-function 'popup-set-list "popup")
 (declare-function 'popup-delete "popup")
-(declare-function 'popup-live-p "popup")
+(declare-function 'popup-replace-displayable "popup")
 
-(defvar pyim-popup-show-last-info nil
-  "保存上一次运行 `pyim-popup-show' 时的一些信息.")
-
-(cl-defun pyim-popup-show (&key string position)
+(cl-defun pyim-page-tooltip-popup-show (&key string position)
   "Show STRING at POSITION with the help of popup-el."
-  ;; 如果上次的 page 还在显示，string 和 position 没有变化时，就不做任何事，这样
-  ;; 可以减少闪烁。
-  (unless (and (popup-live-p (plist-get pyim-popup-show-last-info :popup))
-               (equal (plist-get pyim-popup-show-last-info :string) string)
-               (equal (plist-get pyim-popup-show-last-info :position) position))
-    (let* ((width-and-lines (popup-fill-string string))
-           (width (car width-and-lines))
-           (lines (cdr width-and-lines))
-           (last-popup (plist-get pyim-popup-show-last-info :popup))
-           popup)
-      ;; FIXME: 不知道什么原因，异步获取词条并刷新 page 时，popup 会生成两个
-      ;; page, 所以这里先删除上次创建的，这样处理会带来闪烁问题，不过通过缓存等
-      ;; 一些手段，可以降低闪烁频率。
-      (when (and pyim-page-refresh-run-async-p
-                 (popup-live-p last-popup))
-        (popup-delete last-popup))
-      (setq popup (popup-create position width 15
-                                :around t
-                                :margin-left 1
-                                :margin-right 1
-                                :face 'pyim-page))
-      (setq pyim-popup-show-last-info
-            (list :popup popup
-                  :string string
-                  :position position))
-      (unwind-protect
-          (when (> (popup-width popup) 0)
-            (popup-set-list popup lines)
-            (popup-draw popup)
-            (clear-this-command-keys)
-            (push (read-event nil) unread-command-events)
-            t)
-        (popup-delete popup)))))
+  (let* ((string (popup-replace-displayable string))
+         (width-and-lines (popup-fill-string string))
+         (width (car width-and-lines))
+         (lines (cdr width-and-lines)))
+    (when pyim-page-tooltip-popup
+      (popup-delete pyim-page-tooltip-popup))
+    (setq pyim-page-tooltip-popup
+          (popup-create position width 15
+                        :around t
+                        :margin-left 1
+                        :margin-right 1
+                        :face 'pyim-page))
+    (when (> (popup-width pyim-page-tooltip-popup) 0)
+      (popup-set-list pyim-page-tooltip-popup lines)
+      (popup-draw pyim-page-tooltip-popup))))
 
 (defun pyim-page-hide ()
   "Hide pyim page."
-  (when (and (eq pyim-page-tooltip 'posframe)
-             (functionp 'posframe-hide))
-    (posframe-hide pyim-page-tooltip-posframe-buffer)))
+  (cond
+   ((and (eq pyim-page-tooltip 'popup)
+         (functionp 'popup-delete))
+    (popup-delete pyim-page-tooltip-popup))
+   ((and (eq pyim-page-tooltip 'posframe)
+         (functionp 'posframe-hide))
+    (posframe-hide pyim-page-tooltip-posframe-buffer))
+   (t nil)))
 
 ;; * Footer
 (provide 'pyim-page)
