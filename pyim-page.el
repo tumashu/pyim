@@ -508,29 +508,25 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
       (setq quit-flag nil)
       (pyim-add-unread-command-events 7 t))))
 
-(declare-function 'popup-create "popup")
-(declare-function 'popup-width "popup")
-(declare-function 'popup-fill-string "popup")
-(declare-function 'popup-set-list "popup")
+(declare-function 'popup-tip "popup")
 (declare-function 'popup-delete "popup")
-(declare-function 'popup-replace-displayable "popup")
+(defvar popup-version)
 
 (cl-defun pyim-page-tooltip-popup-show (&key string position)
   "Show STRING at POSITION with the help of popup-el."
-  (let* ((width-and-lines (popup-fill-string string))
-         (width (car width-and-lines))
-         (lines (cdr width-and-lines)))
-    (when pyim-page-tooltip-popup
-      (popup-delete pyim-page-tooltip-popup))
-    (setq pyim-page-tooltip-popup
-          (popup-create position width 15
-                        :around t
-                        :margin-left 1
-                        :margin-right 1
-                        :face 'pyim-page))
-    (when (> (popup-width pyim-page-tooltip-popup) 0)
-      (popup-set-list pyim-page-tooltip-popup lines)
-      (popup-draw pyim-page-tooltip-popup))))
+  (when pyim-page-tooltip-popup
+    (popup-delete pyim-page-tooltip-popup))
+  (setq pyim-page-tooltip-popup
+        (apply #'popup-tip
+               string
+               :point position
+               :around t
+               :margin 1
+               :nowait t
+               :nostrip t
+               ;; popup v0.5.9 以后才支持 face 参数
+               (unless (version<= popup-version "0.5.8")
+                 (list :face 'pyim-page)))))
 
 (defun pyim-page-hide ()
   "Hide pyim page."
