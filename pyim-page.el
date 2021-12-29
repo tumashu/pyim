@@ -103,6 +103,9 @@ Only useful when use posframe.")
 (defvar pyim-page-tooltip-popup nil
   "这个变量用来保存做为 page tooltip 的 popup.")
 
+(defvar pyim-page-minibuffer-last-message nil
+  "函数 `pyim-page-minibuffer-message' 上一次处理的消息字符串。")
+
 (defun pyim-page-current-page ()
   "计算当前选择的词条在第几页面.
 
@@ -213,11 +216,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
        ;; windows 环境下，似乎有很严重的性能问题，原因未知。
        ((eq (selected-window) (minibuffer-window))
         (pyim-page-minibuffer-message
-         (concat (or pyim-page-minibuffer-separator
-                     (let* ((width (string-width (buffer-string)))
-                            (n (- (* 20 (+ 1 (/ width 20))) width)))
-                       (make-string n ?\ )))
-                 (pyim-page-style:minibuffer page-info))))
+         (pyim-page-style:minibuffer page-info)))
        ;; 在 exwm 环境下使用 exwm-xim 输入中文时，使用 minibuffer 来显示 page。
        ((pyim-probe-exwm-environment)
         (message (pyim-page-style:exwm page-info)))
@@ -497,13 +496,23 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
 这个函数就是作这个工作。"
   (message nil)
-  (let ((inhibit-quit t)
-        point-1)
+  (let* ((inhibit-quit t)
+         (begin (point))
+         (length (length pyim-page-minibuffer-last-message))
+         (end (min (+ begin length) (point-max))))
+    (delete-region begin end)
     (save-excursion
-      (insert string)
-      (setq point-1 (point)))
+      (insert
+       (setq pyim-page-minibuffer-last-message
+             (concat
+              (or pyim-page-minibuffer-separator
+                  (let* ((width (string-width (buffer-string)))
+                         (n (- (* 20 (+ 1 (/ width 20))) width)))
+                    (make-string n ?\ )))
+              string)))
+      (setq end (point)))
     (sit-for 1000000)
-    (delete-region (point) point-1)
+    (delete-region (point) (min end (point-max)))
     (when quit-flag
       (setq quit-flag nil)
       (pyim-add-unread-command-events 7 t))))
@@ -534,6 +543,7 @@ minibuffer 原来显示的信息和 pyim 选词框整合在一起显示
 
 (defun pyim-page-hide ()
   "Hide pyim page."
+  (setq pyim-page-minibuffer-last-message nil)
   (cond
    ((and (eq pyim-page-tooltip 'popup)
          (functionp 'popup-delete))

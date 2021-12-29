@@ -251,9 +251,6 @@
     ;; 当用户选择词条时，如果停顿超过1秒，就激活异步流程，不同的输入法异步流程定
     ;; 义也可能不同，比如：全拼输入法目前的异步流程是搜索当前 buffer 获取词条。
     ;; 而 rime 的异步流程是获取所有的词条。
-    ;;
-    ;; 注意事项：异步流程对 page tooltip 有要求, 有些 page tooltip 是无法支持异
-    ;; 步流程的。
     (setq pyim-process-run-async-timer
           (run-with-timer
            pyim-process-async-delay
@@ -320,13 +317,12 @@
 
 (defun pyim-process-run-async ()
   "Function used by `pyim-process-run-async-timer'"
-  (unless (equal (selected-window) (minibuffer-window))
-    (let* ((scheme-name (pyim-scheme-name))
-           (words (delete-dups (pyim-candidates-create pyim-imobjs scheme-name t))))
-      (when words
-        (setq pyim-candidates words)
-        (pyim-preview-refresh)
-        (pyim-page-refresh)))))
+  (let* ((scheme-name (pyim-scheme-name))
+         (words (delete-dups (pyim-candidates-create pyim-imobjs scheme-name t))))
+    (when words
+      (setq pyim-candidates words)
+      (pyim-preview-refresh)
+      (pyim-page-refresh))))
 
 (defun pyim-process-run-async-timer-reset ()
   "Reset `pyim-process-run-async-timer'."
