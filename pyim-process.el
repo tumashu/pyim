@@ -320,7 +320,6 @@
 
 (defun pyim-process-run-async ()
   "Function used by `pyim-process-run-async-timer'"
-  ;; NEED HELP: 目前只有 posframe 和 minibufer 两种 page 可以用于异步处理。
   (unless (equal (selected-window) (minibuffer-window))
     (let* ((scheme-name (pyim-scheme-name))
            (words (delete-dups (pyim-candidates-create pyim-imobjs scheme-name t))))
