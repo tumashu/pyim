@@ -112,14 +112,14 @@ Only useful when use posframe.")
   '((t (:background "gray44")))
   "使用以词选字功能时，选择的汉字所使用的 face.")
 
-(defvar pyim-page-tooltip-posframe-buffer " *pyim-page-tooltip-posframe-buffer*"
+(defvar pyim-page-posframe-buffer " *pyim-page-posframe-buffer*"
   "这个变量用来保存做为 page tooltip 的 posframe 的 buffer.")
 
-(defvar pyim-page-tooltip-popup nil
+(defvar pyim-page-last-popup nil
   "这个变量用来保存做为 page tooltip 的 popup.")
 
-(defvar pyim-page-tooltip-minibuffer-last-string nil
-  "函数 `pyim-page-tooltip-minibuffer-show' 上一次处理的消息字符串。")
+(defvar pyim-page-last-minibuffer-string nil
+  "函数 `pyim-page-show-with-minibuffer' 上一次处理的消息字符串。")
 
 (defun pyim-page-current-page ()
   "计算当前选择的词条在第几页面.
@@ -215,7 +215,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                   (cl-subseq candidates start end)))
          (pos (- (min pyim-candidate-position (length candidates)) start))
          (page-info (make-hash-table))
-         (tooltip (pyim-page-tooltip-get-valid-tooltip)))
+         (tooltip (pyim-page-get-valid-tooltip)))
     (puthash :current-page (pyim-page-current-page) page-info)
     (puthash :total-page (pyim-page-total-page) page-info)
     (puthash :candidates candidate-showed page-info)
@@ -224,7 +224,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
     ;; Show page.
     (when (and (null unread-command-events)
                (null unread-post-input-method-events))
-      (pyim-page-tooltip-show
+      (pyim-page-show
        (pyim-page-info-format page-info tooltip)
        (pyim-preview-start-point)
        tooltip))))
@@ -480,7 +480,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
           (gethash :current-page page-info)
           (gethash :total-page page-info)))
 
-(defun pyim-page-tooltip-get-valid-tooltip ()
+(defun pyim-page-get-valid-tooltip ()
   "获取一个可用的 tooltip."
   (cond
    ;; 在 minibuffer 中输入中文时，默认使用当前输入行来显示候选词。以前在
@@ -501,10 +501,10 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                         (list pyim-page-tooltip)))
           'minibuffer))))
 
-(defun pyim-page-tooltip-show (string position tooltip)
+(defun pyim-page-show (string position tooltip)
   "在 POSITION 位置，使用 posframe 或者 popup 显示字符串 STRING."
   (cond ((eq tooltip 'posframe)
-         (posframe-show pyim-page-tooltip-posframe-buffer
+         (posframe-show pyim-page-posframe-buffer
                         :string string
                         :position position
                         :min-width pyim-page-posframe-min-width
@@ -513,11 +513,11 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                         :border-width pyim-page-posframe-border-width
                         :border-color (face-attribute 'pyim-page-border :background)))
         ((eq tooltip 'popup)
-         (pyim-page-tooltip-popup-show :string string
-                                       :position position))
-        (t (pyim-page-tooltip-minibuffer-show string))))
+         (pyim-page-show-with-popup :string string
+                                    :position position))
+        (t (pyim-page-show-with-minibuffer string))))
 
-(defun pyim-page-tooltip-minibuffer-show (string)
+(defun pyim-page-show-with-minibuffer (string)
   "使用 minibuffer 来显示 string。"
   (if (not (eq (selected-window) (minibuffer-window)))
       (message string)
@@ -525,12 +525,12 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
       (message nil)
       (let* ((inhibit-quit t)
              (begin (point))
-             (length (length pyim-page-tooltip-minibuffer-last-string))
+             (length (length pyim-page-last-minibuffer-string))
              (end (min (+ begin length) (point-max))))
         (delete-region begin end)
         (save-excursion
           (insert
-           (setq pyim-page-tooltip-minibuffer-last-string
+           (setq pyim-page-last-minibuffer-string
                  (concat
                   (or pyim-page-minibuffer-separator
                       (let* ((width (string-width (buffer-string)))
@@ -548,11 +548,11 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 (declare-function 'popup-delete "popup")
 (defvar popup-version)
 
-(cl-defun pyim-page-tooltip-popup-show (&key string position)
+(cl-defun pyim-page-show-with-popup (&key string position)
   "Show STRING at POSITION with the help of popup-el."
-  (when pyim-page-tooltip-popup
-    (popup-delete pyim-page-tooltip-popup))
-  (setq pyim-page-tooltip-popup
+  (when pyim-page-last-popup
+    (popup-delete pyim-page-last-popup))
+  (setq pyim-page-last-popup
         (apply #'popup-tip string
                :point position :around t :nowait t :nostrip t
                ;; popup v0.5.9 以后才支持 face 参数
@@ -561,13 +561,13 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 
 (defun pyim-page-hide ()
   "Hide pyim page."
-  (let ((tooltip (pyim-page-tooltip-get-valid-tooltip)))
+  (let ((tooltip (pyim-page-get-valid-tooltip)))
     (cond
      ((eq tooltip 'popup)
-      (popup-delete pyim-page-tooltip-popup))
+      (popup-delete pyim-page-last-popup))
      ((eq tooltip 'posframe)
-      (posframe-hide pyim-page-tooltip-posframe-buffer))
-     (t (setq pyim-page-tooltip-minibuffer-last-string nil)))))
+      (posframe-hide pyim-page-posframe-buffer))
+     (t (setq pyim-page-last-minibuffer-string nil)))))
 
 ;; * Footer
 (provide 'pyim-page)
