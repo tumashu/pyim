@@ -199,7 +199,7 @@ pyim 支持双拼输入模式，用户可以通过变量 `pyim-default-scheme' �
    注意：pyim 不会自动安装 posframe, 用户需要手动安装这个包，
 3. 按照优先顺序自动选择一个可用的 tooltip
    #+begin_example
-   (setq pyim-page-tooltip '(posframe popup exwm-xim minibuffer))
+   (setq pyim-page-tooltip '(posframe popup minibuffer))
    #+end_example
 
 ** 调整 tooltip 选词框的显示样式

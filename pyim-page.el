@@ -46,7 +46,7 @@
 细节信息请参考 `pyim-page-refresh' 的 docstring."
   :type 'number)
 
-(defcustom pyim-page-tooltip '(posframe popup exwm-xim minibuffer)
+(defcustom pyim-page-tooltip '(posframe popup minibuffer)
   "如何绘制 pyim 选词框.
 
 1. 当这个变量取值为 posframe 时，使用 posframe 包来绘制选词框，
@@ -56,35 +56,29 @@
    有时会遇到选词框错位的问题；
 3. 当这个变量取值为 minibuffer 时，使用 minibuffer 做为选词框，
    这个选项也作为其他选项不可用时的 fallback.
-4. 当这个变量取值为 exwm-xim 时，使用 minibuffer 作为选词框，这个
-   选项专门用于 exwm-xim 环境。
 
 当这个变量的取值是为一个 list 时，pyim 将按照优先顺序动态选择一个
 可用的 tooltip."
   :type '(choice (repeat (choice (const posframe)
                                  (const popup)
-                                 (const exwm-xim)
-                                 (const message)))
+                                 (const minibuffer)))
                  (const posframe)
                  (const popup)
-                 (const exwm-xim)
-                 (const message)))
+                 (const minibuffer)))
 
 (defcustom pyim-page-style 'two-lines
   "这个变量用来控制选词框的格式.
 
-pyim 内建的有三种选词框格式：
+pyim 内建的有四种选词框格式：
 
 1. one-line    单行选词框
 2. two-lines   双行选词框
 3. vertical    垂直选词框
-4. minibuffer  单行选词框 (minibuffer 中专用)
-5. exwm-xim    单行选词框 (exwm-xim 环境中专用)"
+4. minibuffer  单行选词框 (minibuffer 中专用)"
   :type 'symbol)
 
 (defcustom pyim-page-tooltip-style-alist
-  '((minibuffer . minibuffer)
-    (exwm-xim . exwm-xim))
+  '((minibuffer . minibuffer))
   "pyim page tooltip 专用 page style 绑定设置表。
 
 这个表是一个 alist, 每个元素的 car 代表 tooltip, cdr 代表对应的
@@ -478,18 +472,6 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
           (gethash :current-page page-info)
           (gethash :total-page page-info)))
 
-(defun pyim-page-style:exwm-xim (page-info)
-  "专门用于 exwm-xim 环境的 page style."
-  (format "[%s]: %s(%s/%s)"
-          (pyim-page-preview-create)
-          (pyim-page-menu-create
-           (gethash :candidates page-info)
-           (gethash :position page-info)
-           nil
-           (gethash :hightlight-current page-info))
-          (gethash :current-page page-info)
-          (gethash :total-page page-info)))
-
 (defun pyim-page-get-valid-tooltip ()
   "获取一个可用的 tooltip."
   (cond
@@ -498,7 +480,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
    ;; 境下，似乎有很严重的性能问题，原因未知。
    ((eq (selected-window) (minibuffer-window)) 'minibuffer)
    ;; 在 exwm-xim 环境下输入中文。
-   ((pyim-exwm-xim-environment-p) 'exwm-xim)
+   ((pyim-exwm-xim-environment-p) 'minibuffer)
    (t (or (cl-find-if (lambda (tp)
                         (or (and (eq tp 'posframe)
                                  (functionp 'posframe-workable-p)
