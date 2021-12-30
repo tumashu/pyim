@@ -202,8 +202,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
    :candidates 关键字对应的位置，这个 hastable 最终会做为参数传递
    给 `pyim-page-style' 相关的函数，用于生成用于在选词框中显示的
    字符串。"
-  (let* ((message-log-max nil)
-         (start (1- (pyim-page-start)))
+  (let* ((start (1- (pyim-page-start)))
          (end (pyim-page-end))
          (candidates pyim-candidates)
          (candidate-showed
@@ -518,10 +517,11 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
         (t (pyim-page-show-with-minibuffer string))))
 
 (defun pyim-page-show-with-minibuffer (string)
-  "使用 minibuffer 来显示 string。"
-  (if (not (eq (selected-window) (minibuffer-window)))
-      (message string)
-    (let ((max-mini-window-height (+ pyim-page-length 2)))
+  "使用 minibuffer 来显示 STRING。"
+  (let ((max-mini-window-height (+ pyim-page-length 2))
+        (message-log-max nil))
+    (if (not (eq (selected-window) (minibuffer-window)))
+        (message string)
       (message nil)
       (let* ((inhibit-quit t)
              (begin (point))
