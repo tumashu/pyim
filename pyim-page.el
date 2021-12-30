@@ -52,15 +52,14 @@
   "如何绘制 pyim 选词框.
 
 1. 当这个变量取值为 posframe 时，使用 posframe 包来绘制选词框，
-   如果使用 emacs26 图形版的用户推荐使用这个选项。
+   使用 emacs 26 图形版的用户推荐使用这个选项。
 2. 当这个变量取值为 popup 时，使用 popup-el 包来绘制选词框，
    这个选项可以在 emacs 图形版和终端版使用，速度没有 posframe 快，
-   有时会遇到选词框错位的问题；
-3. 当这个变量取值为 minibuffer 时，使用 minibuffer 做为选词框，
+   偶尔会遇到选词框错位的问题。
+3. 当这个变量取值为 minibuffer 时，minibuffer 将做为选词框，
    这个选项也作为其他选项不可用时的 fallback.
-
-当这个变量的取值是为一个 list 时，pyim 将按照优先顺序动态选择一个
-可用的 tooltip."
+4. 当这个变量的取值是为一个 list 时，pyim 将按照优先顺序动态
+   选择一个当前环境可用的 tooltip."
   :type '(choice (repeat (choice (const posframe)
                                  (const popup)
                                  (const minibuffer)))
