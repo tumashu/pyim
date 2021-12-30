@@ -56,14 +56,18 @@
    有时会遇到选词框错位的问题；
 3. 当这个变量取值为 minibuffer 时，使用 minibuffer 做为选词框，
    这个选项也作为其他选项不可用时的 fallback.
+4. 当这个变量取值为 exwm 时，使用 minibuffer 作为选词框，这个选项
+   专门用于 exwm-xim 环境。
 
 当这个变量的取值是为一个 list 时，pyim 将按照优先顺序动态选择一个
 可用的 tooltip."
   :type '(choice (repeat (choice (const posframe)
                                  (const popup)
+                                 (const exwm)
                                  (const message)))
                  (const posframe)
                  (const popup)
+                 (const exwm)
                  (const message)))
 
 (defcustom pyim-page-style 'two-lines
@@ -71,9 +75,11 @@
 
 pyim 内建的有三种选词框格式：
 
-1. one-line  单行选词框
-2. two-lines 双行选词框
-3. vertical  垂直选词框"
+1. one-line    单行选词框
+2. two-lines   双行选词框
+3. vertical    垂直选词框
+4. minibuffer  单行选词框(minibuffer 中专用)
+5. exwm        单行选词框(exwm-xim 环境中专用)"
   :type 'symbol)
 
 (defcustom pyim-page-posframe-border-width 0
@@ -549,13 +555,8 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
   (when pyim-page-tooltip-popup
     (popup-delete pyim-page-tooltip-popup))
   (setq pyim-page-tooltip-popup
-        (apply #'popup-tip
-               string
-               :point position
-               :around t
-               :margin 1
-               :nowait t
-               :nostrip t
+        (apply #'popup-tip string
+               :point position :around t :nowait t :nostrip t
                ;; popup v0.5.9 以后才支持 face 参数
                (unless (version<= popup-version "0.5.8")
                  (list :face 'pyim-page)))))
