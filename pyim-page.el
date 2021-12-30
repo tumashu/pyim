@@ -75,7 +75,10 @@ pyim 内建的有四种选词框格式：
 2. two-lines   双行选词框
 3. vertical    垂直选词框
 4. minibuffer  单行选词框 (minibuffer 中专用)"
-  :type 'symbol)
+  :type '(choice (const two-lines)
+                 (const one-line)
+                 (const vertical)
+                 (const minibuffer)))
 
 (defcustom pyim-page-tooltip-style-alist
   '((minibuffer . minibuffer))
