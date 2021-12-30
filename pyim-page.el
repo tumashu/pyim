@@ -457,7 +457,9 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 +------------------------------------+
 | [ni hao]: 1.你好 2.你号 ...  (1/9) |
 +------------------------------------+"
-  (format "[%-15s]: %s(%s/%s)"
+  ;; 在 minibuffer 中显示 page 的时候，page 字符串直接插入到 minibuffer 现有的内
+  ;; 容中, 为了便于区分，在 page 后面添加一个显眼的字符。
+  (format "[%-15s]: %s(%s/%s) $ "
           (pyim-page-preview-create)
           (pyim-page-menu-create
            (gethash :candidates page-info)
@@ -534,7 +536,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                     (let* ((width (string-width (buffer-string)))
                            (n (- (* 20 (+ 1 (/ width 20))) width)))
                       (make-string n ?\ )))
-                string " $ ")))))))
+                string)))))))
 
 (declare-function 'popup-tip "popup")
 (declare-function 'popup-delete "popup")
