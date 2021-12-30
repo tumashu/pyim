@@ -78,9 +78,19 @@ pyim 内建的有三种选词框格式：
 1. one-line    单行选词框
 2. two-lines   双行选词框
 3. vertical    垂直选词框
-4. minibuffer  单行选词框(minibuffer 中专用)
-5. exwm-xim    单行选词框(exwm-xim 环境中专用)"
+4. minibuffer  单行选词框 (minibuffer 中专用)
+5. exwm-xim    单行选词框 (exwm-xim 环境中专用)"
   :type 'symbol)
+
+(defcustom pyim-page-tooltip-style-alist
+  '((minibuffer . minibuffer)
+    (exwm-xim . exwm-xim))
+  "pyim page tooltip 专用 page style 绑定设置表。
+
+这个表是一个 alist, 每个元素的 car 代表 tooltip, cdr 代表对应的
+page style."
+  :type '(alist :key-type symbol
+                :value-type symbol))
 
 (defcustom pyim-page-posframe-border-width 0
   "posframe的内间距。
@@ -384,9 +394,8 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 
 (defun pyim-page-info-format (page-info tooltip)
   "将 PAGE-INFO 按照 `pyim-page-style' 格式化为选词框中显示的字符串。"
-  (let* ((style (cond ((eq tooltip 'exwm-xim) 'exwm-xim)
-                      ((eq tooltip 'minibuffer) 'minibuffer)
-                      (t pyim-page-style))))
+  (let ((style (or (cdr (assoc tooltip pyim-page-tooltip-style-alist))
+                   pyim-page-style)))
     (let ((func (intern (format "pyim-page-style:%S" style))))
       (if (functionp func)
           (funcall func page-info)
