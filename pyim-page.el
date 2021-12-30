@@ -543,6 +543,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 (cl-defun pyim-page-show-with-popup (&key string position)
   "Show STRING at POSITION with the help of popup-el."
   (when pyim-page-last-popup
+    ;; 异步获取词条的时候，如果不把已经存在的 popup 删除，就会出现两个 page.
     (popup-delete pyim-page-last-popup))
   (setq pyim-page-last-popup
         (apply #'popup-tip string
