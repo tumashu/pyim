@@ -52,6 +52,10 @@
 
 细节信息请参考 `pyim-page-refresh' 的 docstring.")
 
+(defvar pyim-candidates-with-corrections t
+  "Give corrections based on permutations of code input.
+由输入代码的全排列提供所有可能的备选。")
+
 (pyim-register-local-variables
  '(pyim-candidates pyim-candidate-position))
 
@@ -64,6 +68,44 @@ IMOBJS 获得候选词条。"
       (when class
         (funcall (intern (format "pyim-candidates-create:%S" class))
                  imobjs scheme-name async)))))
+
+;; https://www.emacswiki.org/emacs/StringPermutations
+(defun pyim-rotate-string (s n)
+  (cond ((= (length s) 1)
+         s)
+        ((> (length s) 1)
+         (let ((s2 s) (cnt 0))
+           (while (< cnt n)
+             (setq s2 (concat (substring s2 1) (substring s2 0 1)))
+             (setq cnt (1+ cnt)))
+           s2))))
+
+(defun pyim-list-all-rotated-strings (s)
+  (let ((cnt 0))
+    (mapcar
+     (lambda (x)
+       (setq cnt (1+ cnt))
+       (pyim-rotate-string s cnt))
+     s)))
+
+(defun pyim-string-permutations (s)
+  (cond ((null s)
+         nil)
+        ((= (length s) 0)
+         nil)
+        ((= (length s) 1)
+         (list s))
+        ((= (length s) 2)
+         (pyim-list-all-rotated-strings s))
+        (t
+         (apply 'append
+                (mapcar 
+                 (lambda (rotn)
+                   (mapcar 
+                    (lambda (perm)
+                      (concat (substring rotn 0 1) perm))
+                    (pyim-string-permutations (substring rotn 1))))
+                 (pyim-list-all-rotated-strings s))))))
 
 (defun pyim-candidates-create:xingma (imobjs scheme-name &optional async)
   "`pyim-candidates-create' 处理五笔仓颉等形码输入法的函数."
@@ -81,10 +123,19 @@ IMOBJS 获得候选词条。"
                          (car (pyim-dcache-get code)))
                        output2 "")))
           (setq output3
-                (remove "" (or (mapcar (lambda (x)
-                                         (concat str x))
-                                       (pyim-dcache-get output1 '(icode2word code2word shortcode2word)))
-                               (list str))))
+                (if pyim-candidates-with-corrections
+                    (let ((prefix (car (split-string output1 "/")))
+                          (code (cadr (split-string output1 "/"))))
+                      (cl-loop for single-code in (reverse (pyim-string-permutations code))
+                               append 
+                               (remove nil (remove "" (or (mapcar (lambda (x)
+                                                                    (concat str x))
+                                                                  (pyim-dcache-get (concat prefix "/" single-code) '(icode2word code2word shortcode2word)))
+                                                          (list str))))))
+                  (remove "" (or (mapcar (lambda (x)
+                                           (concat str x))
+                                         (pyim-dcache-get output1 '(icode2word code2word shortcode2word)))
+                                 (list str)))))
           (setq result (append result output3))))
       (when (car result)
         (delete-dups result)))))
