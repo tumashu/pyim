@@ -46,7 +46,7 @@
 细节信息请参考 `pyim-page-refresh' 的 docstring."
   :type 'number)
 
-(defcustom pyim-page-tooltip '(posframe popup exwm minibuffer)
+(defcustom pyim-page-tooltip '(posframe popup exwm-xim minibuffer)
   "如何绘制 pyim 选词框.
 
 1. 当这个变量取值为 posframe 时，使用 posframe 包来绘制选词框，
@@ -56,18 +56,18 @@
    有时会遇到选词框错位的问题；
 3. 当这个变量取值为 minibuffer 时，使用 minibuffer 做为选词框，
    这个选项也作为其他选项不可用时的 fallback.
-4. 当这个变量取值为 exwm 时，使用 minibuffer 作为选词框，这个选项
-   专门用于 exwm-xim 环境。
+4. 当这个变量取值为 exwm-xim 时，使用 minibuffer 作为选词框，这个
+   选项专门用于 exwm-xim 环境。
 
 当这个变量的取值是为一个 list 时，pyim 将按照优先顺序动态选择一个
 可用的 tooltip."
   :type '(choice (repeat (choice (const posframe)
                                  (const popup)
-                                 (const exwm)
+                                 (const exwm-xim)
                                  (const message)))
                  (const posframe)
                  (const popup)
-                 (const exwm)
+                 (const exwm-xim)
                  (const message)))
 
 (defcustom pyim-page-style 'two-lines
@@ -79,7 +79,7 @@ pyim 内建的有三种选词框格式：
 2. two-lines   双行选词框
 3. vertical    垂直选词框
 4. minibuffer  单行选词框(minibuffer 中专用)
-5. exwm        单行选词框(exwm-xim 环境中专用)"
+5. exwm-xim    单行选词框(exwm-xim 环境中专用)"
   :type 'symbol)
 
 (defcustom pyim-page-posframe-border-width 0
@@ -156,8 +156,6 @@ non-nil，说明，补全已经用完了.
       (if finish
           whole
         (pyim-page-end t)))))
-
-(declare-function pyim-probe-exwm-environment "pyim-probe")
 
 (defun pyim-page-refresh (&optional hightlight-current)
   "刷新 page 页面的函数.
@@ -387,7 +385,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 
 (defun pyim-page-info-format (page-info tooltip)
   "将 PAGE-INFO 按照 `pyim-page-style' 格式化为选词框中显示的字符串。"
-  (let* ((style (cond ((eq tooltip 'exwm) 'exwm)
+  (let* ((style (cond ((eq tooltip 'exwm-xim) 'exwm-xim)
                       ((eq tooltip 'minibuffer) 'minibuffer)
                       (t pyim-page-style))))
     (let ((func (intern (format "pyim-page-style:%S" style))))
@@ -470,8 +468,8 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
           (gethash :current-page page-info)
           (gethash :total-page page-info)))
 
-(defun pyim-page-style:exwm (page-info)
-  "专门用于 exwm 环境的 page style."
+(defun pyim-page-style:exwm-xim (page-info)
+  "专门用于 exwm-xim 环境的 page style."
   (format "[%s]: %s(%s/%s)"
           (pyim-page-preview-create)
           (pyim-page-menu-create
@@ -489,8 +487,8 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
    ;; minibuffer 中试用过 posframe, 在 linux 环境下，运行还不错，但在 windows 环
    ;; 境下，似乎有很严重的性能问题，原因未知。
    ((eq (selected-window) (minibuffer-window)) 'minibuffer)
-   ;; 在 exwm 环境下使用 exwm-xim 输入中文。
-   ((pyim-exwm-xim-environment-p) 'exwm)
+   ;; 在 exwm-xim 环境下输入中文。
+   ((pyim-exwm-xim-environment-p) 'exwm-xim)
    (t (or (cl-find-if (lambda (tp)
                         (or (and (eq tp 'posframe)
                                  (functionp 'posframe-workable-p)

@@ -55,7 +55,7 @@
   :type 'symbol)
 
 (defcustom pyim-force-input-chinese-functions
-  (list 'pyim-probe-exwm-environment
+  (list 'pyim-probe-exwm-xim-environment
         'pyim-probe-xwidget-webkit-environment)
   "让 pyim 强制输入中文.
 
