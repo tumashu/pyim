@@ -478,11 +478,11 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 (defun pyim-page-get-valid-tooltip ()
   "获取一个可用的 tooltip."
   (cond
-   ;; 在 minibuffer 中输入中文时，默认使用当前输入行来显示候选词。以前在
-   ;; minibuffer 中试用过 posframe, 在 linux 环境下，运行还不错，但在 windows 环
-   ;; 境下，似乎有很严重的性能问题，原因未知。
+   ;; NOTE: 以前在 minibuffer 中试用过 posframe, linux 环境下运行效果还不错，但
+   ;; 在 windows 环境下，似乎有很严重的性能问题，原因未知。
    ((eq (selected-window) (minibuffer-window)) 'minibuffer)
-   ;; 在 exwm-xim 环境下输入中文。
+   ;; 在 exwm-xim 环境下输入中文时，只能使用 minibuffer, 因为应用窗口遮挡的缘故，
+   ;; 其它方式不可用。
    ((pyim-exwm-xim-environment-p) 'minibuffer)
    (t (or (cl-find-if (lambda (tp)
                         (or (and (eq tp 'posframe)
