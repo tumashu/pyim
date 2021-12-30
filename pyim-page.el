@@ -523,26 +523,18 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
     (if (not (eq (selected-window) (minibuffer-window)))
         (message string)
       (message nil)
-      (let* ((inhibit-quit t)
-             (begin (point))
-             (length (length pyim-page-last-minibuffer-string))
-             (end (min (+ begin length) (point-max))))
-        (delete-region begin end)
-        (save-excursion
-          (insert
-           (setq pyim-page-last-minibuffer-string
-                 (concat
-                  (or pyim-page-minibuffer-separator
-                      (let* ((width (string-width (buffer-string)))
-                             (n (- (* 20 (+ 1 (/ width 20))) width)))
-                        (make-string n ?\ )))
-                  string)))
-          (setq end (point)))
-        (sit-for 1000000)
-        (delete-region (point) (min end (point-max)))
-        (when quit-flag
-          (setq quit-flag nil)
-          (pyim-add-unread-command-events 7 t))))))
+      ;; 异步获取词条的时候，上一次的 page 字符串可能还在 Minibuffer 中，所以首
+      ;; 先要将其去除，否则会出现两个 page.
+      (delete-char (length pyim-page-last-minibuffer-string))
+      (save-excursion
+        (insert
+         (setq pyim-page-last-minibuffer-string
+               (concat
+                (or pyim-page-minibuffer-separator
+                    (let* ((width (string-width (buffer-string)))
+                           (n (- (* 20 (+ 1 (/ width 20))) width)))
+                      (make-string n ?\ )))
+                string " $ ")))))))
 
 (declare-function 'popup-tip "popup")
 (declare-function 'popup-delete "popup")
@@ -567,7 +559,10 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
       (popup-delete pyim-page-last-popup))
      ((eq tooltip 'posframe)
       (posframe-hide pyim-page-posframe-buffer))
-     (t (setq pyim-page-last-minibuffer-string nil)))))
+     (t (when (eq (selected-window) (minibuffer-window))
+          ;; 从 minibuffer 中删除 page 字符串。
+          (delete-char (length pyim-page-last-minibuffer-string)))
+        (setq pyim-page-last-minibuffer-string nil)))))
 
 ;; * Footer
 (provide 'pyim-page)
