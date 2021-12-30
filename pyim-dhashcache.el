@@ -481,12 +481,15 @@ code 对应的中文词条了。
   "导出个人词库到 FILE."
   (pyim-dhashcache-export pyim-dhashcache-icode2word file confirm))
 
-(defun pyim-dhashcache-export-words-and-counts (file &optional confirm)
+(defun pyim-dhashcache-export-words-and-counts (file &optional confirm ignore-counts)
   (with-temp-buffer
     (insert ";;; -*- coding: utf-8-unix -*-\n")
     (maphash
      (lambda (key value)
-       (insert (format "%s %s\n" key value)))
+       (insert
+        (if ignore-counts
+            (format "%s\n" key)
+          (format "%s %s\n" key value))))
      pyim-dhashcache-iword2count)
     ;; 在默认情况下，用户选择过的词生成的缓存中存在的词条，
     ;; `pyim-dhashcache-iword2count' 中也一定存在，但如果用户
@@ -496,7 +499,10 @@ code 对应的中文词条了。
      (lambda (_ words)
        (dolist (word words)
          (unless (gethash word pyim-dhashcache-iword2count)
-           (insert (format "%s %s\n" word 0)))))
+           (insert
+            (if ignore-counts
+                (format "%s\n" word)
+              (format "%s %s\n" word 0))))))
      pyim-dhashcache-icode2word)
     (pyim-dcache-write-file file confirm)))
 

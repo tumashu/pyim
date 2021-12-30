@@ -677,6 +677,14 @@
 你好 10
 尼耗 1
 ")))
+    (pyim-dcache-export-words-and-counts file nil t)
+    (with-temp-buffer
+      (insert-file-contents file)
+      (should (equal (buffer-string)
+                     ";;; -*- coding: utf-8-unix -*-
+你好
+尼耗
+")))
     (pyim-dcache-export-personal-words file)
     (with-temp-buffer
       (insert-file-contents file)
