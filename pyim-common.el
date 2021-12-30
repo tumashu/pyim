@@ -191,6 +191,11 @@ When CARE-FIRST-ONE is no-nil, ((a b c) (d e)) => (a d)."
                 (> (float-time (time-since ,start)) ,limit)
                 (throw 'done 'pyim-time-out)))))))
 
+(defvar exwm-xim-buffer-p)
+(defun pyim-exwm-xim-environment-p ()
+  "判断当前环境是否是 exwm-xim 环境。"
+  (bound-and-true-p exwm-xim-buffer-p))
+
 ;; * Footer
 (provide 'pyim-common)
 

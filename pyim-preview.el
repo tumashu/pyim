@@ -101,6 +101,9 @@ pyim 会使用 Emacs overlay 机制在 *待输入buffer* 光标处高亮显示�
     (delete-region (overlay-start pyim-preview-overlay)
                    (overlay-end pyim-preview-overlay))))
 
+(defun pyim-preview-start-point ()
+  "Preview 字符串的开始位置。"
+  (overlay-start pyim-preview-overlay))
 
 ;; * Footer
 (provide 'pyim-preview)

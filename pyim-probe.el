@@ -188,12 +188,11 @@
     (or (not (eq (org-inside-LaTeX-fragment-p) nil))
         (not (eq (org-inside-latex-macro-p) nil)))))
 
-(defvar exwm-xim-buffer-p)
 (defun pyim-probe-exwm-environment ()
   "测试当前是否是 exwm 输入法环境。
 
 这个探针主要用于： `pyim-force-input-chinese-functions'"
-  (bound-and-true-p exwm-xim-buffer-p))
+  (pyim-exwm-xim-environment-p))
 
 (defvar xwidget-webkit-isearch--read-string-buffer)
 (defun pyim-probe-xwidget-webkit-environment ()
