@@ -101,8 +101,6 @@ IMOBJS 获得候选词条。"
                                             all-words)))
                   (mapcar (lambda (word)
                             (concat prefix word))
-                          ;; NOTE: 形码输入法的第一个词选择公共词库中的第一个词，
-                          ;; 剩下的词按照词条 count 大小排序。这种策略是否合理？
                           `(,first-word
                             ,@(pyim-dcache-call-api 'sort-words chars)
                             ,@(pyim-dcache-call-api 'sort-words all-words)))))
