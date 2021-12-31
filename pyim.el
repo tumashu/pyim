@@ -591,12 +591,8 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
           ;; 字符串里面剪掉。
           (delete-region (point-min) (point)))
         (pyim-process-run))
-    ;; 型码输入法，只考虑将词条保存到个人词库，用于调整词频，单字不保存。
     (unless (pyim-process-select-subword-p) ;NOTE: 以词定字的时候，到底应不应该保存词条呢，需要进一步研究。
-      (when (> (length (pyim-process-get-outcome)) 1)
-        (if (member (pyim-process-get-outcome) (pyim-process-get-candidates))
-            (pyim-process-create-word (pyim-process-get-outcome) t)
-          (pyim-process-create-word (pyim-process-get-outcome)))))
+      (pyim-process-create-word (pyim-process-get-outcome)))
     (pyim-process-terminate)
     ;; pyim 使用这个 hook 来处理联想词。
     (run-hooks 'pyim-select-finish-hook)))

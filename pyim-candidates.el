@@ -70,22 +70,37 @@ IMOBJS 获得候选词条。"
   (unless async
     (let (result)
       (dolist (imobj imobjs)
-        (let* ((codes (reverse (pyim-codes-create imobj scheme-name)))
-               (output1 (car codes))
-               (output2 (reverse (cdr codes)))
-               output3 str)
+        (let* ((codes (pyim-codes-create imobj scheme-name))
+               (last-code (car (last codes)))
+               (other-codes (remove last-code codes))
+               output prefix)
 
-          (when output2
-            (setq str (mapconcat
-                       (lambda (code)
-                         (car (pyim-dcache-get code)))
-                       output2 "")))
-          (setq output3
-                (remove "" (or (mapcar (lambda (x)
-                                         (concat str x))
-                                       (pyim-dcache-get output1 '(icode2word code2word shortcode2word)))
-                               (list str))))
-          (setq result (append result output3))))
+          ;; 如果 wubi/aaaa -> 工 㠭；wubi/bbbb -> 子 子子孙孙；wubi/cccc 又 叕；
+          ;; 用户输入为： aaaabbbbcccc
+
+          ;; 那么：
+          ;; 1. codes       =>   ("wubi/aaaa" "wubi/bbbb" "wubi/cccc")
+          ;; 2. last-code   =>   "wubi/cccc"
+          ;; 3. other-codes =>   ("wubi/aaaa" "wubi/bbbb")
+          ;; 4. prefix      =>   工子
+          (when other-codes
+            (setq prefix (mapconcat
+                          (lambda (code)
+                            (car (pyim-dcache-get code '(code2word))))
+                          other-codes "")))
+
+          ;; 5. output => 工子又 工子叕
+          (setq output
+                (mapcar (lambda (word)
+                          (concat prefix word))
+                        ;; NOTE: 形码输入法的第一个词选择公共词库中的第一个词，
+                        ;; 剩下的词按照词条 count 大小排序。这种策略是否合理？
+                        `(,(car (pyim-dcache-get last-code '(code2word)))
+                          ,@(pyim-dcache-call-api
+                             'sort-words
+                             (pyim-dcache-get last-code '(icode2word code2word shortcode2word))))))
+          (setq output (remove "" (or output (list prefix))))
+          (setq result (append result output))))
       (when (car result)
         (delete-dups result)))))
 
