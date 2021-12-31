@@ -94,11 +94,12 @@ IMOBJS 获得候选词条。"
                 ;; NOTE: 下面这种策略是否合理？
                 ;; 1. 第一个词选择公共词库中的第一个词。
                 ;; 2. 剩下的分成字和词，字优先排，字和词各按 count 大小排序。
-                (let* ((first-word (car (pyim-dcache-get last-code '(code2word))))
-                       (all-words (pyim-dcache-get last-code '(icode2word code2word shortcode2word)))
+                (let* ((words (pyim-dcache-get last-code '(code2word)))
+                       (first-word (car words))
                        (chars (cl-remove-if (lambda (word)
                                               (> (length word) 1))
-                                            all-words)))
+                                            words))
+                       (all-words (pyim-dcache-get last-code '(icode2word code2word shortcode2word))))
                   (mapcar (lambda (word)
                             (concat prefix word))
                           `(,first-word
