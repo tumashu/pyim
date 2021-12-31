@@ -93,12 +93,14 @@ IMOBJS 获得候选词条。"
           (setq output
                 ;; NOTE: 下面这种策略是否合理？
                 ;; 1. 第一个词选择公共词库中的第一个词。
-                ;; 2. 剩下的分成字和词，字优先排，字和词各按 count 大小排序。
-                (let* ((words (pyim-dcache-get last-code '(code2word)))
-                       (first-word (car words))
+                ;; 2. 剩下的分成常用字和词，常用字优先排，字和词各按 count 大小排序。
+                (let* ((first-word (car (pyim-dcache-get last-code '(code2word))))
                        (chars (cl-remove-if (lambda (word)
-                                              (> (length word) 1))
-                                            words))
+                                              ;; NOTE: 常用字在这里的定义是用户输入次数超过30次的汉字，30这个数字的选取是非常主观的，也许有
+                                              ;; 更合理的取值。
+                                              (or (> (length word) 1)
+                                                  (< (or (car (pyim-dcache-get word 'iword2count)) 0) 30)))
+                                            (pyim-dcache-get last-code '(icode2word))))
                        (all-words (pyim-dcache-get last-code '(icode2word code2word shortcode2word))))
                   (mapcar (lambda (word)
                             (concat prefix word))

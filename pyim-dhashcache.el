@@ -320,6 +320,9 @@ code 对应的中文词条了。
     (dolist (cache caches)
       (let* ((cache (ignore-errors (symbol-value cache)))
              (value (and cache (gethash code cache))))
+        ;; 处理 iword2count.
+        (unless (listp value)
+          (setq value (list value)))
         (when value
           (setq result (append result value)))))
     result))
