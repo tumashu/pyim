@@ -91,14 +91,21 @@ IMOBJS 获得候选词条。"
 
           ;; 5. output => 工子又 工子叕
           (setq output
-                (mapcar (lambda (word)
-                          (concat prefix word))
-                        ;; NOTE: 形码输入法的第一个词选择公共词库中的第一个词，
-                        ;; 剩下的词按照词条 count 大小排序。这种策略是否合理？
-                        `(,(car (pyim-dcache-get last-code '(code2word)))
-                          ,@(pyim-dcache-call-api
-                             'sort-words
-                             (pyim-dcache-get last-code '(icode2word code2word shortcode2word))))))
+                ;; NOTE: 下面这种策略是否合理？
+                ;; 1. 第一个词选择公共词库中的第一个词。
+                ;; 2. 剩下的分成字和词，字优先排，字和词各按 count 大小排序。
+                (let* ((first-word (car (pyim-dcache-get last-code '(code2word))))
+                       (all-words (pyim-dcache-get last-code '(icode2word code2word shortcode2word)))
+                       (chars (cl-remove-if (lambda (word)
+                                              (> (length word) 1))
+                                            all-words)))
+                  (mapcar (lambda (word)
+                            (concat prefix word))
+                          ;; NOTE: 形码输入法的第一个词选择公共词库中的第一个词，
+                          ;; 剩下的词按照词条 count 大小排序。这种策略是否合理？
+                          `(,first-word
+                            ,@(pyim-dcache-call-api 'sort-words chars)
+                            ,@(pyim-dcache-call-api 'sort-words all-words)))))
           (setq output (remove "" (or output (list prefix))))
           (setq result (append result output))))
       (when (car result)
