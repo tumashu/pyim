@@ -28,7 +28,7 @@
 ;;; Code:
 ;; * 代码                                                           :code:
 (require 'cl-lib)
-;; Emacs 26.1 之前的版本无法按照 posframe.
+;; Emacs 26.1 之前的版本无法安装 posframe.
 (require 'posframe nil t)
 ;; popup 不是 GNU ELPA 包，所以 pyim 不能强制依赖它。
 (require 'popup nil t)
