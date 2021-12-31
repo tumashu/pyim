@@ -281,7 +281,8 @@
                 (if (and str (stringp str))
                     (list str)
                   pyim-candidates-last)))
-          (pyim-process-outcome-handle 'candidate))
+          (pyim-process-outcome-handle 'candidate)
+          (pyim-process-create-word (pyim-process-get-outcome)))
         ;; autoselector 机制已经触发的时候，如果发现 entered buffer 中
         ;; point 后面还有未处理的输入，就将其转到下一轮处理，这种情况
         ;; 很少出现，一般是型码输入法，entered 编辑的时候有可能触发。
@@ -303,7 +304,8 @@
                 (if (and str (stringp str))
                     (list str)
                   pyim-candidates)))
-          (pyim-process-outcome-handle 'candidate))
+          (pyim-process-outcome-handle 'candidate)
+          (pyim-process-create-word (pyim-process-get-outcome)))
         (pyim-add-unread-command-events
          (pyim-entered-get 'point-after))
         (pyim-process-terminate))
