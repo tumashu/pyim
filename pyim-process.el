@@ -557,11 +557,14 @@ WORDCOUNT-HANDLER 也可以是一个函数，其返回值将设置为 WORD 的�
 正多音字。
 
 BUG：拼音无法有效地处理多音字。"
-  (when (and (> (length word) 0)
-             ;; NOTE: 十二个汉字及以上的词条，加到个人词库里面用处不大，这是很主
-             ;; 观的一个数字，也许应该添加一个配置选项？
-             (< (length word) 12)
-             (not (pyim-string-match-p "\\CC" word)))
+  (when (and
+         ;; NOTE: 以词定字的时候，到底应不应该保存词条呢，需要进一步研究。
+         (not (pyim-process-select-subword-p))
+         (> (length word) 0)
+         ;; NOTE: 十二个汉字及以上的词条，加到个人词库里面用处不大，这是很主
+         ;; 观的一个数字，也许应该添加一个配置选项？
+         (< (length word) 12)
+         (not (pyim-string-match-p "\\CC" word)))
     ;; PYIM 有些功能（比如：以词定字功能）会用到 text property, 保存词条之前将
     ;; text property 去除，防止不必要的数据进入 cache.
     (setq word (substring-no-properties word))

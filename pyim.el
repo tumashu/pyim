@@ -562,9 +562,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
             ;; 择更加好用。
             (goto-char (pyim-process-next-imelem-position 20 t 1)))
           (pyim-process-run))
-      ;;NOTE: 以词定字的时候，到底应不应该保存词条呢，需要进一步研究。
-      (unless (pyim-process-select-subword-p)
-        (pyim-process-create-word (pyim-process-get-outcome) t))
+      (pyim-process-create-word (pyim-process-get-outcome) t)
       (pyim-process-terminate)
       ;; pyim 使用这个 hook 来处理联想词。
       (run-hooks 'pyim-select-finish-hook))))
@@ -583,8 +581,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
           (delete-region (point-min) (point)))
         (pyim-process-run))
     ;; NOTE: 以词定字的时候，到底应不应该保存词条呢，需要进一步研究。
-    (unless (pyim-process-select-subword-p)
-      (pyim-process-create-word (pyim-process-get-outcome) t))
+    (pyim-process-create-word (pyim-process-get-outcome) t)
     (pyim-process-terminate)
     ;; pyim 使用这个 hook 来处理联想词。
     (run-hooks 'pyim-select-finish-hook)))
