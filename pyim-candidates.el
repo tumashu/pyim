@@ -56,6 +56,10 @@
  '(pyim-candidates pyim-candidate-position))
 
 ;; ** 获取备选词列表
+(defun pyim-candidates-sort (candidates)
+  "对 CANDIDATES 进行排序。"
+  (pyim-dcache-call-api 'sort-words candidates))
+
 (defun pyim-candidates-create (imobjs scheme-name &optional async)
   "按照 SCHEME-NAME 对应的输入法方案， 从输入法内部对象列表:
 IMOBJS 获得候选词条。"
@@ -105,8 +109,8 @@ IMOBJS 获得候选词条。"
                   (mapcar (lambda (word)
                             (concat prefix word))
                           `(,first-word
-                            ,@(pyim-dcache-call-api 'sort-words chars)
-                            ,@(pyim-dcache-call-api 'sort-words all-words)))))
+                            ,@(pyim-candidates-sort chars)
+                            ,@(pyim-candidates-sort all-words)))))
           (setq output (remove "" (or output (list prefix))))
           (setq result (append result output))))
       (when (car result)
@@ -248,8 +252,7 @@ IMOBJS 获得候选词条。"
     ;; comment.
     (setq personal-words
           `(,(car personal-words)
-            ,@(pyim-dcache-call-api
-               'sort-words (cdr personal-words))))
+            ,@(pyim-candidates-sort (cdr personal-words))))
 
     ;; 调试输出
     (when pyim-debug
