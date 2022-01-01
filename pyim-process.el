@@ -86,8 +86,8 @@
 (defvar pyim-process-translating nil
   "记录是否在转换状态.")
 
-(defvar pyim-process-last-created-word nil
-  "记录最近一次创建的词条， 用于实现快捷删词功能： `pyim-delete-last-word' .")
+(defvar pyim-process-last-created-words nil
+  "记录最近创建的词条， 用于实现快捷删词功能： `pyim-delete-last-word' .")
 
 (defvar pyim-process-run-async-timer nil
   "异步处理 entered 时，使用的 timer.")
@@ -99,8 +99,7 @@
 
 (pyim-register-local-variables
  '(pyim-process-input-ascii
-   pyim-process-translating
-   pyim-process-last-created-word))
+   pyim-process-translating))
 
 (defun pyim-process-init-dcaches (&optional force)
   "PYIM 流程，词库相关的初始化工作。"
@@ -569,7 +568,8 @@ BUG：拼音无法有效地处理多音字。"
     ;; text property 去除，防止不必要的数据进入 cache.
     (setq word (substring-no-properties word))
     ;; 记录最近创建的词条，用于快速删词功能。
-    (setq pyim-process-last-created-word word)
+    (setq pyim-process-last-created-words
+          (cons word (remove word pyim-process-last-created-words)))
     (let* ((scheme-name (pyim-scheme-name))
            (code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
            (codes (pyim-cstring-to-codes

@@ -455,9 +455,9 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
 (defun pyim-delete-last-word ()
   "从个人词库中删除最新创建的词条。"
   (interactive)
-  (when pyim-process-last-created-word
-    (pyim-process-delete-word pyim-process-last-created-word)
-    (message "pyim: 从个人词库中删除词条 “%s” !" pyim-process-last-created-word)))
+  (when pyim-process-last-created-words
+    (pyim-process-delete-word (car pyim-process-last-created-words))
+    (message "pyim: 从个人词库中删除词条 “%s” !" (car pyim-process-last-created-words))))
 
 (defun pyim-delete-word-at-point (&optional number silent)
   "将光标前字符数为 NUMBER 的中文字符串从个人词库中删除
@@ -469,16 +469,25 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
         (message "词条: \"%s\" 已经从个人词库缓冲中删除。" string)))))
 
 (defun pyim-delete-word ()
-  "将高亮选择的词条从个人词库中删除。"
+  "从个人词库中删除词条。"
   (interactive)
-  (if mark-active
-      (let ((string (buffer-substring-no-properties
-                     (region-beginning) (region-end))))
-        (when (and (< (length string) 6)
-                   (> (length string) 0))
-          (pyim-process-delete-word string)
-          (message "将词条: %S 从 personal 缓冲中删除。" string)))
-    (message "请首先高亮选择需要删除的词条。")))
+  (cond
+   (mark-active
+    (let ((string (buffer-substring-no-properties
+                   (region-beginning) (region-end))))
+      (when (and (< (length string) 6)
+                 (> (length string) 0))
+        (pyim-process-delete-word string)
+        (message "将词条: %S 从 personal 缓冲中删除。" string)
+        (deactivate-mark))))
+   (t (let ((words (completing-read-multiple
+                    "请选择需要删除的词条(可多选): "
+                    pyim-process-last-created-words)))
+        (dolist (word words)
+          (pyim-process-delete-word word)
+          (setq pyim-process-last-created-words
+                (remove word pyim-process-last-created-words))
+          (message "将词条: %S 从 personal 缓冲中删除。" word))))))
 
 ;; ** 选词功能
 (defun pyim-select-word-simple ()
