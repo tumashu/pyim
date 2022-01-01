@@ -145,7 +145,7 @@ IMOBJS 获得候选词条。"
                        (all-words (pyim-dcache-get last-code '(icode2word code2word shortcode2word))))
                   (mapcar (lambda (word)
                             (concat prefix word))
-                          `(,first-word
+                          `(,chief-word
                             ,@(pyim-candidates-sort chars)
                             ,@(pyim-candidates-sort all-words)))))
           (setq output (remove "" (or output (list prefix))))
