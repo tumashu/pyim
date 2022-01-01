@@ -451,6 +451,15 @@ code 对应的中文词条了。
              (puthash key new-value pyim-dhashcache-icode2word)
            (remhash key pyim-dhashcache-icode2word)))))
    pyim-dhashcache-icode2word)
+  (maphash
+   (lambda (key value)
+     (when (member word value)
+       (print value)
+       (let ((new-value (remove word value)))
+         (if new-value
+             (puthash key new-value pyim-dhashcache-ishortcode2word)
+           (remhash key pyim-dhashcache-ishortcode2word)))))
+   pyim-dhashcache-ishortcode2word)
   (remhash word pyim-dhashcache-iword2count))
 
 (defun pyim-dhashcache-insert-word-into-icode2word (word code prepend)
