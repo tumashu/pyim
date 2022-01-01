@@ -52,6 +52,9 @@
 
 细节信息请参考 `pyim-page-refresh' 的 docstring.")
 
+(defvar pyim-candidates-possible-chiefs nil
+  "可能做第一位候选词的词条列表。")
+
 (pyim-register-local-variables
  '(pyim-candidates pyim-candidate-position))
 
@@ -68,6 +71,38 @@ IMOBJS 获得候选词条。"
       (when class
         (funcall (intern (format "pyim-candidates-create:%S" class))
                  imobjs scheme-name async)))))
+
+(defun pyim-candidates-add-possible-chief (word)
+  "将 WORD 添加到 `pyim-candidates-possible-chiefs'."
+  (push word pyim-candidates-possible-chiefs)
+  (setq pyim-candidates-possible-chiefs
+        (cl-subseq pyim-candidates-possible-chiefs 0
+                   (min 100 (length pyim-candidates-possible-chiefs)))))
+
+(defun pyim-candidates-get-chief (scheme-name &optional personal-words common-words)
+  "选取第一位候选词。"
+  (let* ((class (pyim-scheme-get-option scheme-name :class))
+         (words pyim-candidates-possible-chiefs)
+         (length (length words))
+         ;; NOTE: 网上传言，一段话平均70个字，按照一个词两个字估算，100个词大概
+         ;; 为两段话。
+         (words100 (cl-subseq words 0 (min 100 length)))
+         ;; NOTE: 10个词大概1句话。
+         (words10 (cl-subseq words 0 (min 10 length))))
+    (if (equal class 'xingma)
+        ;; 形码输入法选择从词库里面获取到的第一个词条。
+        (car common-words)
+      (or
+       ;; 最近输入的10个词中出现一次以上。
+       (cl-find-if (lambda (word)
+                     (> (cl-count word words10 :test #'equal) 1))
+                   personal-words)
+       ;; 最近输入的100个词中出现过三次以上。
+       (cl-find-if (lambda (word)
+                     (> (cl-count word words100 :test #'equal) 3))
+                   personal-words)
+       ;; 个人词条中的第一个词。
+       (car personal-words)))))
 
 (defun pyim-candidates-create:xingma (imobjs scheme-name &optional async)
   "`pyim-candidates-create' 处理五笔仓颉等形码输入法的函数."
@@ -98,7 +133,9 @@ IMOBJS 获得候选词条。"
                 ;; NOTE: 下面这种策略是否合理？
                 ;; 1. 第一个词选择公共词库中的第一个词。
                 ;; 2. 剩下的分成常用字和词，常用字优先排，字和词各按 count 大小排序。
-                (let* ((first-word (car (pyim-dcache-get last-code '(code2word))))
+                (let* ((personal-words (pyim-dcache-get last-code '(icode2word)))
+                       (common-words (pyim-dcache-get last-code '(code2word)))
+                       (chief-word (pyim-candidates-get-chief scheme-name personal-words common-words))
                        (chars (cl-remove-if (lambda (word)
                                               ;; NOTE: 常用字在这里的定义是用户输入次数超过30次的汉字，30这个数字的选取是非常主观的，也许有
                                               ;; 更合理的取值。
@@ -169,7 +206,7 @@ IMOBJS 获得候选词条。"
 
 (defun pyim-candidates-create-quanpin (imobjs scheme-name &optional fast-search)
   "`pyim-candidates-create:quanpin' 内部使用的函数。"
-  (let (jianpin-words znabc-words personal-words common-words pinyin-chars-1 pinyin-chars-2)
+  (let (jianpin-words znabc-words personal-words common-words pinyin-chars-1 pinyin-chars-2 chief-word)
     ;; 智能ABC模式，得到尽可能的拼音组合，查询这些组合，得到的词条做为联想词。
     (let ((codes (mapcar (lambda (x)
                            (pyim-subconcat x "-"))
@@ -250,13 +287,13 @@ IMOBJS 获得候选词条。"
     ;; 个人词条排序：使用词频信息对个人词库得到的候选词排序，第一个词条的位置
     ;; 比较特殊，不参与排序，具体原因请参考 `pyim-page-select-word' 中的
     ;; comment.
-    (setq personal-words
-          `(,(car personal-words)
-            ,@(pyim-candidates-sort (cdr personal-words))))
+    (setq personal-words (pyim-candidates-sort personal-words))
+    (setq chief-word (pyim-candidates-get-chief scheme-name personal-words))
 
     ;; 调试输出
     (when pyim-debug
       (print (list :imobjs imobjs
+                   :chief-word chief-word
                    :personal-words personal-words
                    :common-words common-words
                    :jianpin-words jianpin-words
@@ -270,7 +307,8 @@ IMOBJS 获得候选词条。"
 
     (delete-dups
      (delq nil
-           `(,@personal-words
+           `(,chief-word
+             ,@personal-words
              ,@jianpin-words
              ,@common-words
              ,@znabc-words
