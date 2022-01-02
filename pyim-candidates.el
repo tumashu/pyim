@@ -89,20 +89,28 @@ IMOBJS 获得候选词条。"
          (words100 (cl-subseq words 0 (min 100 length)))
          ;; NOTE: 10个词大概1句话。
          (words10 (cl-subseq words 0 (min 10 length))))
-    (if (equal class 'xingma)
-        ;; 形码输入法选择从词库里面获取到的第一个词条。
-        (car common-words)
+    (cond
+     ((equal class 'xingma)
       (or
-       ;; 最近输入的10个词中出现一次以上。
-       (cl-find-if (lambda (word)
-                     (> (cl-count word words10 :test #'equal) 1))
-                   personal-words)
-       ;; 最近输入的100个词中出现过三次以上。
-       (cl-find-if (lambda (word)
-                     (> (cl-count word words100 :test #'equal) 3))
-                   personal-words)
-       ;; 个人词条中的第一个词。
-       (car personal-words)))))
+       ;; 如果从公共词库里面获取到的第一个词条是汉字，就选择它。
+       (when (= (length (car common-words)) 1)
+         (car common-words))
+       ;; 从个人词库里面按排列的先后顺序，获取一个汉字。
+       (cl-find-if
+        (lambda (word)
+          (= (length word) 1))
+        personal-words)))
+     (t (or
+         ;; 最近输入的10个词中出现一次以上。
+         (cl-find-if (lambda (word)
+                       (> (cl-count word words10 :test #'equal) 1))
+                     personal-words)
+         ;; 最近输入的100个词中出现过三次以上。
+         (cl-find-if (lambda (word)
+                       (> (cl-count word words100 :test #'equal) 3))
+                     personal-words)
+         ;; 个人词条中的第一个词。
+         (car personal-words))))))
 
 (defun pyim-candidates-create:xingma (imobjs scheme-name &optional async)
   "`pyim-candidates-create' 处理五笔仓颉等形码输入法的函数."
@@ -136,20 +144,15 @@ IMOBJS 获得候选词条。"
                 ;; NOTE: 下面这种策略是否合理？
                 ;; 1. 第一个词选择公共词库中的第一个词。
                 ;; 2. 剩下的分成常用字和词，常用字优先排，字和词各按 count 大小排序。
-                (let* ((personal-words (pyim-dcache-get last-code '(icode2word)))
+                (let* ((personal-words
+                        (pyim-candidates-sort
+                         (pyim-dcache-get last-code '(icode2word))))
                        (common-words (pyim-dcache-get last-code '(code2word)))
                        (chief-word (pyim-candidates-get-chief scheme-name personal-words common-words))
-                       (chars (cl-remove-if (lambda (word)
-                                              ;; NOTE: 常用字在这里的定义是用户输入次数超过30次的汉字，30这个数字的选取是非常主观的，也许有
-                                              ;; 更合理的取值。
-                                              (or (> (length word) 1)
-                                                  (< (or (car (pyim-dcache-get word 'iword2count)) 0) 30)))
-                                            (pyim-dcache-get last-code '(icode2word))))
                        (all-words (pyim-dcache-get last-code '(icode2word code2word shortcode2word))))
                   (mapcar (lambda (word)
                             (concat prefix word))
                           `(,chief-word
-                            ,@(pyim-candidates-sort chars)
                             ,@(pyim-candidates-sort all-words)))))
           (setq output (remove "" (or output (list prefix))))
           (setq result (append result output))))
