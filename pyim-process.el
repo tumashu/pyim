@@ -564,6 +564,9 @@ BUG：拼音无法有效地处理多音字。"
     ;; PYIM 有些功能（比如：以词定字功能）会用到 text property, 保存词条之前将
     ;; text property 去除，防止不必要的数据进入 cache.
     (setq word (substring-no-properties word))
+    ;; 以词定字功能使用时，保存的词条应该是定字后的词条。
+    (when (pyim-process-select-subword-p)
+      (setq word (pyim-outcome-get-subword word)))
     ;; 记录最近创建的词条，用于快速删词功能。
     (setq pyim-process-last-created-words
           (cons word (remove word pyim-process-last-created-words)))
