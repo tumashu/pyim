@@ -43,15 +43,19 @@
 
 (defvar pyim-pymap-py2cchar-cache1 nil
   "拼音查汉字功能需要的变量.")
+(defvaralias '朋友输入法-拼音映射表-拼音转汉字-缓存1 'pyim-pymap-py2cchar-cache1)
 
 (defvar pyim-pymap-py2cchar-cache2 nil
   "拼音查汉字功能需要的变量.")
+(defvaralias '朋友输入法-拼音映射表-拼音转汉字-缓存2 'pyim-pymap-py2cchar-cache1)
 
 (defvar pyim-pymap-py2cchar-cache3 nil
   "拼音查汉字功能需要的变量.")
+(defvaralias '朋友输入法-拼音映射表-拼音转汉字-缓存3 'pyim-pymap-py2cchar-cache1)
 
 (defvar pyim-pymap-cchar2py-cache nil
   "汉字转拼音功能需要的变量.")
+(defvaralias '朋友输入法-拼音映射表-汉字转拼音-缓存 'pyim-pymap-py2cchar-cache1)
 
 (defvar pyim-pymap
   '(("a" "阿啊呵腌|嗄吖锕||錒")
@@ -471,6 +475,7 @@
     http://www.gov.cn/zwgk/2013-08/19/content_2469793.htm
 
 但不是完全一致。")
+(defvaralias '朋友输入法-拼音映射表 'pyim-pymap)
 
 (defvar pyim-pymap-commonly-used-cchar
   (cl-remove-if-not
@@ -732,12 +737,14 @@
 蠋翾儳儴𩾌鳚鳛麑麖彟嬿鬒蘘欂甗𨟠巇酅髎犨𨭉㸌爔瀱瀼襫孅骦耰𤫉瓖鬘
 趯罍鼱鳠鳡鳣爟爚灈韂糵礵鹴皭龢鳤亹籥𫚭玃醾齇觿" ""))
   "常用汉字")
+(defvaralias '朋友输入法-拼音映射表-常用汉字表 'pyim-pymap-commonly-used-cchar)
 
 ;; ** "汉字 -> 拼音" 以及 "拼音 -> 汉字" 的转换函数
 (defun pyim-pymap-cache-create (&optional force)
   "创建 pymap 相关的 cache."
   (pyim-pymap-cchar2py-cache-create force)
   (pyim-pymap-py2cchar-cache-create force))
+(defalias '朋友输入法-拼音映射表-创建缓存 'pyim-pymap-cache-create)
 
 (defun pyim-pymap-py2cchar-cache-create (&optional force)
   "构建 pinyin 到 chinese char 的缓存.
@@ -770,6 +777,7 @@
                  (orig-value (gethash key pyim-pymap-py2cchar-cache3)))
             (puthash key (delete-dups `(,@orig-value ,@cchars))
                      pyim-pymap-py2cchar-cache3)))))))
+(defalias '朋友输入法-拼音映射表-拼音转汉字-创建缓存 'pyim-pymap-py2cchar-cache-create)
 
 (defun pyim-pymap-py2cchar-get (pinyin &optional equal-match return-list include-seperator)
   "获取拼音与 PINYIN 想匹配的所有汉字.
@@ -797,6 +805,7 @@
       (if include-seperator
           output
         (remove "|" output)))))
+(defalias '朋友输入法-拼音映射表-拼音转汉字-获取汉字 'pyim-pymap-cchar2py-get)
 
 (defun pyim-pymap-cchar2py-get (char-or-str)
   "获取字符或者字符串 CHAR-OR-STR 对应的拼音 code.
@@ -815,6 +824,7 @@ pyim 在特定的时候需要读取一个汉字的拼音，这个工作由此完
                char-or-str)))
     (when (= (length key) 1)
       (gethash key pyim-pymap-cchar2py-cache))))
+(defalias '朋友输入法-拼音映射表-汉字转拼音-获取拼音)
 
 (defun pyim-pymap-cchar2py-cache-create (&optional force)
   "Build pinyin cchar->pinyin hashtable from `pyim-pymap'.
@@ -832,11 +842,13 @@ If FORCE is non-nil, FORCE build."
             (if cache
                 (puthash key (append (list py) cache) pyim-pymap-cchar2py-cache)
               (puthash key (list py) pyim-pymap-cchar2py-cache))))))))
+(defalias '朋友输入法-拼音映射表-汉字转拼音-缓存-创建 'pyim-pymap-cchar2py-cache-create)
 
 (defun pyim-pymap-cchar< (a b)
   "如果汉字 A 的使用频率大于汉字 B 的使用频率时，返回 non-nil"
   (< (or (cl-position a pyim-pymap-commonly-used-cchar :test #'equal) 1000000)
      (or (cl-position b pyim-pymap-commonly-used-cchar :test #'equal) 1000000)))
+(defalias '朋友输入法-拼音映射表-汉字比较< 'pyim-pymap-cchar<)
 
 (defun pyim-pymap-sort-pymap ()
   "对 `pyim-pymap' 重新排序, 这个函数主要用于维护 `pyim-pymap'."
@@ -848,6 +860,7 @@ If FORCE is non-nil, FORCE build."
                          #'pyim-pymap-cchar<)))
             pymap))
     (reverse pymap)))
+(defalias '朋友输入法-拼音映射表-排序拼音映射表 'pyim-pymap-sort-pymap)
 
 (defun pyim-pymap-build-pymap ()
   "使用 libpinyin 自带的 data 文件创建 `pyim-pymap'.
@@ -912,6 +925,7 @@ If FORCE is non-nil, FORCE build."
        (emacs-lisp-mode)
        (indent-region (point-min) (point-max))
        (buffer-string)))))
+(defalias '朋友输入法-拼音映射表-创建拼音映射表 'pyim-pymap-build-pymap)
 
 ;; * Footer
 (provide 'pyim-pymap)

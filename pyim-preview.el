@@ -40,6 +40,7 @@
 
 (defvar pyim-preview-overlay nil
   "用于保存光标处预览字符串的 overlay.")
+(defvaralias '朋友输入法-预览-overlay 'pyim-preview-overlay)
 
 (pyim-register-local-variables '(pyim-preview-overlay))
 
@@ -56,6 +57,7 @@
       (setq pyim-preview-overlay (make-overlay pos pos))
       (if input-method-highlight-flag
           (overlay-put pyim-preview-overlay 'face 'pyim-preview-face)))))
+(defalias '朋友输入法-预览-设置overlay 'pyim-preview-setup-overlay)
 
 (defun pyim-preview-delete-overlay ()
   "删除 pyim 光标处实时预览功能所需要的 overlay.
@@ -64,6 +66,7 @@
 `pyim-preview-overlay' 中保存的 overlay。"
   (if (and (overlayp pyim-preview-overlay) (overlay-start pyim-preview-overlay))
       (delete-overlay pyim-preview-overlay)))
+(defalias '朋友输入法-预览-删除overlay 'pyim-preview-delete-overlay)
 
 (defun pyim-preview-refresh ()
   "刷新光标处预览.
@@ -94,16 +97,19 @@ pyim 会使用 Emacs overlay 机制在 *待输入buffer* 光标处高亮显示�
     ;; Highlight new preview string.
     (move-overlay pyim-preview-overlay
                   (overlay-start pyim-preview-overlay) (point))))
+(defalias '朋友输入法-预览-刷新 'pyim-preview-refresh)
 
 (defun pyim-preview-delete-string ()
   "删除已经插入 buffer 的 preview 预览字符串。"
   (when (overlay-start pyim-preview-overlay)
     (delete-region (overlay-start pyim-preview-overlay)
                    (overlay-end pyim-preview-overlay))))
+(defalias '朋友输入法-预览-删除字符串 'pyim-preview-delete-string)
 
 (defun pyim-preview-start-point ()
   "Preview 字符串的开始位置。"
   (overlay-start pyim-preview-overlay))
+(defalias '朋友输入法-预览-开始位置 'pyim-preview-start-point)
 
 ;; * Footer
 (provide 'pyim-preview)

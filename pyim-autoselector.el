@@ -57,6 +57,7 @@ entered (nihaom) 的第一个候选词。
 影响，需要用户自己管理。"
   :type '(choice (const nil)
                  (repeat function)))
+(defvaralias '朋友输入法-自动上屏器 'pyim-autoselector)
 
 (defun pyim-autoselector-xingma (&rest _args)
   "适用于型码输入法的自动上屏器.
@@ -84,6 +85,7 @@ entered (nihaom) 的第一个候选词。
        ((> (length entered) n)
         '(:select last))
        (t nil)))))
+(defalias '朋友输入法-自动上屏器-型码 'pyim-autoselector-xingma)
 
 
 ;; * Footer

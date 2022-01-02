@@ -48,6 +48,7 @@
 (defcustom pyim-select-finish-hook nil
   "Pyim 选词完成时运行的 hook."
   :type 'hook)
+(defvaralias '朋友输入法-选词完成时的钩子 'pyim-select-finish-hook)
 
 (defcustom pyim-convert-string-at-point-hook nil
   "Hook of `pyim-convert-string-at-point'.
@@ -59,6 +60,7 @@
 Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
 来构建适合自己的 hook 函数。"
   :type 'hook)
+(defvaralias '朋友输入法-转换光标处字符串成中文时的钩子 'pyim-convert-string-at-point-hook)
 
 (defcustom pyim-select-word-by-number t
   "使用数字键来选择词条.
@@ -66,13 +68,18 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
 如果设置为 nil, 将直接输入数字，适用于使用数字做为
 编码的输入法。"
   :type 'boolean)
+(defvaralias '朋友输入法-是否用数字选词 'pyim-select-word-by-number)
 
 ;;;###autoload
 (defvar pyim-title "PYIM ")
+(defvaralias '朋友输入法-名称 'pyim-title)
 
 (defvar pyim-load-hook nil)
+(defvaralias '朋友输入法-加载时的钩子 'pyim-load-hook)
 (defvar pyim-activate-hook nil)
+(defvaralias '朋友输入法-激活时的钩子 'pyim-activate-hook)
 (defvar pyim-deactivate-hook nil)
+(defvaralias '朋友输入法-退出时的钩子 'pyim-deactivate-hook)
 
 (defvar pyim-mode-map
   (let ((map (make-sparse-keymap))
@@ -127,6 +134,7 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
     (define-key map "\C-g" #'pyim-quit-clear)
     map)
   "Pyim 的 Keymap.")
+(defvaralias '朋友输入法-模式键位映射 'pyim-mode-map)
 
 ;; ** pyim 输入法定义
 (defun pyim-input-method (key)
@@ -151,6 +159,7 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
                   (list (aref input-string 0))
                 (mapcar #'identity input-string))))
         (pyim-process-terminate)))))
+(defalias '朋友输入法-输入 'pyim-input-method)
 
 (defun pyim-input-method-1 (key)
   "`pyim-input-method-1' 是 `pyim-input-method' 内部使用的函数。
@@ -216,6 +225,7 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
     ;; Since KEY doesn't start any translation, just return it.
     ;; But translate KEY if necessary.
     (char-to-string key)))
+(defalias '朋友输入法-输入-1 'pyim-input-method-1)
 
 ;; ** Pyim 输入法注册
 ;;;###autoload
@@ -267,10 +277,12 @@ pyim 使用函数 `pyim-activate' 启动输入法的时候，会将变量
   (run-hooks 'pyim-activate-hook)
   (setq-local input-method-function #'pyim-input-method)
   nil)
+(defalias '朋友输入法-激活 'pyim-activate)
 
 (defun pyim-kill-emacs-hook-function ()
   "Pyim function which is used in `kill-emacs-hook'."
   (pyim-process-save-dcaches t))
+(defalias '朋友输入法-kill-emacs-hook-函数 'pyim-kill-emacs-hook-function)
 
 ;; ** 取消激活功能
 (defun pyim-deactivate ()
@@ -280,6 +292,7 @@ pyim 使用函数 `pyim-activate' 启动输入法的时候，会将变量
   (kill-local-variable 'input-method-function)
   (pyim-process-stop-daemon)
   (run-hooks 'pyim-deactivate-hook))
+(defalias '朋友输入法-取消 'pyim-deactivate)
 
 ;; ** pyim 从 minibuffer 退出功能
 (defun pyim-exit-from-minibuffer ()
@@ -287,6 +300,7 @@ pyim 使用函数 `pyim-activate' 启动输入法的时候，会将变量
   (deactivate-input-method)
   (when (<= (minibuffer-depth) 1)
     (remove-hook 'minibuffer-exit-hook 'pyim-exit-from-minibuffer)))
+(defalias '朋友输入法-从minibuffer退出 'pyim-exit-from-minibuffer)
 
 ;; ** pyim 重启功能
 (defun pyim-restart ()
@@ -298,6 +312,7 @@ pyim 使用函数 `pyim-activate' 启动输入法的时候，会将变量
   (let ((save-personal-dcache
          (yes-or-no-p "重启 pyim 前，需要保存个人词频信息吗？ ")))
     (pyim-restart-1 save-personal-dcache)))
+(defalias '朋友输入法-重启 'pyim-restart)
 
 (defun pyim-restart-1 (&optional save-personal-dcache _refresh-common-dcache)
   "重启 pyim，用于编程环境.
@@ -307,6 +322,7 @@ pyim 使用函数 `pyim-activate' 启动输入法的时候，会将变量
 REFRESH-COMMON-DCACHE 已经废弃，不要再使用了。"
   (pyim-process-save-dcaches save-personal-dcache)
   (pyim-process-init-dcaches :force))
+(defalias '朋友输入法-重启-1 'pyim-restart-1)
 
 ;; ** 键盘输入处理功能
 (defun pyim-self-insert-command ()
@@ -326,6 +342,7 @@ REFRESH-COMMON-DCACHE 已经废弃，不要再使用了。"
    (t
     (pyim-process-outcome-handle 'last-char)
     (pyim-process-terminate))))
+(defalias '朋友输入法-自插入指令 'pyim-self-insert-command)
 
 (cl-pushnew 'pyim-self-insert-command pyim-process-self-insert-commands)
 
@@ -339,21 +356,25 @@ SILENT 设置为 t 是，不显示提醒信息。"
       (setq output (pyim-process-create-word string))
       (unless silent
         (message "将词条: %S 加入 personal 缓冲。" output)))))
+(defalias '朋友输入法-加入光标处词语到个人词库 'pyim-create-word-at-point)
 
 (defun pyim-create-2cchar-word-at-point ()
   "将光标前2个中文字符组成的字符串加入个人词库。"
   (interactive)
   (pyim-create-word-at-point 2))
+(defalias '朋友输入法-将光标前2个中文字符组成的字符串加入个人词库 'pyim-create-2cchar-word-at-point)
 
 (defun pyim-create-3cchar-word-at-point ()
   "将光标前3个中文字符组成的字符串加入个人词库。"
   (interactive)
   (pyim-create-word-at-point 3))
+(defalias '朋友输入法-将光标前3个中文字符组成的字符串加入个人词库 'pyim-create-3cchar-word-at-point)
 
 (defun pyim-create-4cchar-word-at-point ()
   "将光标前4个中文字符组成的字符串加入个人词库。"
   (interactive)
   (pyim-create-word-at-point 4))
+(defalias '朋友输入法-将光标前4个中文字符组成的字符串加入个人词库 'pyim-create-4cchar-word-at-point)
 
 (defun pyim-create-word-from-selection ()
   "Add the selected text as a Chinese word into the personal dictionary."
@@ -367,6 +388,7 @@ SILENT 设置为 t 是，不显示提醒信息。"
             (error "不是纯中文字符串")
           (setq output (pyim-process-create-word string))
           (message "将词条: %S 插入 personal file。" output))))))
+(defalias '朋友输入法-加入选区词语到个人词库 'pyim-create-word-from-selection)
 
 ;; ** 导入词条功能
 (defun pyim-import-words-and-counts (file &optional merge-method silent)
@@ -424,6 +446,7 @@ MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表词�
     (pyim-process-update-personal-words)
 
     (message "PYIM: 词条和词频信息导入完成！")))
+(defalias '朋友输入法-导入词条及相应词频 'pyim-import-words-and-counts)
 
 ;; ** 导出功能
 (defalias 'pyim-export-words-and-counts 'pyim-dcache-export-words-and-counts)
@@ -451,6 +474,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
           (pyim-process-delete-word word)))
       (forward-line 1)))
   (message "pyim: 批量删词完成！"))
+(defalias '朋友输入法-删除文件中的词语 'pyim-delete-words-in-file)
 
 (defun pyim-delete-last-word ()
   "从个人词库中删除最新创建的词条。"
@@ -458,6 +482,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   (when pyim-process-last-created-words
     (pyim-process-delete-word (car pyim-process-last-created-words))
     (message "pyim: 从个人词库中删除词条 “%s” !" (car pyim-process-last-created-words))))
+(defalias '朋友输入法-从个人词库中删除最新创建的词条 'pyim-delete-last-word)
 
 (defun pyim-delete-word-at-point (&optional number silent)
   "将光标前字符数为 NUMBER 的中文字符串从个人词库中删除
@@ -467,6 +492,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
       (pyim-process-delete-word string)
       (unless silent
         (message "词条: \"%s\" 已经从个人词库缓冲中删除。" string)))))
+(defalias '朋友输入法-从个人词库删除光标处词语 'pyim-delete-word-at-point)
 
 (defun pyim-delete-word ()
   "从个人词库中删除词条。"
@@ -488,6 +514,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
           (setq pyim-process-last-created-words
                 (remove word pyim-process-last-created-words))
           (message "将词条: %S 从 personal 缓冲中删除。" word))))))
+(defalias '朋友输入法-将高亮选择的词条从个人词库中删除 'pyim-delete-word)
 
 ;; ** 选词功能
 (defun pyim-select-word-simple ()
@@ -502,12 +529,13 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
       (pyim-process-outcome-handle 'last-char)
     (pyim-process-outcome-handle 'candidate))
   (pyim-process-terminate))
+(defalias '朋友输入法-从选词框中选择当前词条 'pyim-select-word-simple)
 
 (defun pyim-select-word ()
   "从选词框中选择当前词条，然后删除该词条对应拼音。"
   (interactive)
   (pyim-process-create-code-criteria)
-  (if (null (pyim-process-get-candidates))  ; 如果没有选项，输入空格
+  (if (null (pyim-process-get-candidates)) ; 如果没有选项，输入空格
       (progn
         (pyim-process-outcome-handle 'last-char)
         (pyim-process-terminate))
@@ -516,6 +544,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
       (if (and class (functionp func))
           (funcall func)
         (call-interactively #'pyim-select-word:pinyin)))))
+(defalias '朋友输入法-从选词框中选择当前词条并删除对应输入码 'pyim-select-word)
 
 (defun pyim-select-word:pinyin ()
   "从选词框中选择当前词条，然后删除该词条对应拼音。"
@@ -575,6 +604,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
       (pyim-process-terminate)
       ;; pyim 使用这个 hook 来处理联想词。
       (run-hooks 'pyim-select-finish-hook))))
+(defalias '朋友输入法-选择当前词条并删除对应拼音 'pyim-select-word:pinyin)
 
 (defun pyim-select-word:xingma ()
   "从选词框中选择当前词条，然后删除该词条对应编码。"
@@ -594,6 +624,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
     (pyim-process-terminate)
     ;; pyim 使用这个 hook 来处理联想词。
     (run-hooks 'pyim-select-finish-hook)))
+(defalias '朋友输入法-选择当前词条并删除对应型码 'pyim-select-word:xingma)
 
 (defun pyim-select-word-by-number (&optional n)
   "使用数字编号来选择对应的词条。"
@@ -616,12 +647,14 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
     ;; 有些输入法使用数字键编码，这种情况下，数字键就
     ;; 不能用来选词了。
     (call-interactively #'pyim-self-insert-command)))
+(defalias '朋友输入法-使用数字编号来选择对应的词条 'pyim-select-word)
 
 (defun pyim-select-subword-by-number (&optional n)
   "以词定字功能。"
   (interactive)
   (pyim-process-toggle-set-subword-info (or n 1))
   (pyim-process-run t))
+(defalias '朋友输入法-使用数字编号以词定字 'pyim-select-subword-by-number)
 
 ;; ** 翻页和翻词功能
 (defalias 'pyim-previous-page #'pyim-page-previous-page)
@@ -635,6 +668,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   (interactive)
   (pyim-process-outcome-handle "")
   (pyim-process-terminate))
+(defalias '朋友输入法-取消输入 'pyim-quit-clear)
 
 ;; ** 字母上屏功能
 (defun pyim-quit-no-clear ()
@@ -642,6 +676,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   (interactive)
   (pyim-process-outcome-handle 'pyim-entered)
   (pyim-process-terminate))
+(defalias '朋友输入法-字母上屏 'pyim-quit-no-clear)
 
 ;; ** 中英文输入模式切换
 (defun pyim-toggle-input-ascii ()
@@ -649,6 +684,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   (interactive)
   (setq pyim-process-input-ascii
         (not pyim-process-input-ascii)))
+(defalias '朋友输入法-切换中英文输入模式 'pyim-toggle-input-ascii)
 
 ;; ** 主辅输入法切换功能
 (defun pyim-toggle-assistant-scheme ()
@@ -664,6 +700,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
     (setq pyim-assistant-scheme-enable
           (not pyim-assistant-scheme-enable))
     (pyim-process-run)))
+(defalias '朋友输入法-切换辅助输入方案 'pyim-toggle-assistant-scheme)
 
 ;; ** PYIM 输入操作命令
 (defun pyim-forward-point ()
@@ -673,6 +710,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
     (ignore-errors
       (forward-char)))
   (pyim-process-run t))
+(defalias '朋友输入法-前移光标 'pyim-forward-point)
 
 (defun pyim-backward-point ()
   "光标后移"
@@ -681,6 +719,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
     (ignore-errors
       (backward-char)))
   (pyim-process-run t))
+(defalias '朋友输入法-后移光标 'pyim-backward-point)
 
 (defun pyim-backward-imelem (&optional search-forward)
   "光标向后移动一个 imelem 对应的字符串
@@ -691,11 +730,13 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
     (pyim-process-with-entered-buffer
       (goto-char position))
     (pyim-process-run t)))
+(defalias '朋友输入法-后移一个imelem 'pyim-backward-imelem)
 
 (defun pyim-forward-imelem ()
   "光标向前移动一个 imelem 对应的字符串"
   (interactive)
   (pyim-backward-imelem t))
+(defalias '朋友输入法-前移一个imelem 'pyim-forward-imelem)
 
 (defun pyim-end-of-line ()
   "光标移至行尾"
@@ -703,6 +744,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   (pyim-process-with-entered-buffer
     (end-of-line))
   (pyim-process-run t))
+(defalias '朋友输入法-移动光标到行尾 'pyim-end-of-line)
 
 (defun pyim-beginning-of-line ()
   "光标移至行首"
@@ -710,6 +752,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   (pyim-process-with-entered-buffer
     (beginning-of-line))
   (pyim-process-run t))
+(defalias '朋友输入法-移动光标到行首 'pyim-beginning-of-line)
 
 (defun pyim-delete-backward-char (&optional n)
   "向后删除1个字符"
@@ -721,11 +764,13 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
       (pyim-process-run t)
     (pyim-process-outcome-handle "")
     (pyim-process-terminate)))
+(defalias '朋友输入法-向后删除一个字符 'pyim-delete-backward-char)
 
 (defun pyim-delete-forward-char ()
   "向前删除1个字符"
   (interactive)
   (pyim-delete-backward-char -1))
+(defalias '朋友输入法-向前删除一个字符 'pyim-delete-forward-char)
 
 (defun pyim-delete-backward-imelem (&optional search-forward)
   "向后删除一个 imelem 对应的字符串"
@@ -734,11 +779,13 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
     (pyim-process-with-entered-buffer
       (delete-region (point) position))
     (pyim-process-run t)))
+(defalias '朋友输入法-向后删除一个imelem 'pyim-delete-backward-imelem)
 
 (defun pyim-delete-forward-imelem ()
   "向前删除一个 imelem 对应的字符串"
   (interactive)
   (pyim-delete-backward-imelem t))
+(defalias '朋友输入法-向前删除一个imelem 'pyim-delete-forward-imelem)
 
 ;; ** 金手指功能
 ;;;###autoload
@@ -818,6 +865,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
        ((pyim-string-match-p "[[:punct:]：－]" (pyim-char-before-to-string 0))
         (call-interactively 'pyim-punctuation-translate-at-point))
        (t (message "Pyim: pyim-convert-string-at-point did nothing."))))))
+(defalias '朋友输入法-转化光标处字符串为中文 'pyim-convert-string-at-point)
 
 ;; ** 编码反查功能
 (defun pyim-search-word-code ()
@@ -833,6 +881,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
             (message "PYIM (%S): %S -> %S" pyim-default-scheme string codes)
           (message "PYIM: 没有找到 %S 对应的编码。" string)))
       (deactivate-mark))))
+(defalias '朋友输入法-反查编码 'pyim-search-word-code)
 
 ;; ** pyim 中文字符串工具
 (require 'pyim-cstring)

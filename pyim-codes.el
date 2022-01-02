@@ -39,6 +39,7 @@
     (when class
       (funcall (intern (format "pyim-codes-create:%S" class))
                imobj scheme-name first-n))))
+(defalias '朋友输入法-编码-创建 'pyim-codes-create)
 
 (defun pyim-codes-create:quanpin (imobj _scheme-name &optional first-n)
   "从IMOBJ 创建一个 code 列表：codes.
@@ -63,6 +64,7 @@
            (substring py 0 (min first-n (length py)))
          py)))
    imobj))
+(defalias '朋友输入法-编码-创建:全拼 'pyim-codes-create:quanpin)
 
 (defun pyim-codes-create:shuangpin (imobj _scheme-name &optional first-n)
   (pyim-codes-create:quanpin imobj 'quanpin first-n))
@@ -77,6 +79,7 @@
                      (substring x 0 (min first-n (length x)))
                    x)))
        imobj))))
+(defalias '朋友输入法-编码-创建:型码 'pyim-codes-create:xingma)
 
 ;; * Footer
 (provide 'pyim-codes)

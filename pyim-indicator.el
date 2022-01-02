@@ -40,6 +40,7 @@
 Indicator 用于显示输入法当前输入状态（英文还是中文）。"
   :type '(choice (const :tag "Off" nil)
                  (repeat :tag "Indicator functions" function)))
+(defvaralias '朋友输入法-提示器-列表 'pyim-indicator-list)
 
 (defcustom pyim-indicator-use-post-command-hook t
   "pyim-indicator daemon 是否使用 `post-command-hook' 实现。
@@ -47,12 +48,14 @@ Indicator 用于显示输入法当前输入状态（英文还是中文）。"
 如果设置为 t, 则使用 post-command-hook 实现, 设置为 nil, 则使用
 timer 实现。"
   :type 'boolean)
+(defvaralias '朋友输入法-提示器-是否使用-post-command-hook 'pyim-indicator-use-post-command-hook)
 
 (defvar pyim-indicator-cursor-color (list "orange")
   "`pyim-indicator-default' 使用的 cursor 颜色。
 
 这个变量的取值是一个list: (中文输入时的颜色 英文输入时的颜色), 如
 果英文输入时的颜色为 nil, 则使用默认 cursor 颜色。")
+(defvaralias '朋友输入法-提示器-光标颜色 'pyim-indicator-cursor-color)
 
 (defvar pyim-indicator-modeline-string (list "PYIM/C " "PYIM/E ")
   "`pyim-indicator-default' 使用的 modeline 字符串。
@@ -60,21 +63,27 @@ timer 实现。"
 这个变量的取值是一个list:
 
     (中文输入时显示的字符串 英文输入时显示的字符串)。")
+(defvaralias '朋友输入法-提示器-modeline-字符串 'pyim-indicator-modeline-string)
 
 (defvar pyim-indicator-original-cursor-color nil
   "记录 cursor 的原始颜色。")
+(defvaralias '朋友输入法-提示器-原光标颜色 'pyim-indicator-original-cursor-color)
 
 (defvar pyim-indicator-timer nil
   "`pyim-indicator-daemon' 使用的 timer.")
+(defvaralias '朋友输入法-提示器-定时器 'pyim-indicator-timer)
 
 (defvar pyim-indicator-timer-repeat 0.4)
+(defvaralias '朋友输入法-提示器-定时器重复时间 'pyim-indicator-timer-repeat)
 
 (defvar pyim-indicator-daemon-function-argument nil
   "实现 `pyim-indicator-daemon-function' 时，用于传递参数，主要原因
 是由于 `post-command-hook' 不支持参数。")
+(defvaralias '朋友输入法-提示器-后台函数参数 'pyim-indicator-daemon-function-argument)
 
 (defvar pyim-indicator-last-input-method-title nil
   "记录上一次 `current-input-method-title' 的取值。")
+(defvaralias '朋友输入法-提示器-上次输入法名称 'pyim-indicator-last-input-method-title)
 
 (defun pyim-indicator-start-daemon (func)
   "Indicator daemon, 用于实时显示输入法当前输入状态。"
@@ -89,6 +98,7 @@ timer 实现。"
             (run-with-timer
              nil pyim-indicator-timer-repeat
              #'pyim-indicator-daemon-function)))))
+(defalias '朋友输入法-提示器-启动后台 'pyim-indicator-start-daemon)
 
 (defun pyim-indicator-stop-daemon ()
   "Stop indicator daemon."
@@ -99,6 +109,7 @@ timer 实现。"
     (cancel-timer pyim-indicator-timer)
     (setq pyim-indicator-timer nil))
   (pyim-indicator-revert-cursor-color))
+(defalias '朋友输入法-提示器-停止后台 'pyim-indicator-stop-daemon)
 
 (defun pyim-indicator-daemon-function ()
   "`pyim-indicator-daemon' 内部使用的函数。"
@@ -111,11 +122,13 @@ timer 实现。"
         (dolist (indicator pyim-indicator-list)
           (when (functionp indicator)
             (funcall indicator current-input-method chinese-input-p)))))))
+(defalias '朋友输入法-提示器-后台函数 'pyim-indicator-daemon-function)
 
 (defun pyim-indicator-revert-cursor-color ()
   "将 cursor 颜色重置到 pyim 启动之前的状态。"
   (when pyim-indicator-original-cursor-color
     (set-cursor-color pyim-indicator-original-cursor-color)))
+(defalias '朋友输入法-提示器-重置光标颜色 'pyim-indicator-revert-cursor-color)
 
 (defun pyim-indicator-update-mode-line ()
   "更新 mode-line."
@@ -124,6 +137,7 @@ timer 实现。"
     (force-mode-line-update)
     (setq pyim-indicator-last-input-method-title
           current-input-method-title)))
+(defalias '朋友输入法-提示器-更新-mode-line 'pyim-indicator-update-mode-line)
 
 (defun pyim-indicator-with-cursor-color (input-method chinese-input-p)
   "Pyim 自带的 indicator, 通过光标颜色来显示输入状态。"
@@ -138,6 +152,7 @@ timer 实现。"
            (pyim-indicator-select-color
             (list "black" "white")
             pyim-indicator-original-cursor-color))))))
+(defalias '朋友输入法-提示器-自带光标颜色 'pyim-indicator-with-cursor-color)
 
 (defun pyim-indicator-select-color (colors &optional prefer-color)
   "根据背景，选择一个比较显眼的颜色。
@@ -153,6 +168,7 @@ timer 实现。"
                  (lambda (a b)
                    (> (color-distance a background)
                       (color-distance b background))))))))
+(defalias '朋友输入法-提示器-选择颜色 'pyim-indicator-select-color)
 
 (defun pyim-indicator-with-modeline (input-method chinese-input-p)
   "Pyim 自带的 indicator, 使用 mode-line 来显示输入状态。"
@@ -161,6 +177,7 @@ timer 实现。"
         (setq current-input-method-title (nth 0 pyim-indicator-modeline-string))
       (setq current-input-method-title (nth 1 pyim-indicator-modeline-string))))
   (pyim-indicator-update-mode-line))
+(defalias '朋友输入法-提示器-自带modeline 'pyim-indicator-with-modeline)
 
 (defun pyim-indicator-with-posframe (input-method chinese-input-p)
   "Pyim 自带的 indicator, 通过 posframe 来显示输入状态。"
@@ -175,6 +192,7 @@ timer 实现。"
                            :poshandler #'posframe-poshandler-point-top-left-corner
                            :background-color (pyim-indicator-select-color (list "red" "green" "blue" "orange")))
           (posframe-hide buffer))))))
+(defalias '朋友输入法-提示器-自带posframe 'pyim-indicator-with-posframe)
 
 ;; * Footer
 (provide 'pyim-indicator)

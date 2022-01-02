@@ -42,6 +42,7 @@
 如果 `pyim-cregexp-build' 无法支持用户正在使用的 scheme 时，
 将使用这个 scheme."
   :type 'symbol)
+(defvaralias '朋友输入法-正则-默认方案 'pyim-cregexp-fallback-scheme)
 
 (defun pyim-cregexp-char-level-num (num)
   "根据 NUM 返回一个有效的常用汉字级别。"

@@ -69,6 +69,7 @@
        (or (car (setq ppss (nthcdr 3 ppss)))
            (car (setq ppss (cdr ppss)))
            (nth 3 ppss))))))
+(defalias '朋友输入法-探针-程序模式 'pyim-probe-program-mode)
 
 (defvar org-heading-regexp)
 (defvar org-use-speed-commands)
@@ -132,6 +133,7 @@
                  (> (length (pyim-entered-get 'point-before)) 0)))
       (not (or (pyim-string-match-p "\\cc" non-digit-str-before-1)
                (> (length (pyim-entered-get 'point-before)) 0))))))
+(defalias '朋友输入法-探针-动态英语 'pyim-probe-dynamic-english)
 
 (defun pyim-probe-auto-english ()
   "激活这个 pyim 探针函数后，使用下面的规则自动切换中英文输入：
@@ -150,6 +152,7 @@
                 (pyim-string-match-p "\\cc" str-before-2)
               (and (not (pyim-string-match-p "\\cc" str-before-1))
                    (= (length (pyim-entered-get 'point-before)) 0)))))))
+(defalias '朋友输入法-探针-自动英语 'pyim-probe-dynamic-english)
 
 (declare-function evil-normal-state-p "evil")
 (defun pyim-probe-evil-normal-mode ()
@@ -168,6 +171,7 @@
     (and (member (char-to-string char)
                  (mapcar #'car pyim-punctuation-dict))
          (string-match "^[ \t]*$" line-string))))
+(defalias '朋友输入法-探针-行首半角 'pyim-probe-punctuation-line-beginning)
 
 (declare-function pyim-entered-get "pyim-entered" (&optional type))
 (declare-function org-inside-LaTeX-fragment-p "org")
@@ -181,6 +185,7 @@
         (puncts (mapcar #'car pyim-punctuation-dict)))
     (and (member str-before-1 puncts)
          (member (char-to-string char) puncts))))
+(defalias '朋友输入法-探针-半角后半角 'pyim-probe-punctuation-after-punctuation)
 
 (defun pyim-probe-org-latex-mode ()
   "org-mode 中的 latex fragment 和 latex 宏指令中自动切换到英文输入."

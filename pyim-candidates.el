@@ -40,17 +40,21 @@
 (defcustom pyim-enable-shortcode t
   "启用输入联想词功能."
   :type 'boolean)
+(defvaralias '朋友输入法-是否启用联想词 'pyim-enable-shortcode)
 
 (defvar pyim-candidates nil
   "所有备选词条组成的列表.")
+(defvaralias '朋友输入法-备选词条列表 'pyim-candidates)
 
 (defvar pyim-candidates-last nil
   "上一轮备选词条列表，这个变量主要用于 autoselector 机制.")
+(defvaralias '朋友输入法-备选词-上轮 'pyim-candidates-last)
 
 (defvar pyim-candidate-position nil
   "当前选择的词条在 ‘pyim-candidates’ 中的位置.
 
 细节信息请参考 `pyim-page-refresh' 的 docstring.")
+(defvaralias '朋友输入法-备选词-位置 'pyim-candidate-position)
 
 (defvar pyim-candidates-possible-chiefs nil
   "可能做第一位候选词的词条列表。")
@@ -71,6 +75,7 @@ IMOBJS 获得候选词条。"
       (when class
         (funcall (intern (format "pyim-candidates-create:%S" class))
                  imobjs scheme-name async)))))
+(defalias '朋友输入法-备选词-创建 'pyim-candidates-create)
 
 (defun pyim-candidates-add-possible-chief (word)
   "将 WORD 添加到 `pyim-candidates-possible-chiefs'."
@@ -161,6 +166,7 @@ IMOBJS 获得候选词条。"
           (setq result (append result output))))
       (when (car result)
         (delete-dups result)))))
+(defalias '朋友输入法-备选词-创建:型码 'pyim-candidates-create:xingma)
 
 (defun pyim-candidates-create:quanpin (imobjs scheme-name &optional async)
   "`pyim-candidates-create' 处理全拼输入法的函数."
@@ -192,6 +198,7 @@ IMOBJS 获得候选词条。"
           (setq n (length (car candidates)))))
       (append (pyim-subconcat (nreverse output) "")
               candidates))))
+(defalias '朋友输入法-备选词-创建:全拼 'pyim-candidates-create:quanpin)
 
 (defun pyim-candidates-search-buffer (regexp)
   "在当前 buffer 中使用 REGEXP 搜索词条。"
@@ -212,6 +219,7 @@ IMOBJS 获得候选词条。"
       (sort words (lambda (a b)
                     (> (or (gethash a counts) 0)
                        (or (gethash b counts) 0)))))))
+(defalias '朋友输入法-备选词-搜索buffer 'pyim-candidates-search-buffer)
 
 (defun pyim-candidates-create-quanpin (imobjs scheme-name &optional fast-search)
   "`pyim-candidates-create:quanpin' 内部使用的函数。"
@@ -324,10 +332,12 @@ IMOBJS 获得候选词条。"
              ,@pinyin-chars-1
              ,@pinyin-chars-2
              )))))
+(defalias '朋友输入法-备选词-创建全拼词条 'pyim-candidates-create-quanpin)
 
 (defun pyim-candidates-create:shuangpin (imobjs _scheme-name &optional async)
   "`pyim-candidates-create' 处理双拼输入法的函数."
   (pyim-candidates-create:quanpin imobjs 'quanpin async))
+(defalias '朋友输入法-备选词-创建:双拼 'pyim-candidates-create:shuangpin)
 
 ;; * Footer
 (provide 'pyim-candidates)

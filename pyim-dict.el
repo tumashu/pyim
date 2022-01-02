@@ -47,11 +47,14 @@ plist 来表示，比如：
 另外一个与这个变量功能类似的变量是： `pyim-extra-dicts', 专门
 用于和 elpa 格式的词库包集成。"
   :type 'list)
+(defvaralias '朋友输入法-词库列表 'pyim-dicts)
 
 (defvar pyim-extra-dicts nil "与 `pyim-dicts' 类似, 用于和 elpa 格式的词库包集成。.")
+(defvaralias '朋友输入法-额外词库列表 'pyim-extra-dicts)
 
 ;; ** pyim 词库管理工具
 (defvar pyim-dict-manager-buffer "*pyim-dict-manager*")
+(defvaralias '朋友输入法-词库管理器-buffer 'pyim-dict-manager-buffer)
 
 (defun pyim-dict-manager-refresh ()
   "Refresh the contents of the *pyim-dict-manager* buffer."

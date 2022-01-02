@@ -37,6 +37,7 @@
 (defcustom pyim-default-scheme 'quanpin
   "设置 pyim 使用哪一种输入法方案，默认使用全拼输入."
   :type 'symbol)
+(defvaralias '朋友输入法-默认方案 'pyim-default-scheme)
 
 (defcustom pyim-assistant-scheme 'quanpin
   "设置辅助输入法方案.
@@ -44,14 +45,17 @@
 这个功能主要用于五笔等形码输入法，在忘记编码的情况下，
 临时激活某种辅助输入法（比如：拼音输入法）来输入汉字。"
   :type 'symbol)
+(defvaralias '朋友输入法-辅助方案 'pyim-assistant-scheme)
 
 (defvar pyim-assistant-scheme-enable nil
   "设置临时 scheme, 用于五笔等形码输入法临时拼音输入。")
+(defvaralias '朋友输入法-是否启用辅助方案 'pyim-assistant-scheme-enable)
 
 (pyim-register-local-variables '(pyim-assistant-scheme-enable))
 
 (defvar pyim-schemes nil
   "Pyim 支持的所有拼音方案.")
+(defvaralias '朋友输入法-方案列表 'pyim-schemes)
 
 ;;;###autoload
 (defun pyim-default-scheme (&optional scheme-name)
@@ -67,6 +71,7 @@
           scheme-name)
       (message "PYIM: %s 不是一个有效的 scheme 名称, 继续使用 %s." scheme-name pyim-default-scheme)
       nil)))
+(defalias '朋友输入法-设置默认方案 'pyim-default-scheme)
 
 (defun pyim-scheme-add (scheme)
   "Add SCHEME to `pyim-schemes'"
@@ -78,11 +83,13 @@
                         pyim-schemes)))
         (push scheme pyim-schemes))
     (message "PYIM: Invalid pyim scheme config!")))
+(defalias '朋友输入法-方案-添加 'pyim-scheme-add)
 
 (defun pyim-scheme-get (scheme-name)
   "获取名称为 SCHEME-NAME 的输入法方案。"
   (when scheme-name
     (assoc scheme-name pyim-schemes)))
+(defalias '朋友输入法-方案-获取 'pyim-scheme-get)
 
 (defun pyim-scheme-name (&optional default)
   "获取输入法 scheme"
@@ -96,6 +103,7 @@
     (if (assq scheme-name pyim-schemes)
         scheme-name
       'quanpin)))
+(defalias '朋友输入法-方案-获取名字 'pyim-scheme-name)
 
 (defun pyim-scheme-get-option (scheme-name option)
   "获取名称为 SCHEME-NAME 的输入法方案，并提取其属性 OPTION 。"
@@ -107,6 +115,7 @@
       (if (member option (cdr scheme))
           (plist-get (cdr scheme) option)
         (pyim-scheme-get-option scheme-inherit option)))))
+(defalias '朋友输入法-方案-获取属性 'pyim-scheme-get-option)
 
 (pyim-scheme-add
  '(quanpin
