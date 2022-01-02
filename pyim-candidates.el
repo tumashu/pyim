@@ -136,18 +136,19 @@ IMOBJS 获得候选词条。"
                 (let* ((personal-words (pyim-dcache-get last-code '(icode2word)))
                        (common-words (pyim-dcache-get last-code '(code2word)))
                        (chief-word (pyim-candidates-get-chief scheme-name personal-words common-words))
+                       (chief-word (if (= (length chief-word) 1)
+                                       chief-word
+                                     nil))
                        (chars (cl-remove-if (lambda (word)
-                                              ;; NOTE: 常用字在这里的定义是用户输入次数超过30次的汉字，30这个数字的选取是非常主观的，也许有
-                                              ;; 更合理的取值。
-                                              (or (> (length word) 1)
-                                                  (< (or (car (pyim-dcache-get word 'iword2count)) 0) 30)))
+                                              (> (length word) 1))
                                             (pyim-dcache-get last-code '(icode2word))))
                        (all-words (pyim-dcache-get last-code '(icode2word code2word shortcode2word))))
                   (mapcar (lambda (word)
                             (concat prefix word))
-                          `(,first-word
-                            ,@(pyim-candidates-sort chars)
-                            ,@(pyim-candidates-sort all-words)))))
+                          (delete-dups
+                           `(,chief-word
+                             ,(car (pyim-candidates-sort chars))
+                             ,@(pyim-candidates-sort all-words))))))
           (setq output (remove "" (or output (list prefix))))
           (setq result (append result output))))
       (when (car result)
