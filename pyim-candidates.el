@@ -149,11 +149,14 @@ IMOBJS 获得候选词条。"
                          (pyim-dcache-get last-code '(icode2word))))
                        (common-words (pyim-dcache-get last-code '(code2word)))
                        (chief-word (pyim-candidates-get-chief scheme-name personal-words common-words))
-                       (all-words (pyim-dcache-get last-code '(icode2word code2word shortcode2word))))
+                       (common-words (pyim-candidates-sort common-words))
+                       (other-words (pyim-dcache-get last-code '(shortcode2word))))
                   (mapcar (lambda (word)
                             (concat prefix word))
                           `(,chief-word
-                            ,@(pyim-candidates-sort all-words)))))
+                            ,@personal-words
+                            ,@common-words
+                            ,@other-words))))
           (setq output (remove "" (or output (list prefix))))
           (setq result (append result output))))
       (when (car result)
