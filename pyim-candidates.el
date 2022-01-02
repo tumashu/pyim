@@ -125,7 +125,10 @@ IMOBJS 获得候选词条。"
           (when other-codes
             (setq prefix (mapconcat
                           (lambda (code)
-                            (car (pyim-dcache-get code '(code2word))))
+                            (pyim-candidates-get-chief
+                             scheme-name
+                             (pyim-dcache-get code '(icode2word))
+                             (pyim-dcache-get code '(code2word))))
                           other-codes "")))
 
           ;; 5. output => 工子又 工子叕
