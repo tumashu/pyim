@@ -52,16 +52,23 @@
 (defvar pyim-dhashcache-update-icode2word-p nil)
 (defvar pyim-dhashcache-update-code2word-running-p nil)
 
-(defun pyim-dhashcache-sort-words (words-list &optional iword2count)
+(defun pyim-dhashcache-sort-words (words-list &optional iword2count count-weight-table)
   "对 WORDS-LIST 排序，词频大的排在前面.
 
 如果 IWORD2COUNT 为 nil, 排序将使用 `pyim-dhashcache-iword2count'
-中记录的词频信息"
-  (let ((iword2count (or iword2count pyim-dhashcache-iword2count)))
+中记录的词频信息
+
+COUNT-WEIGHT-TABLE 是一个哈希表，保存词条的 count 权重，在排序过
+程中， ‘count * 权重’ 的取值决定了排序先后顺序, 权重是一个不小于1
+的数字。"
+  (let ((iword2count (or iword2count pyim-dhashcache-iword2count))
+        (count-weight-table (or count-weight-table (make-hash-table :test #'equal))))
     (sort words-list
           (lambda (a b)
-            (> (or (gethash a iword2count) 0)
-               (or (gethash b iword2count) 0))))))
+            (> (* (or (gethash a iword2count) 0)
+                  (or (gethash a count-weight-table) 1))
+               (* (or (or (gethash b iword2count) 0)
+                      (or (gethash b count-weight-table) 1))))))))
 
 (defun pyim-dhashcache-get-shortcodes (code)
   "获取 CODE 所有的 shortcodes.

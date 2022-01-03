@@ -67,16 +67,24 @@
         (insert-file-contents file)
         (buffer-string)))))
 
-(defun pyim-dregcache-sort-words (words-list)
+(defun pyim-dregcache-sort-words (words-list &optional iword2count count-weight-table)
   "对 WORDS-LIST 排序，词频大的排在前面.
 
-排序使用 `pyim-dregcache-iword2count' 中记录的词频信息"
-  (sort words-list
-        (lambda (a b)
-          (let ((a (car (split-string a ":")))
-                (b (car (split-string b ":"))))
-            (> (or (gethash a pyim-dregcache-iword2count) 0)
-               (or (gethash b pyim-dregcache-iword2count) 0))))))
+如果 IWORD2COUNT 为 nil, 排序将使用 `pyim-dregcache-iword2count'
+中记录的词频信息
+
+COUNT-WEIGHT-TABLE 是一个哈希表，保存词条的 count 权重，在排序过
+程中， ‘count * 权重’ 的取值决定了排序先后顺序。"
+  (let ((iword2count (or iword2count pyim-dregcache-iword2count))
+        (count-weight-table (or count-weight-table (make-hash-table :test #'equal))))
+    (sort words-list
+          (lambda (a b)
+            (let ((a (car (split-string a ":")))
+                  (b (car (split-string b ":"))))
+              (> (* (or (gethash a iword2count) 0)
+                    (or (gethash a count-weight-table) 1))
+                 (* (or (or (gethash b iword2count) 0)
+                        (or (gethash b count-weight-table) 1)))))))))
 
 (defun pyim-dregcache-sort-icode2word ()
   "对个人词库排序."

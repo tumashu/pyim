@@ -858,6 +858,30 @@ yin-xing 因行
     (should (equal (gethash "n-h" pyim-dhashcache-ishortcode2word)
                    '("你慌" "你好" "你坏")))))
 
+(ert-deftest pyim-tests-pyim-dhashcache-sort-words ()
+  (let ((pyim-dhashcache-iword2count (make-hash-table :test #'equal))
+        (weight-table (make-hash-table :test #'equal))
+        words)
+    (puthash "你好" 3 pyim-dhashcache-iword2count)
+    (puthash "呢耗" 2 pyim-dhashcache-iword2count)
+    (puthash "你豪" 1 pyim-dhashcache-iword2count)
+
+    (puthash "你好" 0.1 weight-table)
+    (puthash "呢耗" 0.3 weight-table)
+    (puthash "你豪" 5   weight-table)
+
+    (setq words (list "呢耗" "你豪" "你好"))
+    (should (equal (pyim-dhashcache-sort-words words)
+                   '("你好" "呢耗" "你豪")))
+
+    (setq words (list "呢耗" "你豪" "你好"))
+    (should (equal (pyim-dhashcache-sort-words words pyim-dhashcache-iword2count)
+                   '("你好" "呢耗" "你豪")))
+
+    (setq words (list "呢耗" "你豪" "你好"))
+    (should  (equal (pyim-dhashcache-sort-words words nil weight-table)
+                    '("你豪" "呢耗" "你好")))))
+
 ;; ** pyim-dregcache 相关单元测试
 (ert-deftest pyim-tests-pyim-general ()
   (let ((pyim-dcache-backend 'pyim-dregcache))
