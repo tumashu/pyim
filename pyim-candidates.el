@@ -59,22 +59,9 @@
  '(pyim-candidates pyim-candidate-position))
 
 ;; ** 获取备选词列表
-(defun pyim-candidates-create-weight-table (words)
-  "基于 WORDS 的先后顺序，创建一个用于候选词排序的 count 权重表。
-count 和 count 权重结合起来确定词条的先后顺序。"
-  (let ((table (make-hash-table :test #'equal))
-        ;; FIXME: 这个权重列表是想当然的数字，因为目前我也不知道这个合理的权重是
-        ;; 什么，希望以后通过实际使用，可以总结出更合理的数字。
-        (weights (list 1.3 1.2 1.1)))
-    (dolist (weight weights)
-      (let ((word (pop words)))
-        (when word
-          (puthash word weight table))))
-    table))
-
-(defun pyim-candidates-sort (candidates &optional weight-table)
+(defun pyim-candidates-sort (candidates)
   "对 CANDIDATES 进行排序。"
-  (pyim-dcache-call-api 'sort-words candidates nil weight-table))
+  (pyim-dcache-call-api 'sort-words candidates))
 
 (defun pyim-candidates-create (imobjs scheme-name &optional async)
   "按照 SCHEME-NAME 对应的输入法方案， 从输入法内部对象列表:
@@ -158,10 +145,7 @@ IMOBJS 获得候选词条。"
                 ;; 1. 第一个词选择公共词库中的第一个词。
                 ;; 2. 剩下的分成常用字和词，常用字优先排，字和词各按 count 大小排序。
                 (let* ((personal-words (pyim-dcache-get last-code '(icode2word)))
-                       (weight-table (pyim-candidates-create-weight-table personal-words))
-                       (personal-words
-                        (pyim-candidates-sort
-                         personal-words weight-table))
+                       (personal-words (pyim-candidates-sort personal-words))
                        (common-words (pyim-dcache-get last-code '(code2word)))
                        (chief-word (pyim-candidates-get-chief scheme-name personal-words common-words))
                        (common-words (pyim-candidates-sort common-words weight-table))
@@ -314,8 +298,7 @@ IMOBJS 获得候选词条。"
     ;; 个人词条排序：使用词频信息对个人词库得到的候选词排序，第一个词条的位置
     ;; 比较特殊，不参与排序，具体原因请参考 `pyim-page-select-word' 中的
     ;; comment.
-    (setq weight-table (pyim-candidates-create-weight-table personal-words))
-    (setq personal-words (pyim-candidates-sort personal-words weight-table))
+    (setq personal-words (pyim-candidates-sort personal-words))
     (setq chief-word (pyim-candidates-get-chief scheme-name personal-words))
 
     ;; 调试输出

@@ -40,10 +40,25 @@
 (require 'pyim-dcache)
 (require 'pyim-scheme)
 
+(defvar pyim-dhashcache-count-types
+  '((day
+     ;; 用于生成类似 :20220206 这样的 key.
+     :format ":%Y%m%d"
+     ;; 最多保存七天 count 到缓存。
+     :max-save-length 7
+     ;; 计算排序综合指标时，最近七天 count 对应的权重。
+     :weights (0.396 0.245 0.151 0.094 0.057 0.038 0.019)
+     ;; 获取前一天需要减去的天数。
+     :delta -1
+     ;; 计算日平均 count 需要乘的数字。
+     :factor 0.143))
+  "计算排序综合指数时，用到的基本信息。")
+
 (defvar pyim-dhashcache-code2word nil)
 (defvar pyim-dhashcache-code2word-md5 nil)
 (defvar pyim-dhashcache-word2code nil)
 (defvar pyim-dhashcache-iword2count nil)
+(defvar pyim-dhashcache-iword2count-log nil)
 (defvar pyim-dhashcache-shortcode2word nil)
 (defvar pyim-dhashcache-icode2word nil)
 (defvar pyim-dhashcache-ishortcode2word nil)
@@ -52,23 +67,65 @@
 (defvar pyim-dhashcache-update-icode2word-p nil)
 (defvar pyim-dhashcache-update-code2word-running-p nil)
 
-(defun pyim-dhashcache-sort-words (words-list &optional iword2count count-weight-table)
-  "对 WORDS-LIST 排序，词频大的排在前面.
-
-如果 IWORD2COUNT 为 nil, 排序将使用 `pyim-dhashcache-iword2count'
-中记录的词频信息
-
-COUNT-WEIGHT-TABLE 是一个哈希表，保存词条的 count 权重，在排序过
-程中， ‘count * 权重’ 的取值决定了排序先后顺序, 权重是一个不小于1
-的数字。"
-  (let ((iword2count (or iword2count pyim-dhashcache-iword2count))
-        (count-weight-table (or count-weight-table (make-hash-table :test #'equal))))
+(defun pyim-dhashcache-sort-words (words-list)
+  "对 WORDS-LIST 排序"
+  (let ((iword2count pyim-dhashcache-iword2count)
+        (iword2count-log pyim-dhashcache-iword2count-log))
     (sort words-list
           (lambda (a b)
-            (> (* (or (gethash a iword2count) 0)
-                  (or (gethash a count-weight-table) 1))
-               (* (or (or (gethash b iword2count) 0)
-                      (or (gethash b count-weight-table) 1))))))))
+            (let ((n1 (pyim-dhashcache-calculate-index
+                       (pyim-dhashcache-get-count-log-value
+                        (gethash a iword2count-log))))
+                  (n2 (pyim-dhashcache-calculate-index
+                       (pyim-dhashcache-get-count-log-value
+                        (gethash b iword2count-log)))))
+              (if (= n1 n2)
+                  (let ((n3 (or (gethash a iword2count) 0))
+                        (n4 (or (gethash b iword2count) 0)))
+                    (> n3 n4))
+                (> n1 n2)))))))
+
+(defun pyim-dhashcache-get-count-log-value (count-log &optional time)
+  "从 COUNT-LOG 中获取所有的 count 值。
+
+比如： ((day :20220205 10
+             :20220204 6   => ((day 10 6 0 3 ...))
+             :20220202 3
+             ...))"
+  (mapcar (lambda (x)
+            (let* ((label (car x))
+                   (plist (cdr x))
+                   (format (plist-get plist :format))
+                   (n (plist-get plist :max-save-length))
+                   (delta (plist-get plist :delta))
+                   (time (or time (current-time)))
+                   output)
+              (dotimes (i n)
+                (let* ((time (time-add time (days-to-time (* i delta))))
+                       (key (intern (format-time-string format time)))
+                       (plist (cdr (assoc label count-log))))
+                  (push (or (plist-get plist key) 0) output)))
+              `(,label ,@(reverse output))))
+          pyim-dhashcache-count-types))
+
+(defun pyim-dhashcache-calculate-index (count-log-value)
+  "根据 COUNT-LOG-VALUE 计算一个综合指数，用于对词条进行排序。
+COUNT-LOG-VALUE 是一个 alist, 其结构类似：
+
+      ((day n1 n2 n3 ...))
+
+其中 (n1 n2 n3 ...) 代表从当前日期逐日倒推，每日 count 所组成的列表。"
+  (apply #'+ (mapcar (lambda (x)
+                       (let* ((label (car x))
+                              (plist (cdr x))
+                              (weights (plist-get plist :weights))
+                              (factor (plist-get plist :factor)))
+                         (* (apply #'+ (cl-mapcar (lambda (a b)
+                                                    (* (or a 0) b))
+                                                  (cdr (assoc label count-log-value))
+                                                  weights))
+                            factor)))
+                     pyim-dhashcache-count-types)))
 
 (defun pyim-dhashcache-get-shortcodes (code)
   "获取 CODE 所有的 shortcodes.
@@ -124,16 +181,15 @@ COUNT-WEIGHT-TABLE 是一个哈希表，保存词条的 count 权重，在排序
         ,@(pyim-dhashcache-async-inject-variables)
         (require 'pyim-dhashcache)
         (pyim-dcache-init-variable pyim-dhashcache-icode2word)
-        (pyim-dcache-init-variable pyim-dhashcache-iword2count)
+        (pyim-dhashcache-init-count-variables)
         (pyim-dcache-save-variable
          'pyim-dhashcache-ishortcode2word
          (pyim-dhashcache-update-ishortcode2word-1
-          pyim-dhashcache-icode2word
-          pyim-dhashcache-iword2count)))
+          pyim-dhashcache-icode2word)))
      (lambda (_)
        (pyim-dcache-reload-variable pyim-dhashcache-ishortcode2word)))))
 
-(defun pyim-dhashcache-update-ishortcode2word-1 (icode2word iword2count)
+(defun pyim-dhashcache-update-ishortcode2word-1 (icode2word)
   "`pyim-dhashcache-update-ishortcode2word' 内部函数."
   (let ((ishortcode2word (make-hash-table :test #'equal)))
     (maphash
@@ -147,7 +203,7 @@ COUNT-WEIGHT-TABLE 是一个哈希表，保存词条的 count 权重，在排序
      icode2word)
     (maphash
      (lambda (key value)
-       (puthash key (pyim-dhashcache-sort-words value iword2count)
+       (puthash key (pyim-dhashcache-sort-words value)
                 ishortcode2word))
      ishortcode2word)
     ishortcode2word))
@@ -166,16 +222,15 @@ COUNT-WEIGHT-TABLE 是一个哈希表，保存词条的 count 权重，在排序
         ,@(pyim-dhashcache-async-inject-variables)
         (require 'pyim-dhashcache)
         (pyim-dcache-init-variable pyim-dhashcache-code2word)
-        (pyim-dcache-init-variable pyim-dhashcache-iword2count)
+        (pyim-dhashcache-init-count-variables)
         (pyim-dcache-save-variable
          'pyim-dhashcache-shortcode2word
          (pyim-dhashcache-update-shortcode2word-1
-          pyim-dhashcache-code2word
-          pyim-dhashcache-iword2count)))
+          pyim-dhashcache-code2word)))
      (lambda (_)
        (pyim-dcache-reload-variable pyim-dhashcache-shortcode2word)))))
 
-(defun pyim-dhashcache-update-shortcode2word-1 (code2word iword2count)
+(defun pyim-dhashcache-update-shortcode2word-1 (code2word)
   "`pyim-dhashcache-update-shortcode2word' 的内部函数"
   (let ((shortcode2word (make-hash-table :test #'equal)))
     (maphash
@@ -197,7 +252,7 @@ COUNT-WEIGHT-TABLE 是一个哈希表，保存词条的 count 权重，在排序
      code2word)
     (maphash
      (lambda (key value)
-       (puthash key (pyim-dhashcache-sort-words value iword2count)
+       (puthash key (pyim-dhashcache-sort-words value)
                 shortcode2word))
      shortcode2word)
     shortcode2word))
@@ -349,10 +404,10 @@ code 对应的中文词条了。
         ,@(pyim-dhashcache-async-inject-variables)
         (require 'pyim-dhashcache)
         (pyim-dcache-init-variable pyim-dhashcache-icode2word)
-        (pyim-dcache-init-variable pyim-dhashcache-iword2count)
+        (pyim-dhashcache-init-count-variables)
         (maphash
          (lambda (key value)
-           (puthash key (pyim-dhashcache-sort-words value pyim-dhashcache-iword2count)
+           (puthash key (pyim-dhashcache-sort-words value)
                     pyim-dhashcache-icode2word))
          pyim-dhashcache-icode2word)
         (pyim-dcache-save-variable
@@ -404,12 +459,17 @@ code 对应的中文词条了。
              (directory-files pyim-dcache-directory nil "-backup-"))
     (message "PYIM: 在 %S 目录中发现备份文件的存在，可能是词库缓存文件损坏导致，请抓紧检查处理！！！"
              pyim-dcache-directory))
-  (pyim-dcache-init-variable pyim-dhashcache-iword2count)
+  (pyim-dhashcache-init-count-variables)
   (pyim-dcache-init-variable pyim-dhashcache-code2word)
   (pyim-dcache-init-variable pyim-dhashcache-word2code)
   (pyim-dcache-init-variable pyim-dhashcache-shortcode2word)
   (pyim-dcache-init-variable pyim-dhashcache-icode2word)
   (pyim-dcache-init-variable pyim-dhashcache-ishortcode2word))
+
+(defun pyim-dhashcache-init-count-variables ()
+  "初始化 count 相关的变量。"
+  (pyim-dcache-init-variable pyim-dhashcache-iword2count)
+  (pyim-dcache-init-variable pyim-dhashcache-iword2count-log))
 
 (defun pyim-dhashcache-save-personal-dcache-to-file ()
   ;; 用户选择过的词
@@ -419,7 +479,11 @@ code 对应的中文词条了。
   ;; 词频
   (pyim-dcache-save-variable
    'pyim-dhashcache-iword2count
-   pyim-dhashcache-iword2count 0.8))
+   pyim-dhashcache-iword2count 0.8)
+  ;; 词频日志
+  (pyim-dcache-save-variable
+   'pyim-dhashcache-iword2count-log
+   pyim-dhashcache-iword2count-log 0.8))
 
 (defmacro pyim-dhashcache-put (cache code &rest body)
   "将 BODY 的返回值保存到 CACHE 对应的 CODE 中。
@@ -446,7 +510,23 @@ code 对应的中文词条了。
       (funcall wordcount-handler (or orig-value 0)))
      ((numberp wordcount-handler)
       wordcount-handler)
-     (t (or orig-value 0)))))
+     (t (or orig-value 0))))
+  (pyim-dhashcache-put
+    pyim-dhashcache-iword2count-log word
+    (let (out)
+      (dolist (x pyim-dhashcache-count-types)
+        (let* ((label (car x))
+               (key (intern (format-time-string (plist-get (cdr x) :format))))
+               (n (plist-get (cdr x) :max-save-length))
+               (plist (cdr (assoc label orig-value)))
+               (value (plist-get plist key))
+               (output (if value
+                           (plist-put plist key (+ 1 value))
+                         (append (list key 1) plist)))
+               (length (length output))
+               (output (cl-subseq output 0 (min length (* 2 n)))))
+          (push `(,label ,@output) out)))
+      out)))
 
 (defun pyim-dhashcache-delete-word (word)
   "将中文词条 WORD 从个人词库中删除"
@@ -467,7 +547,8 @@ code 对应的中文词条了。
              (puthash key new-value pyim-dhashcache-ishortcode2word)
            (remhash key pyim-dhashcache-ishortcode2word)))))
    pyim-dhashcache-ishortcode2word)
-  (remhash word pyim-dhashcache-iword2count))
+  (remhash word pyim-dhashcache-iword2count)
+  (remhash word pyim-dhashcache-iword2count-log))
 
 (defun pyim-dhashcache-insert-word-into-icode2word (word code prepend)
   "将词条 WORD 插入到 icode2word 词库缓存 CODE 键对应的位置.
