@@ -575,7 +575,6 @@ BUG：拼音无法有效地处理多音字。"
            (codes (pyim-cstring-to-codes
                    word scheme-name
                    (or criteria pyim-cstring-to-code-criteria))))
-      (pyim-candidates-add-possible-chief word)
       ;; 保存对应词条的词频
       (when (> (length word) 0)
         (pyim-dcache-update-wordcount word (or wordcount-handler #'1+)))

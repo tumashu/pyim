@@ -52,9 +52,6 @@
 
 细节信息请参考 `pyim-page-refresh' 的 docstring.")
 
-(defvar pyim-candidates-possible-chiefs nil
-  "可能做第一位候选词的词条列表。")
-
 (pyim-register-local-variables
  '(pyim-candidates pyim-candidate-position))
 
@@ -72,45 +69,32 @@ IMOBJS 获得候选词条。"
         (funcall (intern (format "pyim-candidates-create:%S" class))
                  imobjs scheme-name async)))))
 
-(defun pyim-candidates-add-possible-chief (word)
-  "将 WORD 添加到 `pyim-candidates-possible-chiefs'."
-  (push word pyim-candidates-possible-chiefs)
-  (setq pyim-candidates-possible-chiefs
-        (cl-subseq pyim-candidates-possible-chiefs 0
-                   (min 100 (length pyim-candidates-possible-chiefs)))))
-
 (defun pyim-candidates-get-chief (scheme-name &optional personal-words common-words)
   "选取第一位候选词。"
-  (let* ((class (pyim-scheme-get-option scheme-name :class))
-         (words pyim-candidates-possible-chiefs)
-         (length (length words))
-         ;; NOTE: 网上传言，一段话平均70个字，按照一个词两个字估算，100个词大概
-         ;; 为两段话。
-         (words100 (cl-subseq words 0 (min 100 length)))
-         ;; NOTE: 10个词大概1句话。
-         (words10 (cl-subseq words 0 (min 10 length))))
-    (cond
-     ((equal class 'xingma)
-      (or
-       ;; 如果从公共词库里面获取到的第一个词条是汉字，就选择它。
-       (when (= (length (car common-words)) 1)
-         (car common-words))
-       ;; 从个人词库里面按排列的先后顺序，获取一个汉字。
-       (cl-find-if
-        (lambda (word)
-          (= (length word) 1))
-        personal-words)))
-     (t (or
-         ;; 最近输入的10个词中出现一次以上。
-         (cl-find-if (lambda (word)
-                       (> (cl-count word words10 :test #'equal) 1))
-                     personal-words)
-         ;; 最近输入的100个词中出现过三次以上。
-         (cl-find-if (lambda (word)
-                       (> (cl-count word words100 :test #'equal) 3))
-                     personal-words)
-         ;; 个人词条中的第一个词。
-         (car personal-words))))))
+  (let ((class (pyim-scheme-get-option scheme-name :class)))
+    (cond ((equal class 'xingma)
+           (or
+            ;; 如果从公共词库里面获取到的第一个词条是汉字，就选择它。
+            (when (= (length (car common-words)) 1)
+              (car common-words))
+            ;; 从个人词库里面按排列的先后顺序，获取一个汉字。
+            (cl-find-if
+             (lambda (word)
+               (= (length word) 1))
+             personal-words)))
+          (t (or
+              ;; 最近输入的10个不同的词中出现一次以上。
+              (cl-find-if
+               (lambda (word)
+                 (> (or (car (pyim-dcache-get word 'iword2count-recent1)) 0) 1))
+               personal-words)
+              ;; 最近输入的50个不同的词中出现过三次以上。
+              (cl-find-if
+               (lambda (word)
+                 (> (or (car (pyim-dcache-get word 'iword2count-recent2)) 0) 3))
+               personal-words)
+              ;; 个人词条中的第一个词。
+              (car personal-words))))))
 
 (defun pyim-candidates-create:xingma (imobjs scheme-name &optional async)
   "`pyim-candidates-create' 处理五笔仓颉等形码输入法的函数."

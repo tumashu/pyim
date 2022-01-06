@@ -59,6 +59,8 @@
 (defvar pyim-dhashcache-word2code nil)
 (defvar pyim-dhashcache-iword2count nil)
 (defvar pyim-dhashcache-iword2count-log nil)
+(defvar pyim-dhashcache-iword2count-recent1 nil)
+(defvar pyim-dhashcache-iword2count-recent2 nil)
 (defvar pyim-dhashcache-shortcode2word nil)
 (defvar pyim-dhashcache-icode2word nil)
 (defvar pyim-dhashcache-ishortcode2word nil)
@@ -469,7 +471,9 @@ code 对应的中文词条了。
 (defun pyim-dhashcache-init-count-variables ()
   "初始化 count 相关的变量。"
   (pyim-dcache-init-variable pyim-dhashcache-iword2count)
-  (pyim-dcache-init-variable pyim-dhashcache-iword2count-log))
+  (pyim-dcache-init-variable pyim-dhashcache-iword2count-log)
+  (pyim-dcache-init-variable pyim-dhashcache-iword2count-recent1)
+  (pyim-dcache-init-variable pyim-dhashcache-iword2count-recent2))
 
 (defun pyim-dhashcache-save-personal-dcache-to-file ()
   ;; 用户选择过的词
@@ -501,8 +505,31 @@ code 对应的中文词条了。
        (setq ,new-value (progn ,@body))
        (puthash ,key ,new-value ,table))))
 
+(defun pyim-dhashcache-update-iword2count-recent (word n hash-table)
+  (let (words-need-remove)
+    (pyim-dhashcache-put
+      hash-table :all-words
+      (setq orig-value (remove word orig-value))
+      (push word orig-value)
+      (if (<= (length orig-value) n)
+          orig-value
+        (setq words-need-remove (nthcdr n orig-value))
+        (cl-subseq orig-value 0 n)))
+    (dolist (w words-need-remove)
+      (remhash w hash-table))
+    (pyim-dhashcache-put
+      hash-table word
+      (+ (or orig-value 0) 1))
+    hash-table))
+
 (defun pyim-dhashcache-update-iword2count (word &optional wordcount-handler)
   "保存词频到缓存."
+  (setq pyim-dhashcache-iword2count-recent1
+        (pyim-dhashcache-update-iword2count-recent
+         word 10 pyim-dhashcache-iword2count-recent1))
+  (setq pyim-dhashcache-iword2count-recent2
+        (pyim-dhashcache-update-iword2count-recent
+         word 50 pyim-dhashcache-iword2count-recent2))
   (pyim-dhashcache-put
     pyim-dhashcache-iword2count word
     (cond
