@@ -220,6 +220,7 @@ non-nil，文件存在时将会提示用户是否覆盖，默认为覆盖模式"
 如果 FORCE 为真，强制加载。"
   (pyim-dcache-init-variables)
   (when pyim-dcache-auto-update
+    (pyim-dcache-call-api 'update-iword2priority force)
     (pyim-dcache-call-api 'update-personal-words force)
     (let* ((dict-files (mapcar (lambda (x)
                                  (unless (plist-get x :disable)

@@ -61,34 +61,32 @@
 (defvar pyim-dhashcache-iword2count-log nil)
 (defvar pyim-dhashcache-iword2count-recent1 nil)
 (defvar pyim-dhashcache-iword2count-recent2 nil)
+(defvar pyim-dhashcache-iword2priority nil)
 (defvar pyim-dhashcache-shortcode2word nil)
 (defvar pyim-dhashcache-icode2word nil)
 (defvar pyim-dhashcache-ishortcode2word nil)
 (defvar pyim-dhashcache-update-shortcode2word-p nil)
 (defvar pyim-dhashcache-update-ishortcode2word-p nil)
 (defvar pyim-dhashcache-update-icode2word-p nil)
+(defvar pyim-dhashcache-update-iword2priority-p nil)
 (defvar pyim-dhashcache-update-code2word-running-p nil)
 
 (defun pyim-dhashcache-sort-words (words-list)
   "对 WORDS-LIST 排序"
   (let ((iword2count pyim-dhashcache-iword2count)
-        (iword2count-log pyim-dhashcache-iword2count-log))
+        (iword2priority pyim-dhashcache-iword2priority))
     (sort words-list
           (lambda (a b)
-            (let ((n1 (pyim-dhashcache-calculate-index
-                       (pyim-dhashcache-get-count-log-value
-                        (gethash a iword2count-log))))
-                  (n2 (pyim-dhashcache-calculate-index
-                       (pyim-dhashcache-get-count-log-value
-                        (gethash b iword2count-log)))))
+            (let ((n1 (or (gethash a iword2priority) 0))
+                  (n2 (or (gethash b iword2priority) 0)))
               (if (= n1 n2)
                   (let ((n3 (or (gethash a iword2count) 0))
                         (n4 (or (gethash b iword2count) 0)))
                     (> n3 n4))
                 (> n1 n2)))))))
 
-(defun pyim-dhashcache-get-count-log-value (count-log &optional time)
-  "从 COUNT-LOG 中获取所有的 count 值。
+(defun pyim-dhashcache-get-counts-from-log (log-info &optional time)
+  "从 LOG-INFO 中获取所有的 count 值。
 
 比如： ((day :20220205 10
              :20220204 6   => ((day 10 6 0 3 ...))
@@ -105,14 +103,14 @@
               (dotimes (i n)
                 (let* ((time (time-add time (days-to-time (* i delta))))
                        (key (intern (format-time-string format time)))
-                       (plist (cdr (assoc label count-log))))
+                       (plist (cdr (assoc label log-info))))
                   (push (or (plist-get plist key) 0) output)))
               `(,label ,@(reverse output))))
           pyim-dhashcache-count-types))
 
-(defun pyim-dhashcache-calculate-index (count-log-value)
-  "根据 COUNT-LOG-VALUE 计算一个综合指数，用于对词条进行排序。
-COUNT-LOG-VALUE 是一个 alist, 其结构类似：
+(defun pyim-dhashcache-calculate-priority (counts-info)
+  "根据 COUNTS-INFO 计算一个优先级指标，用于对词条进行排序。
+COUNTS-INFO 是一个 alist, 其结构类似：
 
       ((day n1 n2 n3 ...))
 
@@ -124,7 +122,7 @@ COUNT-LOG-VALUE 是一个 alist, 其结构类似：
                               (factor (plist-get plist :factor)))
                          (* (apply #'+ (cl-mapcar (lambda (a b)
                                                     (* (or a 0) b))
-                                                  (cdr (assoc label count-log-value))
+                                                  (cdr (assoc label counts-info))
                                                   weights))
                             factor)))
                      pyim-dhashcache-count-types)))
@@ -183,7 +181,7 @@ COUNT-LOG-VALUE 是一个 alist, 其结构类似：
         ,@(pyim-dhashcache-async-inject-variables)
         (require 'pyim-dhashcache)
         (pyim-dcache-init-variable pyim-dhashcache-icode2word)
-        (pyim-dhashcache-init-count-variables)
+        (pyim-dhashcache-init-count-and-priority-variables)
         (pyim-dcache-save-variable
          'pyim-dhashcache-ishortcode2word
          (pyim-dhashcache-update-ishortcode2word-1
@@ -224,7 +222,7 @@ COUNT-LOG-VALUE 是一个 alist, 其结构类似：
         ,@(pyim-dhashcache-async-inject-variables)
         (require 'pyim-dhashcache)
         (pyim-dcache-init-variable pyim-dhashcache-code2word)
-        (pyim-dhashcache-init-count-variables)
+        (pyim-dhashcache-init-count-and-priority-variables)
         (pyim-dcache-save-variable
          'pyim-dhashcache-shortcode2word
          (pyim-dhashcache-update-shortcode2word-1
@@ -406,7 +404,7 @@ code 对应的中文词条了。
         ,@(pyim-dhashcache-async-inject-variables)
         (require 'pyim-dhashcache)
         (pyim-dcache-init-variable pyim-dhashcache-icode2word)
-        (pyim-dhashcache-init-count-variables)
+        (pyim-dhashcache-init-count-and-priority-variables)
         (maphash
          (lambda (key value)
            (puthash key (pyim-dhashcache-sort-words value)
@@ -461,33 +459,38 @@ code 对应的中文词条了。
              (directory-files pyim-dcache-directory nil "-backup-"))
     (message "PYIM: 在 %S 目录中发现备份文件的存在，可能是词库缓存文件损坏导致，请抓紧检查处理！！！"
              pyim-dcache-directory))
-  (pyim-dhashcache-init-count-variables)
+  (pyim-dhashcache-init-count-and-priority-variables)
   (pyim-dcache-init-variable pyim-dhashcache-code2word)
   (pyim-dcache-init-variable pyim-dhashcache-word2code)
   (pyim-dcache-init-variable pyim-dhashcache-shortcode2word)
   (pyim-dcache-init-variable pyim-dhashcache-icode2word)
   (pyim-dcache-init-variable pyim-dhashcache-ishortcode2word))
 
-(defun pyim-dhashcache-init-count-variables ()
+(defun pyim-dhashcache-init-count-and-priority-variables ()
   "初始化 count 相关的变量。"
   (pyim-dcache-init-variable pyim-dhashcache-iword2count)
   (pyim-dcache-init-variable pyim-dhashcache-iword2count-log)
   (pyim-dcache-init-variable pyim-dhashcache-iword2count-recent1)
-  (pyim-dcache-init-variable pyim-dhashcache-iword2count-recent2))
+  (pyim-dcache-init-variable pyim-dhashcache-iword2count-recent2)
+  (pyim-dcache-init-variable pyim-dhashcache-iword2priority))
 
 (defun pyim-dhashcache-save-personal-dcache-to-file ()
   ;; 用户选择过的词
   (pyim-dcache-save-variable
    'pyim-dhashcache-icode2word
    pyim-dhashcache-icode2word 0.8)
-  ;; 词频
+  ;; 词条总 count
   (pyim-dcache-save-variable
    'pyim-dhashcache-iword2count
    pyim-dhashcache-iword2count 0.8)
-  ;; 词频日志
+  ;; 词条 count 日志
   (pyim-dcache-save-variable
    'pyim-dhashcache-iword2count-log
-   pyim-dhashcache-iword2count-log 0.8))
+   pyim-dhashcache-iword2count-log 0.8)
+  ;; 词条优先级
+  (pyim-dcache-save-variable
+   'pyim-dhashcache-iword2priority
+   pyim-dhashcache-iword2priority 0.8))
 
 (defmacro pyim-dhashcache-put (cache code &rest body)
   "将 BODY 的返回值保存到 CACHE 对应的 CODE 中。
@@ -524,12 +527,15 @@ code 对应的中文词条了。
 
 (defun pyim-dhashcache-update-iword2count (word &optional wordcount-handler)
   "保存词频到缓存."
+  ;; 更新最近输入 10 个词条的 count 表
   (setq pyim-dhashcache-iword2count-recent1
         (pyim-dhashcache-update-iword2count-recent
          word 10 pyim-dhashcache-iword2count-recent1))
+  ;; 更新最近输入 50 个词条的 count 表
   (setq pyim-dhashcache-iword2count-recent2
         (pyim-dhashcache-update-iword2count-recent
          word 50 pyim-dhashcache-iword2count-recent2))
+  ;; 更新总 count 表
   (pyim-dhashcache-put
     pyim-dhashcache-iword2count word
     (cond
@@ -538,6 +544,7 @@ code 对应的中文词条了。
      ((numberp wordcount-handler)
       wordcount-handler)
      (t (or orig-value 0))))
+  ;; 更新 count 日志表。
   (pyim-dhashcache-put
     pyim-dhashcache-iword2count-log word
     (let (out)
@@ -553,7 +560,42 @@ code 对应的中文词条了。
                (length (length output))
                (output (cl-subseq output 0 (min length (* 2 n)))))
           (push `(,label ,@output) out)))
-      out)))
+      out))
+  ;; 更新优先级表
+  (pyim-dhashcache-put
+    pyim-dhashcache-iword2priority word
+    ;; Fix warn
+    (ignore orig-value)
+    (pyim-dhashcache-calculate-priority
+     (pyim-dhashcache-get-counts-from-log
+      (gethash word pyim-dhashcache-iword2count-log)))))
+
+(defun pyim-dhashcache-update-iword2priority (&optional force)
+  "更新词条优先级表，如果 FORCE 为真，强制更新。"
+  (interactive)
+  (when (or force (not pyim-dhashcache-update-iword2priority-p))
+    ;; NOTE: 这个变量按理说应该在回调函数里面设置，但 async 在某些情况下会卡死，
+    ;; 这个变量无法设置为 t, 导致后续产生大量的 emacs 进程，极其影响性能。
+    (setq pyim-dhashcache-update-iword2priority-p t)
+    (async-start
+     `(lambda ()
+        ,@(pyim-dhashcache-async-inject-variables)
+        (require 'pyim-dhashcache)
+        (pyim-dhashcache-init-count-and-priority-variables)
+        (maphash
+         (lambda (key value)
+           (puthash key
+                    (pyim-dhashcache-calculate-priority
+                     (pyim-dhashcache-get-counts-from-log
+                      value))
+                    pyim-dhashcache-iword2priority))
+         pyim-dhashcache-iword2count-log)
+        (pyim-dcache-save-variable
+         'pyim-dhashcache-iword2priority
+         pyim-dhashcache-iword2priority)
+        nil)
+     (lambda (_)
+       (pyim-dcache-reload-variable pyim-dhashcache-iword2priority)))))
 
 (defun pyim-dhashcache-delete-word (word)
   "将中文词条 WORD 从个人词库中删除"
@@ -575,7 +617,8 @@ code 对应的中文词条了。
            (remhash key pyim-dhashcache-ishortcode2word)))))
    pyim-dhashcache-ishortcode2word)
   (remhash word pyim-dhashcache-iword2count)
-  (remhash word pyim-dhashcache-iword2count-log))
+  (remhash word pyim-dhashcache-iword2count-log)
+  (remhash word pyim-dhashcache-iword2priority))
 
 (defun pyim-dhashcache-insert-word-into-icode2word (word code prepend)
   "将词条 WORD 插入到 icode2word 词库缓存 CODE 键对应的位置.
