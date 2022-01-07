@@ -52,29 +52,13 @@
 
 细节信息请参考 `pyim-page-refresh' 的 docstring.")
 
-(defvar pyim-candidates-possible-chiefs nil
-  "可能做第一位候选词的词条列表。")
-
 (pyim-register-local-variables
  '(pyim-candidates pyim-candidate-position))
 
 ;; ** 获取备选词列表
-(defun pyim-candidates-create-weight-table (words)
-  "基于 WORDS 的先后顺序，创建一个用于候选词排序的 count 权重表。
-count 和 count 权重结合起来确定词条的先后顺序。"
-  (let ((table (make-hash-table :test #'equal))
-        ;; FIXME: 这个权重列表是想当然的数字，因为目前我也不知道这个合理的权重是
-        ;; 什么，希望以后通过实际使用，可以总结出更合理的数字。
-        (weights (list 1.3 1.2 1.1)))
-    (dolist (weight weights)
-      (let ((word (pop words)))
-        (when word
-          (puthash word weight table))))
-    table))
-
-(defun pyim-candidates-sort (candidates &optional weight-table)
+(defun pyim-candidates-sort (candidates)
   "对 CANDIDATES 进行排序。"
-  (pyim-dcache-call-api 'sort-words candidates nil weight-table))
+  (pyim-dcache-call-api 'sort-words candidates))
 
 (defun pyim-candidates-create (imobjs scheme-name &optional async)
   "按照 SCHEME-NAME 对应的输入法方案， 从输入法内部对象列表:
@@ -85,45 +69,32 @@ IMOBJS 获得候选词条。"
         (funcall (intern (format "pyim-candidates-create:%S" class))
                  imobjs scheme-name async)))))
 
-(defun pyim-candidates-add-possible-chief (word)
-  "将 WORD 添加到 `pyim-candidates-possible-chiefs'."
-  (push word pyim-candidates-possible-chiefs)
-  (setq pyim-candidates-possible-chiefs
-        (cl-subseq pyim-candidates-possible-chiefs 0
-                   (min 100 (length pyim-candidates-possible-chiefs)))))
-
 (defun pyim-candidates-get-chief (scheme-name &optional personal-words common-words)
   "选取第一位候选词。"
-  (let* ((class (pyim-scheme-get-option scheme-name :class))
-         (words pyim-candidates-possible-chiefs)
-         (length (length words))
-         ;; NOTE: 网上传言，一段话平均70个字，按照一个词两个字估算，100个词大概
-         ;; 为两段话。
-         (words100 (cl-subseq words 0 (min 100 length)))
-         ;; NOTE: 10个词大概1句话。
-         (words10 (cl-subseq words 0 (min 10 length))))
-    (cond
-     ((equal class 'xingma)
-      (or
-       ;; 如果从公共词库里面获取到的第一个词条是汉字，就选择它。
-       (when (= (length (car common-words)) 1)
-         (car common-words))
-       ;; 从个人词库里面按排列的先后顺序，获取一个汉字。
-       (cl-find-if
-        (lambda (word)
-          (= (length word) 1))
-        personal-words)))
-     (t (or
-         ;; 最近输入的10个词中出现一次以上。
-         (cl-find-if (lambda (word)
-                       (> (cl-count word words10 :test #'equal) 1))
-                     personal-words)
-         ;; 最近输入的100个词中出现过三次以上。
-         (cl-find-if (lambda (word)
-                       (> (cl-count word words100 :test #'equal) 3))
-                     personal-words)
-         ;; 个人词条中的第一个词。
-         (car personal-words))))))
+  (let ((class (pyim-scheme-get-option scheme-name :class)))
+    (cond ((equal class 'xingma)
+           (or
+            ;; 如果从公共词库里面获取到的第一个词条是汉字，就选择它。
+            (when (= (length (car common-words)) 1)
+              (car common-words))
+            ;; 从个人词库里面按排列的先后顺序，获取一个汉字。
+            (cl-find-if
+             (lambda (word)
+               (= (length word) 1))
+             personal-words)))
+          (t (or
+              ;; 最近输入的10个不同的词中出现一次以上。
+              (cl-find-if
+               (lambda (word)
+                 (> (or (car (pyim-dcache-get word 'iword2count-recent1)) 0) 1))
+               personal-words)
+              ;; 最近输入的50个不同的词中出现过三次以上。
+              (cl-find-if
+               (lambda (word)
+                 (> (or (car (pyim-dcache-get word 'iword2count-recent2)) 0) 3))
+               personal-words)
+              ;; 个人词条中的第一个词。
+              (car personal-words))))))
 
 (defun pyim-candidates-create:xingma (imobjs scheme-name &optional async)
   "`pyim-candidates-create' 处理五笔仓颉等形码输入法的函数."
@@ -158,10 +129,7 @@ IMOBJS 获得候选词条。"
                 ;; 1. 第一个词选择公共词库中的第一个词。
                 ;; 2. 剩下的分成常用字和词，常用字优先排，字和词各按 count 大小排序。
                 (let* ((personal-words (pyim-dcache-get last-code '(icode2word)))
-                       (weight-table (pyim-candidates-create-weight-table personal-words))
-                       (personal-words
-                        (pyim-candidates-sort
-                         personal-words weight-table))
+                       (personal-words (pyim-candidates-sort personal-words))
                        (common-words (pyim-dcache-get last-code '(code2word)))
                        (chief-word (pyim-candidates-get-chief scheme-name personal-words common-words))
                        (common-words (pyim-candidates-sort common-words weight-table))
@@ -314,8 +282,7 @@ IMOBJS 获得候选词条。"
     ;; 个人词条排序：使用词频信息对个人词库得到的候选词排序，第一个词条的位置
     ;; 比较特殊，不参与排序，具体原因请参考 `pyim-page-select-word' 中的
     ;; comment.
-    (setq weight-table (pyim-candidates-create-weight-table personal-words))
-    (setq personal-words (pyim-candidates-sort personal-words weight-table))
+    (setq personal-words (pyim-candidates-sort personal-words))
     (setq chief-word (pyim-candidates-get-chief scheme-name personal-words))
 
     ;; 调试输出

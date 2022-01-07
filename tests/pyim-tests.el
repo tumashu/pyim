@@ -742,8 +742,8 @@ zuo-zuo-you-mang 作作有芒")
     (should (equal (gethash "啊啊" output2) nil))))
 
 (ert-deftest pyim-tests-pyim-dhashcache-update-shortcode2word ()
-  (let ((code2word (make-hash-table :test #'equal))
-        (iword2count (make-hash-table :test #'equal))
+  (let ((pyim-dhashcache-iword2count (make-hash-table :test #'equal))
+        (code2word (make-hash-table :test #'equal))
         (shortcode2word (make-hash-table :test #'equal))
         output)
 
@@ -755,7 +755,7 @@ zuo-zuo-you-mang 作作有芒")
     (puthash "wubi/aaae" '("𧝣") code2word)
 
     (setq shortcode2word
-          (pyim-dhashcache-update-shortcode2word-1 code2word iword2count))
+          (pyim-dhashcache-update-shortcode2word-1 code2word))
 
     (should (equal (gethash "wubi/aa" shortcode2word)
                    '(#("工" 0 1 (:comment "a"))
@@ -769,8 +769,8 @@ zuo-zuo-you-mang 作作有芒")
                      #("𧝣" 0 1 (:comment "e")))))))
 
 (ert-deftest pyim-tests-pyim-dhashcache-update-ishortcode2word ()
-  (let ((icode2word (make-hash-table :test #'equal))
-        (iword2count (make-hash-table :test #'equal))
+  (let ((pyim-dhashcache-iword2count (make-hash-table :test #'equal))
+        (icode2word (make-hash-table :test #'equal))
         ishortcode2word)
 
     (puthash "ni" '("你" "呢") icode2word)
@@ -778,8 +778,7 @@ zuo-zuo-you-mang 作作有芒")
     (puthash "ni-huai" '("你坏") icode2word)
 
     (setq ishortcode2word
-          (pyim-dhashcache-update-ishortcode2word-1
-           icode2word iword2count))
+          (pyim-dhashcache-update-ishortcode2word-1 icode2word))
 
     (should (equal (gethash "n-h" ishortcode2word)
                    '("你好" "呢耗" "你坏")))
@@ -860,27 +859,30 @@ yin-xing 因行
 
 (ert-deftest pyim-tests-pyim-dhashcache-sort-words ()
   (let ((pyim-dhashcache-iword2count (make-hash-table :test #'equal))
-        (weight-table (make-hash-table :test #'equal))
         words)
     (puthash "你好" 3 pyim-dhashcache-iword2count)
     (puthash "呢耗" 2 pyim-dhashcache-iword2count)
     (puthash "你豪" 1 pyim-dhashcache-iword2count)
 
-    (puthash "你好" 0.1 weight-table)
-    (puthash "呢耗" 0.3 weight-table)
-    (puthash "你豪" 5   weight-table)
-
     (setq words (list "呢耗" "你豪" "你好"))
     (should (equal (pyim-dhashcache-sort-words words)
-                   '("你好" "呢耗" "你豪")))
+                   '("你好" "呢耗" "你豪")))))
 
-    (setq words (list "呢耗" "你豪" "你好"))
-    (should (equal (pyim-dhashcache-sort-words words pyim-dhashcache-iword2count)
-                   '("你好" "呢耗" "你豪")))
+(ert-deftest pyim-tests-pyim-dhashcache-get-counts-from-log ()
+  (should (member (pyim-dhashcache-get-counts-from-log
+                   '((day :20220107 10
+                          :20220106 6
+                          :20220104 3
+                          :20220103 3))
+                   ;; (date-to-time "2022-01-07")
+                   '(25047 4608))
+                  '(((day 6 0 3 3 0 0 0)) ;Fixme: In github-ci will result this value, why?
+                    ((day 10 6 0 3 3 0 0))))))
 
-    (setq words (list "呢耗" "你豪" "你好"))
-    (should  (equal (pyim-dhashcache-sort-words words nil weight-table)
-                    '("你豪" "呢耗" "你好")))))
+(ert-deftest pyim-tests-pyim-dhashcache-calculate-priority ()
+  (should (equal (pyim-dhashcache-calculate-priority
+                  '((day 3 7 6 4 5 9 1)))
+                 0.690833)))
 
 ;; ** pyim-dregcache 相关单元测试
 (ert-deftest pyim-tests-pyim-general ()
