@@ -34,12 +34,12 @@
   "Outcome tools for pyim."
   :group 'pyim)
 
+(defvaralias 'pyim-magic-converter 'pyim-outcome-magic-converter)
+
 (defcustom pyim-outcome-magic-converter nil
   "将 “待选词条” 在 “上屏” 之前自动转换为其他字符串.
 这个功能可以实现“简转繁”，“输入中文得到英文”之类的功能。"
   :type 'function)
-
-(defvaralias 'pyim-magic-converter 'pyim-outcome-magic-converter)
 
 (defcustom pyim-outcome-trigger "v"
   "用于触发特殊操作的字符，相当与单字快捷键.
