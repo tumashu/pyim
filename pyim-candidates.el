@@ -132,7 +132,7 @@ IMOBJS 获得候选词条。"
                        (personal-words (pyim-candidates-sort personal-words))
                        (common-words (pyim-dcache-get last-code '(code2word)))
                        (chief-word (pyim-candidates-get-chief scheme-name personal-words common-words))
-                       (common-words (pyim-candidates-sort common-words weight-table))
+                       (common-words (pyim-candidates-sort common-words))
                        (other-words (pyim-dcache-get last-code '(shortcode2word))))
                   (mapcar (lambda (word)
                             (concat prefix word))
@@ -198,10 +198,11 @@ IMOBJS 获得候选词条。"
 
 (defun pyim-candidates-create-quanpin (imobjs scheme-name &optional fast-search)
   "`pyim-candidates-create:quanpin' 内部使用的函数。"
-  (let ( jianpin-words znabc-words
-         personal-words common-words
-         pinyin-chars-1 pinyin-chars-2
-         chief-word weight-table)
+  (let (;; Let indent beautiful.
+        jianpin-words znabc-words
+        personal-words common-words
+        pinyin-chars-1 pinyin-chars-2
+        chief-word)
     ;; 智能ABC模式，得到尽可能的拼音组合，查询这些组合，得到的词条做为联想词。
     (let ((codes (mapcar (lambda (x)
                            (pyim-subconcat x "-"))
