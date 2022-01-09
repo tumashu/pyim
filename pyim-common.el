@@ -175,6 +175,14 @@ When CARE-FIRST-ONE is no-nil, ((a b c) (d e)) => (a d)."
        (/ n sum))
      nums)))
 
+(defun pyim-numbers> (a b)
+  "比较数字列表 A 和 B."
+  (if (and (car a) (car b)
+           (equal (car a) (car b)))
+      (pyim-numbers> (cdr a) (cdr b))
+    (> (or (car a) 0)
+       (or (car b) 0))))
+
 (defun pyim-add-unread-command-events (key &optional reset)
   "This function is a fork of `quail-add-unread-command-events'."
   (when reset

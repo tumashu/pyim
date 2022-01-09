@@ -84,22 +84,16 @@
         (iword2priority pyim-dhashcache-iword2priority))
     (sort words-list
           (lambda (a b)
-            ;; NOTE: 如果以后在 `pyim-dhashcache-count-types' 中添加了新的 count
-            ;; 类型，就需要更新这个地方，使用 ignore-errors 的原因是为了向后兼容，
-            ;; 以后可以删除。
-            (let ((n1 (or (car (ignore-errors (gethash a iword2priority))) 0))
-                  (n2 (or (car (ignore-errors (gethash b iword2priority))) 0)))
+            (let ((p1 (gethash a iword2priority))
+                  (p2 (gethash b iword2priority)))
               (cond
-               ;; NOTE: n1 和 n2 大于某个数字的时候, 用 n1 和 n2 排序可能才靠谱，
-               ;; 但这个数字到底多大合适，暂时不知道，先随意选择一个数字5吧，以后
-               ;; 也许有更好的选择。
-               ((and (> n1 5)
-                     (> n2 5)
-                     (not (= n1 n2)))
-                (> n1 n2))
-               (t (let ((n3 (or (gethash a iword2count) 0))
-                        (n4 (or (gethash b iword2count) 0)))
-                    (> n3 n4)))))))))
+               ((and (listp p1)
+                     (listp p2)
+                     (not (equal p1 p2)))
+                (pyim-numbers> p1 p2))
+               (t (let ((n1 (or (gethash a iword2count) 0))
+                        (n2 (or (gethash b iword2count) 0)))
+                    (> n1 n2)))))))))
 
 (defun pyim-dhashcache-get-counts-from-log (log-info &optional time)
   "从 LOG-INFO 中获取所有的 count 值。
