@@ -886,7 +886,7 @@ yin-xing 因行
 (ert-deftest pyim-tests-pyim-dhashcache-calculate-priority ()
   (should (equal (pyim-dhashcache-calculate-priority
                   '((day 3 7 6 4 5 9 1)))
-                 69)))
+                 '(69))))
 
 ;; ** pyim-dregcache 相关单元测试
 (ert-deftest pyim-tests-pyim-general ()

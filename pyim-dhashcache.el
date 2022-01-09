@@ -52,10 +52,13 @@
      ;; 从当天日期获取前一天日期时，需要减去的天数，这个在 day count 类型中没有
      ;; 意义，但如果以后添加 month count 类型，这个设置就有意义了。
      :delta 1
-     ;; 计算词条排序优先级时，需要乘的一个数字，目的是让最终的优先级变成一个合适
-     ;; 大小的整数。
+     ;; 计算 day count 对应的优先级数字时，需要乘的一个数，目的是让优先级列表中
+     ;; 的数字变成合适大小的整数。
      :factor ,(/ 100.0 7)))
-  "通过 count 计算词条排序优先级时，用到的基本信息。")
+  "通过 count 计算词条排序优先级时用到重要信息。
+
+在 pyim 中，优先级表示为数字列表， `pyim-dhashcache-count-types'
+每个 count type 对应一个数字。")
 
 (defvar pyim-dhashcache-code2word nil)
 (defvar pyim-dhashcache-code2word-md5 nil)
@@ -64,6 +67,7 @@
 (defvar pyim-dhashcache-iword2count-log nil)
 (defvar pyim-dhashcache-iword2count-recent1 nil)
 (defvar pyim-dhashcache-iword2count-recent2 nil)
+;; 注意事项： 在 pyim 中，优先级是多个数字组成的列表，而不是单个数字。
 (defvar pyim-dhashcache-iword2priority nil)
 (defvar pyim-dhashcache-shortcode2word nil)
 (defvar pyim-dhashcache-icode2word nil)
@@ -80,12 +84,15 @@
         (iword2priority pyim-dhashcache-iword2priority))
     (sort words-list
           (lambda (a b)
-            (let ((n1 (or (gethash a iword2priority) 0))
-                  (n2 (or (gethash b iword2priority) 0)))
+            ;; NOTE: 如果以后在 `pyim-dhashcache-count-types' 中添加了新的 count
+            ;; 类型，就需要更新这个地方，使用 ignore-errors 的原因是为了向后兼容，
+            ;; 以后可以删除。
+            (let ((n1 (or (car (ignore-errors (gethash a iword2priority))) 0))
+                  (n2 (or (car (ignore-errors (gethash b iword2priority))) 0)))
               (cond
-               ;; NOTE: 词条优先级大于某个数字的时候, 用优先级数字才靠谱，但这个
-               ;; 数字到底多大合适，暂时不知道，先随意选择一个数字5吧，以后也许
-               ;; 有更好的选择。
+               ;; NOTE: n1 和 n2 大于某个数字的时候, 用 n1 和 n2 排序可能才靠谱，
+               ;; 但这个数字到底多大合适，暂时不知道，先随意选择一个数字5吧，以后
+               ;; 也许有更好的选择。
                ((and (> n1 5)
                      (> n2 5)
                      (not (= n1 n2)))
@@ -118,25 +125,23 @@
           pyim-dhashcache-count-types))
 
 (defun pyim-dhashcache-calculate-priority (counts-info)
-  "根据 COUNTS-INFO 计算一个优先级指标，用于对词条进行排序。
-COUNTS-INFO 是一个 alist, 其结构类似：
+  "根据 COUNTS-INFO 计算优先级（优先级是多个数字组成的一个列表），
+用于对词条进行排序。COUNTS-INFO 是一个 alist, 其结构类似：
 
       ((day n1 n2 n3 ...))
 
 其中 (n1 n2 n3 ...) 代表从当前日期逐日倒推，每日 count 所组成的列表。"
-  (let ((num-list
-         (mapcar (lambda (x)
-                   (let* ((label (car x))
-                          (plist (cdr x))
-                          (weights (plist-get plist :weights))
-                          (factor (plist-get plist :factor)))
-                     (* (apply #'+ (cl-mapcar (lambda (a b)
+  (mapcar (lambda (x)
+            (let* ((label (car x))
+                   (plist (cdr x))
+                   (weights (plist-get plist :weights))
+                   (factor (plist-get plist :factor)))
+              (round (* (apply #'+ (cl-mapcar (lambda (a b)
                                                 (* (or a 0) b))
                                               (cdr (assoc label counts-info))
                                               weights))
-                        factor)))
-                 pyim-dhashcache-count-types)))
-    (round (apply #'+ num-list))))
+                        factor))))
+          pyim-dhashcache-count-types))
 
 (defun pyim-dhashcache-get-shortcodes (code)
   "获取 CODE 所有的 shortcodes.
