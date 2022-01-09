@@ -84,11 +84,17 @@
           (lambda (a b)
             (let ((n1 (or (gethash a iword2priority) 0))
                   (n2 (or (gethash b iword2priority) 0)))
-              (if (= n1 n2)
-                  (let ((n3 (or (gethash a iword2count) 0))
+              (cond
+               ;; NOTE: 词条优先级大于某个数字的时候, 用优先级数字才靠谱，但这个
+               ;; 数字到底多大合适，暂时不知道，先随意选择一个数字5吧，以后也许
+               ;; 有更好的选择。
+               ((and (> n1 5)
+                     (> n2 5)
+                     (not (= n1 n2)))
+                (> n1 n2))
+               (t (let ((n3 (or (gethash a iword2count) 0))
                         (n4 (or (gethash b iword2count) 0)))
-                    (> n3 n4))
-                (> n1 n2)))))))
+                    (> n3 n4)))))))))
 
 (defun pyim-dhashcache-get-counts-from-log (log-info &optional time)
   "从 LOG-INFO 中获取所有的 count 值。
