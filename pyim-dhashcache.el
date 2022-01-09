@@ -47,12 +47,7 @@
      ;; 最多保存七天 count 到缓存。
      :max-save-length 7
      ;; 计算排序综合指标时，最近七天 count 对应的权重。
-     :weights ,(let* ((nums '(1 2 3 5 8 13 21))
-                      (sum (float (apply #'+ nums))))
-                 (mapcar
-                  (lambda (n)
-                    (/ n sum))
-                  (reverse nums)))
+     :weights ,(pyim-proportion (reverse '(1 2 3 5 8 13 21)))
      ;; 获取前一天需要减去的天数。
      :delta -1
      ;; 计算100天平均 count 需要乘的数字。

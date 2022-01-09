@@ -158,6 +158,10 @@
       t)
     (should (< (float-time (time-since time)) (* limit 2)))))
 
+(ert-deftest pyim-test-pyim-proportion ()
+  (should (equal (pyim-proportion '(1 2 3 4))
+                 '(0.1 0.2 0.3 0.4))))
+
 ;; ** pyim-pymap 相关单元测试
 (ert-deftest pyim-tests-pyim-pymap ()
   (should-not (cl-find-if-not
