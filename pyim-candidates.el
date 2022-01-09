@@ -312,9 +312,23 @@ IMOBJS 获得候选词条。"
              ,@pinyin-chars-2
              )))))
 
-(defun pyim-candidates-create:shuangpin (imobjs _scheme-name &optional async)
+(defun pyim-candidates-create:shuangpin (imobjs scheme-name &optional async)
   "`pyim-candidates-create' 处理双拼输入法的函数."
-  (pyim-candidates-create:quanpin imobjs 'quanpin async))
+  (if async
+      ;; 构建一个搜索中文的正则表达式, 然后使用这个正则表达式在当前 buffer 中搜
+      ;; 索词条。
+      (let ((str (string-join (pyim-codes-create (car imobjs) scheme-name))))
+        (if (< (length str) 1)
+            pyim-candidates
+          ;; NOTE: 让第一个词保持不变是不是合理，有待进一步的观察。
+          `(,(car pyim-candidates)
+            ,@(pyim-candidates-search-buffer
+               ;; 按照 pyim 的内部设计，这里得到的 str 其实是全拼，所以要按照全
+               ;; 拼的规则来生成 cregexp.
+               (let ((pyim-default-scheme 'quanpin))
+                 (pyim-cregexp-build str 3 t)))
+            ,@(cdr pyim-candidates))))
+    (pyim-candidates-create:quanpin imobjs 'quanpin async)))
 
 ;; * Footer
 (provide 'pyim-candidates)
