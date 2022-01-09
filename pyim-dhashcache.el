@@ -42,17 +42,20 @@
 
 (defvar pyim-dhashcache-count-types
   `((day
-     ;; 用于生成类似 :20220206 这样的 key.
+     ;; 保存 day count 时用到的 key 的格式, 类似 :20220206
      :format ":%Y%m%d"
-     ;; 最多保存七天 count 到缓存。
+     ;; 在 dcache iword2count-log 中，一个词条最多保存七天的 day count, 这七天可
+     ;; 能是连续的，也可能不连续。
      :max-save-length 7
-     ;; 计算排序综合指标时，最近七天 count 对应的权重。
+     ;; 计算词条优先级时，连续七天的 day count 对应的权重。
      :weights ,(pyim-proportion (reverse '(1 2 3 5 8 13 21)))
-     ;; 获取前一天需要减去的天数。
-     :delta -1
-     ;; 计算100天平均 count 需要乘的数字。
+     ;; 从当天日期获取前一天日期时，需要减去的天数，这个在 day count 类型中没有
+     ;; 意义，但如果以后添加 month count 类型，这个设置就有意义了。
+     :delta 1
+     ;; 计算词条排序优先级时，需要乘的一个数字，目的是让最终的优先级变成一个合适
+     ;; 大小的整数。
      :factor ,(/ 100.0 7)))
-  "计算排序综合指数时，用到的基本信息。")
+  "通过 count 计算词条排序优先级时，用到的基本信息。")
 
 (defvar pyim-dhashcache-code2word nil)
 (defvar pyim-dhashcache-code2word-md5 nil)
@@ -107,7 +110,7 @@
                    (time (or time (current-time)))
                    output)
               (dotimes (i n)
-                (let* ((time (time-add time (days-to-time (* i delta))))
+                (let* ((time (time-add time (days-to-time (* (- i) delta))))
                        (key (intern (format-time-string format time)))
                        (plist (cdr (assoc label log-info))))
                   (push (or (plist-get plist key) 0) output)))
