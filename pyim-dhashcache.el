@@ -41,17 +41,22 @@
 (require 'pyim-scheme)
 
 (defvar pyim-dhashcache-count-types
-  '((day
+  `((day
      ;; 用于生成类似 :20220206 这样的 key.
      :format ":%Y%m%d"
      ;; 最多保存七天 count 到缓存。
      :max-save-length 7
      ;; 计算排序综合指标时，最近七天 count 对应的权重。
-     :weights (0.396 0.245 0.151 0.094 0.057 0.038 0.019)
+     :weights ,(let* ((nums '(1 2 3 5 8 13 21))
+                      (sum (float (apply #'+ nums))))
+                 (mapcar
+                  (lambda (n)
+                    (/ n sum))
+                  (reverse nums)))
      ;; 获取前一天需要减去的天数。
      :delta -1
-     ;; 计算日平均 count 需要乘的数字。
-     :factor 0.143))
+     ;; 计算100天平均 count 需要乘的数字。
+     :factor ,(/ 100.0 7)))
   "计算排序综合指数时，用到的基本信息。")
 
 (defvar pyim-dhashcache-code2word nil)
@@ -115,17 +120,19 @@ COUNTS-INFO 是一个 alist, 其结构类似：
       ((day n1 n2 n3 ...))
 
 其中 (n1 n2 n3 ...) 代表从当前日期逐日倒推，每日 count 所组成的列表。"
-  (apply #'+ (mapcar (lambda (x)
-                       (let* ((label (car x))
-                              (plist (cdr x))
-                              (weights (plist-get plist :weights))
-                              (factor (plist-get plist :factor)))
-                         (* (apply #'+ (cl-mapcar (lambda (a b)
-                                                    (* (or a 0) b))
-                                                  (cdr (assoc label counts-info))
-                                                  weights))
-                            factor)))
-                     pyim-dhashcache-count-types)))
+  (let ((num-list
+         (mapcar (lambda (x)
+                   (let* ((label (car x))
+                          (plist (cdr x))
+                          (weights (plist-get plist :weights))
+                          (factor (plist-get plist :factor)))
+                     (* (apply #'+ (cl-mapcar (lambda (a b)
+                                                (* (or a 0) b))
+                                              (cdr (assoc label counts-info))
+                                              weights))
+                        factor)))
+                 pyim-dhashcache-count-types)))
+    (round (apply #'+ num-list))))
 
 (defun pyim-dhashcache-get-shortcodes (code)
   "获取 CODE 所有的 shortcodes.
