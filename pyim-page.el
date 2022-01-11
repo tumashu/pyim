@@ -129,9 +129,6 @@ Only useful when use posframe.")
 (defvar pyim-page-last-minibuffer-string nil
   "函数 `pyim-page-show-with-minibuffer' 上一次处理的消息字符串。")
 
-(defvar pyim-page-minibuffer-cursor-type nil
-  "用来保存 minibuffer 中 `cursor-type' 的设置，便于后续恢复。")
-
 (defun pyim-page-current-page ()
   "计算当前选择的词条在第几页面.
 
@@ -526,11 +523,8 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
       ;; 在类似 vertico-posframe 这样的环境中，posframe window-point 同步问题不
       ;; 太好处理，这里使用一个简单粗暴的方式：在输入过程中，隐藏真实的 cursor
       ;; 并显示一个伪 cursor, 输入完成之后再恢复。
-
-      ;; 要注意的是：在输入过程中，这个函数要运行多次的，所以这里捕捉一次真值。
-      (unless pyim-page-minibuffer-cursor-type
-        (setq-local pyim-page-minibuffer-cursor-type cursor-type))
       (setq-local cursor-type nil)
+
       ;; 异步获取词条的时候，上一次的 page 字符串可能还在 Minibuffer 中，所以首
       ;; 先要将其去除，否则会出现两个 page.
       (delete-char (length pyim-page-last-minibuffer-string))
@@ -572,11 +566,11 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
       (posframe-hide pyim-page-posframe-buffer))
      (t (when (eq (selected-window) (minibuffer-window))
           ;; 从 minibuffer 中删除 page 字符串。
-          (delete-char (length pyim-page-last-minibuffer-string)))
-        ;; 在类似 vertico-posframe 这样的环境中，posframe window-point 同步问题
-        ;; 不太好处理，这里使用一个简单粗暴的方式：在输入过程中，隐藏真实的
-        ;; cursor 并显示一个伪 cursor, 输入完成之后再恢复。
-        (setq-local cursor-type pyim-page-minibuffer-cursor-type)
+          (delete-char (length pyim-page-last-minibuffer-string))
+          ;; 在类似 vertico-posframe 这样的环境中，posframe window-point 同步问题
+          ;; 不太好处理，这里使用一个简单粗暴的方式：在输入过程中，隐藏真实的
+          ;; cursor 并显示一个伪 cursor, 输入完成之后再恢复。
+          (setq-local cursor-type t))
         (setq pyim-page-last-minibuffer-string nil)))))
 
 ;; * Footer
