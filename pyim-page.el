@@ -36,7 +36,9 @@
 (require 'pyim-preview)
 
 (eval-when-compile
-  (require 'pyim-entered))
+  (require 'pyim-entered)
+  ;; pyim-page rely on macro: pyim-process-with-entered-buffer
+  (require 'pyim-process))
 
 (defgroup pyim-page nil
   "Page tools for pyim."

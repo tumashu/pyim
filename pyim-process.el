@@ -34,7 +34,9 @@
 (require 'pyim-entered)
 (require 'pyim-imobjs)
 (require 'pyim-codes)
-(require 'pyim-page)
+;; avoid cyclic dependency
+;; pyim-page rely on macro: pyim-process-with-entered-buffer
+;;(require 'pyim-page)
 (require 'pyim-candidates)
 (require 'pyim-preview)
 (require 'pyim-indicator)
