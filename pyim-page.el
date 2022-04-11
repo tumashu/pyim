@@ -359,7 +359,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                             (split-string x "'")
                             "'")))
       ;; | 显示光标位置的字符
-      (pyim-process-with-entered-buffer
+      (pyim-entered-with-entered-buffer
         (if (equal (point) (point-max))
             (fmt (buffer-substring-no-properties (point-min) (point-max)))
           (concat (fmt (buffer-substring-no-properties (point-min) (point)))
