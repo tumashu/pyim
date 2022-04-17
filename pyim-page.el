@@ -34,6 +34,7 @@
 (require 'popup nil t)
 (require 'pyim-common)
 (require 'pyim-preview)
+(require 'pyim-process)
 
 (eval-when-compile
   (require 'pyim-entered))
@@ -236,7 +237,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
        (pyim-preview-start-point)
        tooltip))))
 
-(declare-function pyim-process-terminate "pyim-process")
+(advice-add 'pyim-process-page-refresh :after #'pyim-page-refresh)
 
 (defun pyim-page-next-page (arg)
   "Pyim page 翻页命令.
@@ -572,6 +573,8 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
           ;; cursor 并显示一个伪 cursor, 输入完成之后再恢复。
           (setq-local cursor-type t))
         (setq pyim-page-last-minibuffer-string nil)))))
+
+(advice-add 'pyim-process-page-hide :after #'pyim-page-hide)
 
 ;; * Footer
 (provide 'pyim-page)

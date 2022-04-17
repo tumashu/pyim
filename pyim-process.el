@@ -34,7 +34,6 @@
 (require 'pyim-entered)
 (require 'pyim-imobjs)
 (require 'pyim-codes)
-(require 'pyim-page)
 (require 'pyim-candidates)
 (require 'pyim-preview)
 (require 'pyim-indicator)
@@ -310,7 +309,10 @@
         (pyim-process-terminate))
        (t (setq pyim-candidate-position 1)
           (pyim-preview-refresh)
-          (pyim-page-refresh))))))
+          (pyim-process-page-refresh))))))
+
+(defun pyim-process-page-refresh ()
+  "Page refresh 接口函数。")
 
 (defun pyim-process-self-insert-command-p (cmd)
   "测试 CMD 是否是一个 pyim self insert command."
@@ -323,7 +325,7 @@
     (when words
       (setq pyim-candidates words)
       (pyim-preview-refresh)
-      (pyim-page-refresh))))
+      (pyim-process-page-refresh))))
 
 (defun pyim-process-run-async-timer-reset ()
   "Reset `pyim-process-run-async-timer'."
@@ -611,13 +613,16 @@ BUG：拼音无法有效地处理多音字。"
   (setq pyim-candidates nil)
   (setq pyim-candidates-last nil)
   (pyim-preview-delete-string)
-  (pyim-page-hide)
+  (pyim-process-page-hide)
   (setq pyim-cstring-to-code-criteria nil)
   (pyim-process-run-async-timer-reset)
   (let* ((class (pyim-scheme-get-option (pyim-scheme-name) :class))
          (func (intern (format "pyim-process-terminate:%S" class))))
     (when (and class (functionp func))
       (funcall func))))
+
+(defun pyim-process-page-hide ()
+  "Page hide 接口函数.")
 
 ;; * Footer
 (provide 'pyim-process)
