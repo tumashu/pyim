@@ -29,6 +29,7 @@
 ;; * 代码                                                           :code:
 (require 'cl-lib)
 (require 'pyim-common)
+(require 'pyim-process)
 (require 'posframe nil t)
 
 (defgroup pyim-indicator nil
@@ -76,12 +77,13 @@ timer 实现。"
 (defvar pyim-indicator-last-input-method-title nil
   "记录上一次 `current-input-method-title' 的取值。")
 
-(defun pyim-indicator-start-daemon (func)
+(defun pyim-indicator-start-daemon ()
   "Indicator daemon, 用于实时显示输入法当前输入状态。"
   (unless pyim-indicator-original-cursor-color
     (setq pyim-indicator-original-cursor-color
           (frame-parameter nil 'cursor-color)))
-  (setq pyim-indicator-daemon-function-argument func)
+  (setq pyim-indicator-daemon-function-argument
+        #'pyim-process-indicator-function)
   (if pyim-indicator-use-post-command-hook
       (add-hook 'post-command-hook #'pyim-indicator-daemon-function)
     (unless (timerp pyim-indicator-timer)
@@ -90,15 +92,25 @@ timer 实现。"
              nil pyim-indicator-timer-repeat
              #'pyim-indicator-daemon-function)))))
 
+(advice-add 'pyim-process-start-daemon :after #'pyim-indicator-start-daemon)
+
 (defun pyim-indicator-stop-daemon ()
   "Stop indicator daemon."
   (interactive)
-  (setq pyim-indicator-daemon-function-argument nil)
-  (remove-hook 'post-command-hook #'pyim-indicator-daemon-function)
-  (when (timerp pyim-indicator-timer)
-    (cancel-timer pyim-indicator-timer)
-    (setq pyim-indicator-timer nil))
-  (pyim-indicator-revert-cursor-color))
+  ;; 只有其它的 buffer 中没有启动 pyim 时，才停止 daemon.
+  ;; 因为 daemon 是服务所有 buffer 的。
+  (unless (cl-find-if
+           (lambda (buf)
+             (buffer-local-value 'current-input-method buf))
+           (remove (current-buffer) (buffer-list)))
+    (setq pyim-indicator-daemon-function-argument nil)
+    (remove-hook 'post-command-hook #'pyim-indicator-daemon-function)
+    (when (timerp pyim-indicator-timer)
+      (cancel-timer pyim-indicator-timer)
+      (setq pyim-indicator-timer nil))
+    (pyim-indicator-revert-cursor-color)))
+
+(advice-add 'pyim-process-stop-daemon :after #'pyim-indicator-stop-daemon)
 
 (defun pyim-indicator-daemon-function ()
   "`pyim-indicator-daemon' 内部使用的函数。"
