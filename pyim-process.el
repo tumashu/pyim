@@ -35,7 +35,6 @@
 (require 'pyim-imobjs)
 (require 'pyim-codes)
 (require 'pyim-candidates)
-(require 'pyim-preview)
 (require 'pyim-indicator)
 (require 'pyim-outcome)
 (require 'pyim-punctuation)
@@ -115,8 +114,7 @@
   (pyim-dcache-call-api 'update-personal-words t))
 
 (defun pyim-process-init-ui ()
-  "PYIM 流程，用户界面相关的初始化工作。"
-  (pyim-preview-setup-overlay))
+  "PYIM 流程，用户界面相关的初始化工作。")
 
 (defun pyim-process-start-daemon ()
   "启动 pyim 流程需要的相关 daemon."
@@ -308,8 +306,11 @@
          (pyim-entered-get 'point-after))
         (pyim-process-terminate))
        (t (setq pyim-candidate-position 1)
-          (pyim-preview-refresh)
+          (pyim-process-preview-refresh)
           (pyim-process-page-refresh))))))
+
+(defun pyim-process-preview-refresh ()
+  "Preview refresh 接口函数。")
 
 (defun pyim-process-page-refresh ()
   "Page refresh 接口函数。")
@@ -324,7 +325,7 @@
          (words (delete-dups (pyim-candidates-create pyim-imobjs scheme-name t))))
     (when words
       (setq pyim-candidates words)
-      (pyim-preview-refresh)
+      (pyim-process-preview-refresh)
       (pyim-process-page-refresh))))
 
 (defun pyim-process-run-async-timer-reset ()
@@ -612,7 +613,7 @@ BUG：拼音无法有效地处理多音字。"
   (setq pyim-process-force-input-chinese nil)
   (setq pyim-candidates nil)
   (setq pyim-candidates-last nil)
-  (pyim-preview-delete-string)
+  (pyim-process-preview-hide)
   (pyim-process-page-hide)
   (setq pyim-cstring-to-code-criteria nil)
   (pyim-process-run-async-timer-reset)
@@ -620,6 +621,9 @@ BUG：拼音无法有效地处理多音字。"
          (func (intern (format "pyim-process-terminate:%S" class))))
     (when (and class (functionp func))
       (funcall func))))
+
+(defun pyim-process-preview-hide ()
+  "Preview hide 接口函数.")
 
 (defun pyim-process-page-hide ()
   "Page hide 接口函数.")

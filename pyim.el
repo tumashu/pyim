@@ -38,6 +38,8 @@
 (require 'pyim-common)
 (require 'pyim-scheme)
 (require 'pyim-page)
+(require 'pyim-preview)
+(require 'pyim-indicator)
 (require 'pyim-process)
 (require 'pyim-cstring)
 
