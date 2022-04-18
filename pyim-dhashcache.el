@@ -38,6 +38,7 @@
 (require 'pyim-common)
 (require 'pyim-pymap)
 (require 'pyim-dcache)
+(require 'pyim-dict)
 (require 'pyim-scheme)
 
 (defvar pyim-dhashcache-count-types
@@ -78,6 +79,21 @@
 (defvar pyim-dhashcache-update-icode2word-p nil)
 (defvar pyim-dhashcache-update-iword2priority-p nil)
 (defvar pyim-dhashcache-update-code2word-running-p nil)
+
+(defun pyim-dhashcache-update (&optional force)
+  "读取并加载所有相关词库 dcache.
+
+如果 FORCE 为真，强制加载。"
+  (pyim-dcache-init-variables)
+  (when pyim-dcache-auto-update
+    (pyim-dcache-call-api 'update-iword2priority force)
+    (pyim-dcache-call-api 'update-personal-words force)
+    (let* ((dict-files (mapcar (lambda (x)
+                                 (unless (plist-get x :disable)
+                                   (plist-get x :file)))
+                               `(,@pyim-dicts ,@pyim-extra-dicts)))
+           (dicts-md5 (pyim-dcache-create-files-md5 dict-files)))
+      (pyim-dcache-call-api 'update-code2word dict-files dicts-md5 force))))
 
 (defun pyim-dhashcache-sort-words (words-list)
   "对 WORDS-LIST 排序"

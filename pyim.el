@@ -42,6 +42,7 @@
 (require 'pyim-indicator)
 (require 'pyim-process)
 (require 'pyim-cstring)
+(require 'pyim-dict)
 
 (defgroup pyim nil
   "Pyim is a Chinese input method support quanpin, shuangpin, wubi and cangjie."

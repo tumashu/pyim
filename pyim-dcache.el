@@ -29,7 +29,6 @@
 ;; * 代码                                                           :code:
 (require 'cl-lib)
 (require 'pyim-common)
-(require 'pyim-dict)
 (require 'url-util)
 
 (defgroup pyim-dcache nil
@@ -55,8 +54,8 @@
 (defvar pyim-dcache-auto-update t
   "是否自动创建和更新词库对应的 dcache 文件.
 
-这个变量默认设置为 t, 如果有词库文件添加到 `pyim-dicts' 或者
-`pyim-extra-dicts' 时，pyim 会自动生成相关的 dcache 文件。
+这个变量默认设置为 t, 用户添加新的词库文件时，pyim 会自动生成相关
+的 dcache 文件。
 
 一般不建议将这个变量设置为 nil，除非有以下情况：
 
@@ -218,25 +217,16 @@ non-nil，文件存在时将会提示用户是否覆盖，默认为覆盖模式"
   "读取并加载所有相关词库 dcache.
 
 如果 FORCE 为真，强制加载。"
-  (pyim-dcache-init-variables)
-  (when pyim-dcache-auto-update
-    (pyim-dcache-call-api 'update-iword2priority force)
-    (pyim-dcache-call-api 'update-personal-words force)
-    (let* ((dict-files (mapcar (lambda (x)
-                                 (unless (plist-get x :disable)
-                                   (plist-get x :file)))
-                               `(,@pyim-dicts ,@pyim-extra-dicts)))
-           (dicts-md5 (pyim-dcache-create-dicts-md5 dict-files)))
-      (pyim-dcache-call-api 'update-code2word dict-files dicts-md5 force))))
+  (pyim-dcache-call-api 'update force))
 
-(defun pyim-dcache-create-dicts-md5 (dict-files)
-  "为 DICT-FILES 生成 md5 字符串。"
-  ;;当需要强制更新 dict 缓存时，更改这个字符串。
+(defun pyim-dcache-create-files-md5 (files)
+  "为 FILES 生成 md5 字符串。"
+  ;; 当需要强制更新 dict 缓存时，更改这个字符串。
   (let ((version "v1"))
     (md5 (prin1-to-string
           (mapcar (lambda (file)
                     (list version file (nth 5 (file-attributes file 'string))))
-                  dict-files)))))
+                  files)))))
 
 (defun pyim-dcache-update-wordcount (word &optional wordcount-handler)
   "保存 WORD 词频.
