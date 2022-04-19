@@ -131,44 +131,40 @@ Only useful when use posframe.")
   "计算当前选择的词条在第几页面.
 
 细节信息请参考 `pyim-page-refresh' 的 docstring."
-  (1+ (/ (1- pyim-candidate-position) pyim-page-length)))
+  (1+ (/ (1- (pyim-process-get-candidate-position)) pyim-page-length)))
 
 (defun pyim-page-total-page ()
   "计算 page 总共有多少页.
 
 细节信息请参考 `pyim-page-refresh' 的 docstring."
-  (1+ (/ (1- (length pyim-candidates)) pyim-page-length)))
+  (1+ (/ (1- (pyim-process-candidates-length)) pyim-page-length)))
 
 (defun pyim-page-start ()
   "计算当前所在页的第一个词条的位置.
 
 细节信息请参考 `pyim-page-refresh' 的 docstring."
-  (let ((pos (min (length pyim-candidates) pyim-candidate-position)))
+  (let ((pos (min (pyim-process-candidates-length)
+                  (pyim-process-get-candidate-position))))
     (1+ (* (/ (1- pos) pyim-page-length) pyim-page-length))))
 
-(defun pyim-page-end (&optional finish)
+(defun pyim-page-end ()
   "计算当前所在页的最后一个词条的位置，
 
-如果 pyim-candidates 用完，则检查是否有补全。如果 FINISH 为
-non-nil，说明，补全已经用完了.
-
 细节信息请参考 `pyim-page-refresh' 的 docstring."
-  (let* ((whole (length pyim-candidates))
+  (let* ((whole (pyim-process-candidates-length))
          (len pyim-page-length)
-         (pos pyim-candidate-position)
+         (pos (pyim-process-get-candidate-position))
          (last (* (/ (+ (1- pos) len) len) len)))
     (if (< last whole)
         last
-      (if finish
-          whole
-        (pyim-page-end t)))))
+      whole)))
 
 (defun pyim-page-refresh (&optional hightlight-current)
   "刷新 page 页面的函数.
 
-这个函数主要用来处理选词框选词后，刷新显示问题，pyim 使用
-`pyim-candidates' 来保存 *待选词列表* ，\"nihao\" 对应的
-`pyim-candidates' 的值类似：
+这个函数主要用来处理选词框选词后，刷新显示问题，
+
+\"nihao\" 对应的 *待选词列表* 类似：
 
      (\"你好\" \"倪皓\" \"泥\" \"你\"  ...  \"慝\")
 
@@ -183,8 +179,9 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
   第4页   柅    猊    郳  輗  坭  惄  堄  儗  伲
   第5页   祢    慝
 
-`pyim-candidate-position' 的取值以及 `pyim-page-length' 的设定值
-（默认设置为9），共同决定了 pyim 需要显示哪一页，比如：
+`pyim-process-get-candidate-position' 的返回值以及
+`pyim-page-length' 的设定值（默认设置为9），共同决定了 pyim 需要
+显示哪一页，比如：
 
   第1页  你好  倪皓   泥    你  呢  拟  逆  腻  妮
   第2页  怩    溺     尼    禰  齯  麑  鲵  蜺  衵
@@ -192,25 +189,25 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
   第4页  柅    猊     郳    輗  坭  惄  堄  儗  伲
   第5页  祢    慝
 
-假设当前选择的词条为 \"睨\", 那么 `pyim-candidate-position' 的取
-值为 A 所在的位置。那么：
+假设当前选择的词条为 \"睨\", 那么 `pyim-process-get-candidate-position'
+的返回值为 A 所在的位置。那么：
 
 1. 函数 `pyim-page-current-page' 返回值为3， 说明当前 page 为第3页。
 2. 函数 `pyim-page-total-page'  返回值为5，说明 page 共有5页。
 3. 函数 `pyim-page-start' 返回 B 所在的位置。
 4. 函数 `pyim-page-end' 返回 E 所在的位置。
-5. 函数 `pyim-page-refresh' 会从 `pyim-candidates' 中提取一个 sublist:
+5. 函数 `pyim-page-refresh' 会从待选词条列表中提取一个 sublist:
 
      (\"薿\" \"旎\" \"睨\" \"铌\" \"昵\" \"匿\" \"倪\" \"霓\" \"暱\")
 
-   这个 sublist 的起点为 `pyim-page-start' 的返回值，终点为
-   `pyim-page-end' 的返回值。并保存到一个 hashtable 的
-   :candidates 关键字对应的位置，这个 hastable 最终会做为参数传递
-   给 `pyim-page-style' 相关的函数，用于生成用于在选词框中显示的
-   字符串。"
+这个 sublist 的起点为 `pyim-page-start' 的返回值，终点为
+`pyim-page-end' 的返回值。并保存到一个 hashtable 的 :candidates
+关键字对应的位置，这个 hastable 最终会做为参数传递给
+`pyim-page-style' 相关的函数，用于生成用于在选词框中显示的字符串。
+"
   (let* ((start (1- (pyim-page-start)))
          (end (pyim-page-end))
-         (candidates pyim-candidates)
+         (candidates (pyim-process-get-candidates))
          (candidate-showed
           (mapcar (lambda (x)
                     (let ((comment (get-text-property 0 :comment x)))
@@ -218,7 +215,9 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                           (concat x comment)
                         x)))
                   (cl-subseq candidates start end)))
-         (pos (- (min pyim-candidate-position (length candidates)) start))
+         (pos (- (min (pyim-process-get-candidate-position)
+                      (length candidates))
+                 start))
          (page-info (make-hash-table))
          (tooltip (pyim-page-get-valid-tooltip)))
     (puthash :current-page (pyim-page-current-page) page-info)
@@ -237,29 +236,23 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 (advice-add 'pyim-process-page-refresh :after #'pyim-page-refresh)
 
 (defun pyim-page-next-page (arg)
-  "Pyim page 翻页命令.
-
-原理是：改变 `pyim-candidate-position' 的取值，假设一次只翻一页，
-那么这个函数所做的工作就是：
-1. 首先将 `pyim-candidate-position' 增加 `pyim-page-length' ，确
-   保其指定的位置在下一页。
-2. 然后将 `pyim-candidate-position' 的值设定为 `pyim-page-start'
-   的返回值，确保 `pyim-candidate-position' 的取值为下一页第一个
-   词条的位置。
-3. 最后调用 `pyim-page-refresh' 来重新刷新页面。"
+  "Pyim page 翻页命令."
   (interactive "p")
   (if (= (length (pyim-process-get-entered 'point-before)) 0)
       (progn
         (pyim-process-outcome-handle 'last-char)
         (pyim-process-terminate))
-    (let ((new (+ pyim-candidate-position (* pyim-page-length arg) 1))
-          maxpos)
-      (setq maxpos (+ 1 (length pyim-candidates)))
-      (setq pyim-candidate-position
-            (if (> new 0)
-                (if (> new maxpos) 1 new)
-              maxpos)
-            pyim-candidate-position (pyim-page-start))
+    (let* ((new (+ (pyim-process-get-candidate-position)
+                   (* pyim-page-length arg) 1))
+           (maxpos (+ 1 (pyim-process-candidates-length))))
+      (pyim-process-set-candidate-position
+       (if (> new 0)
+           (if (> new maxpos) 1 new)
+         maxpos))
+      ;; The return value of pyim-page-start will change when candidate position
+      ;; is change.
+      (pyim-process-set-candidate-position
+       (pyim-page-start))
       (pyim-preview-refresh)
       (pyim-page-refresh))))
 
@@ -273,13 +266,12 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
       (progn
         (pyim-process-outcome-handle 'last-char)
         (pyim-process-terminate))
-    (let ((new (+ pyim-candidate-position arg))
-          len)
-      (setq len (length pyim-candidates))
-      (setq pyim-candidate-position
-            (if (>= len new)
-                (if (> new 0) new len)
-              1))
+    (let ((new (+ (pyim-process-get-candidate-position) arg))
+          (len (pyim-process-candidates-length)))
+      (pyim-process-set-candidate-position
+       (if (>= len new)
+           (if (> new 0) new len)
+         1))
       (pyim-preview-refresh)
       (pyim-page-refresh t))))
 
@@ -301,7 +293,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
   (let* ((separator (or separator " "))
          (translated (string-join (mapcar (lambda (w)
                                             (concat (nth 0 w) (nth 1 w)))
-                                          (car pyim-imobjs))
+                                          (car (pyim-process-get-imobjs)))
                                   separator)))
     (concat
      ;; | 显示光标位置的字符
@@ -314,8 +306,8 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
      (when (and (eq pyim-assistant-scheme 'quanpin)
                 (eq pyim-assistant-scheme-enable t))
        (let ((code (pyim-cstring-to-xingma
-                    (nth (1- pyim-candidate-position)
-                         pyim-candidates)
+                    (nth (1- (pyim-process-get-candidate-position))
+                         (pyim-process-get-candidates))
                     (pyim-scheme-name 'default))))
          (if (> (length code) 0)
              (format " [%s](辅)" code)
@@ -324,7 +316,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 (defun pyim-page-preview-create:shuangpin (&optional separator)
   (let ((keymaps (pyim-scheme-get-option (pyim-scheme-name) :keymaps))
         result)
-    (dolist (w (car pyim-imobjs))
+    (dolist (w (car (pyim-process-get-imobjs)))
       (let ((sm (nth 0 w))
             (ym (nth 1 w)))
         (if (equal sm "")
@@ -344,23 +336,14 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
            result))))
     (string-join (reverse result) (or separator " "))))
 
-(defun pyim-page-preview-create:xingma (&optional separator)
-  (let* ((scheme-name (pyim-scheme-name)))
-    (cl-flet* ((segment (x)
-                 (string-join
-                  (car (pyim-imobjs-create x scheme-name))
-                  (or separator " ")))
-               (fmt (x)
-                 (mapconcat #'segment
-                            (split-string x "'")
-                            "'")))
-      ;; | 显示光标位置的字符
-      (pyim-process-with-entered-buffer
-        (if (equal (point) (point-max))
-            (fmt (buffer-substring-no-properties (point-min) (point-max)))
-          (concat (fmt (buffer-substring-no-properties (point-min) (point)))
-                  "| "
-                  (fmt (buffer-substring-no-properties (point) (point-max)))))))))
+(defun pyim-page-preview-create:xingma (&optional _separator)
+  ;; | 显示光标位置的字符
+  (pyim-process-with-entered-buffer
+    (if (equal (point) (point-max))
+        (buffer-substring-no-properties (point-min) (point-max))
+      (concat (buffer-substring-no-properties (point-min) (point))
+              "| "
+              (buffer-substring-no-properties (point) (point-max))))))
 
 (defun pyim-page-menu-create (candidates position &optional separator hightlight-current)
   "这个函数用于创建在 page 中显示的备选词条菜单。"
@@ -370,7 +353,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                   (if (consp candidate)
                       (concat (car candidate) (cdr candidate))
                     candidate))))
-        (dolist (n pyim-outcome-subword-info)
+        (dolist (n (pyim-process-get-outcome-subword-info))
           (when (<= n (length str))
             (set-text-properties (- n 1) n '(face pyim-page-subword) str)))
         (setq i (1+ i))

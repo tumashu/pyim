@@ -328,6 +328,12 @@
 (defun pyim-process-get-candidates ()
   pyim-candidates)
 
+(defun pyim-process-get-candidate-position ()
+  pyim-candidate-position)
+
+(defun pyim-process-candidates-length ()
+  (length pyim-candidates))
+
 (defun pyim-process-set-candidate-position (n)
   (setq pyim-candidate-position n))
 
@@ -335,6 +341,9 @@
   pyim-imobjs)
 
 (defun pyim-process-select-subword-p ()
+  pyim-outcome-subword-info)
+
+(defun pyim-process-get-outcome-subword-info ()
   pyim-outcome-subword-info)
 
 (defun pyim-process-toggle-set-subword-info (n)
