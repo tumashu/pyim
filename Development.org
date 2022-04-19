@@ -23,22 +23,20 @@
 |     |                 |      | -----------                   |      |                 |     |
 |     |                 |      | Entered, Imobjs, Codes,       |      |                 |     |
 |     |                 |      | Candidates, Outcome,          |      |                 |     |
-|     |                 |      | Punctuations, Cregexp,        |      |                 |     |
-|     |                 |      | Cstring, Probe,               |      |                 |     |
-|     |                 |      | Autoselector, Pinyin,         |      |                 |     |
-|     |                 |      | Scheme, Assistant-scheme,     |      |                 |     |
-|     |                 |      |-------------------------------+      |                 |     |
-|     |                 |      | Dcache                        |      |                 |     |
-|     |                 |      | Common                        |      |                 |     |
-|     |                 |      | Pymap                         |      |                 |     |
+|     |                 |      | Punctuations, Pinyin,         |      |                 |     |
+|     |                 |      | Cstring, Cregexp,             |      |                 |     |
+|     |                 |      | Scheme, Assistant-scheme      |      |                 |     |
+|     |                 |      +-------------------------------+      |                 |     |
+|     |                 |      | Common, Dcache, Pymap         |      |                 |     |
+|     |                 |      |                               |      |                 |     |
 |     |                 |      +-------------------------------+      |                 |     |
 |     |                 |                                             |                 |     |
-|     |                 |                                             |                 |     |
+|     |                 | 自动上屏器： Autoselector                   |                 |     |
 |     |                 +---------------------------------------------+                 |     |
 |     |                                                                                 |     |
-|     |  PYIM 持久化层:                                                                 |     |
-|     |  --------------                                                                 |     |
-|     |  Dregcache                                                                      |     |
+|     |  PYIM 持久化层:                                                   探针：        |     |
+|     |  --------------                                                   ------------  |     |
+|     |  Dregcache                                                        Probe         |     |
 |     |  Dhashcache                                                                     |     |
 |     |  Dict                                                                           |     |
 |     +---------------------------------------------------------------------------------+     |
