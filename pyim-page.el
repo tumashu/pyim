@@ -36,9 +36,6 @@
 (require 'pyim-preview)
 (require 'pyim-process)
 
-(eval-when-compile
-  (require 'pyim-entered))
-
 (defgroup pyim-page nil
   "Page tools for pyim."
   :group 'pyim)
@@ -251,7 +248,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
    词条的位置。
 3. 最后调用 `pyim-page-refresh' 来重新刷新页面。"
   (interactive "p")
-  (if (= (length (pyim-entered-get 'point-before)) 0)
+  (if (= (length (pyim-process-get-entered 'point-before)) 0)
       (progn
         (pyim-process-outcome-handle 'last-char)
         (pyim-process-terminate))
@@ -272,7 +269,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 
 (defun pyim-page-next-word (arg)
   (interactive "p")
-  (if (= (length (pyim-entered-get 'point-before)) 0)
+  (if (= (length (pyim-process-get-entered 'point-before)) 0)
       (progn
         (pyim-process-outcome-handle 'last-char)
         (pyim-process-terminate))
@@ -300,8 +297,6 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
     (when class
       (funcall (intern (format "pyim-page-preview-create:%S" class)) separator))))
 
-(declare-function 'pyim-entered-with-entered-buffer "pyim-entered")
-
 (defun pyim-page-preview-create:quanpin (&optional separator)
   (let* ((separator (or separator " "))
          (translated (string-join (mapcar (lambda (w)
@@ -310,7 +305,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                                   separator)))
     (concat
      ;; | 显示光标位置的字符
-     (pyim-entered-with-entered-buffer
+     (pyim-process-with-entered-buffer
        (if (equal 1 (point))
            (concat "|" translated)
          (concat (replace-regexp-in-string (concat separator "'") "'" translated)
@@ -360,7 +355,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                             (split-string x "'")
                             "'")))
       ;; | 显示光标位置的字符
-      (pyim-entered-with-entered-buffer
+      (pyim-process-with-entered-buffer
         (if (equal (point) (point-max))
             (fmt (buffer-substring-no-properties (point-min) (point-max)))
           (concat (fmt (buffer-substring-no-properties (point-min) (point)))
