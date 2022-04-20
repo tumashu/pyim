@@ -524,7 +524,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   "从选词框中选择当前词条，然后删除该词条对应拼音。"
   (interactive)
   (pyim-process-outcome-handle 'candidate)
-  (let* ((imobj (car (pyim-process-get-imobjs)))
+  (let* ((imobj (pyim-process-get-first-imobj))
          (length-selected-word
           ;; 获取 *这一次* 选择词条的长度， 在“多次选择词条才能上屏”的情况下，
           ;; 一定要和 output 的概念作区别。

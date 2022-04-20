@@ -291,7 +291,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
   (let* ((separator (or separator " "))
          (translated (string-join (mapcar (lambda (w)
                                             (concat (nth 0 w) (nth 1 w)))
-                                          (car (pyim-process-get-imobjs)))
+                                          (pyim-process-get-first-imobj))
                                   separator)))
     (concat
      ;; | 显示光标位置的字符
@@ -314,7 +314,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 (defun pyim-page-preview-create:shuangpin (&optional separator)
   (let ((keymaps (pyim-scheme-get-option (pyim-scheme-name) :keymaps))
         result)
-    (dolist (w (car (pyim-process-get-imobjs)))
+    (dolist (w (pyim-process-get-first-imobj))
       (let ((sm (nth 0 w))
             (ym (nth 1 w)))
         (if (equal sm "")

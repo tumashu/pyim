@@ -337,8 +337,8 @@
 (defun pyim-process-set-candidate-position (n)
   (setq pyim-candidate-position n))
 
-(defun pyim-process-get-imobjs ()
-  pyim-imobjs)
+(defun pyim-process-get-first-imobj ()
+  (car pyim-imobjs))
 
 (defun pyim-process-select-subword-p ()
   pyim-outcome-subword-info)
@@ -540,7 +540,7 @@ alist 列表。"
   "创建 `pyim-cstring-to-code-criteria'."
   (setq pyim-cstring-to-code-criteria
         (let ((str (string-join
-                    (pyim-codes-create (car (pyim-process-get-imobjs))
+                    (pyim-codes-create (pyim-process-get-first-imobj)
                                        (pyim-scheme-name)))))
           (if (> (length pyim-cstring-to-code-criteria)
                  (length str))

@@ -84,7 +84,7 @@ pyim 会使用 Emacs overlay 机制在 *待输入buffer* 光标处高亮显示�
                    (lambda (py)
                      (concat (nth 0 py) (nth 1 py)))
                    (nthcdr (length preview)
-                           (car (pyim-process-get-imobjs)))
+                           (pyim-process-get-first-imobj))
                    "'")))
         (when (string< "" rest)
           (setq preview (concat preview rest)))))
