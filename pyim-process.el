@@ -362,6 +362,11 @@
       (setq str (pyim-outcome-magic-convert str)))
     str))
 
+(defun pyim-process-subword-and-magic-convert (string)
+  "返回 STRING 以词定字和魔术转换后的新字符串."
+  (pyim-outcome-magic-convert
+   (pyim-outcome-get-subword string)))
+
 (defun pyim-process-outcome-handle (type)
   "依照 TYPE, 获取 pyim 的 outcome，并将其加入 `pyim-outcome-history'."
   (cond ((not enable-multibyte-characters)

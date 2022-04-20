@@ -29,7 +29,6 @@
 ;; * 代码                                                           :code:
 (require 'cl-lib)
 (require 'pyim-common)
-(require 'pyim-outcome)
 (require 'pyim-process)
 
 (defgroup pyim-preview nil
@@ -78,7 +77,7 @@ pyim 会使用 Emacs overlay 机制在 *待输入buffer* 光标处高亮显示�
          (candidates (pyim-process-get-candidates))
          (pos (1- (min (pyim-process-get-candidate-position)
                        (length candidates))))
-         (preview (concat (pyim-outcome-get)
+         (preview (concat (pyim-process-get-outcome)
                           (nth pos candidates))))
     (when (memq class '(quanpin))
       (let ((rest (mapconcat
@@ -88,9 +87,7 @@ pyim 会使用 Emacs overlay 机制在 *待输入buffer* 光标处高亮显示�
                    "'")))
         (when (string< "" rest)
           (setq preview (concat preview rest)))))
-    (setq preview
-          (pyim-outcome-magic-convert
-           (pyim-outcome-get-subword preview)))
+    (setq preview (pyim-process-subword-and-magic-convert preview))
     ;; Delete old preview string.
     (pyim-preview-delete-string)
     ;; Insert new preview string.
