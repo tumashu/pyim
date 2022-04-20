@@ -75,8 +75,9 @@ pyim 会使用 Emacs overlay 机制在 *待输入buffer* 光标处高亮显示�
 个预览字符串，让用户可以查看将要输入的字符串，这个函数用于更新这
 个字符串的内容。"
   (let* ((class (pyim-scheme-get-option (pyim-scheme-name) :class))
-         (candidates pyim-candidates)
-         (pos (1- (min pyim-candidate-position (length candidates))))
+         (candidates (pyim-process-get-candidates))
+         (pos (1- (min (pyim-process-get-candidate-position)
+                       (length candidates))))
          (preview (concat (pyim-outcome-get)
                           (nth pos candidates))))
     (when (memq class '(quanpin))
