@@ -139,12 +139,13 @@ Only useful when use posframe.")
 细节信息请参考 `pyim-page-refresh' 的 docstring."
   (1+ (/ (1- (pyim-process-candidates-length)) pyim-page-length)))
 
-(defun pyim-page-start ()
+(defun pyim-page-start (&optional candidate-position)
   "计算当前所在页的第一个词条的位置.
 
 细节信息请参考 `pyim-page-refresh' 的 docstring."
   (let ((pos (min (pyim-process-candidates-length)
-                  (pyim-process-get-candidate-position))))
+                  (or candidate-position
+                      (pyim-process-get-candidate-position)))))
     (1+ (* (/ (1- pos) pyim-page-length) pyim-page-length))))
 
 (defun pyim-page-end ()
@@ -246,13 +247,10 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                    (* pyim-page-length arg) 1))
            (maxpos (+ 1 (pyim-process-candidates-length))))
       (pyim-process-set-candidate-position
-       (if (> new 0)
-           (if (> new maxpos) 1 new)
-         maxpos))
-      ;; The return value of pyim-page-start will change when candidate position
-      ;; is change.
-      (pyim-process-set-candidate-position
-       (pyim-page-start))
+       (pyim-page-start
+        (if (> new 0)
+            (if (> new maxpos) 1 new)
+          maxpos)))
       (pyim-preview-refresh)
       (pyim-page-refresh))))
 
