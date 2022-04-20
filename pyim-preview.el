@@ -111,6 +111,8 @@ pyim 会使用 Emacs overlay 机制在 *待输入buffer* 光标处高亮显示�
   "Preview 字符串的开始位置。"
   (overlay-start pyim-preview-overlay))
 
+(advice-add 'pyim-process-ui-position :override #'pyim-preview-start-point)
+
 ;; * Footer
 (provide 'pyim-preview)
 

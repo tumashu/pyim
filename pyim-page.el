@@ -33,7 +33,6 @@
 ;; popup 不是 GNU ELPA 包，所以 pyim 不能强制依赖它。
 (require 'popup nil t)
 (require 'pyim-common)
-(require 'pyim-preview)
 (require 'pyim-process)
 
 (defgroup pyim-page nil
@@ -231,7 +230,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                (null unread-post-input-method-events))
       (pyim-page-show
        (pyim-page-info-format page-info tooltip)
-       (pyim-preview-start-point)
+       (pyim-process-ui-position)
        tooltip))))
 
 (advice-add 'pyim-process-page-refresh :after #'pyim-page-refresh)
@@ -251,7 +250,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
         (if (> new 0)
             (if (> new maxpos) 1 new)
           maxpos)))
-      (pyim-preview-refresh)
+      (pyim-process-preview-refresh)
       (pyim-page-refresh))))
 
 (defun pyim-page-previous-page (arg)
@@ -270,7 +269,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
        (if (>= len new)
            (if (> new 0) new len)
          1))
-      (pyim-preview-refresh)
+      (pyim-process-preview-refresh)
       (pyim-page-refresh t))))
 
 (defun pyim-page-previous-word (arg)

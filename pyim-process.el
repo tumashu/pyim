@@ -115,6 +115,9 @@
 (defun pyim-process-init-ui ()
   "PYIM 流程，用户界面相关的初始化工作。")
 
+(defun pyim-process-ui-position ()
+  "用户界面定位点获取函数接口.")
+
 (defun pyim-process-start-daemon ()
   "启动 pyim 流程需要的相关 daemon, 接口函数.")
 
