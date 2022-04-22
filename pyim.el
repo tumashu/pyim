@@ -41,6 +41,7 @@
 (require 'pyim-preview)
 (require 'pyim-indicator)
 (require 'pyim-process)
+(require 'pyim-autoselector)
 (require 'pyim-cstring)
 (require 'pyim-dict)
 

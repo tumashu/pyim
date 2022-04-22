@@ -190,7 +190,7 @@
           `(:select current :replace-with ,commit))
          (t nil))))))
 
-(add-to-list 'pyim-autoselector 'pyim-autoselector-rime)
+(add-to-list 'pyim-process-autoselector 'pyim-autoselector-rime)
 
 (defun pyim-liberime-create-word (codes words)
   "通过 CODES 和 WORDS 的信息，在 rime 后端重新造词和调整词频。
