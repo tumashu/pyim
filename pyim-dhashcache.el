@@ -84,16 +84,16 @@
   "读取并加载所有相关词库 dcache.
 
 如果 FORCE 为真，强制加载。"
-  (pyim-dcache-init-variables)
+  (pyim-dhashcache-init-variables)
   (when pyim-dcache-auto-update
-    (pyim-dcache-call-api 'update-iword2priority force)
-    (pyim-dcache-call-api 'update-personal-words force)
+    (pyim-dhashcache-update-iword2priority force)
+    (pyim-dhashcache-update-personal-words force)
     (let* ((dict-files (mapcar (lambda (x)
                                  (unless (plist-get x :disable)
                                    (plist-get x :file)))
                                `(,@pyim-dicts ,@pyim-extra-dicts)))
            (dicts-md5 (pyim-dcache-create-files-md5 dict-files)))
-      (pyim-dcache-call-api 'update-code2word dict-files dicts-md5 force))))
+      (pyim-dhashcache-update-code2word dict-files dicts-md5 force))))
 
 (defun pyim-dhashcache-sort-words (words-list)
   "对 WORDS-LIST 排序"
