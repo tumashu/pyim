@@ -50,16 +50,15 @@
   "读取并加载所有相关词库 dcache.
 
 如果 FORCE 为真，强制加载。"
-  (pyim-dcache-init-variables)
+  (pyim-dregcache-init-variables)
   (when pyim-dcache-auto-update
-    (pyim-dcache-call-api 'update-iword2priority force)
-    (pyim-dcache-call-api 'update-personal-words force)
+    (pyim-dregcache-update-personal-words force)
     (let* ((dict-files (mapcar (lambda (x)
                                  (unless (plist-get x :disable)
                                    (plist-get x :file)))
                                `(,@pyim-dicts ,@pyim-extra-dicts)))
            (dicts-md5 (pyim-dcache-create-files-md5 dict-files)))
-      (pyim-dcache-call-api 'update-code2word dict-files dicts-md5 force))))
+      (pyim-dregcache-update-code2word dict-files dicts-md5 force))))
 
 (defun pyim-dregcache-variable-file (variable)
   "Get VARIABLE dcache file path."
