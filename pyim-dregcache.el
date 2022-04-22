@@ -377,13 +377,14 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
 (defun pyim-dregcache-update-iword2count (word &optional wordcount-handler)
   "保存词频到缓存."
   (when pyim-debug (message "pyim-dregcache-update-iword2count. word=%s" word))
-  (let* ((orig-value (gethash word pyim-dregcache-iword2count))
+  (let* ((orig-value
+          (or (gethash word pyim-dregcache-iword2count) 0))
          (new-value (cond
                      ((functionp wordcount-handler)
                       (funcall wordcount-handler orig-value))
                      ((numberp wordcount-handler)
                       wordcount-handler)
-                     (t (+ (or orig-value 0) 1)))))
+                     (t (+ orig-value 1)))))
     (unless (equal orig-value new-value)
       (puthash word new-value pyim-dregcache-iword2count))))
 
