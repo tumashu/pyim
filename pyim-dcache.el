@@ -270,8 +270,9 @@ non-nil，文件存在时将会提示用户是否覆盖，默认为覆盖模式"
 
 当词库文件加载完成后，pyim 就可以用这个函数从词库缓存中搜索某个
 code 对应的中文词条了."
-  `(,@(pyim-dcache-call-api 'get code from)
-    ,@(pyim-pymap-py2cchar-get code t t)))
+  (when code
+    `(,@(pyim-dcache-call-api 'get code from)
+      ,@(pyim-pymap-py2cchar-get code t t))))
 
 ;; * Footer
 (provide 'pyim-dcache)

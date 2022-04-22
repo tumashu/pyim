@@ -86,12 +86,12 @@ IMOBJS 获得候选词条。"
               ;; 最近输入的10个不同的词中出现一次以上。
               (cl-find-if
                (lambda (word)
-                 (> (or (car (pyim-dcache-get word 'iword2count-recent1)) 0) 1))
+                 (> (or (car (pyim-dcache-get word '(iword2count-recent1))) 0) 1))
                personal-words)
               ;; 最近输入的50个不同的词中出现过三次以上。
               (cl-find-if
                (lambda (word)
-                 (> (or (car (pyim-dcache-get word 'iword2count-recent2)) 0) 3))
+                 (> (or (car (pyim-dcache-get word '(iword2count-recent2))) 0) 3))
                personal-words)
               ;; 个人词条中的第一个词。
               (car personal-words))))))

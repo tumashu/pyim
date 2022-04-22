@@ -283,20 +283,25 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
 
 (defun pyim-dregcache-get (code &optional from)
   "从 `pyim-dregcache-cache' 搜索 CODE, 得到对应的词条."
-  (if (or (memq 'icode2word from)
-          (memq 'ishortcode2word from))
-      (pyim-dregcache-get-icode2word-ishortcode2word code)
-    (let ((dict-files (pyim-dregcache-all-dict-files))
-          result)
-      (when pyim-debug (message "pyim-dregcache-get is called. code=%s" code))
-      (when dict-files
-        (dolist (file dict-files)
-          (let* ((file-info (lax-plist-get pyim-dregcache-cache file))
-                 (content (pyim-dregcache-get-content code file-info)))
-            (setq result (append (pyim-dregcache-get-1 content code) result)))))
-      ;; `push' plus `nreverse' is more efficient than `add-to-list'
-      ;; Many examples exist in Emacs' own code
-      (nreverse result))))
+  (cond ((or (memq 'icode2word from)
+             (memq 'ishortcode2word from))
+         (pyim-dregcache-get-icode2word-ishortcode2word code))
+        ;; FIXME: pyim-dregcache 暂时不支持 iword2count-recent1 和
+        ;; iword2count-recent2.
+        ((or (memq 'iword2count-recent1 from)
+             (memq 'iword2count-recent2 from))
+         nil)
+        (t (let ((dict-files (pyim-dregcache-all-dict-files))
+                 result)
+             (when pyim-debug (message "pyim-dregcache-get is called. code=%s" code))
+             (when dict-files
+               (dolist (file dict-files)
+                 (let* ((file-info (lax-plist-get pyim-dregcache-cache file))
+                        (content (pyim-dregcache-get-content code file-info)))
+                   (setq result (append (pyim-dregcache-get-1 content code) result)))))
+             ;; `push' plus `nreverse' is more efficient than `add-to-list'
+             ;; Many examples exist in Emacs' own code
+             (nreverse result)))))
 
 (defun pyim-dregcache-get-icode2word-ishortcode2word (code)
   "以 CODE 搜索个人词和个人联想词.  正则表达式搜索词库,不需要为联想词开单独缓存."
