@@ -67,8 +67,8 @@
 (defvar pyim-dhashcache-word2code nil)
 (defvar pyim-dhashcache-iword2count nil)
 (defvar pyim-dhashcache-iword2count-log nil)
-(defvar pyim-dhashcache-iword2count-recent1 nil)
-(defvar pyim-dhashcache-iword2count-recent2 nil)
+(defvar pyim-dhashcache-iword2count-recent-10-words nil)
+(defvar pyim-dhashcache-iword2count-recent-50-words nil)
 ;; 注意事项： 在 pyim 中，优先级是多个数字组成的列表，而不是单个数字。
 (defvar pyim-dhashcache-iword2priority nil)
 (defvar pyim-dhashcache-shortcode2word nil)
@@ -497,8 +497,8 @@ code 对应的中文词条了。
   "初始化 count 相关的变量。"
   (pyim-dcache-init-variable pyim-dhashcache-iword2count)
   (pyim-dcache-init-variable pyim-dhashcache-iword2count-log)
-  (pyim-dcache-init-variable pyim-dhashcache-iword2count-recent1)
-  (pyim-dcache-init-variable pyim-dhashcache-iword2count-recent2)
+  (pyim-dcache-init-variable pyim-dhashcache-iword2count-recent-10-words)
+  (pyim-dcache-init-variable pyim-dhashcache-iword2count-recent-50-words)
   (pyim-dcache-init-variable pyim-dhashcache-iword2priority))
 
 (defun pyim-dhashcache-save-personal-dcache-to-file ()
@@ -555,13 +555,13 @@ code 对应的中文词条了。
 (defun pyim-dhashcache-update-iword2count (word &optional wordcount-handler)
   "保存词频到缓存."
   ;; 更新最近输入 10 个词条的 count 表
-  (setq pyim-dhashcache-iword2count-recent1
+  (setq pyim-dhashcache-iword2count-recent-10-words
         (pyim-dhashcache-update-iword2count-recent
-         word 10 pyim-dhashcache-iword2count-recent1))
+         word 10 pyim-dhashcache-iword2count-recent-10-words))
   ;; 更新最近输入 50 个词条的 count 表
-  (setq pyim-dhashcache-iword2count-recent2
+  (setq pyim-dhashcache-iword2count-recent-50-words
         (pyim-dhashcache-update-iword2count-recent
-         word 50 pyim-dhashcache-iword2count-recent2))
+         word 50 pyim-dhashcache-iword2count-recent-50-words))
   ;; 更新总 count 表
   (pyim-dhashcache-put
     pyim-dhashcache-iword2count word

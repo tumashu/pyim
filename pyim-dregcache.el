@@ -285,10 +285,10 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
   (cond ((or (memq 'icode2word from)
              (memq 'ishortcode2word from))
          (pyim-dregcache-get-icode2word-ishortcode2word code))
-        ;; FIXME: pyim-dregcache 暂时不支持 iword2count-recent1 和
-        ;; iword2count-recent2.
-        ((or (memq 'iword2count-recent1 from)
-             (memq 'iword2count-recent2 from))
+        ;; FIXME: pyim-dregcache 暂时不支持 iword2count-recent-10-words 和
+        ;; iword2count-recent-50-words.
+        ((or (memq 'iword2count-recent-10-words from)
+             (memq 'iword2count-recent-50-words from))
          nil)
         (t (let ((dict-files (pyim-dregcache-all-dict-files))
                  result)
