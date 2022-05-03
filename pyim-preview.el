@@ -67,7 +67,7 @@
   (if (and (overlayp pyim-preview-overlay) (overlay-start pyim-preview-overlay))
       (delete-overlay pyim-preview-overlay)))
 
-(defun pyim-preview-refresh ()
+(defun pyim-preview-refresh (&rest _)
   "刷新光标处预览.
 
 pyim 会使用 Emacs overlay 机制在 *待输入buffer* 光标处高亮显示一
