@@ -116,6 +116,18 @@ entered (nihaom) 的第一个候选词。
 
 (defvar pyim-process-run-exhibit-timer nil)
 
+(defvar pyim-process-ui-init-hook nil
+  "Hook used to run ui init functions.")
+
+(defvar pyim-process-ui-refresh-hook nil
+  "Hook used to run ui refresh functions.")
+
+(defvar pyim-process-ui-hide-hook nil
+  "Hook used to run ui hide functions.")
+
+(defvar pyim-process-ui-position-function #'point
+  "The value is a function returned a position where ui place.")
+
 (pyim-register-local-variables
  '(pyim-process-input-ascii
    pyim-process-translating))
@@ -133,12 +145,6 @@ entered (nihaom) 的第一个候选词。
 
 (defun pyim-process-update-personal-words ()
   (pyim-dcache-call-api 'update-personal-words t))
-
-(defun pyim-process-init-ui ()
-  "PYIM 流程，用户界面相关的初始化工作。")
-
-(defun pyim-process-ui-position ()
-  "用户界面定位点获取函数接口.")
 
 (defun pyim-process-start-daemon ()
   "启动 pyim 流程需要的相关 daemon, 接口函数.")
@@ -322,14 +328,7 @@ entered (nihaom) 的第一个候选词。
          (pyim-entered-get 'point-after))
         (pyim-process-terminate))
        (t (setq pyim-candidate-position 1)
-          (pyim-process-preview-refresh)
-          (pyim-process-page-refresh))))))
-
-(defun pyim-process-preview-refresh ()
-  "Preview refresh 接口函数。")
-
-(defun pyim-process-page-refresh ()
-  "Page refresh 接口函数。")
+          (run-hooks 'pyim-process-ui-refresh-hook))))))
 
 (defun pyim-process-self-insert-command-p (cmd)
   "测试 CMD 是否是一个 pyim self insert command."
@@ -341,8 +340,7 @@ entered (nihaom) 的第一个候选词。
          (words (delete-dups (pyim-candidates-create pyim-imobjs scheme-name t))))
     (when words
       (setq pyim-candidates words)
-      (pyim-process-preview-refresh)
-      (pyim-process-page-refresh))))
+      (run-hooks 'pyim-process-ui-refresh-hook))))
 
 (defun pyim-process-run-async-timer-reset ()
   "Reset `pyim-process-run-async-timer'."
@@ -646,8 +644,7 @@ BUG：拼音无法有效地处理多音字。"
   (setq pyim-process-force-input-chinese nil)
   (setq pyim-candidates nil)
   (setq pyim-candidates-last nil)
-  (pyim-process-preview-hide)
-  (pyim-process-page-hide)
+  (run-hooks 'pyim-process-ui-hide-hook)
   (setq pyim-cstring-to-code-criteria nil)
   (pyim-process-run-async-timer-reset)
   (let* ((class (pyim-scheme-get-option (pyim-scheme-name) :class))
@@ -655,11 +652,6 @@ BUG：拼音无法有效地处理多音字。"
     (when (and class (functionp func))
       (funcall func))))
 
-(defun pyim-process-preview-hide ()
-  "Preview hide 接口函数.")
-
-(defun pyim-process-page-hide ()
-  "Page hide 接口函数.")
 
 ;; * Footer
 (provide 'pyim-process)

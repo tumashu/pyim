@@ -144,7 +144,7 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
           overriding-local-map)
       (list key)
     ;; (message "call with key: %S" key-or-string)
-    (pyim-process-init-ui)
+    (run-hooks 'pyim-process-ui-init-hook)
     (with-silent-modifications
       (unwind-protect
           (let ((input-string (pyim-input-method-1 key)))

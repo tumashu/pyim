@@ -230,10 +230,10 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                (null unread-post-input-method-events))
       (pyim-page-show
        (pyim-page-info-format page-info tooltip)
-       (pyim-process-ui-position)
+       (funcall pyim-process-ui-position-function)
        tooltip))))
 
-(advice-add 'pyim-process-page-refresh :after #'pyim-page-refresh)
+(add-hook 'pyim-process-ui-refresh-hook #'pyim-page-refresh)
 
 (defun pyim-page-next-page (arg)
   "Pyim page 翻页命令."
@@ -549,7 +549,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
           (setq-local cursor-type t))
         (setq pyim-page-last-minibuffer-string nil)))))
 
-(advice-add 'pyim-process-page-hide :after #'pyim-page-hide)
+(add-hook 'pyim-process-ui-hide-hook #'pyim-page-hide)
 
 ;; * Footer
 (provide 'pyim-page)
