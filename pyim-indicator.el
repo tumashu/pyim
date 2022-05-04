@@ -92,7 +92,7 @@ timer 实现。"
              nil pyim-indicator-timer-repeat
              #'pyim-indicator-daemon-function)))))
 
-(advice-add 'pyim-process-start-daemon :after #'pyim-indicator-start-daemon)
+(add-hook 'pyim-process-start-daemon-hook #'pyim-indicator-start-daemon)
 
 (defun pyim-indicator-stop-daemon ()
   "Stop indicator daemon."
@@ -110,7 +110,7 @@ timer 实现。"
       (setq pyim-indicator-timer nil))
     (pyim-indicator-revert-cursor-color)))
 
-(advice-add 'pyim-process-stop-daemon :after #'pyim-indicator-stop-daemon)
+(add-hook 'pyim-process-stop-daemon-hook #'pyim-indicator-stop-daemon)
 
 (defun pyim-indicator-daemon-function ()
   "`pyim-indicator-daemon' 内部使用的函数。"

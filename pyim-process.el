@@ -128,6 +128,12 @@ entered (nihaom) 的第一个候选词。
 (defvar pyim-process-ui-position-function #'point
   "The value is a function returned a position where ui place.")
 
+(defvar pyim-process-start-daemon-hook nil
+  "Pyim start daemon hook.")
+
+(defvar pyim-process-stop-daemon-hook nil
+  "Pyim stop daemon hook.")
+
 (pyim-register-local-variables
  '(pyim-process-input-ascii
    pyim-process-translating))
@@ -147,11 +153,13 @@ entered (nihaom) 的第一个候选词。
   (pyim-dcache-call-api 'update-personal-words t))
 
 (defun pyim-process-start-daemon ()
-  "启动 pyim 流程需要的相关 daemon, 接口函数.")
+  "启动 pyim 流程需要的 daemon."
+  (run-hooks 'pyim-process-start-daemon-hook))
 
 (defun pyim-process-stop-daemon ()
-  "关闭 pyim 流程已经启动的 daemon, 接口函数."
-  (interactive))
+  "关闭 pyim 流程已经启动的 daemon."
+  (interactive)
+  (run-hooks 'pyim-process-stop-daemon-hook))
 
 (defmacro pyim-process-with-entered-buffer (&rest forms)
   "PYIM 流程的输入保存在一个 buffer 中，使用 FORMS 处理这个 buffer
