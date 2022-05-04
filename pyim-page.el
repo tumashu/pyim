@@ -250,7 +250,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
         (if (> new 0)
             (if (> new maxpos) 1 new)
           maxpos)))
-      (run-hooks 'pyim-process-ui-refresh-hook))))
+      (pyim-process-ui-refresh))))
 
 (defun pyim-page-previous-page (arg)
   (interactive "p")
@@ -268,7 +268,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
        (if (>= len new)
            (if (> new 0) new len)
          1))
-      (run-hook-with-args 'pyim-process-ui-refresh-hook 'hightlight-current))))
+      (pyim-process-ui-refresh 'hightlight-current))))
 
 (defun pyim-page-previous-word (arg)
   (interactive "p")
