@@ -36,7 +36,6 @@
 (require 'cl-lib)
 (require 'async nil t)
 (require 'pyim-common)
-(require 'pyim-pymap)
 (require 'pyim-dcache)
 (require 'pyim-dict)
 (require 'pyim-scheme)
