@@ -31,7 +31,7 @@
 ;; * 代码                                                                 :code:
 (require 'ert)
 (require 'pyim)
-(require 'pyim-basedict)
+(require 'pyim-basedict) ;pyim-test.el use pyim-basedict v0.5.0.
 (require 'pyim-dregcache)
 (require 'pyim-dhashcache)
 
