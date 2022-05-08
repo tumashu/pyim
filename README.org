@@ -101,6 +101,9 @@ pyim 的目标是： *尽最大的努力成为一个好用的 Emacs 中文输入
 ;; (pyim-default-scheme 'wubi)
 ;; (pyim-default-scheme 'cangjie)
 
+;; 我使用云拼音
+;; (setq pyim-cloudim 'baidu)
+
 ;; pyim 探针设置
 ;; 设置 pyim 探针设置，这是 pyim 高级功能设置，可以实现 *无痛* 中英文切换 :-)
 ;; 我自己使用的中英文动态切换规则是：
@@ -159,6 +162,13 @@ pyim 默认使用 pyim-basedict 词库, 这个词库的词条量8万左右，是
 | C-DEL 或  C-BACKSPACE | 删除最后一个拼音           |
 | M-DEL 或  M-BACKSPACE | 删除最后一个拼音           |
 | F1,F2,F3,F4           | 以词定字                   |
+** 使用云拼音
+pyim 可以使用搜索引擎提供的云拼音服务，比如：
+
+#+begin_example
+(setq pyim-cloudim 'baidu)
+;; (setq pyim-cloudim 'google)
+#+end_example
 
 ** 使用双拼模式
 pyim 支持双拼输入模式，用户可以通过变量 `pyim-default-scheme' 来设定：
