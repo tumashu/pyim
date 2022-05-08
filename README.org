@@ -162,13 +162,21 @@ pyim 默认使用 pyim-basedict 词库, 这个词库的词条量8万左右，是
 | C-DEL 或  C-BACKSPACE | 删除最后一个拼音           |
 | M-DEL 或  M-BACKSPACE | 删除最后一个拼音           |
 | F1,F2,F3,F4           | 以词定字                   |
-** 使用云拼音
-pyim 可以使用搜索引擎提供的云拼音服务，比如：
+** 使用云输入法
+pyim 可以使用搜索引擎提供的云输入法服务，比如：
 
 #+begin_example
 (setq pyim-cloudim 'baidu)
 ;; (setq pyim-cloudim 'google)
 #+end_example
+
+不过，由于 json 解析库的原因，Emacs 旧版本可能无法使用云输入法，可以通过下面的函
+数测试一下。
+
+#+begin_example
+(pyim-cloudim:baidu "nihao" 'pinyin)
+#+end_example
+
 
 ** 使用双拼模式
 pyim 支持双拼输入模式，用户可以通过变量 `pyim-default-scheme' 来设定：

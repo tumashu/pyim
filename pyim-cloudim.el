@@ -54,7 +54,8 @@
 
 (defun pyim-cloudim:baidu (string input-method)
   "使用 baidu 云 INPUT-METHOD 输入法引擎搜索 STRING, 获取词条列表。"
-  (when (equal input-method 'pinyin)
+  (when (and (equal input-method 'pinyin)
+             (functionp 'json-parse-buffer))
     (with-current-buffer (url-retrieve-synchronously
                           (format "https://olime.baidu.com/py?py=%s" string)
                           t nil 0.5)
@@ -65,12 +66,13 @@
   (goto-char (point-min))
   (search-forward "\n\n" nil t)
   (delete-region (point-min) (point))
-  (let ((data (json-parse-buffer)))
+  (let ((data (funcall 'json-parse-buffer)))
     (list (elt (elt (elt (gethash "0" data) 0) 0) 0))))
 
 (defun pyim-cloudim:google (string input-method)
   "使用 google 云 INPUT-METHOD 输入法引擎搜索 STRING, 获取词条列表。"
-  (when (eq input-method 'pinyin)
+  (when (and (eq input-method 'pinyin)
+             (functionp 'json-parse-buffer))
     (with-current-buffer (url-retrieve-synchronously
                           (format "https://www.google.cn/inputtools/request?ime=pinyin&text=%s" string)
                           t nil 0.5)
@@ -81,7 +83,7 @@
   (goto-char (point-min))
   (search-forward "\n\n" nil t)
   (delete-region (point-min) (point))
-  (let ((data (json-parse-buffer)))
+  (let ((data (funcall 'json-parse-buffer)))
     (list (elt (elt (elt (elt data 1) 0) 1) 0))))
 
 ;; * Footer
