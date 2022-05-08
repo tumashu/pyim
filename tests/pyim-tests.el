@@ -399,6 +399,18 @@
     (should (equal (pyim-candidates-search-buffer (pyim-cregexp-build "nh" 3 t))
                    '("牛蛤" "你坏" "你好" "牛和" "你话")))))
 
+(ert-deftest pyim-tests-pyim-candidates-cloud-search ()
+  (let ((pyim-candidates-cloud-search-function
+         (lambda (x y)
+           (list x y "b"))))
+    (should (equal (pyim-candidates-cloud-search "a" 'pinyin) '("a" pinyin "b"))))
+
+  (let ((pyim-candidates-cloud-search-function nil))
+    (should (not (pyim-candidates-cloud-search "a" 'pinyin))))
+
+  (let ((pyim-candidates-cloud-search-function "xxx"))
+    (should (not (pyim-candidates-cloud-search "a" 'pinyin)))))
+
 ;; ** pyim-cstring 相关单元测试
 (ert-deftest pyim-tests-pyim-cstring-partition ()
   (should (equal (pyim-cstring-partition "你好 hello 你好")
@@ -925,6 +937,50 @@ yin-xing 因行
     (should (string= (nth 0 words) "尊"))
     ;; `pyim-dregcache-get' calls `pyim-pymap-py2cchar-get' before return result
     (should (eq (length words) 51))))
+
+(ert-deftest pyim-tests-pyim-cloudim ()
+  (with-temp-buffer
+    (insert "HTTP/1.1 200 OK
+Content-Length: 88
+Content-Type: text/plain; charset=utf-8
+Date: Sun, 08 May 2022 00:56:13 GMT
+
+{\"0\":[[[\"你好\",5,{\"pinyin\":\"ni'hao\",\"type\":\"IMEDICT\"}]]],\"1\":\"ni'hao\",\"result\":[null]}")
+    (should (equal (pyim-cloudim-parse-baidu-buffer) '("你好"))))
+
+  (with-temp-buffer
+    (insert "HTTP/1.1 200 OK
+Date: Sun, 08 May 2022 03:33:56 GMT
+Pragma: no-cache
+Expires: -1
+Cache-Control: no-cache, must-revalidate
+Cross-Origin-Resource-Policy: cross-origin
+Content-Type: application/json; charset=UTF-8
+X-Content-Type-Options: nosniff
+Content-Disposition: attachment; filename=\"f.txt\"
+Server: Google Input Server/1.0
+X-XSS-Protection: 0
+X-Frame-Options: SAMEORIGIN
+Alt-Svc: h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"
+Transfer-Encoding: chunked
+
+[\"SUCCESS\",[[\"nihao\",[\"你好\"],[],{\"annotation\":[\"ni hao\"],\"candidate_type\":[0],\"lc\":[\"16 16\"]}]]]")
+    (should (equal (pyim-cloudim-parse-google-buffer) '("你好"))))
+
+  (should (equal (pyim-cloudim:baidu "nihao" 'pinyin) '("你好")))
+  (should (equal (pyim-cloudim:google "nihao" 'pinyin) '("你好")))
+
+  (let ((pyim-cloudim 'baidu))
+    (should (equal (pyim-cloudim "nihao" 'pinyin) '("你好"))))
+
+  (let ((pyim-cloudim 'google))
+    (should (equal (pyim-cloudim "nihao" 'pinyin) '("你好"))))
+
+  (let ((pyim-cloudim 'xxx))
+    (should (not (pyim-cloudim "nihao" 'pinyin))))
+
+  (let ((pyim-cloudim nil))
+    (should (not (pyim-cloudim "nihao" 'pinyin)))))
 
 (ert-run-tests-batch-and-exit)
 ;; * Footer

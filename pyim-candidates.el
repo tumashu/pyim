@@ -52,6 +52,9 @@
 
 细节信息请参考 `pyim-page-refresh' 的 docstring.")
 
+(defvar pyim-candidates-cloud-search-function nil
+  "`pyim-candidates-cloud-search' 调用的函数.")
+
 (pyim-register-local-variables
  '(pyim-candidates pyim-candidate-position))
 
@@ -155,6 +158,7 @@ IMOBJS 获得候选词条。"
             pyim-candidates
           ;; NOTE: 让第一个词保持不变是不是合理，有待进一步的观察。
           `(,(car pyim-candidates)
+            ,@(pyim-candidates-cloud-search str 'pinyin)
             ,@(pyim-candidates-search-buffer
                (pyim-cregexp-build str 3 t))
             ,@(cdr pyim-candidates))))
@@ -175,6 +179,11 @@ IMOBJS 获得候选词条。"
           (setq n (length (car candidates)))))
       (append (pyim-subconcat (nreverse output) "")
               candidates))))
+
+(defun pyim-candidates-cloud-search (string input-method)
+  "云搜索 STRING, 返回候选词条列表."
+  (ignore-errors
+    (funcall pyim-candidates-cloud-search-function string input-method)))
 
 (defun pyim-candidates-search-buffer (regexp)
   "在当前 buffer 中使用 REGEXP 搜索词条。"
