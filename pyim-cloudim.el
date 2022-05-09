@@ -30,6 +30,7 @@
 (require 'cl-lib)
 (require 'url)
 (require 'json)
+(require 'pyim-candidates)
 
 (defgroup pyim-cloudim nil
   "Cloud input method for pyim."
