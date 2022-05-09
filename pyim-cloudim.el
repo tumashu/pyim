@@ -68,6 +68,7 @@
   (search-forward "\n\n" nil t)
   (delete-region (point-min) (point))
   (let ((data (funcall 'json-parse-buffer)))
+    (kill-buffer)
     (list (elt (elt (elt (gethash "0" data) 0) 0) 0))))
 
 (defun pyim-cloudim:google (string scheme-name)
@@ -85,6 +86,7 @@
   (search-forward "\n\n" nil t)
   (delete-region (point-min) (point))
   (let ((data (funcall 'json-parse-buffer)))
+    (kill-buffer)
     (list (elt (elt (elt (elt data 1) 0) 1) 0))))
 
 ;; * Footer
