@@ -403,13 +403,13 @@
   (let ((pyim-candidates-cloud-search-function
          (lambda (x y)
            (list x y "b"))))
-    (should (equal (pyim-candidates-cloud-search "a" 'pinyin) '("a" pinyin "b"))))
+    (should (equal (pyim-candidates-cloud-search "a" 'quanpin) '("a" pinyin "b"))))
 
   (let ((pyim-candidates-cloud-search-function nil))
-    (should (not (pyim-candidates-cloud-search "a" 'pinyin))))
+    (should (not (pyim-candidates-cloud-search "a" 'quanpin))))
 
   (let ((pyim-candidates-cloud-search-function "xxx"))
-    (should (not (pyim-candidates-cloud-search "a" 'pinyin)))))
+    (should (not (pyim-candidates-cloud-search "a" 'quanpin)))))
 
 ;; ** pyim-cstring 相关单元测试
 (ert-deftest pyim-tests-pyim-cstring-partition ()
@@ -969,20 +969,20 @@ Transfer-Encoding: chunked
       (should (equal (pyim-cloudim-parse-google-buffer) '("你好"))))
 
     (when (not noninteractive)
-      (should (equal (pyim-cloudim:baidu "nihao" 'pinyin) '("你好")))
-      (should (equal (pyim-cloudim:google "nihao" 'pinyin) '("你好")))
+      (should (equal (pyim-cloudim:baidu "nihao" 'quanpin) '("你好")))
+      (should (equal (pyim-cloudim:google "nihao" 'quanpin) '("你好")))
 
       (let ((pyim-cloudim 'baidu))
-        (should (equal (pyim-cloudim "nihao" 'pinyin) '("你好"))))
+        (should (equal (pyim-cloudim "nihao" 'quanpin) '("你好"))))
 
       (let ((pyim-cloudim 'google))
-        (should (equal (pyim-cloudim "nihao" 'pinyin) '("你好"))))
+        (should (equal (pyim-cloudim "nihao" 'quanpin) '("你好"))))
 
       (let ((pyim-cloudim 'xxx))
-        (should (not (pyim-cloudim "nihao" 'pinyin))))
+        (should (not (pyim-cloudim "nihao" 'quanpin))))
 
       (let ((pyim-cloudim nil))
-        (should (not (pyim-cloudim "nihao" 'pinyin)))))))
+        (should (not (pyim-cloudim "nihao" 'quanpin)))))))
 
 (ert-run-tests-batch-and-exit)
 ;; * Footer

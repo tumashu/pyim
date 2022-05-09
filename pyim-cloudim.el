@@ -42,19 +42,19 @@
           (const :tag "Use baidu cloud input method." baidu)
           (const :tag "Use google cloud input method." google)))
 
-(defun pyim-cloudim (string input-method)
-  "使用云 INPUT-METHOD 输入法引擎搜索 STRING 获取词条列表.
+(defun pyim-cloudim (string scheme-name)
+  "使用云输入法引擎搜索 STRING 获取词条列表.
 云输入法由 `pyim-cloudim' 设置。"
   (when (and pyim-cloudim (symbolp pyim-cloudim))
     (let ((func (intern (format "pyim-cloudim:%s" pyim-cloudim))))
       (when (functionp func)
-        (funcall func string input-method)))))
+        (funcall func string scheme-name)))))
 
 (setq pyim-candidates-cloud-search-function #'pyim-cloudim)
 
-(defun pyim-cloudim:baidu (string input-method)
-  "使用 baidu 云 INPUT-METHOD 输入法引擎搜索 STRING, 获取词条列表。"
-  (when (and (equal input-method 'pinyin)
+(defun pyim-cloudim:baidu (string scheme-name)
+  "使用 baidu 云输入法引擎搜索 STRING, 获取词条列表。"
+  (when (and (equal scheme-name 'quanpin)
              (functionp 'json-parse-buffer))
     (with-current-buffer (url-retrieve-synchronously
                           (format "https://olime.baidu.com/py?py=%s" string)
@@ -69,9 +69,9 @@
   (let ((data (funcall 'json-parse-buffer)))
     (list (elt (elt (elt (gethash "0" data) 0) 0) 0))))
 
-(defun pyim-cloudim:google (string input-method)
-  "使用 google 云 INPUT-METHOD 输入法引擎搜索 STRING, 获取词条列表。"
-  (when (and (eq input-method 'pinyin)
+(defun pyim-cloudim:google (string scheme-name)
+  "使用 google 云输入法引擎搜索 STRING, 获取词条列表。"
+  (when (and (eq scheme-name 'quanpin)
              (functionp 'json-parse-buffer))
     (with-current-buffer (url-retrieve-synchronously
                           (format "https://www.google.cn/inputtools/request?ime=pinyin&text=%s" string)
