@@ -403,7 +403,7 @@
   (let ((pyim-candidates-cloud-search-function
          (lambda (x y)
            (list x y "b"))))
-    (should (equal (pyim-candidates-cloud-search "a" 'quanpin) '("a" pinyin "b"))))
+    (should (equal (pyim-candidates-cloud-search "a" 'quanpin) '("a" quanpin "b"))))
 
   (let ((pyim-candidates-cloud-search-function nil))
     (should (not (pyim-candidates-cloud-search "a" 'quanpin))))
