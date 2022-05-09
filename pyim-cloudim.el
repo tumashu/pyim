@@ -59,7 +59,7 @@
              (functionp 'json-parse-buffer))
     (with-current-buffer (url-retrieve-synchronously
                           (format "https://olime.baidu.com/py?py=%s" string)
-                          t nil 0.5)
+                          t nil 0.1)
       (pyim-cloudim-parse-baidu-buffer))))
 
 (defun pyim-cloudim-parse-baidu-buffer ()
@@ -76,7 +76,7 @@
              (functionp 'json-parse-buffer))
     (with-current-buffer (url-retrieve-synchronously
                           (format "https://www.google.cn/inputtools/request?ime=pinyin&text=%s" string)
-                          t nil 0.5)
+                          t nil 0.1)
       (pyim-cloudim-parse-google-buffer))))
 
 (defun pyim-cloudim-parse-google-buffer ()
