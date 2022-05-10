@@ -187,23 +187,24 @@ IMOBJS 获得候选词条。"
 
 (defun pyim-candidates-search-buffer (regexp)
   "在当前 buffer 中使用 REGEXP 搜索词条。"
-  (save-excursion
-    (let ((counts (make-hash-table :test #'equal))
-          (time-limit 0.1)
-          words)
-      (goto-char (point-min))
-      (pyim-time-limit-while (and (not (input-pending-p))
-                                  (re-search-forward regexp nil t)) time-limit
-        (let ((match (match-string-no-properties 0)))
-          ;; NOTE: 单个汉字我觉得不值得收集。
-          (when (>= (length match) 2)
-            (if (member match words)
-                (cl-incf (gethash match counts))
-              (push match words)
-              (puthash match 1 counts)))))
-      (sort words (lambda (a b)
-                    (> (or (gethash a counts) 0)
-                       (or (gethash b counts) 0)))))))
+  (when (not (input-pending-p)) ;只有在用户输入停顿的时候才搜索 buffer.
+    (save-excursion
+      (let ((counts (make-hash-table :test #'equal))
+            (time-limit 0.1)
+            words)
+        (goto-char (point-min))
+        (pyim-time-limit-while (and (not (input-pending-p)) ;如果用户继续输入，就停止 buffer 搜索。
+                                    (re-search-forward regexp nil t)) time-limit
+          (let ((match (match-string-no-properties 0)))
+            ;; NOTE: 单个汉字我觉得不值得收集。
+            (when (>= (length match) 2)
+              (if (member match words)
+                  (cl-incf (gethash match counts))
+                (push match words)
+                (puthash match 1 counts)))))
+        (sort words (lambda (a b)
+                      (> (or (gethash a counts) 0)
+                         (or (gethash b counts) 0))))))))
 
 (defun pyim-candidates-create-quanpin (imobjs scheme-name &optional fast-search)
   "`pyim-candidates-create:quanpin' 内部使用的函数。"
