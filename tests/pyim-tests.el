@@ -939,18 +939,17 @@ yin-xing 因行
     (should (eq (length words) 51))))
 
 (ert-deftest pyim-tests-pyim-cloudim ()
-  (when (functionp 'json-parse-buffer)
-    (with-temp-buffer
-      (insert "HTTP/1.1 200 OK
+  (with-temp-buffer
+    (insert "HTTP/1.1 200 OK
 Content-Length: 88
 Content-Type: text/plain; charset=utf-8
 Date: Sun, 08 May 2022 00:56:13 GMT
 
 {\"0\":[[[\"你好\",5,{\"pinyin\":\"ni'hao\",\"type\":\"IMEDICT\"}]]],\"1\":\"ni'hao\",\"result\":[null]}")
-      (should (equal (pyim-cloudim-parse-baidu-buffer) '("你好"))))
+    (should (equal (pyim-cloudim-parse-baidu-buffer) '("你好"))))
 
-    (with-temp-buffer
-      (insert "HTTP/1.1 200 OK
+  (with-temp-buffer
+    (insert "HTTP/1.1 200 OK
 Date: Sun, 08 May 2022 03:33:56 GMT
 Pragma: no-cache
 Expires: -1
@@ -966,23 +965,23 @@ Alt-Svc: h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000,h3-Q050=\":443\"; ma
 Transfer-Encoding: chunked
 
 [\"SUCCESS\",[[\"nihao\",[\"你好\"],[],{\"annotation\":[\"ni hao\"],\"candidate_type\":[0],\"lc\":[\"16 16\"]}]]]")
-      (should (equal (pyim-cloudim-parse-google-buffer) '("你好"))))
+    (should (equal (pyim-cloudim-parse-google-buffer) '("你好"))))
 
-    (when (not noninteractive)
-      (should (equal (pyim-cloudim:baidu "nihao" 'quanpin) '("你好")))
-      (should (equal (pyim-cloudim:google "nihao" 'quanpin) '("你好")))
+  (when (not noninteractive)
+    (should (equal (pyim-cloudim:baidu "nihao" 'quanpin) '("你好")))
+    (should (equal (pyim-cloudim:google "nihao" 'quanpin) '("你好")))
 
-      (let ((pyim-cloudim 'baidu))
-        (should (equal (pyim-cloudim "nihao" 'quanpin) '("你好"))))
+    (let ((pyim-cloudim 'baidu))
+      (should (equal (pyim-cloudim "nihao" 'quanpin) '("你好"))))
 
-      (let ((pyim-cloudim 'google))
-        (should (equal (pyim-cloudim "nihao" 'quanpin) '("你好"))))
+    (let ((pyim-cloudim 'google))
+      (should (equal (pyim-cloudim "nihao" 'quanpin) '("你好"))))
 
-      (let ((pyim-cloudim 'xxx))
-        (should (not (pyim-cloudim "nihao" 'quanpin))))
+    (let ((pyim-cloudim 'xxx))
+      (should (not (pyim-cloudim "nihao" 'quanpin))))
 
-      (let ((pyim-cloudim nil))
-        (should (not (pyim-cloudim "nihao" 'quanpin)))))))
+    (let ((pyim-cloudim nil))
+      (should (not (pyim-cloudim "nihao" 'quanpin))))))
 
 (ert-run-tests-batch-and-exit)
 ;; * Footer
