@@ -55,10 +55,12 @@
 (defun pyim-cloudim:baidu (string scheme-name)
   "使用 baidu 云输入法引擎搜索 STRING, 获取词条列表。"
   (when (equal scheme-name 'quanpin)
-    (with-current-buffer (pyim-cloudim-url-retrieve-sync
-                          (format "https://olime.baidu.com/py?py=%s" string)
-                          t nil 0.1)
-      (pyim-cloudim-parse-baidu-buffer))))
+    (let ((buffer (pyim-cloudim-url-retrieve-sync
+                   (format "https://olime.baidu.com/py?py=%s" string)
+                   t nil 0.2)))
+      (when (bufferp buffer)
+        (with-current-buffer buffer
+          (pyim-cloudim-parse-baidu-buffer))))))
 
 (defun pyim-cloudim-url-retrieve-sync (url &optional silent inhibit-cookies timeout)
   "Pyim 版本的 `url-retrieve-synchronously'.
@@ -134,10 +136,12 @@
 (defun pyim-cloudim:google (string scheme-name)
   "使用 google 云输入法引擎搜索 STRING, 获取词条列表。"
   (when (eq scheme-name 'quanpin)
-    (with-current-buffer (pyim-cloudim-url-retrieve-sync
-                          (format "https://www.google.cn/inputtools/request?ime=pinyin&text=%s" string)
-                          t nil 0.1)
-      (pyim-cloudim-parse-google-buffer))))
+    (let ((buffer (pyim-cloudim-url-retrieve-sync
+                   (format "https://www.google.cn/inputtools/request?ime=pinyin&text=%s" string)
+                   t nil 0.2)))
+      (when (bufferp buffer)
+        (with-current-buffer buffer
+          (pyim-cloudim-parse-google-buffer))))))
 
 (defun pyim-cloudim-parse-google-buffer ()
   "解析 `pyim-cloudim-url-retrieve-sync' 返回的 google buffer."
