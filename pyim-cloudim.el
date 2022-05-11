@@ -29,7 +29,6 @@
 ;; * 代码                                                           :code:
 (require 'cl-lib)
 (require 'url)
-(require 'json)
 (require 'pyim-candidates)
 
 (defgroup pyim-cloudim nil
@@ -55,8 +54,7 @@
 
 (defun pyim-cloudim:baidu (string scheme-name)
   "使用 baidu 云输入法引擎搜索 STRING, 获取词条列表。"
-  (when (and (equal scheme-name 'quanpin)
-             (functionp 'json-parse-buffer))
+  (when (equal scheme-name 'quanpin)
     (with-current-buffer (pyim-cloudim-url-retrieve-sync
                           (format "https://olime.baidu.com/py?py=%s" string)
                           t nil 0.1)
@@ -91,14 +89,14 @@
                              (float-time (time-since start-time)))
                   (throw 'done 'timeout))
 	            (url-debug 'retrieval
-		                   "Spinning in url-retrieve-synchronously: nil (%S)"
+		                   "Spinning in pyim-cloudim-url-retrieve-sync: nil (%S)"
 		                   proc-buffer)
                 (when-let ((redirect-buffer
                             (buffer-local-value 'url-redirect-buffer
                                                 proc-buffer)))
                   (unless (eq redirect-buffer proc-buffer)
                     (url-debug
-                     'retrieval "Redirect in url-retrieve-synchronously: %S -> %S"
+                     'retrieval "Redirect in pyim-cloudim-url-retrieve-sync: %S -> %S"
 		             proc-buffer redirect-buffer)
                     (let (kill-buffer-query-functions)
                       (kill-buffer proc-buffer))
@@ -121,31 +119,28 @@
       data-buffer)))
 
 (defun pyim-cloudim-parse-baidu-buffer ()
-  "解析 `url-retrieve-synchronously' 返回的 baidu buffer."
-  (goto-char (point-min))
-  (search-forward "\n\n" nil t)
-  (delete-region (point-min) (point))
-  (let ((data (funcall 'json-parse-buffer)))
-    (kill-buffer)
-    (list (elt (elt (elt (gethash "0" data) 0) 0) 0))))
+  "解析 `pyim-cloudim-url-retrieve-sync' 返回的 baidu buffer."
+  ;; 以前使用 `json-parse-buffer' 来处理返回的结果，但旧版本的 Emacs 无法使用，
+  ;; 所以现在使用这种简单粗暴的方式。
+  (let ((word (replace-regexp-in-string
+               "\\CC" ""
+               (decode-coding-string
+                (buffer-string)
+                'utf-8))))
+    (when (> (length word) 0)
+      (list word))))
 
 (defun pyim-cloudim:google (string scheme-name)
   "使用 google 云输入法引擎搜索 STRING, 获取词条列表。"
-  (when (and (eq scheme-name 'quanpin)
-             (functionp 'json-parse-buffer))
+  (when (eq scheme-name 'quanpin)
     (with-current-buffer (pyim-cloudim-url-retrieve-sync
                           (format "https://www.google.cn/inputtools/request?ime=pinyin&text=%s" string)
                           t nil 0.1)
       (pyim-cloudim-parse-google-buffer))))
 
 (defun pyim-cloudim-parse-google-buffer ()
-  "解析 `url-retrieve-synchronously' 返回的 google buffer."
-  (goto-char (point-min))
-  (search-forward "\n\n" nil t)
-  (delete-region (point-min) (point))
-  (let ((data (funcall 'json-parse-buffer)))
-    (kill-buffer)
-    (list (elt (elt (elt (elt data 1) 0) 1) 0))))
+  "解析 `pyim-cloudim-url-retrieve-sync' 返回的 google buffer."
+  (pyim-cloudim-parse-baidu-buffer))
 
 ;; * Footer
 (provide 'pyim-cloudim)

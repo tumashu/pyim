@@ -170,14 +170,6 @@ pyim 可以使用搜索引擎提供的云输入法服务，比如：
 ;; (setq pyim-cloudim 'google)
 #+end_example
 
-不过，由于 json 解析库的原因，Emacs 旧版本可能无法使用云输入法，可以通过下面的函
-数测试一下。
-
-#+begin_example
-(pyim-cloudim:baidu "nihao" 'pinyin)
-#+end_example
-
-
 ** 使用双拼模式
 pyim 支持双拼输入模式，用户可以通过变量 `pyim-default-scheme' 来设定：
 
