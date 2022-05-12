@@ -130,6 +130,7 @@
                (decode-coding-string
                 (buffer-string)
                 'utf-8))))
+    (kill-buffer)
     (when (> (length word) 0)
       (list word))))
 
