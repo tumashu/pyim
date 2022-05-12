@@ -60,7 +60,8 @@
                    t nil 0.2)))
       (when (bufferp buffer)
         (with-current-buffer buffer
-          (pyim-cloudim-parse-baidu-buffer))))))
+          (prog1 (pyim-cloudim-parse-baidu-buffer)
+            (kill-buffer)))))))
 
 (defun pyim-cloudim-url-retrieve-sync (url &optional silent inhibit-cookies timeout)
   "Pyim 版本的 `url-retrieve-synchronously'.
@@ -130,7 +131,6 @@
                (decode-coding-string
                 (buffer-string)
                 'utf-8))))
-    (kill-buffer)
     (when (> (length word) 0)
       (list word))))
 
