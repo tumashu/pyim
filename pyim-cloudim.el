@@ -132,7 +132,7 @@
                 (buffer-string)
                 'utf-8))))
     (when (> (length word) 0)
-      (list word))))
+      (list (propertize word :comment "(云)")))))
 
 (defun pyim-cloudim:google (string scheme-name)
   "使用 google 云输入法引擎搜索 STRING, 获取词条列表。"
