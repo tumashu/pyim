@@ -142,7 +142,8 @@
                    t nil 0.2)))
       (when (bufferp buffer)
         (with-current-buffer buffer
-          (pyim-cloudim-parse-google-buffer))))))
+          (prog1 (pyim-cloudim-parse-google-buffer)
+            (kill-buffer)))))))
 
 (defun pyim-cloudim-parse-google-buffer ()
   "解析 `pyim-cloudim-url-retrieve-sync' 返回的 google buffer."
