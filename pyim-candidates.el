@@ -195,13 +195,14 @@ IMOBJS 获得候选词条。"
         (goto-char (point-min))
         (pyim-time-limit-while (and (not (input-pending-p)) ;如果用户继续输入，就停止 buffer 搜索。
                                     (re-search-forward regexp nil t)) time-limit
-          (let ((match (match-string-no-properties 0)))
+          (let* ((match (match-string-no-properties 0))
+                 (word (propertize match :comment "(Buf)")))
             ;; NOTE: 单个汉字我觉得不值得收集。
-            (when (>= (length match) 2)
-              (if (member match words)
-                  (cl-incf (gethash match counts))
-                (push match words)
-                (puthash match 1 counts)))))
+            (when (>= (length word) 2)
+              (if (member word words)
+                  (cl-incf (gethash word counts))
+                (push word words)
+                (puthash word 1 counts)))))
         (sort words (lambda (a b)
                       (> (or (gethash a counts) 0)
                          (or (gethash b counts) 0))))))))
