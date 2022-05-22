@@ -397,7 +397,9 @@
   (with-temp-buffer
     (insert "你好你好你坏你坏你话牛蛤牛和牛蛤牛蛤牛蛤牛蛤牛蛤")
     (should (equal (pyim-candidates-search-buffer (pyim-cregexp-build "nh" 3 t))
-                   '("牛蛤" "你坏" "你好" "牛和" "你话")))))
+                   '("牛蛤" "你坏" "你好" "牛和" "你话")))
+    (let ((words (pyim-candidates-search-buffer (pyim-cregexp-build "nh" 3 t))))
+      (equal (get-text-property 0 :comment (car words)) "(Buf)"))))
 
 (ert-deftest pyim-tests-pyim-candidates-cloud-search ()
   (let ((pyim-candidates-cloud-search-function
