@@ -948,7 +948,8 @@ Content-Type: text/plain; charset=utf-8
 Date: Sun, 08 May 2022 00:56:13 GMT
 
 {\"0\":[[[\"你好\",5,{\"pinyin\":\"ni'hao\",\"type\":\"IMEDICT\"}]]],\"1\":\"ni'hao\",\"result\":[null]}")
-    (should (equal (pyim-cloudim-parse-baidu-buffer) '("你好"))))
+    (should (equal (pyim-cloudim-parse-baidu-buffer) '("你好")))
+    (should (equal (get-text-property 0 :comment (car (pyim-cloudim-parse-baidu-buffer))) "(云)")))
 
   (with-temp-buffer
     (insert "HTTP/1.1 200 OK
@@ -967,7 +968,8 @@ Alt-Svc: h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000,h3-Q050=\":443\"; ma
 Transfer-Encoding: chunked
 
 [\"SUCCESS\",[[\"nihao\",[\"你好\"],[],{\"annotation\":[\"ni hao\"],\"candidate_type\":[0],\"lc\":[\"16 16\"]}]]]")
-    (should (equal (pyim-cloudim-parse-google-buffer) '("你好"))))
+    (should (equal (pyim-cloudim-parse-google-buffer) '("你好")))
+    (should (equal (get-text-property 0 :comment (car (pyim-cloudim-parse-google-buffer))) "(云)")))
 
   (when (not noninteractive)
     (should (equal (pyim-cloudim:baidu "nihao" 'quanpin) '("你好")))
