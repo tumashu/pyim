@@ -81,7 +81,7 @@
            (proc-buffer (url-retrieve url callback nil silent
                                       inhibit-cookies)))
       (if (not proc-buffer)
-          (url-debug 'retrieval "Synchronous fetching unnecessary %s" url)
+          (url-debug 'retrieval "Synchronous fetching unnecessary %s url-asynchronous=%s" url url-asynchronous)
         (unwind-protect
             (catch 'done
               (while (and (not (input-pending-p)) ;如果用户继续输入，就停止云搜索。

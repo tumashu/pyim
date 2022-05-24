@@ -28,7 +28,7 @@
 ;;; Code:
 ;; * 代码                                                           :code:
 (require 'cl-lib)
-(require 'isearch)
+(when (>= emacs-major-version 26) (require 'isearch))
 (require 'xr)
 (require 'rx)
 (require 'pyim-pymap)

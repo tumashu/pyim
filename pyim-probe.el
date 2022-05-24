@@ -53,6 +53,7 @@
 
 ;;; Code:
 ;; * 代码                                                                 :code:
+(when (>= emacs-major-version 26) (require 'isearch))
 (require 'pyim-common)
 (require 'pyim-process)
 
