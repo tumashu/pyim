@@ -4,8 +4,13 @@ EMACS ?= emacs
 
 .PHONY: test lint clean deps compile
 
+EMACS_BATCH_OPTS=--batch --quick --directory .. --directory ./deps
+RM=@rm -rf
+
 clean:
-	@rm -rf "pyim-tests-temp-*" "../*.elc" "*.elc"
+	$(RM) pyim-tests-temp-*
+	$(RM) ../*.elc
+	$(RM) *.elc
 
 deps:
 	@mkdir -p deps;
@@ -20,12 +25,13 @@ deps:
 
 
 lint: deps
-	@$(EMACS) --batch --quick --directory .. --directory ./deps --load ./pyim-elint.el 2>&1 | grep -vE "pyim-cregexp.el:[0-9]+:Warning: Empty varlist in let|pyim-indicator.el:[0-9]+:Error: Call to undefined function: posframe-show" | grep -E "([Ee]rror|[Ww]arning):" && exit 1 || exit 0
+	@$(EMACS) $(EMACS_BATCH_OPTS) --load ./pyim-elint.el 2>&1 | grep -vE "pyim-cregexp.el:[0-9]+:Warning: Empty varlist in let|pyim-indicator.el:[0-9]+:Error: Call to undefined function: posframe-show" | grep -E "([Ee]rror|[Ww]arning):" && exit 1 || exit 0
 
-compile: deps clean
-	@$(EMACS) --batch --quick --directory .. --directory ./deps --load ./pyim-byte-compile.el 2>&1 | grep -E "([Ee]rror|[Ww]arning):" && exit 1 || exit 0
+compile: deps
+	$(RM) ../*.elc
+	@$(EMACS) $(EMACS_BATCH_OPTS) --load ./pyim-byte-compile.el 2>&1 | grep -E "([Ee]rror|[Ww]arning):" && exit 1 || exit 0
 
 # test: lint compile deps clean
-test: deps clean compile
-	@$(EMACS) --batch --quick --directory .. --directory ./deps --load ./pyim-tests.el
-	@rm -rf "pyim-tests-temp-*"
+test: compile deps
+	@$(EMACS) $(EMACS_BATCH_OPTS) --load ./pyim-tests.el
+	$(RM) pyim-tests-temp-*
