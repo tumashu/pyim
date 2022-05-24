@@ -51,7 +51,8 @@
   "`pyim-cregexp-convert-at-point' 使用的函数。
 
 此函数有一个参数 cregexp, 表示生成的 cregexp. 其返回值会插入当前
-buffer.")
+buffer."
+  :type 'function)
 
 (defun pyim-cregexp-char-level-num (num)
   "根据 NUM 返回一个有效的常用汉字级别。"
