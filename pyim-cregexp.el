@@ -46,6 +46,13 @@
 将使用这个 scheme."
   :type 'symbol)
 
+(defcustom pyim-cregexp-convert-at-point-function
+  #'pyim-cregexp-convert-at-point-function
+  "`pyim-cregexp-convert-at-point' 使用的函数。
+
+此函数有一个参数 cregexp, 表示生成的 cregexp. 其返回值会插入当前
+buffer.")
+
 (defun pyim-cregexp-char-level-num (num)
   "根据 NUM 返回一个有效的常用汉字级别。"
   (if (numberp num)
@@ -221,11 +228,8 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
 在 minibuffer 中，这个命令默认会自动运行 `exit-minibuffer'.
 这个可以使用 INSERT-ONLY 参数控制。"
   (interactive "P")
-  (unless (equal input-method-function 'pyim-input-method)
-    (activate-input-method 'pyim))
-  (let* ((buffer-string
-          (buffer-substring (point-min) (point-max)))
-         (string (if mark-active
+  (pyim-pymap-cache-create)
+  (let* ((string (if mark-active
                      (buffer-substring-no-properties
                       (region-beginning) (region-end))
                    (buffer-substring
@@ -236,16 +240,21 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
          (length (length string))
          (cregexp (pyim-cregexp-build string)))
     (delete-char (- 0 length))
-    (cond
-     ;; Deal with `org-search-view'
-     ((and (window-minibuffer-p)
-           (string-match-p
-            (regexp-quote "[+-]Word/{Regexp}") buffer-string))
-      (insert (format "{%s}" cregexp)))
-     (t (insert cregexp)))
+    (insert (funcall pyim-cregexp-convert-at-point-function cregexp))
     (when (and (not insert-only)
                (window-minibuffer-p))
       (exit-minibuffer))))
+
+(defun pyim-cregexp-convert-at-point-function (cregexp)
+  "这个函数是变量 `pyim-cregexp-convert-at-point-function' 的默认取值。"
+  (cond
+   ;; Deal with `org-search-view'
+   ((and (window-minibuffer-p)
+         (string-match-p
+          (regexp-quote "[+-]Word/{Regexp}")
+          (buffer-substring (point-min) (point-max))))
+    (format "{%s}" cregexp))
+   (t cregexp)))
 
 ;; * Footer
 (provide 'pyim-cregexp)
