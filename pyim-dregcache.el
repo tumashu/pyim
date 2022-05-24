@@ -37,6 +37,7 @@
 (require 'pyim-common)
 (require 'pyim-dict)
 (require 'subr-x)
+(require 'pyim-dcache)
 
 (defvar pyim-dregcache-partition-minimum-size 32
   "小于这个数值(单位为M)的词典不需要用分区算法加速.可节约一半的内存.")
