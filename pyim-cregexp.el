@@ -28,13 +28,12 @@
 ;;; Code:
 ;; * 代码                                                           :code:
 (require 'cl-lib)
-(when (>= emacs-major-version 26) (require 'isearch))
-(require 'xr)
-(require 'rx)
+(require 'pyim-dcache)
+(require 'pyim-imobjs)
 (require 'pyim-pymap)
 (require 'pyim-scheme)
-(require 'pyim-imobjs)
-(require 'pyim-dcache)
+(require 'rx)
+(require 'xr)
 
 (defgroup pyim-cregexp nil
   "Chinese regexp tools for pyim."
@@ -247,46 +246,6 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
     (when (and (not insert-only)
                (window-minibuffer-p))
       (exit-minibuffer))))
-
-(defun pyim-cregexp-isearch-search-fun ()
-  "这个函数为 isearch 相关命令添加中文拼音搜索功能，
-做为 `isearch-search-fun' 函数的 advice 使用。"
-  (funcall
-   (lambda ()
-     `(lambda (string &optional bound noerror count)
-        (funcall (if ,isearch-forward
-                     're-search-forward
-                   're-search-backward)
-                 (pyim-cregexp-build string) bound noerror count)))))
-
-;;;###autoload
-(define-minor-mode pyim-isearch-mode
-  "这个 mode 为 isearch 添加拼音搜索功能."
-  :global t
-  :require 'pyim
-  :lighter " pyim-isearch"
-  (if pyim-isearch-mode
-      (progn
-        (advice-add 'isearch-search-fun :override #'pyim-cregexp-isearch-search-fun)
-        (message "PYIM: `pyim-isearch-mode' 已经激活，激活后，一些 isearch 扩展包有可能失效。"))
-    (advice-remove 'isearch-search-fun #'pyim-cregexp-isearch-search-fun)))
-
-(declare-function ivy--regex-plus "ivy")
-
-(defun pyim-cregexp-ivy (str)
-  "Let ivy support search Chinese with pinyin feature."
-  (let ((x (ivy--regex-plus str))
-        (case-fold-search nil))
-    (if (listp x)
-        (mapcar (lambda (y)
-                  (if (cdr y)
-                      (list (if (equal (car y) "")
-                                ""
-                              (pyim-cregexp-build (car y)))
-                            (cdr y))
-                    (list (pyim-cregexp-build (car y)))))
-                x)
-      (pyim-cregexp-build x))))
 
 ;; * Footer
 (provide 'pyim-cregexp)

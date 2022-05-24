@@ -32,18 +32,18 @@
 
 ;; * 核心代码                                                           :code:
 ;; ** require + defcustom + defvar
-(require 'subr-x)
 (require 'cl-lib)
 (require 'help-mode)
-(require 'pyim-common)
-(require 'pyim-scheme)
-(require 'pyim-page)
-(require 'pyim-preview)
-(require 'pyim-indicator)
-(require 'pyim-process)
 (require 'pyim-autoselector)
+(require 'pyim-common)
 (require 'pyim-cstring)
 (require 'pyim-dict)
+(require 'pyim-indicator)
+(require 'pyim-page)
+(require 'pyim-preview)
+(require 'pyim-process)
+(require 'pyim-scheme)
+(require 'subr-x)
 
 (defgroup pyim nil
   "Pyim is a Chinese input method support quanpin, shuangpin, wubi and cangjie."
@@ -850,6 +850,48 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
 
 ;; ** pyim 中文 regexp 工具
 (require 'pyim-cregexp)
+(when (>= emacs-major-version 26)
+  (require 'isearch))
+
+;;;###autoload
+(define-minor-mode pyim-isearch-mode
+  "这个 mode 为 isearch 添加拼音搜索功能."
+  :global t
+  :require 'pyim
+  :lighter " pyim-isearch"
+  (if pyim-isearch-mode
+      (progn
+        (advice-add 'isearch-search-fun :override #'pyim-isearch-search-fun)
+        (message "PYIM: `pyim-isearch-mode' 已经激活，激活后，一些 isearch 扩展包有可能失效。"))
+    (advice-remove 'isearch-search-fun #'pyim-isearch-search-fun)))
+
+(defun pyim-isearch-search-fun ()
+  "这个函数为 isearch 相关命令添加中文拼音搜索功能，
+做为 `isearch-search-fun' 函数的 advice 使用。"
+  (funcall
+   (lambda ()
+     `(lambda (string &optional bound noerror count)
+        (funcall (if ,isearch-forward
+                     're-search-forward
+                   're-search-backward)
+                 (pyim-cregexp-build string) bound noerror count)))))
+
+(declare-function ivy--regex-plus "ivy")
+
+(defun pyim-cregexp-ivy (str)
+  "Let ivy support search Chinese with pinyin feature."
+  (let ((x (ivy--regex-plus str))
+        (case-fold-search nil))
+    (if (listp x)
+        (mapcar (lambda (y)
+                  (if (cdr y)
+                      (list (if (equal (car y) "")
+                                ""
+                              (pyim-cregexp-build (car y)))
+                            (cdr y))
+                    (list (pyim-cregexp-build (car y)))))
+                x)
+      (pyim-cregexp-build x))))
 
 ;; ** pyim 探针
 (require 'pyim-probe)
