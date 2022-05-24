@@ -29,6 +29,7 @@
 ;; * 代码                                                           :code:
 (require 'cl-lib)
 (require 'pyim-common)
+(require 'pyim-pymap)
 (require 'url-util)
 
 (defgroup pyim-dcache nil

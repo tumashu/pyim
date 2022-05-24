@@ -28,9 +28,13 @@
 ;;; Code:
 ;; * 代码                                                           :code:
 (require 'cl-lib)
-(require 'pyim-pymap)
+(require 'isearch)
 (require 'xr)
 (require 'rx)
+(require 'pyim-pymap)
+(require 'pyim-scheme)
+(require 'pyim-imobjs)
+(require 'pyim-dcache)
 
 (defgroup pyim-cregexp nil
   "Chinese regexp tools for pyim."

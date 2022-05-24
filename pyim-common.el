@@ -30,6 +30,8 @@
 
 ;;; Code:
 ;; * 代码                                                                 :code:
+(require 'cl-lib)
+(require 'subr-x)
 
 (defgroup pyim-common nil
   "pyim common."
