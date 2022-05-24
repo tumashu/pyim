@@ -32,6 +32,8 @@
 (require 'pyim-dcache)
 (require 'pyim-codes)
 (require 'pyim-pymap)
+(require 'pyim-cregexp)
+(require 'pyim-cstring)
 
 (defgroup pyim-candidates nil
   "Candidates of pyim."

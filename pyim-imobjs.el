@@ -30,6 +30,7 @@
 (require 'cl-lib)
 (require 'pyim-common)
 (require 'pyim-pinyin)
+(require 'pyim-scheme)
 
 (defgroup pyim-imobjs nil
   "Imobjs lib for pyim."

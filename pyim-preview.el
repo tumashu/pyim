@@ -30,6 +30,7 @@
 (require 'cl-lib)
 (require 'pyim-common)
 (require 'pyim-process)
+(require 'mule)
 
 (defgroup pyim-preview nil
   "Preview libs for pyim."
@@ -40,6 +41,8 @@
 
 (defvar pyim-preview-overlay nil
   "用于保存光标处预览字符串的 overlay.")
+
+(defvar input-method-highlight-flag) ;; fixed compiling error
 
 (pyim-register-local-variables '(pyim-preview-overlay))
 

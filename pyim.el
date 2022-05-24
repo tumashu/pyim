@@ -223,7 +223,7 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
 
 ;; ** Pyim 输入法注册
 ;;;###autoload
-(register-input-method "pyim" "UTF-8" #'pyim-activate pyim-title)
+(register-input-method "pyim" "UTF-8" #'pyim-activate pyim-title "")
 
 ;; ** PYim 输入法启动功能
 ;;;###autoload
