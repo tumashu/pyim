@@ -850,8 +850,9 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
 
 ;; ** pyim 中文 regexp 工具
 (require 'pyim-cregexp)
-(when (>= emacs-major-version 26)
-  (require 'isearch))
+
+(declare-function isearch-search-fun "isearch")
+(defvar isearch-forward)
 
 ;;;###autoload
 (define-minor-mode pyim-isearch-mode
