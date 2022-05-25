@@ -53,8 +53,6 @@
 
 ;;; Code:
 ;; * 代码                                                                 :code:
-(when (>= emacs-major-version 26)
-  (require 'isearch))
 (require 'pyim-common)
 (require 'pyim-process)
 
@@ -76,6 +74,7 @@
 (defvar org-heading-regexp)
 (defvar org-use-speed-commands)
 (defvar pyim-isearch-mode)
+(defvar isearch-mode)
 
 (defun pyim-probe-org-speed-commands ()
   "激活这个 pyim 探针函数后，可以解决 org-speed-commands 与 pyim 冲突问题。
