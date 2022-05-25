@@ -902,9 +902,6 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
 ;; ** pyim 云输入法
 (require 'pyim-cloudim)
 
-;; ** pyim hacks
-(require 'pyim-hacks)
-
 ;; * Footer
 (provide 'pyim)
 
