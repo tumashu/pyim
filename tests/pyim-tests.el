@@ -559,7 +559,11 @@
       ;; 天安门<I>
       (goto-char (point-max))
       (should (equal (pyim-cstring-words-at-point)
-                     '(("天安门" 3 0) ("安门" 2 0)))))))
+                     '(("天安门" 3 0) ("安门" 2 0))))
+
+      ;; <I>天安门abc
+      (goto-char (point-min))
+      (should (equal (pyim-cstring-words-at-point t) nil)))))
 
 (ert-deftest pyim-tests-pyim-cstring-forward-or-backward-word ()
   (with-temp-buffer
