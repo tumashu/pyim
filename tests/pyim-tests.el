@@ -561,6 +561,19 @@
       (should (equal (pyim-cstring-words-at-point)
                      '(("天安门" 3 0) ("安门" 2 0)))))))
 
+(ert-deftest pyim-tests-pyim-cstring-forward-or-backward-word ()
+  (with-temp-buffer
+    (insert "哈哈我爱北京天安门天安门上太阳升")
+    (goto-char 2)
+    (pyim-cstring-forward-word 1)
+    (should (equal (buffer-substring (point-min) (point)) "哈哈"))
+    (pyim-cstring-forward-word 3)
+    (should (equal (buffer-substring (point-min) (point)) "哈哈我爱北京天安门"))
+    (pyim-cstring-backward-word 1)
+    (should (equal (buffer-substring (point-min) (point)) "哈哈我爱北京"))
+    (pyim-cstring-backward-word 2)
+    (should (equal (buffer-substring (point-min) (point)) "哈哈"))))
+
 ;; ** pyim-cregexp 相关单元测试
 (ert-deftest pyim-tests-pyim-cregexp ()
   (let ((regexp (pyim-cregexp-build "nihao")))
