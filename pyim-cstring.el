@@ -413,7 +413,9 @@ CRITERIA 字符串一般是通过 imobjs 构建的，它保留了用户原始的
         (setq str (substring str 0 (min 9 str-length)))))
 
     (cond
-     ((or (bobp) (eq (point) (line-beginning-position))) nil)
+     (;; FIXME: 在光标在 buffer 开头或者行首时，直接返回 nil.
+      ;; 也许这块应该更好的处理。
+      (or (bobp) (eq (point) (line-beginning-position))) nil)
      ((and str (not (pyim-string-match-p "\\CC" str)))
       (setq words-alist
             (pyim-cstring-split-to-list str))
