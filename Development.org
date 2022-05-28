@@ -13,7 +13,7 @@
 |     | ----------------                                                  ------------  |     |
 |     | Pyim 用户命令, Entered 用户命令                                   Page          |     |
 |     | Cregexp 用户命令，Cstring 用户命令                                Preview       |     |
-|     | Dict 管理命令，标点用户命令，Pymap 管理命令                       Indicator     |     |
+|     | Dict 管理命令，标点用户命令，Pymap-utils                          Indicator     |     |
 |     |                                                                                 |     |
 |     |                 +---------------------------------------------+                 |     |
 |     | 自动上屏器:     | PYIM 用例层： Process                       |                 |     |

@@ -32,8 +32,9 @@
 (require 'ert)
 (require 'pyim)
 (require 'pyim-basedict) ;pyim-test.el use pyim-basedict v0.5.0.
-(require 'pyim-dregcache)
 (require 'pyim-dhashcache)
+(require 'pyim-dregcache)
+(require 'pyim-pymap-utils)
 
 (defun pyim-tests-make-temp-file (&optional dir-flag)
   (make-temp-file "pyim-tests-temp-" dir-flag))
