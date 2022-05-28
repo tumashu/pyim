@@ -32,6 +32,7 @@
 (require 'ert)
 (require 'pyim)
 (require 'pyim-basedict) ;pyim-test.el use pyim-basedict v0.5.0.
+(require 'pyim-cstring-utils)
 (require 'pyim-dhashcache)
 (require 'pyim-dregcache)
 (require 'pyim-pymap-utils)
