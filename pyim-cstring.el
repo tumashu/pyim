@@ -37,15 +37,6 @@
   "Chinese string tools for pyim."
   :group 'pyim)
 
-(defvar pyim-cstring-to-code-criteria nil
-  "用于 code 选取的基准字符串。
-
-`pyim-cstring-to-codes' 获取到一个词条的多个 codes 时，会将所有的
-codes 与这个字符串进行比较，然后选择一个最相似的 code 输出.
-
-这个字符串主要用于全拼和双拼输入法的多音字矫正，一般使用用户输入
-生成的 imobjs 转换得到，保留了用户原始输入的许多信息。")
-
 (defun pyim-cstring-partition (string &optional to-cchar)
   "STRING partition.
 

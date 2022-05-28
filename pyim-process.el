@@ -108,6 +108,15 @@ entered (nihaom) 的第一个候选词。
 (defvar pyim-process-last-created-words nil
   "记录最近创建的词条， 用于实现快捷删词功能： `pyim-delete-last-word' .")
 
+(defvar pyim-process-code-criteria nil
+  "用于 code 选取的基准字符串。
+
+当获取到一个词条的多个 codes 时， pyim 会将所有的 codes 与这个字
+符串进行比较，然后选择一个与这个字符串最相似的 code.
+
+这个变量主要用于全拼和双拼输入法的多音字矫正，其取值一般使用用户
+输入生成的 imobjs 转换得到，保留了用户原始输入的许多信息。")
+
 (defvar pyim-process-run-async-timer nil
   "异步处理 entered 时，使用的 timer.")
 
@@ -579,14 +588,14 @@ alist 列表。"
           (not (pyim-process-auto-switch-english-input-p))))))
 
 (defun pyim-process-create-code-criteria ()
-  "创建 `pyim-cstring-to-code-criteria'."
-  (setq pyim-cstring-to-code-criteria
+  "创建 `pyim-process-code-criteria'."
+  (setq pyim-process-code-criteria
         (let ((str (string-join
                     (pyim-codes-create (pyim-process-get-first-imobj)
                                        (pyim-scheme-name)))))
-          (if (> (length pyim-cstring-to-code-criteria)
+          (if (> (length pyim-process-code-criteria)
                  (length str))
-              pyim-cstring-to-code-criteria
+              pyim-process-code-criteria
             str))))
 
 (defun pyim-process-create-word (word &optional prepend wordcount-handler criteria)
@@ -624,7 +633,7 @@ BUG：拼音无法有效地处理多音字。"
            (code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
            (codes (pyim-cstring-to-codes
                    word scheme-name
-                   (or criteria pyim-cstring-to-code-criteria))))
+                   (or criteria pyim-process-code-criteria))))
       ;; 保存对应词条的词频
       (when (> (length word) 0)
         (pyim-dcache-update-wordcount word (or wordcount-handler #'1+)))
@@ -657,10 +666,10 @@ BUG：拼音无法有效地处理多音字。"
   "Terminate the translation of the current key."
   (setq pyim-process-translating nil)
   (pyim-entered-erase-buffer)
+  (setq pyim-process-code-criteria nil)
   (setq pyim-process-force-input-chinese nil)
   (setq pyim-candidates nil)
   (setq pyim-candidates-last nil)
-  (setq pyim-cstring-to-code-criteria nil)
   (pyim-process-run-async-timer-reset)
   (pyim-process-ui-hide)
   (let* ((class (pyim-scheme-get-option (pyim-scheme-name) :class))
