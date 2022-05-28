@@ -37,7 +37,6 @@
 (require 'pyim-autoselector)
 (require 'pyim-common)
 (require 'pyim-cstring)
-(require 'pyim-dict)
 (require 'pyim-indicator)
 (require 'pyim-page)
 (require 'pyim-preview)

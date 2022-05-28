@@ -9,14 +9,20 @@
 
 * 不兼容更新
 
-** <2022-05-29 Sun> Cregexp 和 Cstring 部分命令需要用户自己 require.
+** <2022-05-29 Sun> Cregexp, Cstring 和 Dict-Manager 一些功能需要用户手工 require.
 
-Pyim 将部分与输入法功能关联不大的 cregexp 和 cstring 命令独立出来了，默认不会加
-载，需要用户手动加载，这样可以减少 pyim 的依赖数量，降低 pyim 的代码复杂度。
+Pyim 将部分与输入法功能正常运行关联不大的 cregexp 和 cstring 命令独立出来了，默
+认不会加载，需要用户手动加载，这样可以减少 pyim 的依赖数量，降低 pyim 的代码复杂
+度。
+
+由于许多用户不使用 pyim-dict-manager, 所以默认也不 require 这个包。
 
 #+begin_src emacs-lisp
 (require 'pyim-cstring-utils)
 (require 'pyim-cregexp-utils)
+;; 如果用户是通过 elpa 来安装词库，或者直接手工管理 pyim-dicts 变量，就不需要
+;; 加载 pyim-dict-manager 这个包。
+(require 'pyim-dict-manager)
 #+end_src
 
 ** <2021-04-28 Wed> 五笔输入法和仓颉输入法的不兼容更新
@@ -450,8 +456,14 @@ pyim 默认没有携带任何拼音词库，用户可以使用下面几种方式
 
 [[file:snapshots/imewlconverter-wordfreq.gif]]
 
-生成词库后，运行 `pyim-dicts-manager' ，按照命令提示，将转换得到的词库文件的信息
-添加到 `pyim-dicts' 中，完成后运行命令 `pyim-restart' 或者重启emacs。
+生成词库后，
+
+#+begin_src emacs-lisp
+(require 'pyim-dict-manager)
+#+end_src
+
+然后运行 `pyim-dicts-manager' ，按照命令提示，将转换得到的词库文件的信息添加到
+`pyim-dicts' 中，完成后运行命令 `pyim-restart' 或者重启emacs。
 
 *** 第二种方式 (Linux & Unix 用户推荐使用)
 E-Neo 同学编写了一个词库转换工具: [[https://github.com/E-Neo/scel2pyim][scel2pyim]] , 可以将一个搜狗词库转换为 pyim 词库。

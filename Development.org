@@ -12,9 +12,8 @@
 |     | PYIM 用户命令层:                                                  PYIM 视图层： |     |
 |     | ----------------                                                  ------------  |     |
 |     | Pyim 输入法相关命令                                               Page          |     |
-|     | Cregexp-utils                                                     Preview       |     |
-|     | Cstring-utils                                                     Indicator     |     |
-|     | Pymap-utils                                                                     |     |
+|     | Cregexp-Utils, Cstring-Utils                                      Preview       |     |
+|     | Pymap-Utils, Dict-Manager                                         Indicator     |     |
 |     |                                                                                 |     |
 |     |                 +---------------------------------------------+                 |     |
 |     | 自动上屏器:     | PYIM 用例层： Process                       |                 |     |
@@ -26,7 +25,7 @@
 |     |                 |      | Candidates, Outcome,          |      |                 |     |
 |     |                 |      | Punctuations, Pinyin,         |      |                 |     |
 |     |                 |      | Cstring, Cregexp,             |      |                 |     |
-|     |                 |      | Scheme, Assistant-scheme      |      |                 |     |
+|     |                 |      | Scheme, Assistant-Scheme      |      |                 |     |
 |     |                 |      +-------------------------------+      |                 |     |
 |     |                 |      | Common, Dcache, Pymap         |      |                 |     |
 |     |                 |      |                               |      |                 |     |
