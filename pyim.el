@@ -37,6 +37,9 @@
 (require 'pyim-autoselector)
 (require 'pyim-common)
 (require 'pyim-cstring)
+;; NOTE: pyim.el 不依赖这个包, 但由于历史原因，许多 elpa 词库包通过 pyim 来得到
+;; dict 相关的操作函数，所以暂时需要保留。
+(require 'pyim-dict)
 (require 'pyim-indicator)
 (require 'pyim-page)
 (require 'pyim-preview)
