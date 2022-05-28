@@ -839,7 +839,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
       (deactivate-mark))))
 
 ;; ** pyim 中文字符串工具
-(require 'pyim-cstring)
+(require 'pyim-cstring-utils)
 (defalias 'pyim-forward-word 'pyim-cstring-forward-word)
 (defalias 'pyim-backward-word 'pyim-cstring-backward-word)
 ;; PYIM 重构以前使用的一些函数名称，alias 一下，便于兼容。

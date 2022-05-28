@@ -1,4 +1,4 @@
-;;; pyim-cregexp.el --- Chinese regexp core for pyim.        -*- lexical-binding: t; -*-
+;;; pyim-cregexp.el --- Chinese regexp core tools for pyim.        -*- lexical-binding: t; -*-
 
 ;; * Header
 ;; Copyright (C) 2021 Free Software Foundation, Inc.

@@ -107,9 +107,6 @@ buffer."
 ;; 让 ivy 支持 code 搜索。
 (declare-function ivy--regex-plus "ivy")
 
-;; pyim-cregexp.el 是核心库，为保持稳定，不能添加太多的依赖，所以我把这个函数从
-;; pyim-cregexp.el 移到这里，也许我应该更改一下这个函数的名称，让其不使用
-;; pyim-cregexp 前缀，但由于向后兼容的原因，我决定再观察观察。
 (defun pyim-cregexp-ivy (str)
   "Let ivy support search Chinese with pinyin feature."
   (let ((x (ivy--regex-plus str))
