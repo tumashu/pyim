@@ -9,6 +9,16 @@
 
 * 不兼容更新
 
+** <2022-05-29 Sun> Cregexp 和 Cstring 部分命令需要用户自己 require.
+
+Pyim 将部分与输入法功能关联不大的 cregexp 和 cstring 命令独立出来了，默认不会加
+载，需要用户手动加载，这样可以减少 pyim 的依赖数量，降低 pyim 的代码复杂度。
+
+#+begin_src emacs-lisp
+(require 'pyim-cstring-utils)
+(require 'pyim-cregexp-utils)
+#+end_src
+
 ** <2021-04-28 Wed> 五笔输入法和仓颉输入法的不兼容更新
 
 五笔输入法和仓颉输入法原来使用一个标点符号作为 code-prefix, 现在使用 "wubi/" 和
@@ -121,6 +131,7 @@ pyim 的目标是： *尽最大的努力成为一个好用的 Emacs 中文输入
 ;;                 pyim-probe-punctuation-after-punctuation))
 
 ;; 开启代码搜索中文功能（比如拼音，五笔码等）
+(require 'pyim-cregexp-utils)
 (pyim-isearch-mode 1)
 
 ;; 显示5个候选词。
@@ -486,15 +497,16 @@ E-Neo 同学编写了一个词库转换工具: [[https://github.com/E-Neo/scel2p
 2. `pyim-cstring-to-pinyin-simple'  （不考虑多音字）
 
 ** 中文分词
-pyim 包含了一个简单的分词函数：`pyim-cstring-split-to-list', 可以将一个中文字符
-串分成一个词条列表，比如：
+pyim-cstring-utils 包含了一个简单的分词函数：`pyim-cstring-split-to-list', 可以
+将一个中文字符串分成一个词条列表，比如：
 
-#+begin_example
-                  (("天安" 5 7)
-我爱北京天安门 ->  ("天安门" 5 8)
-                   ("北京" 3 5)
-                   ("我爱" 1 3))
-#+end_example
+#+begin_src emacs-lisp :results verbatim
+(require 'pyim-cstring-utils)
+(pyim-cstring-split-to-list "我爱北京天安门")
+#+end_src
+
+#+RESULTS:
+: (("天安" 4 6) ("天安门" 4 7) ("北京" 2 4) ("我爱" 0 2))
 
 其中，每一个词条列表中包含三个元素，第一个元素为词条本身，第二个元素为词条相对于
 字符串的起始位置，第三个元素为词条结束位置。
@@ -506,8 +518,8 @@ pyim 包含了一个简单的分词函数：`pyim-cstring-split-to-list', 可以
 在的中文词条。
 
 ** 获取光标处的中文词条
-pyim 包含了一个简单的命令：`pyim-cstring-words-at-point', 这个命令可以得到光标处
-的 *英文* 或者 *中文* 词条的 *列表*，这个命令依赖分词函数：
+pyim-cstring-utils 包含了一个简单的命令：`pyim-cstring-words-at-point', 这个命令
+可以得到光标处的 *英文* 或者 *中文* 词条的 *列表*，这个命令依赖分词函数：
 `pyim-cstring-split-to-list'。
 
 ** 让 `forward-word' 和 `back-backward’ 在中文环境下正常工作
@@ -520,17 +532,19 @@ pyim 包含了一个简单的命令：`pyim-cstring-words-at-point', 这个命�
 
 用户只需将其绑定到快捷键上就可以了，比如：
 
-#+begin_example
+#+begin_src emacs-lisp
+(require 'pyim-cstring-utils)
 (global-set-key (kbd "M-f") 'pyim-forward-word)
 (global-set-key (kbd "M-b") 'pyim-backward-word)
-#+end_example
+#+end_src
 
 ** 为 isearch 相关命令添加拼音搜索支持
 pyim 安装后，可以通过下面的设置开启拼音搜索功能：
 
-#+begin_example
+#+begin_src emacs-lisp
+(require 'pyim-cregexp-utils)
 (pyim-isearch-mode 1)
-#+end_example
+#+end_src
 
 注意：这个功能有一些限制，搜索字符串中只能出现 “a-z” 和 “'”，如果有其他字符（比
 如 regexp 操作符），则自动关闭拼音搜索功能。
@@ -557,10 +571,11 @@ pyim 安装后，可以通过下面的设置开启拼音搜索功能：
 
 ** 让 ivy 支持拼音搜索候选项功能
 
-#+begin_example
+#+begin_src emacs-lisp
+(require 'pyim-cregexp-utils)
 (setq ivy-re-builders-alist
       '((t . pyim-cregexp-ivy)))
-#+end_example
+#+end_src
 
 ** 让 avy 支持拼音搜索
 #+begin_src emacs-lisp
@@ -572,10 +587,10 @@ pyim 安装后，可以通过下面的设置开启拼音搜索功能：
 #+end_src
 ** 让 vertico, selectrum 等补全框架，通过 orderless 支持拼音搜索候选项功能。
 
-#+begin_example
+#+begin_src emacs-lisp
 (defun my-orderless-regexp (orig-func component)
   (let ((result (funcall orig-func component)))
     (pyim-cregexp-build result)))
 
 (advice-add 'orderless-regexp :around #'my-orderless-regexp)
-#+end_example
+#+end_src
