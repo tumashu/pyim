@@ -103,6 +103,8 @@ pyim 的目标是： *尽最大的努力成为一个好用的 Emacs 中文输入
 
 #+begin_src elisp
 (require 'pyim)
+(require 'pyim-cstring-utils)
+(require 'pyim-cregexp-utils)
 
 (setq default-input-method "pyim")
 
@@ -137,7 +139,6 @@ pyim 的目标是： *尽最大的努力成为一个好用的 Emacs 中文输入
 ;;                 pyim-probe-punctuation-after-punctuation))
 
 ;; 开启代码搜索中文功能（比如拼音，五笔码等）
-(require 'pyim-cregexp-utils)
 (pyim-isearch-mode 1)
 
 ;; 显示5个候选词。
