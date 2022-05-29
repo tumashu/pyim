@@ -837,14 +837,6 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
 ;; ** pyim 云输入法
 (require 'pyim-cloudim)
 
-;; ** pyim 中文字符串工具
-;; FIXME: pyim 相关功能不依赖这个包，require 是由于向后兼容的原因，未来会删除。
-(require 'pyim-cstring-utils)
-
-;; ** pyim 中文 regexp 工具
-;; FIXME: pyim 相关功能不依赖这个包，require 是由于向后兼容的原因，未来会删除。
-(require 'pyim-cregexp-utils)
-
 ;; * Footer
 (provide 'pyim)
 

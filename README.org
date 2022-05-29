@@ -9,21 +9,14 @@
 
 * 不兼容更新
 
-** <2022-05-29 Sun> Cregexp, Cstring 和 Dict-Manager 一些功能需要用户手工 require.
+** <2022-05-29 Sun> pyim-cregexp-utils, pyim-cstring-utils 和 pyim-dict-manager 需要用户手动 require.
 
-Pyim 将部分与输入法功能正常运行关联不大的 cregexp 和 cstring 命令独立出来了，默
-认不会加载，需要用户手动加载，这样可以减少 pyim 的依赖数量，降低 pyim 的代码复杂
-度。
+为降低 pyim 代码的复杂度，减少 pyim 依赖包的数量，下面三个包不会自动加载，需要用
+户手动 require.
 
-由于许多用户不使用 pyim-dict-manager, 所以默认也不 require 这个包。
-
-#+begin_src emacs-lisp
-(require 'pyim-cstring-utils)
-(require 'pyim-cregexp-utils)
-;; 如果用户是通过 elpa 来安装词库，或者直接手工管理 pyim-dicts 变量，就不需要
-;; 加载 pyim-dict-manager 这个包。
-(require 'pyim-dict-manager)
-#+end_src
+1. pyim-cregexp-utils
+2. pyim-cstring-utils
+3. pyim-dict-manager (使用 elpa 安装词库，或者手动管理 pyim-dicts 变量的用户不需要这个包)
 
 ** <2021-04-28 Wed> 五笔输入法和仓颉输入法的不兼容更新
 
@@ -103,10 +96,15 @@ pyim 的目标是： *尽最大的努力成为一个好用的 Emacs 中文输入
 
 #+begin_src elisp
 (require 'pyim)
-(require 'pyim-cstring-utils)
+(require 'pyim-basedict)
 (require 'pyim-cregexp-utils)
 
+(pyim-basedict-enable)
+
 (setq default-input-method "pyim")
+
+;; 显示5个候选词。
+(setq pyim-page-length 5)
 
 ;; 金手指设置，可以将光标处的编码，比如：拼音字符串，转换为中文。
 (global-set-key (kbd "M-j") 'pyim-convert-string-at-point)
@@ -140,13 +138,6 @@ pyim 的目标是： *尽最大的努力成为一个好用的 Emacs 中文输入
 
 ;; 开启代码搜索中文功能（比如拼音，五笔码等）
 (pyim-isearch-mode 1)
-
-;; 显示5个候选词。
-(setq pyim-page-length 5)
-
-;; Basedict
-(require 'pyim-basedict)
-(pyim-basedict-enable)
 #+end_src
 
 ** 添加词库文件
