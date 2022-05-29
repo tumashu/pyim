@@ -30,7 +30,6 @@
 (require 'cl-lib)
 (require 'pyim-common)
 (require 'pyim-process)
-(require 'posframe nil t)
 
 (defgroup pyim-indicator nil
   "Indicator for pyim."
@@ -173,20 +172,6 @@ timer 实现。"
         (setq current-input-method-title (nth 0 pyim-indicator-modeline-string))
       (setq current-input-method-title (nth 1 pyim-indicator-modeline-string))))
   (pyim-indicator-update-mode-line))
-
-(defun pyim-indicator-with-posframe (input-method chinese-input-p)
-  "Pyim 自带的 indicator, 通过 posframe 来显示输入状态。"
-  (when (posframe-workable-p)
-    (let ((buffer " *pyim-indicator*"))
-      (if (not (equal input-method "pyim"))
-          (posframe-delete buffer)
-        (if chinese-input-p
-            (posframe-show buffer
-                           :string ".."
-                           :font "Monospace-2"
-                           :poshandler #'posframe-poshandler-point-top-left-corner
-                           :background-color (pyim-indicator-select-color (list "red" "green" "blue" "orange")))
-          (posframe-hide buffer))))))
 
 ;; * Footer
 (provide 'pyim-indicator)
