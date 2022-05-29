@@ -292,12 +292,11 @@ pyim 输入状态指示器可以帮助用户快速了解当前 pyim 是处于英
 状态，因为 pyim probe 探针功能可以让中英文输入状态动态切换，所以快速了解当前中英
 文输入状态有时候显得很重要。
 
-pyim 当前内置三种指示器实现方式：
+pyim 当前内置两种指示器实现方式：
 1. 改变光标颜色： pyim-indicator-with-cursor-color, 用户可以使用变量
    pyim-indicator-cursor-color 来配置两种输入状态对应的光标颜色。
 2. 使用 modeline 显示状态字符串：pyim-indicator-with-mode-line, 用户可以使用变量
    pyim-indicator-modeline-string 来配置两种状态对应的显示字符串。
-3. 使用 posframe 来显示一个带颜色小点：pyim-indicator-with-posframe
 
 设置默认启用的指示器有两个，用户可以使用下面的变量调整：
 #+begin_example
