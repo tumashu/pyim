@@ -79,6 +79,22 @@ NUMBER 用于递归，表示子字符串在 CSTRING 中的位置。"
         (substring cstring 0 -1)
         max-length number)))))
 
+;; ** 获取光标处中文字符串
+(defun pyim-cstring-at-point (&optional number)
+  "获取光标一个中文字符串，字符数量为：NUMBER."
+  (save-excursion
+    (let* ((point (point))
+           (begin (- point number))
+           (begin (if (> begin 0)
+                      begin
+                    (point-min)))
+           (string (buffer-substring-no-properties
+                    point begin)))
+      (when (and (stringp string)
+                 (= (length string) number)
+                 (not (pyim-string-match-p "\\CC" string)))
+        string))))
+
 ;; ** 中文字符串到拼音的转换工具
 ;;;###autoload
 (defun pyim-cstring-to-pinyin (string &optional shou-zi-mu separator

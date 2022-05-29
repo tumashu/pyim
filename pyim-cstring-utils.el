@@ -140,22 +140,7 @@ CHINESE-STRING 分词，得到一个词条 alist，这个 alist 的元素都是�
   (goto-char (point-min))
   (message "分词完成！"))
 
-;; ** 获取光标处中文字符串或者中文词条的功能
-(defun pyim-cstring-at-point (&optional number)
-  "获取光标一个中文字符串，字符数量为：NUMBER."
-  (save-excursion
-    (let* ((point (point))
-           (begin (- point number))
-           (begin (if (> begin 0)
-                      begin
-                    (point-min)))
-           (string (buffer-substring-no-properties
-                    point begin)))
-      (when (and (stringp string)
-                 (= (length string) number)
-                 (not (pyim-string-match-p "\\CC" string)))
-        string))))
-
+;; ** 获取光标处中文词条的功能
 (defun pyim-cstring-words-at-point (&optional end-of-point)
   "获取光标当前的词条列表，当 END-OF-POINT 设置为 t 时，获取光标后的词条列表。
 词条列表的每一个元素都是列表，这些列表的第一个元素为词条，第二个元素为光标处到词条
