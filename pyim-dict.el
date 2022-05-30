@@ -48,7 +48,10 @@ plist 来表示，比如：
 用于和 elpa 格式的词库包集成。"
   :type 'list)
 
-(defvar pyim-extra-dicts nil "与 `pyim-dicts' 类似, 用于和 elpa 格式的词库包集成。.")
+(defvar pyim-extra-dicts nil
+  "类似 `pyim-dicts', 不过这个变量主要用于 elpa 词库包。
+
+不建议用户手工设置这个变量。")
 
 (defun pyim-extra-dicts-add-dict (new-dict)
   "添加 `new-dict' 到 `pyim-extra-dicts'.
