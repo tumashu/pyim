@@ -767,6 +767,19 @@
 ni-hao 你好 尼耗
 ")))))
 
+;; ** pyim-dict 相关单元测试
+(ert-deftest pyim-tests-pyim-extra-dicts-add-dict ()
+  (let ((pyim-extra-dicts nil)
+        (dict1 '(:name "test1" :file "/home/user/test1.pyim"))
+        (dict2 '(:name "test2" :file "/home/user/test2.pyim"))
+        (dict3 '(:name "test1" :file "/home/user/test3.pyim")))
+    (pyim-extra-dicts-add-dict dict1)
+    (should (equal pyim-extra-dicts `(,dict1)))
+    (pyim-extra-dicts-add-dict dict2)
+    (should (equal pyim-extra-dicts `(,dict1 ,dict2)))
+    (pyim-extra-dicts-add-dict dict3)
+    (should (equal pyim-extra-dicts `(,dict3 ,dict2)))))
+
 ;; ** pyim-dhashcache 相关单元测试
 (ert-deftest pyim-tests-pyim-dhashcache-get-shortcodes ()
   (should (equal (pyim-dhashcache-get-shortcodes ".abcde") nil))

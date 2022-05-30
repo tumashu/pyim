@@ -54,13 +54,13 @@ plist 来表示，比如：
 不建议用户手工设置这个变量。")
 
 (defun pyim-extra-dicts-add-dict (new-dict)
-  "添加 `new-dict' 到 `pyim-extra-dicts'.
+  "将 NEW-DICT 添加到 `pyim-extra-dicts'.
 
 其中 NEW-DICT 的格式为：
 
    (:name \"XXX\" :file \"/path/to/XXX.pyim\")
 
-这个函数用于制作 elpa 格式的词库 ，不建议普通用户使用。"
+这个函数主要用于 elpa 词库包 ，不建议普通用户使用。"
   (let (replace result)
     (dolist (dict pyim-extra-dicts)
       (if (equal (plist-get dict :name)
@@ -70,8 +70,10 @@ plist 来表示，比如：
         (push dict result)))
     (setq result (reverse result))
     (setq pyim-extra-dicts
-          (if replace result `(,@result ,new-dict)))
-    (message "Add pyim dict %S to `pyim-extra-dicts'." (plist-get new-dict :name))
+          (if replace
+              result
+            `(,@result ,new-dict)))
+    (message "PYIM: Add dict %S to `pyim-extra-dicts'." (plist-get new-dict :name))
     t))
 
 ;; * Footer
