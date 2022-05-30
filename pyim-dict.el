@@ -71,23 +71,6 @@ plist 来表示，比如：
     (message "Add pyim dict %S to `pyim-extra-dicts'." (plist-get new-dict :name))
     t))
 
-(defun pyim-dict-name-available-p (dict-name)
-  "查询 `pyim-dicts' 中 `:name' 为 DICT-NAME 的词库信息是否存在。
-这个函数主要用于词库 package。"
-  (cl-some (lambda (x)
-             (let ((name (plist-get x :name)))
-               (equal name dict-name)))
-           pyim-dicts))
-
-(defun pyim-dict-file-available-p (dict-file)
-  "查询 `pyim-dicts' 中 `:file' 为 DICT-FILE 的词库信息是否存在。
-这个函数主要用于词库 package。"
-  (cl-some (lambda (x)
-             (let ((file (plist-get x :file)))
-               (equal (expand-file-name file)
-                      (expand-file-name dict-file))))
-           pyim-dicts))
-
 ;; * Footer
 (provide 'pyim-dict)
 
