@@ -967,22 +967,59 @@ yin-xing 因行
 
 (ert-deftest pyim-tests-pyim-dregcache-backend ()
   (let ((pyim-dcache-backend 'pyim-dregcache)
-        words)
-    (should (eq (length pyim-dregcache-cache) 0))
+        words
+        file-info
+        content)
+    (setq pyim-dregcache-cache nil)
+
     ;; load dictionary
     (pyim-dcache-update t)
     ;; cache is filled
     (should (> (length pyim-dregcache-cache) 0))
+    ;; get first dictionary cache
+    (setq file-info (lax-plist-get pyim-dregcache-cache
+                                   (car (pyim-dregcache-all-dict-files))))
+
+    (setq content (plist-get file-info :content))
+    (let ((i 0)
+          (chars "abcdefghjklmnopqrstwxyz"))
+      (should (eq (length content) (length chars)))
+      (while (< i (length chars))
+        (should (eq (elt chars i) (elt (nth i content) 0)))
+        (setq i (1+ i))))
+    (should (string= (pyim-dregcache-get-content "ai" file-info)
+                     (pyim-dregcache-get-content "a" file-info)))
+    (should (string= (pyim-dregcache-get-content "ba" file-info)
+                     (pyim-dregcache-get-content "b" file-info)))
+    (should (string= (pyim-dregcache-get-content "ze" file-info)
+                     (pyim-dregcache-get-content "z" file-info)))
 
     ;; test dregcache api
+    (setq words (pyim-dcache-get "a"))
+    (should (eq (length words) 16))
+    (should (string= (nth 0 words) "阿"))
+
+    (setq  words (pyim-dcache-get "za-cao"))
+    (should (eq (length words) 1))
+    (should (string= (nth 0 words) "杂草"))
+
+    (setq  words (pyim-dcache-get "ba-shi-tian-huan-you-di-qiu"))
+    (should (eq (length words) 1))
+    (should (string= (nth 0 words) "八十天环游地球"))
+
     (setq words (pyim-dcache-get "zun-bei"))
     (should (eq (length words) 1))
     (should (string= (nth 0 words) "尊卑"))
 
     (setq words (pyim-dcache-get "zun"))
     (should (string= (nth 0 words) "尊"))
+
+    (let* ((gc-cons-threshold most-positive-fixnum))
+      (message "search by code \"zun-yi\" takes %s seconds" (benchmark-run-compiled 1 (pyim-dcache-get "zun-yi"))))
+
     ;; `pyim-dregcache-get' calls `pyim-pymap-py2cchar-get' before return result
     (should (eq (length words) 51))))
+
 
 (ert-deftest pyim-tests-pyim-cloudim ()
   (with-temp-buffer

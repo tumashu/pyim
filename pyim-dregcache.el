@@ -39,9 +39,6 @@
 (require 'subr-x)
 (require 'pyim-dcache)
 
-(defvar pyim-dregcache-partition-minimum-size 32
-  "小于这个数值(单位为M)的词典不需要用分区算法加速.可节约一半的内存.")
-
 (defvar pyim-dregcache-cache nil)
 (defvar pyim-dregcache-icode2word nil)
 (defvar pyim-dregcache-iword2count nil)
@@ -59,6 +56,11 @@
                                    (plist-get x :file)))
                                `(,@pyim-dicts ,@pyim-extra-dicts)))
            (dicts-md5 (pyim-dcache-create-files-md5 dict-files)))
+      (when pyim-debug
+        (message "pyim-dregcache-update: pyim-dicts=%s pyim-extra-dicts=%s dict-files=%s"
+                 pyim-dicts
+                 pyim-extra-dicts
+                 dict-files))
       (pyim-dregcache-update-code2word dict-files dicts-md5 force))))
 
 (defun pyim-dregcache-variable-file (variable)
@@ -115,42 +117,26 @@
 
 (defun pyim-dregcache-create-cache-content (raw-content)
   "将 RAW-CONTENT 划分成可以更高效搜索的缓冲区."
-  (let* (rlt)
-    (cond
-     ;; 小词库不用划分"子搜索区域".
-     ;; `pyim-dregcache-partition-minimum-size'定义了小词库的最大值
-     ((< (length raw-content) (* pyim-dregcache-partition-minimum-size 1024 1024))
-      (setq rlt (list :content raw-content)))
-     (t
-      (let* ((chars "bcdefghjklmnopqrstwxyz")
-             pattern
-             (i 0)
-             dict-splited
-             (content-segments '())
-             (start 0)
-             end)
-        ;; 将字典缓存划分成多个"子搜索区域"
-        (while (< i (length chars))
-          (setq pattern (concat "^" (string (elt chars i))))
-          (setq end (string-match pattern raw-content start))
-          (when end
-            (setq content-segments
-                  `(,@content-segments ,(substring-no-properties raw-content start end)))
-            (setq dict-splited t)
-            ;; 将搜索起始点前移
-            (setq start end))
-          (setq i (1+ i)))
+  (let ((chars "bcdefghjklmnopqrstwxyz")
+        (i 0)
+        content-segments
+        (start (string-match "^a" raw-content))
+        chunk
+        end)
+    ;; 将字典缓存划分成多个"子搜索区域"
+    (while (< i (length chars))
+      (when (setq end (string-match (string ?^ (elt chars i))
+                                    raw-content
+                                    start))
+        (setq chunk (substring-no-properties raw-content start end))
+        (push chunk content-segments)
+        (setq start end))
+      (setq i (1+ i)))
 
-        (cond
-         ;; attach segments
-         (dict-splited
-          ;; 将剩余的附后
-          (setq content-segments
-                `(,@content-segments ,(substring-no-properties raw-content start end)))
-          (setq rlt (list :content content-segments)))
-         (t
-          (setq rlt (list :content raw-content)))))))
-    rlt))
+    ;; last chunk
+    (setq chunk (substring-no-properties raw-content end (length raw-content)))
+    (push chunk content-segments)
+    (list :content (nreverse content-segments))))
 
 (defun pyim-dregcache-load-dictionary-file (dict-file)
   "READ from DICT-FILE."
@@ -244,19 +230,17 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
   (let* ((rlt (plist-get file-info :content))
          idx
          (ch (elt code 0)))
-    (when (listp rlt)
-      (cond
-       ((<= ch ?h)
-        (setq idx (- ch ?a)))
-       ((<= ch ?t)
-        ;; 'i' could not be first character of pinyin code
-        (setq idx (- ch ?a 1)))
-       (t
-        ;; 'i', 'u', 'v' could not be first character of pinyin code
-        (setq idx (- ch ?a 3))))
-      ;; fetch segment using the first character of pinyin code
-      (setq rlt (nth idx rlt)))
-    rlt))
+    (cond
+     ((< ch ?i)
+      (setq idx (- ch ?a)))
+     ((< ch ?u)
+      ;; 'i' could not be first character of pinyin code
+      (setq idx (- ch ?a 1)))
+     (t
+      ;; 'i', 'u', 'v' could not be first character of pinyin code
+      (setq idx (- ch ?a 3))))
+    ;; fetch segment using the first character of pinyin code
+    (nth idx rlt)))
 
 (defun pyim-dregcache-get-1 (content code)
   (let ((case-fold-search t)
@@ -293,6 +277,7 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
          nil)
         (t (let ((dict-files (pyim-dregcache-all-dict-files))
                  result)
+
              (when pyim-debug (message "pyim-dregcache-get is called. code=%s" code))
              (when dict-files
                (dolist (file dict-files)
@@ -466,7 +451,7 @@ update-icode2word 目前只要是用于更新型码输入法的 code-prefix, 所
         (dolist (file dict-files)
           (let* ((file-info (lax-plist-get pyim-dregcache-cache file))
                  (contents (lax-plist-get file-info :content)))
-            (dolist (content (if (listp contents) contents (list contents)))
+            (dolist (content contents)
               (setq code (pyim-dregcache-search-word-code-1 word content))
               (when code (throw 'result (list code))))))))))
 
