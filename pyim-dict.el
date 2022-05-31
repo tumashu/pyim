@@ -76,6 +76,14 @@ plist 来表示，比如：
     (message "PYIM: Add dict %S to `pyim-extra-dicts'." (plist-get new-dict :name))
     t))
 
+(defun pyim-dict-get-enabled-dict-files ()
+  "获取所有已经启用的 dict 文件。"
+  (delete nil
+          (mapcar (lambda (x)
+                    (unless (plist-get x :disable)
+                      (plist-get x :file)))
+                  `(,@pyim-dicts ,@pyim-extra-dicts))))
+
 ;; * Footer
 (provide 'pyim-dict)
 

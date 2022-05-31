@@ -87,10 +87,7 @@
   (when pyim-dcache-auto-update
     (pyim-dhashcache-update-iword2priority force)
     (pyim-dhashcache-update-personal-words force)
-    (let* ((dict-files (mapcar (lambda (x)
-                                 (unless (plist-get x :disable)
-                                   (plist-get x :file)))
-                               `(,@pyim-dicts ,@pyim-extra-dicts)))
+    (let* ((dict-files (pyim-dict-get-enabled-dict-files))
            (dicts-md5 (pyim-dcache-create-files-md5 dict-files)))
       (pyim-dhashcache-update-code2word dict-files dicts-md5 force))))
 
@@ -341,8 +338,7 @@ DCACHE 是一个 code -> words 的 hashtable.
 (defun pyim-dhashcache-update-code2word (dict-files dicts-md5 &optional force)
   "读取并加载词库.
 
-读取 `pyim-dicts' 和 `pyim-extra-dicts' 里面的词库文件，生成对应的
-词库缓冲文件，然后加载词库缓存。
+读取词库文件 DICT-FILES，生成对应的词库缓冲文件，然后加载词库缓存。
 
 如果 FORCE 为真，强制加载。"
   (interactive)

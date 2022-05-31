@@ -51,10 +51,7 @@
   (pyim-dregcache-init-variables)
   (when pyim-dcache-auto-update
     (pyim-dregcache-update-personal-words force)
-    (let* ((dict-files (mapcar (lambda (x)
-                                 (unless (plist-get x :disable)
-                                   (plist-get x :file)))
-                               `(,@pyim-dicts ,@pyim-extra-dicts)))
+    (let* ((dict-files (pyim-dict-get-enabled-dict-files))
            (dicts-md5 (pyim-dcache-create-files-md5 dict-files)))
       (when pyim-debug
         (message "pyim-dregcache-update: pyim-dicts=%s pyim-extra-dicts=%s dict-files=%s"
@@ -153,8 +150,7 @@
 (defun pyim-dregcache-update-code2word (dict-files dicts-md5 &optional force)
   "读取并加载词库.
 
-读取 `pyim-dicts' 和 `pyim-extra-dicts' 里面的词库文件，生成对应的
-词库缓冲文件，然后加载词库缓存。
+读取词库文件 DICT-FILES，生成对应的词库缓冲文件，然后加载词库缓存。
 
 DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
 
