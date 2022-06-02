@@ -514,15 +514,12 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
       (progn
         (pyim-process-outcome-handle 'last-char)
         (pyim-process-terminate))
-    (let* ((class (pyim-scheme-get-option (pyim-scheme-name) :class))
-           (func (intern (format "pyim-select-word:%S" class))))
-      (if (and class (functionp func))
-          (funcall func)
-        (call-interactively #'pyim-select-word:pinyin)))))
+    (pyim-select-word-really (pyim-scheme-current))))
 
-(defun pyim-select-word:pinyin ()
+(cl-defgeneric pyim-select-word-really (scheme))
+
+(cl-defmethod pyim-select-word-really ((_scheme pyim-scheme-quanpin))
   "从选词框中选择当前词条，然后删除该词条对应拼音。"
-  (interactive)
   (pyim-process-outcome-handle 'candidate)
   (let* ((imobj (pyim-process-get-first-imobj))
          (length-selected-word
@@ -579,9 +576,8 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
       ;; pyim 使用这个 hook 来处理联想词。
       (run-hooks 'pyim-select-finish-hook))))
 
-(defun pyim-select-word:xingma ()
+(cl-defmethod pyim-select-word-really ((_scheme pyim-scheme-xingma))
   "从选词框中选择当前词条，然后删除该词条对应编码。"
-  (interactive)
   (pyim-process-outcome-handle 'candidate)
   (if (pyim-process-with-entered-buffer
         (and (> (point) 1)
@@ -751,9 +747,9 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   (unless (equal input-method-function 'pyim-input-method)
     (activate-input-method 'pyim))
   (let* ((case-fold-search nil)
-         (scheme-name (pyim-scheme-name))
-         (first-chars (pyim-scheme-get-option scheme-name :first-chars))
-         (rest-chars (pyim-scheme-get-option scheme-name :rest-chars))
+         (scheme (pyim-scheme-current))
+         (first-chars (pyim-scheme-common-first-chars scheme))
+         (rest-chars (pyim-scheme-common-rest-chars scheme))
          (string (if mark-active
                      (buffer-substring-no-properties
                       (region-beginning) (region-end))

@@ -111,9 +111,8 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
 
 (defun pyim-cregexp-build-1 (str &optional char-level-num chinese-only)
   (let* ((num (pyim-cregexp-char-level-num char-level-num))
-         (scheme-name (pyim-scheme-name))
-         (class (pyim-scheme-get-option scheme-name :class))
-         (code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
+         (scheme (pyim-scheme-current))
+         (code-prefix (pyim-scheme-common-code-prefix scheme))
          (sep "#####&&&&#####")
          (lst (remove "" (split-string
                           (replace-regexp-in-string
@@ -121,22 +120,23 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
                           sep))))
     ;; 确保 pyim 词库加载
     (pyim-dcache-init-variables)
-    ;; pyim 暂时只支持全拼和双拼搜索
-    (when (not (member class '(quanpin shuangpin xingma)))
-      (setq scheme-name pyim-cregexp-fallback-scheme))
+    (unless (or (pyim-scheme-quanpin-p scheme)
+                (pyim-scheme-shuangpin-p scheme)
+                (pyim-scheme-xingma-p scheme))
+      (setq scheme (pyim-scheme-get pyim-cregexp-fallback-scheme)))
     (mapconcat
      (lambda (string)
        (if (or (pyim-string-match-p "[^a-z']+" string)
                (equal string ""))
            string
          (let* ((string1 (replace-regexp-in-string "'" "" string))
-                (imobjs (pyim-imobjs-create string1 scheme-name))
+                (imobjs (pyim-imobjs-create string1 scheme))
                 (regexp-list
                  (mapcar
                   (lambda (imobj)
-                    (if (eq class 'xingma)
-                        (pyim-cregexp-build:xingma imobj nil nil nil code-prefix)
-                      (pyim-cregexp-build:quanpin imobj nil nil nil num)))
+                    (if (pyim-scheme-xingma-p scheme)
+                        (pyim-cregexp-build-xingma imobj nil nil nil code-prefix)
+                      (pyim-cregexp-build-quanpin imobj nil nil nil num)))
                   imobjs))
                 (regexp
                  (when regexp-list
@@ -152,7 +152,7 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
            (format "\\(?:%s\\)" regexp))))
      lst "")))
 
-(defun pyim-cregexp-build:quanpin (imobj &optional match-beginning
+(defun pyim-cregexp-build-quanpin (imobj &optional match-beginning
                                          first-equal all-equal char-level-num)
   "从 IMOBJ 创建一个搜索中文的 regexp."
   (let* ((num (pyim-cregexp-char-level-num char-level-num))
@@ -184,7 +184,7 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
     (unless (equal regexp "")
       (concat (if match-beginning "^" "") regexp))))
 
-(defun pyim-cregexp-build:xingma (imobj &optional match-beginning
+(defun pyim-cregexp-build-xingma (imobj &optional match-beginning
                                         first-equal _all-equal code-prefix)
   "从 IMOBJ 创建一个搜索中文的 regexp."
   (cl-flet ((build-regexp
@@ -209,7 +209,7 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
                                          (if first-equal
                                              (substring x 0 1)
                                            x))))
-                       (build-regexp (pyim-dcache-get code))))
+                       (build-regexp (pyim-dcache-get code '(code2word)))))
                    imobj "")))
       (unless (equal regexp "")
         (concat (if match-beginning "^" "") regexp)))))

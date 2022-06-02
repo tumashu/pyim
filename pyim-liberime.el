@@ -46,6 +46,15 @@
 (require 'pyim)
 (require 'liberime nil t)
 
+(cl-defstruct (pyim-scheme-rime
+               (:include pyim-scheme-common)
+               (:constructor pyim-scheme-rime-create)
+               (:copier nil))
+  "Rime 输入法方案。"
+  code-prefix-history
+  code-split-length
+  code-maximum-length)
+
 (pyim-scheme-add
  '(rime
    :document
@@ -94,28 +103,35 @@
 (declare-function liberime-process-key "liberime" (keycode &optional mask))
 (declare-function liberime-select-candidate "liberime" (num))
 
-(defun pyim-liberime-scheme-name (orig_func &optional default)
-  "Advice function of `pyim-scheme-name'."
-  (let* ((scheme-name (funcall orig_func default))
-         (class (pyim-scheme-get-option scheme-name :class)))
-    (if (eq class 'rime)
+(defun pyim-liberime-scheme (orig_func &optional default)
+  "Advice function of `pyim-scheme-current'."
+  (let* ((scheme (funcall orig_func default)))
+    (if (pyim-scheme-rime-p scheme)
         (if (featurep 'liberime-core)
-            scheme-name
-          'quanpin)
-      scheme-name)))
+            scheme
+          (pyim-scheme-get 'quanpin))
+      scheme)))
 
-(advice-add 'pyim-scheme-name :around #'pyim-liberime-scheme-name)
+(advice-add 'pyim-scheme-current :around #'pyim-liberime-scheme)
 
-(defun pyim-imobjs-create:rime (entered &optional _)
+(cl-defmethod pyim-imobjs-create (entered (_scheme pyim-scheme-rime))
   (list (list entered)))
 
-(defun pyim-codes-create:rime (imobj scheme-name &optional first-n)
-  (pyim-codes-create:xingma imobj scheme-name first-n))
+(cl-defmethod pyim-codes-create (imobj (scheme pyim-scheme-rime) &optional first-n)
+  (when scheme
+    (let ((code-prefix (pyim-scheme-common-code-prefix scheme)))
+      (mapcar
+       (lambda (x)
+         (concat (or code-prefix "")
+                 (if (numberp first-n)
+                     (substring x 0 (min first-n (length x)))
+                   x)))
+       imobj))))
 
-(defun pyim-candidates-create:rime (imobjs scheme-name &optional async)
+(cl-defmethod pyim-candidates-create (imobjs (scheme pyim-scheme-rime) &optional async)
   "`pyim-candidates-create' 处理 rime 输入法的函数."
-  (let* ((code (car (pyim-codes-create (car imobjs) scheme-name)))
-         (code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
+  (let* ((code (car (pyim-codes-create (car imobjs) scheme)))
+         (code-prefix (pyim-scheme-common-code-prefix scheme))
          (s (replace-regexp-in-string "-" "" code))
          ;; `liberime-search' 搜索的时候不需要 code-prefix, 去除。
          (s (if code-prefix
@@ -126,20 +142,19 @@
                                      (* pyim-page-length 2)))))
     words))
 
-(defun pyim-page-preview-create:rime (&optional separator)
+(cl-defmethod pyim-page-preview-create ((_scheme pyim-scheme-rime) &optional separator)
   (let* ((preedit (or (liberime-get-preedit)
                       (pyim-entered-get 'point-before))))
     (pyim-process-with-entered-buffer
-     (if (equal 1 (point))
-         (concat "|" preedit)
-       (concat (replace-regexp-in-string (concat separator "'") "'" preedit)
-               " |" (buffer-substring-no-properties (point) (point-max)))))))
+      (if (equal 1 (point))
+          (concat "|" preedit)
+        (concat (replace-regexp-in-string (concat separator "'") "'" preedit)
+                " |" (buffer-substring-no-properties (point) (point-max)))))))
 
 (defvar pyim-liberime-code-log nil)
 (defvar pyim-liberime-word-log nil)
-(defun pyim-select-word:rime ()
+(cl-defmethod pyim-select-word-really ((_scheme pyim-scheme-rime))
   "从选词框中选择当前词条，然后删除该词条对应拼音。"
-  (interactive)
   (pyim-process-outcome-handle 'candidate)
   (let* ((entered (pyim-entered-get 'point-before))
          (word (string-remove-prefix
@@ -174,9 +189,8 @@
 
 (defun pyim-autoselector-rime (&rest _args)
   "适用于RIME的自动上屏器."
-  (let* ((scheme-name (pyim-scheme-name))
-         (class (pyim-scheme-get-option scheme-name :class)))
-    (when (eq class 'rime)
+  (let* ((scheme (pyim-scheme-current)))
+    (when (pyim-scheme-rime-p scheme)
       (let* ((commit (liberime-get-commit))
              (context (liberime-get-context))
              (composition (alist-get 'composition context))
@@ -270,7 +284,7 @@ Please see: https://github.com/rime/librime/issues/349"
    ;; 找不到通用的处理方式的话就不做截取处理。
    (t input)))
 
-(defun pyim-process-terminate:rime ()
+(cl-defmethod pyim-process-terminate-really :after ((_scheme pyim-scheme-rime))
   (liberime-clear-commit)
   (liberime-clear-composition))
 

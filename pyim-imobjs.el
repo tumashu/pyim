@@ -81,21 +81,17 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 
 (pyim-register-local-variables '(pyim-imobjs))
 
-(defun pyim-imobjs-create (entered &optional scheme-name)
-  "按照 SCHEME-NAME 对应的输入法方案，从 ENTERED 字符串中创建一个
-或者多个 imobj 组成的列表，不同的输入法，imobj 的结构也是不一样的。"
-  (let ((class (pyim-scheme-get-option scheme-name :class)))
-    (when class
-      (funcall (intern (format "pyim-imobjs-create:%S" class))
-               entered scheme-name))))
+(cl-defgeneric pyim-imobjs-create (entered scheme)
+  "按照 SCHEME 对应的输入法方案，从 ENTERED 字符串中创建一个
+或者多个 imobj 组成的列表，不同的输入法，imobj 的结构也是不一样的。")
 
-(defun pyim-imobjs-create:quanpin (entered &optional _)
+(cl-defmethod pyim-imobjs-create (entered (scheme pyim-scheme-quanpin))
   "从用户输入的字符串 ENTERED 创建一个输入法内部对象列表: imobjs.
 
 这个 imobjs 可能包含一个 imobj, 也可能包含多个，每个 imobj 都包含
 声母和韵母的相关信息，比如：
 
-    (pyim-imobjs-create:quanpin \"woaimeinv\" 'quanpin)
+    (pyim-imobjs-create \"woaimeinv\" (pyim-scheme-get (quote quanpin)))
 
 结果为:
 
@@ -106,7 +102,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 
 如果字符串无法正确处理，则返回 nil, 比如：
 
-   (pyim-imobjs-create \"ua\" 'quanpin)
+   (pyim-imobjs-create \"ua\" (pyim-scheme-get (quote quanpin)))
 
 全拼输入法的 imelem 是四个字符串组成的 list, 类似：
 
@@ -141,11 +137,11 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
                     (concat "'" (nth 2 (car x)))))
             (setq output (append output x)))))
       (when output
-        (pyim-imobjs-find-fuzzy:quanpin (list output))))))
+        (pyim-imobjs-find-fuzzy (list output) scheme)))))
 
 ;; "nihc" -> (((\"n\" \"i\" \"n\" \"i\") (\"h\" \"ao\" \"h\" \"c\")))
-(defun pyim-imobjs-create:shuangpin (entered &optional scheme-name)
-  (let ((keymaps (pyim-scheme-get-option scheme-name :keymaps))
+(cl-defmethod pyim-imobjs-create (entered (scheme pyim-scheme-shuangpin))
+  (let ((keymaps (pyim-scheme-shuangpin-keymaps scheme))
         (list (string-to-list (replace-regexp-in-string "-" "" entered)))
         results)
     (while list
@@ -167,11 +163,10 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 
         (when (and one-word-pinyins (> (length one-word-pinyins) 0))
           (push one-word-pinyins results))))
-    (pyim-imobjs-find-fuzzy:quanpin
-     (pyim-permutate-list (nreverse results)))))
+    (pyim-imobjs-find-fuzzy (pyim-permutate-list (nreverse results)) scheme)))
 
-(defun pyim-imobjs-create:xingma (entered &optional scheme-name)
-  (let ((n (pyim-scheme-get-option scheme-name :code-split-length)))
+(cl-defmethod pyim-imobjs-create (entered (scheme pyim-scheme-xingma))
+  (let ((n (pyim-scheme-xingma-code-split-length scheme)))
     (let (output)
       (mapc (lambda (x)
               (while (not (string-empty-p x))
@@ -184,7 +179,10 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
             (split-string entered "'"))
       (list (nreverse output)))))
 
-(defun pyim-imobjs-find-fuzzy:quanpin (imobjs)
+(cl-defgeneric pyim-imobjs-find-fuzzy (imobjs scheme)
+  "用于处理模糊音的函数。")
+
+(cl-defmethod pyim-imobjs-find-fuzzy (imobjs (_scheme pyim-scheme-quanpin))
   "用于处理模糊音的函数。"
   (let (fuzzy-imobjs result1 result2)
     (dolist (imobj imobjs)
