@@ -225,7 +225,7 @@
           (push (delete-dups (append w2 w1)) jianpin-words)))
       (pyim-zip (nreverse jianpin-words) fast-search))))
 
-(defun pyim-candidates-dcache-words (imobjs scheme &optional fast-search ignore-pymap-chars)
+(defun pyim-candidates-dcache-words (imobjs scheme &optional fast-search pymap-chars-num)
   "从 dcache 获取个人词条，词库词条和第一汉字列表。"
   (let (personal-words common-words pinyin-chars-1 pinyin-chars-2)
     (dolist (imobj imobjs)
@@ -247,9 +247,11 @@
              ;; 如果 w3 找不到第一个拼音对应的汉字，那就进一步使用
              ;; `pyim-pymap-py2cchar-get' 来查找，这个函数支持声母搜索。可以得到
              ;; 更多的词条。
-             (w4 (when (and (not w3) (not ignore-pymap-chars))
-                   (pyim-candidates-pymap-chars
-                    (car (pyim-codes-create imobj scheme))))))
+             (w4 (unless w3
+                   (cl-subseq
+                    (pyim-candidates-pymap-chars
+                     (car (pyim-codes-create imobj scheme)))
+                    0 pymap-chars-num))))
         (push w1 personal-words)
         (push w2 common-words)
         (push w3 pinyin-chars-1)
