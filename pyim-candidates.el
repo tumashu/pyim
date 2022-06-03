@@ -322,7 +322,7 @@
                       (> (or (gethash a counts) 0)
                          (or (gethash b counts) 0))))))))
 
-(cl-defmethod pyim-candidates-create-async (imobjs (scheme pyim-scheme-shuangpin))
+(cl-defmethod pyim-candidates-create-async (_imobjs (_scheme pyim-scheme-shuangpin))
   "按照 SCHEME, 用异步的方式从 IMOBJS 获得候选词条，用于双拼输入法。"
   (let ((pyim-default-scheme 'quanpin))
     (cl-call-next-method)))
