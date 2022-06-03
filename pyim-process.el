@@ -362,7 +362,7 @@ entered (nihaom) 的第一个候选词。
 (defun pyim-process-run-async ()
   "Function used by `pyim-process-run-async-timer'"
   (let* ((scheme (pyim-scheme-current))
-         (words (delete-dups (pyim-candidates-create pyim-imobjs scheme t))))
+         (words (delete-dups (pyim-candidates-create-async pyim-imobjs scheme))))
     (when words
       (setq pyim-candidates words)
       (pyim-process-ui-refresh))))

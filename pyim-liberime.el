@@ -128,7 +128,7 @@
                    x)))
        imobj))))
 
-(cl-defmethod pyim-candidates-create (imobjs (scheme pyim-scheme-rime) &optional async)
+(cl-defmethod pyim-candidates-create (imobjs (scheme pyim-scheme-rime))
   "`pyim-candidates-create' 处理 rime 输入法的函数."
   (let* ((code (car (pyim-codes-create (car imobjs) scheme)))
          (code-prefix (pyim-scheme-common-code-prefix scheme))

@@ -95,117 +95,73 @@
    ;; 个人词条中的第一个词。
    (car personal-words)))
 
-(cl-defgeneric pyim-candidates-create (imobjs scheme &optional async)
+(cl-defgeneric pyim-candidates-create (imobjs scheme)
   "按照 SCHEME, 从 IMOBJS 获得候选词条。")
 
-(cl-defmethod pyim-candidates-create (imobjs (scheme pyim-scheme-xingma)
-                                             &optional async)
+(cl-defmethod pyim-candidates-create (imobjs (scheme pyim-scheme-xingma))
   "按照 SCHEME, 从 IMOBJS 获得候选词条，用于五笔仓颉等形码输入法。"
-  (unless async
-    (let (result)
-      (dolist (imobj imobjs)
-        (let* ((codes (pyim-codes-create imobj scheme))
-               (last-code (car (last codes)))
-               (other-codes (remove last-code codes))
-               output prefix)
+  (let (result)
+    (dolist (imobj imobjs)
+      (let* ((codes (pyim-codes-create imobj scheme))
+             (last-code (car (last codes)))
+             (other-codes (remove last-code codes))
+             output prefix)
 
-          ;; 如果 wubi/aaaa -> 工 㠭；wubi/bbbb -> 子 子子孙孙；wubi/cccc 又 叕；
-          ;; 用户输入为： aaaabbbbcccc
+        ;; 如果 wubi/aaaa -> 工 㠭；wubi/bbbb -> 子 子子孙孙；wubi/cccc 又 叕；
+        ;; 用户输入为： aaaabbbbcccc
 
-          ;; 那么：
-          ;; 1. codes       =>   ("wubi/aaaa" "wubi/bbbb" "wubi/cccc")
-          ;; 2. last-code   =>   "wubi/cccc"
-          ;; 3. other-codes =>   ("wubi/aaaa" "wubi/bbbb")
-          ;; 4. prefix      =>   工子
-          (when other-codes
-            (setq prefix (mapconcat
-                          (lambda (code)
-                            (pyim-candidates-get-chief
-                             scheme
-                             (pyim-dcache-get code '(icode2word))
-                             (pyim-dcache-get code '(code2word))))
-                          other-codes "")))
+        ;; 那么：
+        ;; 1. codes       =>   ("wubi/aaaa" "wubi/bbbb" "wubi/cccc")
+        ;; 2. last-code   =>   "wubi/cccc"
+        ;; 3. other-codes =>   ("wubi/aaaa" "wubi/bbbb")
+        ;; 4. prefix      =>   工子
+        (when other-codes
+          (setq prefix (mapconcat
+                        (lambda (code)
+                          (pyim-candidates-get-chief
+                           scheme
+                           (pyim-dcache-get code '(icode2word))
+                           (pyim-dcache-get code '(code2word))))
+                        other-codes "")))
 
-          ;; 5. output => 工子又 工子叕
-          (setq output
-                (let* ((personal-words (pyim-dcache-get last-code '(icode2word)))
-                       (personal-words (pyim-candidates-sort personal-words))
-                       (common-words (pyim-dcache-get last-code '(code2word)))
-                       (chief-word (pyim-candidates-get-chief scheme personal-words common-words))
-                       (common-words (pyim-candidates-sort common-words))
-                       (other-words (pyim-dcache-get last-code '(shortcode2word))))
-                  (mapcar (lambda (word)
-                            (concat prefix word))
-                          `(,chief-word
-                            ,@personal-words
-                            ,@common-words
-                            ,@other-words))))
-          (setq output (remove "" (or output (list prefix))))
-          (setq result (append result output))))
-      (when (car result)
-        (delete-dups result)))))
+        ;; 5. output => 工子又 工子叕
+        (setq output
+              (let* ((personal-words (pyim-dcache-get last-code '(icode2word)))
+                     (personal-words (pyim-candidates-sort personal-words))
+                     (common-words (pyim-dcache-get last-code '(code2word)))
+                     (chief-word (pyim-candidates-get-chief scheme personal-words common-words))
+                     (common-words (pyim-candidates-sort common-words))
+                     (other-words (pyim-dcache-get last-code '(shortcode2word))))
+                (mapcar (lambda (word)
+                          (concat prefix word))
+                        `(,chief-word
+                          ,@personal-words
+                          ,@common-words
+                          ,@other-words))))
+        (setq output (remove "" (or output (list prefix))))
+        (setq result (append result output))))
+    (when (car result)
+      (delete-dups result))))
 
-(cl-defmethod pyim-candidates-create (imobjs (scheme pyim-scheme-quanpin)
-                                             &optional async)
+(cl-defmethod pyim-candidates-create (imobjs (scheme pyim-scheme-quanpin))
   "按照 SCHEME, 从 IMOBJS 获得候选词条，用于全拼输入法。"
-  (if async
-      ;; 构建一个搜索中文的正则表达式, 然后使用这个正则表达式在当前 buffer 中搜
-      ;; 索词条。
-      (let ((str (string-join (pyim-codes-create (car imobjs) scheme))))
-        (if (< (length str) 1)
-            pyim-candidates
-          ;; NOTE: 让第一个词保持不变是不是合理，有待进一步的观察。
-          `(,(car pyim-candidates)
-            ,@(pyim-candidates-cloud-search str scheme)
-            ,@(pyim-candidates-search-buffer
-               (pyim-cregexp-build str 3 t))
-            ,@(cdr pyim-candidates))))
-    ;; 这段代码主要实现以下功能：假如用户输入 nihaomazheshi, 但词库里面找不到对
-    ;; 应的词条，那么输入法自动用 nihaoma 和 zheshi 的第一个词条："你好吗" 和 "
-    ;; 这是" 连接成一个新的字符串 "你好吗这是" 做为第一个候选词。
-    (let* ((candidates (pyim-candidates-create-quanpin imobjs scheme))
-           (n (length (car candidates)))
-           output)
-      (push (car candidates) output)
-      (while (and (> n 0)
-                  (car (setq imobjs
-                             (mapcar (lambda (imobj)
-                                       (nthcdr n imobj))
-                                     imobjs))))
-        (let ((candidates (pyim-candidates-create-quanpin imobjs scheme)))
-          (push (car (pyim-candidates-create-quanpin imobjs scheme t)) output)
-          (setq n (length (car candidates)))))
-      (append (pyim-subconcat (nreverse output) "")
-              candidates))))
-
-(cl-defgeneric pyim-candidates-cloud-search (string scheme)
-  "云搜索 STRING, 返回候选词条列表.")
-
-(cl-defmethod pyim-candidates-cloud-search (_string _scheme)
-  "默认不使用云搜索."
-  nil)
-
-(defun pyim-candidates-search-buffer (regexp)
-  "在当前 buffer 中使用 REGEXP 搜索词条。"
-  (when (not (input-pending-p)) ;只有在用户输入停顿的时候才搜索 buffer.
-    (save-excursion
-      (let ((counts (make-hash-table :test #'equal))
-            (time-limit 0.1)
-            words)
-        (goto-char (point-min))
-        (pyim-time-limit-while (and (not (input-pending-p)) ;如果用户继续输入，就停止 buffer 搜索。
-                                    (re-search-forward regexp nil t)) time-limit
-          (let* ((match (match-string-no-properties 0))
-                 (word (propertize match :comment "(Buf)")))
-            ;; NOTE: 单个汉字我觉得不值得收集。
-            (when (>= (length word) 2)
-              (if (member word words)
-                  (cl-incf (gethash word counts))
-                (push word words)
-                (puthash word 1 counts)))))
-        (sort words (lambda (a b)
-                      (> (or (gethash a counts) 0)
-                         (or (gethash b counts) 0))))))))
+  ;; 这段代码主要实现以下功能：假如用户输入 nihaomazheshi, 但词库里面找不到对
+  ;; 应的词条，那么输入法自动用 nihaoma 和 zheshi 的第一个词条："你好吗" 和 "
+  ;; 这是" 连接成一个新的字符串 "你好吗这是" 做为第一个候选词。
+  (let* ((candidates (pyim-candidates-create-quanpin imobjs scheme))
+         (n (length (car candidates)))
+         output)
+    (push (car candidates) output)
+    (while (and (> n 0)
+                (car (setq imobjs
+                           (mapcar (lambda (imobj)
+                                     (nthcdr n imobj))
+                                   imobjs))))
+      (let ((candidates (pyim-candidates-create-quanpin imobjs scheme)))
+        (push (car (pyim-candidates-create-quanpin imobjs scheme t)) output)
+        (setq n (length (car candidates)))))
+    (append (pyim-subconcat (nreverse output) "")
+            candidates)))
 
 (defun pyim-candidates-create-quanpin (imobjs scheme &optional fast-search)
   "`pyim-candidates-create' 内部使用的函数。"
@@ -323,24 +279,69 @@
              ,@pinyin-chars-2
              )))))
 
-(cl-defmethod pyim-candidates-create (imobjs (scheme pyim-scheme-shuangpin)
-                                             &optional async)
+(cl-defmethod pyim-candidates-create (imobjs (scheme pyim-scheme-shuangpin))
   "按照 SCHEME, 从 IMOBJS 获得候选词条，用于双拼输入法。"
-  (if async
-      ;; 构建一个搜索中文的正则表达式, 然后使用这个正则表达式在当前 buffer 中搜
-      ;; 索词条。
-      (let ((str (string-join (pyim-codes-create (car imobjs) scheme))))
-        (if (< (length str) 1)
-            pyim-candidates
-          ;; NOTE: 让第一个词保持不变是不是合理，有待进一步的观察。
-          `(,(car pyim-candidates)
-            ,@(pyim-candidates-search-buffer
-               ;; 按照 pyim 的内部设计，这里得到的 str 其实是全拼，所以要按照全
-               ;; 拼的规则来生成 cregexp.
-               (let ((pyim-default-scheme 'quanpin))
-                 (pyim-cregexp-build str 3 t)))
-            ,@(cdr pyim-candidates))))
-    (cl-call-next-method)))
+  (cl-call-next-method))
+
+(cl-defgeneric pyim-candidates-create-async (imobjs scheme)
+  "按照 SCHEME, 使用异步的方式从 IMOBJS 获得候选词条。"
+  nil)
+
+(cl-defmethod pyim-candidates-create-async (imobjs (scheme pyim-scheme-quanpin))
+  "按照 SCHEME, 用异步的方式从 IMOBJS 获得候选词条，用于全拼输入法。"
+  ;; 构建一个搜索中文的正则表达式, 然后使用这个正则表达式在当前 buffer 中搜
+  ;; 索词条。
+  (let ((str (string-join (pyim-codes-create (car imobjs) scheme))))
+    (if (< (length str) 1)
+        pyim-candidates
+      ;; NOTE: 让第一个词保持不变是不是合理，有待进一步的观察。
+      `(,(car pyim-candidates)
+        ,@(pyim-candidates-cloud-search str scheme)
+        ,@(pyim-candidates-search-buffer
+           (pyim-cregexp-build str 3 t))
+        ,@(cdr pyim-candidates)))))
+
+(cl-defgeneric pyim-candidates-cloud-search (string scheme)
+  "云搜索 STRING, 返回候选词条列表."
+  nil)
+
+(defun pyim-candidates-search-buffer (regexp)
+  "在当前 buffer 中使用 REGEXP 搜索词条。"
+  (when (not (input-pending-p)) ;只有在用户输入停顿的时候才搜索 buffer.
+    (save-excursion
+      (let ((counts (make-hash-table :test #'equal))
+            (time-limit 0.1)
+            words)
+        (goto-char (point-min))
+        (pyim-time-limit-while (and (not (input-pending-p)) ;如果用户继续输入，就停止 buffer 搜索。
+                                    (re-search-forward regexp nil t)) time-limit
+          (let* ((match (match-string-no-properties 0))
+                 (word (propertize match :comment "(Buf)")))
+            ;; NOTE: 单个汉字我觉得不值得收集。
+            (when (>= (length word) 2)
+              (if (member word words)
+                  (cl-incf (gethash word counts))
+                (push word words)
+                (puthash word 1 counts)))))
+        (sort words (lambda (a b)
+                      (> (or (gethash a counts) 0)
+                         (or (gethash b counts) 0))))))))
+
+(cl-defmethod pyim-candidates-create-async (imobjs (scheme pyim-scheme-shuangpin))
+  "按照 SCHEME, 用异步的方式从 IMOBJS 获得候选词条，用于双拼输入法。"
+  ;; 构建一个搜索中文的正则表达式, 然后使用这个正则表达式在当前 buffer 中搜
+  ;; 索词条。
+  (let ((str (string-join (pyim-codes-create (car imobjs) scheme))))
+    (if (< (length str) 1)
+        pyim-candidates
+      ;; NOTE: 让第一个词保持不变是不是合理，有待进一步的观察。
+      `(,(car pyim-candidates)
+        ,@(pyim-candidates-search-buffer
+           ;; 按照 pyim 的内部设计，这里得到的 str 其实是全拼，所以要按照全
+           ;; 拼的规则来生成 cregexp.
+           (let ((pyim-default-scheme 'quanpin))
+             (pyim-cregexp-build str 3 t)))
+        ,@(cdr pyim-candidates)))))
 
 ;; * Footer
 (provide 'pyim-candidates)
