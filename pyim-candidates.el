@@ -279,11 +279,14 @@
              ,@pinyin-chars-2
              )))))
 
-(cl-defmethod pyim-candidates-create (imobjs (scheme pyim-scheme-shuangpin))
+(cl-defmethod pyim-candidates-create (_imobjs (_scheme pyim-scheme-shuangpin))
   "按照 SCHEME, 从 IMOBJS 获得候选词条，用于双拼输入法。"
   (cl-call-next-method))
 
 (cl-defgeneric pyim-candidates-create-async (imobjs scheme)
+  "按照 SCHEME, 使用异步的方式从 IMOBJS 获得候选词条。")
+
+(cl-defmethod pyim-candidates-create-async (_imobjs _scheme)
   "按照 SCHEME, 使用异步的方式从 IMOBJS 获得候选词条。"
   nil)
 
@@ -302,6 +305,9 @@
         ,@(cdr pyim-candidates)))))
 
 (cl-defgeneric pyim-candidates-cloud-search (string scheme)
+  "云搜索 STRING, 返回候选词条列表.")
+
+(cl-defmethod pyim-candidates-cloud-search (_string _scheme)
   "云搜索 STRING, 返回候选词条列表."
   nil)
 
