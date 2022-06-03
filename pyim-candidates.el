@@ -322,19 +322,8 @@
 
 (cl-defmethod pyim-candidates-create-async (imobjs (scheme pyim-scheme-shuangpin))
   "按照 SCHEME, 用异步的方式从 IMOBJS 获得候选词条，用于双拼输入法。"
-  ;; 构建一个搜索中文的正则表达式, 然后使用这个正则表达式在当前 buffer 中搜
-  ;; 索词条。
-  (let ((str (string-join (pyim-codes-create (car imobjs) scheme))))
-    (if (< (length str) 1)
-        pyim-candidates
-      ;; NOTE: 让第一个词保持不变是不是合理，有待进一步的观察。
-      `(,(car pyim-candidates)
-        ,@(pyim-candidates-search-buffer
-           ;; 按照 pyim 的内部设计，这里得到的 str 其实是全拼，所以要按照全
-           ;; 拼的规则来生成 cregexp.
-           (let ((pyim-default-scheme 'quanpin))
-             (pyim-cregexp-build str 3 t)))
-        ,@(cdr pyim-candidates)))))
+  (let ((pyim-default-scheme 'quanpin))
+    (cl-call-next-method)))
 
 ;; * Footer
 (provide 'pyim-candidates)
