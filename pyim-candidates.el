@@ -167,7 +167,7 @@
   "`pyim-candidates-create' 内部使用的函数。"
   (let* ((znabc-words (pyim-candidates-znabc-words imobjs scheme fast-search))
          (jianpin-words (pyim-candidates-jianpin-words imobjs scheme))
-         (dcache-words (pyim-candidates-create-get-dcache-words imobjs scheme))
+         (dcache-words (pyim-candidates-dcache-words imobjs scheme))
          (personal-words (nth 0 dcache-words))
          (common-words (nth 1 dcache-words))
          (pinyin-chars-1 (nth 2 dcache-words))
@@ -245,7 +245,7 @@
           (push (delete-dups (append w2 w1)) jianpin-words)))
       (pyim-zip (nreverse jianpin-words) fast-search))))
 
-(defun pyim-candidates-create-get-dcache-words (imobjs scheme &optional fast-search ignore-pymap-chars)
+(defun pyim-candidates-dcache-words (imobjs scheme &optional fast-search ignore-pymap-chars)
   "获取个人词条，词库词条和第一汉字列表。"
   (let (personal-words common-words pinyin-chars-1 pinyin-chars-2)
     (dolist (imobj imobjs)
