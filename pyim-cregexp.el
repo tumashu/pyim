@@ -112,7 +112,7 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
 (defun pyim-cregexp-build-1 (str &optional char-level-num chinese-only)
   (let* ((num (pyim-cregexp-char-level-num char-level-num))
          (scheme (pyim-scheme-current))
-         (code-prefix (pyim-scheme-common-code-prefix scheme))
+         (code-prefix (pyim-scheme-code-prefix scheme))
          (sep "#####&&&&#####")
          (lst (remove "" (split-string
                           (replace-regexp-in-string

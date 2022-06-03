@@ -748,8 +748,8 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
     (activate-input-method 'pyim))
   (let* ((case-fold-search nil)
          (scheme (pyim-scheme-current))
-         (first-chars (pyim-scheme-common-first-chars scheme))
-         (rest-chars (pyim-scheme-common-rest-chars scheme))
+         (first-chars (pyim-scheme-first-chars scheme))
+         (rest-chars (pyim-scheme-rest-chars scheme))
          (string (if mark-active
                      (buffer-substring-no-properties
                       (region-beginning) (region-end))

@@ -65,7 +65,7 @@
 (cl-defmethod pyim-codes-create (imobj (scheme pyim-scheme-xingma) &optional first-n)
   "用于处理形码输入法的 `pyim-codes-create' 方法。"
   (when scheme
-    (let ((code-prefix (pyim-scheme-common-code-prefix scheme)))
+    (let ((code-prefix (pyim-scheme-code-prefix scheme)))
       (mapcar
        (lambda (x)
          (concat (or code-prefix "")

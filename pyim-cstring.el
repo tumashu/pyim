@@ -177,7 +177,7 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
 返回的形码不包括 code-prefix。当 RETURN-LIST 设置为 t 时，返回一
 个形码 list。"
   (when (string-match-p "^\\cc+\\'" string)
-    (let* ((prefix (pyim-scheme-common-code-prefix scheme))
+    (let* ((prefix (pyim-scheme-code-prefix scheme))
            (dcache-codes
             (mapcar (lambda (x)
                       (when (string-prefix-p prefix x)

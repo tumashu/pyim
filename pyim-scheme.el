@@ -53,8 +53,8 @@
 (defvar pyim-schemes nil
   "Pyim 支持的所有拼音方案.")
 
-(cl-defstruct (pyim-scheme-common
-               (:constructor pyim-scheme-common-create)
+(cl-defstruct (pyim-scheme
+               (:constructor pyim-scheme-create)
                (:copier nil))
   "输入法方案通用的 slots."
   class
@@ -66,7 +66,7 @@
   prefer-triggers)
 
 (cl-defstruct (pyim-scheme-quanpin
-               (:include pyim-scheme-common)
+               (:include pyim-scheme)
                (:constructor pyim-scheme-quanpin-create)
                (:copier nil))
   "全拼输入法方案类型。")
@@ -82,7 +82,7 @@
   keymaps)
 
 (cl-defstruct (pyim-scheme-xingma
-               (:include pyim-scheme-common)
+               (:include pyim-scheme)
                (:constructor pyim-scheme-xingma-create)
                (:copier nil))
   "形码输入法方案类型。"
@@ -102,7 +102,7 @@
 ;;;###autoload
 (defun pyim-default-scheme (&optional scheme-name)
   (interactive)
-  (let* ((scheme-names (mapcar #'pyim-scheme-common-name pyim-schemes))
+  (let* ((scheme-names (mapcar #'pyim-scheme-name pyim-schemes))
          (scheme-name
           (or scheme-name
               (intern (completing-read "PYIM: 将 pyim-default-scheme 设置为：" scheme-names)))))
@@ -125,7 +125,7 @@
         (when (and (symbolp scheme-name)
                    (functionp func))
           (dolist (x pyim-schemes)
-            (push (if (equal (pyim-scheme-common-name x) scheme-name)
+            (push (if (equal (pyim-scheme-name x) scheme-name)
                       (progn (setq update-p t)
                              scheme)
                     x)
@@ -148,7 +148,7 @@
   (when scheme-name
     (cl-find-if
      (lambda (x)
-       (equal (pyim-scheme-common-name x) scheme-name))
+       (equal (pyim-scheme-name x) scheme-name))
      pyim-schemes)))
 
 (pyim-scheme-add

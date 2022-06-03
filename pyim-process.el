@@ -243,8 +243,8 @@ entered (nihaom) 的第一个候选词。
 (defun pyim-process-input-chinese-p ()
   "确定 pyim 是否需要启动中文输入模式."
   (let* ((scheme (pyim-scheme-current))
-         (first-chars (pyim-scheme-common-first-chars scheme))
-         (rest-chars (pyim-scheme-common-rest-chars scheme)))
+         (first-chars (pyim-scheme-first-chars scheme))
+         (rest-chars (pyim-scheme-rest-chars scheme)))
     (and (or (pyim-process-force-input-chinese-p)
              (and (not pyim-process-input-ascii)
                   (not (pyim-process-auto-switch-english-input-p))))
@@ -630,7 +630,7 @@ BUG：拼音无法有效地处理多音字。"
     (setq pyim-process-last-created-words
           (cons word (remove word pyim-process-last-created-words)))
     (let* ((scheme (pyim-scheme-current))
-           (code-prefix (pyim-scheme-common-code-prefix scheme))
+           (code-prefix (pyim-scheme-code-prefix scheme))
            (codes (pyim-cstring-to-codes
                    word scheme
                    (or criteria pyim-process-code-criteria))))

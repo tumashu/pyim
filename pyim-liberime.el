@@ -47,7 +47,7 @@
 (require 'liberime nil t)
 
 (cl-defstruct (pyim-scheme-rime
-               (:include pyim-scheme-common)
+               (:include pyim-scheme)
                (:constructor pyim-scheme-rime-create)
                (:copier nil))
   "Rime 输入法方案。"
@@ -119,7 +119,7 @@
 
 (cl-defmethod pyim-codes-create (imobj (scheme pyim-scheme-rime) &optional first-n)
   (when scheme
-    (let ((code-prefix (pyim-scheme-common-code-prefix scheme)))
+    (let ((code-prefix (pyim-scheme-code-prefix scheme)))
       (mapcar
        (lambda (x)
          (concat (or code-prefix "")
@@ -131,7 +131,7 @@
 (cl-defmethod pyim-candidates-create (imobjs (scheme pyim-scheme-rime))
   "适用于 rime 的 `pyim-candidates-create' 方法。"
   (let* ((code (car (pyim-codes-create (car imobjs) scheme)))
-         (code-prefix (pyim-scheme-common-code-prefix scheme))
+         (code-prefix (pyim-scheme-code-prefix scheme))
          (s (replace-regexp-in-string "-" "" code))
          ;; `liberime-search' 搜索的时候不需要 code-prefix, 去除。
          (s (if code-prefix
@@ -143,7 +143,7 @@
 (cl-defmethod pyim-candidates-create-async (imobjs (scheme pyim-scheme-rime))
   "适用于 rime 的 `pyim-candidates-create-async' 方法。"
   (let* ((code (car (pyim-codes-create (car imobjs) scheme)))
-         (code-prefix (pyim-scheme-common-code-prefix scheme))
+         (code-prefix (pyim-scheme-code-prefix scheme))
          (s (replace-regexp-in-string "-" "" code))
          ;; `liberime-search' 搜索的时候不需要 code-prefix, 去除。
          (s (if code-prefix

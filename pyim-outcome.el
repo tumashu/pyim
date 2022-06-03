@@ -165,8 +165,8 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
               (char-to-string user-trigger)
             (when (= (length user-trigger) 1)
               user-trigger)))
-         (first-char (pyim-scheme-common-first-chars (pyim-scheme-current)))
-         (prefer-triggers (pyim-scheme-common-prefer-triggers
+         (first-char (pyim-scheme-first-chars (pyim-scheme-current)))
+         (prefer-triggers (pyim-scheme-prefer-triggers
                            (pyim-scheme-current))))
     (if (pyim-string-match-p (regexp-quote user-trigger) first-char)
         (progn

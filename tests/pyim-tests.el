@@ -59,36 +59,36 @@
 ;; ** pyim-schemes 相关单元测试
 (ert-deftest pyim-tests-pyim-schemes ()
   (let ((pyim-default-scheme 'wubi))
-    (should (equal (pyim-scheme-common-name
+    (should (equal (pyim-scheme-name
                     (pyim-scheme-current))
                    'wubi)))
 
   (let ((pyim-default-scheme 'wuci))
-    (should (equal (pyim-scheme-common-name
+    (should (equal (pyim-scheme-name
                     (pyim-scheme-current))
                    'quanpin)))
 
   (let ((pyim-default-scheme 'wubi)
         (pyim-assistant-scheme 'cangjie)
         (pyim-assistant-scheme-enable t))
-    (should (equal (pyim-scheme-common-name
+    (should (equal (pyim-scheme-name
                     (pyim-scheme-current))
                    'cangjie)))
 
   (let ((pyim-default-scheme 'wubi)
         (pyim-assistant-scheme 'cangjie)
         (pyim-assistant-scheme-enable nil))
-    (should (equal (pyim-scheme-common-name
+    (should (equal (pyim-scheme-name
                     (pyim-scheme-current))
                    'wubi)))
 
-  (should (equal (pyim-scheme-common-name
+  (should (equal (pyim-scheme-name
                   (pyim-scheme-get 'quanpin))
                  'quanpin))
 
   (should-not (pyim-scheme-get 'quanpin1))
 
-  (should (equal (pyim-scheme-common-name
+  (should (equal (pyim-scheme-name
                   (pyim-scheme-get 'wubi))
                  'wubi)))
 
@@ -120,7 +120,7 @@
 
     (pyim-scheme-add "error")
 
-    (should (equal (mapcar #'pyim-scheme-common-document pyim-schemes)
+    (should (equal (mapcar #'pyim-scheme-document pyim-schemes)
                    '("test2" "test3")))))
 
 ;; ** pyim-common 相关单元测试
