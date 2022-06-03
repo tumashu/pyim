@@ -164,44 +164,24 @@
             candidates)))
 
 (defun pyim-candidates-quanpin (imobjs scheme &optional fast-search)
-  "`pyim-candidates-create' 内部使用的函数。"
+  "用于全拼输入法的 `pyim-candidates-create' 方法内部使用的函数。"
   (let* ((znabc-words (pyim-candidates-znabc-words imobjs scheme fast-search))
          (jianpin-words (pyim-candidates-jianpin-words imobjs scheme fast-search))
          (dcache-words (pyim-candidates-dcache-words imobjs scheme fast-search))
-         (personal-words (nth 0 dcache-words))
+         (personal-words (pyim-candidates-sort (nth 0 dcache-words)))
+         (chief-word (pyim-candidates-get-chief scheme personal-words))
          (common-words (nth 1 dcache-words))
          (pinyin-chars-1 (nth 2 dcache-words))
          (pinyin-chars-2 (nth 3 dcache-words))
-         chief-word)
-
-    (setq personal-words (pyim-candidates-sort personal-words))
-    (setq chief-word (pyim-candidates-get-chief scheme personal-words))
-
-    ;; 调试输出
-    (when pyim-debug
-      (print (list :imobjs imobjs
-                   :chief-word chief-word
-                   :personal-words personal-words
-                   :common-words common-words
-                   :jianpin-words jianpin-words
-                   :znabc-words znabc-words
-                   :pinyin-chars-1
-                   (cl-subseq pinyin-chars-1
-                              0 (min (length pinyin-chars-1) 5))
-                   :pinyin-chars-2
-                   (cl-subseq pinyin-chars-2
-                              0 (min (length pinyin-chars-2) 5)))))
-
-    (delete-dups
-     (delq nil
-           `(,chief-word
-             ,@personal-words
-             ,@jianpin-words
-             ,@common-words
-             ,@znabc-words
-             ,@pinyin-chars-1
-             ,@pinyin-chars-2
-             )))))
+         (words `( :chief-word ,chief-word
+                   :personal-words ,@personal-words
+                   :jianpin-words ,@jianpin-words
+                   :common-words ,@common-words
+                   :znabc-words ,@znabc-words
+                   :pinyin-chars-1 ,@pinyin-chars-1
+                   :pinyin-chars-2 ,@pinyin-chars-2)))
+    (when pyim-debug (print words))
+    (delete-dups (cl-remove-if-not #'stringp words))))
 
 (defun pyim-candidates-znabc-words (imobjs scheme &optional fast-search)
   "智能ABC模式，得到尽可能的拼音组合，查询这些组合，得到的词条做为联想词。"
