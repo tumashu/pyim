@@ -166,8 +166,8 @@
 (defun pyim-candidates-create-quanpin (imobjs scheme &optional fast-search)
   "`pyim-candidates-create' 内部使用的函数。"
   (let* ((znabc-words (pyim-candidates-znabc-words imobjs scheme fast-search))
-         (jianpin-words (pyim-candidates-jianpin-words imobjs scheme))
-         (dcache-words (pyim-candidates-dcache-words imobjs scheme))
+         (jianpin-words (pyim-candidates-jianpin-words imobjs scheme fast-search))
+         (dcache-words (pyim-candidates-dcache-words imobjs scheme fast-search))
          (personal-words (nth 0 dcache-words))
          (common-words (nth 1 dcache-words))
          (pinyin-chars-1 (nth 2 dcache-words))
