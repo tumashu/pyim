@@ -166,33 +166,9 @@
 (defun pyim-candidates-create-quanpin (imobjs scheme &optional fast-search)
   "`pyim-candidates-create' 内部使用的函数。"
   (let ((znabc-words (pyim-candidates-create-like-znabc imobjs scheme fast-search))
-        jianpin-words personal-words common-words
+        (jianpin-words (pyim-candidates-create-like-jianpin imobjs scheme))
+        personal-words common-words
         pinyin-chars-1 pinyin-chars-2 chief-word)
-    ;; 假如输入 "nih" ，那么搜索 code 为 "n-h" 的词条，然后筛选出所有拼音匹配
-    ;; "ni-h" 或者 "ni[^-]*-h" 的词条。
-    (when (and pyim-enable-shortcode
-               (> (length (car imobjs)) 1))
-      (dolist (imobj imobjs)
-        (let* ((w (pyim-dcache-get
-                   (string-join (pyim-codes-create imobj scheme 1) "-")
-                   '(ishortcode2word)))
-               (regexp1 (string-join
-                         (pyim-codes-create imobj scheme)
-                         "-"))
-               (regexp2 (string-join
-                         (pyim-codes-create imobj scheme)
-                         "[^-]*-"))
-               (w1 (cl-remove-if-not
-                    (lambda (cstr)
-                      (let ((py (pyim-cstring-to-pinyin cstr nil "-")))
-                        (or (string-match-p regexp1 py)
-                            (string-match-p regexp2 py))))
-                    w))
-               (w2 (cl-remove-if-not
-                    (lambda (cstr)
-                      (string-match-p regexp1 (pyim-cstring-to-pinyin cstr nil "-")))
-                    w1)))
-          (push (append w2 w1) jianpin-words))))
 
     ;; 获取个人词条，词库词条和第一汉字列表。
     (dolist (imobj imobjs)
@@ -276,6 +252,37 @@
     (pyim-zip (mapcar #'pyim-dcache-get
                       (pyim-zip codes))
               fast-search)))
+
+(defun pyim-candidates-create-like-jianpin (imobjs scheme)
+  "简拼模式。
+
+ 假如输入 \"nih\" ，那么搜索 code 为 \"n-h\" 的词条，然后筛选出所
+ 有拼音匹配\"ni-h\" 或者 \"ni[^-]*-h\" 的词条。"
+  (when (and pyim-enable-shortcode
+             (> (length (car imobjs)) 1))
+    (let (jianpin-words)
+      (dolist (imobj imobjs)
+        (let* ((w (pyim-dcache-get
+                   (string-join (pyim-codes-create imobj scheme 1) "-")
+                   '(ishortcode2word)))
+               (regexp1 (string-join
+                         (pyim-codes-create imobj scheme)
+                         "-"))
+               (regexp2 (string-join
+                         (pyim-codes-create imobj scheme)
+                         "[^-]*-"))
+               (w1 (cl-remove-if-not
+                    (lambda (cstr)
+                      (let ((py (pyim-cstring-to-pinyin cstr nil "-")))
+                        (or (string-match-p regexp1 py)
+                            (string-match-p regexp2 py))))
+                    w))
+               (w2 (cl-remove-if-not
+                    (lambda (cstr)
+                      (string-match-p regexp1 (pyim-cstring-to-pinyin cstr nil "-")))
+                    w1)))
+          (push (delete-dups (append w2 w1)) jianpin-words)))
+      jianpin-words)))
 
 (cl-defmethod pyim-candidates-create (_imobjs (_scheme pyim-scheme-shuangpin))
   "按照 SCHEME, 从 IMOBJS 获得候选词条，用于双拼输入法。"
