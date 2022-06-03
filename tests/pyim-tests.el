@@ -1176,7 +1176,7 @@ yin-xing 因行
 
     ;; test dregcache api
     (setq words (pyim-dcache-get "a"))
-    (should (eq (length words) 16))
+    (should (eq (length words) 8))
     (should (string= (nth 0 words) "阿"))
 
     (setq  words (pyim-dcache-get "za-cao"))
