@@ -129,7 +129,7 @@
        imobj))))
 
 (cl-defmethod pyim-candidates-create (imobjs (scheme pyim-scheme-rime))
-  "`pyim-candidates-create' 处理 rime 输入法的函数."
+  "适用于 rime 的 `pyim-candidates-create' 方法。"
   (let* ((code (car (pyim-codes-create (car imobjs) scheme)))
          (code-prefix (pyim-scheme-common-code-prefix scheme))
          (s (replace-regexp-in-string "-" "" code))
@@ -137,9 +137,19 @@
          (s (if code-prefix
                 (string-remove-prefix code-prefix s)
               s))
-         (words (liberime-search s (if async
-                                       nil
-                                     (* pyim-page-length 2)))))
+         (words (liberime-search s (* pyim-page-length 2))))
+    words))
+
+(cl-defmethod pyim-candidates-create-async (imobjs (scheme pyim-scheme-rime))
+  "适用于 rime 的 `pyim-candidates-create-async' 方法。"
+  (let* ((code (car (pyim-codes-create (car imobjs) scheme)))
+         (code-prefix (pyim-scheme-common-code-prefix scheme))
+         (s (replace-regexp-in-string "-" "" code))
+         ;; `liberime-search' 搜索的时候不需要 code-prefix, 去除。
+         (s (if code-prefix
+                (string-remove-prefix code-prefix s)
+              s))
+         (words (liberime-search s nil)))
     words))
 
 (cl-defmethod pyim-page-preview-create ((_scheme pyim-scheme-rime) &optional separator)
