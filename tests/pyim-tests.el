@@ -1198,7 +1198,7 @@ yin-xing 因行
       (message "search by code \"zun-yi\" takes %s seconds" (benchmark-run-compiled 1 (pyim-dcache-get "zun-yi"))))
 
     ;; `pyim-dregcache-get' calls `pyim-pymap-py2cchar-get' before return result
-    (should (eq (length words) 51))))
+    (should (eq (length words) 26))))
 
 
 (ert-deftest pyim-tests-pyim-cloudim ()
