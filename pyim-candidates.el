@@ -270,10 +270,6 @@
                      (car (split-string x "|")))
                    (pyim-pymap-py2cchar-get pinyin)))))
 
-(cl-defmethod pyim-candidates-create (_imobjs (_scheme pyim-scheme-shuangpin))
-  "按照 SCHEME, 从 IMOBJS 获得候选词条，用于双拼输入法。"
-  (cl-call-next-method))
-
 (cl-defgeneric pyim-candidates-create-async (imobjs scheme)
   "按照 SCHEME, 使用异步的方式从 IMOBJS 获得候选词条。")
 
