@@ -450,6 +450,41 @@
                    '("cangjie/aaaa")))))
 
 ;; ** pyim-candidates 相关单元测试
+(ert-deftest pyim-tests-pyim-candidates-get-chief ()
+  (let ((wubi (pyim-scheme-get 'wubi))
+        (personal-words1 '("呵呵" "天" "恭恭敬敬"))
+        (personal-words2 '("呵呵" "恭恭敬敬"))
+        (common-words1 '("工" "恭恭敬敬"))
+        (common-words2 '("恭恭敬敬" "工")))
+
+    ;; 形码输入法选择第一位词条的规则是：
+    ;; 1. 如果从公共词库里面获取到的第一个词条是汉字，就选择它。
+    ;; 2. 如果不是，就从个人词库里面按排列的先后顺序，获取一个汉字。
+    (should (equal (pyim-candidates-get-chief wubi personal-words1 common-words1)
+                   "工"))
+    (should (equal (pyim-candidates-get-chief wubi personal-words1 common-words2)
+                   "天"))
+    (should-not (pyim-candidates-get-chief wubi personal-words2 common-words2)))
+
+  (let ((quanpin (pyim-scheme-get 'quanpin))
+        (pyim-dhashcache-iword2count-recent-10-words
+         (read "#s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data (:all-words (\"就\" \"不是\" \"如果\" \"是\" \"规则\" \"的\" \"词条\" \"第一位\" \"选择\" \"输入法\") \"如果\" 1 \"的\" 1 \"就\" 1 \"输入法\" 2 \"词条\" 1 \"不是\" 1 \"选择\" 1 \"第一位\" 1 \"规则\" 1 \"是\" 1))"))
+        (pyim-dhashcache-iword2count-recent-50-words
+         (read "#s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data (:all-words (\"就\" \"不是\" \"如果\" \"是\" \"规则\" \"的\" \"词条\" \"第一位\" \"选择\" \"输入法\" \"形码\" \"天\" \"网\" \"呵呵\" \"工\" \"你\" \"天空\" \"蓝天\" \"大地\" \"不好\" \"我\" \"你好\") \"你好\" 1 \"你\" 3 \"我\" 1 \"不好\" 1 \"天空\" 2 \"天\" 3 \"大地\" 1 \"蓝天\" 4 \"工\" 2 \"呵呵\" 1 \"网\" 1 \"形码\" 1 \"输入法\" 1 \"选择\" 1 \"第一位\" 1 \"词条\" 1 \"的\" 1 \"规则\" 1 \"是\" 1 \"如果\" 1 \"不是\" 1 \"就\" 1))"))
+        (personal-words1 '("输入罚" "输入法"))
+        (personal-words2 '("蓝田" "蓝天"))
+        (personal-words3 '("美丽" "魅力")))
+
+    ;; 1. 最近输入的10个不同的词中出现一次以上。
+    (should (equal (pyim-candidates-get-chief quanpin personal-words1 nil)
+                   "输入法"))
+    ;; 2. 最近输入的50个不同的词中出现过三次以上。
+    (should (equal (pyim-candidates-get-chief quanpin personal-words2 nil)
+                   "蓝天"))
+    ;; 3. 个人词条中的第一个词。
+    (should (equal (pyim-candidates-get-chief quanpin personal-words3 nil)
+                   "美丽"))))
+
 (ert-deftest pyim-tests-pyim-candidates-search-buffer ()
   (with-temp-buffer
     (insert "你好你好你坏你坏你话牛蛤牛和牛蛤牛蛤牛蛤牛蛤牛蛤")
