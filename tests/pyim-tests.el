@@ -485,6 +485,34 @@
     (should (equal (pyim-candidates-get-chief quanpin personal-words3 nil)
                    "美丽"))))
 
+(ert-deftest pyim-tests-pyim-candidates-create-xingma ()
+  (let ((wubi (pyim-scheme-get 'wubi))
+        (pyim-dhashcache-icode2word
+         (read "#s(hash-table size 1642 test equal rehash-size 1.5 rehash-threshold 0.8125 data (\"wubi/aaaa\" (\"工\" \"㠭\") \"wubi/bbbb\" (\"子\" \"子子孙孙孙孙\") \"wubi/cccc\" (\"又\" \"叕\")))"))
+        (pyim-dhashcache-code2word
+         (read "#s(hash-table size 1642 test equal rehash-size 1.5 rehash-threshold 0.8125 data (\"wubi/aaaa\" (\"㠭\") \"wubi/bbbb\" (\"子子孙孙\" \"子\") \"wubi/cccc\" (\"叕\" \"又\")))")))
+    (should (equal (pyim-candidates-create
+                    (pyim-imobjs-create "aaaa" wubi)
+                    wubi)
+                   '("㠭" "工")))
+    (should (equal (pyim-candidates-create
+                    (pyim-imobjs-create "bbbb" wubi)
+                    wubi)
+                   '("子" "子子孙孙孙孙" "子子孙孙")))
+    (should (equal (pyim-candidates-create
+                    (pyim-imobjs-create "cccc" wubi)
+                    wubi)
+                   '("叕" "又")))
+    (should (equal (pyim-candidates-create
+                    (pyim-imobjs-create "aaaabbbb" wubi)
+                    wubi)
+                   '("㠭子" "㠭子子孙孙孙孙" "㠭子子孙孙")))
+    (should (equal
+             (pyim-candidates-create
+              (pyim-imobjs-create "aaaabbbbcccc" wubi)
+              wubi)
+             '("㠭子叕" "㠭子又")))))
+
 (ert-deftest pyim-tests-pyim-candidates-search-buffer ()
   (with-temp-buffer
     (insert "你好你好你坏你坏你话牛蛤牛和牛蛤牛蛤牛蛤牛蛤牛蛤")
