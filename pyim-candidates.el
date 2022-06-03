@@ -215,7 +215,7 @@
               fast-search)))
 
 (defun pyim-candidates-jianpin-words (imobjs scheme &optional fast-search)
-  "简拼模式。
+  "获取简拼词语。
 
  假如输入 \"nih\" ，那么搜索 code 为 \"n-h\" 的词条，然后筛选出所
  有拼音匹配\"ni-h\" 或者 \"ni[^-]*-h\" 的词条。"
@@ -246,7 +246,7 @@
       (pyim-zip (nreverse jianpin-words) fast-search))))
 
 (defun pyim-candidates-dcache-words (imobjs scheme &optional fast-search ignore-pymap-chars)
-  "获取个人词条，词库词条和第一汉字列表。"
+  "从 dcache 获取个人词条，词库词条和第一汉字列表。"
   (let (personal-words common-words pinyin-chars-1 pinyin-chars-2)
     (dolist (imobj imobjs)
       (let* (;; 个人词条
@@ -281,7 +281,7 @@
     (list personal-words common-words pinyin-chars-1 pinyin-chars-2)))
 
 (defun pyim-candidates-pymap-chars (pinyin)
-  "获取 pymap 表里面的汉字。"
+  "从 pymap 表获取汉字。"
   (mapcar #'char-to-string
           (pyim-zip
            (mapcar (lambda (x)
