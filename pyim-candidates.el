@@ -128,9 +128,6 @@
 
           ;; 5. output => 工子又 工子叕
           (setq output
-                ;; NOTE: 下面这种策略是否合理？
-                ;; 1. 第一个词选择公共词库中的第一个词。
-                ;; 2. 剩下的分成常用字和词，常用字优先排，字和词各按 count 大小排序。
                 (let* ((personal-words (pyim-dcache-get last-code '(icode2word)))
                        (personal-words (pyim-candidates-sort personal-words))
                        (common-words (pyim-dcache-get last-code '(code2word)))
