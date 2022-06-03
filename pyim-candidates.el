@@ -148,7 +148,7 @@
   ;; 这段代码主要实现以下功能：假如用户输入 nihaomazheshi, 但词库里面找不到对
   ;; 应的词条，那么输入法自动用 nihaoma 和 zheshi 的第一个词条："你好吗" 和 "
   ;; 这是" 连接成一个新的字符串 "你好吗这是" 做为第一个候选词。
-  (let* ((candidates (pyim-candidates-create-quanpin imobjs scheme))
+  (let* ((candidates (pyim-candidates-quanpin imobjs scheme))
          (n (length (car candidates)))
          output)
     (push (car candidates) output)
@@ -157,13 +157,13 @@
                            (mapcar (lambda (imobj)
                                      (nthcdr n imobj))
                                    imobjs))))
-      (let ((candidates (pyim-candidates-create-quanpin imobjs scheme)))
-        (push (car (pyim-candidates-create-quanpin imobjs scheme t)) output)
+      (let ((candidates (pyim-candidates-quanpin imobjs scheme)))
+        (push (car (pyim-candidates-quanpin imobjs scheme t)) output)
         (setq n (length (car candidates)))))
     (append (pyim-subconcat (nreverse output) "")
             candidates)))
 
-(defun pyim-candidates-create-quanpin (imobjs scheme &optional fast-search)
+(defun pyim-candidates-quanpin (imobjs scheme &optional fast-search)
   "`pyim-candidates-create' 内部使用的函数。"
   (let* ((znabc-words (pyim-candidates-znabc-words imobjs scheme fast-search))
          (jianpin-words (pyim-candidates-jianpin-words imobjs scheme fast-search))
