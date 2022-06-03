@@ -526,7 +526,7 @@
     (should (equal (pyim-candidates-znabc-words imobjs quanpin t)
                    '("你好吗朋友" "你好吗" "你好")))))
 
-(ert-deftest pyim-tests-pyim-candidates-create-like-jianpin ()
+(ert-deftest pyim-tests-pyim-candidates-jianpin-words ()
   (let* ((pyim-dhashcache-code2word (make-hash-table :test #'equal))
          (pyim-dhashcache-icode2word (make-hash-table :test #'equal))
          (pyim-dhashcache-ishortcode2word (make-hash-table :test #'equal))
@@ -534,9 +534,9 @@
          (imobjs1 (pyim-imobjs-create "nih" quanpin))
          (imobjs2 (pyim-imobjs-create "ni" quanpin)))
     (puthash "n-h" (list "你好" "你坏" "尼耗" "南好" "内核" "内河") pyim-dhashcache-ishortcode2word)
-    (should (equal (pyim-candidates-create-like-jianpin imobjs1 quanpin)
+    (should (equal (pyim-candidates-jianpin-words imobjs1 quanpin)
                    '("你好" "你坏" "尼耗")))
-    (should-not (pyim-candidates-create-like-jianpin imobjs2 quanpin))))
+    (should-not (pyim-candidates-jianpin-words imobjs2 quanpin))))
 
 (ert-deftest pyim-tests-pyim-candidates-get-dcache-words ()
   (let* ((pyim-dhashcache-code2word (make-hash-table :test #'equal))

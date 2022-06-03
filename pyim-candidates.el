@@ -166,7 +166,7 @@
 (defun pyim-candidates-create-quanpin (imobjs scheme &optional fast-search)
   "`pyim-candidates-create' 内部使用的函数。"
   (let* ((znabc-words (pyim-candidates-znabc-words imobjs scheme fast-search))
-         (jianpin-words (pyim-candidates-create-like-jianpin imobjs scheme))
+         (jianpin-words (pyim-candidates-jianpin-words imobjs scheme))
          (dcache-words (pyim-candidates-create-get-dcache-words imobjs scheme))
          (personal-words (nth 0 dcache-words))
          (common-words (nth 1 dcache-words))
@@ -214,7 +214,7 @@
                       (pyim-zip codes))
               fast-search)))
 
-(defun pyim-candidates-create-like-jianpin (imobjs scheme &optional fast-search)
+(defun pyim-candidates-jianpin-words (imobjs scheme &optional fast-search)
   "简拼模式。
 
  假如输入 \"nih\" ，那么搜索 code 为 \"n-h\" 的词条，然后筛选出所
