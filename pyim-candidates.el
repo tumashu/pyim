@@ -165,22 +165,9 @@
 
 (defun pyim-candidates-create-quanpin (imobjs scheme &optional fast-search)
   "`pyim-candidates-create' 内部使用的函数。"
-  (let (;; Let indent beautiful.
-        jianpin-words znabc-words
-        personal-words common-words
-        pinyin-chars-1 pinyin-chars-2
-        chief-word)
-    ;; 智能ABC模式，得到尽可能的拼音组合，查询这些组合，得到的词条做为联想词。
-    (let ((codes (mapcar (lambda (x)
-                           (pyim-subconcat x "-"))
-                         (mapcar (lambda (imobj)
-                                   (pyim-codes-create imobj scheme))
-                                 imobjs))))
-      (setq znabc-words
-            (pyim-zip (mapcar #'pyim-dcache-get
-                              (pyim-zip codes))
-                      fast-search)))
-
+  (let ((znabc-words (pyim-candidates-create-like-znabc imobjs scheme fast-search))
+        jianpin-words personal-words common-words
+        pinyin-chars-1 pinyin-chars-2 chief-word)
     ;; 假如输入 "nih" ，那么搜索 code 为 "n-h" 的词条，然后筛选出所有拼音匹配
     ;; "ni-h" 或者 "ni[^-]*-h" 的词条。
     (when (and pyim-enable-shortcode
@@ -278,6 +265,17 @@
              ,@pinyin-chars-1
              ,@pinyin-chars-2
              )))))
+
+(defun pyim-candidates-create-like-znabc (imobjs scheme &optional fast-search)
+  "智能ABC模式，得到尽可能的拼音组合，查询这些组合，得到的词条做为联想词。"
+  (let ((codes (mapcar (lambda (x)
+                         (pyim-subconcat x "-"))
+                       (mapcar (lambda (imobj)
+                                 (pyim-codes-create imobj scheme))
+                               imobjs))))
+    (pyim-zip (mapcar #'pyim-dcache-get
+                      (pyim-zip codes))
+              fast-search)))
 
 (cl-defmethod pyim-candidates-create (_imobjs (_scheme pyim-scheme-shuangpin))
   "按照 SCHEME, 从 IMOBJS 获得候选词条，用于双拼输入法。"
