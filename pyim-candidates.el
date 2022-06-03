@@ -165,7 +165,7 @@
 
 (defun pyim-candidates-create-quanpin (imobjs scheme &optional fast-search)
   "`pyim-candidates-create' 内部使用的函数。"
-  (let* ((znabc-words (pyim-candidates-create-like-znabc imobjs scheme fast-search))
+  (let* ((znabc-words (pyim-candidates-znabc-words imobjs scheme fast-search))
          (jianpin-words (pyim-candidates-create-like-jianpin imobjs scheme))
          (dcache-words (pyim-candidates-create-get-dcache-words imobjs scheme))
          (personal-words (nth 0 dcache-words))
@@ -203,7 +203,7 @@
              ,@pinyin-chars-2
              )))))
 
-(defun pyim-candidates-create-like-znabc (imobjs scheme &optional fast-search)
+(defun pyim-candidates-znabc-words (imobjs scheme &optional fast-search)
   "智能ABC模式，得到尽可能的拼音组合，查询这些组合，得到的词条做为联想词。"
   (let ((codes (mapcar (lambda (x)
                          (pyim-subconcat x "-"))
