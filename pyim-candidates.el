@@ -165,54 +165,15 @@
 
 (defun pyim-candidates-create-quanpin (imobjs scheme &optional fast-search)
   "`pyim-candidates-create' 内部使用的函数。"
-  (let ((znabc-words (pyim-candidates-create-like-znabc imobjs scheme fast-search))
-        (jianpin-words (pyim-candidates-create-like-jianpin imobjs scheme))
-        personal-words common-words
-        pinyin-chars-1 pinyin-chars-2 chief-word)
+  (let* ((znabc-words (pyim-candidates-create-like-znabc imobjs scheme fast-search))
+         (jianpin-words (pyim-candidates-create-like-jianpin imobjs scheme))
+         (dcache-words (pyim-candidates-create-get-dcache-words imobjs scheme))
+         (personal-words (nth 0 dcache-words))
+         (common-words (nth 1 dcache-words))
+         (pinyin-chars-1 (nth 2 dcache-words))
+         (pinyin-chars-2 (nth 3 dcache-words))
+         chief-word)
 
-    ;; 获取个人词条，词库词条和第一汉字列表。
-    (dolist (imobj imobjs)
-      (let* (;; 个人词条
-             (w1 (pyim-dcache-get
-                  (string-join (pyim-codes-create imobj scheme) "-")
-                  (if pyim-enable-shortcode
-                      '(icode2word ishortcode2word)
-                    '(icode2word))))
-             ;; 词库词条
-             (w2 (pyim-dcache-get
-                  (string-join (pyim-codes-create imobj scheme) "-")
-                  (if pyim-enable-shortcode
-                      '(code2word shortcode2word)
-                    '(code2word))))
-             ;; 第一个汉字
-             (w3 (pyim-dcache-get
-                  (car (pyim-codes-create imobj scheme))))
-             ;; 如果 w3 找不到第一个拼音对应的汉字，那就进一步使用
-             ;; `pyim-pymap-py2cchar-get' 来查找，这个函数支持声母搜索。可以得到
-             ;; 更多的词条。
-             (w4 (unless w3
-                   (mapcar #'char-to-string
-                           (pyim-zip
-                            (mapcar (lambda (x)
-                                      ;; NOTE: 这里只取最常用的汉字，太多的汉字会带来后续处理压力，可能拖慢输入法。不过
-                                      ;; 这个结论只是猜测。
-                                      (car (split-string x "|")))
-                                    (pyim-pymap-py2cchar-get
-                                     (car (pyim-codes-create imobj scheme)))))))))
-        (push w1 personal-words)
-        (push w2 common-words)
-        (push w3 pinyin-chars-1)
-        (push w4 pinyin-chars-2)))
-
-    (setq jianpin-words (pyim-zip (nreverse jianpin-words) fast-search))
-    (setq personal-words (pyim-zip (nreverse personal-words) fast-search))
-    (setq common-words (pyim-zip (nreverse common-words) fast-search))
-    (setq pinyin-chars-1 (pyim-zip (nreverse pinyin-chars-1) fast-search))
-    (setq pinyin-chars-2 (pyim-zip (nreverse pinyin-chars-2) fast-search))
-
-    ;; 个人词条排序：使用词频信息对个人词库得到的候选词排序，第一个词条的位置
-    ;; 比较特殊，不参与排序，具体原因请参考 `pyim-page-select-word' 中的
-    ;; comment.
     (setq personal-words (pyim-candidates-sort personal-words))
     (setq chief-word (pyim-candidates-get-chief scheme personal-words))
 
@@ -253,7 +214,7 @@
                       (pyim-zip codes))
               fast-search)))
 
-(defun pyim-candidates-create-like-jianpin (imobjs scheme)
+(defun pyim-candidates-create-like-jianpin (imobjs scheme &optional fast-search)
   "简拼模式。
 
  假如输入 \"nih\" ，那么搜索 code 为 \"n-h\" 的词条，然后筛选出所
@@ -282,7 +243,52 @@
                       (string-match-p regexp1 (pyim-cstring-to-pinyin cstr nil "-")))
                     w1)))
           (push (delete-dups (append w2 w1)) jianpin-words)))
-      jianpin-words)))
+      (pyim-zip (nreverse jianpin-words) fast-search))))
+
+(defun pyim-candidates-create-get-dcache-words (imobjs scheme &optional fast-search ignore-pymap-chars)
+  "获取个人词条，词库词条和第一汉字列表。"
+  (let (personal-words common-words pinyin-chars-1 pinyin-chars-2)
+    (dolist (imobj imobjs)
+      (let* (;; 个人词条
+             (w1 (pyim-dcache-get
+                  (string-join (pyim-codes-create imobj scheme) "-")
+                  (if pyim-enable-shortcode
+                      '(icode2word ishortcode2word)
+                    '(icode2word))))
+             ;; 词库词条
+             (w2 (pyim-dcache-get
+                  (string-join (pyim-codes-create imobj scheme) "-")
+                  (if pyim-enable-shortcode
+                      '(code2word shortcode2word)
+                    '(code2word))))
+             ;; 第一个汉字
+             (w3 (pyim-dcache-get
+                  (car (pyim-codes-create imobj scheme))))
+             ;; 如果 w3 找不到第一个拼音对应的汉字，那就进一步使用
+             ;; `pyim-pymap-py2cchar-get' 来查找，这个函数支持声母搜索。可以得到
+             ;; 更多的词条。
+             (w4 (when (and (not w3) (not ignore-pymap-chars))
+                   (pyim-candidates-create-get-pymap-chars
+                    (car (pyim-codes-create imobj scheme))))))
+        (push w1 personal-words)
+        (push w2 common-words)
+        (push w3 pinyin-chars-1)
+        (push w4 pinyin-chars-2)))
+    (setq personal-words (pyim-zip (nreverse personal-words) fast-search))
+    (setq common-words (pyim-zip (nreverse common-words) fast-search))
+    (setq pinyin-chars-1 (pyim-zip (nreverse pinyin-chars-1) fast-search))
+    (setq pinyin-chars-2 (pyim-zip (nreverse pinyin-chars-2) fast-search))
+    (list personal-words common-words pinyin-chars-1 pinyin-chars-2)))
+
+(defun pyim-candidates-create-get-pymap-chars (pinyin)
+  "获取 pymap 表里面的汉字。"
+  (mapcar #'char-to-string
+          (pyim-zip
+           (mapcar (lambda (x)
+                     ;; NOTE: 这里只取最常用的汉字，太多的汉字会带来后续处理压力，可能拖慢输入法。不过
+                     ;; 这个结论只是猜测。
+                     (car (split-string x "|")))
+                   (pyim-pymap-py2cchar-get pinyin)))))
 
 (cl-defmethod pyim-candidates-create (_imobjs (_scheme pyim-scheme-shuangpin))
   "按照 SCHEME, 从 IMOBJS 获得候选词条，用于双拼输入法。"
