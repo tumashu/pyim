@@ -268,7 +268,7 @@
              ;; `pyim-pymap-py2cchar-get' 来查找，这个函数支持声母搜索。可以得到
              ;; 更多的词条。
              (w4 (when (and (not w3) (not ignore-pymap-chars))
-                   (pyim-candidates-create-get-pymap-chars
+                   (pyim-candidates-pymap-chars
                     (car (pyim-codes-create imobj scheme))))))
         (push w1 personal-words)
         (push w2 common-words)
@@ -280,7 +280,7 @@
     (setq pinyin-chars-2 (pyim-zip (nreverse pinyin-chars-2) fast-search))
     (list personal-words common-words pinyin-chars-1 pinyin-chars-2)))
 
-(defun pyim-candidates-create-get-pymap-chars (pinyin)
+(defun pyim-candidates-pymap-chars (pinyin)
   "获取 pymap 表里面的汉字。"
   (mapcar #'char-to-string
           (pyim-zip

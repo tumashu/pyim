@@ -559,8 +559,8 @@
     (should (equal (pyim-candidates-dcache-words imobjs3 quanpin nil t)
                    '(("你" "尼") ("你" "尼") ("你" "尼" "你" "尼") nil)))))
 
-(ert-deftest pyim-tests-pyim-candidates-create-get-pymap-chars ()
-  (should (equal (cl-subseq (pyim-candidates-create-get-pymap-chars "ni") 0 10)
+(ert-deftest pyim-tests-pyim-candidates-pymap-chars ()
+  (should (equal (cl-subseq (pyim-candidates-pymap-chars "ni") 0 10)
                  '("你" "年" "娘" "鸟" "摄" "您" "宁" "牛" "尼" "念"))))
 
 (ert-deftest pyim-tests-pyim-candidates-search-buffer ()
