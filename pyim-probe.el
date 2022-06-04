@@ -80,7 +80,8 @@
   "激活这个 pyim 探针函数后，可以解决 org-speed-commands 与 pyim 冲突问题。
 
 用于：`pyim-english-input-switch-functions' 。"
-  (and (string= major-mode "org-mode")
+  (and (> emacs-major-version 25)
+       (string= major-mode "org-mode")
        (bolp)
        (looking-at org-heading-regexp)
        org-use-speed-commands))

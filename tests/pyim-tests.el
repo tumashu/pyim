@@ -1355,16 +1355,17 @@ Transfer-Encoding: chunked
     (should (pyim-probe-isearch-mode))))
 
 (ert-deftest pyim-tests-pyim-probe-org-speed-commands ()
-  (with-temp-buffer
-    (let ((org-use-speed-commands t))
-      (org-mode)
-      (insert "* heading")
-      (goto-char (line-beginning-position))
-      (should (pyim-probe-org-speed-commands))
-      (forward-char 1)
-      (should-not (pyim-probe-org-speed-commands))
-      (forward-char 1)
-      (should-not (pyim-probe-org-speed-commands)))))
+  (when (> emacs-major-version 25)
+    (with-temp-buffer
+      (let ((org-use-speed-commands t))
+        (org-mode)
+        (insert "* heading")
+        (goto-char (line-beginning-position))
+        (should (pyim-probe-org-speed-commands))
+        (forward-char 1)
+        (should-not (pyim-probe-org-speed-commands))
+        (forward-char 1)
+        (should-not (pyim-probe-org-speed-commands))))))
 
 (ert-deftest pyim-tests-pyim-probe-org-structure-template ()
   (with-temp-buffer
