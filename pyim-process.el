@@ -59,7 +59,7 @@
   :type 'symbol)
 
 (defvaralias 'pyim-autoselector 'pyim-process-autoselector)
-(defcustom pyim-process-autoselector '(pyim-autoselector-xingma)
+(defcustom pyim-process-autoselector nil
   "已经启用的自动上屏器.
 
 自动上屏器是一个函数。假设用户已经输入 \"nihao\", 并按下 \"m\" 键，

@@ -63,6 +63,7 @@
         '(:select last))
        (t nil)))))
 
+(cl-pushnew #'pyim-autoselector-xingma pyim-process-autoselector)
 
 ;; * Footer
 (provide 'pyim-autoselector)
