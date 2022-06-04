@@ -44,7 +44,7 @@
 
 (cl-defmethod pyim-candidates-cloud-search
   (string (_scheme pyim-scheme-quanpin)
-          &context (pyim-cloudim (eql 'baidu)))
+          &context (pyim-cloudim (eql baidu)))
   "使用 baidu 云输入法引擎搜索 STRING, 获取词条列表。"
   (let ((buffer (pyim-cloudim-url-retrieve-sync
                  (format "https://olime.baidu.com/py?py=%s" string)
@@ -127,7 +127,7 @@
 
 (cl-defmethod pyim-candidates-cloud-search
   (string (_scheme pyim-scheme-quanpin)
-          &context (pyim-cloudim (eql 'google)))
+          &context (pyim-cloudim (eql google)))
   "使用 google 云输入法引擎搜索 STRING, 获取词条列表。"
   (let ((buffer (pyim-cloudim-url-retrieve-sync
                  (format "https://www.google.cn/inputtools/request?ime=pinyin&text=%s" string)

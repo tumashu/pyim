@@ -272,7 +272,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 (cl-defgeneric pyim-page-show (string position tooltip)
   "在 POSITION 位置，使用 posframe 或者 popup 显示字符串 STRING.")
 
-(cl-defmethod pyim-page-show (string position (_tooltip (eql 'posframe)))
+(cl-defmethod pyim-page-show (string position (_tooltip (eql posframe)))
   "在 POSITION 位置，使用 posframe STRING."
   (posframe-show pyim-page-posframe-buffer
                  :string string
@@ -283,7 +283,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                  :border-width pyim-page-posframe-border-width
                  :border-color (face-attribute 'pyim-page-border :background)))
 
-(cl-defmethod pyim-page-show (string _position (_tooltip (eql 'minibufer)))
+(cl-defmethod pyim-page-show (string _position (_tooltip (eql minibufer)))
   "使用 minibuffer 来显示 STRING。"
   (let ((max-mini-window-height (+ pyim-page-length 2))
         (message-log-max nil))
@@ -314,7 +314,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 (declare-function 'popup-delete "popup")
 (defvar popup-version)
 
-(cl-defmethod pyim-page-show (string position (_tooltip (eql 'popup)))
+(cl-defmethod pyim-page-show (string position (_tooltip (eql popup)))
   "Show STRING at POSITION with the help of popup-el."
   (when pyim-page-last-popup
     ;; 异步获取词条的时候，如果不把已经存在的 popup 删除，就会出现两个 page.
@@ -329,7 +329,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 (cl-defgeneric pyim-page-info-format (style page-info)
   "将 PAGE-INFO 按照 STYLE 格式化为选词框中显示的字符串。")
 
-(cl-defmethod pyim-page-info-format ((_style (eql 'two-lines)) page-info)
+(cl-defmethod pyim-page-info-format ((_style (eql two-lines)) page-info)
   "将 PAGE-INFO 格式化为选词框中显示的字符串.
 
 样式类似：
@@ -350,7 +350,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
            nil
            (gethash :hightlight-current page-info))))
 
-(cl-defmethod pyim-page-info-format ((_style (eql 'one-line)) page-info)
+(cl-defmethod pyim-page-info-format ((_style (eql one-line)) page-info)
   "将 PAGE-INFO 格式化为选词框中显示的字符串.
 
 样式类似：
@@ -370,7 +370,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
           (gethash :current-page page-info)
           (gethash :total-page page-info)))
 
-(cl-defmethod pyim-page-info-format ((_style (eql 'vertical)) page-info)
+(cl-defmethod pyim-page-info-format ((_style (eql vertical)) page-info)
   "将 PAGE-INFO 格式化为选词框中显示的字符串.
 
 样式类似：
@@ -392,7 +392,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
            "\n"
            (gethash :hightlight-current page-info))))
 
-(cl-defmethod pyim-page-info-format ((_style (eql 'minibuffer)) page-info)
+(cl-defmethod pyim-page-info-format ((_style (eql minibuffer)) page-info)
   "将 PAGE-INFO 格式化为选词框中显示的字符串.
 
 样式类似：
@@ -536,15 +536,15 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 (cl-defgeneric pyim-page-hide-tooltip (tooltip)
   "Hide TOOLTIP.")
 
-(cl-defmethod pyim-page-hide-tooltip ((_tooltip (eql 'popup)))
+(cl-defmethod pyim-page-hide-tooltip ((_tooltip (eql popup)))
   "Hide popup tooltip."
   (popup-delete pyim-page-last-popup))
 
-(cl-defmethod pyim-page-hide-tooltip ((_tooltip (eql 'posframe)))
+(cl-defmethod pyim-page-hide-tooltip ((_tooltip (eql posframe)))
   "Hide posframe tooltip."
   (posframe-hide pyim-page-posframe-buffer))
 
-(cl-defmethod pyim-page-hide-tooltip ((_tooltip (eql 'minibuffer)))
+(cl-defmethod pyim-page-hide-tooltip ((_tooltip (eql minibuffer)))
   "Hide minibuffer tooltip."
   (popup-delete pyim-page-last-popup)
   (when (eq (selected-window) (minibuffer-window))
