@@ -67,7 +67,8 @@
 
 这个函数会在 `pyim-input-method' 中调用，用于删除
 `pyim-preview-overlay' 中保存的 overlay。"
-  (if (and (overlayp pyim-preview-overlay) (overlay-start pyim-preview-overlay))
+  (if (and (overlayp pyim-preview-overlay)
+           (overlay-start pyim-preview-overlay))
       (delete-overlay pyim-preview-overlay)))
 
 (defun pyim-preview-refresh (&rest _)
@@ -76,22 +77,8 @@
 pyim 会使用 Emacs overlay 机制在 *待输入buffer* 光标处高亮显示一
 个预览字符串，让用户可以查看将要输入的字符串，这个函数用于更新这
 个字符串的内容。"
-  (let* ((class (pyim-scheme-get-option (pyim-scheme-name) :class))
-         (candidates (pyim-process-get-candidates))
-         (pos (1- (min (pyim-process-get-candidate-position)
-                       (length candidates))))
-         (preview (concat (pyim-process-get-outcome)
-                          (nth pos candidates))))
-    (when (memq class '(quanpin))
-      (let ((rest (mapconcat
-                   (lambda (py)
-                     (concat (nth 0 py) (nth 1 py)))
-                   (nthcdr (length preview)
-                           (pyim-process-get-first-imobj))
-                   "'")))
-        (when (string< "" rest)
-          (setq preview (concat preview rest)))))
-    (setq preview (pyim-process-subword-and-magic-convert preview))
+  (let* ((scheme (pyim-scheme-current))
+         (preview (pyim-preview-string scheme)))
     ;; Delete old preview string.
     (pyim-preview-delete-string)
     ;; Insert new preview string.
@@ -101,6 +88,35 @@ pyim 会使用 Emacs overlay 机制在 *待输入buffer* 光标处高亮显示�
                   (overlay-start pyim-preview-overlay) (point))))
 
 (add-hook 'pyim-process-ui-refresh-hook #'pyim-preview-refresh)
+
+(cl-defgeneric pyim-preview-string (scheme)
+  "获得 preview 字符串。")
+
+(cl-defmethod pyim-preview-string (_scheme)
+  "获得 preview 字符串。"
+  (let* ((candidates (pyim-process-get-candidates))
+         (pos (1- (min (pyim-process-get-candidate-position)
+                       (length candidates))))
+         (preview (concat (pyim-process-get-outcome)
+                          (nth pos candidates))))
+    (pyim-process-subword-and-magic-convert preview)))
+
+(cl-defmethod pyim-preview-string ((_scheme pyim-scheme-quanpin))
+  "获得 preview 字符串，适用于全拼输入法。"
+  (let* ((candidates (pyim-process-get-candidates))
+         (pos (1- (min (pyim-process-get-candidate-position)
+                       (length candidates))))
+         (preview (concat (pyim-process-get-outcome)
+                          (nth pos candidates)))
+         (rest (mapconcat
+                (lambda (py)
+                  (concat (nth 0 py) (nth 1 py)))
+                (nthcdr (length preview)
+                        (pyim-process-get-first-imobj))
+                "'")))
+    (when (string< "" rest)
+      (setq preview (concat preview rest)))
+    (pyim-process-subword-and-magic-convert preview)))
 
 (defun pyim-preview-delete-string ()
   "删除已经插入 buffer 的 preview 预览字符串。"

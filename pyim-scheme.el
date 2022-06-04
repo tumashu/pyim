@@ -53,10 +53,56 @@
 (defvar pyim-schemes nil
   "Pyim 支持的所有拼音方案.")
 
+(cl-defstruct (pyim-scheme
+               (:constructor pyim-scheme-create)
+               (:copier nil))
+  "输入法方案通用的 slots."
+  class
+  name
+  document
+  first-chars
+  rest-chars
+  code-prefix
+  prefer-triggers)
+
+(cl-defstruct (pyim-scheme-quanpin
+               (:include pyim-scheme)
+               (:constructor pyim-scheme-quanpin-create)
+               (:copier nil))
+  "全拼输入法方案类型。")
+
+(cl-defstruct (pyim-scheme-shuangpin
+               (:include pyim-scheme-quanpin)
+               (:constructor pyim-scheme-shuangpin-create)
+               (:copier nil))
+  "双拼输入法方案类型。
+
+在 PYIM 中，双拼输入法是建立在全拼输入法的基础上的，所以将其定义
+为全拼输入法类型的子类型。"
+  keymaps)
+
+(cl-defstruct (pyim-scheme-xingma
+               (:include pyim-scheme)
+               (:constructor pyim-scheme-xingma-create)
+               (:copier nil))
+  "形码输入法方案类型。"
+  code-prefix-history
+  code-split-length
+  code-maximum-length)
+
+(cl-defstruct (pyim-scheme-wubi
+               (:include pyim-scheme-xingma)
+               (:constructor pyim-scheme-wubi-create)
+               (:copier nil))
+  "五笔输入法方案类型。
+
+单独创建五笔方案类型，是为了支持五笔反查功能，因为1到4字的中文词
+语, 五笔编码有固定的规则，其它形码没有类似特点。" )
+
 ;;;###autoload
 (defun pyim-default-scheme (&optional scheme-name)
   (interactive)
-  (let* ((scheme-names (mapcar #'car pyim-schemes))
+  (let* ((scheme-names (mapcar #'pyim-scheme-name pyim-schemes))
          (scheme-name
           (or scheme-name
               (intern (completing-read "PYIM: 将 pyim-default-scheme 设置为：" scheme-names)))))
@@ -68,45 +114,42 @@
       (message "PYIM: %s 不是一个有效的 scheme 名称, 继续使用 %s." scheme-name pyim-default-scheme)
       nil)))
 
-(defun pyim-scheme-add (scheme)
+(defun pyim-scheme-add (scheme-config)
   "Add SCHEME to `pyim-schemes'"
-  (if (listp scheme)
-      (let ((scheme-name (car scheme)))
-        (when (symbolp scheme-name)
-          (setq pyim-schemes
-                (remove (assoc scheme-name pyim-schemes)
-                        pyim-schemes)))
-        (push scheme pyim-schemes))
+  (if (listp scheme-config)
+      (let* ((scheme-name (car scheme-config))
+             (scheme-type (plist-get (cdr scheme-config) :class))
+             (func (intern (format "pyim-scheme-%s-create" scheme-type)))
+             (scheme (apply func :name scheme-name (cdr scheme-config)))
+             schemes update-p)
+        (when (and (symbolp scheme-name)
+                   (functionp func))
+          (dolist (x pyim-schemes)
+            (push (if (equal (pyim-scheme-name x) scheme-name)
+                      (progn (setq update-p t)
+                             scheme)
+                    x)
+                  schemes))
+          (unless update-p
+            (push scheme schemes))
+          (setq pyim-schemes (reverse schemes))))
     (message "PYIM: Invalid pyim scheme config!")))
 
+(defun pyim-scheme-current ()
+  "获取当前正在使用的 scheme。"
+  (or (pyim-scheme-get
+       (if pyim-assistant-scheme-enable
+           pyim-assistant-scheme
+         pyim-default-scheme))
+      (pyim-scheme-get 'quanpin)))
+
 (defun pyim-scheme-get (scheme-name)
-  "获取名称为 SCHEME-NAME 的输入法方案。"
+  "获取名称为 SCHEME-NAME 的 scheme."
   (when scheme-name
-    (assoc scheme-name pyim-schemes)))
-
-(defun pyim-scheme-name (&optional default)
-  "获取输入法 scheme"
-  (let (scheme-name)
-    (if (and pyim-assistant-scheme-enable
-             (not default))
-        (setq scheme-name
-              (or pyim-assistant-scheme
-                  pyim-default-scheme))
-      (setq scheme-name pyim-default-scheme))
-    (if (assq scheme-name pyim-schemes)
-        scheme-name
-      'quanpin)))
-
-(defun pyim-scheme-get-option (scheme-name option)
-  "获取名称为 SCHEME-NAME 的输入法方案，并提取其属性 OPTION 。"
-  (when scheme-name
-    (let* ((scheme (pyim-scheme-get scheme-name))
-           (scheme-inherit
-            (car (pyim-scheme-get
-                  (plist-get (cdr scheme) :inherit)))))
-      (if (member option (cdr scheme))
-          (plist-get (cdr scheme) option)
-        (pyim-scheme-get-option scheme-inherit option)))))
+    (cl-find-if
+     (lambda (x)
+       (equal (pyim-scheme-name x) scheme-name))
+     pyim-schemes)))
 
 (pyim-scheme-add
  '(quanpin
@@ -119,7 +162,7 @@
 (pyim-scheme-add
  '(wubi
    :document "五笔输入法。"
-   :class xingma
+   :class wubi
    :first-chars "abcdefghijklmnopqrstuvwxyz"
    :rest-chars "abcdefghijklmnopqrstuvwxyz'"
    :code-prefix "wubi/" ;五笔词库中所有的 code 都以 "wubi/" 开头，防止和其它词库冲突。

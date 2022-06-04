@@ -42,26 +42,17 @@
           (const :tag "Use baidu cloud input method." baidu)
           (const :tag "Use google cloud input method." google)))
 
-(defun pyim-cloudim (string scheme-name)
-  "使用云输入法引擎搜索 STRING 获取词条列表.
-云输入法由 `pyim-cloudim' 设置。"
-  (when (and pyim-cloudim (symbolp pyim-cloudim))
-    (let ((func (intern (format "pyim-cloudim:%s" pyim-cloudim))))
-      (when (functionp func)
-        (funcall func string scheme-name)))))
-
-(setq pyim-candidates-cloud-search-function #'pyim-cloudim)
-
-(defun pyim-cloudim:baidu (string scheme-name)
+(cl-defmethod pyim-candidates-cloud-search
+  (string (_scheme pyim-scheme-quanpin)
+          &context (pyim-cloudim (eql baidu)))
   "使用 baidu 云输入法引擎搜索 STRING, 获取词条列表。"
-  (when (equal scheme-name 'quanpin)
-    (let ((buffer (pyim-cloudim-url-retrieve-sync
-                   (format "https://olime.baidu.com/py?py=%s" string)
-                   t nil 0.2)))
-      (when (bufferp buffer)
-        (with-current-buffer buffer
-          (prog1 (pyim-cloudim-parse-baidu-buffer)
-            (kill-buffer)))))))
+  (let ((buffer (pyim-cloudim-url-retrieve-sync
+                 (format "https://olime.baidu.com/py?py=%s" string)
+                 t nil 0.2)))
+    (when (bufferp buffer)
+      (with-current-buffer buffer
+        (prog1 (pyim-cloudim-parse-baidu-buffer)
+          (kill-buffer))))))
 
 (defun pyim-cloudim-url-retrieve-sync (url &optional silent inhibit-cookies timeout)
   "Pyim 版本的 `url-retrieve-synchronously'.
@@ -134,16 +125,17 @@
     (when (> (length word) 0)
       (list (propertize word :comment "(云)")))))
 
-(defun pyim-cloudim:google (string scheme-name)
+(cl-defmethod pyim-candidates-cloud-search
+  (string (_scheme pyim-scheme-quanpin)
+          &context (pyim-cloudim (eql google)))
   "使用 google 云输入法引擎搜索 STRING, 获取词条列表。"
-  (when (eq scheme-name 'quanpin)
-    (let ((buffer (pyim-cloudim-url-retrieve-sync
-                   (format "https://www.google.cn/inputtools/request?ime=pinyin&text=%s" string)
-                   t nil 0.2)))
-      (when (bufferp buffer)
-        (with-current-buffer buffer
-          (prog1 (pyim-cloudim-parse-google-buffer)
-            (kill-buffer)))))))
+  (let ((buffer (pyim-cloudim-url-retrieve-sync
+                 (format "https://www.google.cn/inputtools/request?ime=pinyin&text=%s" string)
+                 t nil 0.3)))
+    (when (bufferp buffer)
+      (with-current-buffer buffer
+        (prog1 (pyim-cloudim-parse-google-buffer)
+          (kill-buffer))))))
 
 (defun pyim-cloudim-parse-google-buffer ()
   "解析 `pyim-cloudim-url-retrieve-sync' 返回的 google buffer."

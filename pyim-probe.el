@@ -80,7 +80,8 @@
   "激活这个 pyim 探针函数后，可以解决 org-speed-commands 与 pyim 冲突问题。
 
 用于：`pyim-english-input-switch-functions' 。"
-  (and (string= major-mode "org-mode")
+  (and (> emacs-major-version 25)
+       (string= major-mode "org-mode")
        (bolp)
        (looking-at org-heading-regexp)
        org-use-speed-commands))
@@ -184,10 +185,13 @@
          (member (char-to-string char) puncts))))
 
 (defun pyim-probe-org-latex-mode ()
-  "org-mode 中的 latex fragment 和 latex 宏指令中自动切换到英文输入."
-  (when (eq major-mode 'org-mode)
-    (or (not (eq (org-inside-LaTeX-fragment-p) nil))
-        (not (eq (org-inside-latex-macro-p) nil)))))
+  "org-mode 中的 latex fragment 和 latex 宏指令中自动切换到英文输入.
+
+FIXME: 这个 probe 在 Emacs 25 上运行可能存在问题。"
+  (when (and (> emacs-major-version 25)
+             (eq major-mode 'org-mode))
+    (or (org-inside-LaTeX-fragment-p)
+        (org-inside-latex-macro-p))))
 
 (defun pyim-probe-exwm-xim-environment ()
   "测试当前是否是 exwm-xim 输入法环境。
@@ -204,6 +208,8 @@
           'xwidget-webkit-pass-command-event-with-input-method)
       (bound-and-true-p xwidget-webkit-isearch--read-string-buffer)))
 
+(cl-pushnew #'pyim-probe-exwm-xim-environment pyim-force-input-chinese-functions)
+(cl-pushnew #'pyim-probe-xwidget-webkit-environment pyim-force-input-chinese-functions)
 
 ;; * Footer
 (provide 'pyim-probe)

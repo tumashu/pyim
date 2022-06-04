@@ -32,25 +32,23 @@
 (require 'pyim-imobjs)
 (require 'pyim-dcache)
 
-(defun pyim-codes-create (imobj scheme-name &optional first-n)
-  "按照 SCHEME-NAME 对应的输入法方案，从一个 IMOBJ 创建一个列表 codes, 这个列表
-包含一个或者多个 code 字符串，这些 code 字符串用于从词库中搜索词条."
-  (let ((class (pyim-scheme-get-option scheme-name :class)))
-    (when class
-      (funcall (intern (format "pyim-codes-create:%S" class))
-               imobj scheme-name first-n))))
+(cl-defgeneric pyim-codes-create (imobj scheme &optional first-n)
+  "按照 SCHEME 对应的输入法方案，从一个 IMOBJ 创建一个列表 codes.
 
-(defun pyim-codes-create:quanpin (imobj _scheme-name &optional first-n)
+这个列表包含一个或者多个 code 字符串，这些 code 字符串用于从词库
+中搜索词条.")
+
+(cl-defmethod pyim-codes-create (imobj (_scheme pyim-scheme-quanpin) &optional first-n)
   "从IMOBJ 创建一个 code 列表：codes.
 
 列表 codes 中包含一个或者多个 code 字符串，这些 code 字符串用于从
 词库中搜索相关词条。
 
-    (pyim-codes-create '((\"w\" \"o\" \"w\" \"o\")
-                         (\"\" \"ai\" \"\" \"ai\")
-                         (\"m\" \"ei\" \"m\" \"ei\")
-                         (\"n\"  \"v\" \"n\"  \"v\"))
-                       'quanpin)
+    (pyim-codes-create (quote ((\"w\" \"o\" \"w\" \"o\")
+                               (\"\" \"ai\" \"\" \"ai\")
+                               (\"m\" \"ei\" \"m\" \"ei\")
+                               (\"n\"  \"v\" \"n\"  \"v\")))
+                       (pyim-scheme-get (quote quanpin)))
 
 结果为:
 
@@ -64,12 +62,10 @@
          py)))
    imobj))
 
-(defun pyim-codes-create:shuangpin (imobj _scheme-name &optional first-n)
-  (pyim-codes-create:quanpin imobj 'quanpin first-n))
-
-(defun pyim-codes-create:xingma (imobj scheme-name &optional first-n)
-  (when scheme-name
-    (let ((code-prefix (pyim-scheme-get-option scheme-name :code-prefix)))
+(cl-defmethod pyim-codes-create (imobj (scheme pyim-scheme-xingma) &optional first-n)
+  "用于处理形码输入法的 `pyim-codes-create' 方法。"
+  (when scheme
+    (let ((code-prefix (pyim-scheme-code-prefix scheme)))
       (mapcar
        (lambda (x)
          (concat (or code-prefix "")

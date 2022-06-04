@@ -50,9 +50,7 @@
 运行结果为 t 时，pyim 开启英文输入功能。"
   :type 'symbol)
 
-(defcustom pyim-force-input-chinese-functions
-  (list 'pyim-probe-exwm-xim-environment
-        'pyim-probe-xwidget-webkit-environment)
+(defcustom pyim-force-input-chinese-functions nil
   "让 pyim 强制输入中文.
 
 这个变量的取值为一个函数列表，这个函数列表中的任意一个函数的运行
@@ -61,7 +59,7 @@
   :type 'symbol)
 
 (defvaralias 'pyim-autoselector 'pyim-process-autoselector)
-(defcustom pyim-process-autoselector '(pyim-autoselector-xingma)
+(defcustom pyim-process-autoselector nil
   "已经启用的自动上屏器.
 
 自动上屏器是一个函数。假设用户已经输入 \"nihao\", 并按下 \"m\" 键，
@@ -189,11 +187,11 @@ entered (nihaom) 的第一个候选词。
 
 如果 SEARCH-FORWARD 为 t, 则向前搜索，反之，向后搜索。"
   (pyim-entered-with-entered-buffer
-    (let* ((scheme-name (pyim-scheme-name))
+    (let* ((scheme (pyim-scheme-current))
            (start (or start (point)))
            (end-position start)
            (string (buffer-substring-no-properties (point-min) start))
-           (orig-imobj-len (length (car (pyim-imobjs-create string scheme-name))))
+           (orig-imobj-len (length (car (pyim-imobjs-create string scheme))))
            imobj pos)
       (if search-forward
           ;; "ni|haoshijie" -> "nihao|shijie"
@@ -201,7 +199,7 @@ entered (nihaom) 的第一个候选词。
             (setq pos (point-max))
             (while (and (> pos start) (= end-position start))
               (setq string (buffer-substring-no-properties (point-min) pos)
-                    imobj (car (pyim-imobjs-create string scheme-name)))
+                    imobj (car (pyim-imobjs-create string scheme)))
               (if (>= (+ orig-imobj-len num) (length imobj))
                   (setq end-position pos)
                 (cl-decf pos))))
@@ -211,7 +209,7 @@ entered (nihaom) 的第一个候选词。
           (setq pos start)
           (while (and (>= pos (point-min)) (= end-position start))
             (setq string (buffer-substring-no-properties (point-min) pos)
-                  imobj (car (pyim-imobjs-create string scheme-name)))
+                  imobj (car (pyim-imobjs-create string scheme)))
             (if (= (- orig-imobj-len num) (length imobj))
                 (setq end-position pos)
               (cl-decf pos)))))
@@ -242,9 +240,9 @@ entered (nihaom) 的第一个候选词。
 
 (defun pyim-process-input-chinese-p ()
   "确定 pyim 是否需要启动中文输入模式."
-  (let* ((scheme-name (pyim-scheme-name))
-         (first-chars (pyim-scheme-get-option scheme-name :first-chars))
-         (rest-chars (pyim-scheme-get-option scheme-name :rest-chars)))
+  (let* ((scheme (pyim-scheme-current))
+         (first-chars (pyim-scheme-first-chars scheme))
+         (rest-chars (pyim-scheme-rest-chars scheme)))
     (and (or (pyim-process-force-input-chinese-p)
              (and (not pyim-process-input-ascii)
                   (not (pyim-process-auto-switch-english-input-p))))
@@ -278,13 +276,13 @@ entered (nihaom) 的第一个候选词。
 
 (defun pyim-process-run-1 ()
   "查询 `pyim-entered-buffer' 光标前的拼音字符串（如果光标在行首则为光标后的）, 显示备选词等待用户选择。"
-  (let* ((scheme-name (pyim-scheme-name))
+  (let* ((scheme (pyim-scheme-current))
          entered-to-translate)
     (setq entered-to-translate
           (pyim-entered-get 'point-before))
-    (setq pyim-imobjs (pyim-imobjs-create entered-to-translate scheme-name))
+    (setq pyim-imobjs (pyim-imobjs-create entered-to-translate scheme))
     (setq pyim-candidates
-          (or (delete-dups (pyim-candidates-create pyim-imobjs scheme-name))
+          (or (delete-dups (pyim-candidates-create pyim-imobjs scheme))
               (list entered-to-translate)))
     (pyim-process-run-async-timer-reset)
     ;; 当用户选择词条时，如果停顿超过1秒，就激活异步流程，不同的输入法异步流程定
@@ -361,8 +359,8 @@ entered (nihaom) 的第一个候选词。
 
 (defun pyim-process-run-async ()
   "Function used by `pyim-process-run-async-timer'"
-  (let* ((scheme-name (pyim-scheme-name))
-         (words (delete-dups (pyim-candidates-create pyim-imobjs scheme-name t))))
+  (let* ((scheme (pyim-scheme-current))
+         (words (delete-dups (pyim-candidates-create-async pyim-imobjs scheme))))
     (when words
       (setq pyim-candidates words)
       (pyim-process-ui-refresh))))
@@ -592,7 +590,7 @@ alist 列表。"
   (setq pyim-process-code-criteria
         (let ((str (string-join
                     (pyim-codes-create (pyim-process-get-first-imobj)
-                                       (pyim-scheme-name)))))
+                                       (pyim-scheme-current)))))
           (if (> (length pyim-process-code-criteria)
                  (length str))
               pyim-process-code-criteria
@@ -629,10 +627,10 @@ BUG：拼音无法有效地处理多音字。"
     ;; 记录最近创建的词条，用于快速删词功能。
     (setq pyim-process-last-created-words
           (cons word (remove word pyim-process-last-created-words)))
-    (let* ((scheme-name (pyim-scheme-name))
-           (code-prefix (pyim-scheme-get-option scheme-name :code-prefix))
+    (let* ((scheme (pyim-scheme-current))
+           (code-prefix (pyim-scheme-code-prefix scheme))
            (codes (pyim-cstring-to-codes
-                   word scheme-name
+                   word scheme
                    (or criteria pyim-process-code-criteria))))
       ;; 保存对应词条的词频
       (when (> (length word) 0)
@@ -664,6 +662,12 @@ BUG：拼音无法有效地处理多音字。"
 
 (defun pyim-process-terminate ()
   "Terminate the translation of the current key."
+  (pyim-process-terminate-really (pyim-scheme-current)))
+
+(cl-defgeneric pyim-process-terminate-really (scheme)
+  "Terminate the translation of the current key.")
+
+(cl-defmethod pyim-process-terminate-really (_scheme)
   (setq pyim-process-translating nil)
   (pyim-entered-erase-buffer)
   (setq pyim-process-code-criteria nil)
@@ -671,11 +675,7 @@ BUG：拼音无法有效地处理多音字。"
   (setq pyim-candidates nil)
   (setq pyim-candidates-last nil)
   (pyim-process-run-async-timer-reset)
-  (pyim-process-ui-hide)
-  (let* ((class (pyim-scheme-get-option (pyim-scheme-name) :class))
-         (func (intern (format "pyim-process-terminate:%S" class))))
-    (when (and class (functionp func))
-      (funcall func))))
+  (pyim-process-ui-hide))
 
 (defun pyim-process-ui-hide ()
   "隐藏 pyim 相关 UI."

@@ -112,7 +112,7 @@ ADJUST-DUO-YIN-Zi 设置为 t 时, `pyim-cstring-to-pinyin' 会使用 pyim 已
 2. 多音字校正速度比较慢，实时转换会产生卡顿。
 
 BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结果会
-包含多余的连接符：比如： '你=好' --> 'ni-=-hao'"
+包含多余的连接符：比如： \"你=好\" --> \"ni-=-hao\""
   (if (not (pyim-string-match-p "\\cc" string))
       (if return-list
           (list string)
@@ -167,85 +167,103 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
   (pyim-cstring-to-pinyin string shou-zi-mu separator return-list t))
 
 ;; ** 中文字符串到形码的转换工具
-(defun pyim-cstring-to-xingma (string scheme-name &optional return-list)
-  "返回汉字 STRING 对应形码方案 SCHEME-NAME 的 code (不包括
-code-prefix)。当RETURN-LIST 设置为 t 时，返回一个 code list。"
+(cl-defgeneric pyim-cstring-to-xingma (string scheme &optional return-list)
+  "将中文 STRING 转换为 SCHEME 方案对应的形码。")
+
+(cl-defmethod pyim-cstring-to-xingma (string (scheme pyim-scheme-xingma)
+                                             &optional return-list)
+  "将中文 STRING 转换为 SCHEME 方案对应的形码。
+
+返回的形码不包括 code-prefix。当 RETURN-LIST 设置为 t 时，返回一
+个形码 list。"
   (when (string-match-p "^\\cc+\\'" string)
-    (let* ((prefix (pyim-scheme-get-option scheme-name :code-prefix))
-           (func (intern (concat "pyim-cstring-to-xingma:" (symbol-name scheme-name))))
-           (dcache-codes (mapcar (lambda (x)
-                                   (when (string-prefix-p prefix x)
-                                     (string-remove-prefix prefix x)))
-                                 (sort (cl-copy-list (pyim-dcache-call-api 'search-word-code string))
-                                       (lambda (a b) (> (length a) (length b))))))
-           (codes (or (remove nil dcache-codes)
-                      (and (functionp func)
-                           (funcall func string scheme-name)))))
+    (let* ((prefix (pyim-scheme-code-prefix scheme))
+           (dcache-codes
+            (mapcar (lambda (x)
+                      (when (string-prefix-p prefix x)
+                        (string-remove-prefix prefix x)))
+                    (sort (cl-copy-list (pyim-dcache-call-api 'search-word-code string))
+                          (lambda (a b)
+                            (> (length a) (length b))))))
+           (codes (remove nil dcache-codes)))
       (when codes
         (if return-list
             codes
           ;; 如果要返回一个字符串，那就返回第一个，也就是最长的那个编码。
           (car codes))))))
 
-(defun pyim-cstring-to-xingma:wubi (string &optional scheme-name)
-  "返回汉字 STRING 的五笔编码 (不包括 code-prefix) 编码列表。"
-  (let ((length (length string))
-        (string (split-string string "" t)))
-    (cond
-     ;; 双字词，分别取两个字的前两个编码
-     ((eq length 2)
-      (let ((s1 (pyim-cstring-to-xingma (nth 0 string) scheme-name))
-            (s2 (pyim-cstring-to-xingma (nth 1 string) scheme-name)))
-        (when (and s1 s2)
-          (list (concat (substring s1 0 2)
-                        (substring s2 0 2))))))
-     ;; 三字词，取前二字的首编码，及第三个字的前两个编码
-     ((eq length 3)
-      (let ((s1 (pyim-cstring-to-xingma (nth 0 string) scheme-name))
-            (s2 (pyim-cstring-to-xingma (nth 1 string) scheme-name))
-            (s3 (pyim-cstring-to-xingma (nth 2 string) scheme-name)))
-        (when (and s1 s2 s3)
-          (list (concat (substring s1 0 1)
-                        (substring s2 0 1)
-                        (substring s3 0 2))))))
-     ;; 四字词及以上，分别前三个字及最后一个字的首编码
-     ((> length 3)
-      (let ((s1 (pyim-cstring-to-xingma (nth 0 string) scheme-name))
-            (s2 (pyim-cstring-to-xingma (nth 1 string) scheme-name))
-            (s3 (pyim-cstring-to-xingma (nth 2 string) scheme-name))
-            (s4 (pyim-cstring-to-xingma (nth (1- length) string) scheme-name)))
-        (when (and s1 s2 s3 s4)
-          (list (concat (substring s1 0 1)
-                        (substring s2 0 1)
-                        (substring s3 0 1)
-                        (substring s4 0 1))))))
-     (t nil))))
+(cl-defmethod pyim-cstring-to-xingma (string (scheme pyim-scheme-wubi)
+                                             &optional return-list)
+  "将中文 STRING 转换为五笔编码。
 
-(defun pyim-cstring-to-codes (string scheme-name &optional criteria)
-  "将 STRING 转换为 SCHEME-NAME 对应的 codes.
+得到的五笔编码包括 code-prefix。当 RETURN-LIST 设置为 t 时，返回
+一个五笔编码 list。"
+  (or (cl-call-next-method)
+      (let ((length (length string))
+            (string (split-string string "" t))
+            code)
+        (cond
+         ;; 双字词，分别取两个字的前两个编码
+         ((eq length 2)
+          (let ((s1 (pyim-cstring-to-xingma (nth 0 string) scheme))
+                (s2 (pyim-cstring-to-xingma (nth 1 string) scheme)))
+            (when (and s1 s2)
+              (setq code (concat (substring s1 0 2)
+                                 (substring s2 0 2))))))
+         ;; 三字词，取前二字的首编码，及第三个字的前两个编码
+         ((eq length 3)
+          (let ((s1 (pyim-cstring-to-xingma (nth 0 string) scheme))
+                (s2 (pyim-cstring-to-xingma (nth 1 string) scheme))
+                (s3 (pyim-cstring-to-xingma (nth 2 string) scheme)))
+            (when (and s1 s2 s3)
+              (setq code (concat (substring s1 0 1)
+                                 (substring s2 0 1)
+                                 (substring s3 0 2))))))
+         ;; 四字词及以上，分别前三个字及最后一个字的首编码
+         ((> length 3)
+          (let ((s1 (pyim-cstring-to-xingma (nth 0 string) scheme))
+                (s2 (pyim-cstring-to-xingma (nth 1 string) scheme))
+                (s3 (pyim-cstring-to-xingma (nth 2 string) scheme))
+                (s4 (pyim-cstring-to-xingma (nth (1- length) string) scheme)))
+            (when (and s1 s2 s3 s4)
+              (setq code (concat (substring s1 0 1)
+                                 (substring s2 0 1)
+                                 (substring s3 0 1)
+                                 (substring s4 0 1))))))
+         (t nil))
+        (when code
+          (if return-list
+              (list code)
+            code)))))
 
-当 pyim class 为拼音，并且提供 CRITERIA 字符串时，检索到的所有
-codes 会和这个字符串进行比较，然后选择一个相似度最高的 code 作为
-输出，这种处理方式适合拼音输入法，形码输入法一般不需要类似的操作。
+(cl-defgeneric pyim-cstring-to-codes (string scheme &optional criteria)
+  "将 STRING 转换为 SCHEME 对应的 codes.")
+
+(cl-defmethod pyim-cstring-to-codes (string (scheme pyim-scheme-xingma) &optional _)
+  "将中文字符串 STRING 转换为对应的形码."
+  (pyim-cstring-to-xingma string scheme t))
+
+(cl-defmethod pyim-cstring-to-codes (string (_scheme pyim-scheme-quanpin) &optional criteria)
+  "将中文字符串 STRING 转换为对应的拼音。
+
+如果用户提供 CRITERIA 字符串，那么检索到的所有 codes 会和这个字符
+串进行字符串相似度比较，然后选择一个相似度最高的 code 作为输出，
+这种处理方式适合拼音输入法，形码输入法一般不需要类似的操作。
 
 CRITERIA 字符串一般是通过 imobjs 构建的，它保留了用户原始的输入信
 息。"
-  (let ((class (pyim-scheme-get-option scheme-name :class)))
-    (cond ((eq class 'xingma)
-           (pyim-cstring-to-xingma string scheme-name t))
-          ;;拼音使用了多音字校正
-          (t (let ((codes (pyim-cstring-to-pinyin string nil "-" t nil t))
-                   codes-sorted)
-               (if (< (length criteria) 1)
-                   codes
-                 ;; 将 所有 codes 与 criteria 字符串比对，选取相似度最高的一个
-                 ;; code. 这种处理方式适合拼音输入法。
-                 (setq codes-sorted
-                       (sort codes
-                             (lambda (a b)
-                               (< (pyim-string-distance a criteria)
-                                  (pyim-string-distance b criteria)))))
-                 (list (car codes-sorted))))))))
+  (let ((codes (pyim-cstring-to-pinyin string nil "-" t nil t))
+        codes-sorted)
+    (if (< (length criteria) 1)
+        codes
+      ;; 将 所有 codes 与 criteria 字符串比对，选取相似度最高的一个
+      ;; code. 这种处理方式适合拼音输入法。
+      (setq codes-sorted
+            (sort codes
+                  (lambda (a b)
+                    (< (pyim-string-distance a criteria)
+                       (pyim-string-distance b criteria)))))
+      (list (car codes-sorted)))))
 
 ;; PYIM 重构以前使用的一些函数名称，alias 一下，便于兼容。
 (defalias 'pyim-hanzi2pinyin-simple 'pyim-cstring-to-pinyin-simple)
