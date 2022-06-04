@@ -329,7 +329,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 (cl-defgeneric pyim-page-info-format (style page-info)
   "将 PAGE-INFO 按照 STYLE 格式化为选词框中显示的字符串。")
 
-(cl-defmethod pyim-page-info-format (_style page-info)
+(cl-defmethod pyim-page-info-format ((_style (eql 'two-lines)) page-info)
   "将 PAGE-INFO 格式化为选词框中显示的字符串.
 
 样式类似：
