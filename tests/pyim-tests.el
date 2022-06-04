@@ -1323,7 +1323,7 @@ Transfer-Encoding: chunked
   (let ((pyim-isearch-mode t))
     (with-current-buffer (get-buffer-create "test")
       (setq-local isearch-mode t))
-    (should (pyim-probe-isearch-mode)))))
+    (should (pyim-probe-isearch-mode))))
 
 (ert-deftest pyim-tests-pyim-probe-org-speed-commands ()
   (with-temp-buffer
@@ -1405,7 +1405,7 @@ Transfer-Encoding: chunked
       (evil-local-mode -1)
       (should-not (pyim-probe-evil-normal-mode)))))
 
-(ert-deftest pyim-tests-pyim-probe-punctuation-line-beginning (char)
+(ert-deftest pyim-tests-pyim-probe-punctuation-line-beginning ()
   (with-temp-buffer
     (should (pyim-probe-punctuation-line-beginning ?.))
     (insert "fff")
@@ -1413,7 +1413,7 @@ Transfer-Encoding: chunked
     (insert "\n")
     (should (pyim-probe-punctuation-line-beginning ?.))))
 
-(ert-deftest pyim-tests-pyim-probe-punctuation-after-punctuation (char)
+(ert-deftest pyim-tests-pyim-probe-punctuation-after-punctuation ()
   (with-temp-buffer
     (should-not (pyim-probe-punctuation-after-punctuation ?.))
     (insert "'")
@@ -1453,7 +1453,7 @@ Transfer-Encoding: chunked
 
 (ert-deftest pyim-tests-pyim-probe-xwidget-webkit-environment ()
   ;; TODO
-  ))
+  )
 
 (ert-run-tests-batch-and-exit)
 ;; * Footer
