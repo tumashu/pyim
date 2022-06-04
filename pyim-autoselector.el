@@ -41,27 +41,32 @@
 比如：五笔等型码输入法，重码率很低，90%以上的情况都是选择第一个词
 条，自动选择可以减少按空格强制选词的机会。"
   (let* ((scheme (pyim-scheme-current))
-         (n (pyim-scheme-xingma-code-split-length scheme))
+         (split-length (pyim-scheme-xingma-code-split-length scheme))
          (entered (pyim-process-get-entered 'point-before))
          (candidates (pyim-process-get-candidates))
          (last-candidates (pyim-process-get-last-candidates)))
     (when (pyim-scheme-xingma-p scheme)
-      (cond
-       ((and (= (length entered) n)
-             (= (length candidates) 1)
-             ;; 如果没有候选词，pyim 默认将用户输入当做候选词，这时不能自动上屏，
-             ;; 因为这种情况往往是用户输入有误，自动上屏之后，调整输入就变得麻烦了。
-             (not (equal entered (car candidates))))
-        '(:select current))
-       ((and (> (length entered) n)
-             (equal (substring entered 0 n)
-                    (car last-candidates)))
-        ;; 自动清除错误输入模式，类似微软五笔：敲第五个字母的时候，前面四个字母自
-        ;; 动清除。
-        '(:select last :replace-with ""))
-       ((> (length entered) n)
-        '(:select last))
-       (t nil)))))
+      (pyim-autoselector-xingma-1
+       split-length entered candidates last-candidates))))
+
+(defun pyim-autoselector-xingma-1 (split-length entered candidates last-candidates)
+  "`pyim-autoselector-xingma' 内部使用的函数。"
+  (cond
+   ((and (= (length entered) split-length)
+         (= (length candidates) 1)
+         ;; 如果没有候选词，pyim 默认将用户输入当做候选词，这时不能自动上屏，
+         ;; 因为这种情况往往是用户输入有误，自动上屏之后，调整输入就变得麻烦了。
+         (not (equal entered (car candidates))))
+    '(:select current))
+   ((and (> (length entered) split-length)
+         (equal (substring entered 0 split-length)
+                (car last-candidates)))
+    ;; 自动清除错误输入模式，类似微软五笔：敲第五个字母的时候，前面四个字母自
+    ;; 动清除。
+    '(:select last :replace-with ""))
+   ((> (length entered) split-length)
+    '(:select last))
+   (t nil)))
 
 (cl-pushnew #'pyim-autoselector-xingma pyim-process-autoselector)
 
