@@ -204,6 +204,8 @@
           'xwidget-webkit-pass-command-event-with-input-method)
       (bound-and-true-p xwidget-webkit-isearch--read-string-buffer)))
 
+(cl-pushnew #'pyim-probe-exwm-xim-environment pyim-force-input-chinese-functions)
+(cl-pushnew #'pyim-probe-xwidget-webkit-environment pyim-force-input-chinese-functions)
 
 ;; * Footer
 (provide 'pyim-probe)

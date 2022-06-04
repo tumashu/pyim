@@ -50,9 +50,7 @@
 运行结果为 t 时，pyim 开启英文输入功能。"
   :type 'symbol)
 
-(defcustom pyim-force-input-chinese-functions
-  (list 'pyim-probe-exwm-xim-environment
-        'pyim-probe-xwidget-webkit-environment)
+(defcustom pyim-force-input-chinese-functions nil
   "让 pyim 强制输入中文.
 
 这个变量的取值为一个函数列表，这个函数列表中的任意一个函数的运行
