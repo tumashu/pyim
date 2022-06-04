@@ -48,7 +48,7 @@
 ;; 20. TODO   pyim-outcome.el
 ;; 21. [30%]  pyim-page.el
 ;; 22. DONE   pyim-pinyin.el
-;; 23. TODO   pyim-preview.el
+;; 23. [30%]  pyim-preview.el
 ;; 24. [95%]  pyim-probe.el
 ;; 25. TODO   pyim-process.el
 ;; 26. DONE   pyim-punctuation.el
@@ -1529,6 +1529,40 @@ Transfer-Encoding: chunked
   (should
    (equal (pyim-page-menu-create '("你好" "尼耗" "您耗" "您好" "你") 3 nil t)
           #("1.你好 2.尼耗 3[您耗]4.您好 5.你 " 11 15 (face pyim-page-selection)))))
+
+;; ** pyim-preview 相关单元测试
+(ert-deftest pyim-tests-pyim-preview-string ()
+  (let ((pyim-candidates '("世界" "时节" "使节" "视界" ))
+        (pyim-candidate-position 1)
+        (pyim-outcome-history '("你好"))
+        (pyim-imobjs '((("sh" "i" "sh" "i") ("j" "ie" "j" "ie"))))
+        (scheme (pyim-scheme-get 'quanpin)))
+    (should (equal (pyim-preview-string scheme)
+                   "你好世界")))
+
+  (let ((pyim-candidates '("世界" "时节" "使节" "视界" ))
+        (pyim-candidate-position 2)
+        (pyim-outcome-history nil)
+        (pyim-imobjs '((("sh" "i" "sh" "i") ("j" "ie" "j" "ie"))))
+        (scheme (pyim-scheme-get 'quanpin)))
+    (should (equal (pyim-preview-string scheme)
+                   "时节")))
+
+  (let ((pyim-candidates '("这是" "蛰是" "这时" "真实" "这使" "这事" "这" "者" "着" "折" "哲" "浙" "遮"))
+        (pyim-candidate-position 10)
+        (pyim-outcome-history nil)
+        (pyim-imobjs '((("zh" "e" "zh" "e") ("sh" "i" "sh" "i"))))
+        (scheme (pyim-scheme-get 'quanpin)))
+    (should (equal (pyim-preview-string scheme)
+                   "折shi")))
+
+  (let ((pyim-candidates '("工" "藏匿" "工工" "花花草草" "㠭"))
+        (pyim-candidate-position 4)
+        (pyim-outcome-history nil)
+        (pyim-imobjs '(("aaaa")))
+        (scheme (pyim-scheme-get 'wubi)))
+    (should (equal (pyim-preview-string scheme)
+                   "花花草草"))))
 
 
 (ert-run-tests-batch-and-exit)
