@@ -46,7 +46,7 @@
 ;; 18. TODO   pyim-indicator.el
 ;; 19. IGNORE pyim-liberime.el
 ;; 20. TODO   pyim-outcome.el
-;; 21. TODO   pyim-page.el
+;; 21. [30%]  pyim-page.el
 ;; 22. DONE   pyim-pinyin.el
 ;; 23. TODO   pyim-preview.el
 ;; 24. [95%]  pyim-probe.el
@@ -1483,6 +1483,53 @@ Transfer-Encoding: chunked
 (ert-deftest pyim-tests-pyim-probe-xwidget-webkit-environment ()
   ;; TODO
   )
+
+;; ** pyim-probe 相关单元测试
+(ert-deftest pyim-tests-pyim-page-get-page-style ()
+  (let ((pyim-page-tooltip-style-alist
+         '((minibuffer . minibuffer)))
+        (pyim-page-style 'test))
+    (should (equal (pyim-page-get-page-style 'minibuffer)
+                   'minibuffer))
+    (should (equal (pyim-page-get-page-style 'test)
+                   'test))))
+
+(ert-deftest pyim-tests-pyim-page-info-format ()
+  (let ((page-info (make-hash-table)))
+    (puthash :scheme (pyim-scheme-get 'quanpin) page-info)
+    (puthash :current-page 1 page-info)
+    (puthash :total-page 26 page-info)
+    (puthash :candidates '("你好" "尼耗" "您耗" "您好" "你") page-info)
+    (puthash :position 3 page-info)
+    (puthash :hightlight-current 'hightlight-current page-info)
+    (puthash :assistant-enable nil page-info)
+
+    (should (equal (pyim-page-info-format 'two-lines page-info)
+                   "=> | [1/26]: 
+1.你好 2.尼耗 3[您耗]4.您好 5.你 "))
+    (should (equal (pyim-page-info-format 'one-line page-info)
+                   "[|]: 1.你好 2.尼耗 3[您耗]4.您好 5.你 (1/26)"))
+    (should (equal (pyim-page-info-format 'vertical page-info)
+                   "=> | [1/26]: 
+1.你好 
+2.尼耗 
+3[您耗]
+4.您好 
+5.你 "))
+    (should (equal (pyim-page-info-format 'minibuffer page-info)
+                   "[|              ]: 1.你好 2.尼耗 3[您耗]4.您好 5.你 (1/26) $ "))))
+
+(ert-deftest pyim-tests-pyim-page-menu-create ()
+  (should
+   (equal (pyim-page-menu-create '("你好" "尼耗" "您耗" "您好" "你") 0 nil t)
+          #("1.你好 2.尼耗 3.您耗 4.您好 5.你 " 13 17 (face pyim-page-selection))))
+  (should
+   (equal (pyim-page-menu-create '("你好" "尼耗" "您耗" "您好" "你") 1 nil t)
+          #("1[你好]2.尼耗 3.您耗 4.您好 5.你 " 1 5 (face pyim-page-selection))))
+  (should
+   (equal (pyim-page-menu-create '("你好" "尼耗" "您耗" "您好" "你") 3 nil t)
+          #("1.你好 2.尼耗 3[您耗]4.您好 5.你 " 11 15 (face pyim-page-selection)))))
+
 
 (ert-run-tests-batch-and-exit)
 ;; * Footer
