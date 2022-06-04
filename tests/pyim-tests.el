@@ -1512,6 +1512,11 @@ Transfer-Encoding: chunked
     (should (equal (pyim-page-info-format 'two-lines page-info)
                    "=> | [1/26]: 
 1.你好 2.尼耗 3[您耗]4.您好 5.你 "))
+
+    (should (equal (pyim-page-info-format 'no-exist-style page-info)
+                   "=> | [1/26]: 
+1.你好 2.尼耗 3[您耗]4.您好 5.你 "))
+
     (should (equal (pyim-page-info-format 'one-line page-info)
                    "[|]: 1.你好 2.尼耗 3[您耗]4.您好 5.你 (1/26)"))
     (should (equal (pyim-page-info-format 'vertical page-info)
