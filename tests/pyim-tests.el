@@ -1247,7 +1247,7 @@ yin-xing 因行
     ;; `pyim-dregcache-get' calls `pyim-pymap-py2cchar-get' before return result
     (should (eq (length words) 26))))
 
-
+;; ** pyim-cloudim 相关单元测试
 (ert-deftest pyim-tests-pyim-cloudim ()
   (with-temp-buffer
     (insert "HTTP/1.1 200 OK
@@ -1299,6 +1299,161 @@ Transfer-Encoding: chunked
     (let ((pyim-cloudim nil)
           (quanpin (pyim-scheme-get 'quanpin)))
       (should (not (pyim-candidates-cloud-search "nihao" quanpin))))))
+
+;; ** pyim-probe 相关单元测试
+(ert-deftest pyim-tests-pyim-probe-program-mode ()
+  (with-temp-buffer
+    (emacs-lisp-mode)
+    (insert ";; comment")
+    (should-not (pyim-probe-program-mode))
+    (insert "\n")
+    (should (pyim-probe-program-mode))
+    (insert "()")
+    (backward-char 1)
+    (should (pyim-probe-program-mode))
+    (insert "setq test")
+    (should (pyim-probe-program-mode))
+    (insert " \"\"")
+    (backward-char 1)
+    (should-not (pyim-probe-program-mode))))
+
+(ert-deftest pyim-tests-pyim-probe-program-mode ()
+  ;; Isearch mode 不好写测试，这里假设 isearch 命令运行时，至少有一个 buffer 中
+  ;; 变量 isearch-mode 取值为 t. 参考了 `isearch-define-mode-toggle'.
+  (let ((pyim-isearch-mode t))
+    (with-current-buffer (get-buffer-create "test")
+      (setq-local isearch-mode t))
+    (should (pyim-probe-isearch-mode)))))
+
+(ert-deftest pyim-tests-pyim-probe-org-speed-commands ()
+  (with-temp-buffer
+    (let ((org-use-speed-commands t))
+      (org-mode)
+      (insert "* heading")
+      (goto-char (line-beginning-position))
+      (should (pyim-probe-org-speed-commands))
+      (forward-char 1)
+      (should-not (pyim-probe-org-speed-commands))
+      (forward-char 1)
+      (should-not (pyim-probe-org-speed-commands)))))
+
+(ert-deftest pyim-tests-pyim-probe-org-structure-template ()
+  (with-temp-buffer
+    (org-mode)
+    (insert "<")
+    (should (pyim-probe-org-structure-template))
+    (insert "abcde")
+    (should (pyim-probe-org-structure-template))
+    (insert " ")
+    (should-not (pyim-probe-org-structure-template))
+
+    (erase-buffer)
+
+    (insert "    <")
+    (should (pyim-probe-org-structure-template))
+    (insert "abcde")
+    (should (pyim-probe-org-structure-template))
+    (insert " ")
+    (should-not (pyim-probe-org-structure-template))))
+
+(ert-deftest pyim-tests-pyim-probe-dynamic-english ()
+  (with-temp-buffer
+    ;; 从光标往前找第一个非数字的字符，为其他字符时，输入下一个字符时默认开启英文输入
+    (insert "english")
+    (should (pyim-probe-dynamic-english))
+
+    (insert "123")
+    (should (pyim-probe-dynamic-english))
+
+    (insert ",")
+    (should (pyim-probe-dynamic-english))
+
+    (insert "  ")
+    (should (pyim-probe-dynamic-english))
+
+    ;; 从光标往前找第一个非数字的字符，为中文字符时，输入下一个字符时默认开启中文输入
+    (insert "中文")
+    (should-not (pyim-probe-dynamic-english))))
+
+(ert-deftest pyim-tests-pyim-probe-auto-english ()
+  (with-temp-buffer
+    ;; 1. 当前字符为英文字符（不包括空格）时，输入下一个字符为英文字符
+    (insert "english")
+    (should (pyim-probe-auto-english))
+    ;; 当前字符为中文字符或输入字符为行首字符时，输入的字符为中文字符
+    (insert "\n")
+    (should-not (pyim-probe-auto-english))
+
+    (insert "中文")
+    (should-not (pyim-probe-auto-english))
+    ;; 以单个空格为界，自动切换中文和英文字符
+
+    (insert " ")
+    (should (pyim-probe-auto-english))
+
+    (insert "english ")
+    (should-not (pyim-probe-auto-english))
+
+    (insert "中文 ")
+    (should (pyim-probe-auto-english))))
+
+(ert-deftest pyim-tests-pyim-probe-evil-normal-mode ()
+  (when (featurep 'evil)
+    (with-temp-buffer
+      (evil-local-mode)
+      (should (pyim-probe-evil-normal-mode))
+      (evil-local-mode -1)
+      (should-not (pyim-probe-evil-normal-mode)))))
+
+(ert-deftest pyim-tests-pyim-probe-punctuation-line-beginning (char)
+  (with-temp-buffer
+    (should (pyim-probe-punctuation-line-beginning ?.))
+    (insert "fff")
+    (should-not (pyim-probe-punctuation-line-beginning ?.))
+    (insert "\n")
+    (should (pyim-probe-punctuation-line-beginning ?.))))
+
+(ert-deftest pyim-tests-pyim-probe-punctuation-after-punctuation (char)
+  (with-temp-buffer
+    (should-not (pyim-probe-punctuation-after-punctuation ?.))
+    (insert "'")
+    (should (pyim-probe-punctuation-after-punctuation ?.))
+    (insert "abc")
+    (should-not (pyim-probe-punctuation-after-punctuation ?.))
+    (insert "123")
+    (should-not (pyim-probe-punctuation-after-punctuation ?.))
+    (insert "。")
+    (should-not (pyim-probe-punctuation-after-punctuation ?.))
+    (insert ".")
+    (should (pyim-probe-punctuation-after-punctuation ?.))))
+
+(ert-deftest pyim-tests-pyim-probe-org-latex-mode ()
+  (with-temp-buffer
+    (org-mode)
+    (insert "\\begin{equation}")
+    (save-excursion
+      (insert "\\end{equation}"))
+    (should (pyim-probe-org-latex-mode))
+
+    (erase-buffer)
+    (insert "$$")
+    (backward-char 1)
+    (should (pyim-probe-org-latex-mode))
+
+    (erase-buffer)
+    (insert "\\documentclass{article}")
+    (should (pyim-probe-org-latex-mode))))
+
+(ert-deftest pyim-tests-pyim-probe-exwm-xim-environment ()
+  (with-temp-buffer
+    (setq-local exwm-xim-buffer-p t)
+    (should (pyim-probe-exwm-xim-environment))
+    (setq-local exwm-xim-buffer-p nil)
+    (should-not (pyim-probe-exwm-xim-environment))))
+
+(ert-deftest pyim-tests-pyim-probe-xwidget-webkit-environment ()
+  ;; TODO
+  ))
 
 (ert-run-tests-batch-and-exit)
 ;; * Footer
