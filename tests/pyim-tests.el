@@ -25,7 +25,36 @@
 ;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;;  pyim test case.
+;; pyim test case.
+;; 1.  TODO   pyim-autoselector.el
+;; 2.  [90%]  pyim-candidates.el
+;; 3.  [95%]  pyim-cloudim.el
+;; 4.  DONE   pyim-codes.el
+;; 5.  DONE   pyim-common.el
+;; 6.  [95%]  pyim-cregexp.el
+;; 7.  [95%]  pyim-cregexp-utils.el
+;; 8.  DONE   pyim-cstring.el
+;; 9.  DONE   pyim-cstring-utils.el
+;; 10. DONE   pyim-dcache.el
+;; 11. [95%]  pyim-dhashcache.el
+;; 12. DONE   pyim-dict.el
+;; 13. IGNORE pyim-dict-manager.el
+;; 14. [20%]  pyim-dregcache.el
+;; 15. TODO   pyim.el
+;; 16. DONE   pyim-entered.el
+;; 17. DONE   pyim-imobjs.el
+;; 18. TODO   pyim-indicator.el
+;; 19. IGNORE pyim-liberime.el
+;; 20. TODO   pyim-outcome.el
+;; 21. TODO   pyim-page.el
+;; 22. DONE   pyim-pinyin.el
+;; 23. TODO   pyim-preview.el
+;; 24. [95%]  pyim-probe.el
+;; 25. TODO   pyim-process.el
+;; 26. DONE   pyim-punctuation.el
+;; 27. DONE   pyim-pymap.el
+;; 28. IGNORE pyim-pymap-utils.el
+;; 29  DONE   pyim-scheme.el
 
 ;;; Code:
 ;; * 代码                                                                 :code:
