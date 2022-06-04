@@ -294,7 +294,8 @@ Please see: https://github.com/rime/librime/issues/349"
    ;; 找不到通用的处理方式的话就不做截取处理。
    (t input)))
 
-(cl-defmethod pyim-process-terminate-really :after ((_scheme pyim-scheme-rime))
+(cl-defmethod pyim-process-terminate-really ((_scheme pyim-scheme-rime))
+  (cl-call-next-method)
   (liberime-clear-commit)
   (liberime-clear-composition))
 
