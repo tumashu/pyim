@@ -184,10 +184,13 @@
          (member (char-to-string char) puncts))))
 
 (defun pyim-probe-org-latex-mode ()
-  "org-mode 中的 latex fragment 和 latex 宏指令中自动切换到英文输入."
-  (when (eq major-mode 'org-mode)
-    (or (not (eq (org-inside-LaTeX-fragment-p) nil))
-        (not (eq (org-inside-latex-macro-p) nil)))))
+  "org-mode 中的 latex fragment 和 latex 宏指令中自动切换到英文输入.
+
+FIXME: 这个 probe 在 Emacs 25 上运行可能存在问题。"
+  (when (and (> emacs-major-version 25)
+             (eq major-mode 'org-mode))
+    (or (org-inside-LaTeX-fragment-p)
+        (org-inside-latex-macro-p))))
 
 (defun pyim-probe-exwm-xim-environment ()
   "测试当前是否是 exwm-xim 输入法环境。

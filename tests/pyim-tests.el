@@ -1457,21 +1457,25 @@ Transfer-Encoding: chunked
     (should (pyim-probe-punctuation-after-punctuation ?.))))
 
 (ert-deftest pyim-tests-pyim-probe-org-latex-mode ()
-  (with-temp-buffer
-    (org-mode)
-    (insert "\\begin{equation}")
-    (save-excursion
-      (insert "\\end{equation}"))
-    (should (pyim-probe-org-latex-mode))
+  (when (> emacs-major-version 25)
+    (with-temp-buffer
+      (org-mode)
+      (insert "\\begin{equation}")
+      (save-excursion
+        (insert "\\end{equation}"))
+      (should (pyim-probe-org-latex-mode))
 
-    (erase-buffer)
-    (insert "$$")
-    (backward-char 1)
-    (should (pyim-probe-org-latex-mode))
+      (erase-buffer)
+      (insert "$$")
+      (backward-char 1)
+      (should (pyim-probe-org-latex-mode))
 
-    (erase-buffer)
-    (insert "\\documentclass{article}")
-    (should (pyim-probe-org-latex-mode))))
+      (erase-buffer)
+      (insert "\\documentclass{article}")
+      (should (pyim-probe-org-latex-mode))))
+
+  (when (< emacs-major-version 26)
+    (should-not (pyim-probe-org-latex-mode))))
 
 (ert-deftest pyim-tests-pyim-probe-exwm-xim-environment ()
   (with-temp-buffer
