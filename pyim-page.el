@@ -229,7 +229,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
   "获取当前选择的词条在 candidates 中的位置。"
   (- (min (pyim-process-get-candidate-position)
           (pyim-process-candidates-length))
-     (pyim-page-start)))
+     (1- (pyim-page-start))))
 
 (defun pyim-page-get-valid-tooltip ()
   "获取一个可用的 tooltip."
