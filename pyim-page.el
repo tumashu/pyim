@@ -173,16 +173,16 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 `pyim-page-style' 相关的函数，用于生成用于在选词框中显示的字符串。"
   (let* ((candidate-showed (pyim-page-get-showed-candidates))
          (positon (pyim-page-get-selected-word-position))
-         (page-info (make-hash-table))
          (tooltip (pyim-page-get-valid-tooltip))
-         (style (pyim-page-get-page-style tooltip)))
-    (puthash :scheme (pyim-scheme-current) page-info)
-    (puthash :current-page (pyim-page-current-page) page-info)
-    (puthash :total-page (pyim-page-total-page) page-info)
-    (puthash :candidates candidate-showed page-info)
-    (puthash :position positon page-info)
-    (puthash :hightlight-current hightlight-current page-info)
-    (puthash :assistant-enable pyim-assistant-scheme-enable page-info)
+         (style (pyim-page-get-page-style tooltip))
+         (page-info
+          (list :scheme (pyim-scheme-current)
+                :current-page (pyim-page-current-page)
+                :total-page (pyim-page-total-page)
+                :candidates candidate-showed
+                :position positon
+                :hightlight-current hightlight-current
+                :assistant-enable pyim-assistant-scheme-enable)))
     ;; Show page.
     (when (and (null unread-command-events)
                (null unread-post-input-method-events))
@@ -340,15 +340,15 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 +----------------------------+"
   (format "=> %s%s [%s/%s]: \n%s"
           (pyim-page-preview-create
-           (gethash :scheme page-info))
-          (if (gethash :assistant-enable page-info) " (辅)" "")
-          (gethash :current-page page-info)
-          (gethash :total-page page-info)
+           (plist-get page-info :scheme))
+          (if (plist-get page-info :assistant-enable) " (辅)" "")
+          (plist-get page-info :current-page)
+          (plist-get page-info :total-page)
           (pyim-page-menu-create
-           (gethash :candidates page-info)
-           (gethash :position page-info)
+           (plist-get page-info :candidates)
+           (plist-get page-info :position)
            nil
-           (gethash :hightlight-current page-info))))
+           (plist-get page-info :hightlight-current))))
 
 (cl-defmethod pyim-page-info-format ((_style (eql one-line)) page-info)
   "将 PAGE-INFO 格式化为选词框中显示的字符串.
@@ -360,15 +360,15 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 +-----------------------------------+"
   (format "[%s%s]: %s(%s/%s)"
           (pyim-page-preview-create
-           (gethash :scheme page-info) " ")
-          (if (gethash :assistant-enable page-info) " (辅)" "")
+           (plist-get page-info :scheme) " ")
+          (if (plist-get page-info :assistant-enable) " (辅)" "")
           (pyim-page-menu-create
-           (gethash :candidates page-info)
-           (gethash :position page-info)
+           (plist-get page-info :candidates)
+           (plist-get page-info :position)
            nil
-           (gethash :hightlight-current page-info))
-          (gethash :current-page page-info)
-          (gethash :total-page page-info)))
+           (plist-get page-info :hightlight-current))
+          (plist-get page-info :current-page)
+          (plist-get page-info :total-page)))
 
 (cl-defmethod pyim-page-info-format ((_style (eql vertical)) page-info)
   "将 PAGE-INFO 格式化为选词框中显示的字符串.
@@ -382,15 +382,15 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 +--------------+"
   (format "=> %s%s [%s/%s]: \n%s"
           (pyim-page-preview-create
-           (gethash :scheme page-info))
-          (if (gethash :assistant-enable page-info) " (辅)" "")
-          (gethash :current-page page-info)
-          (gethash :total-page page-info)
+           (plist-get page-info :scheme))
+          (if (plist-get page-info :assistant-enable) " (辅)" "")
+          (plist-get page-info :current-page)
+          (plist-get page-info :total-page)
           (pyim-page-menu-create
-           (gethash :candidates page-info)
-           (gethash :position page-info)
+           (plist-get page-info :candidates)
+           (plist-get page-info :position)
            "\n"
-           (gethash :hightlight-current page-info))))
+           (plist-get page-info :hightlight-current))))
 
 (cl-defmethod pyim-page-info-format ((_style (eql minibuffer)) page-info)
   "将 PAGE-INFO 格式化为选词框中显示的字符串.
@@ -404,15 +404,15 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
   ;; 容中, 为了便于区分，在 page 后面添加一个显眼的字符。
   (format "[%-15s%s]: %s(%s/%s) $ "
           (pyim-page-preview-create
-           (gethash :scheme page-info))
-          (if (gethash :assistant-enable page-info) " (辅)" "")
+           (plist-get page-info :scheme))
+          (if (plist-get page-info :assistant-enable) " (辅)" "")
           (pyim-page-menu-create
-           (gethash :candidates page-info)
-           (gethash :position page-info)
+           (plist-get page-info :candidates)
+           (plist-get page-info :position)
            nil
-           (gethash :hightlight-current page-info))
-          (gethash :current-page page-info)
-          (gethash :total-page page-info)))
+           (plist-get page-info :hightlight-current))
+          (plist-get page-info :current-page)
+          (plist-get page-info :total-page)))
 
 (cl-defgeneric pyim-page-preview-create (scheme &optional separator)
   "这个函数用于创建在 page 中显示的预览字符串。

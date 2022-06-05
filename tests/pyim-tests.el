@@ -1509,14 +1509,14 @@ Transfer-Encoding: chunked
                    'test))))
 
 (ert-deftest pyim-tests-pyim-page-info-format ()
-  (let ((page-info (make-hash-table)))
-    (puthash :scheme (pyim-scheme-get 'quanpin) page-info)
-    (puthash :current-page 1 page-info)
-    (puthash :total-page 26 page-info)
-    (puthash :candidates '("你好" "尼耗" "您耗" "您好" "你") page-info)
-    (puthash :position 3 page-info)
-    (puthash :hightlight-current 'hightlight-current page-info)
-    (puthash :assistant-enable nil page-info)
+  (let ((page-info
+         (list :scheme (pyim-scheme-get 'quanpin)
+               :current-page 1
+               :total-page 26
+               :candidates '("你好" "尼耗" "您耗" "您好" "你")
+               :position 3
+               :hightlight-current 'hightlight-current
+               :assistant-enable nil)))
 
     (should (equal (pyim-page-info-format 'two-lines page-info)
                    "=> | [1/26]: 
