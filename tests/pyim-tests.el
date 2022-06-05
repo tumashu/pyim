@@ -872,8 +872,9 @@
     (should (string-match-p regexp "牛蛤")))
 
   (let* ((str (nth 2 (split-string (car (pyim-pymap-py2cchar-get "wang" t)) "|")))
-         (regexp1 (pyim-cregexp-build-1 "wang" 3))
-         (regexp2 (pyim-cregexp-build-1 "wang" 2)))
+         (quanpin (pyim-scheme-get 'quanpin))
+         (regexp1 (pyim-cregexp-build-1 "wang" 3 nil quanpin))
+         (regexp2 (pyim-cregexp-build-1 "wang" 2 nil quanpin)))
     (should (string-match-p regexp1 str))
     (should-not (string-match-p regexp2 str)))
 
@@ -886,6 +887,7 @@
     (should-not (string-match-p regexp2 "当王")))
 
   (let ((pyim-default-scheme 'wubi)
+        (wubi (pyim-scheme-get 'wubi))
         (pyim-dhashcache-code2word (make-hash-table :test #'equal)))
     (puthash "wubi/aaaa" (list "工" "恭恭敬敬") pyim-dhashcache-code2word)
     (puthash "wubi/adww" (list "欺" "蒙古人" "其人" "欺人" "斯人" "惹人" "匧" "歁" "莢") pyim-dhashcache-code2word)
@@ -893,7 +895,7 @@
     (should (equal (pyim-cregexp-build "adww") "\\(?:adww\\|[其匧惹斯欺歁莢蒙][人古]?人?\\)"))
     (should (equal (pyim-cregexp-build "aaaa'aaaa")
                    "\\(?:\\(?:aaaa'\\|aaaa\\|[工恭]恭?敬?敬?\\)\\(?:aaaa\\|[工恭]恭?敬?敬?\\)\\)"))
-    (should (equal (pyim-cregexp-build-1 "aaaa'aaaa")
+    (should (equal (pyim-cregexp-build-1 "aaaa'aaaa" nil nil wubi)
                    "\\(?:aaaa'\\|aaaa\\|[工恭][恭]?[敬]?[敬]?\\)\\(?:aaaa\\|[工恭][恭]?[敬]?[敬]?\\)")))
 
   (with-temp-buffer
