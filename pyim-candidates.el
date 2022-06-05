@@ -298,7 +298,7 @@
       `(,(car pyim-candidates)
         ,@(pyim-candidates-cloud-search str scheme)
         ,@(pyim-candidates-search-buffer
-           (pyim-cregexp-build str 3 t scheme))
+           (pyim-cregexp-create str scheme 3 t))
         ,@(cdr pyim-candidates)))))
 
 (cl-defgeneric pyim-candidates-cloud-search (string scheme)
