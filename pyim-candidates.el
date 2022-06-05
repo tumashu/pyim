@@ -298,7 +298,7 @@
       `(,(car pyim-candidates)
         ,@(pyim-candidates-cloud-search str scheme)
         ,@(pyim-candidates-search-buffer
-           (pyim-cregexp-build str 3 t))
+           (pyim-cregexp-build str 3 t scheme))
         ,@(cdr pyim-candidates)))))
 
 (cl-defgeneric pyim-candidates-cloud-search (string scheme)
@@ -330,10 +330,11 @@
                       (> (or (gethash a counts) 0)
                          (or (gethash b counts) 0))))))))
 
-(cl-defmethod pyim-candidates-create-async (_imobjs (_scheme pyim-scheme-shuangpin))
+(cl-defmethod pyim-candidates-create-async (imobjs (_scheme pyim-scheme-shuangpin))
   "按照 SCHEME, 用异步的方式从 IMOBJS 获得候选词条，用于双拼输入法。"
-  (let ((pyim-default-scheme 'quanpin))
-    (cl-call-next-method)))
+  ;; 注意：pyim 支持的双拼输入法，内部使用全拼的 imobjs, 所以这里直接调用全拼的
+  ;; `pyim-candidates-create-async' 方法来处理 imobjs。
+  (pyim-candidates-create-async imobjs (pyim-scheme-get 'quanpin)))
 
 ;; * Footer
 (provide 'pyim-candidates)

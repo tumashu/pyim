@@ -152,6 +152,8 @@
        (equal (pyim-scheme-name x) scheme-name))
      pyim-schemes)))
 
+;; 注意：这个 quanpin scheme 在 pyim 中有特殊的作用，许多功能都依赖 quanpin
+;; scheme 的存在，所以这个 scheme 不可以删除，也不可以更改名字。
 (pyim-scheme-add
  '(quanpin
    :document "全拼输入法方案（不可删除）。"
