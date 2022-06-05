@@ -878,9 +878,10 @@
     (should (string-match-p regexp1 str))
     (should-not (string-match-p regexp2 str)))
 
-  (let* ((imobj '(("d" "a" "d" "a") ("w" "ang" "w" "ang")))
-         (regexp1 (pyim-cregexp-build-quanpin imobj))
-         (regexp2 (pyim-cregexp-build-quanpin imobj nil nil t)))
+  (let* ((quanpin (pyim-scheme-get 'quanpin))
+         (imobj '(("d" "a" "d" "a") ("w" "ang" "w" "ang")))
+         (regexp1 (pyim-cregexp-create-from-imobj imobj quanpin))
+         (regexp2 (pyim-cregexp-create-from-imobj imobj quanpin nil nil t)))
     (should (string-match-p regexp1 "大王"))
     (should (string-match-p regexp1 "当王"))
     (should (string-match-p regexp2 "大王"))
