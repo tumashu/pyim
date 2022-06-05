@@ -334,7 +334,7 @@
   "按照 SCHEME, 用异步的方式从 IMOBJS 获得候选词条，用于双拼输入法。"
   ;; 注意：pyim 支持的双拼输入法，内部使用全拼的 imobjs, 所以这里直接调用全拼的
   ;; `pyim-candidates-create-async' 方法来处理 imobjs。
-  (pyim-candidates-create-async imobjs (pyim-scheme-get 'quanpin)))
+  (cl-call-next-method imobjs (pyim-scheme-get 'quanpin)))
 
 ;; * Footer
 (provide 'pyim-candidates)
