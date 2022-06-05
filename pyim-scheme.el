@@ -163,6 +163,7 @@
    :prefer-triggers ("v")
    :cregexp-support-p t))
 
+;; 注意：许多测试依赖这个 scheme, 所以更改名称或者删除会导致这些测试失败。
 (pyim-scheme-add
  '(wubi
    :document "五笔输入法。"
@@ -176,6 +177,7 @@
    :prefer-triggers nil
    :cregexp-support-p t))
 
+;; 注意：一些测试依赖这个 scheme, 所以更改名称或者删除会导致这些测试失败。
 (pyim-scheme-add
  '(cangjie
    :document "倉頡输入法。"
