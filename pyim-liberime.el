@@ -67,7 +67,8 @@
    :code-prefix-history ("&")
    :first-chars "abcdefghijklmnopqrstuvwxyz"
    :rest-chars "abcdefghijklmnopqrstuvwxyz'-a"
-   :prefer-triggers nil))
+   :prefer-triggers nil
+   :cregexp-support-p nil))
 
 (pyim-scheme-add
  '(rime-quanpin

@@ -827,6 +827,12 @@
 
 ;; ** pyim-cregexp 相关单元测试
 (ert-deftest pyim-tests-pyim-cregexp ()
+  (let ((wubi (pyim-scheme-get 'wubi))
+        (pyim-default-scheme 'quanpin)
+        (pyim-cregexp-fallback-scheme 'wubi))
+    (should (equal (pyim-scheme-name (pyim-cregexp-scheme)) 'quanpin))
+    (should (equal (pyim-scheme-name (pyim-cregexp-scheme wubi)) 'wubi)))
+
   (let ((regexp (pyim-cregexp-build "nihao")))
     (should (string-match-p regexp "nihao"))
     (should (string-match-p regexp "anihaob"))

@@ -52,7 +52,7 @@
       (max (min num 4) 1)
     4))
 
-(defun pyim-cregexp-build (string &optional char-level-num chinese-only)
+(defun pyim-cregexp-build (string &optional char-level-num chinese-only scheme)
   "根据 STRING 构建一个中文 regexp, 用于 \"拼音搜索汉字\".
 
 比如：\"nihao\" -> \"[你呢...][好号...] \\| nihao\"
@@ -71,6 +71,7 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
 就无法搜索生僻字了。"
   ;; NOTE: (rx-to-string "") will return "\\(?:\\)",
   ;; While I want (pyim-cregexp-build "") return just "".
+  (setq scheme (pyim-cregexp-scheme scheme))
   (if (equal string "")
       string
     (let ((num (pyim-cregexp-char-level-num char-level-num))
@@ -82,12 +83,24 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
                      (pyim-cregexp-build-from-rx
                       (lambda (x)
                         (if (stringp x)
-                            (xr (pyim-cregexp-build-1 x num chinese-only))
+                            (xr (pyim-cregexp-build-1 x num chinese-only scheme))
                           x))
                       (xr string))))
                   string))
         (setq num (1- num)))
       rx-string)))
+
+(defun pyim-cregexp-scheme (&optional scheme)
+  "返回一个支持 cregexp 的 scheme.
+
+这个函数同时考虑 SCHEME, current scheme 和
+`pyim-cregexp-fallback-scheme'."
+  (let ((current-scheme (pyim-scheme-current)))
+    (cond
+     ((and scheme (pyim-scheme-cregexp-support-p scheme)) scheme)
+     ((and current-scheme (pyim-scheme-cregexp-support-p current-scheme))
+      current-scheme)
+     (t (pyim-scheme-get pyim-cregexp-fallback-scheme)))))
 
 (defun pyim-cregexp-valid-p (cregexp)
   "Return t when cregexp is a valid regexp."
@@ -109,9 +122,8 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
              rx-form))
     (_ (funcall fn rx-form))))
 
-(defun pyim-cregexp-build-1 (str &optional char-level-num chinese-only)
+(defun pyim-cregexp-build-1 (str &optional char-level-num chinese-only scheme)
   (let* ((num (pyim-cregexp-char-level-num char-level-num))
-         (scheme (pyim-scheme-current))
          (code-prefix (pyim-scheme-code-prefix scheme))
          (sep "#####&&&&#####")
          (lst (remove "" (split-string
@@ -120,10 +132,6 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
                           sep))))
     ;; 确保 pyim 词库加载
     (pyim-dcache-init-variables)
-    (unless (or (pyim-scheme-quanpin-p scheme)
-                (pyim-scheme-shuangpin-p scheme)
-                (pyim-scheme-xingma-p scheme))
-      (setq scheme (pyim-scheme-get pyim-cregexp-fallback-scheme)))
     (mapconcat
      (lambda (string)
        (if (or (pyim-string-match-p "[^a-z']+" string)
