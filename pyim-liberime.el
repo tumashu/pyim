@@ -104,9 +104,9 @@
 (declare-function liberime-process-key "liberime" (keycode &optional mask))
 (declare-function liberime-select-candidate "liberime" (num))
 
-(defun pyim-liberime-scheme (orig_func &optional default)
+(defun pyim-liberime-scheme (orig_func)
   "Advice function of `pyim-scheme-current'."
-  (let* ((scheme (funcall orig_func default)))
+  (let ((scheme (funcall orig_func)))
     (if (pyim-scheme-rime-p scheme)
         (if (featurep 'liberime-core)
             scheme
