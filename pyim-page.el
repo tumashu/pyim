@@ -283,7 +283,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                  :border-width pyim-page-posframe-border-width
                  :border-color (face-attribute 'pyim-page-border :background)))
 
-(cl-defmethod pyim-page-show (string _position (_tooltip (eql minibufer)))
+(cl-defmethod pyim-page-show (string _position (_tooltip (eql minibuffer)))
   "使用 minibuffer 来显示 STRING。"
   (let ((max-mini-window-height (+ pyim-page-length 2))
         (message-log-max nil))
