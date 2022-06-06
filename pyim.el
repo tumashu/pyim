@@ -821,7 +821,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
            codes)
       (if (not (string-match-p "^\\cc+\\'" string))
           (error "PYIM: 不是纯中文字符串。")
-        (setq codes (pyim-cstring-to-codes string pyim-default-scheme))
+        (setq codes (pyim-cstring-to-codes string (pyim-scheme-current)))
         (if codes
             (message "PYIM (%S): %S -> %S" pyim-default-scheme string codes)
           (message "PYIM: 没有找到 %S 对应的编码。" string)))
