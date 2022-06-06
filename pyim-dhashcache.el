@@ -326,7 +326,16 @@ DCACHE 是一个 code -> words 的 hashtable.
        (lambda (code words)
          (unless (pyim-string-match-p "-" code)
            (dolist (word words)
-             (let ((value (gethash word hashtable)))
+             (let ((value (gethash word hashtable))
+                   ;; NOTE: 这里使用 `cl-copy-seq', 可以让保存的文件内容类似：
+                   ;;
+                   ;;   "呵" ("he" "a")
+                   ;;
+                   ;; 而不是：
+                   ;;
+                   ;;   "呵" (#9="he" #2#)
+                   ;;
+                   (code (cl-copy-seq code)))
                (puthash word
                         (if value
                             `(,code ,@value)
