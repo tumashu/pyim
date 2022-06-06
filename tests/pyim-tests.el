@@ -1061,7 +1061,9 @@ ni-hao 你好 尼耗
     (with-temp-buffer
       (insert ";; -*- coding: utf-8 -*--
 a 阿 啊 呵 腌 吖 嗄 锕 錒
+pinyin/a 阿 啊 呵 腌 吖 嗄 锕 錒
 a-a 啊啊
+wo 我
 zuo-zuo-ye 做作业
 zuo-zuo-you-mang 作作有芒")
       (write-region (point-min) (point-max) dist-file))
@@ -1077,7 +1079,8 @@ zuo-zuo-you-mang 作作有芒")
     (should (equal (gethash "a" output1) '("阿" "啊" "呵" "腌" "吖" "嗄" "锕" "錒")))
     (should (equal (gethash "a-a" output1) '("啊啊")))
     (should (equal (gethash "zuo-zuo-you-mang" output1) '("作作有芒")))
-    (should (equal (gethash "啊" output2) '("a")))
+    (should (equal (gethash "啊" output2) '("pinyin/a")))
+    (should (equal (gethash "我" output2) nil))
     (should (equal (gethash "啊啊" output2) nil))))
 
 (ert-deftest pyim-tests-pyim-dhashcache-update-shortcode2word ()
