@@ -56,15 +56,14 @@
 (cl-defstruct (pyim-scheme
                (:constructor pyim-scheme-create)
                (:copier nil))
-  "输入法方案通用的 slots."
-  class
-  name
-  document
-  first-chars
-  rest-chars
-  code-prefix
-  prefer-triggers
-  cregexp-support-p)
+  "输入法通用方案类型."
+  (name         nil :type symbol  :documentation "输入法名称。")
+  (document     nil :type string  :documentation "输入法简要说明。")
+  (first-chars  nil :type string  :documentation "输入法启动后，可以处理的第一个字符。")
+  (rest-chars   nil :type string  :documentation "输入法处理一个字符后，可以继续处理的字符。")
+  (code-prefix  nil :type string  :documentation "pyim 词库用到的编码前缀，比如：wubi/ 等。")
+  (prefer-triggers   nil :type list    :documentation "单字符快捷键设置，有些输入法不使用某个字母，这个字母就可以做为快捷键使用。")
+  (cregexp-support-p nil :type boolean :documentation "输入法是否支持从代码生成搜索中文的正则表达式。"))
 
 (cl-defstruct (pyim-scheme-quanpin
                (:include pyim-scheme)
@@ -80,16 +79,19 @@
 
 在 PYIM 中，双拼输入法是建立在全拼输入法的基础上的，所以将其定义
 为全拼输入法类型的子类型。"
-  keymaps)
+  (keymaps nil :type list :documentation "双拼到全拼的声母韵母映射表。"))
 
 (cl-defstruct (pyim-scheme-xingma
                (:include pyim-scheme)
                (:constructor pyim-scheme-xingma-create)
                (:copier nil))
-  "形码输入法方案类型。"
-  code-prefix-history
-  code-split-length
-  code-maximum-length)
+  "形码输入法方案类型。
+
+这个输入法方案类型代表那些重码少，编码长度固定的一类输入法，比如：
+五笔输入法，仓颉输入法等。"
+  (code-prefix-history nil :type list   :documentation "输入法以前使用过的代码前缀，用于编写词库升级程序。")
+  (code-split-length   nil :type number :documentation "代码分割长度。")
+  (code-maximum-length nil :type number :documentation "代码最大长度。"))
 
 (cl-defstruct (pyim-scheme-wubi
                (:include pyim-scheme-xingma)
@@ -116,12 +118,17 @@
       nil)))
 
 (defun pyim-scheme-add (scheme-config)
-  "Add SCHEME to `pyim-schemes'"
+  "Add SCHEME to `pyim-schemes'."
   (if (listp scheme-config)
       (let* ((scheme-name (car scheme-config))
              (scheme-type (plist-get (cdr scheme-config) :class))
+             ;; `pyim-scheme-add' 在 pyim 使用 `cl-defstruct' 重构之前就已经存在
+             ;; 很长时间，使用下面的方式向后兼容。
              (func (intern (format "pyim-scheme-%s-create" scheme-type)))
-             (scheme (apply func :name scheme-name (cdr scheme-config)))
+             ;; 函数 pyim-scheme-*-create 不识别 :class 参数，所以后续需要从
+             ;; scheme-config 中删除 :class xxx.
+             (args (remove :class (plist-put (cdr scheme-config) :class :class)))
+             (scheme (apply func :name scheme-name args))
              schemes update-p)
         (when (and (symbolp scheme-name)
                    (functionp func))
