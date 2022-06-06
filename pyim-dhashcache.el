@@ -324,7 +324,9 @@ DCACHE 是一个 code -> words 的 hashtable.
     (let ((hashtable (make-hash-table :size 1000000 :test #'equal)))
       (maphash
        (lambda (code words)
-         (unless (pyim-string-match-p "-" code)
+         ;; 这里主要考虑五笔仓颉等形码输入法，也就是 code-prefix 中包含 "/" 的输
+         ;; 入法，全拼输入法反查功能主要使用 pymap 实现，不使用这个表。
+         (when (pyim-string-match-p "/" code)
            (dolist (word words)
              (let ((value (gethash word hashtable))
                    ;; NOTE: 这里使用 `cl-copy-seq', 可以让保存的文件内容类似：
