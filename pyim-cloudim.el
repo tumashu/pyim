@@ -79,7 +79,7 @@
       (url-retrieve
        (format "https://www.google.cn/inputtools/request?ime=pinyin&text=%s" str)
        (lambda (_)
-         (funcall callback (cons imobjs (pyim-cloudim-parse-baidu-buffer)))
+         (funcall callback (cons imobjs (pyim-cloudim-parse-google-buffer)))
          (kill-buffer))
        nil t))))
 
