@@ -141,8 +141,8 @@
          (words (liberime-search s (* pyim-page-length 2))))
     words))
 
-(cl-defmethod pyim-candidates-create-async (imobjs (scheme pyim-scheme-rime))
-  "适用于 rime 的 `pyim-candidates-create-async' 方法。"
+(cl-defmethod pyim-candidates-create-delay (imobjs (scheme pyim-scheme-rime))
+  "适用于 rime 的 `pyim-candidates-create-delay' 方法。"
   (let* ((code (car (pyim-codes-create (car imobjs) scheme)))
          (code-prefix (pyim-scheme-code-prefix scheme))
          (s (replace-regexp-in-string "-" "" code))

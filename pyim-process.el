@@ -87,8 +87,11 @@ entered (nihaom) 的第一个候选词。
 如果为 0 或者 nil, 则不等待立刻显示可选词."
   :type 'integer)
 
-(defcustom pyim-process-async-delay 0.3
-  "延迟多少秒开始异步获取词条。"
+(define-obsolete-variable-alias
+  'pyim-process-async-delay 'pyim-process-get-candidates-delay "5.0")
+
+(defcustom pyim-process-get-candidates-delay 0.5
+  "延迟多少秒开始延迟获取词条。"
   :type 'integer)
 
 (defvar pyim-process-input-ascii nil
@@ -115,7 +118,7 @@ entered (nihaom) 的第一个候选词。
 这个变量主要用于全拼和双拼输入法的多音字矫正，其取值一般使用用户
 输入生成的 imobjs 转换得到，保留了用户原始输入的许多信息。")
 
-(defvar pyim-process-run-async-timer nil
+(defvar pyim-process-get-candidates-delay-timer nil
   "异步处理 entered 时，使用的 timer.")
 
 (defvar pyim-process-self-insert-commands nil
@@ -284,14 +287,7 @@ entered (nihaom) 的第一个候选词。
     (setq pyim-candidates
           (or (delete-dups (pyim-candidates-create pyim-imobjs scheme))
               (list entered-to-translate)))
-    (pyim-process-run-async-timer-reset)
-    ;; 当用户选择词条时，如果停顿超过1秒，就激活异步流程，不同的输入法异步流程定
-    ;; 义也可能不同，比如：全拼输入法目前的异步流程是搜索当前 buffer 获取词条。
-    ;; 而 rime 的异步流程是获取所有的词条。
-    (setq pyim-process-run-async-timer
-          (run-with-timer
-           pyim-process-async-delay
-           nil #'pyim-process-run-async))
+    (pyim-process-get-candidates-delay)
     ;; 自动上屏功能
     (let ((autoselector-results
            (mapcar (lambda (x)
@@ -357,19 +353,32 @@ entered (nihaom) 的第一个候选词。
   "测试 CMD 是否是一个 pyim self insert command."
   (member cmd pyim-process-self-insert-commands))
 
-(defun pyim-process-run-async ()
-  "Function used by `pyim-process-run-async-timer'"
+(defun pyim-process-get-candidates-delay ()
+  "延迟获取候选词条。
+
+当用户选择词条时，如果停顿时间超过某个阈值，就激活延迟候选词获取
+流程，不同的输入法对延迟获取候选词流程定义也可能不同，比如：全拼
+输入法目前的延迟获取候选词流程是搜索当前 buffer 获取词条。而 rime
+的延迟获取候选词流程是获取所有的词条。"
+  (pyim-process-get-candidates-delay-timer-reset)
+  (setq pyim-process-get-candidates-delay-timer
+        (run-with-timer
+         pyim-process-get-candidates-delay
+         nil #'pyim-process-get-candidates-delay-1)))
+
+(defun pyim-process-get-candidates-delay-1 ()
+  "Function used by `pyim-process-get-candidates-delay-timer'"
   (let* ((scheme (pyim-scheme-current))
-         (words (delete-dups (pyim-candidates-create-async pyim-imobjs scheme))))
+         (words (delete-dups (pyim-candidates-create-delay pyim-imobjs scheme))))
     (when words
       (setq pyim-candidates words)
       (pyim-process-ui-refresh))))
 
-(defun pyim-process-run-async-timer-reset ()
-  "Reset `pyim-process-run-async-timer'."
-  (when pyim-process-run-async-timer
-    (cancel-timer pyim-process-run-async-timer)
-    (setq pyim-process-run-async-timer nil)))
+(defun pyim-process-get-candidates-delay-timer-reset ()
+  "Reset `pyim-process-get-candidates-delay-timer'."
+  (when pyim-process-get-candidates-delay-timer
+    (cancel-timer pyim-process-get-candidates-delay-timer)
+    (setq pyim-process-get-candidates-delay-timer nil)))
 
 (defun pyim-process-get-candidates ()
   pyim-candidates)
@@ -674,7 +683,7 @@ BUG：拼音无法有效地处理多音字。"
   (setq pyim-process-force-input-chinese nil)
   (setq pyim-candidates nil)
   (setq pyim-candidates-last nil)
-  (pyim-process-run-async-timer-reset)
+  (pyim-process-get-candidates-delay-timer-reset)
   (pyim-process-ui-hide))
 
 (defun pyim-process-ui-hide ()
