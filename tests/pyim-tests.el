@@ -647,9 +647,6 @@
     (let ((words (pyim-candidates-search-buffer (pyim-cregexp-build "nh" 3 t))))
       (should (equal (get-text-property 0 :comment (car words)) "(buf)")))))
 
-(ert-deftest pyim-tests-pyim-candidates-cloud-search ()
-  (should-not (pyim-candidates-cloud-search "a" t)))
-
 ;; ** pyim-cstring 相关单元测试
 (ert-deftest pyim-tests-pyim-cstring-partition ()
   (should (equal (pyim-cstring-partition "你好 hello 你好")
