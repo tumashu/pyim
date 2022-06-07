@@ -88,9 +88,9 @@ entered (nihaom) 的第一个候选词。
   :type 'integer)
 
 (define-obsolete-variable-alias
-  'pyim-process-async-delay 'pyim-process-get-candidates-delay "5.0")
+  'pyim-process-async-delay 'pyim-process-run-delay "5.0")
 
-(defcustom pyim-process-get-candidates-delay 0.5
+(defcustom pyim-process-run-delay 0.5
   "延迟多少秒开始延迟获取词条。"
   :type 'integer)
 
@@ -118,7 +118,7 @@ entered (nihaom) 的第一个候选词。
 这个变量主要用于全拼和双拼输入法的多音字矫正，其取值一般使用用户
 输入生成的 imobjs 转换得到，保留了用户原始输入的许多信息。")
 
-(defvar pyim-process-get-candidates-delay-timer nil
+(defvar pyim-process-run-delay-timer nil
   "异步处理 entered 时，使用的 timer.")
 
 (defvar pyim-process-self-insert-commands nil
@@ -287,8 +287,7 @@ entered (nihaom) 的第一个候选词。
     (setq pyim-candidates
           (or (delete-dups (pyim-candidates-create pyim-imobjs scheme))
               (list entered-to-translate)))
-    (pyim-process-get-candidates-async)
-    (pyim-process-get-candidates-delay)
+    (pyim-process-run-delay)
     ;; 自动上屏功能
     (let ((autoselector-results
            (mapcar (lambda (x)
@@ -346,45 +345,40 @@ entered (nihaom) 的第一个候选词。
        (t (setq pyim-candidate-position 1)
           (pyim-process-ui-refresh))))))
 
-(defun pyim-process-ui-refresh (&optional hightlight-current)
-  "刷新 pyim 相关 UI."
-  (run-hook-with-args 'pyim-process-ui-refresh-hook hightlight-current))
-
-(defun pyim-process-self-insert-command-p (cmd)
-  "测试 CMD 是否是一个 pyim self insert command."
-  (member cmd pyim-process-self-insert-commands))
-
-(defun pyim-process-get-candidates-delay ()
+(defun pyim-process-run-delay ()
   "延迟获取候选词条。
 
 当用户选择词条时，如果停顿时间超过某个阈值，就激活延迟候选词获取
 流程，不同的输入法对延迟获取候选词流程定义也可能不同，比如：全拼
 输入法目前的延迟获取候选词流程是搜索当前 buffer 获取词条。而 rime
 的延迟获取候选词流程是获取所有的词条。"
-  (pyim-process-get-candidates-delay-timer-reset)
-  (setq pyim-process-get-candidates-delay-timer
+  (pyim-process-run-delay-timer-reset)
+  (setq pyim-process-run-delay-timer
         (run-with-timer
-         pyim-process-get-candidates-delay
-         nil #'pyim-process-get-candidates-delay-1)))
+         pyim-process-run-delay
+         nil #'pyim-process-run-delay-1)))
 
-(defun pyim-process-get-candidates-delay-1 ()
-  "Function used by `pyim-process-get-candidates-delay-timer'"
+(defun pyim-process-run-delay-1 ()
+  "Function used by `pyim-process-run-delay-timer'"
+  (pyim-process-handle-candidates-async)
+  (pyim-process-handle-candidates-limit-time))
+
+(defun pyim-process-handle-candidates-limit-time ()
+  "使用限时的方式获取候选词。"
   (let* ((scheme (pyim-scheme-current))
          (words (delete-dups
-                 (pyim-candidates-create-delay
+                 (pyim-candidates-create-limit-time
                   pyim-imobjs scheme
                   pyim-candidates))))
     (when words
       (setq pyim-candidates words)
       (pyim-process-ui-refresh))))
 
-(defun pyim-process-get-candidates-delay-timer-reset ()
-  "Reset `pyim-process-get-candidates-delay-timer'."
-  (when pyim-process-get-candidates-delay-timer
-    (cancel-timer pyim-process-get-candidates-delay-timer)
-    (setq pyim-process-get-candidates-delay-timer nil)))
+(defun pyim-process-ui-refresh (&optional hightlight-current)
+  "刷新 pyim 相关 UI."
+  (run-hook-with-args 'pyim-process-ui-refresh-hook hightlight-current))
 
-(defun pyim-process-get-candidates-async ()
+(defun pyim-process-handle-candidates-async ()
   "使用异步的方式获取候选词条词条。"
   (let ((buffer (current-buffer)))
     (pyim-candidates-create-async
@@ -400,6 +394,16 @@ entered (nihaom) 的第一个候选词。
                     ,@(cdr async-return)
                     ,@(cdr pyim-candidates))))
            (pyim-process-ui-refresh)))))))
+
+(defun pyim-process-run-delay-timer-reset ()
+  "Reset `pyim-process-run-delay-timer'."
+  (when pyim-process-run-delay-timer
+    (cancel-timer pyim-process-run-delay-timer)
+    (setq pyim-process-run-delay-timer nil)))
+
+(defun pyim-process-self-insert-command-p (cmd)
+  "测试 CMD 是否是一个 pyim self insert command."
+  (member cmd pyim-process-self-insert-commands))
 
 (defun pyim-process-get-candidates ()
   pyim-candidates)
@@ -704,7 +708,7 @@ BUG：拼音无法有效地处理多音字。"
   (setq pyim-process-force-input-chinese nil)
   (setq pyim-candidates nil)
   (setq pyim-candidates-last nil)
-  (pyim-process-get-candidates-delay-timer-reset)
+  (pyim-process-run-delay-timer-reset)
   (pyim-process-ui-hide))
 
 (defun pyim-process-ui-hide ()
