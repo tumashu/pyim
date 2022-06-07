@@ -392,13 +392,14 @@ entered (nihaom) 的第一个候选词。
      (lambda (async-return)
        (with-current-buffer buffer
          (when (and pyim-process-translating
+                    (not (input-pending-p))
                     (equal (car async-return) pyim-imobjs))
            (setq pyim-candidates
                  (delete-dups
                   `(,(car pyim-candidates)
                     ,@(cdr async-return)
-                    ,@(cdr pyim-candidates)))))
-         (pyim-process-ui-refresh))))))
+                    ,@(cdr pyim-candidates))))
+           (pyim-process-ui-refresh)))))))
 
 (defun pyim-process-get-candidates ()
   pyim-candidates)
