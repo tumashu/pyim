@@ -81,12 +81,6 @@ entered (nihaom) 的第一个候选词。
   :type '(choice (const nil)
                  (repeat function)))
 
-(defcustom pyim-exhibit-delay-ms 0
-  "输入或者删除拼音字符后等待多少毫秒后才显示可选词
-当用户快速输入连续的拼音时可提升用户体验.
-如果为 0 或者 nil, 则不等待立刻显示可选词."
-  :type 'integer)
-
 (define-obsolete-variable-alias
   'pyim-process-async-delay 'pyim-process-run-delay "5.0")
 
@@ -123,8 +117,6 @@ entered (nihaom) 的第一个候选词。
 
 (defvar pyim-process-self-insert-commands nil
   "保存所有的 self insert command.")
-
-(defvar pyim-process-run-exhibit-timer nil)
 
 (defvar pyim-process-ui-init-hook nil
   "Hook used to run ui init functions.")
@@ -261,36 +253,22 @@ entered (nihaom) 的第一个候选词。
       (and (not pyim-process-input-ascii)
            (not (pyim-process-auto-switch-english-input-p)))))
 
-(defun pyim-process-run (&optional no-delay)
-  "延迟 `pyim-exhibit-delay-ms' 显示备选词等待用户选择。"
+(defun pyim-process-run ()
+  "查询 entered 字符串, 显示备选词等待用户选择。"
   (if (= (length (pyim-entered-get 'point-before)) 0)
       (pyim-process-terminate)
-    (when pyim-process-run-exhibit-timer
-      (cancel-timer pyim-process-run-exhibit-timer))
-    (cond
-     ((or no-delay
-          (not pyim-exhibit-delay-ms)
-          (eq pyim-exhibit-delay-ms 0))
-      (pyim-process-run-1))
-     (t (setq pyim-process-run-exhibit-timer
-              (run-with-timer (/ pyim-exhibit-delay-ms 1000.0)
-                              nil
-                              #'pyim-process-run-1))))))
-
-(defun pyim-process-run-1 ()
-  "查询 `pyim-entered-buffer' 光标前的拼音字符串（如果光标在行首则为光标后的）, 显示备选词等待用户选择。"
-  (let* ((scheme (pyim-scheme-current))
-         entered-to-translate)
-    (setq entered-to-translate
-          (pyim-entered-get 'point-before))
-    (setq pyim-imobjs (pyim-imobjs-create entered-to-translate scheme))
-    (setq pyim-candidates
-          (or (delete-dups (pyim-candidates-create pyim-imobjs scheme))
-              (list entered-to-translate)))
-    (unless (pyim-process-auto-select)
-      (setq pyim-candidate-position 1)
-      (pyim-process-ui-refresh)
-      (pyim-process-run-delay))))
+    (let* ((scheme (pyim-scheme-current))
+           entered-to-translate)
+      (setq entered-to-translate
+            (pyim-entered-get 'point-before))
+      (setq pyim-imobjs (pyim-imobjs-create entered-to-translate scheme))
+      (setq pyim-candidates
+            (or (delete-dups (pyim-candidates-create pyim-imobjs scheme))
+                (list entered-to-translate)))
+      (unless (pyim-process-auto-select)
+        (setq pyim-candidate-position 1)
+        (pyim-process-ui-refresh)
+        (pyim-process-run-delay)))))
 
 (defun pyim-process-auto-select ()
   "自动上屏操作。"

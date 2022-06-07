@@ -620,7 +620,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   "以词定字功能。"
   (interactive)
   (pyim-process-toggle-set-subword-info (or n 1))
-  (pyim-process-run t))
+  (pyim-process-run))
 
 ;; ** 翻页和翻词功能
 (defalias 'pyim-previous-page #'pyim-page-previous-page)
@@ -671,7 +671,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   (pyim-process-with-entered-buffer
     (ignore-errors
       (forward-char)))
-  (pyim-process-run t))
+  (pyim-process-run))
 
 (defun pyim-backward-point ()
   "光标后移"
@@ -679,7 +679,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   (pyim-process-with-entered-buffer
     (ignore-errors
       (backward-char)))
-  (pyim-process-run t))
+  (pyim-process-run))
 
 (defun pyim-backward-imelem (&optional search-forward)
   "光标向后移动一个 imelem 对应的字符串
@@ -689,7 +689,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   (let ((position (pyim-process-next-imelem-position 1 search-forward)))
     (pyim-process-with-entered-buffer
       (goto-char position))
-    (pyim-process-run t)))
+    (pyim-process-run)))
 
 (defun pyim-forward-imelem ()
   "光标向前移动一个 imelem 对应的字符串"
@@ -701,14 +701,14 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   (interactive)
   (pyim-process-with-entered-buffer
     (end-of-line))
-  (pyim-process-run t))
+  (pyim-process-run))
 
 (defun pyim-beginning-of-line ()
   "光标移至行首"
   (interactive)
   (pyim-process-with-entered-buffer
     (beginning-of-line))
-  (pyim-process-run t))
+  (pyim-process-run))
 
 (defun pyim-delete-backward-char (&optional n)
   "向后删除1个字符"
@@ -717,7 +717,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
     (ignore-errors
       (delete-char (- 0 (or n 1)))))
   (if (> (length (pyim-process-get-entered 'point-before)) 0)
-      (pyim-process-run t)
+      (pyim-process-run)
     (pyim-process-outcome-handle "")
     (pyim-process-terminate)))
 
@@ -732,7 +732,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   (let ((position (pyim-process-next-imelem-position 1 search-forward)))
     (pyim-process-with-entered-buffer
       (delete-region (point) position))
-    (pyim-process-run t)))
+    (pyim-process-run)))
 
 (defun pyim-delete-forward-imelem ()
   "向前删除一个 imelem 对应的字符串"
