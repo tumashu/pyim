@@ -141,7 +141,7 @@
          (words (liberime-search s (* pyim-page-length 2))))
     words))
 
-(cl-defmethod pyim-candidates-create-delay (imobjs (scheme pyim-scheme-rime))
+(cl-defmethod pyim-candidates-create-delay (imobjs (scheme pyim-scheme-rime) _orig-candidates)
   "适用于 rime 的 `pyim-candidates-create-delay' 方法。"
   (let* ((code (car (pyim-codes-create (car imobjs) scheme)))
          (code-prefix (pyim-scheme-code-prefix scheme))

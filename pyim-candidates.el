@@ -280,7 +280,7 @@
                                 (pyim-pymap-py2cchar-get pinyin))))))
     (cl-subseq chars 0 num)))
 
-(cl-defgeneric pyim-candidates-create-delay (imobjs scheme)
+(cl-defgeneric pyim-candidates-create-delay (imobjs scheme orig-candidates)
   "按照 SCHEME, 使用延迟的方式从 IMOBJS 获得候选词条。
 
 如果用户输入等待时间超过某个阈值时，输入法就会调用这个函数来获取额
@@ -289,23 +289,23 @@
 2. 这个函数运行有时间限制，运行超过某个时间后，无论有没有结果，必须结束。
 3. 这个函数需要探测用户是否输入，如果用户开始输入，这个函数运行必须结束。")
 
-(cl-defmethod pyim-candidates-create-delay (_imobjs _scheme)
+(cl-defmethod pyim-candidates-create-delay (_imobjs _scheme orig-candidates)
   "按照 SCHEME, 使用延迟的方式从 IMOBJS 获得候选词条。"
-  nil)
+  orig-candidates)
 
-(cl-defmethod pyim-candidates-create-delay (imobjs (scheme pyim-scheme-quanpin))
+(cl-defmethod pyim-candidates-create-delay (imobjs (scheme pyim-scheme-quanpin) orig-candidates)
   "按照 SCHEME, 用延迟的方式从 IMOBJS 获得候选词条，用于全拼输入法。"
   ;; 构建一个搜索中文的正则表达式, 然后使用这个正则表达式在当前 buffer 中搜
   ;; 索词条。
   (let ((str (string-join (pyim-codes-create (car imobjs) scheme))))
     (if (< (length str) 1)
-        pyim-candidates
+        orig-candidates
       ;; NOTE: 让第一个词保持不变是不是合理，有待进一步的观察。
-      `(,(car pyim-candidates)
+      `(,(car orig-candidates)
         ,@(pyim-candidates-cloud-search str scheme)
         ,@(pyim-candidates-search-buffer
            (pyim-cregexp-create str scheme 3 t))
-        ,@(cdr pyim-candidates)))))
+        ,@(cdr orig-candidates)))))
 
 (cl-defgeneric pyim-candidates-cloud-search (string scheme)
   "云搜索 STRING, 返回候选词条列表.")
@@ -336,11 +336,11 @@
                       (> (or (gethash a counts) 0)
                          (or (gethash b counts) 0))))))))
 
-(cl-defmethod pyim-candidates-create-delay (imobjs (_scheme pyim-scheme-shuangpin))
+(cl-defmethod pyim-candidates-create-delay (imobjs (_scheme pyim-scheme-shuangpin) orig-candidates)
   "按照 SCHEME, 用延迟的方式从 IMOBJS 获得候选词条，用于双拼输入法。"
   ;; 注意：pyim 支持的双拼输入法，内部使用全拼的 imobjs, 所以这里直接调用全拼的
   ;; `pyim-candidates-create-delay' 方法来处理 imobjs。
-  (cl-call-next-method imobjs (pyim-scheme-get 'quanpin)))
+  (cl-call-next-method imobjs (pyim-scheme-get 'quanpin) orig-candidates))
 
 ;; * Footer
 (provide 'pyim-candidates)

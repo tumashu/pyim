@@ -369,7 +369,10 @@ entered (nihaom) 的第一个候选词。
 (defun pyim-process-get-candidates-delay-1 ()
   "Function used by `pyim-process-get-candidates-delay-timer'"
   (let* ((scheme (pyim-scheme-current))
-         (words (delete-dups (pyim-candidates-create-delay pyim-imobjs scheme))))
+         (words (delete-dups
+                 (pyim-candidates-create-delay
+                  pyim-imobjs scheme
+                  pyim-candidates))))
     (when words
       (setq pyim-candidates words)
       (pyim-process-ui-refresh))))
