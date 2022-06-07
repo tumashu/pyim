@@ -302,17 +302,9 @@
         orig-candidates
       ;; NOTE: 让第一个词保持不变是不是合理，有待进一步的观察。
       `(,(car orig-candidates)
-        ,@(pyim-candidates-cloud-search str scheme)
         ,@(pyim-candidates-search-buffer
            (pyim-cregexp-create str scheme 3 t))
         ,@(cdr orig-candidates)))))
-
-(cl-defgeneric pyim-candidates-cloud-search (string scheme)
-  "云搜索 STRING, 返回候选词条列表.")
-
-(cl-defmethod pyim-candidates-cloud-search (_string _scheme)
-  "云搜索 STRING, 返回候选词条列表."
-  nil)
 
 (defun pyim-candidates-search-buffer (regexp)
   "在当前 buffer 中使用 REGEXP 搜索词条。"
@@ -341,6 +333,15 @@
   ;; 注意：pyim 支持的双拼输入法，内部使用全拼的 imobjs, 所以这里直接调用全拼的
   ;; `pyim-candidates-create-delay' 方法来处理 imobjs。
   (cl-call-next-method imobjs (pyim-scheme-get 'quanpin) orig-candidates))
+
+(cl-defgeneric pyim-candidates-create-async (imobjs scheme callback)
+  "按照 SCHEME, 使用异步的方式从 IMOBJS 获得候选词条。
+
+获取到的词条后，需要将其做为参数，调用 CALLBACK 函数。")
+
+(cl-defmethod pyim-candidates-create-async (_imobjs _scheme _callback)
+  "按照 SCHEME, 使用异步的方式从 IMOBJS 获得候选词条，默认什么也不做。"
+  nil)
 
 ;; * Footer
 (provide 'pyim-candidates)

@@ -287,6 +287,7 @@ entered (nihaom) 的第一个候选词。
     (setq pyim-candidates
           (or (delete-dups (pyim-candidates-create pyim-imobjs scheme))
               (list entered-to-translate)))
+    (pyim-process-get-candidates-async)
     (pyim-process-get-candidates-delay)
     ;; 自动上屏功能
     (let ((autoselector-results
@@ -382,6 +383,22 @@ entered (nihaom) 的第一个候选词。
   (when pyim-process-get-candidates-delay-timer
     (cancel-timer pyim-process-get-candidates-delay-timer)
     (setq pyim-process-get-candidates-delay-timer nil)))
+
+(defun pyim-process-get-candidates-async ()
+  "使用异步的方式获取候选词条词条。"
+  (let ((buffer (current-buffer)))
+    (pyim-candidates-create-async
+     pyim-imobjs (pyim-scheme-current)
+     (lambda (async-return)
+       (with-current-buffer buffer
+         (when (and pyim-process-translating
+                    (equal (car async-return) pyim-imobjs))
+           (setq pyim-candidates
+                 (delete-dups
+                  `(,(car pyim-candidates)
+                    ,@(cdr async-return)
+                    ,@(cdr pyim-candidates)))))
+         (pyim-process-ui-refresh))))))
 
 (defun pyim-process-get-candidates ()
   pyim-candidates)
