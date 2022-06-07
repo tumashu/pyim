@@ -1315,28 +1315,7 @@ Transfer-Encoding: chunked
 
 [\"SUCCESS\",[[\"nihao\",[\"你好\"],[],{\"annotation\":[\"ni hao\"],\"candidate_type\":[0],\"lc\":[\"16 16\"]}]]]")
     (should (equal (pyim-cloudim-parse-google-buffer) '("你好")))
-    (should (equal (get-text-property 0 :comment (car (pyim-cloudim-parse-google-buffer))) "(云)")))
-
-  (when (not noninteractive)
-    (let ((wubi (pyim-scheme-get 'wubi)))
-      (should (equal (pyim-candidates-cloud-search "nihao" wubi) nil))
-      (should (equal (pyim-candidates-cloud-search "nihao" wubi) nil)))
-
-    (let ((pyim-cloudim 'baidu)
-          (quanpin (pyim-scheme-get 'quanpin)))
-      (should (equal (pyim-candidates-cloud-search "nihao" quanpin) '("你好"))))
-
-    (let ((pyim-cloudim 'google)
-          (quanpin (pyim-scheme-get 'quanpin)))
-      (should (equal (pyim-candidates-cloud-search "nihao" quanpin) '("你好"))))
-
-    (let ((pyim-cloudim 'xxx)
-          (quanpin (pyim-scheme-get 'quanpin)))
-      (should (not (pyim-candidates-cloud-search "nihao" quanpin))))
-
-    (let ((pyim-cloudim nil)
-          (quanpin (pyim-scheme-get 'quanpin)))
-      (should (not (pyim-candidates-cloud-search "nihao" quanpin))))))
+    (should (equal (get-text-property 0 :comment (car (pyim-cloudim-parse-google-buffer))) "(云)"))))
 
 ;; ** pyim-probe 相关单元测试
 (ert-deftest pyim-tests-pyim-probe-program-mode ()
