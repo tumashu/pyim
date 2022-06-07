@@ -287,63 +287,75 @@ entered (nihaom) 的第一个候选词。
     (setq pyim-candidates
           (or (delete-dups (pyim-candidates-create pyim-imobjs scheme))
               (list entered-to-translate)))
-    (pyim-process-run-delay)
-    ;; 自动上屏功能
-    (let ((autoselector-results
-           (mapcar (lambda (x)
-                     (when (functionp x)
-                       (ignore-errors
-                         (funcall x))))
-                   (cl-remove-duplicates pyim-process-autoselector :from-end t)))
-          result)
-      (cond
-       ;; 假如用户输入 "nihao", 然后按了 "m" 键, 那么当前的 entered
-       ;; 就是"nihaom", 如果 autoselector 返回 list: (:select last),
-       ;; 那么，“nihao” 对应的第一个候选词将上屏，m键下一轮继续处理。
-       ;; 这是一种 "踩雷确认模式".
-       ((and
-         ;; autoselector 功能会影响手动连续选择功能，所以这里做了一些限制，
-         ;; 只有在输入的时候才能够触发 autoselector 机制。
-         (pyim-process-self-insert-command-p this-command)
-         (cl-find-if (lambda (x)
-                       (setq result x)
-                       (equal (plist-get x :select) 'last))
-                     autoselector-results))
-        (let* ((str (plist-get result :replace-with))
-               (pyim-candidates
-                (if (and str (stringp str))
-                    (list str)
-                  pyim-candidates-last)))
-          (pyim-process-outcome-handle 'candidate)
-          (pyim-process-create-word (pyim-process-get-outcome) t))
-        ;; autoselector 机制已经触发的时候，如果发现 entered buffer 中
-        ;; point 后面还有未处理的输入，就将其转到下一轮处理，这种情况
-        ;; 很少出现，一般是型码输入法，entered 编辑的时候有可能触发。
-        (pyim-add-unread-command-events
-         (pyim-entered-get 'point-after))
-        (pyim-add-unread-command-events last-command-event)
-        (pyim-process-terminate))
-       ;; 假设用户已经输入 "niha", 然后按了 "o" 键，那么，当前
-       ;; entered 就是 "nihao". 如果 autoselector 函数返回一个 list:
-       ;; (:select current), 那么就直接将 "nihao" 对应的第一个候选词
-       ;; 上屏幕。
-       ((and (pyim-process-self-insert-command-p this-command)
-             (cl-find-if (lambda (x)
-                           (setq result x)
-                           (equal (plist-get x :select) 'current))
-                         autoselector-results))
-        (let* ((str (plist-get result :replace-with))
-               (pyim-candidates
-                (if (and str (stringp str))
-                    (list str)
-                  pyim-candidates)))
-          (pyim-process-outcome-handle 'candidate)
-          (pyim-process-create-word (pyim-process-get-outcome) t))
-        (pyim-add-unread-command-events
-         (pyim-entered-get 'point-after))
-        (pyim-process-terminate))
-       (t (setq pyim-candidate-position 1)
-          (pyim-process-ui-refresh))))))
+    (unless (pyim-process-auto-select)
+      (setq pyim-candidate-position 1)
+      (pyim-process-ui-refresh)
+      (pyim-process-run-delay))))
+
+(defun pyim-process-auto-select ()
+  "自动上屏操作。"
+  (let* ((results (pyim-process-autoselector-results))
+         ;; 假如用户输入 "nihao", 然后按了 "m" 键, 那么当前的 entered
+         ;; 就是"nihaom", 如果 autoselector 返回 list: (:select last),
+         ;; 那么，“nihao” 对应的第一个候选词将上屏，m键下一轮继续处理。
+         ;; 这是一种 "踩雷确认模式".
+         (select-last-word
+          (pyim-process-autoselector-find-result results 'last))
+         ;; 假设用户已经输入 "niha", 然后按了 "o" 键，那么，当前
+         ;; entered 就是 "nihao". 如果 autoselector 函数返回一个 list:
+         ;; (:select current), 那么就直接将 "nihao" 对应的第一个候选词
+         ;; 上屏幕。
+         (select-current-word
+          (pyim-process-autoselector-find-result results 'current)))
+    (when (or select-last-word
+              select-current-word)
+      (let* ((str (if select-last-word
+                      (plist-get select-last-word :replace-with)
+                    (plist-get select-current-word :replace-with)))
+             (candidates (if select-last-word
+                             pyim-candidates-last
+                           pyim-candidates))
+             (pyim-candidates
+              (if (and str (stringp str))
+                  (list str)
+                candidates)))
+        (pyim-process-outcome-handle 'candidate)
+        (pyim-process-create-word (pyim-process-get-outcome) t))
+      ;; autoselector 机制已经触发的时候，如果发现 entered buffer 中
+      ;; point 后面还有未处理的输入，就将其转到下一轮处理，这种情况
+      ;; 很少出现，一般是型码输入法，entered 编辑的时候有可能触发。
+      (pyim-add-unread-command-events
+       (pyim-entered-get 'point-after))
+      (when select-last-word
+        (pyim-add-unread-command-events last-command-event))
+      (pyim-process-terminate)
+      ;; 必须返回 t.
+      t)))
+
+(defun pyim-process-autoselector-results ()
+  "运行所有 autoselectors, 返回结果列表。"
+  ;; autoselector 功能会影响手动连续选择功能，所以这里做了一些限制，
+  ;; 只有在输入的时候才能够触发 autoselector 机制。
+  (when (pyim-process-self-insert-command-p this-command)
+    (mapcar (lambda (x)
+              (when (functionp x)
+                (ignore-errors
+                  (funcall x))))
+            (cl-remove-duplicates pyim-process-autoselector :from-end t))))
+
+(defun pyim-process-self-insert-command-p (cmd)
+  "测试 CMD 是否是一个 pyim self insert command."
+  (member cmd pyim-process-self-insert-commands))
+
+(defun pyim-process-autoselector-find-result (results type)
+  "从所有 autoselector 运行结果中，寻找返回类型为 TYPE 的结果。"
+  (cl-find-if (lambda (x)
+                (equal (plist-get x :select) type))
+              results))
+
+(defun pyim-process-ui-refresh (&optional hightlight-current)
+  "刷新 pyim 相关 UI."
+  (run-hook-with-args 'pyim-process-ui-refresh-hook hightlight-current))
 
 (defun pyim-process-run-delay ()
   "延迟获取候选词条。
@@ -357,6 +369,12 @@ entered (nihaom) 的第一个候选词。
         (run-with-timer
          pyim-process-run-delay
          nil #'pyim-process-run-delay-1)))
+
+(defun pyim-process-run-delay-timer-reset ()
+  "Reset `pyim-process-run-delay-timer'."
+  (when pyim-process-run-delay-timer
+    (cancel-timer pyim-process-run-delay-timer)
+    (setq pyim-process-run-delay-timer nil)))
 
 (defun pyim-process-run-delay-1 ()
   "Function used by `pyim-process-run-delay-timer'"
@@ -374,10 +392,6 @@ entered (nihaom) 的第一个候选词。
       (setq pyim-candidates words)
       (pyim-process-ui-refresh))))
 
-(defun pyim-process-ui-refresh (&optional hightlight-current)
-  "刷新 pyim 相关 UI."
-  (run-hook-with-args 'pyim-process-ui-refresh-hook hightlight-current))
-
 (defun pyim-process-handle-candidates-async ()
   "使用异步的方式获取候选词条词条。"
   (let ((buffer (current-buffer)))
@@ -394,16 +408,6 @@ entered (nihaom) 的第一个候选词。
                     ,@(cdr async-return)
                     ,@(cdr pyim-candidates))))
            (pyim-process-ui-refresh)))))))
-
-(defun pyim-process-run-delay-timer-reset ()
-  "Reset `pyim-process-run-delay-timer'."
-  (when pyim-process-run-delay-timer
-    (cancel-timer pyim-process-run-delay-timer)
-    (setq pyim-process-run-delay-timer nil)))
-
-(defun pyim-process-self-insert-command-p (cmd)
-  "测试 CMD 是否是一个 pyim self insert command."
-  (member cmd pyim-process-self-insert-commands))
 
 (defun pyim-process-get-candidates ()
   pyim-candidates)
