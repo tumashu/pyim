@@ -1334,7 +1334,7 @@ Transfer-Encoding: chunked
     (backward-char 1)
     (should-not (pyim-probe-program-mode))))
 
-(ert-deftest pyim-tests-pyim-probe-program-mode ()
+(ert-deftest pyim-tests-pyim-probe-isearch-mode ()
   ;; Isearch mode 不好写测试，这里假设 isearch 命令运行时，至少有一个 buffer 中
   ;; 变量 isearch-mode 取值为 t. 参考了 `isearch-define-mode-toggle'.
   (let ((pyim-isearch-mode t))
