@@ -46,7 +46,7 @@
 这个 imobjs 可能包含一个 imobj, 也可能包含多个，每个 imobj 都包含
 声母和韵母的相关信息，比如：
 
-    (pyim-imobjs-create \"woaimeinv\" (pyim-scheme-get (quote quanpin)))
+    (pyim-imobjs-create \"woaimeinv\" (pyim-scheme-get \\='quanpin))
 
 结果为:
 
@@ -55,9 +55,13 @@
       (\"m\" \"ei\" \"m\" \"ei\")
       (\"n\" \"v\" \"n\" \"v\")))
 
-如果字符串无法正确处理，则返回 nil, 比如：
+如果字符串无法正确处理，则特殊处理, 比如：
 
-   (pyim-imobjs-create \"ua\" (pyim-scheme-get (quote quanpin)))
+   (pyim-imobjs-create \"ua\" (pyim-scheme-get \\='quanpin))
+
+结果为：
+
+   (((\"\" \"ua\" \"\" \"ua\")))
 
 全拼输入法的 imelem 是四个字符串组成的 list, 类似：
 
@@ -67,8 +71,8 @@
 
   (声母1, 韵母1, 声母2, 韵母2)
 
-声母1和声母2一般用来生成 code 字符串，用于词库中寻找词条。声母2和
-韵母2一般用来反向构建 entered 字符串，用于“多次选择生成词条”这个
+声母1和韵母1一般用来生成 code 字符串，用于词库中寻找词条。声母2和
+韵母2一般用来反向构建 entered 字符串，用于 “多次选择生成词条” 这个
 功能。
 
 大多数情况，声母1 = 声母2, 韵母1 = 韵母2, 只有在使用模糊音的时候，
