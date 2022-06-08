@@ -136,9 +136,22 @@ entered (nihaom) 的第一个候选词。
 (defvar pyim-process-stop-daemon-hook nil
   "Pyim stop daemon hook.")
 
+(defvar pyim-process-candidates nil
+  "所有备选词条组成的列表.")
+
+(defvar pyim-process-candidates-last nil
+  "上一轮备选词条列表，这个变量主要用于 autoselector 机制.")
+
+(defvar pyim-process-candidate-position nil
+  "当前选择的词条在 `pyim-candidates’ 中的位置.
+
+细节信息请参考 `pyim-page-refresh' 的 docstring.")
+
 (pyim-register-local-variables
  '(pyim-process-input-ascii
-   pyim-process-translating))
+   pyim-process-translating
+   pyim-process-candidates
+   pyim-process-candidate-position))
 
 (defun pyim-process-ui-init ()
   "初始化 pyim 相关 UI."
@@ -262,11 +275,11 @@ entered (nihaom) 的第一个候选词。
       (setq entered-to-translate
             (pyim-entered-get 'point-before))
       (setq pyim-imobjs (pyim-imobjs-create entered-to-translate scheme))
-      (setq pyim-candidates
+      (setq pyim-process-candidates
             (or (delete-dups (pyim-candidates-create pyim-imobjs scheme))
                 (list entered-to-translate)))
       (unless (eq (pyim-process-auto-select) 'auto-select-success)
-        (setq pyim-candidate-position 1)
+        (setq pyim-process-candidate-position 1)
         (pyim-process-ui-refresh)
         (pyim-process-run-delay)))))
 
@@ -300,9 +313,9 @@ entered (nihaom) 的第一个候选词。
                                select-current-word)
                              :replace-with))
              (candidates (if select-last-word
-                             pyim-candidates-last
-                           pyim-candidates))
-             (pyim-candidates
+                             pyim-process-candidates-last
+                           pyim-process-candidates))
+             (pyim-process-candidates
               (if (and str (stringp str))
                   (list str)
                 candidates)))
@@ -380,8 +393,8 @@ entered (nihaom) 的第一个候选词。
          (words (pyim-candidates-create-limit-time
                  pyim-imobjs scheme)))
     (when words
-      (setq pyim-candidates
-            (pyim-process-merge-candidates words pyim-candidates))
+      (setq pyim-process-candidates
+            (pyim-process-merge-candidates words pyim-process-candidates))
       (pyim-process-ui-refresh))))
 
 (defun pyim-process-merge-candidates (new-candidates old-candidates)
@@ -402,24 +415,24 @@ entered (nihaom) 的第一个候选词。
          (when (and pyim-process-translating
                     (not (input-pending-p))
                     (equal (car async-return) pyim-imobjs))
-           (setq pyim-candidates
-                 (pyim-process-merge-candidates (cdr async-return) pyim-candidates))
+           (setq pyim-process-candidates
+                 (pyim-process-merge-candidates (cdr async-return) pyim-process-candidates))
            (pyim-process-ui-refresh)))))))
 
 (defun pyim-process-get-candidates ()
-  pyim-candidates)
+  pyim-process-candidates)
 
 (defun pyim-process-get-last-candidates ()
-  pyim-candidates-last)
+  pyim-process-candidates-last)
 
 (defun pyim-process-get-candidate-position ()
-  pyim-candidate-position)
+  pyim-process-candidate-position)
 
 (defun pyim-process-candidates-length ()
-  (length pyim-candidates))
+  (length pyim-process-candidates))
 
 (defun pyim-process-set-candidate-position (n)
-  (setq pyim-candidate-position n))
+  (setq pyim-process-candidate-position n))
 
 (defun pyim-process-get-first-imobj ()
   (car pyim-imobjs))
@@ -466,15 +479,15 @@ entered (nihaom) 的第一个候选词。
           pyim-outcome-history))
         ((eq type 'candidate)
          (let ((candidate
-                (nth (1- pyim-candidate-position)
-                     pyim-candidates)))
+                (nth (1- pyim-process-candidate-position)
+                     pyim-process-candidates)))
            (push
             (concat (pyim-outcome-get) candidate)
             pyim-outcome-history)))
         ((eq type 'candidate-and-last-char)
          (let ((candidate
-                (nth (1- pyim-candidate-position)
-                     pyim-candidates)))
+                (nth (1- pyim-process-candidate-position)
+                     pyim-process-candidates)))
            (push
             (concat (pyim-outcome-get)
                     candidate
@@ -707,8 +720,8 @@ BUG：拼音无法有效地处理多音字。"
   (pyim-entered-erase-buffer)
   (setq pyim-process-code-criteria nil)
   (setq pyim-process-force-input-chinese nil)
-  (setq pyim-candidates nil)
-  (setq pyim-candidates-last nil)
+  (setq pyim-process-candidates nil)
+  (setq pyim-process-candidates-last nil)
   (pyim-process-run-delay-timer-reset)
   (pyim-process-ui-hide))
 

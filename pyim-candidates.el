@@ -43,20 +43,6 @@
   "启用输入联想词功能."
   :type 'boolean)
 
-(defvar pyim-candidates nil
-  "所有备选词条组成的列表.")
-
-(defvar pyim-candidates-last nil
-  "上一轮备选词条列表，这个变量主要用于 autoselector 机制.")
-
-(defvar pyim-candidate-position nil
-  "当前选择的词条在 `pyim-candidates’ 中的位置.
-
-细节信息请参考 `pyim-page-refresh' 的 docstring.")
-
-(pyim-register-local-variables
- '(pyim-candidates pyim-candidate-position))
-
 ;; ** 获取备选词列表
 (defun pyim-candidates-sort (candidates)
   "对 CANDIDATES 进行排序。"
