@@ -271,18 +271,27 @@ entered (nihaom) 的第一个候选词。
         (pyim-process-run-delay)))))
 
 (defun pyim-process-auto-select ()
-  "自动上屏操作。"
+  "自动上屏操作流程。
+
+1. (:select last) 模式：
+
+假如用户输入 \"nihao\", 然后按了 \"m\" 键, 那么当前的 entered 就
+是 \"nihaom\", 如果 autoselector 返回 list: (:select last), 那么，
+\"nihao\" 对应的第一个候选词将上屏，m 键下一轮继续处理，这是一种
+\"踩雷确认模式\".
+
+2. (:select current) 模式：
+
+假设用户已经输入 \"niha\", 然后按了 \"o\" 键，那么，当前 entered
+就是 \"nihao\". 如果 autoselector 函数返回一个 list:
+(:select current), 那么就直接将 \"nihao\" 对应的第一个候选词上屏
+幕。
+
+3. 如果返回的 list 中包含 :replace-with \"xxx\" 信息，那么
+\"xxx\" 上屏。"
   (let* ((results (pyim-process-autoselector-results))
-         ;; 假如用户输入 "nihao", 然后按了 "m" 键, 那么当前的 entered
-         ;; 就是"nihaom", 如果 autoselector 返回 list: (:select last),
-         ;; 那么，“nihao” 对应的第一个候选词将上屏，m键下一轮继续处理。
-         ;; 这是一种 "踩雷确认模式".
          (select-last-word
           (pyim-process-autoselector-find-result results 'last))
-         ;; 假设用户已经输入 "niha", 然后按了 "o" 键，那么，当前
-         ;; entered 就是 "nihao". 如果 autoselector 函数返回一个 list:
-         ;; (:select current), 那么就直接将 "nihao" 对应的第一个候选词
-         ;; 上屏幕。
          (select-current-word
           (pyim-process-autoselector-find-result results 'current)))
     (when (or select-last-word select-current-word)
