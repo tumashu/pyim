@@ -193,7 +193,7 @@ If you don't like this function, set the variable to nil")
   "返回合适的标点符号，PUNCT-LIST 为标点符号列表.
 
 这个函数用于处理成对的全角标点符号，简单来说：如果第一次输入的标
-点是：（‘）时，那么下一次输入的标点就是（’）。
+点是：\"“\"时，那么下一次输入的标点就是\"”\"。
 
 PUNCT-LIST 格式类似：
 

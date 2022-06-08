@@ -88,7 +88,7 @@ dcache 文件的方法让 pyim 正常工作。")
 (defmacro pyim-dcache-init-variable (variable &optional fallback-value)
   "初始化 VARIABLE.
 
-如果 VARIABLE 的值为 nil, 则使用 ‘pyim-dcache-directory’ 中对应文
+如果 VARIABLE 的值为 nil, 则使用 `pyim-dcache-directory' 中对应文
 件的内容来设置 VARIABLE 变量, 如果此时 VARIABLE 取值还是 nil, 那
 么就将 VARIABLE 的值设置为 FALLBACK-VALUE."
   `(when (and (symbolp ',variable) (not ,variable))

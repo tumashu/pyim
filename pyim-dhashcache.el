@@ -191,7 +191,7 @@
         (async-inject-variables "^pyim-.+?directory$")))
 
 (defun pyim-dhashcache-update-ishortcode2word (&optional force)
-  "读取 ‘pyim-dhashcache-icode2word’ 中的词库，创建 *简拼* 缓存，然后加载这个缓存.
+  "读取 `pyim-dhashcache-icode2word' 中的词库，创建 *简拼* 缓存，然后加载这个缓存.
 
 如果 FORCE 为真，强制加载缓存。"
   (interactive)

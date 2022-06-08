@@ -528,7 +528,7 @@
 
 (\"满\" \"慢\" \"漫\"  ...)
 
-如果 INCLUDE-SEPERATOR 是 non-nil, 返回的列表包含一个 ‘|’ 号，pyim 用这个分隔符
+如果 INCLUDE-SEPERATOR 是 non-nil, 返回的列表包含一个 \"|\" 号，pyim 用这个分隔符
 来区分 3500 个常用汉字和生僻字。"
   (pyim-pymap-py2cchar-cache-create)
   (when (and pinyin (stringp pinyin))

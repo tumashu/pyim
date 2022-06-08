@@ -77,7 +77,7 @@
 
 (defun pyim-permutate-list (list)
   "使用排列组合的方式重新排列 LIST.
-这个函数由 ‘二中’ 提供。"
+这个函数由 \"二中\" 提供。"
   (let ((list-head (car list))
         (list-tail (cdr list)))
     (cond ((null list-tail)
@@ -132,7 +132,7 @@ When CARE-FIRST-ONE is no-nil, ((a b c) (d e)) => (a d)."
     (nreverse output)))
 
 (defun pyim-char-before-to-string (num)
-  "得到光标前第 `num' 个字符，并将其转换为字符串。"
+  "得到光标前第 NUM 个字符，并将其转换为字符串。"
   (let* ((point (point))
          (point-before (- point num)))
     (when (and (> point-before 0)
@@ -140,7 +140,7 @@ When CARE-FIRST-ONE is no-nil, ((a b c) (d e)) => (a d)."
       (char-to-string (char-before point-before)))))
 
 (defun pyim-char-after-to-string (num)
-  "得到光标后第 `num' 个字符，并将其转换为字符串。"
+  "得到光标后第 NUM 个字符，并将其转换为字符串。"
   (let* ((point (point))
          (point-after (+ point num)))
     (when (char-after point-after)
