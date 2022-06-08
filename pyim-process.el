@@ -377,29 +377,33 @@ entered (nihaom) 的第一个候选词。
 (defun pyim-process-handle-candidates-limit-time ()
   "使用限时的方式获取候选词。"
   (let* ((scheme (pyim-scheme-current))
-         (words (delete-dups
-                 (pyim-candidates-create-limit-time
-                  pyim-imobjs scheme
-                  pyim-candidates))))
+         (words (pyim-candidates-create-limit-time
+                 pyim-imobjs scheme)))
     (when words
-      (setq pyim-candidates words)
+      (setq pyim-candidates
+            (pyim-process-merge-candidates words pyim-candidates))
       (pyim-process-ui-refresh))))
+
+(defun pyim-process-merge-candidates (new-candidates old-candidates)
+  "将 OLD-CANDIDATES 和 NEW-CANDIDATES 合并的默认策略。"
+  (remove nil (delete-dups
+               `(,(car old-candidates)
+                 ,@new-candidates
+                 ,@(cdr old-candidates)))))
 
 (defun pyim-process-handle-candidates-async ()
   "使用异步的方式获取候选词条词条。"
-  (let ((buffer (current-buffer)))
+  (let ((scheme (pyim-scheme-current))
+        (buffer (current-buffer)))
     (pyim-candidates-create-async
-     pyim-imobjs (pyim-scheme-current)
+     pyim-imobjs scheme
      (lambda (async-return)
        (with-current-buffer buffer
          (when (and pyim-process-translating
                     (not (input-pending-p))
                     (equal (car async-return) pyim-imobjs))
            (setq pyim-candidates
-                 (delete-dups
-                  `(,(car pyim-candidates)
-                    ,@(cdr async-return)
-                    ,@(cdr pyim-candidates))))
+                 (pyim-process-merge-candidates (cdr async-return) pyim-candidates))
            (pyim-process-ui-refresh)))))))
 
 (defun pyim-process-get-candidates ()
