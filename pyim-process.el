@@ -265,7 +265,7 @@ entered (nihaom) 的第一个候选词。
       (setq pyim-candidates
             (or (delete-dups (pyim-candidates-create pyim-imobjs scheme))
                 (list entered-to-translate)))
-      (unless (pyim-process-auto-select)
+      (unless (eq (pyim-process-auto-select) 'auto-select-success)
         (setq pyim-candidate-position 1)
         (pyim-process-ui-refresh)
         (pyim-process-run-delay)))))
@@ -285,11 +285,11 @@ entered (nihaom) 的第一个候选词。
          ;; 上屏幕。
          (select-current-word
           (pyim-process-autoselector-find-result results 'current)))
-    (when (or select-last-word
-              select-current-word)
-      (let* ((str (if select-last-word
-                      (plist-get select-last-word :replace-with)
-                    (plist-get select-current-word :replace-with)))
+    (when (or select-last-word select-current-word)
+      (let* ((str (plist-get (if select-last-word
+                                 select-last-word
+                               select-current-word)
+                             :replace-with))
              (candidates (if select-last-word
                              pyim-candidates-last
                            pyim-candidates))
@@ -307,8 +307,9 @@ entered (nihaom) 的第一个候选词。
       (when select-last-word
         (pyim-add-unread-command-events last-command-event))
       (pyim-process-terminate)
-      ;; 必须返回 t.
-      t)))
+      ;; 如果自动上屏操作成功完成，就返回 'auto-select-success,
+      ;; pyim 后续操作会检测这个返回值。
+      'auto-select-success)))
 
 (defun pyim-process-autoselector-results ()
   "运行所有 autoselectors, 返回结果列表。"
