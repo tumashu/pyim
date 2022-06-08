@@ -337,17 +337,22 @@ entered (nihaom) 的第一个候选词。
   (run-hook-with-args 'pyim-process-ui-refresh-hook hightlight-current))
 
 (defun pyim-process-run-delay ()
-  "延迟获取候选词条。
+  "运行延迟获取候选词流程。
 
-当用户选择词条时，如果停顿时间超过某个阈值，就激活延迟候选词获取
-流程，不同的输入法对延迟获取候选词流程定义也可能不同，比如：全拼
-输入法目前的延迟获取候选词流程是搜索当前 buffer 获取词条。而 rime
-的延迟获取候选词流程是获取所有的词条。"
+当用户输入停顿时间超过 `pyim-process-run-delay' 这个阈值时，就激
+活延迟获取候选词流程，目前，延迟获取候选词有两种处理模式：
+
+1. 同步+限时+用户抢断模式：比如：搜索 buffer 词条等。
+2. 异步模式：比如：调用云输入法接口等。
+
+注意：按理说，两种模式的延时阈值应该单独设置的，但当前 pyim 没有
+将其分开，因为这样做在满足当前需求的同时，可以简化代码，如果以后
+有新功能必须将其分开时，再做考虑。"
   (pyim-process-run-delay-timer-reset)
   (setq pyim-process-run-delay-timer
         (run-with-timer
          pyim-process-run-delay
-         nil #'pyim-process-run-delay-1)))
+         nil #'pyim-process-run-delay-timer-function)))
 
 (defun pyim-process-run-delay-timer-reset ()
   "Reset `pyim-process-run-delay-timer'."
@@ -355,7 +360,7 @@ entered (nihaom) 的第一个候选词。
     (cancel-timer pyim-process-run-delay-timer)
     (setq pyim-process-run-delay-timer nil)))
 
-(defun pyim-process-run-delay-1 ()
+(defun pyim-process-run-delay-timer-function ()
   "Function used by `pyim-process-run-delay-timer'"
   (pyim-process-handle-candidates-async)
   (pyim-process-handle-candidates-limit-time))
