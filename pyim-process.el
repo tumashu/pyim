@@ -469,6 +469,9 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 (defun pyim-process-get-last-candidates ()
   pyim-process-candidates-last)
 
+(defun pyim-process-update-last-candidates ()
+  (setq pyim-process-candidates-last pyim-process-candidates))
+
 (defun pyim-process-get-candidate-position ()
   pyim-process-candidate-position)
 

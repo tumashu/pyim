@@ -315,7 +315,7 @@ REFRESH-COMMON-DCACHE 已经废弃，不要再使用了。"
 (defun pyim-self-insert-command ()
   "Pyim 默认的 self-insert-command."
   (interactive "*")
-  (setq pyim-process-candidates-last pyim-process-candidates)
+  (pyim-process-update-last-candidates)
   (cond
    ((pyim-process-input-chinese-p)
     (pyim-process-with-entered-buffer
