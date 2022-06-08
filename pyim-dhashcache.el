@@ -289,7 +289,7 @@
 (defun pyim-dhashcache-generate-dcache-file (dict-files dcache-file)
   "读取词库文件列表：DICT-FILES, 生成一个词库缓冲文件 DCACHE-FILE.
 
-pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 'utf-8-unix,
+pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 \\='utf-8-unix,
 其结构类似：
 
   ni-bu-hao 你不好
