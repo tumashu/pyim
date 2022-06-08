@@ -136,6 +136,49 @@ entered (nihaom) 的第一个候选词。
 (defvar pyim-process-stop-daemon-hook nil
   "Pyim stop daemon hook.")
 
+(defvar pyim-process-imobjs nil
+  "Imobj (Input method object) 组成的 list.
+
+imobj 在 pyim 里面的概念，类似与编译器里面的语法树，
+它代表 pyim 输入的字符串 entered 解析得到的一个结构化对象，
+以全拼输入法的为例：
+
+1. entered: nihaoma
+2. imobj: ((\"n\" \"i\" \"n\" \"i\") (\"h\" \"ao\" \"h\" \"ao\") (\"m\" \"a\" \"m\" \"a\"))
+
+而 imobjs 是 imobj 组成的一个列表，因为有模糊音等概念的存在，一个
+entered 需要以多种方式或者多步骤解析，得到多种可能的 imobj, 这些
+imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
+
+1. entered: guafeng (设置了模糊音 en -> eng)
+2. imobj-1: ((\"g\" \"ua\" \"g\" \"ua\") (\"f\" \"en\" \"f\" \"eng\"))
+3. imobj-2: ((\"g\" \"ua\" \"g\" \"ua\") (\"f\" \"eng\" \"f\" \"eng\"))
+4. imobjs:  (((\"g\" \"ua\" \"g\" \"ua\") (\"f\" \"en\" \"f\" \"eng\"))
+             ((\"g\" \"ua\" \"g\" \"ua\") (\"f\" \"eng\" \"f\" \"eng\")))
+
+这个变量用来保存解析得到的 imobjs。
+
+解析完成之后，pyim 会为每一个 imobj 创建对应 code 字符串, 然后在词库
+中搜索 code 字符串来得到所需要的词条，最后使用特定的方式将得到的
+词条组合成一个候选词列表：`pyim-candidates' 并通过 pyim-page 相关
+功能来显示选词框，供用户选择词条，比如：
+
+1. imobj: ((\"g\" \"ua\" \"g\" \"ua\") (\"f\" \"en\" \"f\" \"en\"))
+2. code: gua-fen
+
+从上面的说明可以看出，imobj 本身也是有结构的：
+
+1. imobj: ((\"g\" \"ua\" \"g\" \"ua\") (\"f\" \"en\" \"f\" \"en\"))
+
+我们将 (\"g\" \"ua\" \"g\" \"ua\") 这些子结构，叫做 imelem (IM element), *大
+多数情况下*, 一个 imelem 能够代表一个汉字，这个概念在编辑 entered
+的时候，非常有用。
+
+另外要注意的是，不同的输入法， imelem 的内部结构是不一样的，比如：
+1. quanping:  (\"g\" \"ua\" \"g\" \"ua\")
+2. shuangpin: (\"h\" \"ao\" \"h\" \"c\")
+3. wubi:      (\"aaaa\")")
+
 (defvar pyim-process-candidates nil
   "所有备选词条组成的列表.")
 
@@ -150,6 +193,7 @@ entered (nihaom) 的第一个候选词。
 (pyim-register-local-variables
  '(pyim-process-input-ascii
    pyim-process-translating
+   pyim-process-imobjs
    pyim-process-candidates
    pyim-process-candidate-position))
 
@@ -274,9 +318,9 @@ entered (nihaom) 的第一个候选词。
            entered-to-translate)
       (setq entered-to-translate
             (pyim-entered-get 'point-before))
-      (setq pyim-imobjs (pyim-imobjs-create entered-to-translate scheme))
+      (setq pyim-process-imobjs (pyim-imobjs-create entered-to-translate scheme))
       (setq pyim-process-candidates
-            (or (delete-dups (pyim-candidates-create pyim-imobjs scheme))
+            (or (delete-dups (pyim-candidates-create pyim-process-imobjs scheme))
                 (list entered-to-translate)))
       (unless (eq (pyim-process-auto-select) 'auto-select-success)
         (setq pyim-process-candidate-position 1)
@@ -391,7 +435,7 @@ entered (nihaom) 的第一个候选词。
   "使用限时的方式获取候选词。"
   (let* ((scheme (pyim-scheme-current))
          (words (pyim-candidates-create-limit-time
-                 pyim-imobjs scheme)))
+                 pyim-process-imobjs scheme)))
     (when words
       (setq pyim-process-candidates
             (pyim-process-merge-candidates words pyim-process-candidates))
@@ -409,12 +453,12 @@ entered (nihaom) 的第一个候选词。
   (let ((scheme (pyim-scheme-current))
         (buffer (current-buffer)))
     (pyim-candidates-create-async
-     pyim-imobjs scheme
+     pyim-process-imobjs scheme
      (lambda (async-return)
        (with-current-buffer buffer
          (when (and pyim-process-translating
                     (not (input-pending-p))
-                    (equal (car async-return) pyim-imobjs))
+                    (equal (car async-return) pyim-process-imobjs))
            (setq pyim-process-candidates
                  (pyim-process-merge-candidates (cdr async-return) pyim-process-candidates))
            (pyim-process-ui-refresh)))))))
@@ -435,7 +479,7 @@ entered (nihaom) 的第一个候选词。
   (setq pyim-process-candidate-position n))
 
 (defun pyim-process-get-first-imobj ()
-  (car pyim-imobjs))
+  (car pyim-process-imobjs))
 
 (defun pyim-process-select-subword-p ()
   pyim-outcome-subword-info)
