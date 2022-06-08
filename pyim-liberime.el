@@ -189,7 +189,7 @@
        (reverse pyim-liberime-word-log))
       ;; 使用 rime 的同时，也附带的优化 quanpin 的词库。
       (let ((pyim-default-scheme 'quanpin))
-        (if (member (pyim-outcome-get) pyim-process-candidates)
+        (if (member (pyim-outcome-get) (pyim-process-get-candidates))
             (pyim-process-create-word (pyim-outcome-get) t)
           (pyim-process-create-word (pyim-outcome-get))))
       (setq pyim-liberime-code-log nil)
