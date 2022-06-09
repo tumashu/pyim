@@ -474,8 +474,11 @@ update-icode2word 目前只要是用于更新型码输入法的 code-prefix, 所
               (setq code (pyim-dregcache-search-word-code-1 word content))
               (when code (throw 'result (list code))))))))))
 
-(defun pyim-dregcache-export-personal-words (file &optional confirm)
+(cl-defmethod pyim-dcache-export-personal-words
+  (file &context (pyim-dcache-backend (eql pyim-dregcache))
+        &optional confirm)
   "将个人词库存入 FILE."
+  (pyim-dregcache-init-variables)
   (when pyim-dregcache-icode2word
     ;; 按词频排序，把词频信息保存到用户词典
     (pyim-dregcache-sort-icode2word)

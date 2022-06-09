@@ -193,25 +193,17 @@ AUTO-BACKUP-THRESHOLD 倍, 那么原值将自动备份到 FILE 对应的备份�
   t)
 
 ;; ** Dcache 导出功能
-(defun pyim-dcache-export-words-and-counts (file &optional confirm ignore-counts)
+(cl-defgeneric pyim-dcache-export-words-and-counts (file &optional confirm ignore-counts)
   "将个人词条以及词条对应的词频信息导出到文件 FILE.
 
 如果 FILE 为 nil, 提示用户指定导出文件位置, 如果 CONFIRM 为
-non-nil，文件存在时将会提示用户是否覆盖，默认为覆盖模式"
-  (interactive "F将词条和词频信息导出到文件: ")
-  (pyim-dcache-init-variables)
-  (pyim-dcache-call-api 'export-words-and-counts file confirm ignore-counts)
-  (message "PYIM: 词条和词频信息导出完成。"))
+non-nil，文件存在时将会提示用户是否覆盖，默认为覆盖模式")
 
-(defun pyim-dcache-export-personal-words (file &optional confirm)
+(cl-defgeneric pyim-dcache-export-personal-words (file &optional confirm)
   "将用户的个人词条导出为 pyim 词库文件.
 
 如果 FILE 为 nil, 提示用户指定导出文件位置, 如果 CONFIRM 为 non-nil，
-文件存在时将会提示用户是否覆盖，默认为覆盖模式。"
-  (interactive "F将个人词条导出到文件：")
-  (pyim-dcache-init-variables)
-  (pyim-dcache-call-api 'export-personal-words file confirm)
-  (message "PYIM: 个人词条导出完成。"))
+文件存在时将会提示用户是否覆盖，默认为覆盖模式。")
 
 ;; ** Dcache 更新功能
 (cl-defgeneric pyim-dcache-update (&optional force)

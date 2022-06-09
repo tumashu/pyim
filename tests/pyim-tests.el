@@ -982,7 +982,8 @@
     (should (equal my/test:1 "hello"))))
 
 (ert-deftest pyim-tests-pyim-dcache-export ()
-  (let ((pyim-dhashcache-iword2count (make-hash-table :test #'equal))
+  (let ((pyim-dcache-backend 'pyim-dhashcache)
+        (pyim-dhashcache-iword2count (make-hash-table :test #'equal))
         (pyim-dhashcache-icode2word (make-hash-table :test #'equal))
         (file (pyim-tests-make-temp-file)))
     (puthash "你好" 10 pyim-dhashcache-iword2count)

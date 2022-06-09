@@ -711,11 +711,17 @@ code 对应的中文词条了。
 (defun pyim-dhashcache-search-word-code (string)
   (gethash string pyim-dhashcache-word2code))
 
-(defun pyim-dhashcache-export-personal-words (file &optional confirm)
+(cl-defmethod pyim-dcache-export-personal-words
+  (file &context (pyim-dcache-backend (eql pyim-dhashcache))
+        &optional confirm)
   "导出个人词库到 FILE."
+  (pyim-dhashcache-init-variables)
   (pyim-dhashcache-export pyim-dhashcache-icode2word file confirm))
 
-(defun pyim-dhashcache-export-words-and-counts (file &optional confirm ignore-counts)
+(cl-defmethod pyim-dcache-export-words-and-counts
+  (file &context (pyim-dcache-backend (eql pyim-dhashcache))
+        &optional confirm ignore-counts)
+  (pyim-dhashcache-init-variables)
   (with-temp-buffer
     (insert ";;; -*- coding: utf-8-unix -*-\n")
     (maphash
