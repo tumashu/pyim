@@ -397,6 +397,12 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
   ;; 删除对应词条的词频
   (remhash word pyim-dregcache-iword2count))
 
+(cl-defmethod pyim-dcache-insert-word
+  (word code prepend
+        &context (pyim-dcache-backend (eql pyim-dregcache)))
+  "将词条 WORD 插入到 `pyim-dregcache-icode2word'."
+  (pyim-dregcache-insert-word-into-icode2word word code prepend))
+
 (defun pyim-dregcache-insert-word-into-icode2word (word code prepend)
   "保存个人词到缓存,和其他词库格式一样以共享正则搜索算法."
   (when pyim-debug

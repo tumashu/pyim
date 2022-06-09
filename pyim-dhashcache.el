@@ -664,6 +664,20 @@ code 对应的中文词条了。
   (remhash word pyim-dhashcache-iword2count-log)
   (remhash word pyim-dhashcache-iword2priority))
 
+(cl-defmethod pyim-dcache-insert-word
+  (word code prepend
+        &context (pyim-dcache-backend (eql pyim-dhashcache)))
+  "将词条 WORD 插入到下面两个词库缓存中。
+
+1. `pyim-dhashcache-icode2word'
+2. `pyim-dhashcache-insert-word-into-ishortcode2word'."
+  (pyim-dhashcache-insert-word-into-icode2word word code prepend)
+  ;; NOTE: 保存词条到 icode2word 词库缓存的同时，也在 ishortcode2word 词库缓存中
+  ;; 临时写入一份，供当前 Emacs session 使用，但退出时 pyim 不会保存
+  ;; ishortcode2word 词库缓存到文件，因为下次启动 Emacs 的时候，ishortcode2word
+  ;; 词库缓存会从 icode2word 再次重建。
+  (pyim-dhashcache-insert-word-into-ishortcode2word word code prepend))
+
 (defun pyim-dhashcache-insert-word-into-icode2word (word code prepend)
   "将词条 WORD 插入到 icode2word 词库缓存 CODE 键对应的位置.
 
