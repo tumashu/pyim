@@ -90,6 +90,9 @@
   (when pyim-dregcache-icode2word
     (nreverse (pyim-dregcache-get-1 pyim-dregcache-icode2word code))))
 
+(defmacro pyim-dregcache-match-line (code)
+  `(concat "^" (pyim-dregcache-code2regexp ,code) " \\(.+\\)"))
+
 (defun pyim-dregcache-get-1 (content code)
   (let ((case-fold-search t)
         (start 0)
@@ -113,8 +116,14 @@
       (setq start (+ start 2 (length code) (length word))))
     output))
 
-(defmacro pyim-dregcache-match-line (code)
-  `(concat "^" (pyim-dregcache-code2regexp ,code) " \\(.+\\)"))
+(defmacro pyim-dregcache-is-shenmu (code)
+  "判断CODE 是否是一个声母."
+  `(and (eq (length ,code) 1)
+        (not (string-match ,code "aeo"))))
+
+(defmacro pyim-dregcache-shenmu2regexp (char)
+  "将声母 CHAR 转换为通用正则表达式匹配所有以该声母开头的汉字."
+  `(concat ,char "[a-z]*"))
 
 (defun pyim-dregcache-code2regexp (code)
   "将 CODE 转换成正则表达式用来搜索辞典缓存中的匹配项目.
@@ -153,15 +162,6 @@
          (t
           ;; tian-an-men => tian-an-men[a-z-]*
           (concat s "[a-z-]*"))))))))
-
-(defmacro pyim-dregcache-is-shenmu (code)
-  "判断CODE 是否是一个声母."
-  `(and (eq (length ,code) 1)
-        (not (string-match ,code "aeo"))))
-
-(defmacro pyim-dregcache-shenmu2regexp (char)
-  "将声母 CHAR 转换为通用正则表达式匹配所有以该声母开头的汉字."
-  `(concat ,char "[a-z]*"))
 
 (defun pyim-dregcache-all-dict-files ()
   "所有词典文件."
