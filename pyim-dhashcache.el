@@ -81,7 +81,7 @@
 
 ;; ** 初始化 dhashcache 相关函数
 (cl-defmethod pyim-dcache-init-variables
-  (&context (pyim-dcache-backend (eql pyim-dhashcache)))
+  (&context ((pyim-dcache-backend) (eql pyim-dhashcache)))
   "初始化 dcache 缓存相关变量."
   (when (and (not pyim-dhashcache-icode2word)
              pyim-dcache-directory
@@ -106,7 +106,7 @@
 
 ;; ** 从 dhashcache 搜索词条相关函数
 (cl-defmethod pyim-dcache-get
-  (code &context (pyim-dcache-backend (eql pyim-dhashcache))
+  (code &context ((pyim-dcache-backend) (eql pyim-dhashcache))
         &optional from)
   "从 FROM 对应的 dcaches 中搜索 CODE, 得到对应的词条.
 
@@ -136,13 +136,13 @@ code 对应的中文词条了。
 
 ;; ** 从 dhashcache 搜索代码相关函数
 (cl-defmethod pyim-dcache-search-word-code
-  (string &context (pyim-dcache-backend (eql pyim-dhashcache)))
+  (string &context ((pyim-dcache-backend) (eql pyim-dhashcache)))
   (gethash string pyim-dhashcache-word2code))
 
 ;; ** 给 dhashcache 添加词条相关函数
 (cl-defmethod pyim-dcache-insert-word
   (word code prepend
-        &context (pyim-dcache-backend (eql pyim-dhashcache)))
+        &context ((pyim-dcache-backend) (eql pyim-dhashcache)))
   "将词条 WORD 插入到下面两个词库缓存中。
 
 1. `pyim-dhashcache-icode2word'
@@ -210,7 +210,7 @@ code 对应的中文词条了。
 
 ;; ** 从 dhashcache 删除词条相关函数
 (cl-defmethod pyim-dcache-delete-word
-  (word &context (pyim-dcache-backend (eql pyim-dhashcache)))
+  (word &context ((pyim-dcache-backend) (eql pyim-dhashcache)))
   "将中文词条 WORD 从个人词库中删除"
   (maphash
    (lambda (key value)
@@ -235,7 +235,7 @@ code 对应的中文词条了。
 
 ;; ** 更新 dhashcache 相关函数
 (cl-defmethod pyim-dcache-update
-  (&context (pyim-dcache-backend (eql pyim-dhashcache)) &optional force)
+  (&context ((pyim-dcache-backend) (eql pyim-dhashcache)) &optional force)
   "读取并加载所有相关词库 dcache.
 
 如果 FORCE 为真，强制加载。"
@@ -559,7 +559,7 @@ pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 \\='utf
 
 ;; ** 更新 dhashcache 词频功能
 (cl-defmethod pyim-dcache-update-wordcount
-  (word &context (pyim-dcache-backend (eql pyim-dhashcache))
+  (word &context ((pyim-dcache-backend) (eql pyim-dhashcache))
         &optional wordcount-handler)
   (pyim-dhashcache-update-iword2count word wordcount-handler))
 
@@ -627,7 +627,7 @@ pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 \\='utf
 
 ;; ** 根据 dhashcache 信息对词条进行排序
 (cl-defmethod pyim-dcache-sort-words
-  (words-list &context (pyim-dcache-backend (eql pyim-dhashcache)))
+  (words-list &context ((pyim-dcache-backend) (eql pyim-dhashcache)))
   "对 WORDS-LIST 排序"
   (let ((iword2count pyim-dhashcache-iword2count)
         (iword2priority pyim-dhashcache-iword2priority))
@@ -646,7 +646,7 @@ pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 \\='utf
 
 ;; ** 升级 dhashcache 相关函数
 (cl-defmethod pyim-dcache-upgrade
-  (&context (pyim-dcache-backend (eql pyim-dhashcache)))
+  (&context ((pyim-dcache-backend) (eql pyim-dhashcache)))
   "升级词库缓存.
 
 当前已有的功能：
@@ -685,7 +685,7 @@ pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 \\='utf
 
 ;; ** 保存 dhashcache 相关函数
 (cl-defmethod pyim-dcache-save-caches
-  (&context (pyim-dcache-backend (eql pyim-dhashcache)))
+  (&context ((pyim-dcache-backend) (eql pyim-dhashcache)))
   (pyim-dhashcache-save-personal-dcache-to-file))
 
 (defun pyim-dhashcache-save-personal-dcache-to-file ()
@@ -708,7 +708,7 @@ pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 \\='utf
 
 ;; ** 导出相关函数
 (cl-defmethod pyim-dcache-export-personal-words
-  (file &context (pyim-dcache-backend (eql pyim-dhashcache))
+  (file &context ((pyim-dcache-backend) (eql pyim-dhashcache))
         &optional confirm)
   "导出个人词库到 FILE."
   (pyim-dcache-init-variables)
@@ -738,7 +738,7 @@ pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 \\='utf
     (pyim-dcache-write-file file confirm)))
 
 (cl-defmethod pyim-dcache-export-words-and-counts
-  (file &context (pyim-dcache-backend (eql pyim-dhashcache))
+  (file &context ((pyim-dcache-backend) (eql pyim-dhashcache))
         &optional confirm ignore-counts)
   (pyim-dcache-init-variables)
   (with-temp-buffer

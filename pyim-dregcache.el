@@ -46,7 +46,7 @@
 
 ;; ** 初始化 dregcache 相关函数
 (cl-defmethod pyim-dcache-init-variables
-  (&context (pyim-dcache-backend (eql pyim-dregcache)))
+  (&context ((pyim-dcache-backend) (eql pyim-dregcache)))
   "初始化 cache 缓存相关变量."
   (pyim-dcache-init-variable
    pyim-dregcache-iword2count
@@ -59,7 +59,7 @@
 
 ;; ** 从 dregcache 搜索词条相关函数
 (cl-defmethod pyim-dcache-get
-  (code &context (pyim-dcache-backend (eql pyim-dregcache))
+  (code &context ((pyim-dcache-backend) (eql pyim-dregcache))
         &optional from)
   "从 `pyim-dregcache-cache' 搜索 CODE, 得到对应的词条."
   (when code
@@ -191,7 +191,7 @@
 
 ;; ** 从 dregcache 搜索代码相关函数
 (cl-defmethod pyim-dcache-search-word-code
-  (word &context (pyim-dcache-backend (eql pyim-dregcache)))
+  (word &context ((pyim-dcache-backend) (eql pyim-dregcache)))
   "从 `pyim-dregcache-cache' 和 `pyim-dregcache-icode2word' 搜索 word, 得到对应的code."
   (when pyim-debug (message "pyim-dregcache-search-word-code word=%s" word))
   (when pyim-dregcache-cache
@@ -217,7 +217,7 @@
 ;; ** 给 dregcache 添加词条相关函数
 (cl-defmethod pyim-dcache-insert-word
   (word code prepend
-        &context (pyim-dcache-backend (eql pyim-dregcache)))
+        &context ((pyim-dcache-backend) (eql pyim-dregcache)))
   "将词条 WORD 插入到 `pyim-dregcache-icode2word'."
   (pyim-dregcache-insert-word-into-icode2word word code prepend))
 
@@ -251,7 +251,7 @@
 
 ;; ** 从 dregcache 删除词条相关函数
 (cl-defmethod pyim-dcache-delete-word
-  (word &context (pyim-dcache-backend (eql pyim-dregcache)))
+  (word &context ((pyim-dcache-backend) (eql pyim-dregcache)))
   "将中文词条 WORD 从个人词库中删除."
   (with-temp-buffer
     (insert pyim-dregcache-icode2word)
@@ -277,7 +277,7 @@
 
 ;; ** 更新 dregcache 相关函数
 (cl-defmethod pyim-dcache-update
-  (&context (pyim-dcache-backend (eql pyim-dregcache)) &optional force)
+  (&context ((pyim-dcache-backend) (eql pyim-dregcache)) &optional force)
   "读取并加载所有相关词库 dcache.
 
 如果 FORCE 为真，强制加载。"
@@ -395,7 +395,7 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
 
 ;; ** 更新 dregcache 词频功能。
 (cl-defmethod pyim-dcache-update-wordcount
-  (word &context (pyim-dcache-backend (eql pyim-dregcache))
+  (word &context ((pyim-dcache-backend) (eql pyim-dregcache))
         &optional wordcount-handler)
   (pyim-dregcache-update-iword2count word wordcount-handler))
 
@@ -414,7 +414,7 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
       (puthash word new-value pyim-dregcache-iword2count))))
 
 ;; ** 升级 dregcache 相关函数
-(cl-defmethod pyim-dcache-upgrade (&context (pyim-dcache-backend (eql pyim-dregcache)))
+(cl-defmethod pyim-dcache-upgrade (&context ((pyim-dcache-backend) (eql pyim-dregcache)))
   "升级词库缓存.
 
 当前已有的功能：
@@ -441,7 +441,7 @@ update-icode2word 目前只要是用于更新型码输入法的 code-prefix, 所
 
 ;; ** 保存 dregcache 相关函数
 (cl-defmethod pyim-dcache-save-caches
-  (&context (pyim-dcache-backend (eql pyim-dregcache)))
+  (&context ((pyim-dcache-backend) (eql pyim-dregcache)))
   (pyim-dregcache-save-personal-dcache-to-file))
 
 (defun pyim-dregcache-save-personal-dcache-to-file ()
@@ -468,12 +468,12 @@ update-icode2word 目前只要是用于更新型码输入法的 code-prefix, 所
 
 ;; ** 导出 dregcache 相关函数
 (cl-defmethod pyim-dcache-export-words-and-counts
-  (file &context (pyim-dcache-backend (eql pyim-dregcache))
+  (file &context ((pyim-dcache-backend) (eql pyim-dregcache))
         &optional confirm)
   "TODO")
 
 (cl-defmethod pyim-dcache-export-personal-words
-  (file &context (pyim-dcache-backend (eql pyim-dregcache))
+  (file &context ((pyim-dcache-backend) (eql pyim-dregcache))
         &optional confirm)
   "将个人词库存入 FILE."
   (pyim-dcache-init-variables)
