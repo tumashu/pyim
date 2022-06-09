@@ -44,7 +44,8 @@
 (defvar pyim-dregcache-iword2count nil)
 (defvar pyim-dregcache-dicts-md5 nil)
 
-(defun pyim-dregcache-update (&optional force)
+(cl-defmethod pyim-dcache-update
+  (&context (pyim-dcache-backend (eql pyim-dregcache)) &optional force)
   "读取并加载所有相关词库 dcache.
 
 如果 FORCE 为真，强制加载。"

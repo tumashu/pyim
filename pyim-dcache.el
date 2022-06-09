@@ -214,11 +214,10 @@ non-nil，文件存在时将会提示用户是否覆盖，默认为覆盖模式"
   (message "PYIM: 个人词条导出完成。"))
 
 ;; ** Dcache 更新功能
-(defun pyim-dcache-update (&optional force)
+(cl-defgeneric pyim-dcache-update (&optional force)
   "读取并加载所有相关词库 dcache.
 
-如果 FORCE 为真，强制加载。"
-  (pyim-dcache-call-api 'update force))
+如果 FORCE 为真，强制加载。")
 
 (defun pyim-dcache-create-files-md5 (files)
   "为 FILES 生成 md5 字符串。"

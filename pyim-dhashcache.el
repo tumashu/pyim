@@ -79,7 +79,8 @@
 (defvar pyim-dhashcache-update-iword2priority-p nil)
 (defvar pyim-dhashcache-update-code2word-running-p nil)
 
-(defun pyim-dhashcache-update (&optional force)
+(cl-defmethod pyim-dcache-update
+  (&context (pyim-dcache-backend (eql pyim-dhashcache)) &optional force)
   "读取并加载所有相关词库 dcache.
 
 如果 FORCE 为真，强制加载。"
