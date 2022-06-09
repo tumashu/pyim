@@ -156,6 +156,15 @@ AUTO-BACKUP-THRESHOLD 倍, 那么原值将自动备份到 FILE 对应的备份�
     (write-region (point-min) (point-max) filename nil :silent)
     (message "Saving file %s..." filename)))
 
+(defun pyim-dcache-create-files-md5 (files)
+  "为 FILES 生成 md5 字符串。"
+  ;; 当需要强制更新 dict 缓存时，更改这个字符串。
+  (let ((version "v1"))
+    (md5 (prin1-to-string
+          (mapcar (lambda (file)
+                    (list version file (nth 5 (file-attributes file 'string))))
+                  files)))))
+
 ;; ** Dcache 重新加载变量相关函数
 (defmacro pyim-dcache-reload-variable (variable)
   "从 `pyim-dcache-directory' 重新读取并设置 VARIABLE 的值."
@@ -203,15 +212,6 @@ code 对应的中文词条了."
 (cl-defgeneric pyim-dcache-update (&optional force)
   "读取并加载所有相关词库 dcache, 如果 FORCE 为真，强制加载。")
 
-(defun pyim-dcache-create-files-md5 (files)
-  "为 FILES 生成 md5 字符串。"
-  ;; 当需要强制更新 dict 缓存时，更改这个字符串。
-  (let ((version "v1"))
-    (md5 (prin1-to-string
-          (mapcar (lambda (file)
-                    (list version file (nth 5 (file-attributes file 'string))))
-                  files)))))
-
 ;; ** Dcache 更新词条统计量功能接口
 (cl-defgeneric pyim-dcache-update-wordcount (word &optional wordcount-handler)
   "保存 WORD 词频.
@@ -249,7 +249,6 @@ non-nil，文件存在时将会提示用户是否覆盖，默认为覆盖模式"
 
 如果 FILE 为 nil, 提示用户指定导出文件位置, 如果 CONFIRM 为 non-nil，
 文件存在时将会提示用户是否覆盖，默认为覆盖模式。")
-
 
 ;; * Footer
 (provide 'pyim-dcache)
