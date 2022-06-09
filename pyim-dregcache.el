@@ -468,8 +468,8 @@ update-icode2word 目前只要是用于更新型码输入法的 code-prefix, 所
 
 ;; ** 导出 dregcache 相关函数
 (cl-defmethod pyim-dcache-export-words-and-counts
-  (file &context ((pyim-dcache-backend) (eql pyim-dregcache))
-        &optional confirm)
+  (_file &context ((pyim-dcache-backend) (eql pyim-dregcache))
+         &optional _confirm)
   "TODO")
 
 (cl-defmethod pyim-dcache-export-personal-words
