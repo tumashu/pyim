@@ -425,6 +425,13 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
     (setq pyim-dregcache-icode2word
           (buffer-string))))
 
+(cl-defmethod pyim-dcache-upgrade (&context (pyim-dcache-backend (eql pyim-dregcache)))
+  "升级词库缓存.
+
+当前已有的功能：
+1. 基于 :code-prefix-history 信息，升级为新的 code-prefix。"
+  (pyim-dregcache-upgrade-icode2word))
+
 (defun pyim-dregcache-upgrade-icode2word ()
   "升级 icode2word 缓存。
 

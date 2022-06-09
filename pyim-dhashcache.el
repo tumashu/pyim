@@ -454,6 +454,13 @@ code 对应的中文词条了。
        (pyim-dcache-reload-variable pyim-dhashcache-icode2word)
        (pyim-dhashcache-update-ishortcode2word force)))))
 
+(cl-defmethod pyim-dcache-upgrade (&context (pyim-dcache-backend (eql pyim-dhashcache)))
+  "升级词库缓存.
+
+当前已有的功能：
+1. 基于 :code-prefix-history 信息，升级为新的 code-prefix。"
+  (pyim-dhashcache-upgrade-icode2word))
+
 (defun pyim-dhashcache-upgrade-icode2word ()
   "升级 icode2word 缓存。"
   (let ((delete-old-key-p (yes-or-no-p "Delete old key after upgrade? "))

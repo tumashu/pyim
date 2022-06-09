@@ -311,6 +311,12 @@ REFRESH-COMMON-DCACHE 已经废弃，不要再使用了。"
   (pyim-process-save-dcaches save-personal-dcache)
   (pyim-process-init-dcaches :force))
 
+;; ** 升级功能
+(defun pyim-upgrade ()
+  "升级 pyim 功能。"
+  (interactive)
+  (pyim-dcache-upgrade))
+
 ;; ** 键盘输入处理功能
 (defun pyim-self-insert-command ()
   "Pyim 默认的 self-insert-command."
