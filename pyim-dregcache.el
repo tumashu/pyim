@@ -44,133 +44,77 @@
 (defvar pyim-dregcache-iword2count nil)
 (defvar pyim-dregcache-dicts-md5 nil)
 
-(cl-defmethod pyim-dcache-update
-  (&context (pyim-dcache-backend (eql pyim-dregcache)) &optional force)
-  "读取并加载所有相关词库 dcache.
+;; ** 初始化 dregcache 相关函数
+(cl-defmethod pyim-dcache-init-variables
+  (&context (pyim-dcache-backend (eql pyim-dregcache)))
+  "初始化 cache 缓存相关变量."
+  (pyim-dcache-init-variable
+   pyim-dregcache-iword2count
+   ;; dregcache 引擎也需要词频信息，第一次使用 dregcache 引擎的时候，
+   ;; 自动导入 dhashcache 引擎的词频信息，以后两个引擎的词频信息就
+   ;; 完全分开了。
+   (pyim-dcache-get-value 'pyim-dhashcache-iword2count))
+  (unless pyim-dregcache-icode2word
+    (pyim-dregcache-update-personal-words t)))
 
-如果 FORCE 为真，强制加载。"
-  (pyim-dcache-init-variables)
-  (when pyim-dcache-auto-update
-    (pyim-dregcache-update-personal-words force)
-    (let* ((dict-files (pyim-dict-get-enabled-dict-files))
-           (dicts-md5 (pyim-dcache-create-files-md5 dict-files)))
-      (when pyim-debug
-        (message "pyim-dregcache-update: pyim-dicts=%s pyim-extra-dicts=%s dict-files=%s"
-                 pyim-dicts
-                 pyim-extra-dicts
-                 dict-files))
-      (pyim-dregcache-update-code2word dict-files dicts-md5 force))))
+;; ** 从 dregcache 搜索词条相关函数
+(cl-defmethod pyim-dcache-get
+  (code &context (pyim-dcache-backend (eql pyim-dregcache))
+        &optional from)
+  "从 `pyim-dregcache-cache' 搜索 CODE, 得到对应的词条."
+  (when code
+    (cond ((or (memq 'icode2word from)
+               (memq 'ishortcode2word from))
+           (pyim-dregcache-get-icode2word-ishortcode2word code))
+          ;; FIXME: pyim-dregcache 暂时不支持 iword2count-recent-10-words 和
+          ;; iword2count-recent-50-words.
+          ((or (memq 'iword2count-recent-10-words from)
+               (memq 'iword2count-recent-50-words from))
+           nil)
+          (t (let ((dict-files (pyim-dregcache-all-dict-files))
+                   result)
 
-(defun pyim-dregcache-variable-file (variable)
-  "Get VARIABLE dcache file path."
-  (concat (file-name-as-directory pyim-dcache-directory)
-          (symbol-name variable)))
+               (when pyim-debug (message "pyim-dregcache-get is called. code=%s" code))
+               (when dict-files
+                 (dolist (file dict-files)
+                   (let* ((file-info (lax-plist-get pyim-dregcache-cache file))
+                          (content (pyim-dregcache-get-content code file-info)))
+                     (setq result (append (pyim-dregcache-get-1 content code) result)))))
+               ;; `push' plus `nreverse' is more efficient than `add-to-list'
+               ;; Many examples exist in Emacs' own code
+               (nreverse result))))))
 
-(defun pyim-dregcache-save-variable (variable value)
-  "Save VARIABLE with its VALUE."
-  (let* ((file (pyim-dregcache-variable-file variable))
-         (save-silently t))
-    (make-directory (file-name-directory file) t)
-    (with-temp-buffer
-      (insert value)
-      (pyim-dcache-write-file file))))
+(defun pyim-dregcache-get-icode2word-ishortcode2word (code)
+  "以 CODE 搜索个人词和个人联想词.  正则表达式搜索词库,不需要为联想词开单独缓存."
+  (when pyim-debug (message "pyim-dregcache-get-icode2word-ishortcode2word called => %s" code))
+  (when pyim-dregcache-icode2word
+    (nreverse (pyim-dregcache-get-1 pyim-dregcache-icode2word code))))
 
-(defun pyim-dregcache-load-variable (variable)
-  "载入 VARIABLE 对应的文件内容."
-  (let* ((file (pyim-dregcache-variable-file variable)))
-    (when (and file (file-exists-p file))
-      (with-temp-buffer
-        (insert-file-contents file)
-        (buffer-string)))))
+(defun pyim-dregcache-get-1 (content code)
+  (let ((case-fold-search t)
+        (start 0)
+        (pattern (pyim-dregcache-match-line code))
+        (content-length (length content))
+        word
+        output)
+    (while (and (< start content-length)
+                (setq start (string-match pattern content start)))
+      ;; 提取词
+      (setq word (match-string-no-properties 1 content))
+      (when word
+        (cond
+         ((string-match "^[^ ]+$" word)
+          ;; 单个词
+          (push word output))
+         (t
+          ;; 多个字
+          (setq output (append (nreverse (split-string word " +")) output)))))
+      ;; 继续搜索
+      (setq start (+ start 2 (length code) (length word))))
+    output))
 
-(defun pyim-dregcache-sort-words (words-list)
-  "对 WORDS-LIST 排序，词频大的排在前面."
-  (let ((iword2count pyim-dregcache-iword2count))
-    (sort words-list
-          (lambda (a b)
-            (let ((a (car (split-string a ":")))
-                  (b (car (split-string b ":"))))
-              (> (or (gethash a iword2count) 0)
-                 (or (gethash b iword2count) 0)))))))
-
-(defun pyim-dregcache-sort-icode2word ()
-  "对个人词库排序."
-  ;; https://github.com/redguardtoo/zhfreq
-  (with-temp-buffer
-    (dolist (l (split-string pyim-dregcache-icode2word "\n"))
-      (cond
-       ((string-match "^\\([a-z-]+ \\)\\(.*\\)" l)
-        ;; 3字以上词很少，如果只处理单字,2字词,3字词
-        ;; ((string-match "^\\([a-z]+ \\|[a-z]+-[a-z]+ \\|[a-z]+-[a-z]+-[a-z]+ \\)\\(.*\\)" l)
-        (let* ((pinyin (match-string 1 l))
-               (words (pyim-dregcache-sort-words (split-string (match-string 2 l) " "))))
-          (insert (format "%s\n" (concat pinyin (string-join words " "))))))
-       ;; 其他词
-       ((string= l "")
-        ;; skip empty line
-        )
-       (t
-        (insert (format "%s\n" l)))))
-    (setq pyim-dregcache-icode2word (buffer-string))))
-
-(defun pyim-dregcache-create-cache-content (raw-content)
-  "将 RAW-CONTENT 划分成可以更高效搜索的缓冲区."
-  (let ((chars "bcdefghjklmnopqrstwxyz")
-        (i 0)
-        content-segments
-        (start (string-match "^a" raw-content))
-        chunk
-        end)
-    ;; 将字典缓存划分成多个"子搜索区域"
-    (while (< i (length chars))
-      (when (setq end (string-match (string ?^ (elt chars i))
-                                    raw-content
-                                    start))
-        (setq chunk (substring-no-properties raw-content start end))
-        (push chunk content-segments)
-        (setq start end))
-      (setq i (1+ i)))
-
-    ;; last chunk
-    (setq chunk (substring-no-properties raw-content end (length raw-content)))
-    (push chunk content-segments)
-    (list :content (nreverse content-segments))))
-
-(defun pyim-dregcache-load-dictionary-file (dict-file)
-  "READ from DICT-FILE."
-  (let* ((raw-content (with-temp-buffer
-                        (insert-file-contents dict-file)
-                        (buffer-string))))
-    (setq pyim-dregcache-cache
-          ;; use string type as key, so have to use `lax-plist-put'
-          ;; @see https://www.gnu.org/software/emacs/manual/html_node/elisp/Plist-Access.html#Plist-Access
-          (lax-plist-put pyim-dregcache-cache
-                         (file-truename dict-file)
-                         (pyim-dregcache-create-cache-content raw-content)))))
-
-(defun pyim-dregcache-update-code2word (dict-files dicts-md5 &optional force)
-  "读取并加载词库.
-
-读取词库文件 DICT-FILES，生成对应的词库缓冲文件，然后加载词库缓存。
-
-DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
-
-如果 FORCE 为真，强制加载。"
-  (interactive)
-  (when (or force (not (equal dicts-md5 pyim-dregcache-dicts-md5)))
-    ;; no hashtable i file mapping algorithm
-    (dolist (file dict-files)
-      (pyim-dregcache-load-dictionary-file file))
-    (setq pyim-dregcache-dicts-md5 dicts-md5)))
-
-(defmacro pyim-dregcache-shenmu2regexp (char)
-  "将声母 CHAR 转换为通用正则表达式匹配所有以该声母开头的汉字."
-  `(concat ,char "[a-z]*"))
-
-(defmacro pyim-dregcache-is-shenmu (code)
-  "判断CODE 是否是一个声母."
-  `(and (eq (length ,code) 1)
-        (not (string-match ,code "aeo"))))
+(defmacro pyim-dregcache-match-line (code)
+  `(concat "^" (pyim-dregcache-code2regexp ,code) " \\(.+\\)"))
 
 (defun pyim-dregcache-code2regexp (code)
   "将 CODE 转换成正则表达式用来搜索辞典缓存中的匹配项目.
@@ -210,8 +154,14 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
           ;; tian-an-men => tian-an-men[a-z-]*
           (concat s "[a-z-]*"))))))))
 
-(defmacro pyim-dregcache-match-line (code)
-  `(concat "^" (pyim-dregcache-code2regexp ,code) " \\(.+\\)"))
+(defmacro pyim-dregcache-is-shenmu (code)
+  "判断CODE 是否是一个声母."
+  `(and (eq (length ,code) 1)
+        (not (string-match ,code "aeo"))))
+
+(defmacro pyim-dregcache-shenmu2regexp (char)
+  "将声母 CHAR 转换为通用正则表达式匹配所有以该声母开头的汉字."
+  `(concat ,char "[a-z]*"))
 
 (defun pyim-dregcache-all-dict-files ()
   "所有词典文件."
@@ -239,60 +189,109 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
     ;; fetch segment using the first character of pinyin code
     (nth idx rlt)))
 
-(defun pyim-dregcache-get-1 (content code)
-  (let ((case-fold-search t)
-        (start 0)
-        (pattern (pyim-dregcache-match-line code))
-        (content-length (length content))
-        word
-        output)
-    (while (and (< start content-length)
-                (setq start (string-match pattern content start)))
-      ;; 提取词
-      (setq word (match-string-no-properties 1 content))
-      (when word
-        (cond
-         ((string-match "^[^ ]+$" word)
-          ;; 单个词
-          (push word output))
-         (t
-          ;; 多个字
-          (setq output (append (nreverse (split-string word " +")) output)))))
-      ;; 继续搜索
-      (setq start (+ start 2 (length code) (length word))))
-    output))
+;; ** 从 dregcache 搜索代码相关函数
+(cl-defmethod pyim-dcache-search-word-code
+  (word &context (pyim-dcache-backend (eql pyim-dregcache)))
+  "从 `pyim-dregcache-cache' 和 `pyim-dregcache-icode2word' 搜索 word, 得到对应的code."
+  (when pyim-debug (message "pyim-dregcache-search-word-code word=%s" word))
+  (when pyim-dregcache-cache
+    (catch 'result
+      (let ((dict-files (pyim-dregcache-all-dict-files))
+            code)
+        (when pyim-dregcache-icode2word
+          (setq code (pyim-dregcache-search-word-code-1 word pyim-dregcache-icode2word))
+          (when code (throw 'result (list code))))
+        (dolist (file dict-files)
+          (let* ((file-info (lax-plist-get pyim-dregcache-cache file))
+                 (contents (lax-plist-get file-info :content)))
+            (dolist (content contents)
+              (setq code (pyim-dregcache-search-word-code-1 word content))
+              (when code (throw 'result (list code))))))))))
 
-(cl-defmethod pyim-dcache-get
-  (code &context (pyim-dcache-backend (eql pyim-dregcache))
-        &optional from)
-  "从 `pyim-dregcache-cache' 搜索 CODE, 得到对应的词条."
-  (when code
-    (cond ((or (memq 'icode2word from)
-               (memq 'ishortcode2word from))
-           (pyim-dregcache-get-icode2word-ishortcode2word code))
-          ;; FIXME: pyim-dregcache 暂时不支持 iword2count-recent-10-words 和
-          ;; iword2count-recent-50-words.
-          ((or (memq 'iword2count-recent-10-words from)
-               (memq 'iword2count-recent-50-words from))
-           nil)
-          (t (let ((dict-files (pyim-dregcache-all-dict-files))
-                   result)
+(defun pyim-dregcache-search-word-code-1 (word content)
+  (let* ((case-fold-search t)
+         (regexp (concat "^\\([a-z-]+\\)\\(.*\\) " "\\(" word " \\|" word "$\\)")))
+    (when (string-match regexp content)
+      (match-string-no-properties 1 content))))
 
-               (when pyim-debug (message "pyim-dregcache-get is called. code=%s" code))
-               (when dict-files
-                 (dolist (file dict-files)
-                   (let* ((file-info (lax-plist-get pyim-dregcache-cache file))
-                          (content (pyim-dregcache-get-content code file-info)))
-                     (setq result (append (pyim-dregcache-get-1 content code) result)))))
-               ;; `push' plus `nreverse' is more efficient than `add-to-list'
-               ;; Many examples exist in Emacs' own code
-               (nreverse result))))))
+;; ** 给 dregcache 添加词条相关函数
+(cl-defmethod pyim-dcache-insert-word
+  (word code prepend
+        &context (pyim-dcache-backend (eql pyim-dregcache)))
+  "将词条 WORD 插入到 `pyim-dregcache-icode2word'."
+  (pyim-dregcache-insert-word-into-icode2word word code prepend))
 
-(defun pyim-dregcache-get-icode2word-ishortcode2word (code)
-  "以 CODE 搜索个人词和个人联想词.  正则表达式搜索词库,不需要为联想词开单独缓存."
-  (when pyim-debug (message "pyim-dregcache-get-icode2word-ishortcode2word called => %s" code))
-  (when pyim-dregcache-icode2word
-    (nreverse (pyim-dregcache-get-1 pyim-dregcache-icode2word code))))
+(defun pyim-dregcache-insert-word-into-icode2word (word code prepend)
+  "保存个人词到缓存,和其他词库格式一样以共享正则搜索算法."
+  (when pyim-debug
+    (message "pyim-dregcache-insert-word-into-icode2word called => %s %s %s"
+             word
+             code
+             prepend))
+  (with-temp-buffer
+    (when pyim-dregcache-icode2word
+      (insert pyim-dregcache-icode2word))
+    (goto-char (point-min))
+    (let* ((case-fold-search t)
+           substring replace-string beg end old-word-list)
+      (if (re-search-forward (concat "^" code " \\(.*\\)") nil t)
+          (progn
+            (setq beg (match-beginning 0))
+            (setq end (match-end 0))
+            (setq substring (match-string-no-properties 1))
+            (delete-region beg end)
+            ;; 这里不进行排序，在pyim-dregcache-update-personal-words排序
+            (setq old-word-list (pyim-dregcache-sort-words (split-string substring " ")))
+            (setq replace-string (concat code " " (string-join (delete-dups `(,@old-word-list ,word)) " "))))
+        (setq replace-string (concat code " " (or replace-string word) "\n")))
+      (goto-char (or beg (point-max)))
+      (insert replace-string))
+    (setq pyim-dregcache-icode2word
+          (buffer-string))))
+
+;; ** 从 dregcache 删除词条相关函数
+(cl-defmethod pyim-dcache-delete-word
+  (word &context (pyim-dcache-backend (eql pyim-dregcache)))
+  "将中文词条 WORD 从个人词库中删除."
+  (with-temp-buffer
+    (insert pyim-dregcache-icode2word)
+    (goto-char (point-min))
+    (let* ((case-fold-search t)
+           substring beg end)
+      (while (re-search-forward (concat "^\\([a-z-]+\\) \\(.*\\)" word "\\(.*\\)$") nil t)
+        (setq beg (match-beginning 0))
+        (setq end (match-end 0))
+        (setq substring (concat (match-string-no-properties 1)
+                                (match-string-no-properties 2)
+                                (match-string-no-properties 3)))
+
+        ;; delete string and the newline char
+        (delete-region beg (+ 1 end))
+        (when (> (length (split-string substring " ")) 1)
+          (goto-char beg)
+          (insert substring)))
+      (setq pyim-dregcache-icode2word
+            (buffer-string))))
+  ;; 删除对应词条的词频
+  (remhash word pyim-dregcache-iword2count))
+
+;; ** 更新 dhashcache 相关函数
+(cl-defmethod pyim-dcache-update
+  (&context (pyim-dcache-backend (eql pyim-dregcache)) &optional force)
+  "读取并加载所有相关词库 dcache.
+
+如果 FORCE 为真，强制加载。"
+  (pyim-dcache-init-variables)
+  (when pyim-dcache-auto-update
+    (pyim-dregcache-update-personal-words force)
+    (let* ((dict-files (pyim-dict-get-enabled-dict-files))
+           (dicts-md5 (pyim-dcache-create-files-md5 dict-files)))
+      (when pyim-debug
+        (message "pyim-dregcache-update: pyim-dicts=%s pyim-extra-dicts=%s dict-files=%s"
+                 pyim-dicts
+                 pyim-extra-dicts
+                 dict-files))
+      (pyim-dregcache-update-code2word dict-files dicts-md5 force))))
 
 (defun pyim-dregcache-update-personal-words (&optional force)
   "合并 `pyim-dregcache-icode2word' 磁盘文件. 加载排序后的结果.
@@ -331,39 +330,70 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
   (when (and force pyim-dregcache-icode2word)
     (pyim-dregcache-sort-icode2word)))
 
-(cl-defmethod pyim-dcache-init-variables
-  (&context (pyim-dcache-backend (eql pyim-dregcache)))
-  "初始化 cache 缓存相关变量."
-  (pyim-dcache-init-variable
-   pyim-dregcache-iword2count
-   ;; dregcache 引擎也需要词频信息，第一次使用 dregcache 引擎的时候，
-   ;; 自动导入 dhashcache 引擎的词频信息，以后两个引擎的词频信息就
-   ;; 完全分开了。
-   (pyim-dcache-get-value 'pyim-dhashcache-iword2count))
-  (unless pyim-dregcache-icode2word
-    (pyim-dregcache-update-personal-words t)))
+(defun pyim-dregcache-load-variable (variable)
+  "载入 VARIABLE 对应的文件内容."
+  (let* ((file (pyim-dregcache-variable-file variable)))
+    (when (and file (file-exists-p file))
+      (with-temp-buffer
+        (insert-file-contents file)
+        (buffer-string)))))
 
-(cl-defmethod pyim-dcache-save-caches
-  (&context (pyim-dcache-backend (eql pyim-dregcache)))
-  (pyim-dregcache-save-personal-dcache-to-file))
+(defun pyim-dregcache-variable-file (variable)
+  "Get VARIABLE dcache file path."
+  (concat (file-name-as-directory pyim-dcache-directory)
+          (symbol-name variable)))
 
-(defun pyim-dregcache-save-personal-dcache-to-file ()
-  "保存缓存内容到默认目录."
-  (when pyim-debug (message "pyim-dregcache-save-personal-dcache-to-file called"))
-  ;; 用户选择过的词存为标准辞典格式保存
-  (when pyim-dregcache-icode2word
-    (pyim-dregcache-save-variable
-     'pyim-dregcache-icode2word
-     pyim-dregcache-icode2word))
-  ;; 词频
-  (pyim-dcache-save-variable
-   'pyim-dregcache-iword2count
-   pyim-dregcache-iword2count))
+(defun pyim-dregcache-update-code2word (dict-files dicts-md5 &optional force)
+  "读取并加载词库.
 
-(defun pyim-dregcache-export-words-and-counts ()
-  "TODO"
-  )
+读取词库文件 DICT-FILES，生成对应的词库缓冲文件，然后加载词库缓存。
 
+DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
+
+如果 FORCE 为真，强制加载。"
+  (interactive)
+  (when (or force (not (equal dicts-md5 pyim-dregcache-dicts-md5)))
+    ;; no hashtable i file mapping algorithm
+    (dolist (file dict-files)
+      (pyim-dregcache-load-dictionary-file file))
+    (setq pyim-dregcache-dicts-md5 dicts-md5)))
+
+(defun pyim-dregcache-load-dictionary-file (dict-file)
+  "READ from DICT-FILE."
+  (let* ((raw-content (with-temp-buffer
+                        (insert-file-contents dict-file)
+                        (buffer-string))))
+    (setq pyim-dregcache-cache
+          ;; use string type as key, so have to use `lax-plist-put'
+          ;; @see https://www.gnu.org/software/emacs/manual/html_node/elisp/Plist-Access.html#Plist-Access
+          (lax-plist-put pyim-dregcache-cache
+                         (file-truename dict-file)
+                         (pyim-dregcache-create-cache-content raw-content)))))
+
+(defun pyim-dregcache-create-cache-content (raw-content)
+  "将 RAW-CONTENT 划分成可以更高效搜索的缓冲区."
+  (let ((chars "bcdefghjklmnopqrstwxyz")
+        (i 0)
+        content-segments
+        (start (string-match "^a" raw-content))
+        chunk
+        end)
+    ;; 将字典缓存划分成多个"子搜索区域"
+    (while (< i (length chars))
+      (when (setq end (string-match (string ?^ (elt chars i))
+                                    raw-content
+                                    start))
+        (setq chunk (substring-no-properties raw-content start end))
+        (push chunk content-segments)
+        (setq start end))
+      (setq i (1+ i)))
+
+    ;; last chunk
+    (setq chunk (substring-no-properties raw-content end (length raw-content)))
+    (push chunk content-segments)
+    (list :content (nreverse content-segments))))
+
+;; ** 更新 dregcache 词条计数。
 (cl-defmethod pyim-dcache-update-wordcount
   (word &context (pyim-dcache-backend (eql pyim-dregcache))
         &optional wordcount-handler)
@@ -383,65 +413,7 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
     (unless (equal orig-value new-value)
       (puthash word new-value pyim-dregcache-iword2count))))
 
-(cl-defmethod pyim-dcache-delete-word
-  (word &context (pyim-dcache-backend (eql pyim-dregcache)))
-  "将中文词条 WORD 从个人词库中删除."
-  (with-temp-buffer
-    (insert pyim-dregcache-icode2word)
-    (goto-char (point-min))
-    (let* ((case-fold-search t)
-           substring beg end)
-      (while (re-search-forward (concat "^\\([a-z-]+\\) \\(.*\\)" word "\\(.*\\)$") nil t)
-        (setq beg (match-beginning 0))
-        (setq end (match-end 0))
-        (setq substring (concat (match-string-no-properties 1)
-                                (match-string-no-properties 2)
-                                (match-string-no-properties 3)))
-
-        ;; delete string and the newline char
-        (delete-region beg (+ 1 end))
-        (when (> (length (split-string substring " ")) 1)
-          (goto-char beg)
-          (insert substring)))
-      (setq pyim-dregcache-icode2word
-            (buffer-string))))
-  ;; 删除对应词条的词频
-  (remhash word pyim-dregcache-iword2count))
-
-(cl-defmethod pyim-dcache-insert-word
-  (word code prepend
-        &context (pyim-dcache-backend (eql pyim-dregcache)))
-  "将词条 WORD 插入到 `pyim-dregcache-icode2word'."
-  (pyim-dregcache-insert-word-into-icode2word word code prepend))
-
-(defun pyim-dregcache-insert-word-into-icode2word (word code prepend)
-  "保存个人词到缓存,和其他词库格式一样以共享正则搜索算法."
-  (when pyim-debug
-    (message "pyim-dregcache-insert-word-into-icode2word called => %s %s %s"
-             word
-             code
-             prepend))
-  (with-temp-buffer
-    (when pyim-dregcache-icode2word
-      (insert pyim-dregcache-icode2word))
-    (goto-char (point-min))
-    (let* ((case-fold-search t)
-           substring replace-string beg end old-word-list)
-      (if (re-search-forward (concat "^" code " \\(.*\\)") nil t)
-          (progn
-            (setq beg (match-beginning 0))
-            (setq end (match-end 0))
-            (setq substring (match-string-no-properties 1))
-            (delete-region beg end)
-            ;; 这里不进行排序，在pyim-dregcache-update-personal-words排序
-            (setq old-word-list (pyim-dregcache-sort-words (split-string substring " ")))
-            (setq replace-string (concat code " " (string-join (delete-dups `(,@old-word-list ,word)) " "))))
-        (setq replace-string (concat code " " (or replace-string word) "\n")))
-      (goto-char (or beg (point-max)))
-      (insert replace-string))
-    (setq pyim-dregcache-icode2word
-          (buffer-string))))
-
+;; ** 升级 dhashcache 相关函数
 (cl-defmethod pyim-dcache-upgrade (&context (pyim-dcache-backend (eql pyim-dregcache)))
   "升级词库缓存.
 
@@ -456,30 +428,45 @@ dregcache 只支持全拼和双拼，不能用于五笔之类的型码输入法�
 update-icode2word 目前只要是用于更新型码输入法的 code-prefix, 所
 以不需要具体实现细节。")
 
-(defun pyim-dregcache-search-word-code-1 (word content)
-  (let* ((case-fold-search t)
-         (regexp (concat "^\\([a-z-]+\\)\\(.*\\) " "\\(" word " \\|" word "$\\)")))
-    (when (string-match regexp content)
-      (match-string-no-properties 1 content))))
+;; ** 根据 dregcache 信息对词条进行排序
+(defun pyim-dregcache-sort-words (words-list)
+  "对 WORDS-LIST 排序，词频大的排在前面."
+  (let ((iword2count pyim-dregcache-iword2count))
+    (sort words-list
+          (lambda (a b)
+            (let ((a (car (split-string a ":")))
+                  (b (car (split-string b ":"))))
+              (> (or (gethash a iword2count) 0)
+                 (or (gethash b iword2count) 0)))))))
 
-(cl-defmethod pyim-dcache-search-word-code
-  (word &context (pyim-dcache-backend (eql pyim-dregcache)))
-  "从 `pyim-dregcache-cache' 和 `pyim-dregcache-icode2word' 搜索 word, 得到对应的code."
-  (when pyim-debug (message "pyim-dregcache-search-word-code word=%s" word))
-  (when pyim-dregcache-cache
-    (catch 'result
-      (let ((dict-files (pyim-dregcache-all-dict-files))
-            code)
-        (when pyim-dregcache-icode2word
-          (setq code (pyim-dregcache-search-word-code-1 word pyim-dregcache-icode2word))
-          (when code (throw 'result (list code))))
-        (dolist (file dict-files)
-          (let* ((file-info (lax-plist-get pyim-dregcache-cache file))
-                 (contents (lax-plist-get file-info :content)))
-            (dolist (content contents)
-              (setq code (pyim-dregcache-search-word-code-1 word content))
-              (when code (throw 'result (list code))))))))))
+;; ** 保存 dregcache 相关函数
+(cl-defmethod pyim-dcache-save-caches
+  (&context (pyim-dcache-backend (eql pyim-dregcache)))
+  (pyim-dregcache-save-personal-dcache-to-file))
 
+(defun pyim-dregcache-save-personal-dcache-to-file ()
+  "保存缓存内容到默认目录."
+  (when pyim-debug (message "pyim-dregcache-save-personal-dcache-to-file called"))
+  ;; 用户选择过的词存为标准辞典格式保存
+  (when pyim-dregcache-icode2word
+    (pyim-dregcache-save-variable
+     'pyim-dregcache-icode2word
+     pyim-dregcache-icode2word))
+  ;; 词频
+  (pyim-dcache-save-variable
+   'pyim-dregcache-iword2count
+   pyim-dregcache-iword2count))
+
+(defun pyim-dregcache-save-variable (variable value)
+  "Save VARIABLE with its VALUE."
+  (let* ((file (pyim-dregcache-variable-file variable))
+         (save-silently t))
+    (make-directory (file-name-directory file) t)
+    (with-temp-buffer
+      (insert value)
+      (pyim-dcache-write-file file))))
+
+;; ** 导出 dregcache 相关函数
 (cl-defmethod pyim-dcache-export-personal-words
   (file &context (pyim-dcache-backend (eql pyim-dregcache))
         &optional confirm)
@@ -497,6 +484,30 @@ update-icode2word 目前只要是用于更新型码输入法的 code-prefix, 所
       ;; 按拼音排序
       (sort-lines nil (point-min) (point-max))
       (pyim-dcache-write-file file confirm))))
+
+(defun pyim-dregcache-sort-icode2word ()
+  "对个人词库排序."
+  ;; https://github.com/redguardtoo/zhfreq
+  (with-temp-buffer
+    (dolist (l (split-string pyim-dregcache-icode2word "\n"))
+      (cond
+       ((string-match "^\\([a-z-]+ \\)\\(.*\\)" l)
+        ;; 3字以上词很少，如果只处理单字,2字词,3字词
+        ;; ((string-match "^\\([a-z]+ \\|[a-z]+-[a-z]+ \\|[a-z]+-[a-z]+-[a-z]+ \\)\\(.*\\)" l)
+        (let* ((pinyin (match-string 1 l))
+               (words (pyim-dregcache-sort-words (split-string (match-string 2 l) " "))))
+          (insert (format "%s\n" (concat pinyin (string-join words " "))))))
+       ;; 其他词
+       ((string= l "")
+        ;; skip empty line
+        )
+       (t
+        (insert (format "%s\n" l)))))
+    (setq pyim-dregcache-icode2word (buffer-string))))
+
+(defun pyim-dregcache-export-words-and-counts ()
+  "TODO"
+  )
 
 ;; * Footer
 

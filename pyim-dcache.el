@@ -65,15 +65,7 @@ pyim 对资源的消耗。
 2. 自动更新功能无法正常工作，用户通过手工从其他机器上拷贝
 dcache 文件的方法让 pyim 正常工作。")
 
-;; ** Dcache 变量处理相关功能
-(cl-defgeneric pyim-dcache-init-variables ()
-  "初始化 dcache 缓存相关变量."
-  nil)
-
-(cl-defmethod pyim-dcache-init-variables :before ()
-  (unless (featurep pyim-dcache-backend)
-    (require pyim-dcache-backend)))
-
+;; ** Dcache 变量初始化相关函数
 (defmacro pyim-dcache-init-variable (variable &optional fallback-value)
   "初始化 VARIABLE.
 
@@ -85,18 +77,22 @@ dcache 文件的方法让 pyim 正常工作。")
                          ,fallback-value
                          (make-hash-table :test #'equal)))))
 
-(defmacro pyim-dcache-reload-variable (variable)
-  "从 `pyim-dcache-directory' 重新读取并设置 VARIABLE 的值."
-  `(when (symbolp ',variable)
-     (setq ,variable (or (pyim-dcache-get-value ',variable)
-                         (make-hash-table :test #'equal)))))
-
 (defun pyim-dcache-get-value (variable)
   "从 `pyim-dcache-directory' 中读取与 VARIABLE 对应的文件中保存的值."
   (let ((file (expand-file-name (url-hexify-string (symbol-name variable))
                                 pyim-dcache-directory)))
     (pyim-dcache-get-value-from-file file)))
 
+(defun pyim-dcache-get-value-from-file (file)
+  "读取保存到 FILE 里面的 value."
+  (when (and (> (length file) 0)
+             (file-exists-p file))
+    (with-temp-buffer
+      (insert-file-contents file)
+      (ignore-errors
+        (read (current-buffer))))))
+
+;; ** Dcache 保存变量相关函数
 (defun pyim-dcache-save-variable (variable value &optional auto-backup-threshold)
   "将 VARIABLE 变量的取值保存到 `pyim-dcache-directory' 中对应文件中.
 
@@ -105,14 +101,6 @@ dcache 文件的方法让 pyim 正常工作。")
   (let ((file (expand-file-name (url-hexify-string (symbol-name variable))
                                 pyim-dcache-directory)))
     (pyim-dcache-save-value-to-file value file auto-backup-threshold)))
-
-(defun pyim-dcache-value-length (value)
-  "获取 VALUE 的某个可以作为长度的值."
-  (or (ignore-errors
-        (if (hash-table-p value)
-            (hash-table-count value)
-          (length value)))
-      0))
 
 (defun pyim-dcache-save-value-to-file (value file &optional auto-backup-threshold)
   "将 VALUE 保存到 FILE 文件中.
@@ -144,16 +132,14 @@ AUTO-BACKUP-THRESHOLD 倍, 那么原值将自动备份到 FILE 对应的备份�
         (insert ";; End:")
         (pyim-dcache-write-file file)))))
 
-(defun pyim-dcache-get-value-from-file (file)
-  "读取保存到 FILE 里面的 value."
-  (when (and (> (length file) 0)
-             (file-exists-p file))
-    (with-temp-buffer
-      (insert-file-contents file)
-      (ignore-errors
-        (read (current-buffer))))))
+(defun pyim-dcache-value-length (value)
+  "获取 VALUE 的某个可以作为长度的值."
+  (or (ignore-errors
+        (if (hash-table-p value)
+            (hash-table-count value)
+          (length value)))
+      0))
 
-;; ** Dcache 文件处理功能
 (defun pyim-dcache-write-file (filename &optional confirm)
   "A helper function to write dcache files."
   (let ((coding-system-for-write 'utf-8-unix)
@@ -170,13 +156,88 @@ AUTO-BACKUP-THRESHOLD 倍, 那么原值将自动备份到 FILE 对应的备份�
     (write-region (point-min) (point-max) filename nil :silent)
     (message "Saving file %s..." filename)))
 
+;; ** Dcache 重新加载变量相关函数
+(defmacro pyim-dcache-reload-variable (variable)
+  "从 `pyim-dcache-directory' 重新读取并设置 VARIABLE 的值."
+  `(when (symbolp ',variable)
+     (setq ,variable (or (pyim-dcache-get-value ',variable)
+                         (make-hash-table :test #'equal)))))
+
+;; ** Dcache 初始化功能接口
+(cl-defgeneric pyim-dcache-init-variables ()
+  "初始化 dcache 缓存相关变量."
+  nil)
+
+(cl-defmethod pyim-dcache-init-variables :before ()
+  (unless (featurep pyim-dcache-backend)
+    (require pyim-dcache-backend)))
+
+;; ** Dcache 检索词条功能接口
+(cl-defgeneric pyim-dcache-get (_code &optional _from)
+  "从 FROM 对应的 dcache 中搜索 CODE, 得到对应的词条.
+
+当词库文件加载完成后，pyim 就可以用这个函数从词库缓存中搜索某个
+code 对应的中文词条了."
+  nil)
+
+(cl-defmethod pyim-dcache-get :before (_code &optional _from)
+  (unless (featurep pyim-dcache-backend)
+    (require pyim-dcache-backend)))
+
+;; ** Dcache 代码反查功能接口
+(cl-defgeneric pyim-dcache-search-word-code (word)
+  "从 dcache 中搜索 WROD 对应的 code.")
+
+;; ** Dcache 加词功能接口
+(cl-defgeneric pyim-dcache-insert-word (word code prepend)
+  "将词条 WORD 插入到 dcache 中。
+
+如果 PREPEND 为 non-nil, 词条将放到已有词条的最前面。
+内部函数会根据 CODE 来确定插入对应的 hash key.")
+
+;; ** Dcache 删词功能
+(cl-defgeneric pyim-dcache-delete-word (word)
+  "将中文词条 WORD 从个人词库中删除")
+
+;; ** Dcache 更新功能接口
+(cl-defgeneric pyim-dcache-update (&optional force)
+  "读取并加载所有相关词库 dcache, 如果 FORCE 为真，强制加载。")
+
+(defun pyim-dcache-create-files-md5 (files)
+  "为 FILES 生成 md5 字符串。"
+  ;; 当需要强制更新 dict 缓存时，更改这个字符串。
+  (let ((version "v1"))
+    (md5 (prin1-to-string
+          (mapcar (lambda (file)
+                    (list version file (nth 5 (file-attributes file 'string))))
+                  files)))))
+
+;; ** Dcache 更新词条统计量功能接口
+(cl-defgeneric pyim-dcache-update-wordcount (word &optional wordcount-handler)
+  "保存 WORD 词频.
+
+1. 如果 WORDCOUNT-HANDLER 是一个函数：那么其返回值将作为词频保存，
+   参数为原有词频。
+2. 如果 WORDCOUNT-HANDLER 是一个数值：那么这个数值直接作为词频保存。
+3. 如果 WORDCOUNT-HANDLER 为其他值：词频不变.")
+
+;; ** Dcache 升级功能接口
+(cl-defgeneric pyim-dcache-upgrade ()
+  "升级词库缓存.")
+
+;; ** Dcache 排序功能接口
+(cl-defgeneric pyim-dcache-sort-words (words)
+  "对 WORDS 进行排序。"
+  words)
+
+;; ** Dcache 保存功能接口
 (cl-defgeneric pyim-dcache-save-caches ()
   "保存 dcache.
 
 将用户选择过的词生成的缓存和词频缓存的取值
 保存到它们对应的文件中.")
 
-;; ** Dcache 导出功能
+;; ** Dcache 导出功能接口
 (cl-defgeneric pyim-dcache-export-words-and-counts (file &optional confirm ignore-counts)
   "将个人词条以及词条对应的词频信息导出到文件 FILE.
 
@@ -189,65 +250,6 @@ non-nil，文件存在时将会提示用户是否覆盖，默认为覆盖模式"
 如果 FILE 为 nil, 提示用户指定导出文件位置, 如果 CONFIRM 为 non-nil，
 文件存在时将会提示用户是否覆盖，默认为覆盖模式。")
 
-;; ** Dcache 更新功能
-(cl-defgeneric pyim-dcache-update (&optional force)
-  "读取并加载所有相关词库 dcache.
-
-如果 FORCE 为真，强制加载。")
-
-(defun pyim-dcache-create-files-md5 (files)
-  "为 FILES 生成 md5 字符串。"
-  ;; 当需要强制更新 dict 缓存时，更改这个字符串。
-  (let ((version "v1"))
-    (md5 (prin1-to-string
-          (mapcar (lambda (file)
-                    (list version file (nth 5 (file-attributes file 'string))))
-                  files)))))
-
-(cl-defgeneric pyim-dcache-update-wordcount (word &optional wordcount-handler)
-  "保存 WORD 词频.
-
-1. 如果 WORDCOUNT-HANDLER 是一个函数：那么其返回值将作为词频保存，
-   参数为原有词频。
-2. 如果 WORDCOUNT-HANDLER 是一个数值：那么这个数值直接作为词频保存。
-3. 如果 WORDCOUNT-HANDLER 为其他值：词频不变.")
-
-;; ** Dcache 加词功能
-(cl-defgeneric pyim-dcache-insert-word (word code prepend)
-  "将词条 WORD 插入到 dcache 中。
-
-如果 PREPEND 为 non-nil, 词条将放到已有词条的最前面。
-内部函数会根据 CODE 来确定插入对应的 hash key.")
-
-;; ** Dcache 升级功能
-(cl-defgeneric pyim-dcache-upgrade ()
-  "升级词库缓存.")
-
-;; ** Dcache 删词功能
-(cl-defgeneric pyim-dcache-delete-word (word)
-  "将中文词条 WORD 从个人词库中删除")
-
-;; ** Dcache 检索功能
-(cl-defgeneric pyim-dcache-get (code &optional from)
-  "从 FROM 对应的 dcache 中搜索 CODE, 得到对应的词条.
-
-当词库文件加载完成后，pyim 就可以用这个函数从词库缓存中搜索某个
-code 对应的中文词条了."
-  ;; Fix compile warn
-  (ignore code from)
-  nil)
-
-(cl-defmethod pyim-dcache-get :before (_code &optional _from)
-  (unless (featurep pyim-dcache-backend)
-    (require pyim-dcache-backend)))
-
-(cl-defgeneric pyim-dcache-search-word-code (word)
-  "从 dcache 中搜索 WROD 对应的 code.")
-
-;; ** Dcache 排序功能
-(cl-defgeneric pyim-dcache-sort-words (words)
-  "对 WORDS 进行排序。"
-  words)
 
 ;; * Footer
 (provide 'pyim-dcache)
