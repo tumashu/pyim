@@ -630,8 +630,7 @@ code 对应的中文词条了。
      (lambda (_)
        (pyim-dcache-reload-variable pyim-dhashcache-iword2priority)))))
 
-(cl-defmethod pyim-dcache-delete-word
-  (word &context (pyim-dcache-backend (eql pyim-dhashcache)))
+(defun pyim-dhashcache-delete-word (word)
   "将中文词条 WORD 从个人词库中删除"
   (maphash
    (lambda (key value)

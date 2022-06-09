@@ -261,8 +261,9 @@ non-nil，文件存在时将会提示用户是否覆盖，默认为覆盖模式"
   (pyim-dcache-call-api 'upgrade-icode2word))
 
 ;; ** Dcache 删词功能
-(cl-defgeneric pyim-dcache-delete-word (word)
-  "将中文词条 WORD 从个人词库中删除")
+(defun pyim-dcache-delete-word (word)
+  "将中文词条 WORD 从个人词库中删除"
+  (pyim-dcache-call-api 'delete-word word))
 
 ;; ** Dcache 检索功能
 (defun pyim-dcache-get (code &optional from)
