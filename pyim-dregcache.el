@@ -49,7 +49,7 @@
   "读取并加载所有相关词库 dcache.
 
 如果 FORCE 为真，强制加载。"
-  (pyim-dregcache-init-variables)
+  (pyim-dcache-init-variables)
   (when pyim-dcache-auto-update
     (pyim-dregcache-update-personal-words force)
     (let* ((dict-files (pyim-dict-get-enabled-dict-files))
@@ -331,7 +331,8 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
   (when (and force pyim-dregcache-icode2word)
     (pyim-dregcache-sort-icode2word)))
 
-(defun pyim-dregcache-init-variables ()
+(cl-defmethod pyim-dcache-init-variables
+  (&context (pyim-dcache-backend (eql pyim-dregcache)))
   "初始化 cache 缓存相关变量."
   (pyim-dcache-init-variable
    pyim-dregcache-iword2count
@@ -461,7 +462,8 @@ update-icode2word 目前只要是用于更新型码输入法的 code-prefix, 所
     (when (string-match regexp content)
       (match-string-no-properties 1 content))))
 
-(defun pyim-dregcache-search-word-code (word)
+(cl-defmethod pyim-dcache-search-word-code
+  (word &context (pyim-dcache-backend (eql pyim-dregcache)))
   "从 `pyim-dregcache-cache' 和 `pyim-dregcache-icode2word' 搜索 word, 得到对应的code."
   (when pyim-debug (message "pyim-dregcache-search-word-code word=%s" word))
   (when pyim-dregcache-cache
@@ -482,7 +484,7 @@ update-icode2word 目前只要是用于更新型码输入法的 code-prefix, 所
   (file &context (pyim-dcache-backend (eql pyim-dregcache))
         &optional confirm)
   "将个人词库存入 FILE."
-  (pyim-dregcache-init-variables)
+  (pyim-dcache-init-variables)
   (when pyim-dregcache-icode2word
     ;; 按词频排序，把词频信息保存到用户词典
     (pyim-dregcache-sort-icode2word)

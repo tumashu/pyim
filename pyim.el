@@ -430,7 +430,7 @@ MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表词�
     ;; 有这一步骤，导入的词条就会被覆盖。
     (pyim-process-save-dcaches t)
     ;; 更新相关的 dcache
-    (pyim-process-update-personal-words)
+    (pyim-process-update t)
 
     (message "PYIM: 词条和词频信息导入完成！")))
 

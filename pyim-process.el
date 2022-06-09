@@ -205,6 +205,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   "PYIM 流程，词库相关的初始化工作。"
   (pyim-recreate-local-variables)
   (pyim-pymap-cache-create)
+  (pyim-dcache-init-variables)
   (pyim-dcache-update force))
 
 (defun pyim-process-save-dcaches (&optional force)
@@ -213,8 +214,8 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
     (pyim-dcache-save-caches))
   t)
 
-(defun pyim-process-update-personal-words ()
-  (pyim-dcache-call-api 'update-personal-words t))
+(defun pyim-process-update (&optional force)
+  (pyim-dcache-update force))
 
 (defun pyim-process-start-daemon ()
   "启动 pyim 流程需要的 daemon."

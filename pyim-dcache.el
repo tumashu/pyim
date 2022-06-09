@@ -65,25 +65,14 @@ pyim 对资源的消耗。
 2. 自动更新功能无法正常工作，用户通过手工从其他机器上拷贝
 dcache 文件的方法让 pyim 正常工作。")
 
-;; ** Dcache API 调用功能
-(defun pyim-dcache-call-api (api-name &rest api-args)
-  "Get backend API named API-NAME then call it with arguments API-ARGS."
-  ;; make sure the backend is load
-  (unless (featurep pyim-dcache-backend)
-    (require pyim-dcache-backend))
-  (let ((func (intern (concat (symbol-name pyim-dcache-backend)
-                              "-" (symbol-name api-name)))))
-    (if (functionp func)
-        (apply func api-args)
-      (when pyim-debug
-        (message "%S 不是一个有效的 dcache api 函数." (symbol-name func))
-        ;; Need to return nil
-        nil))))
-
 ;; ** Dcache 变量处理相关功能
-(defun pyim-dcache-init-variables ()
+(cl-defgeneric pyim-dcache-init-variables ()
   "初始化 dcache 缓存相关变量."
-  (pyim-dcache-call-api 'init-variables))
+  nil)
+
+(cl-defmethod pyim-dcache-init-variables :before ()
+  (unless (featurep pyim-dcache-backend)
+    (require pyim-dcache-backend)))
 
 (defmacro pyim-dcache-init-variable (variable &optional fallback-value)
   "初始化 VARIABLE.
@@ -243,7 +232,22 @@ non-nil，文件存在时将会提示用户是否覆盖，默认为覆盖模式"
   "从 FROM 对应的 dcache 中搜索 CODE, 得到对应的词条.
 
 当词库文件加载完成后，pyim 就可以用这个函数从词库缓存中搜索某个
-code 对应的中文词条了.")
+code 对应的中文词条了."
+  ;; Fix compile warn
+  (ignore code from)
+  nil)
+
+(cl-defmethod pyim-dcache-get :before (_code &optional _from)
+  (unless (featurep pyim-dcache-backend)
+    (require pyim-dcache-backend)))
+
+(cl-defgeneric pyim-dcache-search-word-code (word)
+  "从 dcache 中搜索 WROD 对应的 code.")
+
+;; ** Dcache 排序功能
+(cl-defgeneric pyim-dcache-sort-words (words)
+  "对 WORDS 进行排序。"
+  words)
 
 ;; * Footer
 (provide 'pyim-dcache)

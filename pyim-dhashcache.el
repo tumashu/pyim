@@ -84,7 +84,7 @@
   "读取并加载所有相关词库 dcache.
 
 如果 FORCE 为真，强制加载。"
-  (pyim-dhashcache-init-variables)
+  (pyim-dcache-init-variables)
   (when pyim-dcache-auto-update
     (pyim-dhashcache-update-iword2priority force)
     (pyim-dhashcache-update-personal-words force)
@@ -92,7 +92,8 @@
            (dicts-md5 (pyim-dcache-create-files-md5 dict-files)))
       (pyim-dhashcache-update-code2word dict-files dicts-md5 force))))
 
-(defun pyim-dhashcache-sort-words (words-list)
+(cl-defmethod pyim-dcache-sort-words
+  (words-list &context (pyim-dcache-backend (eql pyim-dhashcache)))
   "对 WORDS-LIST 排序"
   (let ((iword2count pyim-dhashcache-iword2count)
         (iword2priority pyim-dhashcache-iword2priority))
@@ -227,7 +228,7 @@
      icode2word)
     (maphash
      (lambda (key value)
-       (puthash key (pyim-dhashcache-sort-words value)
+       (puthash key (pyim-dcache-sort-words value)
                 ishortcode2word))
      ishortcode2word)
     ishortcode2word))
@@ -276,7 +277,7 @@
      code2word)
     (maphash
      (lambda (key value)
-       (puthash key (pyim-dhashcache-sort-words value)
+       (puthash key (pyim-dcache-sort-words value)
                 shortcode2word))
      shortcode2word)
     shortcode2word))
@@ -444,7 +445,7 @@ code 对应的中文词条了。
         (pyim-dhashcache-init-count-and-priority-variables)
         (maphash
          (lambda (key value)
-           (puthash key (pyim-dhashcache-sort-words value)
+           (puthash key (pyim-dcache-sort-words value)
                     pyim-dhashcache-icode2word))
          pyim-dhashcache-icode2word)
         (pyim-dcache-save-variable
@@ -495,7 +496,8 @@ code 对应的中文词条了。
 (defun pyim-dhashcache-update-personal-words (&optional force)
   (pyim-dhashcache-update-icode2word force))
 
-(defun pyim-dhashcache-init-variables ()
+(cl-defmethod pyim-dcache-init-variables
+  (&context (pyim-dcache-backend (eql pyim-dhashcache)))
   "初始化 dcache 缓存相关变量."
   (when (and (not pyim-dhashcache-icode2word)
              pyim-dcache-directory
@@ -712,20 +714,21 @@ code 对应的中文词条了。
           `(,word ,@(remove word orig-value))
         `(,@(remove word orig-value) ,word)))))
 
-(defun pyim-dhashcache-search-word-code (string)
+(cl-defmethod pyim-dcache-search-word-code
+  (string &context (pyim-dcache-backend (eql pyim-dhashcache)))
   (gethash string pyim-dhashcache-word2code))
 
 (cl-defmethod pyim-dcache-export-personal-words
   (file &context (pyim-dcache-backend (eql pyim-dhashcache))
         &optional confirm)
   "导出个人词库到 FILE."
-  (pyim-dhashcache-init-variables)
+  (pyim-dcache-init-variables)
   (pyim-dhashcache-export pyim-dhashcache-icode2word file confirm))
 
 (cl-defmethod pyim-dcache-export-words-and-counts
   (file &context (pyim-dcache-backend (eql pyim-dhashcache))
         &optional confirm ignore-counts)
-  (pyim-dhashcache-init-variables)
+  (pyim-dcache-init-variables)
   (with-temp-buffer
     (insert ";;; -*- coding: utf-8-unix -*-\n")
     (maphash
