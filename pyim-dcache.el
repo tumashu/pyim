@@ -265,11 +265,13 @@ non-nil，文件存在时将会提示用户是否覆盖，默认为覆盖模式"
   "将中文词条 WORD 从个人词库中删除")
 
 ;; ** Dcache 检索功能
-(cl-defgeneric pyim-dcache-get (code &optional from)
+(defun pyim-dcache-get (code &optional from)
   "从 FROM 对应的 dcache 中搜索 CODE, 得到对应的词条.
 
 当词库文件加载完成后，pyim 就可以用这个函数从词库缓存中搜索某个
-code 对应的中文词条了.")
+code 对应的中文词条了."
+  (when code
+    (pyim-dcache-call-api 'get code from)))
 
 ;; * Footer
 (provide 'pyim-dcache)

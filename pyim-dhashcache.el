@@ -396,9 +396,7 @@ DCACHE 是一个 code -> words 的 hashtable.
      dcache)
     (pyim-dcache-write-file file confirm)))
 
-(cl-defmethod pyim-dcache-get
-  (code &context (pyim-dcache-backend (eql pyim-dhashcache))
-        &optional from)
+(defun pyim-dhashcache-get (code &optional from)
   "从 FROM 对应的 dcaches 中搜索 CODE, 得到对应的词条.
 
 当词库文件加载完成后，pyim 就可以用这个函数从词库缓存中搜索某个
@@ -406,24 +404,23 @@ code 对应的中文词条了。
 
 如果 FROM 为 nil, 则默认搜索 `pyim-dhashcache-icode2word' 和
 `pyim-dhashcache-code2word' 两个 dcache."
-  (when code
-    (let* ((caches (mapcar (lambda (x)
-                             (intern (concat "pyim-dhashcache-" (symbol-name x))))
-                           (or (and from
-                                    (if (listp from)
-                                        from
-                                      (list from)))
-                               '(icode2word code2word))))
-           result)
-      (dolist (cache caches)
-        (let* ((cache (ignore-errors (symbol-value cache)))
-               (value (and cache (gethash code cache))))
-          ;; 处理 iword2count.
-          (unless (listp value)
-            (setq value (list value)))
-          (when value
-            (setq result (append result value)))))
-      result)))
+  (let* ((caches (mapcar (lambda (x)
+                           (intern (concat "pyim-dhashcache-" (symbol-name x))))
+                         (or (and from
+                                  (if (listp from)
+                                      from
+                                    (list from)))
+                             '(icode2word code2word))))
+         result)
+    (dolist (cache caches)
+      (let* ((cache (ignore-errors (symbol-value cache)))
+             (value (and cache (gethash code cache))))
+        ;; 处理 iword2count.
+        (unless (listp value)
+          (setq value (list value)))
+        (when value
+          (setq result (append result value)))))
+    result))
 
 (defun pyim-dhashcache-update-icode2word (&optional force)
   "对 personal 缓存中的词条进行排序，加载排序后的结果.
