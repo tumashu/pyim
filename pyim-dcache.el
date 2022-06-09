@@ -30,6 +30,7 @@
 (require 'cl-lib)
 (require 'pyim-common)
 (require 'pyim-pymap)
+(require 'pyim-scheme)
 (require 'url-util)
 
 (defgroup pyim-dcache nil
@@ -49,7 +50,8 @@
 `pyim-dregcache' 速度和词库大小成正比.  当词库接近100M大小时,
 在六年历史的笔记本上会有一秒的延迟. 这时建议换用 `pyim-dhashcache'.
 
-注意：`pyim-dregcache' 只支持全拼和双拼输入法，不支持其它型码输入法."
+注意：`pyim-dregcache' 只支持全拼和双拼输入法，不支持其它型码输入
+法。"
   :type 'symbol)
 
 (defvar pyim-dcache-auto-update t
@@ -172,14 +174,27 @@ AUTO-BACKUP-THRESHOLD 倍, 那么原值将自动备份到 FILE 对应的备份�
      (setq ,variable (or (pyim-dcache-get-value ',variable)
                          (make-hash-table :test #'equal)))))
 
+;; ** Dcache 后端加载相关函数
+(defun pyim-dcache-load-backend ()
+  "检查 `pyim-dcache-backend' 设置并 require 相应 package."
+  (let ((backend (pyim-dcache-backend)))
+    (unless (featurep backend)
+      (require backend))))
+
+(defun pyim-dcache-backend ()
+  "返回当前可用的 dcache backend."
+  (if (and (eq pyim-dcache-backend 'pyim-dregcache)
+           (pyim-scheme-quanpin-p (pyim-scheme-current)))
+      'pyim-dregcache
+    'pyim-dhashcache))
+
 ;; ** Dcache 初始化功能接口
 (cl-defgeneric pyim-dcache-init-variables ()
   "初始化 dcache 缓存相关变量."
   nil)
 
 (cl-defmethod pyim-dcache-init-variables :before ()
-  (unless (featurep pyim-dcache-backend)
-    (require pyim-dcache-backend)))
+  (pyim-dcache-load-backend))
 
 ;; ** Dcache 检索词条功能接口
 (cl-defgeneric pyim-dcache-get (_code &optional _from)
@@ -190,8 +205,7 @@ code 对应的中文词条了."
   nil)
 
 (cl-defmethod pyim-dcache-get :before (_code &optional _from)
-  (unless (featurep pyim-dcache-backend)
-    (require pyim-dcache-backend)))
+  (pyim-dcache-load-backend))
 
 ;; ** Dcache 代码反查功能接口
 (cl-defgeneric pyim-dcache-search-word-code (word)

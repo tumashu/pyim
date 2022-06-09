@@ -948,6 +948,18 @@
       (should (equal (gethash "测伌" pyim-dhashcache-iword2count) 0)))))
 
 ;; ** pyim-dcache 相关单元测试
+(ert-deftest pyim-tests-pyim-dcache-backend ()
+  (let ((pyim-dcache-backend 'pyim-dregcache)
+        (pyim-default-scheme 'quanpin))
+    (should (eq (pyim-dcache-backend) 'pyim-dregcache)))
+
+  (let ((pyim-dcache-backend 'pyim-dregcache)
+        (pyim-default-scheme 'wubi))
+    (should (eq (pyim-dcache-backend) 'pyim-dhashcache)))
+
+  (let ((pyim-dcache-backend 'pyim-dhashcache1))
+    (should (eq (pyim-dcache-backend) 'pyim-dhashcache))))
+
 (ert-deftest pyim-tests-pyim-dcache-save/read-variable-value ()
   (let* ((file (pyim-tests-make-temp-file))
          (backup-file (concat file "-backup-" (format-time-string "%Y%m%d%H%M%S")))
