@@ -212,9 +212,9 @@ code 对应的中文词条了."
 (cl-defgeneric pyim-dcache-update (&optional force)
   "读取并加载所有相关词库 dcache, 如果 FORCE 为真，强制加载。")
 
-;; ** Dcache 更新词条统计量功能接口
+;; ** Dcache 更新词频功能接口
 (cl-defgeneric pyim-dcache-update-wordcount (word &optional wordcount-handler)
-  "保存 WORD 词频.
+  "更新 WORD 词频.
 
 1. 如果 WORDCOUNT-HANDLER 是一个函数：那么其返回值将作为词频保存，
    参数为原有词频。

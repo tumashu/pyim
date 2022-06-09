@@ -275,7 +275,7 @@
   ;; 删除对应词条的词频
   (remhash word pyim-dregcache-iword2count))
 
-;; ** 更新 dhashcache 相关函数
+;; ** 更新 dregcache 相关函数
 (cl-defmethod pyim-dcache-update
   (&context (pyim-dcache-backend (eql pyim-dregcache)) &optional force)
   "读取并加载所有相关词库 dcache.
@@ -393,7 +393,7 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
     (push chunk content-segments)
     (list :content (nreverse content-segments))))
 
-;; ** 更新 dregcache 词条计数。
+;; ** 更新 dregcache 词频功能。
 (cl-defmethod pyim-dcache-update-wordcount
   (word &context (pyim-dcache-backend (eql pyim-dregcache))
         &optional wordcount-handler)
@@ -413,7 +413,7 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
     (unless (equal orig-value new-value)
       (puthash word new-value pyim-dregcache-iword2count))))
 
-;; ** 升级 dhashcache 相关函数
+;; ** 升级 dregcache 相关函数
 (cl-defmethod pyim-dcache-upgrade (&context (pyim-dcache-backend (eql pyim-dregcache)))
   "升级词库缓存.
 

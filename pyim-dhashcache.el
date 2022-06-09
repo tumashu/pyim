@@ -557,7 +557,7 @@ pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 \\='utf
           (push (concat prefix (substring code1 0 i)) results)))
       results)))
 
-;; ** 更新 dhashcache 词条计数
+;; ** 更新 dhashcache 词频功能
 (cl-defmethod pyim-dcache-update-wordcount
   (word &context (pyim-dcache-backend (eql pyim-dhashcache))
         &optional wordcount-handler)
