@@ -1254,6 +1254,7 @@ yin-xing 因行
     (setq pyim-dregcache-cache nil)
 
     ;; load dictionary
+    (pyim-dcache-init-variables)
     (pyim-dcache-update t)
     ;; cache is filled
     (should (> (length pyim-dregcache-cache) 0))
