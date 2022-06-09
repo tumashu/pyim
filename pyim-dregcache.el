@@ -342,6 +342,10 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
   (unless pyim-dregcache-icode2word
     (pyim-dregcache-update-personal-words t)))
 
+(cl-defmethod pyim-dcache-save-caches
+  (&context (pyim-dcache-backend (eql pyim-dregcache)))
+  (pyim-dregcache-save-personal-dcache-to-file))
+
 (defun pyim-dregcache-save-personal-dcache-to-file ()
   "保存缓存内容到默认目录."
   (when pyim-debug (message "pyim-dregcache-save-personal-dcache-to-file called"))

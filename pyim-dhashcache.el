@@ -518,6 +518,10 @@ code 对应的中文词条了。
   (pyim-dcache-init-variable pyim-dhashcache-iword2count-recent-50-words)
   (pyim-dcache-init-variable pyim-dhashcache-iword2priority))
 
+(cl-defmethod pyim-dcache-save-caches
+  (&context (pyim-dcache-backend (eql pyim-dhashcache)))
+  (pyim-dhashcache-save-personal-dcache-to-file))
+
 (defun pyim-dhashcache-save-personal-dcache-to-file ()
   ;; 用户选择过的词
   (pyim-dcache-save-variable

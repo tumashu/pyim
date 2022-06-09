@@ -181,16 +181,11 @@ AUTO-BACKUP-THRESHOLD 倍, 那么原值将自动备份到 FILE 对应的备份�
     (write-region (point-min) (point-max) filename nil :silent)
     (message "Saving file %s..." filename)))
 
-(defun pyim-dcache-save-caches ()
+(cl-defgeneric pyim-dcache-save-caches ()
   "保存 dcache.
 
-  将用户选择过的词生成的缓存和词频缓存的取值
-  保存到它们对应的文件中.
-
-  这个函数默认作为 `kill-emacs-hook' 使用。"
-  (interactive)
-  (pyim-dcache-call-api 'save-personal-dcache-to-file)
-  t)
+将用户选择过的词生成的缓存和词频缓存的取值
+保存到它们对应的文件中.")
 
 ;; ** Dcache 导出功能
 (cl-defgeneric pyim-dcache-export-words-and-counts (file &optional confirm ignore-counts)
