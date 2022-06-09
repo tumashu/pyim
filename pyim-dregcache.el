@@ -358,6 +358,11 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
   "TODO"
   )
 
+(cl-defmethod pyim-dcache-update-wordcount
+  (word &context (pyim-dcache-backend (eql pyim-dregcache))
+        &optional wordcount-handler)
+  (pyim-dregcache-update-iword2count word wordcount-handler))
+
 (defun pyim-dregcache-update-iword2count (word &optional wordcount-handler)
   "保存词频到缓存."
   (when pyim-debug (message "pyim-dregcache-update-iword2count. word=%s" word))

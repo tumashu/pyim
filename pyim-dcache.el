@@ -229,14 +229,13 @@ non-nil，文件存在时将会提示用户是否覆盖，默认为覆盖模式"
                     (list version file (nth 5 (file-attributes file 'string))))
                   files)))))
 
-(defun pyim-dcache-update-wordcount (word &optional wordcount-handler)
+(cl-defgeneric pyim-dcache-update-wordcount (word &optional wordcount-handler)
   "保存 WORD 词频.
 
 1. 如果 WORDCOUNT-HANDLER 是一个函数：那么其返回值将作为词频保存，
    参数为原有词频。
 2. 如果 WORDCOUNT-HANDLER 是一个数值：那么这个数值直接作为词频保存。
-3. 如果 WORDCOUNT-HANDLER 为其他值：词频不变."
-  (pyim-dcache-call-api 'update-iword2count word wordcount-handler))
+3. 如果 WORDCOUNT-HANDLER 为其他值：词频不变.")
 
 ;; ** Dcache 加词功能
 (cl-defgeneric pyim-dcache-insert-word (word code prepend)

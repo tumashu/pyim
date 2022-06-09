@@ -568,6 +568,11 @@ code 对应的中文词条了。
       (+ (or orig-value 0) 1))
     hash-table))
 
+(cl-defmethod pyim-dcache-update-wordcount
+  (word &context (pyim-dcache-backend (eql pyim-dhashcache))
+        &optional wordcount-handler)
+  (pyim-dhashcache-update-iword2count word wordcount-handler))
+
 (defun pyim-dhashcache-update-iword2count (word &optional wordcount-handler)
   "保存词频到缓存."
   ;; 更新最近输入 10 个词条的 count 表
