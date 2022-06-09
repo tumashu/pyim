@@ -1126,7 +1126,8 @@ zuo-zuo-you-mang 作作有芒")
                    '("你" "呢")))))
 
 (ert-deftest pyim-tests-pyim-dhashcache-put/delete ()
-  (let ((pyim-dhashcache-icode2word (make-hash-table :test #'equal)))
+  (let ((pyim-dcache-backend 'pyim-dhashcache)
+        (pyim-dhashcache-icode2word (make-hash-table :test #'equal)))
     (puthash "ni-hao" '("你好" "呢耗") pyim-dhashcache-icode2word)
     (pyim-dhashcache-put
       pyim-dhashcache-icode2word "ni-hao"
@@ -1136,9 +1137,9 @@ zuo-zuo-you-mang 作作有芒")
       (list "你不好"))
     (should (equal (gethash "ni-hao" pyim-dhashcache-icode2word) '("呢毫" "你好" "呢耗")))
     (should (equal (gethash "ni-bu-hao" pyim-dhashcache-icode2word) '("你不好")))
-    (pyim-dhashcache-delete-word "你不好")
+    (pyim-dcache-delete-word "你不好")
     (should (equal (gethash "ni-bu-hao" pyim-dhashcache-icode2word) nil))
-    (pyim-dhashcache-delete-word "你好")
+    (pyim-dcache-delete-word "你好")
     (should (equal (gethash "ni-hao" pyim-dhashcache-icode2word) '("呢毫" "呢耗")))))
 
 (ert-deftest pyim-tests-pyim-dhashcache-update-iword2count ()
@@ -1167,7 +1168,8 @@ yin-xing 因行
 ")))))
 
 (ert-deftest pyim-tests-pyim-dhashcache-get ()
-  (let ((pyim-dhashcache-code2word (make-hash-table :test #'equal))
+  (let ((pyim-dcache-backend 'pyim-dhashcache)
+        (pyim-dhashcache-code2word (make-hash-table :test #'equal))
         (pyim-dhashcache-icode2word (make-hash-table :test #'equal))
         (pyim-dhashcache-iword2count (make-hash-table :test #'equal)))
 
@@ -1175,11 +1177,11 @@ yin-xing 因行
     (puthash "ni-hao" '("你好") pyim-dhashcache-code2word)
     (puthash "你好" 10 pyim-dhashcache-iword2count)
 
-    (should (equal (pyim-dhashcache-get "ni-hao" '(code2word)) '("你好")))
-    (should (equal (pyim-dhashcache-get "ni-hao" '(icode2word)) '("呢耗")))
-    (should (equal (pyim-dhashcache-get "你好" '(iword2count)) '(10)))
-    (should (equal (pyim-dhashcache-get "ni-hao" '(code2word icode2word)) '("你好" "呢耗")))
-    (should (equal (pyim-dhashcache-get "ni-hao") '("呢耗" "你好")))))
+    (should (equal (pyim-dcache-get "ni-hao" '(code2word)) '("你好")))
+    (should (equal (pyim-dcache-get "ni-hao" '(icode2word)) '("呢耗")))
+    (should (equal (pyim-dcache-get "你好" '(iword2count)) '(10)))
+    (should (equal (pyim-dcache-get "ni-hao" '(code2word icode2word)) '("你好" "呢耗")))
+    (should (equal (pyim-dcache-get "ni-hao") '("呢耗" "你好")))))
 
 (ert-deftest pyim-tests-pyim-dhashcache-insert-word-into-icode2word ()
   (let ((pyim-dhashcache-icode2word (make-hash-table :test #'equal)))
