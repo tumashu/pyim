@@ -982,7 +982,8 @@
     (should (equal my/test:1 "hello"))))
 
 (ert-deftest pyim-tests-pyim-dcache-export ()
-  (let ((pyim-dhashcache-iword2count (make-hash-table :test #'equal))
+  (let ((pyim-dcache-backend 'pyim-dhashcache)
+        (pyim-dhashcache-iword2count (make-hash-table :test #'equal))
         (pyim-dhashcache-icode2word (make-hash-table :test #'equal))
         (file (pyim-tests-make-temp-file)))
     (puthash "你好" 10 pyim-dhashcache-iword2count)
@@ -1196,15 +1197,16 @@ yin-xing 因行
     (should (equal (gethash "n-h" pyim-dhashcache-ishortcode2word)
                    '("你慌" "你好" "你坏")))))
 
-(ert-deftest pyim-tests-pyim-dhashcache-sort-words ()
-  (let ((pyim-dhashcache-iword2count (make-hash-table :test #'equal))
+(ert-deftest pyim-tests-pyim-dcache-sort-words ()
+  (let ((pyim-dcache-backend 'pyim-dhashcache)
+        (pyim-dhashcache-iword2count (make-hash-table :test #'equal))
         words)
     (puthash "你好" 3 pyim-dhashcache-iword2count)
     (puthash "呢耗" 2 pyim-dhashcache-iword2count)
     (puthash "你豪" 1 pyim-dhashcache-iword2count)
 
     (setq words (list "呢耗" "你豪" "你好"))
-    (should (equal (pyim-dhashcache-sort-words words)
+    (should (equal (pyim-dcache-sort-words words)
                    '("你好" "呢耗" "你豪")))))
 
 (ert-deftest pyim-tests-pyim-dhashcache-get-counts-from-log ()

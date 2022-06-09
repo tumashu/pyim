@@ -46,7 +46,7 @@
 ;; ** 获取备选词列表
 (defun pyim-candidates-sort (candidates)
   "对 CANDIDATES 进行排序。"
-  (pyim-dcache-call-api 'sort-words candidates))
+  (pyim-dcache-sort-words candidates))
 
 (cl-defgeneric pyim-candidates-get-chief (scheme &optional personal-words common-words)
   "PYIM 输入法第一位候选词的获取策略。")
