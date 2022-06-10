@@ -59,13 +59,15 @@
 
 ;; ** 从 dregcache 搜索词条相关函数
 (cl-defmethod pyim-dcache-get
-  (code &context ((pyim-dcache-backend) (eql pyim-dregcache))
-        &optional from)
-  "从 `pyim-dregcache-cache' 搜索 CODE, 得到对应的词条."
-  (when code
+  (key &context ((pyim-dcache-backend) (eql pyim-dregcache))
+       &optional from)
+  "从 FROM 中搜索 KEY, 得到对应的结果。
+
+用于 pyim-dregcache 类型的 dcache 后端。"
+  (when key
     (cond ((or (memq 'icode2word from)
                (memq 'ishortcode2word from))
-           (pyim-dregcache-get-icode2word-ishortcode2word code))
+           (pyim-dregcache-get-icode2word-ishortcode2word key))
           ;; FIXME: pyim-dregcache 暂时不支持 iword2count-recent-10-words 和
           ;; iword2count-recent-50-words.
           ((or (memq 'iword2count-recent-10-words from)
@@ -74,12 +76,12 @@
           (t (let ((dict-files (pyim-dregcache-all-dict-files))
                    result)
 
-               (when pyim-debug (message "pyim-dregcache-get is called. code=%s" code))
+               (when pyim-debug (message "pyim-dregcache-get is called. key=%s" key))
                (when dict-files
                  (dolist (file dict-files)
                    (let* ((file-info (lax-plist-get pyim-dregcache-cache file))
-                          (content (pyim-dregcache-get-content code file-info)))
-                     (setq result (append (pyim-dregcache-get-1 content code) result)))))
+                          (content (pyim-dregcache-get-content key file-info)))
+                     (setq result (append (pyim-dregcache-get-1 content key) result)))))
                ;; `push' plus `nreverse' is more efficient than `add-to-list'
                ;; Many examples exist in Emacs' own code
                (nreverse result))))))

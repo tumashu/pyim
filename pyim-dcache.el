@@ -197,11 +197,25 @@ AUTO-BACKUP-THRESHOLD 倍, 那么原值将自动备份到 FILE 对应的备份�
   (pyim-dcache-load-backend))
 
 ;; ** Dcache 检索词条功能接口
-(cl-defgeneric pyim-dcache-get (_code &optional _from)
-  "从 FROM 对应的 dcache 中搜索 CODE, 得到对应的词条.
+(cl-defgeneric pyim-dcache-get (_key &optional _from)
+  "从 FROM 中搜索 KEY, 得到对应的取值.
 
-当词库文件加载完成后，pyim 就可以用这个函数从词库缓存中搜索某个
-code 对应的中文词条了."
+FORM 是一个包含下面几个符号的 list, 每个符号代表一种类型的
+dcache.
+
+* 编码 -> 词条
+1. code2word                     用编码搜索词条
+3. icode2word                    用编码搜索个人词条
+4. ishortcode2word               用简码搜索个人词条
+7. shortcode2word                用简码搜索个人词条
+
+* 词条 -> 编码
+2. word2code                     用词条搜索编码
+
+* 词条 -> 词频
+3. iword2count                   用个人词条搜索编码
+4. iword2count-recent-10-words   搜索最近输入10个词的词频
+5. iword2count-recent-50-words   搜索最近输入50个词的词频"
   nil)
 
 (cl-defmethod pyim-dcache-get :before (_code &optional _from)
