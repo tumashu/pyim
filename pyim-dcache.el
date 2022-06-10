@@ -205,17 +205,17 @@ dcache.
 
 * 编码 -> 词条
 1. code2word                     用编码搜索词条
-3. icode2word                    用编码搜索个人词条
-4. ishortcode2word               用简码搜索个人词条
-7. shortcode2word                用简码搜索个人词条
+2. icode2word                    用编码搜索个人词条
+3. ishortcode2word               用简码搜索个人词条
+4. shortcode2word                用简码搜索个人词条
 
 * 词条 -> 编码
-2. word2code                     用词条搜索编码
+1. word2code                     用词条搜索编码
 
 * 词条 -> 词频
-3. iword2count                   用个人词条搜索编码
-4. iword2count-recent-10-words   搜索最近输入10个词的词频
-5. iword2count-recent-50-words   搜索最近输入50个词的词频"
+1. iword2count                   用个人词条搜索编码
+2. iword2count-recent-10-words   搜索最近输入10个词的词频
+3. iword2count-recent-50-words   搜索最近输入50个词的词频"
   nil)
 
 (cl-defmethod pyim-dcache-get :before (_code &optional _from)
