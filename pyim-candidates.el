@@ -309,7 +309,7 @@
   "按照 SCHEME, 用限时运行的方式从 IMOBJS 获得候选词条，用于双拼输入法。"
   ;; 注意：pyim 支持的双拼输入法，内部使用全拼的 imobjs, 所以这里直接调用全拼的
   ;; `pyim-candidates-create-limit-time' 方法来处理 imobjs。
-  (cl-call-next-method imobjs (pyim-scheme-get 'quanpin)))
+  (pyim-candidates-create-limit-time imobjs (pyim-scheme-get 'quanpin)))
 
 (cl-defgeneric pyim-candidates-create-async (_imobjs _scheme _callback)
   "按照 SCHEME, 使用异步的方式从 IMOBJS 获得候选词条。
