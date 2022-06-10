@@ -182,7 +182,7 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
             (mapcar (lambda (x)
                       (when (string-prefix-p prefix x)
                         (string-remove-prefix prefix x)))
-                    (sort (cl-copy-list (pyim-dcache-search-word-code string))
+                    (sort (cl-copy-list (pyim-dcache-get string '(word2code)))
                           (lambda (a b)
                             (> (length a) (length b))))))
            (codes (remove nil dcache-codes)))

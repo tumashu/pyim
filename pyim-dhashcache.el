@@ -130,11 +130,6 @@
             (setq result (append result value)))))
       result)))
 
-;; ** 从 dhashcache 搜索代码相关函数
-(cl-defmethod pyim-dcache-search-word-code
-  (string &context ((pyim-dcache-backend) (eql pyim-dhashcache)))
-  (gethash string pyim-dhashcache-word2code))
-
 ;; ** 给 dhashcache 添加词条相关函数
 (cl-defmethod pyim-dcache-insert-word
   (word code prepend

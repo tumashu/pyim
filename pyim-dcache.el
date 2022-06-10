@@ -221,10 +221,6 @@ dcache.
 (cl-defmethod pyim-dcache-get :before (_code &optional _from)
   (pyim-dcache-load-backend))
 
-;; ** Dcache 代码反查功能接口
-(cl-defgeneric pyim-dcache-search-word-code (word)
-  "从 dcache 中搜索 WROD 对应的 code.")
-
 ;; ** Dcache 加词功能接口
 (cl-defgeneric pyim-dcache-insert-word (word code prepend)
   "将词条 WORD 插入到 dcache 中。

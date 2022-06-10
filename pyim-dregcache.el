@@ -68,23 +68,35 @@
     (cond ((or (memq 'icode2word from)
                (memq 'ishortcode2word from))
            (pyim-dregcache-get-icode2word-ishortcode2word key))
+          ((or (not from)
+               (memq 'code2word from)
+               (memq 'shortcode2word from))
+           (pyim-dregcache-get-code2word-shortcode2word key))
           ;; FIXME: pyim-dregcache 暂时不支持 iword2count-recent-10-words 和
           ;; iword2count-recent-50-words.
           ((or (memq 'iword2count-recent-10-words from)
                (memq 'iword2count-recent-50-words from))
            nil)
-          (t (let ((dict-files (pyim-dregcache-all-dict-files))
-                   result)
+          ;; pyim-dregcache 目前只能用于全拼输入法，而 pyim 中全拼输入法代码反查
+          ;; 功能是通过 pymap 相关函数实现的，不使用 word2code.
+          ((memq 'word2code from)
+           nil)
+          (t nil))))
 
-               (when pyim-debug (message "pyim-dregcache-get is called. key=%s" key))
-               (when dict-files
-                 (dolist (file dict-files)
-                   (let* ((file-info (lax-plist-get pyim-dregcache-cache file))
-                          (content (pyim-dregcache-get-content key file-info)))
-                     (setq result (append (pyim-dregcache-get-1 content key) result)))))
-               ;; `push' plus `nreverse' is more efficient than `add-to-list'
-               ;; Many examples exist in Emacs' own code
-               (nreverse result))))))
+(defun pyim-dregcache-get-code2word-shortcode2word (code)
+  (when pyim-debug (message "pyim-dregcache-get-code2word-shortcode2word called => %s" code))
+  (let ((dict-files (pyim-dregcache-all-dict-files))
+        result)
+
+    (when pyim-debug (message "pyim-dregcache-get is called. code=%s" code))
+    (when dict-files
+      (dolist (file dict-files)
+        (let* ((file-info (lax-plist-get pyim-dregcache-cache file))
+               (content (pyim-dregcache-get-content code file-info)))
+          (setq result (append (pyim-dregcache-get-1 content code) result)))))
+    ;; `push' plus `nreverse' is more efficient than `add-to-list'
+    ;; Many examples exist in Emacs' own code
+    (nreverse result)))
 
 (defun pyim-dregcache-get-icode2word-ishortcode2word (code)
   "以 CODE 搜索个人词和个人联想词.  正则表达式搜索词库,不需要为联想词开单独缓存."
@@ -190,31 +202,6 @@
       (setq idx (- ch ?a 3))))
     ;; fetch segment using the first character of pinyin code
     (nth idx rlt)))
-
-;; ** 从 dregcache 搜索代码相关函数
-(cl-defmethod pyim-dcache-search-word-code
-  (word &context ((pyim-dcache-backend) (eql pyim-dregcache)))
-  "从 `pyim-dregcache-cache' 和 `pyim-dregcache-icode2word' 搜索 word, 得到对应的code."
-  (when pyim-debug (message "pyim-dregcache-search-word-code word=%s" word))
-  (when pyim-dregcache-cache
-    (catch 'result
-      (let ((dict-files (pyim-dregcache-all-dict-files))
-            code)
-        (when pyim-dregcache-icode2word
-          (setq code (pyim-dregcache-search-word-code-1 word pyim-dregcache-icode2word))
-          (when code (throw 'result (list code))))
-        (dolist (file dict-files)
-          (let* ((file-info (lax-plist-get pyim-dregcache-cache file))
-                 (contents (lax-plist-get file-info :content)))
-            (dolist (content contents)
-              (setq code (pyim-dregcache-search-word-code-1 word content))
-              (when code (throw 'result (list code))))))))))
-
-(defun pyim-dregcache-search-word-code-1 (word content)
-  (let* ((case-fold-search t)
-         (regexp (concat "^\\([a-z-]+\\)\\(.*\\) " "\\(" word " \\|" word "$\\)")))
-    (when (string-match regexp content)
-      (match-string-no-properties 1 content))))
 
 ;; ** 给 dregcache 添加词条相关函数
 (cl-defmethod pyim-dcache-insert-word
