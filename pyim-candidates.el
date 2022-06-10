@@ -266,15 +266,13 @@
                                 (pyim-pymap-py2cchar-get pinyin))))))
     (cl-subseq chars 0 num)))
 
-(cl-defgeneric pyim-candidates-create-limit-time (imobjs scheme orig-candidates)
+(cl-defgeneric pyim-candidates-create-limit-time (_imobjs _scheme)
   "按照 SCHEME, 使用限时运行的方式从 IMOBJS 获得候选词条。
 
 1. 这个函数是同步运行。
 2. 这个函数运行有时间限制，运行超过某个时间后，无论有没有结果，必须结束。
-3. 这个函数需要探测用户是否输入，如果用户开始输入，这个函数运行必须结束。")
-
-(cl-defmethod pyim-candidates-create-limit-time (_imobjs _scheme)
-  "按照 SCHEME, 使用限时运行的方式从 IMOBJS 获得候选词条。")
+3. 这个函数需要探测用户是否输入，如果用户开始输入，这个函数运行必须结束。"
+  nil)
 
 (cl-defmethod pyim-candidates-create-limit-time (imobjs (scheme pyim-scheme-quanpin))
   "按照 SCHEME, 用限时运行的方式从 IMOBJS 获得候选词条，用于全拼输入法。"
@@ -313,13 +311,10 @@
   ;; `pyim-candidates-create-limit-time' 方法来处理 imobjs。
   (cl-call-next-method imobjs (pyim-scheme-get 'quanpin)))
 
-(cl-defgeneric pyim-candidates-create-async (imobjs scheme callback)
+(cl-defgeneric pyim-candidates-create-async (_imobjs _scheme _callback)
   "按照 SCHEME, 使用异步的方式从 IMOBJS 获得候选词条。
 
-获取到的词条后，需要将其做为参数，调用 CALLBACK 函数。")
-
-(cl-defmethod pyim-candidates-create-async (_imobjs _scheme _callback)
-  "按照 SCHEME, 使用异步的方式从 IMOBJS 获得候选词条，默认什么也不做。"
+获取到的词条后，需要将其做为参数，调用 CALLBACK 函数。"
   nil)
 
 ;; * Footer
