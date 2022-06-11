@@ -1239,6 +1239,23 @@ yin-xing 因行
                   '((day 3 7 6 4 5 9 1)))
                  '(69))))
 
+(ert-deftest pyim-tests-pyim-dhashcache-upgrade-icode2word ()
+  (let ((pyim-dhashcache-icode2word (make-hash-table :test #'equal)))
+    (puthash ".aaaa" '("工") pyim-dhashcache-icode2word)
+    (puthash "wubi/aaaa" '("㠭" "工") pyim-dhashcache-icode2word)
+    (pyim-dhashcache-upgrade-icode2word t)
+    (should-not (gethash ".aaaa" pyim-dhashcache-icode2word))
+    (should (equal (gethash "wubi/aaaa" pyim-dhashcache-icode2word)
+                   '("㠭" "工"))))
+  (let ((pyim-dhashcache-icode2word (make-hash-table :test #'equal)))
+    (puthash ".aaaa" '("工") pyim-dhashcache-icode2word)
+    (puthash "wubi/aaaa" '("㠭" "工") pyim-dhashcache-icode2word)
+    (pyim-dhashcache-upgrade-icode2word)
+    (should (equal (gethash ".aaaa" pyim-dhashcache-icode2word)
+                   '("工")))
+    (should (equal (gethash "wubi/aaaa" pyim-dhashcache-icode2word)
+                   '("㠭" "工")))))
+
 ;; ** pyim-dregcache 相关单元测试
 (ert-deftest pyim-tests-pyim-general ()
   (let ((pyim-dcache-backend 'pyim-dregcache))

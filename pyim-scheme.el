@@ -57,13 +57,14 @@
                (:constructor pyim-scheme-create)
                (:copier nil))
   "输入法通用方案类型."
-  (name         nil :type symbol  :documentation "输入法名称。")
-  (document     nil :type string  :documentation "输入法简要说明。")
-  (first-chars  nil :type string  :documentation "输入法启动后，可以处理的第一个字符。")
-  (rest-chars   nil :type string  :documentation "输入法处理一个字符后，可以继续处理的字符。")
-  (code-prefix  nil :type string  :documentation "pyim 词库用到的编码前缀，比如：wubi/ 等。")
-  (prefer-triggers   nil :type list    :documentation "单字符快捷键设置，有些输入法不使用某个字母，这个字母就可以做为快捷键使用。")
-  (cregexp-support-p nil :type boolean :documentation "输入法是否支持从代码生成搜索中文的正则表达式。"))
+  (name                nil :type symbol  :documentation "输入法名称。")
+  (document            nil :type string  :documentation "输入法简要说明。")
+  (first-chars         nil :type string  :documentation "输入法启动后，可以处理的第一个字符。")
+  (rest-chars          nil :type string  :documentation "输入法处理一个字符后，可以继续处理的字符。")
+  (code-prefix         nil :type string  :documentation "pyim 词库用到的编码前缀，比如：wubi/ 等。")
+  (code-prefix-history nil :type list    :documentation "输入法以前使用过的编码前缀，用于编写词库升级程序。")
+  (prefer-triggers     nil :type list    :documentation "单字符快捷键设置，有些输入法不使用某个字母，这个字母就可以做为快捷键使用。")
+  (cregexp-support-p   nil :type boolean :documentation "输入法是否支持从代码生成搜索中文的正则表达式。"))
 
 (cl-defstruct (pyim-scheme-quanpin
                (:include pyim-scheme)
@@ -89,7 +90,6 @@
 
 这个输入法方案类型代表那些重码少，编码长度固定的一类输入法，比如：
 五笔输入法，仓颉输入法等。"
-  (code-prefix-history nil :type list   :documentation "输入法以前使用过的代码前缀，用于编写词库升级程序。")
   (code-split-length   nil :type number :documentation "代码分割长度。")
   (code-maximum-length nil :type number :documentation "代码最大长度。"))
 

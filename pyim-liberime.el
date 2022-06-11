@@ -51,7 +51,6 @@
                (:constructor pyim-scheme-rime-create)
                (:copier nil))
   "Rime 输入法方案。"
-  code-prefix-history
   code-split-length
   code-maximum-length)
 
