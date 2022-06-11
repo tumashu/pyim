@@ -1836,6 +1836,18 @@ Transfer-Encoding: chunked
     (cl-pushnew 'test pyim-process-self-insert-commands)
     (should (pyim-process-self-insert-command-p 'test))))
 
+(ert-deftest pyim-tests-pyim-process-ui-refresh ()
+  (let* ((result1 nil)
+         (result2 nil)
+         (pyim-process-ui-refresh-hook
+          (list (lambda (x)
+                  (setq result1 "result1"))
+                (lambda (x)
+                  (setq result2 "result2")))))
+    (pyim-process-ui-refresh)
+    (should (equal result1 "result1"))
+    (should (equal result2 "result2"))))
+
 (ert-deftest pyim-tests-pyim-process-merge-candidates ()
   (should (equal (pyim-process-merge-candidates
                   '("a" "b" "c") '("d" "e" "f" "a" "b"))
