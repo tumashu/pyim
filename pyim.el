@@ -273,7 +273,8 @@ pyim 使用函数 `pyim-activate' 启动输入法的时候，会将变量
 
 (defun pyim-kill-emacs-hook-function ()
   "Pyim function which is used in `kill-emacs-hook'."
-  (pyim-process-save-dcaches t))
+  (pyim-process-save-dcaches t)
+  t)
 
 ;; ** 取消激活功能
 (defun pyim-deactivate ()

@@ -211,8 +211,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 (defun pyim-process-save-dcaches (&optional force)
   "PYIM 流程，保存 dcache."
   (when force
-    (pyim-dcache-save-caches))
-  t)
+    (pyim-dcache-save-caches)))
 
 (defun pyim-process-update (&optional force)
   (pyim-dcache-update force))
