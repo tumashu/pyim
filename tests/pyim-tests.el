@@ -1033,6 +1033,7 @@
         (file (pyim-tests-make-temp-file)))
     (puthash "你好" 10 pyim-dhashcache-iword2count)
     (puthash "尼耗" 1 pyim-dhashcache-iword2count)
+    (puthash "wo-hao" (list "我好") pyim-dhashcache-icode2word)
     (puthash "ni-hao" (list "你好" "尼耗") pyim-dhashcache-icode2word)
     (pyim-dcache-export-words-and-counts file)
     (with-temp-buffer
@@ -1041,6 +1042,7 @@
                      ";;; -*- coding: utf-8-unix -*-
 你好 10
 尼耗 1
+我好 0
 ")))
     (pyim-dcache-export-words-and-counts file nil t)
     (with-temp-buffer
@@ -1049,6 +1051,7 @@
                      ";;; -*- coding: utf-8-unix -*-
 你好
 尼耗
+我好
 ")))
     (pyim-dcache-export-personal-words file)
     (with-temp-buffer
@@ -1056,6 +1059,7 @@
       (should (equal (buffer-string)
                      ";;; -*- coding: utf-8-unix -*-
 ni-hao 你好 尼耗
+wo-hao 我好
 ")))))
 
 (ert-deftest pyim-tests-pyim-dcache-insert-word ()

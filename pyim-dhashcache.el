@@ -39,6 +39,7 @@
 (require 'pyim-dcache)
 (require 'pyim-dict)
 (require 'pyim-scheme)
+(require 'sort)
 
 (defvar pyim-dhashcache-count-types
   `((day
@@ -718,7 +719,6 @@ pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 \\='utf
 如果 CONFIRM 为 non-nil，文件存在时将会提示用户是否覆盖，
 默认为覆盖模式"
   (with-temp-buffer
-    (insert ";;; -*- coding: utf-8-unix -*-\n")
     (maphash
      (lambda (key value)
        (let ((value (cl-remove-if
@@ -733,6 +733,9 @@ pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 \\='utf
          (when value
            (insert (format "%s %s\n" key (mapconcat #'identity value " "))))))
      dcache)
+    (sort-lines nil (point-min) (point-max))
+    (goto-char (point-min))
+    (insert ";;; -*- coding: utf-8-unix -*-\n")
     (pyim-dcache-write-file file confirm)))
 
 (cl-defmethod pyim-dcache-export-words-and-counts
