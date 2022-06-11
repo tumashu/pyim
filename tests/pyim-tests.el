@@ -1035,6 +1035,22 @@ ni-hao 你好 尼耗
     (should (equal (gethash "ni-hao" pyim-dhashcache-icode2word)
                    '("尼耗" "你好" "呢耗" #("你豪" 0 2 (:noexport t)))))))
 
+(ert-deftest pyim-tests-pyim-dcache-update-wordcount ()
+  (let ((pyim-dcache-backend 'pyim-dhashcache)
+        (pyim-dhashcache-iword2count (make-hash-table :test #'equal)))
+    (pyim-dcache-update-wordcount "你好")
+    (should (equal (gethash "你好" pyim-dhashcache-iword2count) 0))
+    (pyim-dcache-update-wordcount "你好" (lambda (n) (+ n 3)))
+    (should (equal (gethash "你好" pyim-dhashcache-iword2count) 3))
+    (pyim-dcache-update-wordcount "你好" #'1+)
+    (should (equal (gethash "你好" pyim-dhashcache-iword2count) 4))
+    (pyim-dcache-update-wordcount "你好" 10)
+    (should (equal (gethash "你好" pyim-dhashcache-iword2count) 10))
+    (pyim-dcache-update-wordcount "你好" nil)
+    (should (equal (gethash "你好" pyim-dhashcache-iword2count) 10))
+    (pyim-dcache-update-wordcount "你好" "xxx")
+    (should (equal (gethash "你好" pyim-dhashcache-iword2count) 10))))
+
 ;; ** pyim-dict 相关单元测试
 (ert-deftest pyim-tests-pyim-dict ()
   (let ((pyim-extra-dicts nil)
