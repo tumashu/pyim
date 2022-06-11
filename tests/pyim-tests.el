@@ -1240,6 +1240,8 @@ yin-xing 因行
                  '(69))))
 
 (ert-deftest pyim-tests-pyim-dhashcache-upgrade-icode2word ()
+  (should (equal (pyim-dhashcache-upgrade-icode2word-rulers)
+                 '(((".") . "wubi/") (("@") . "cangjie/"))))
   (let ((pyim-dhashcache-icode2word (make-hash-table :test #'equal)))
     (puthash ".aaaa" '("工") pyim-dhashcache-icode2word)
     (puthash "wubi/aaaa" '("㠭" "工") pyim-dhashcache-icode2word)
