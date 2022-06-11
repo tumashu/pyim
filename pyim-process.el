@@ -296,21 +296,27 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   "确定 pyim 是否需要启动中文输入模式."
   (let* ((scheme (pyim-scheme-current))
          (first-chars (pyim-scheme-first-chars scheme))
-         (rest-chars (pyim-scheme-rest-chars scheme)))
-    (and (or (pyim-process-force-input-chinese-p)
-             (and (not pyim-process-input-ascii)
-                  (not (pyim-process-auto-switch-english-input-p))))
-         (if (not (string< "" (pyim-entered-get 'point-before)))
-             (member last-command-event
-                     (mapcar #'identity first-chars))
-           (member last-command-event
-                   (mapcar #'identity rest-chars))))))
+         (rest-chars (pyim-scheme-rest-chars scheme))
+         (entered (pyim-entered-get 'point-before)))
+    (and (pyim-process-input-chinese-predicate-1)
+         (pyim-process-input-chinese-predicate-2
+          last-command-event entered first-chars rest-chars))))
 
-(defun pyim-process-indicator-function ()
-  "Indicator function."
+(defun pyim-process-input-chinese-predicate-1 ()
+  "`pyim-process-input-chinese-p' 内部函数，测试环境。"
   (or (pyim-process-force-input-chinese-p)
       (and (not pyim-process-input-ascii)
            (not (pyim-process-auto-switch-english-input-p)))))
+
+(defun pyim-process-input-chinese-predicate-2 (event entered first-chars rest-chars)
+  "`pyim-process-input-chinese-p' 内部函数，测试输入。"
+  (if (not (string< "" entered))
+      (member event (mapcar #'identity first-chars))
+    (member event (mapcar #'identity rest-chars))))
+
+(defun pyim-process-indicator-function ()
+  "Indicator function."
+  (pyim-process-input-chinese-predicate-1))
 
 (defun pyim-process-run ()
   "查询 entered 字符串, 显示备选词等待用户选择。"

@@ -1616,6 +1616,194 @@ Transfer-Encoding: chunked
                         '(4 "aaaa" ("工") ("工")))
                  '(:select current))))
 
+;; ** pyim-process 相关单元测试
+(ert-deftest pyim-tests-pyim-process-ui-init ()
+  (let* ((pyim-test nil)
+         (pyim-process-ui-init-hook
+          (list (lambda ()
+                  (setq pyim-test 'hello)))))
+    (pyim-process-ui-init)
+    (should (equal pyim-test 'hello))))
+
+(ert-deftest pyim-tests-pyim-process-start-daemon ()
+  (let* ((pyim-test nil)
+         (pyim-process-start-daemon-hook
+          (list (lambda ()
+                  (setq pyim-test 'hello)))))
+    (pyim-process-start-daemon)
+    (should (equal pyim-test 'hello))))
+
+(ert-deftest pyim-tests-pyim-process-stop-daemon ()
+  (let* ((pyim-test nil)
+         (pyim-process-stop-daemon-hook
+          (list (lambda ()
+                  (setq pyim-test 'hello)))))
+    (pyim-process-stop-daemon)
+    (should (equal pyim-test 'hello))))
+
+(ert-deftest pyim-tests-pyim-process-auto-switch-english-input-p ()
+  (let ((pyim-english-input-switch-functions
+         (list (lambda () t)
+               (lambda () nil)
+               (lambda () nil))))
+    (should (pyim-process-auto-switch-english-input-p)))
+
+  (let ((pyim-english-input-switch-functions
+         (list (lambda () t)
+               (lambda () t)
+               (lambda () nil))))
+    (should (pyim-process-auto-switch-english-input-p)))
+
+  (let ((pyim-english-input-switch-functions
+         (list (lambda () nil)
+               (lambda () nil)
+               (lambda () nil))))
+    (should-not (pyim-process-auto-switch-english-input-p)))
+
+  (let ((pyim-english-input-switch-functions nil))
+    (should-not (pyim-process-auto-switch-english-input-p)))
+
+  (let ((pyim-english-input-switch-functions
+         (lambda () nil)))
+    (should-not (pyim-process-auto-switch-english-input-p)))
+
+  (let ((pyim-english-input-switch-functions
+         (lambda () t)))
+    (should (pyim-process-auto-switch-english-input-p)))
+
+  (let ((pyim-english-input-switch-functions "xxx"))
+    (should-not (pyim-process-auto-switch-english-input-p))))
+
+(ert-deftest pyim-tests-pyim-process-force-input-chinese-p ()
+  (let ((pyim-process-force-input-chinese nil)
+        (pyim-force-input-chinese-functions
+         (list (lambda () t)
+               (lambda () nil)
+               (lambda () nil))))
+    (should (pyim-process-force-input-chinese-p)))
+
+  (let ((pyim-process-force-input-chinese nil)
+        (pyim-force-input-chinese-functions
+         (list (lambda () t)
+               (lambda () t)
+               (lambda () nil))))
+    (should (pyim-process-force-input-chinese-p)))
+
+  (let ((pyim-process-force-input-chinese nil)
+        (pyim-force-input-chinese-functions
+         (lambda () t)))
+    (should (pyim-process-force-input-chinese-p)))
+
+  (let ((pyim-process-force-input-chinese nil)
+        (pyim-force-input-chinese-functions
+         (lambda () nil)))
+    (should-not (pyim-process-force-input-chinese-p)))
+
+  (let ((pyim-process-force-input-chinese nil)
+        (pyim-force-input-chinese-functions "xxx"))
+    (should-not (pyim-process-force-input-chinese-p)))
+
+  (let ((pyim-process-force-input-chinese nil)
+        (pyim-force-input-chinese-functions
+         (list (lambda () nil)
+               (lambda () nil)
+               (lambda () nil))))
+    (should-not (pyim-process-force-input-chinese-p)))
+
+  (let ((pyim-process-force-input-chinese t)
+        (pyim-force-input-chinese-functions nil))
+    (should (pyim-process-force-input-chinese-p)))
+
+  (let ((pyim-process-force-input-chinese t)
+        (pyim-force-input-chinese-functions
+         (list (lambda () nil)
+               (lambda () nil)
+               (lambda () nil))))
+    (should (pyim-process-force-input-chinese-p))))
+
+(ert-deftest pyim-tests-pyim-process-input-chinese-predicate-1 ()
+  (cl-letf (((symbol-function 'pyim-process-force-input-chinese-p)
+             (lambda () t))
+            (pyim-process-input-ascii t)
+            ((symbol-function 'pyim-process-auto-switch-english-input-p)
+             (lambda () t)))
+    (should (pyim-process-input-chinese-predicate-1)))
+
+  (cl-letf (((symbol-function 'pyim-process-force-input-chinese-p)
+             (lambda () t))
+            (pyim-process-input-ascii nil)
+            ((symbol-function 'pyim-process-auto-switch-english-input-p)
+             (lambda () t)))
+    (should (pyim-process-input-chinese-predicate-1)))
+
+  (cl-letf (((symbol-function 'pyim-process-force-input-chinese-p)
+             (lambda () t))
+            (pyim-process-input-ascii nil)
+            ((symbol-function 'pyim-process-auto-switch-english-input-p)
+             (lambda () t)))
+    (should (pyim-process-input-chinese-predicate-1)))
+
+  (cl-letf (((symbol-function 'pyim-process-force-input-chinese-p)
+             (lambda () nil))
+            (pyim-process-input-ascii nil)
+            ((symbol-function 'pyim-process-auto-switch-english-input-p)
+             (lambda () nil)))
+    (should (pyim-process-input-chinese-predicate-1)))
+
+  (cl-letf (((symbol-function 'pyim-process-force-input-chinese-p)
+             (lambda () nil))
+            (pyim-process-input-ascii t)
+            ((symbol-function 'pyim-process-auto-switch-english-input-p)
+             (lambda () nil)))
+    (should-not (pyim-process-input-chinese-predicate-1)))
+
+  (cl-letf (((symbol-function 'pyim-process-force-input-chinese-p)
+             (lambda () nil))
+            (pyim-process-input-ascii nil)
+            ((symbol-function 'pyim-process-auto-switch-english-input-p)
+             (lambda () t)))
+    (should-not (pyim-process-input-chinese-predicate-1)))
+
+  (cl-letf (((symbol-function 'pyim-process-force-input-chinese-p)
+             (lambda () nil))
+            (pyim-process-input-ascii nil)
+            ((symbol-function 'pyim-process-auto-switch-english-input-p)
+             (lambda () nil)))
+    (should (pyim-process-input-chinese-predicate-1))))
+
+(ert-deftest pyim-tests-pyim-process-input-chinese-predicate-2 ()
+  (should (pyim-process-input-chinese-predicate-2 ?a "" "abc" "def"))
+  (should-not (pyim-process-input-chinese-predicate-2 ?d "" "abc" "def"))
+  (should (pyim-process-input-chinese-predicate-2 ?d "a" "abc" "def"))
+  (should-not (pyim-process-input-chinese-predicate-2 ?g "a" "abc" "def")))
+
+(ert-deftest pyim-tests-pyim-process-input-chinese-p ()
+  (cl-letf (((symbol-function 'pyim-process-input-chinese-predicate-1)
+             (lambda (&rest _) nil))
+            ((symbol-function 'pyim-process-input-chinese-predicate-2)
+             (lambda (&rest _) nil)))
+    (should-not (pyim-process-input-chinese-p)))
+
+  (cl-letf (((symbol-function 'pyim-process-input-chinese-predicate-1)
+             (lambda (&rest _) t))
+            ((symbol-function 'pyim-process-input-chinese-predicate-2)
+             (lambda (&rest _) nil)))
+    (should-not (pyim-process-input-chinese-p)))
+
+  (cl-letf (((symbol-function 'pyim-process-input-chinese-predicate-1)
+             (lambda (&rest _) nil))
+            ((symbol-function 'pyim-process-input-chinese-predicate-2)
+             (lambda (&rest _) t)))
+    (should-not (pyim-process-input-chinese-p)))
+
+  (cl-letf (((symbol-function 'pyim-process-input-chinese-predicate-1)
+             (lambda (&rest _) t))
+            ((symbol-function 'pyim-process-input-chinese-predicate-2)
+             (lambda (&rest _) t)))
+    (should (pyim-process-input-chinese-p)))
+
+  )
+
 (ert-run-tests-batch-and-exit)
 
 ;; * Footer
