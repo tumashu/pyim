@@ -1800,9 +1800,46 @@ Transfer-Encoding: chunked
              (lambda (&rest _) t))
             ((symbol-function 'pyim-process-input-chinese-predicate-2)
              (lambda (&rest _) t)))
-    (should (pyim-process-input-chinese-p)))
+    (should (pyim-process-input-chinese-p))))
 
-  )
+(ert-deftest pyim-tests-pyim-process-autoselector ()
+  (let* ((pyim-process-autoselector
+          (list (lambda ()
+                  (list :select 'current :replace "test1"))
+                (lambda ()
+                  (list :select 'current :replace "test1"))
+                (lambda ()
+                  (list :select 'current :replace "test2"))
+                (lambda ()
+                  (list :select 'current :replace "test2"))
+                (lambda ()
+                  (list :select 'last :replace "test3"))
+                (lambda ()
+                  (list :select 'last :replace "test3"))
+                (lambda ()
+                  (list :select 'last :replace "test4"))
+                (lambda ()
+                  (list :select 'last :replace "test4"))))
+         (results (pyim-process-autoselector-results)))
+    (should (equal results
+                   '((:select current :replace "test1")
+                     (:select current :replace "test2")
+                     (:select last :replace "test3")
+                     (:select last :replace "test4"))))
+    (should (equal (pyim-process-autoselector-find-result results 'current)
+                   '(:select current :replace "test1")))
+    (should (equal (pyim-process-autoselector-find-result results 'last)
+                   '(:select last :replace "test3")))))
+
+(ert-deftest pyim-tests-pyim-process-self-insert-command-p ()
+  (let ((pyim-process-self-insert-commands nil))
+    (cl-pushnew 'test pyim-process-self-insert-commands)
+    (should (pyim-process-self-insert-command-p 'test))))
+
+(ert-deftest pyim-tests-pyim-process-merge-candidates ()
+  (should (equal (pyim-process-merge-candidates
+                  '("a" "b" "c") '("d" "e" "f" "a" "b"))
+                 '("d" "a" "b" "c" "e" "f"))))
 
 (ert-run-tests-batch-and-exit)
 

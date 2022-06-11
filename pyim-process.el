@@ -354,7 +354,11 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 
 3. 如果返回的 list 中包含 :replace-with \"xxx\" 信息，那么
 \"xxx\" 上屏。"
-  (let* ((results (pyim-process-autoselector-results))
+  (let* ((results
+          ;; autoselector 功能会影响手动连续选择功能，所以这里做了一些限制，
+          ;; 只有在输入的时候才能够触发 autoselector 机制。
+          (when (pyim-process-self-insert-command-p this-command)
+            (pyim-process-autoselector-results)))
          (select-last-word
           (pyim-process-autoselector-find-result results 'last))
          (select-current-word
@@ -387,14 +391,14 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 
 (defun pyim-process-autoselector-results ()
   "运行所有 autoselectors, 返回结果列表。"
-  ;; autoselector 功能会影响手动连续选择功能，所以这里做了一些限制，
-  ;; 只有在输入的时候才能够触发 autoselector 机制。
-  (when (pyim-process-self-insert-command-p this-command)
-    (mapcar (lambda (x)
-              (when (functionp x)
-                (ignore-errors
-                  (funcall x))))
-            (cl-remove-duplicates pyim-process-autoselector :from-end t))))
+  (mapcar (lambda (x)
+            (when (functionp x)
+              (ignore-errors
+                (funcall x))))
+          (cl-remove-duplicates
+           pyim-process-autoselector
+           :from-end t
+           :test #'equal)))
 
 (defun pyim-process-self-insert-command-p (cmd)
   "测试 CMD 是否是一个 pyim self insert command."
