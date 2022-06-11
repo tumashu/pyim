@@ -774,6 +774,39 @@
     (should (equal (pyim-cstring-to-xingma "工" wubi t) '("aaaa")))
     (should (equal (pyim-cstring-to-xingma "工房" wubi t) '("aayn")))))
 
+(ert-deftest pyim-tests-pyim-cstring-to-codes ()
+  (let ((pyim-dhashcache-word2code (make-hash-table :test #'equal))
+        (pyim-dhashcache-word2code (make-hash-table :test #'equal))
+        (quanpin (pyim-scheme-get 'quanpin))
+        (wubi (pyim-scheme-get 'wubi))
+        (cangjie (pyim-scheme-get 'cangjie)))
+    (should (equal (pyim-cstring-to-codes "行行" quanpin)
+                   '("xing-xing" "xing-heng" "xing-hang"
+                     "heng-xing" "heng-heng" "heng-hang"
+                     "hang-xing" "hang-heng" "hang-hang")))
+    (should (equal (pyim-cstring-to-codes "行行" quanpin "xinxin")
+                   '("xing-xing")))
+    (should (equal (pyim-cstring-to-codes "行行" quanpin "xx")
+                   '("xing-xing")))
+    (should (equal (pyim-cstring-to-codes "行行" quanpin "xinhang")
+                   '("xing-hang")))
+    (should (equal (pyim-cstring-to-codes "行行" quanpin "xh")
+                   '("xing-heng")))
+
+    (puthash "工" (list "wubi/aaaa" "cangjie/mlm" "gong") pyim-dhashcache-word2code)
+    (puthash "房" (list "wubi/yny") pyim-dhashcache-word2code)
+    (puthash "丛" (list "wubi/wwg") pyim-dhashcache-word2code)
+
+    (should (equal (pyim-cstring-to-codes "工" cangjie) '("mlm")))
+    (should-not (pyim-cstring-to-codes "工房" cangjie))
+
+    (should (equal (pyim-cstring-to-codes "工" wubi) '("aaaa")))
+    (should (equal (pyim-cstring-to-codes "工房" wubi) '("aayn")))
+    (should (equal (pyim-cstring-to-codes "工房丛" wubi) '("ayww")))
+    (should (equal (pyim-cstring-to-codes "工房丛房" wubi) '("aywy")))
+    (should (equal (pyim-cstring-to-codes "工" wubi t) '("aaaa")))
+    (should (equal (pyim-cstring-to-codes "工房" wubi t) '("aayn")))))
+
 (ert-deftest pyim-tests-pyim-cstring-words-at-point ()
   (let ((pyim-dhashcache-code2word (make-hash-table :test #'equal)))
     (puthash "tian-an" (list "天安") pyim-dhashcache-code2word)
