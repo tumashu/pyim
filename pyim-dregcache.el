@@ -64,24 +64,34 @@
   "从 FROM 中搜索 KEY, 得到对应的结果。
 
 用于 pyim-dregcache 类型的 dcache 后端。"
+  (setq from (or from '(icode2word code2word)))
   (when key
-    (cond ((or (memq 'icode2word from)
-               (memq 'ishortcode2word from))
-           (pyim-dregcache-get-icode2word-ishortcode2word key))
-          ((or (not from)
-               (memq 'code2word from)
-               (memq 'shortcode2word from))
-           (pyim-dregcache-get-code2word-shortcode2word key))
-          ;; FIXME: pyim-dregcache 暂时不支持 iword2count-recent-10-words 和
-          ;; iword2count-recent-50-words.
-          ((or (memq 'iword2count-recent-10-words from)
-               (memq 'iword2count-recent-50-words from))
-           nil)
-          ;; pyim-dregcache 目前只能用于全拼输入法，而 pyim 中全拼输入法代码反查
-          ;; 功能是通过 pymap 相关函数实现的，不使用 word2code.
-          ((memq 'word2code from)
-           nil)
-          (t nil))))
+    (let (value result)
+      (dolist (x from)
+        (setq value (pyim-dregcache-get-key-from-dcache-type key x))
+        ;; 处理 iword2count.
+        (unless (listp value)
+          (setq value (list value)))
+        (when value
+          (setq result (append result value))))
+      result)))
+
+(defun pyim-dregcache-get-key-from-dcache-type (key dcache-type)
+  (cond ((memq dcache-type '(icode2word ishortcode2word))
+         (pyim-dregcache-get-icode2word-ishortcode2word key))
+        ((memq dcache-type '(code2word shortcode2word))
+         (pyim-dregcache-get-code2word-shortcode2word key))
+        ((memq dcache-type '(iword2count))
+         (gethash key pyim-dregcache-iword2count))
+        ;; FIXME: pyim-dregcache 暂时不支持 iword2count-recent-10-words 和
+        ;; iword2count-recent-50-words.
+        ((memq dcache-type '(iword2count-recent-10-words iword2count-recent-50-words))
+         nil)
+        ;; pyim-dregcache 目前只能用于全拼输入法，而 pyim 中全拼输入法代码反查
+        ;; 功能是通过 pymap 相关函数实现的，不使用 word2code.
+        ((memq dcache-type '(word2code))
+         nil)
+        (t nil)))
 
 (defun pyim-dregcache-get-code2word-shortcode2word (code)
   (when pyim-debug (message "pyim-dregcache-get-code2word-shortcode2word called => %s" code))
