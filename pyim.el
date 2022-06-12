@@ -37,6 +37,11 @@
 (require 'pyim-autoselector)
 (require 'pyim-common)
 (require 'pyim-cstring)
+(require 'pyim-dhashcache)
+;; NOTE: pyim 默认使用 dhashcache, 按理说不需要加载 dregcache, 但以前 pyim 支持
+;; 动态加载后端，由于简化代码的原因，这个功能取消了，require dregcache 是为了向
+;; 后兼容，未来也许会取消加载。
+(require 'pyim-dregcache)
 (require 'pyim-indicator)
 (require 'pyim-page)
 (require 'pyim-preview)
@@ -442,7 +447,7 @@ MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表词�
 如果 FILE 为 nil, 提示用户指定导出文件位置, 如果 CONFIRM 为
 non-nil，文件存在时将会提示用户是否覆盖，默认为覆盖模式"
   (interactive "F将词条和词频信息导出到文件: ")
-  (pyim-process-init-dcaches)
+  (pyim-dcache-init-variables)
   (pyim-dcache-export-words-and-counts file confirm ignore-counts)
   (message "PYIM: 词条和词频信息导出完成。"))
 
@@ -452,7 +457,7 @@ non-nil，文件存在时将会提示用户是否覆盖，默认为覆盖模式"
 如果 FILE 为 nil, 提示用户指定导出文件位置, 如果 CONFIRM 为 non-nil，
 文件存在时将会提示用户是否覆盖，默认为覆盖模式。"
   (interactive "F将个人词条导出到文件：")
-  (pyim-process-init-dcaches)
+  (pyim-dcache-init-variables)
   (pyim-dcache-export-personal-words file confirm)
   (message "PYIM: 个人词条导出完成。"))
 
