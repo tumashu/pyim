@@ -220,9 +220,6 @@ dcache.
 如果 FROM 是 nil, 那么 fallback 到 \\='(icode2word code2word)."
   nil)
 
-(cl-defmethod pyim-dcache-get :before (_code &optional _from)
-  (pyim-dcache-load-backend))
-
 ;; ** Dcache 加词功能接口
 (cl-defgeneric pyim-dcache-insert-word (word code prepend)
   "将词条 WORD 插入到 dcache 中。
