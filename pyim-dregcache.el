@@ -280,7 +280,6 @@
   "读取并加载所有相关词库 dcache.
 
 如果 FORCE 为真，强制加载。"
-  (pyim-dcache-init-variables)
   (when pyim-dcache-auto-update
     (pyim-dregcache-update-personal-words force)
     (let* ((dict-files (pyim-dict-get-enabled-dict-files))
@@ -475,7 +474,6 @@ update-icode2word 目前只要是用于更新型码输入法的 code-prefix, 所
   (file &context ((pyim-dcache-backend) (eql pyim-dregcache))
         &optional confirm)
   "将个人词库存入 FILE."
-  (pyim-dcache-init-variables)
   (when pyim-dregcache-icode2word
     ;; 按词频排序，把词频信息保存到用户词典
     (pyim-dregcache-sort-icode2word)

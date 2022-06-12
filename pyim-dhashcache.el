@@ -231,7 +231,6 @@
   "读取并加载所有相关词库 dcache.
 
 如果 FORCE 为真，强制加载。"
-  (pyim-dcache-init-variables)
   (when pyim-dcache-auto-update
     (pyim-dhashcache-update-iword2priority force)
     (pyim-dhashcache-update-personal-words force)
@@ -710,7 +709,6 @@ pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 \\='utf
   (file &context ((pyim-dcache-backend) (eql pyim-dhashcache))
         &optional confirm)
   "导出个人词库到 FILE."
-  (pyim-dcache-init-variables)
   (pyim-dhashcache-export pyim-dhashcache-icode2word file confirm))
 
 (defun pyim-dhashcache-export (dcache file &optional confirm)
@@ -741,7 +739,6 @@ pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 \\='utf
 (cl-defmethod pyim-dcache-export-words-and-counts
   (file &context ((pyim-dcache-backend) (eql pyim-dhashcache))
         &optional confirm ignore-counts)
-  (pyim-dcache-init-variables)
   (with-temp-buffer
     (insert ";;; -*- coding: utf-8-unix -*-\n")
     (maphash

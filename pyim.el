@@ -442,6 +442,10 @@ MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表词�
 如果 FILE 为 nil, 提示用户指定导出文件位置, 如果 CONFIRM 为
 non-nil，文件存在时将会提示用户是否覆盖，默认为覆盖模式"
   (interactive "F将词条和词频信息导出到文件: ")
+  (pyim-dcache-init-variables)
+  ;; FIXME: 只运行一次 `pyim-dcache-init-variables' 会出现 hashtable nil 的错误，
+  ;; 不知道什么原因。
+  (pyim-dcache-init-variables)
   (pyim-dcache-export-words-and-counts file confirm ignore-counts)
   (message "PYIM: 词条和词频信息导出完成。"))
 
@@ -451,6 +455,10 @@ non-nil，文件存在时将会提示用户是否覆盖，默认为覆盖模式"
 如果 FILE 为 nil, 提示用户指定导出文件位置, 如果 CONFIRM 为 non-nil，
 文件存在时将会提示用户是否覆盖，默认为覆盖模式。"
   (interactive "F将个人词条导出到文件：")
+  (pyim-dcache-init-variables)
+  ;; FIXME: 只运行一次 `pyim-dcache-init-variables' 会出现 hashtable nil 的错误，
+  ;; 不知道什么原因。
+  (pyim-dcache-init-variables)
   (pyim-dcache-export-personal-words file confirm)
   (message "PYIM: 个人词条导出完成。"))
 
