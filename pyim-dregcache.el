@@ -280,16 +280,15 @@
   "读取并加载所有相关词库 dcache.
 
 如果 FORCE 为真，强制加载。"
-  (when pyim-dcache-auto-update
-    (pyim-dregcache-update-personal-words force)
-    (let* ((dict-files (pyim-dict-get-enabled-dict-files))
-           (dicts-md5 (pyim-dcache-create-files-md5 dict-files)))
-      (when pyim-debug
-        (message "pyim-dregcache-update: pyim-dicts=%s pyim-extra-dicts=%s dict-files=%s"
-                 pyim-dicts
-                 pyim-extra-dicts
-                 dict-files))
-      (pyim-dregcache-update-code2word dict-files dicts-md5 force))))
+  (pyim-dregcache-update-personal-words force)
+  (let* ((dict-files (pyim-dict-get-enabled-dict-files))
+         (dicts-md5 (pyim-dcache-create-files-md5 dict-files)))
+    (when pyim-debug
+      (message "pyim-dregcache-update: pyim-dicts=%s pyim-extra-dicts=%s dict-files=%s"
+               pyim-dicts
+               pyim-extra-dicts
+               dict-files))
+    (pyim-dregcache-update-code2word dict-files dicts-md5 force)))
 
 (defun pyim-dregcache-update-personal-words (&optional force)
   "合并 `pyim-dregcache-icode2word' 磁盘文件. 加载排序后的结果.

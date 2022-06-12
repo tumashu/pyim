@@ -231,12 +231,11 @@
   "读取并加载所有相关词库 dcache.
 
 如果 FORCE 为真，强制加载。"
-  (when pyim-dcache-auto-update
-    (pyim-dhashcache-update-iword2priority force)
-    (pyim-dhashcache-update-personal-words force)
-    (let* ((dict-files (pyim-dict-get-enabled-dict-files))
-           (dicts-md5 (pyim-dcache-create-files-md5 dict-files)))
-      (pyim-dhashcache-update-code2word dict-files dicts-md5 force))))
+  (pyim-dhashcache-update-iword2priority force)
+  (pyim-dhashcache-update-personal-words force)
+  (let* ((dict-files (pyim-dict-get-enabled-dict-files))
+         (dicts-md5 (pyim-dcache-create-files-md5 dict-files)))
+    (pyim-dhashcache-update-code2word dict-files dicts-md5 force)))
 
 (defun pyim-dhashcache-update-iword2priority (&optional force)
   "更新词条优先级表，如果 FORCE 为真，强制更新。"
