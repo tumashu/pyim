@@ -177,24 +177,21 @@ AUTO-BACKUP-THRESHOLD 倍, 那么原值将自动备份到 FILE 对应的备份�
 ;; ** Dcache 后端加载相关函数
 (defun pyim-dcache-load-backend ()
   "检查 `pyim-dcache-backend' 设置并 require 相应 package."
-  (let ((backend (pyim-dcache-backend)))
+  (let ((backend pyim-dcache-backend))
     (unless (featurep backend)
       (require backend))))
 
 (defun pyim-dcache-backend ()
   "返回当前可用的 dcache backend."
   (if (and (eq pyim-dcache-backend 'pyim-dregcache)
+           (featurep 'pyim-dregcache)
            (pyim-scheme-quanpin-p (pyim-scheme-current)))
       'pyim-dregcache
     'pyim-dhashcache))
 
 ;; ** Dcache 初始化功能接口
 (cl-defgeneric pyim-dcache-init-variables ()
-  "初始化 dcache 缓存相关变量."
-  nil)
-
-(cl-defmethod pyim-dcache-init-variables :before ()
-  (pyim-dcache-load-backend))
+  "初始化 dcache 缓存相关变量.")
 
 ;; ** Dcache 检索词条功能接口
 (cl-defgeneric pyim-dcache-get (_key &optional _from)
