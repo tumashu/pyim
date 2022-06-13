@@ -546,7 +546,6 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 
 (cl-defmethod pyim-page-hide-tooltip ((_tooltip (eql minibuffer)))
   "Hide minibuffer tooltip."
-  (popup-delete pyim-page-last-popup)
   (when (eq (selected-window) (minibuffer-window))
     ;; 从 minibuffer 中删除 page 字符串。
     (delete-char (length pyim-page-last-minibuffer-string))
