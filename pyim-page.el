@@ -123,6 +123,9 @@ Only useful when use posframe.")
 (defvar pyim-page-last-popup nil
   "这个变量用来保存做为 page tooltip 的 popup.")
 
+(defvar pyim-page-last-popon nil
+  "这个变量用来保存做为 page tooltip 的 popon.")
+
 (defvar pyim-page-last-minibuffer-string nil
   "函数 `pyim-page-show-with-minibuffer' 上一次处理的消息字符串。")
 
@@ -246,6 +249,8 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                                  (posframe-workable-p))
                             (and (eq tp 'popup)
                                  (featurep 'popup))
+                            (and (eq tp 'popon)
+                                 (featurep 'popon))
                             (eq tp 'minibuffer)))
                       (if (listp pyim-page-tooltip)
                           pyim-page-tooltip
@@ -325,6 +330,21 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                ;; popup v0.5.9 以后才支持 face 参数
                (unless (version<= popup-version "0.5.8")
                  (list :face 'pyim-page)))))
+
+(declare-function 'popon-create "popon")
+(declare-function 'popon-kill "popon")
+(declare-function 'popon-x-y-at-pos "popon")
+
+(cl-defmethod pyim-page-show (string position (_tooltip (eql popon)))
+  "Show STRING at POSITION with the help of popon."
+  (when pyim-page-last-popon
+    ;; 异步获取词条的时候，如果不把已经存在的 popon 删除，就会出现两个 page.
+    (popon-kill pyim-page-last-popon))
+  (let* ((x-y (popon-x-y-at-pos position))
+         (x (car x-y))
+         (y (cdr x-y)))
+    (setq pyim-page-last-popon
+          (popon-create string (cons x (+ y 1))))))
 
 (cl-defgeneric pyim-page-info-format (style page-info)
   "将 PAGE-INFO 按照 STYLE 格式化为选词框中显示的字符串。")
@@ -539,6 +559,10 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 (cl-defmethod pyim-page-hide-tooltip ((_tooltip (eql popup)))
   "Hide popup tooltip."
   (popup-delete pyim-page-last-popup))
+
+(cl-defmethod pyim-page-hide-tooltip ((_tooltip (eql popon)))
+  "Hide popon tooltip."
+  (popon-kill pyim-page-last-popon))
 
 (cl-defmethod pyim-page-hide-tooltip ((_tooltip (eql posframe)))
   "Hide posframe tooltip."
