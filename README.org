@@ -9,6 +9,17 @@
 
 * 不兼容更新
 
+** <2022-06-13 Mon> pyim-dcache-backend 所需的 package 需要用户手工加载了。
+
+以前 pyim 可以根据 pyim-dcache-backend 的取值自动加载需要的 package, 这样做虽然
+方便，但代码特别容易出现问题，考虑到 pyim 未来支持的后端不会有太大变化，我删除了
+这个功能，为了向后兼容，pyim 目前会自动加载 pyim-dregcache 包, 但这个兼容代码未
+来可能会删除，所以使用 pyim-dregcache 的用户，建议给自己的配置中添加：
+
+#+begin_src elisp
+(require 'pyim-dregcache)
+#+end_src
+
 ** <2022-05-29 Sun> pyim-cregexp-utils, pyim-cstring-utils 和 pyim-dict-manager 需要用户手动 require.
 
 为降低 pyim 代码的复杂度，减少 pyim 依赖包的数量，下面三个包不会自动加载，需要用

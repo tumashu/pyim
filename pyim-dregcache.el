@@ -44,6 +44,16 @@
 (defvar pyim-dregcache-iword2count nil)
 (defvar pyim-dregcache-dicts-md5 nil)
 
+;; ** 获取当前可用后端
+(cl-defmethod pyim-dcache-backend
+  (&context (pyim-dcache-backend (eql pyim-dregcache)))
+  "返回当前可用的 dcache backend."
+  (if (and (featurep 'pyim-dregcache)
+           ;; pyim-dregcache 后端目前只支持全拼或者双拼。
+           (pyim-scheme-quanpin-p (pyim-scheme-current)))
+      'pyim-dregcache
+    'pyim-dhashcache))
+
 ;; ** 初始化 dregcache 相关函数
 (cl-defmethod pyim-dcache-init-variables
   (&context ((pyim-dcache-backend) (eql pyim-dregcache)))

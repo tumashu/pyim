@@ -175,13 +175,11 @@ AUTO-BACKUP-THRESHOLD 倍, 那么原值将自动备份到 FILE 对应的备份�
      (setq ,variable (or (pyim-dcache-get-value ',variable)
                          (make-hash-table :test #'equal)))))
 
-;; ** Dcache 获取当前可用后端
-(defun pyim-dcache-backend ()
+;; ** Dcache 获取当前可用后端接口
+(cl-defgeneric pyim-dcache-backend ()
   "返回当前可用的 dcache backend."
-  (if (and (eq pyim-dcache-backend 'pyim-dregcache)
-           (featurep 'pyim-dregcache)
-           (pyim-scheme-quanpin-p (pyim-scheme-current)))
-      'pyim-dregcache
+  (if (featurep pyim-dcache-backend)
+      pyim-dcache-backend
     'pyim-dhashcache))
 
 ;; ** Dcache 初始化功能接口
