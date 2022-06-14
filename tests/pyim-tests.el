@@ -1580,6 +1580,15 @@ Transfer-Encoding: chunked
   )
 
 ;; ** pyim-probe 相关单元测试
+(ert-deftest pyim-tests-pyim-page-tooltip-valid-p ()
+  (let ((pyim-page-tooltip-infos
+         `((posframe1 :package posframe1)
+           (posframe2 :package posframe :test (lambda () t))
+           (posframe3 :package posframe :test (lambda () nil)))))
+    (should-not (pyim-page-tooltip-valid-p 'posframe1))
+    (should (pyim-page-tooltip-valid-p 'posframe2))
+    (should-not (pyim-page-tooltip-valid-p 'posframe3))))
+
 (ert-deftest pyim-tests-pyim-page-get-page-style ()
   (let ((pyim-page-tooltip-style-alist
          '((minibuffer . minibuffer)))

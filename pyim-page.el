@@ -129,6 +129,18 @@ Only useful when use posframe.")
 (defvar pyim-page-last-minibuffer-string nil
   "函数 `pyim-page-show-with-minibuffer' 上一次处理的消息字符串。")
 
+(defvar pyim-page-tooltip-infos
+  '((posframe
+     :package posframe
+     :test posframe-workable-p)
+    (popup
+     :package popup)
+    (minibuffer
+     :package minibuffer))
+  "pyim-page tooltip 相关信息。
+
+用于函数 `pyim-page-tooltip-valid-p'.")
+
 (defun pyim-page-refresh (&optional hightlight-current)
   "刷新 page 页面的函数.
 
@@ -235,7 +247,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
      (1- (pyim-page-start))))
 
 (defun pyim-page-get-valid-tooltip ()
-  "获取一个可用的 tooltip."
+  "根据当前环境，获取一个可用的 tooltip."
   (cond
    ;; NOTE: 以前在 minibuffer 中试用过 posframe, linux 环境下运行效果还不错，但
    ;; 在 windows 环境下，似乎有很严重的性能问题，原因未知。
@@ -243,19 +255,23 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
    ;; 在 exwm-xim 环境下输入中文时，只能使用 minibuffer, 因为应用窗口遮挡的缘故，
    ;; 其它方式不可用。
    ((pyim-exwm-xim-environment-p) 'minibuffer)
-   (t (or (cl-find-if (lambda (tp)
-                        (or (and (eq tp 'posframe)
-                                 (functionp 'posframe-workable-p)
-                                 (posframe-workable-p))
-                            (and (eq tp 'popup)
-                                 (featurep 'popup))
-                            (and (eq tp 'popon)
-                                 (featurep 'popon))
-                            (eq tp 'minibuffer)))
+   (t (or (cl-find-if #'pyim-page-tooltip-valid-p
                       (if (listp pyim-page-tooltip)
                           pyim-page-tooltip
                         (list pyim-page-tooltip)))
           'minibuffer))))
+
+(defun pyim-page-tooltip-valid-p (tooltip)
+  "测试 TOOLTIP 当前是否可用。"
+  (let* ((info (alist-get tooltip pyim-page-tooltip-infos))
+         (package (plist-get info :package))
+         (test-func (plist-get info :test)))
+    (cond
+     ((not (featurep package)) nil)
+     ((not (functionp test-func)) t)
+     ((and (functionp test-func)
+           (funcall test-func)) t)
+     (t nil))))
 
 (defun pyim-page-get-page-style (tooltip)
   "依照 TOOLTIP 和 `pyim-page-style', 得到一个 page style."
@@ -570,7 +586,6 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 
 (cl-defmethod pyim-page-hide-tooltip ((_tooltip (eql minibuffer)))
   "Hide minibuffer tooltip."
-  (popup-delete pyim-page-last-popup)
   (when (eq (selected-window) (minibuffer-window))
     ;; 从 minibuffer 中删除 page 字符串。
     (delete-char (length pyim-page-last-minibuffer-string))
