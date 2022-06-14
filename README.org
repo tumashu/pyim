@@ -9,6 +9,14 @@
 
 * 不兼容更新
 
+** <2022-06-15 Wed> Do not require popup in pyim-page.el
+popup 是一个非 gnu elpa 包，pyim-page.el 不应该 require 它，需要用户自己手动
+require, 使用 popup tooltip 的用户需要在配置中添加：
+
+#+begin_src elisp
+(require 'popup)
+#+end_src
+
 ** <2022-06-13 Mon> pyim-dcache-backend 所需的 package 需要用户手工加载了。
 
 以前 pyim 可以根据 pyim-dcache-backend 的取值自动加载需要的 package, 这样做虽然
@@ -109,6 +117,14 @@ pyim 的目标是： *尽最大的努力成为一个好用的 Emacs 中文输入
 (require 'pyim)
 (require 'pyim-basedict)
 (require 'pyim-cregexp-utils)
+
+;; 如果使用 popup page tooltip, 就需要加载 popup 包。
+;; (require 'popup nil t)
+;; (setq pyim-page-tooltip 'popup)
+
+;; 如果使用 pyim-dregcache dcache 后端，就需要加载 pyim-dregcache 包。
+;; (require 'pyim-dregcache)
+;; (setq pyim-dcache-backend 'pyim-dregcache)
 
 (pyim-basedict-enable)
 

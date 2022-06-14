@@ -30,7 +30,8 @@
 (require 'cl-lib)
 ;; Emacs 26.1 之前的版本无法安装 posframe.
 (require 'posframe nil t)
-;; popup 不是 GNU ELPA 包，所以 pyim 不能强制依赖它。
+;; popup 不是 gnu elpa 包，所以不应该在这里加载它，加载它是由于向后兼容的原因，
+;; 未来可能删除。
 (require 'popup nil t)
 (require 'pyim-common)
 (require 'pyim-process)
@@ -297,7 +298,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
   (1+ (/ (1- (pyim-process-candidates-length)) pyim-page-length)))
 
 (cl-defgeneric pyim-page-show (string position tooltip)
-  "在 POSITION 位置，使用 posframe 或者 popup 显示字符串 STRING.")
+  "在 POSITION 位置，使用 TOOLTIP 显示字符串 STRING.")
 
 (cl-defmethod pyim-page-show (string position (_tooltip (eql posframe)))
   "在 POSITION 位置，使用 posframe STRING."
@@ -344,7 +345,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 (cl-defmethod pyim-page-show (string position (_tooltip (eql popup)))
   "Show STRING at POSITION with the help of popup-el."
   (when pyim-page-last-popup
-    ;; 异步获取词条的时候，如果不把已经存在的 popup 删除，就会出现两个 page.
+    ;; 延迟获取词条的时候，如果不把已经存在的 popup 删除，就会出现两个 page.
     (popup-delete pyim-page-last-popup))
   (setq pyim-page-last-popup
         (apply #'popup-tip string
@@ -360,7 +361,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 (cl-defmethod pyim-page-show (string position (_tooltip (eql popon)))
   "Show STRING at POSITION with the help of popon."
   (when pyim-page-last-popon
-    ;; 异步获取词条的时候，如果不把已经存在的 popon 删除，就会出现两个 page.
+    ;; 延迟获取词条的时候，如果不把已经存在的 popon 删除，就会出现两个 page.
     (popon-kill pyim-page-last-popon))
   (let* ((x-y (popon-x-y-at-pos position))
          (x (car x-y))
