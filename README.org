@@ -220,8 +220,13 @@ pyim 支持双拼输入模式，用户可以通过变量 `pyim-default-scheme' �
    #+begin_example
    (require 'popup)
    (setq pyim-page-tooltip 'popup)
-   ;; (setq pyim-page-tooltip 'popon)
    #+end_example
+
+   #+begin_example
+   (require 'popon)
+   (setq pyim-page-tooltip 'popon)
+   #+end_example
+
 2. 使用 posframe 来绘制选词框
    #+begin_example
    (require 'posframe)
