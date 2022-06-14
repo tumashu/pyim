@@ -32,8 +32,6 @@
 (require 'posframe nil t)
 ;; popup 不是 GNU ELPA 包，所以 pyim 不能强制依赖它。
 (require 'popup nil t)
-;; popon 不是 GNU ELPA 包，所以 pyim 不能强制依赖它。
-(require 'popon nil t)
 (require 'pyim-common)
 (require 'pyim-process)
 
@@ -339,8 +337,8 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                       (make-string n ?\ )))
                 string)))))))
 
-(declare-function 'popup-tip "popup")
-(declare-function 'popup-delete "popup")
+(declare-function popup-tip "popup")
+(declare-function popup-delete "popup")
 (defvar popup-version)
 
 (cl-defmethod pyim-page-show (string position (_tooltip (eql popup)))
@@ -355,9 +353,9 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                (unless (version<= popup-version "0.5.8")
                  (list :face 'pyim-page)))))
 
-(declare-function 'popon-create "popon")
-(declare-function 'popon-kill "popon")
-(declare-function 'popon-x-y-at-pos "popon")
+(declare-function popon-create "popon")
+(declare-function popon-kill "popon")
+(declare-function popon-x-y-at-pos "popon")
 
 (cl-defmethod pyim-page-show (string position (_tooltip (eql popon)))
   "Show STRING at POSITION with the help of popon."

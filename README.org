@@ -216,12 +216,15 @@ pyim 支持双拼输入模式，用户可以通过变量 `pyim-default-scheme' �
 ** 让选词框跟随光标
 用户可以通过下面的设置让 pyim 在 *光标处* 显示一个选词框：
 
-1. 使用 popup 包来绘制选词框 （emacs overlay 机制）
+1. 使用 popup 或者 popon 包来绘制选词框 （emacs overlay 机制）
    #+begin_example
+   (require 'popup)
    (setq pyim-page-tooltip 'popup)
+   ;; (setq pyim-page-tooltip 'popon)
    #+end_example
 2. 使用 posframe 来绘制选词框
    #+begin_example
+   (require 'posframe)
    (setq pyim-page-tooltip 'posframe)
    #+end_example
    注意：pyim 不会自动安装 posframe, 用户需要手动安装这个包，
