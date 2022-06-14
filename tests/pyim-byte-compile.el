@@ -29,7 +29,7 @@
 (require 'find-lisp)
 
 (let ((files (find-lisp-find-files-internal
-              "../"
+              "./"
               (lambda (file dir)
                 (and (not (file-directory-p (expand-file-name file dir)))
                      (string-match "\\.el$" file)

@@ -20,4 +20,4 @@ jobs:
       run: emacs --version
 
     - name: Run tests
-      run: make -C tests test
+      run: make test
