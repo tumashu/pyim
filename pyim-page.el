@@ -32,6 +32,8 @@
 (require 'posframe nil t)
 ;; popup 不是 GNU ELPA 包，所以 pyim 不能强制依赖它。
 (require 'popup nil t)
+;; popon 不是 GNU ELPA 包，所以 pyim 不能强制依赖它。
+(require 'popon nil t)
 (require 'pyim-common)
 (require 'pyim-process)
 
@@ -53,15 +55,19 @@
 2. 当这个变量取值为 popup 时，使用 popup-el 包来绘制选词框，
    这个选项可以在 emacs 图形版和终端版使用，速度没有 posframe 快，
    偶尔会遇到选词框错位的问题。
-3. 当这个变量取值为 minibuffer 时，minibuffer 将做为选词框，
+3. 当这个变量取值为 popon 时，使用 popon 包来绘制选词框，这个选项
+   效果类似 popup, 不过目前不支持背景颜色。
+4. 当这个变量取值为 minibuffer 时，minibuffer 将做为选词框，
    这个选项也作为其他选项不可用时的 fallback.
-4. 当这个变量的取值是为一个 list 时，pyim 将按照优先顺序动态
+5. 当这个变量的取值是为一个 list 时，pyim 将按照优先顺序动态
    选择一个当前环境可用的 tooltip."
   :type '(choice (repeat (choice (const posframe)
                                  (const popup)
+                                 (const popon)
                                  (const minibuffer)))
                  (const posframe)
                  (const popup)
+                 (const popon)
                  (const minibuffer)))
 
 (defcustom pyim-page-style 'two-lines
@@ -135,6 +141,8 @@ Only useful when use posframe.")
      :test posframe-workable-p)
     (popup
      :package popup)
+    (popon
+     :package popon)
     (minibuffer
      :package minibuffer))
   "pyim-page tooltip 相关信息。
