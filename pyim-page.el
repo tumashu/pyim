@@ -298,7 +298,16 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
   (1+ (/ (1- (pyim-process-candidates-length)) pyim-page-length)))
 
 (cl-defgeneric pyim-page-show (string position tooltip)
-  "在 POSITION 位置，使用 TOOLTIP 显示字符串 STRING.")
+  "在 POSITION 位置，使用 TOOLTIP 显示字符串 STRING.
+
+注意事项： pyim-page 将背景颜色设置功能放置在 `pyim-page-show' ，
+因为在 `pyim-page-info-format' 中实现此功能，需要计算字符串宽度和
+补充空格，添加 text propertize, 过程相当啰嗦，而背景颜色设置不是
+pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度感觉得不
+偿失。
+
+所以我们的选择是：尽量选择支持背景颜色设置的 tooltip, 如果不支持，
+就放弃这个功能。")
 
 (cl-defmethod pyim-page-show (string position (_tooltip (eql posframe)))
   "在 POSITION 位置，使用 posframe STRING."
