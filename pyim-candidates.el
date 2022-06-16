@@ -211,20 +211,18 @@
           (push (delete-dups (append w2 w1)) jianpin-words)))
       (pyim-zip (nreverse jianpin-words) fast-search))))
 
-(defun pyim-candidates-dcache-quanpin-words (imobjs scheme &optional fast-search pymap-chars-num)
+(defun pyim-candidates-dcache-quanpin-words (imobjs scheme &optional fast-search char-num)
   "从 dcache 获取个人词条，词库词条和第一汉字列表。"
   (let (personal-words common-words pinyin-chars-1 pinyin-chars-2)
     (dolist (imobj imobjs)
       (let* ((w1 (pyim-candidates-quanpin-personal-words imobj scheme))
              (w2 (pyim-candidates-quanpin-common-words imobj scheme))
              ;; 第一个汉字
-             (w3 (pyim-candidates-quanpin-chars imobj scheme))
+             (w3 (pyim-candidates-quanpin-chars imobj scheme char-num))
              ;; 如果 w3 找不到第一个拼音对应的汉字，那就进一步使用
              ;; `pyim-pymap-py2cchar-get' 来查找，这个函数支持声母搜索。可以得到
              ;; 更多的词条。
-             (w4 (unless w3
-                   (pyim-candidates-pymap-chars
-                    (car (pyim-codes-create imobj scheme)) pymap-chars-num))))
+             (w4 (unless w3 (pyim-candidates-pymap-chars imobj scheme char-num))))
         (push w1 personal-words)
         (push w2 common-words)
         (push w3 pinyin-chars-1)
@@ -249,21 +247,29 @@
        '(code2word shortcode2word)
      '(code2word))))
 
-(defun pyim-candidates-quanpin-chars (imobj scheme)
-  (pyim-dcache-get
-   (car (pyim-codes-create imobj scheme))
-   '(icode2word code2word)))
+(defun pyim-candidates-quanpin-chars (imobj scheme &optional num)
+  (let* ((code (car (pyim-codes-create imobj scheme)))
+         (chars (delete-dups
+                 `(,@(pyim-dcache-get code '(icode2word code2word))
+                   ,@(pyim-pymap-py2cchar-get code t t))))
+         (num (when (numberp num)
+                (min num (length chars)))))
+    (cl-subseq chars 0 num)))
 
-(defun pyim-candidates-pymap-chars (pinyin &optional num)
+(defun pyim-candidates-pymap-chars (imobj scheme &optional num)
   "从 pymap 表获取汉字。"
-  (let ((chars (mapcar #'char-to-string
-                       (pyim-zip
-                        (mapcar (lambda (x)
-                                  ;; NOTE: 这里只取最常用的汉字，太多的汉字会带
-                                  ;; 来后续处理压力，可能拖慢输入法。不过这个结
-                                  ;; 论只是猜测。
-                                  (car (split-string x "|")))
-                                (pyim-pymap-py2cchar-get pinyin))))))
+  (let* ((pinyin (car (pyim-codes-create imobj scheme)))
+         (chars (mapcar #'char-to-string
+                        (pyim-zip
+                         (mapcar (lambda (x)
+                                   ;; NOTE: 这里只取最常用的汉字，太多的汉字会带
+                                   ;; 来后续处理压力，可能拖慢输入法。不过这个结
+                                   ;; 论只是猜测。
+                                   (car (split-string x "|")))
+                                 (pyim-pymap-py2cchar-get
+                                  pinyin (> (length imobj) 1))))))
+         (num (when (numberp num)
+                (min num (length chars)))))
     (cl-subseq chars 0 num)))
 
 (cl-defgeneric pyim-candidates-create-limit-time (_imobjs _scheme)

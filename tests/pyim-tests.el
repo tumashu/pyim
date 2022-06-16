@@ -585,9 +585,9 @@
     (should (equal (pyim-candidates-dcache-quanpin-words imobjs1 quanpin nil 10)
                    '(("你" "您" "妮") nil nil ("南" "乃" "囊" "脑" "呢" "内" "嫩" "能" "你" "年"))))
     (should (equal (pyim-candidates-dcache-quanpin-words imobjs2 quanpin nil 10)
-                   '(("你" "尼") ("尼" "你") ("你" "尼" "尼" "你") nil)))
+                   '(("你" "尼") ("尼" "你") ("你" "尼" "呢" "泥" "拟" "逆" "倪" "妮" "腻" "匿") nil)))
     (should (equal (pyim-candidates-dcache-quanpin-words imobjs3 quanpin nil 10)
-                   '(("你好" "尼耗" "呢耗") ("你好" "尼耗") ("你好" "尼耗" "呢耗" "你好" "尼耗") nil)))))
+                   '(("你好" "尼耗" "呢耗") ("你好" "尼耗") ("你好" "尼耗" "呢耗") nil)))))
 
 (ert-deftest pyim-tests-pyim-candidates-quanpin-personal-words ()
   (let* ((pyim-dhashcache-icode2word (make-hash-table :test #'equal))
@@ -632,12 +632,17 @@
          (imobjs (pyim-imobjs-create "nihao" quanpin)))
     (puthash "ni" (list "你" "呢") pyim-dhashcache-icode2word)
     (puthash "ni" (list "你" "尼") pyim-dhashcache-code2word)
-    (should (equal (pyim-candidates-quanpin-chars (car imobjs) quanpin)
-                   '("你" "呢" "你" "尼")))))
+    (should (equal (pyim-candidates-quanpin-chars (car imobjs) quanpin 10)
+                   '("你" "呢" "尼" "泥" "拟" "逆" "倪" "妮" "腻" "匿")))))
 
 (ert-deftest pyim-tests-pyim-candidates-pymap-chars ()
-  (should (equal (pyim-candidates-pymap-chars "ni" 10)
-                 '("你" "年" "娘" "鸟" "摄" "您" "宁" "牛" "尼" "念"))))
+  (let* ((quanpin (pyim-scheme-get 'quanpin))
+         (imobjs1 (pyim-imobjs-create "ni" quanpin))
+         (imobjs2 (pyim-imobjs-create "nihao" quanpin)))
+    (should (equal (pyim-candidates-pymap-chars (car imobjs1) quanpin 10)
+                   '("你" "年" "娘" "鸟" "摄" "您" "宁" "牛" "尼" "念")))
+    (should (equal (pyim-candidates-pymap-chars (car imobjs2) quanpin 10)
+                   '("你" "尼" "呢" "泥" "拟" "逆" "倪" "妮" "腻" "匿")))))
 
 (ert-deftest pyim-tests-pyim-candidates-search-buffer ()
   (with-temp-buffer
