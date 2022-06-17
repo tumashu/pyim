@@ -635,13 +635,13 @@
     (should (equal (pyim-candidates-quanpin-first-chars (car imobjs) quanpin 10)
                    '("你" "呢" "尼" "泥" "拟" "逆" "倪" "妮" "腻" "匿")))))
 
-(ert-deftest pyim-tests-pyim-candidates-pymap-chars ()
+(ert-deftest pyim-tests-pyim-candidates-quanpin-first-possible-chars ()
   (let* ((quanpin (pyim-scheme-get 'quanpin))
          (imobjs1 (pyim-imobjs-create "ni" quanpin))
          (imobjs2 (pyim-imobjs-create "nihao" quanpin)))
-    (should (equal (pyim-candidates-pymap-chars (car imobjs1) quanpin 10)
+    (should (equal (pyim-candidates-quanpin-first-possible-chars (car imobjs1) quanpin 10)
                    '("你" "年" "娘" "鸟" "摄" "您" "宁" "牛" "尼" "念")))
-    (should (equal (pyim-candidates-pymap-chars (car imobjs2) quanpin 10)
+    (should (equal (pyim-candidates-quanpin-first-possible-chars (car imobjs2) quanpin 10)
                    '("你" "尼" "呢" "泥" "拟" "逆" "倪" "妮" "腻" "匿")))))
 
 (ert-deftest pyim-tests-pyim-candidates-search-buffer ()
