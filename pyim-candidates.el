@@ -218,7 +218,7 @@
       (let* ((w1 (pyim-candidates-quanpin-personal-words imobj scheme))
              (w2 (pyim-candidates-quanpin-common-words imobj scheme))
              ;; 第一个汉字
-             (w3 (pyim-candidates-quanpin-chars imobj scheme char-num))
+             (w3 (pyim-candidates-quanpin-first-chars imobj scheme char-num))
              ;; 如果 w3 找不到第一个拼音对应的汉字，那就进一步使用
              ;; `pyim-pymap-py2cchar-get' 来查找，这个函数支持声母搜索。可以得到
              ;; 更多的词条。
@@ -247,7 +247,10 @@
        '(code2word shortcode2word)
      '(code2word))))
 
-(defun pyim-candidates-quanpin-chars (imobj scheme &optional num)
+(defun pyim-candidates-quanpin-first-chars (imobj scheme &optional num)
+  "获取输入的全拼对应的第一个汉字。
+
+假如用户输入 nihao 时，获取 ni 对应的汉字。"
   (let* ((code (car (pyim-codes-create imobj scheme)))
          (chars (delete-dups
                  `(,@(pyim-dcache-get code '(icode2word code2word))

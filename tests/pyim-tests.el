@@ -625,14 +625,14 @@
     (should (equal (pyim-candidates-quanpin-common-words (car imobjs3) quanpin)
                    '("呢耗" "你好" "你坏" "尼耗")))))
 
-(ert-deftest pyim-tests-pyim-candidates-quanpin-chars ()
+(ert-deftest pyim-tests-pyim-candidates-quanpin-first-chars ()
   (let* ((pyim-dhashcache-icode2word (make-hash-table :test #'equal))
          (pyim-dhashcache-code2word (make-hash-table :test #'equal))
          (quanpin (pyim-scheme-get 'quanpin))
          (imobjs (pyim-imobjs-create "nihao" quanpin)))
     (puthash "ni" (list "你" "呢") pyim-dhashcache-icode2word)
     (puthash "ni" (list "你" "尼") pyim-dhashcache-code2word)
-    (should (equal (pyim-candidates-quanpin-chars (car imobjs) quanpin 10)
+    (should (equal (pyim-candidates-quanpin-first-chars (car imobjs) quanpin 10)
                    '("你" "呢" "尼" "泥" "拟" "逆" "倪" "妮" "腻" "匿")))))
 
 (ert-deftest pyim-tests-pyim-candidates-pymap-chars ()
