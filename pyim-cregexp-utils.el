@@ -28,6 +28,7 @@
 ;;; Code:
 ;; * 代码                                                           :code:
 (require 'pyim-cregexp)
+(require 'pyim-dhashcache)
 
 (defgroup pyim-cregexp nil
   "Chinese regexp tools for pyim."
