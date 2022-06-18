@@ -29,6 +29,7 @@
 ;; * 代码                                                           :code:
 (require 'cl-lib)
 (require 'pyim-cstring)
+(require 'pyim-dhashcache)
 
 (defgroup pyim-cstring nil
   "Chinese string tools for pyim."
