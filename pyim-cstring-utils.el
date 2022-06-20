@@ -248,8 +248,9 @@ CHINESE-STRING 分词，得到一个词条 alist，这个 alist 的元素都是�
            (max-length (max (or max-length 1) 1)))
       (backward-char max-length))))
 
-(defalias 'pyim-forward-word 'pyim-cstring-forward-word)
-(defalias 'pyim-backward-word 'pyim-cstring-backward-word)
+(defalias 'pyim-cwords-at-point #'pyim-cstring-words-at-point)
+(defalias 'pyim-forward-word #'pyim-cstring-forward-word)
+(defalias 'pyim-backward-word #'pyim-cstring-backward-word)
 
 ;; * Footer
 (provide 'pyim-cstring-utils)

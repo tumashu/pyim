@@ -31,7 +31,7 @@ deps:
 	@if [ ! -f .deps/pyim-basedict.pyim ]; then curl -L $(BASEDICT_PYIM_URL) > .deps/pyim-basedict.pyim; fi;
 
 lint: deps
-	@$(EMACS) $(EMACS_BATCH_OPTS) --load ./tests/pyim-elint.el 2>&1 | grep -vE "pyim-cregexp.el:[0-9]+:Warning: Empty varlist in let|pyim-indicator.el:[0-9]+:Error: Call to undefined function: posframe-show" | grep -E "([Ee]rror|[Ww]arning):" && exit 1 || exit 0
+	@$(EMACS) $(EMACS_BATCH_OPTS) --load ./tests/pyim-elint.el 2>&1 | grep -E "([Ee]rror|[Ww]arning):" && exit 1 || exit 0
 
 compile: deps
 	$(RM) *.elc

@@ -27,8 +27,10 @@
 ;;; Code:
 (require 'elint)
 
-(let ((elint-directory-skip-re "\\(\\.dir-locals\\|ldefs-boot\\|loaddefs\\)\\.el\\'"))
-  (elint-directory ".."))
+(let ((elint-directory-skip-re "\\(\\.dir-locals\\|ldefs-boot\\|loaddefs\\)\\.el\\'")
+      ;; elint can not work well with cl-defgeneric and cl-defstruct.
+      (elint-ignored-warnings '(undefined-functions)))
+  (elint-directory "."))
 
 (provide 'pyim-elint)
 ;;; pyim-elint.el ends here

@@ -266,10 +266,9 @@ CRITERIA 字符串一般是通过 imobjs 构建的，它保留了用户原始的
       (list (car codes-sorted)))))
 
 ;; PYIM 重构以前使用的一些函数名称，alias 一下，便于兼容。
-(defalias 'pyim-hanzi2pinyin-simple 'pyim-cstring-to-pinyin-simple)
-(defalias 'pyim-hanzi2pinyin 'pyim-cstring-to-pinyin)
-(defalias 'pyim-hanzi2xingma 'pyim-cstring-to-xingma)
-(defalias 'pyim-cwords-at-point 'pyim-cstring-words-at-point)
+(defalias 'pyim-hanzi2pinyin-simple #'pyim-cstring-to-pinyin-simple)
+(defalias 'pyim-hanzi2pinyin #'pyim-cstring-to-pinyin)
+(defalias 'pyim-hanzi2xingma #'pyim-cstring-to-xingma)
 
 ;; * Footer
 (provide 'pyim-cstring)
