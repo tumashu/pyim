@@ -211,16 +211,15 @@
           (push (delete-dups (append w2 w1)) jianpin-words)))
       (pyim-zip (nreverse jianpin-words) fast-search))))
 
-(defun pyim-candidates-dcache-quanpin-words (imobjs scheme &optional fast-search char-num)
+(defun pyim-candidates-dcache-quanpin-words (imobjs scheme &optional fast-search)
   "从 dcache 获取个人词条，词库词条和第一汉字列表。"
   (let (personal-words common-words pinyin-chars-1 pinyin-chars-2)
     (dolist (imobj imobjs)
       (let* ((w1 (pyim-candidates-quanpin-personal-words imobj scheme))
              (w2 (pyim-candidates-quanpin-common-words imobj scheme))
-             (w3 (pyim-candidates-quanpin-first-chars imobj scheme char-num))
+             (w3 (pyim-candidates-quanpin-first-chars imobj scheme))
              (w4 (unless w3
-                   (pyim-candidates-quanpin-first-possible-chars
-                    imobj scheme char-num))))
+                   (pyim-candidates-quanpin-first-possible-chars imobj scheme))))
         (push w1 personal-words)
         (push w2 common-words)
         (push w3 pinyin-chars-1)
@@ -245,19 +244,17 @@
        '(code2word shortcode2word)
      '(code2word))))
 
-(defun pyim-candidates-quanpin-first-chars (imobj scheme &optional num)
+(defun pyim-candidates-quanpin-first-chars (imobj scheme)
   "获取输入的全拼对应的第一个汉字。
 
 假如用户输入 nihao 时，获取 ni 对应的汉字。"
   (let* ((code (car (pyim-codes-create imobj scheme)))
          (chars (delete-dups
                  `(,@(pyim-dcache-get code '(icode2word code2word))
-                   ,@(pyim-pymap-py2cchar-get code t t))))
-         (num (when (numberp num)
-                (min num (length chars)))))
-    (cl-subseq chars 0 num)))
+                   ,@(pyim-pymap-py2cchar-get code t t)))))
+    chars))
 
-(defun pyim-candidates-quanpin-first-possible-chars (imobj scheme &optional num)
+(defun pyim-candidates-quanpin-first-possible-chars (imobj scheme)
   "获取输入的全拼对应的第一个可能的常用汉字。
 
 1. 假如用户输入 ni 时，获取拼音匹配 ni.* 的常用汉字，比如： ni
@@ -272,10 +269,8 @@
                                    ;; 论只是猜测。
                                    (car (split-string x "|")))
                                  (pyim-pymap-py2cchar-get
-                                  pinyin (> (length imobj) 1))))))
-         (num (when (numberp num)
-                (min num (length chars)))))
-    (cl-subseq chars 0 num)))
+                                  pinyin (> (length imobj) 1)))))))
+    chars))
 
 (cl-defgeneric pyim-candidates-create-limit-time (_imobjs _scheme)
   "按照 SCHEME, 使用限时运行的方式从 IMOBJS 获得候选词条。
