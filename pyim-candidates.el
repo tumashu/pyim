@@ -184,8 +184,8 @@
 (defun pyim-candidates-jianpin-words (imobjs scheme &optional fast-search)
   "获取简拼词语。
 
- 假如输入 \"nih\" ，那么搜索 code 为 \"n-h\" 的词条，然后筛选出所
- 有拼音匹配\"ni-h\" 或者 \"ni[^-]*-h\" 的词条。"
+假如输入 \"nih\" ，那么搜索 code 为 \"n-h\" 的词条，然后筛选出所
+有拼音匹配\"ni-h\" 或者 \"ni[^-]*-h\" 的词条。"
   (when (and pyim-enable-shortcode
              (> (length (car imobjs)) 1))
     (let (jianpin-words)
