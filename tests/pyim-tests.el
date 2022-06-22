@@ -951,8 +951,8 @@
 
   (let* ((str (nth 2 (split-string (car (pyim-pymap-py2cchar-get "wang" t)) "|")))
          (quanpin (pyim-scheme-get 'quanpin))
-         (regexp1 (pyim-cregexp-create-1 "wang" quanpin 3 nil))
-         (regexp2 (pyim-cregexp-create-1 "wang" quanpin 2)))
+         (regexp1 (pyim-cregexp-create-cregexp-from-string "wang" quanpin 3 nil))
+         (regexp2 (pyim-cregexp-create-cregexp-from-string "wang" quanpin 2)))
     (should (string-match-p regexp1 str))
     (should-not (string-match-p regexp2 str)))
 
@@ -974,7 +974,7 @@
     (should (equal (pyim-cregexp-build "adww") "\\(?:adww\\|[其匧惹斯欺歁莢蒙][人古]?人?\\)"))
     (should (equal (pyim-cregexp-build "aaaa'aaaa")
                    "\\(?:\\(?:aaaa'\\|aaaa\\|[工恭]恭?敬?敬?\\)\\(?:aaaa\\|[工恭]恭?敬?敬?\\)\\)"))
-    (should (equal (pyim-cregexp-create-1 "aaaa'aaaa" wubi)
+    (should (equal (pyim-cregexp-create-cregexp-from-string "aaaa'aaaa" wubi)
                    "\\(?:aaaa'\\|aaaa\\|[工恭][恭]?[敬]?[敬]?\\)\\(?:aaaa\\|[工恭][恭]?[敬]?[敬]?\\)"))
     (should (equal (pyim-cregexp-build-xingma-regexp-from-words '("工" "恭恭敬敬"))
                    "[工恭][恭]?[敬]?[敬]?"))

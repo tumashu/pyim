@@ -90,29 +90,26 @@ CHAR-LEVEL-NUM 代表汉字常用级别，pyim 中根据汉字的使用频率，
 会抛弃一些不常用的汉字，重新生成，知道生成一个 Emacs 可以处理的
 regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子的时候，
 就无法搜索生僻字了。"
-  ;; NOTE: (rx-to-string "") will return "\\(?:\\)",
-  ;; While I want (pyim-cregexp-create "") return just "".
   (if (and string scheme
            (stringp string)
            (> (length string) 0)
            (pyim-scheme-p scheme)
            (pyim-scheme-cregexp-support-p scheme))
-      (let ((num (pyim-cregexp-char-level-num char-level-num))
-            rx-string)
-        (while (not (pyim-cregexp-valid-p rx-string))
-          (setq rx-string
-                (or (ignore-errors
-                      (rx-to-string
-                       (pyim-cregexp-create-from-rx
-                        (lambda (x)
-                          (if (stringp x)
-                              (xr (pyim-cregexp-create-1 x scheme num chinese-only))
-                            x))
-                        (xr string))))
-                    string))
-          (setq num (1- num)))
-        rx-string)
+      (pyim-cregexp-create-valid-cregexp-from-string
+       string scheme char-level-num chinese-only)
     string))
+
+(defun pyim-cregexp-create-valid-cregexp-from-string
+    (string scheme &optional char-level-num chinese-only)
+  "从 STRING 创建一个有效的搜索中文的 regexp."
+  (let ((num (pyim-cregexp-char-level-num char-level-num))
+        rx-string)
+    (while (not (pyim-cregexp-valid-p rx-string))
+      (setq rx-string
+            (pyim-cregexp-create-beautiful-cregexp-from-string
+             string scheme num chinese-only))
+      (setq num (1- num)))
+    rx-string))
 
 (defun pyim-cregexp-valid-p (cregexp)
   "Return t when cregexp is a valid regexp."
@@ -123,18 +120,35 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
          ;; FIXME: Emacs can't handle regexps whose length is too big :-(
          (error nil))))
 
-(defun pyim-cregexp-create-from-rx (fn rx-form)
+(defun pyim-cregexp-create-beautiful-cregexp-from-string
+    (string scheme &optional char-level-num chinese-only)
+  "使用 rx 和 xr, 从 STRING 生成一个漂亮的搜索中文的 regexp.
+
+这个 regexp 可能正常使用，也可能长度超出 emacs 的限制。"
+  (or (ignore-errors
+        (rx-to-string
+         (pyim-cregexp-create-cregexp-from-rx
+          (lambda (x)
+            (if (stringp x)
+                (xr (pyim-cregexp-create-cregexp-from-string
+                     x scheme char-level-num chinese-only))
+              x))
+          (xr string))))
+      string))
+
+(defun pyim-cregexp-create-cregexp-from-rx (fn rx-form)
   (pcase rx-form
     ('nil nil)
     (`(,form) (funcall fn form))
     (`(any . ,_) rx-form)
     (`(,_ . ,_)
      (mapcar (lambda (x)
-               (pyim-cregexp-create-from-rx fn x))
+               (pyim-cregexp-create-cregexp-from-rx fn x))
              rx-form))
     (_ (funcall fn rx-form))))
 
-(defun pyim-cregexp-create-1 (str scheme &optional char-level-num chinese-only)
+(defun pyim-cregexp-create-cregexp-from-string
+    (str scheme &optional char-level-num chinese-only)
   (let* ((num (pyim-cregexp-char-level-num char-level-num))
          (sep "#####&&&&#####")
          (lst (remove "" (split-string
