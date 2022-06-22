@@ -178,33 +178,45 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
          &optional match-beginning first-equal all-equal char-level-num)
   "从 IMOBJ 创建一个搜索中文的 regexp, 适用于全拼输入法。"
   (let* ((num (pyim-cregexp-char-level-num char-level-num))
-         (imobj (mapcar (lambda (x)
-                          (concat (nth 0 x) (nth 1 x)))
-                        imobj))
-         (cchar-list
-          (let ((n 0) results)
-            (dolist (py imobj)
-              (let* ((equal-match
-                      (or all-equal
-                          (and first-equal (= n 0))))
-                     (cchars
-                      (mapconcat (lambda (x)
-                                   (mapconcat #'identity
-                                              (let* ((list (split-string x "|"))
-                                                     (length (length list)))
-                                                (cl-subseq list 0 (min num length)))
-                                              ""))
-                                 (pyim-pymap-py2cchar-get py equal-match nil t) "")))
-                (push cchars results))
-              (setq n (+ 1 n)))
-            (nreverse results)))
+         (pinyin-list (pyim-cregexp-quanpin-get-pinyin-list imobj))
+         (cchars-list
+          (pyim-cregexp-quanpin-get-cchars-from-pinyin-list
+           pinyin-list all-equal first-equal num))
          (regexp
           (mapconcat (lambda (x)
                        (when (pyim-string-match-p "\\cc" x)
                          (format "[%s]" x)))
-                     cchar-list "")))
+                     cchars-list "")))
     (unless (equal regexp "")
       (concat (if match-beginning "^" "") regexp))))
+
+(defun pyim-cregexp-quanpin-get-pinyin-list (imobj)
+  "从 IMOBJ 生成类似 (\"ni\" \"hao\") 的拼音列表。"
+  (mapcar (lambda (x)
+            (concat (nth 0 x) (nth 1 x)))
+          imobj))
+
+(defun pyim-cregexp-quanpin-get-cchars-from-pinyin-list
+    (pinyin-list all-equal first-equal char-level-num)
+  "(\"ni\" \"hao\") => (\"你 ... 蔫 ... 鸟 ... 宁 ...\" \"好号毫\")"
+  (let ((num (pyim-cregexp-char-level-num char-level-num))
+        (n 0)
+        results)
+    (dolist (py pinyin-list)
+      (let* ((equal-match
+              (or all-equal
+                  (and first-equal (= n 0))))
+             (cchars (mapconcat
+                      (lambda (x)
+                        (mapconcat #'identity
+                                   (let* ((list (split-string x "|"))
+                                          (length (length list)))
+                                     (cl-subseq list 0 (min num length)))
+                                   ""))
+                      (pyim-pymap-py2cchar-get py equal-match nil t) "")))
+        (push cchars results))
+      (setq n (+ 1 n)))
+    (nreverse results)))
 
 (cl-defmethod pyim-cregexp-create-from-imobj
   (imobj (scheme pyim-scheme-xingma)
