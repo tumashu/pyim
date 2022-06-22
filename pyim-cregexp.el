@@ -149,39 +149,48 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
     (_ (funcall fn rx-form))))
 
 (defun pyim-cregexp-create-cregexp-from-string
-    (str scheme &optional char-level-num chinese-only)
-  (let* ((num (pyim-cregexp-char-level-num char-level-num))
-         (sep "#####&&&&#####")
-         (lst (remove "" (split-string
-                          (replace-regexp-in-string
-                           "\\([a-z]+'*\\)" (concat sep "\\1" sep) str)
-                          sep))))
+    (string scheme &optional char-level-num chinese-only)
+  (let* ((char-level-num (pyim-cregexp-char-level-num char-level-num))
+         (string-list (pyim-cregexp-split-string string)))
     ;; 确保 pyim 词库加载
     (pyim-dcache-init-variables)
-    (mapconcat
-     (lambda (string)
-       (if (or (pyim-string-match-p "[^a-z']+" string)
-               (equal string ""))
-           string
-         (let* ((string1 (replace-regexp-in-string "'" "" string))
-                (imobjs (pyim-imobjs-create string1 scheme))
-                (regexp-list
-                 (mapcar (lambda (imobj)
-                           (pyim-cregexp-create-from-imobj imobj scheme nil nil nil num))
-                         imobjs))
-                (regexp
-                 (when regexp-list
-                   (string-join (delq nil regexp-list) "\\|")))
-                (regexp
-                 (if chinese-only
-                     regexp
-                   (if (> (length regexp) 0)
-                       (if (equal string string1)
-                           (concat string "\\|" regexp)
-                         (concat string "\\|" string1 "\\|" regexp))
-                     string))))
-           (format "\\(?:%s\\)" regexp))))
-     lst "")))
+    (pyim-cregexp-create-cregexp-from-string-list
+     string-list scheme char-level-num chinese-only)))
+
+(defun pyim-cregexp-split-string (string)
+  (let ((sep "#####&&&&#####"))
+    (remove "" (split-string
+                (replace-regexp-in-string
+                 "\\([a-z]+'*\\)" (concat sep "\\1" sep) string)
+                sep))))
+
+(defun pyim-cregexp-create-cregexp-from-string-list
+    (string-list scheme &optional char-level-num chinese-only)
+  (mapconcat
+   (lambda (string)
+     (if (or (pyim-string-match-p "[^a-z']+" string)
+             (equal string ""))
+         string
+       (let* ((string1 (replace-regexp-in-string "'" "" string))
+              (imobjs (pyim-imobjs-create string1 scheme))
+              (regexp-list
+               (mapcar (lambda (imobj)
+                         (pyim-cregexp-create-from-imobj
+                          imobj scheme nil nil nil char-level-num))
+                       imobjs))
+              (regexp
+               (when regexp-list
+                 (string-join (delq nil regexp-list) "\\|")))
+              (regexp
+               (if chinese-only
+                   regexp
+                 (if (> (length regexp) 0)
+                     (if (equal string string1)
+                         (concat string "\\|" regexp)
+                       (concat string "\\|" string1 "\\|" regexp))
+                   string))))
+         (format "\\(?:%s\\)" regexp))))
+   string-list ""))
 
 (cl-defgeneric pyim-cregexp-create-from-imobj
     (imobj _scheme &optional match-beginning
