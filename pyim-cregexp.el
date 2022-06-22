@@ -60,12 +60,19 @@
 
 这个函数同时考虑 SCHEME, current scheme 和
 `pyim-cregexp-fallback-scheme'."
-  (let ((current-scheme (pyim-scheme-current)))
-    (cond
-     ((and scheme (pyim-scheme-cregexp-support-p scheme)) scheme)
-     ((and current-scheme (pyim-scheme-cregexp-support-p current-scheme))
-      current-scheme)
-     (t (pyim-scheme-get pyim-cregexp-fallback-scheme)))))
+  (or (pyim-cregexp-find-scheme scheme)
+      (pyim-cregexp-find-scheme pyim-default-scheme)
+      (pyim-cregexp-find-scheme pyim-cregexp-fallback-scheme)
+      (pyim-cregexp-find-scheme 'quanpin)))
+
+(defun pyim-cregexp-find-scheme (scheme-or-name)
+  "如果 SCHEME-OR-NAME 支持 cregexp 功能，就返回对应的 scheme."
+  (let ((scheme (if (pyim-scheme-p scheme-or-name)
+                    scheme-or-name
+                  (pyim-scheme-get scheme-or-name))))
+    (when (and (pyim-scheme-p scheme)
+               (pyim-scheme-cregexp-support-p scheme))
+      scheme)))
 
 (defun pyim-cregexp-create (string scheme &optional char-level-num chinese-only)
   "根据 STRING 构建一个中文 regexp, 用于 \"拼音搜索汉字\".
