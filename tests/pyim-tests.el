@@ -1083,6 +1083,7 @@
         (pyim-dhashcache-icode2word (make-hash-table :test #'equal))
         (file (pyim-tests-make-temp-file)))
     (puthash "你好" 10 pyim-dhashcache-iword2count)
+    (puthash "锕系" 10 pyim-dhashcache-iword2count)
     (puthash "尼耗" 1 pyim-dhashcache-iword2count)
     (puthash "wo-hao" (list "我好") pyim-dhashcache-icode2word)
     (puthash "ni-hao" (list "你好" "尼耗") pyim-dhashcache-icode2word)
@@ -1091,8 +1092,9 @@
       (insert-file-contents file)
       (should (equal (buffer-string)
                      ";;; -*- coding: utf-8-unix -*-
-你好 10
+锕系 10
 尼耗 1
+你好 10
 我好 0
 ")))
     (pyim-dcache-export-words-and-counts file nil t)
@@ -1100,8 +1102,9 @@
       (insert-file-contents file)
       (should (equal (buffer-string)
                      ";;; -*- coding: utf-8-unix -*-
-你好
+锕系
 尼耗
+你好
 我好
 ")))
     (pyim-dcache-export-personal-words file)
@@ -1160,6 +1163,19 @@ wo-hao 我好
                    '("/home/user/test3.pyim" "/home/user/test2.pyim")))))
 
 ;; ** pyim-dhashcache 相关单元测试
+(ert-deftest pyim-tests-pyim-dhashcache-pinyin-string< ()
+  (should (pyim-dhashcache-pinyin-string< "啊" "波"))
+  (should-not (string< "锕" "波"))
+  (should (pyim-dhashcache-pinyin-string< "锕" "波"))
+  (should-not (pyim-dhashcache-pinyin-string< "波" "啊"))
+  (should (pyim-dhashcache-pinyin-string< "a" "b"))
+  (should-not (pyim-dhashcache-pinyin-string< "b" "a"))
+  (should (pyim-dhashcache-pinyin-string< "aa" "ab"))
+  (should-not (pyim-dhashcache-pinyin-string< "ab" "aa"))
+  (should (pyim-dhashcache-pinyin-string< "你不好" "你好"))
+  (should-not (pyim-dhashcache-pinyin-string< "你好" "你不好"))
+  )
+
 (ert-deftest pyim-tests-pyim-dhashcache-get-shortcodes ()
   (should (equal (pyim-dhashcache-get-shortcodes ".abcde") nil))
   (should (equal (pyim-dhashcache-get-shortcodes "wubi/abcde")

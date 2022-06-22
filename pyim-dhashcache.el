@@ -36,6 +36,7 @@
 (require 'cl-lib)
 (require 'async nil t)
 (require 'pyim-common)
+(require 'pyim-cstring)
 (require 'pyim-dcache)
 (require 'pyim-dict)
 (require 'pyim-scheme)
@@ -716,51 +717,71 @@ pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 \\='utf
 如果 CONFIRM 为 non-nil，文件存在时将会提示用户是否覆盖，
 默认为覆盖模式"
   (with-temp-buffer
-    (maphash
-     (lambda (key value)
-       (let ((value (cl-remove-if
-                     (lambda (x)
-                       ;; 如果某个词条的 text 属性 :noexport 设置为 t, 在导出的
-                       ;; 时候自动忽略这个词条。
-                       (and (stringp x)
-                            (get-text-property 0 :noexport x)))
-                     (if (listp value)
-                         value
-                       (list value)))))
-         (when value
-           (insert (format "%s %s\n" key (mapconcat #'identity value " "))))))
-     dcache)
-    (sort-lines nil (point-min) (point-max))
-    (goto-char (point-min))
-    (insert ";;; -*- coding: utf-8-unix -*-\n")
-    (pyim-dcache-write-file file confirm)))
+    (let (export-lines)
+      (maphash
+       (lambda (key value)
+         (let ((value (cl-remove-if
+                       (lambda (x)
+                         ;; 如果某个词条的 text 属性 :noexport 设置为 t, 在导出的
+                         ;; 时候自动忽略这个词条。
+                         (and (stringp x)
+                              (get-text-property 0 :noexport x)))
+                       (if (listp value)
+                           value
+                         (list value)))))
+           (when value
+             (push
+              (format "%s %s\n" key (mapconcat #'identity value " "))
+              export-lines))))
+       dcache)
+      (setq export-lines (sort export-lines #'string<))
+      (goto-char (point-min))
+      (insert ";;; -*- coding: utf-8-unix -*-\n")
+      (dolist (line export-lines)
+        (insert line))
+      (pyim-dcache-write-file file confirm))))
 
 (cl-defmethod pyim-dcache-export-words-and-counts
   (file &context ((pyim-dcache-backend) (eql pyim-dhashcache))
         &optional confirm ignore-counts)
   (with-temp-buffer
-    (insert ";;; -*- coding: utf-8-unix -*-\n")
-    (maphash
-     (lambda (key value)
-       (insert
-        (if ignore-counts
-            (format "%s\n" key)
-          (format "%s %s\n" key value))))
-     pyim-dhashcache-iword2count)
-    ;; 在默认情况下，用户选择过的词生成的缓存中存在的词条，
-    ;; `pyim-dhashcache-iword2count' 中也一定存在，但如果用户
-    ;; 使用了特殊的方式给用户选择过的词生成的缓存中添加了
-    ;; 词条，那么就需要将这些词条也导出，且设置词频为 0
-    (maphash
-     (lambda (_ words)
-       (dolist (word words)
-         (unless (gethash word pyim-dhashcache-iword2count)
-           (insert
-            (if ignore-counts
-                (format "%s\n" word)
-              (format "%s %s\n" word 0))))))
-     pyim-dhashcache-icode2word)
-    (pyim-dcache-write-file file confirm)))
+    (let (export-lines)
+      (maphash
+       (lambda (key value)
+         (push
+          (if ignore-counts
+              (format "%s\n" key)
+            (format "%s %s\n" key value))
+          export-lines))
+       pyim-dhashcache-iword2count)
+      ;; 在默认情况下，用户选择过的词生成的缓存中存在的词条，
+      ;; `pyim-dhashcache-iword2count' 中也一定存在，但如果用户
+      ;; 使用了特殊的方式给用户选择过的词生成的缓存中添加了
+      ;; 词条，那么就需要将这些词条也导出，且设置词频为 0
+      (maphash
+       (lambda (_ words)
+         (dolist (word words)
+           (unless (gethash word pyim-dhashcache-iword2count)
+             (push
+              (if ignore-counts
+                  (format "%s\n" word)
+                (format "%s %s\n" word 0))
+              export-lines))))
+       pyim-dhashcache-icode2word)
+      (setq export-lines
+            (sort export-lines
+                  #'pyim-dhashcache-pinyin-string<))
+      (goto-char (point-min))
+      (insert ";;; -*- coding: utf-8-unix -*-\n")
+      (dolist (line export-lines)
+        (insert line))
+      (pyim-dcache-write-file file confirm))))
+
+(defun pyim-dhashcache-pinyin-string< (a b)
+  "比较 A 和 B 两个字符串的拼音的大小。"
+  (let ((pinyin1 (pyim-cstring-to-pinyin-simple a))
+        (pinyin2 (pyim-cstring-to-pinyin-simple b)))
+    (string< pinyin1 pinyin2)))
 
 ;; * Footer
 (provide 'pyim-dhashcache)
