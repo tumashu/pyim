@@ -58,7 +58,7 @@
 (defun pyim-cregexp-scheme (&optional scheme)
   "返回一个支持 cregexp 的 scheme.
 
-这个函数同时考虑 SCHEME, current scheme 和
+这个函数同时考虑 SCHEME, `pyim-default-scheme' 和
 `pyim-cregexp-fallback-scheme'."
   (or (pyim-cregexp-find-scheme scheme)
       (pyim-cregexp-find-scheme pyim-default-scheme)
