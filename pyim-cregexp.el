@@ -210,34 +210,39 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
   (imobj (scheme pyim-scheme-xingma)
          &optional match-beginning first-equal _all-equal _char-level-num)
   "从 IMOBJ 创建一个搜索中文的 regexp, 适用于形码输入法。"
-  (cl-flet ((build-regexp
-              (list)
-              (let* ((n (apply #'max (mapcar #'length list)))
-                     results)
-                (dotimes (i n)
-                  (push (format "[%s]%s"
-                                (mapconcat
-                                 (lambda (x)
-                                   (if (> i (- (length x) 1))
-                                       ""
-                                     (char-to-string
-                                      (elt x i))))
-                                 list "")
-                                (if (> i 0) "?" ""))
-                        results))
-                (string-join (reverse results)))))
-    (let* ((code-prefix (pyim-scheme-code-prefix scheme))
-           (regexp (mapconcat
-                    (lambda (x)
-                      (let ((code (concat (or code-prefix "")
-                                          (if first-equal
-                                              (substring x 0 1)
-                                            x))))
-                        (build-regexp (pyim-dcache-get code '(code2word)))))
-                    imobj "")))
-      (unless (equal regexp "")
-        (concat (if match-beginning "^" "") regexp)))))
+  (let* ((code-prefix (pyim-scheme-code-prefix scheme))
+         (regexp (mapconcat
+                  (lambda (x)
+                    (let ((code (concat (or code-prefix "")
+                                        (if first-equal
+                                            (substring x 0 1)
+                                          x))))
+                      (pyim-cregexp-build-xingma-regexp-from-words
+                       (pyim-dcache-get code '(code2word)))))
+                  imobj "")))
+    (unless (equal regexp "")
+      (concat (if match-beginning "^" "") regexp))))
 
+(defun pyim-cregexp-build-xingma-regexp-from-words (words)
+  "根据 WORDS, 创建一个可以搜索这些 WORDS 的 regexp.
+
+比如：工, 恭恭敬敬 => [工恭][恭]?[敬]?[敬]?
+
+通过 \"[工恭][恭]?[敬]?[敬]?\" 可以搜索 \"工\" 和 \"恭恭敬敬\"."
+  (let ((n (apply #'max (mapcar #'length words)))
+        results)
+    (dotimes (i n)
+      (push (format "[%s]%s"
+                    (mapconcat
+                     (lambda (x)
+                       (if (> i (- (length x) 1))
+                           ""
+                         (char-to-string
+                          (elt x i))))
+                     words "")
+                    (if (> i 0) "?" ""))
+            results))
+    (string-join (reverse results))))
 
 ;; * Footer
 (provide 'pyim-cregexp)
