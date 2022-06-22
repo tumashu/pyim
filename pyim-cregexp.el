@@ -46,12 +46,6 @@
 将使用这个 scheme."
   :type 'symbol)
 
-(defun pyim-cregexp-char-level-num (num)
-  "根据 NUM 返回一个有效的常用汉字级别。"
-  (if (numberp num)
-      (max (min num 4) 1)
-    4))
-
 (defun pyim-cregexp-build (string &optional char-level-num chinese-only)
   "根据 STRING 构建一个中文 regexp.
 
@@ -102,14 +96,21 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
 (defun pyim-cregexp-create-valid-cregexp-from-string
     (string scheme &optional char-level-num chinese-only)
   "从 STRING 创建一个有效的搜索中文的 regexp."
-  (let ((num (pyim-cregexp-char-level-num char-level-num))
+  (let ((char-level-num
+         (pyim-cregexp-char-level-num char-level-num))
         rx-string)
     (while (not (pyim-cregexp-valid-p rx-string))
       (setq rx-string
             (pyim-cregexp-create-beautiful-cregexp-from-string
-             string scheme num chinese-only))
-      (setq num (1- num)))
+             string scheme char-level-num chinese-only))
+      (setq char-level-num (1- char-level-num)))
     rx-string))
+
+(defun pyim-cregexp-char-level-num (num)
+  "根据 NUM 返回一个有效的常用汉字级别。"
+  (if (numberp num)
+      (max (min num 4) 1)
+    4))
 
 (defun pyim-cregexp-valid-p (cregexp)
   "Return t when cregexp is a valid regexp."
