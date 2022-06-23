@@ -409,7 +409,7 @@ pyim 当前内置两种指示器实现方式：
 
 
 * 试用
-在pyim项目根目录运行命令=make runemacs=试用最新的pyim。
+在pyim项目根目录运行shell命令 `make runemacs' 试用最新的pyim。
 
 只有pyim和其依赖的包被载入。用户自己的emacs配置不会被载入。
 
@@ -418,7 +418,7 @@ pyim 当前内置两种指示器实现方式：
 EMACS=~/my-whatever-directory/bin/emacs make runemacs
 #+end_src
 
-Emacs启动后运行=M-x toggle-input-method= 或按=C-/=启动输入法。
+Emacs启动后 "M-x toggle-input-method" 或按 "C-/" 打开输入法。
 * 捐赠
 您可以通过小额捐赠的方式支持 pyim 的开发工作，具体方式：
 
