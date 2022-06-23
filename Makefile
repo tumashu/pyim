@@ -4,7 +4,8 @@ EMACS ?= emacs
 
 .PHONY: test lint clean deps compile
 
-EMACS_BATCH_OPTS=--batch --quick --directory . --directory .deps
+EMACS_GENERIC_OPTS=--quick --directory . --directory .deps
+EMACS_BATCH_OPTS:=--batch $(EMACS_GENERIC_OPTS)
 RM=@rm -rf
 
 XR_URL="https://git.savannah.gnu.org/cgit/emacs/elpa.git/plain/xr.el?h=externals/xr"
@@ -41,3 +42,6 @@ compile: deps
 test: compile deps
 	@$(EMACS) $(EMACS_BATCH_OPTS) --load ./tests/pyim-tests.el
 	$(RM) pyim-tests-temp-*
+
+runemacs: deps
+	@$(EMACS) $(EMACS_GENERIC_OPTS) --load ./tests/pyim-emacs-init.el
