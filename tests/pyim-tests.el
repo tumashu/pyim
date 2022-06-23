@@ -210,24 +210,40 @@
 
 (ert-deftest pyim-tests-pyim-add-unread-command-events ()
   (let ((unread-command-events nil))
-    (pyim-add-unread-command-events ?a)
-    (should (equal unread-command-events
-                   '((no-record . 97))))
-    (pyim-add-unread-command-events "b")
-    (should (equal unread-command-events
-                   '((no-record . 98)
-                     (no-record . 97))))
-    (pyim-add-unread-command-events "cd")
-    (should (equal unread-command-events
-                   '((no-record . 99)
-                     (no-record . 100)
-                     (no-record . 98)
-                     (no-record . 97))))
-    (pyim-add-unread-command-events "e" t)
-    (should (equal unread-command-events
-                   '((no-record . 101))))
-    (pyim-add-unread-command-events nil t)
-    (should (equal unread-command-events nil))))
+    (if (> emacs-major-version 26)
+        (progn
+          (pyim-add-unread-command-events ?a)
+          (should (equal unread-command-events
+                         '((no-record . 97))))
+          (pyim-add-unread-command-events "b")
+          (should (equal unread-command-events
+                         '((no-record . 98)
+                           (no-record . 97))))
+          (pyim-add-unread-command-events "cd")
+          (should (equal unread-command-events
+                         '((no-record . 99)
+                           (no-record . 100)
+                           (no-record . 98)
+                           (no-record . 97))))
+          (pyim-add-unread-command-events "e" t)
+          (should (equal unread-command-events
+                         '((no-record . 101))))
+          (pyim-add-unread-command-events nil t)
+          (should (equal unread-command-events nil)))
+      (pyim-add-unread-command-events ?a)
+      (should (equal unread-command-events
+                     '(97)))
+      (pyim-add-unread-command-events "b")
+      (should (equal unread-command-events
+                     '(98 97)))
+      (pyim-add-unread-command-events "cd")
+      (should (equal unread-command-events
+                     '(99 100 98 97)))
+      (pyim-add-unread-command-events "e" t)
+      (should (equal unread-command-events
+                     '(101)))
+      (pyim-add-unread-command-events nil t)
+      (should (equal unread-command-events nil)))))
 
 (ert-deftest pyim-tests-pyim-time-limit-while ()
   (let ((time (current-time))

@@ -191,9 +191,19 @@ When CARE-FIRST-ONE is no-nil, ((a b c) (d e)) => (a d)."
     (setq unread-command-events nil))
   (setq unread-command-events
         (if (characterp key)
-            (cons (cons 'no-record key) unread-command-events)
-          (append (cl-mapcan (lambda (e) (list (cons 'no-record e)))
-                             (append key nil))
+            ;; Emacs >= 27 support (no-record . EVENT), please read emacs
+            ;; commit: f13d97b4de02586cce49909aa2f3f51fcb5daa5f (Fix defining
+            ;; keyboard macros in CUA mode)
+            (cons (if (> emacs-major-version 26)
+                      (cons 'no-record key)
+                    key)
+                  unread-command-events)
+          (append (cl-mapcan
+                   (lambda (e)
+                     (list (if (> emacs-major-version 26)
+                               (cons 'no-record e)
+                             e)))
+                   (append key nil))
                   unread-command-events))))
 
 ;; Fork from `company-dabbrev--time-limit-while' in company-mode."
