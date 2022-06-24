@@ -71,7 +71,7 @@
            (overlay-start pyim-preview--overlay))
       (delete-overlay pyim-preview--overlay)))
 
-(defun pyim-preview-refresh (&rest _)
+(defun pyim-preview--refresh (&rest _)
   "刷新光标处预览.
 
 pyim 会使用 Emacs overlay 机制在 *待输入buffer* 光标处高亮显示一
@@ -87,7 +87,7 @@ pyim 会使用 Emacs overlay 机制在 *待输入buffer* 光标处高亮显示�
     (move-overlay pyim-preview--overlay
                   (overlay-start pyim-preview--overlay) (point))))
 
-(add-hook 'pyim-process-ui-refresh-hook #'pyim-preview-refresh)
+(add-hook 'pyim-process-ui-refresh-hook #'pyim-preview--refresh)
 
 (cl-defgeneric pyim-preview-string (scheme)
   "获得 preview 字符串。")

@@ -489,7 +489,7 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
 (cl-defgeneric pyim-page-preview-create (scheme &optional separator)
   "这个函数用于创建在 page 中显示的预览字符串。
 
-这个预览是在 page 中显示，而 `pyim-preview-refresh' 对应的预览
+这个预览是在 page 中显示，而 `pyim-preview--refresh' 对应的预览
 是在 buffer 光标处显示，两者要做区别。")
 
 (cl-defmethod pyim-page-preview-create ((_scheme pyim-scheme-quanpin) &optional separator)
