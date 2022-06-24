@@ -50,7 +50,7 @@
 
 (pyim-register-local-variables '(pyim-scheme--enable-assistant-p))
 
-(defvar pyim-schemes nil
+(defvar pyim-scheme--all-schemes nil
   "Pyim 支持的所有拼音方案.")
 
 (cl-defstruct (pyim-scheme
@@ -105,7 +105,7 @@
 ;;;###autoload
 (defun pyim-default-scheme (&optional scheme-name)
   (interactive)
-  (let* ((scheme-names (mapcar #'pyim-scheme-name pyim-schemes))
+  (let* ((scheme-names (mapcar #'pyim-scheme-name pyim-scheme--all-schemes))
          (scheme-name
           (or scheme-name
               (intern (completing-read "PYIM: 将 pyim-default-scheme 设置为：" scheme-names)))))
@@ -118,7 +118,7 @@
       nil)))
 
 (defun pyim-scheme-add (scheme-config)
-  "Add SCHEME to `pyim-schemes'."
+  "Add SCHEME to `pyim-scheme--all-schemes'."
   (if (listp scheme-config)
       (let* ((scheme-name (car scheme-config))
              (scheme-type (plist-get (cdr scheme-config) :class))
@@ -132,7 +132,7 @@
              schemes update-p)
         (when (and (symbolp scheme-name)
                    (functionp func))
-          (dolist (x pyim-schemes)
+          (dolist (x pyim-scheme--all-schemes)
             (push (if (equal (pyim-scheme-name x) scheme-name)
                       (progn (setq update-p t)
                              scheme)
@@ -140,7 +140,7 @@
                   schemes))
           (unless update-p
             (push scheme schemes))
-          (setq pyim-schemes (reverse schemes))))
+          (setq pyim-scheme--all-schemes (reverse schemes))))
     (message "PYIM: Invalid pyim scheme config!")))
 
 (defun pyim-scheme-current ()
@@ -157,7 +157,7 @@
     (cl-find-if
      (lambda (x)
        (equal (pyim-scheme-name x) scheme-name))
-     pyim-schemes)))
+     pyim-scheme--all-schemes)))
 
 (defun pyim-scheme-assistant-status ()
   pyim-scheme--enable-assistant-p)

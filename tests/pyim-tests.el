@@ -85,8 +85,8 @@
 (when noninteractive
   (pyim-tests-noninteractive-init))
 
-;; ** pyim-schemes 相关单元测试
-(ert-deftest pyim-tests-pyim-schemes ()
+;; ** pyim-scheme--all-schemes 相关单元测试
+(ert-deftest pyim-tests-pyim-scheme--all-schemes ()
   (let ((pyim-default-scheme 'wubi))
     (should (equal (pyim-scheme-name
                     (pyim-scheme-current))
@@ -122,7 +122,7 @@
                  'wubi)))
 
 (ert-deftest pyim-tests-pyim-scheme-add ()
-  (let ((pyim-schemes nil))
+  (let ((pyim-scheme--all-schemes nil))
     (pyim-scheme-add
      '(quanpin
        :document "test1"
@@ -149,7 +149,7 @@
 
     (pyim-scheme-add "error")
 
-    (should (equal (mapcar #'pyim-scheme-document pyim-schemes)
+    (should (equal (mapcar #'pyim-scheme-document pyim-scheme--all-schemes)
                    '("test2" "test3")))))
 
 ;; ** pyim-common 相关单元测试
