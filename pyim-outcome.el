@@ -122,7 +122,7 @@ pyim 使用函数 `pyim-process-outcome-handle-char' 来处理特殊功能触发
 (defvar pyim-outcome-subword-info nil
   "在以词定字功能中，用来保存字的位置。")
 
-(defvar pyim-outcome-magic-convert-cache nil
+(defvar pyim-outcome--magic-convert-cache nil
   "用来临时保存 `pyim-outcome-magic-convert' 的结果.
 从而加快同一个字符串第二次的转换速度。")
 
@@ -146,9 +146,9 @@ pyim 使用函数 `pyim-process-outcome-handle-char' 来处理特殊功能触发
 (defun pyim-outcome-magic-convert (str)
   "用于处理 `pyim-outcome-magic-converter' 的函数。"
   (if (functionp pyim-outcome-magic-converter)
-      (or (cdr (assoc str pyim-outcome-magic-convert-cache))
+      (or (cdr (assoc str pyim-outcome--magic-convert-cache))
           (let ((result (funcall pyim-outcome-magic-converter str)))
-            (setq pyim-outcome-magic-convert-cache
+            (setq pyim-outcome--magic-convert-cache
                   `((,str . ,result)))
             result))
     str))
