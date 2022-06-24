@@ -562,6 +562,18 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
          result)))
     (string-join (nreverse result) (or separator ""))))
 
+(defun pyim-page-get-candidate-position-by-numeric-key (num-key)
+  "根据 NUM-KEY 获取一个有效的 candidate position.
+
+如果获取不到，返回 nil."
+  (let ((index (if (numberp num-key)
+                   (- num-key 1)
+                 0))
+        (end (pyim-page--end)))
+    (when (= index -1) (setq index 9))
+    (when (<= (+ index (pyim-page--start)) end)
+      (+ (pyim-page--start) index))))
+
 (defun pyim-page-next-page (arg)
   "Pyim page 翻页命令."
   (interactive "p")
@@ -578,19 +590,6 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
             (if (> new maxpos) 1 new)
           maxpos)))
       (pyim-process-ui-refresh))))
-
-(defun pyim-page-numeric-key-valid-p (num-key)
-  "判断 NUM-KEY 是否是一个有效的数字选择键。"
-  (let ((index (if (numberp num-key)
-                   (- num-key 1)
-                 0))
-        (end (pyim-page--end)))
-    (when (= index -1) (setq index 9))
-    (if (> (+ index (pyim-page--start)) end)
-        (progn (pyim-page--refresh) nil)
-      (pyim-process-set-candidate-position
-       (+ (pyim-page--start) index))
-      t)))
 
 (defun pyim-page-previous-page (arg)
   (interactive "p")

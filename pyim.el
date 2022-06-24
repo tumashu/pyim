@@ -623,16 +623,18 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
     ;; pyim 使用这个 hook 来处理联想词。
     (run-hooks 'pyim-select-finish-hook)))
 
-(defun pyim-select-word-by-number (&optional n)
+(defun pyim-select-word-by-number (&optional num)
   "使用数字编号来选择对应的词条。"
   (interactive)
-  (if (or pyim-select-word-by-number n)
+  (if (or pyim-select-word-by-number num)
       (if (null (pyim-process-get-candidates))
           (progn
             (pyim-process-outcome-handle 'last-char)
             (pyim-process-terminate))
-        (when (pyim-page-numeric-key-valid-p n)
-          (pyim-select-word)))
+        (let ((position (pyim-page-get-candidate-position-by-numeric-key num)))
+          (when position
+            (pyim-process-set-candidate-position position)
+            (pyim-select-word))))
     ;; 有些输入法使用数字键编码，这种情况下，数字键就
     ;; 不能用来选词了。
     (call-interactively #'pyim-self-insert-command)))
