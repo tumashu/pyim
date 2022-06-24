@@ -52,11 +52,11 @@
       (url-retrieve
        (format "https://olime.baidu.com/py?py=%s" str)
        (lambda (_)
-         (funcall callback (cons imobjs (pyim-cloudim-parse-baidu-buffer)))
+         (funcall callback (cons imobjs (pyim-cloudim--parse-baidu-buffer)))
          (kill-buffer))
        nil t))))
 
-(defun pyim-cloudim-parse-baidu-buffer ()
+(defun pyim-cloudim--parse-baidu-buffer ()
   "解析 `pyim-cloudim-url-retrieve-sync' 返回的 baidu buffer."
   ;; NOTE: 以前这个函数使用 `json-parse-buffer' 来处理返回的结果，但因为旧版本
   ;; Emacs 没有 `json-parse-buffer' 函数，所以现在改用这种简单粗暴的方式，虽然没
@@ -85,7 +85,7 @@
 
 (defun pyim-cloudim-parse-google-buffer ()
   "解析 `pyim-cloudim-url-retrieve-sync' 返回的 google buffer."
-  (pyim-cloudim-parse-baidu-buffer))
+  (pyim-cloudim--parse-baidu-buffer))
 
 ;; * Footer
 (provide 'pyim-cloudim)

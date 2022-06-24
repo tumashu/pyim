@@ -1533,8 +1533,8 @@ Content-Type: text/plain; charset=utf-8
 Date: Sun, 08 May 2022 00:56:13 GMT
 
 {\"0\":[[[\"你好\",5,{\"pinyin\":\"ni'hao\",\"type\":\"IMEDICT\"}]]],\"1\":\"ni'hao\",\"result\":[null]}")
-    (should (equal (pyim-cloudim-parse-baidu-buffer) '("你好")))
-    (should (equal (get-text-property 0 :comment (car (pyim-cloudim-parse-baidu-buffer))) "(云)")))
+    (should (equal (pyim-cloudim--parse-baidu-buffer) '("你好")))
+    (should (equal (get-text-property 0 :comment (car (pyim-cloudim--parse-baidu-buffer))) "(云)")))
 
   (with-temp-buffer
     (insert "HTTP/1.1 200 OK
