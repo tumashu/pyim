@@ -926,24 +926,24 @@
   (should-not (pyim-cregexp--find-scheme 'wubi1))
   (should (equal (pyim-scheme-name (pyim-cregexp--find-scheme (pyim-scheme-get 'wubi))) 'wubi)))
 
-(ert-deftest pyim-tests-pyim-cregexp-scheme ()
+(ert-deftest pyim-tests-pyim-cregexp--scheme ()
   (let ((wubi (pyim-scheme-get 'wubi)))
-    (should (equal (pyim-scheme-name (pyim-cregexp-scheme wubi)) 'wubi)))
+    (should (equal (pyim-scheme-name (pyim-cregexp--scheme wubi)) 'wubi)))
 
   (let ((wubi (pyim-scheme-get 'wubi1))
         (pyim-default-scheme 'quanpin))
-    (should (equal (pyim-scheme-name (pyim-cregexp-scheme wubi)) 'quanpin)))
+    (should (equal (pyim-scheme-name (pyim-cregexp--scheme wubi)) 'quanpin)))
 
   (let ((pyim-default-scheme 'quanpin))
-    (should (equal (pyim-scheme-name (pyim-cregexp-scheme)) 'quanpin)))
+    (should (equal (pyim-scheme-name (pyim-cregexp--scheme)) 'quanpin)))
 
   (let ((pyim-default-scheme 'quanpin1)
         (pyim-cregexp-fallback-scheme 'wubi))
-    (should (equal (pyim-scheme-name (pyim-cregexp-scheme)) 'wubi)))
+    (should (equal (pyim-scheme-name (pyim-cregexp--scheme)) 'wubi)))
 
   (let ((pyim-default-scheme 'quanpin1)
         (pyim-cregexp-fallback-scheme 'wubi1))
-    (should (equal (pyim-scheme-name (pyim-cregexp-scheme)) 'quanpin))))
+    (should (equal (pyim-scheme-name (pyim-cregexp--scheme)) 'quanpin))))
 
 (ert-deftest pyim-tests-pyim-cregexp ()
   (let ((regexp (pyim-cregexp-build "nihao")))

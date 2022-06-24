@@ -52,10 +52,10 @@
 这个函数的功能和 `pyim-cregexp-build' 类似，大多数参数也相同，不
 同点是这个函数没有 scheme 参数，它会根据 `pyim-default-scheme' 和
 `pyim-cregexp-fallback-scheme' 等信息动态的获取 scheme."
-  (let ((scheme (pyim-cregexp-scheme)))
+  (let ((scheme (pyim-cregexp--scheme)))
     (pyim-cregexp-create string scheme char-level-num chinese-only)))
 
-(defun pyim-cregexp-scheme (&optional scheme)
+(defun pyim-cregexp--scheme (&optional scheme)
   "返回一个支持 cregexp 的 scheme.
 
 这个函数同时考虑 SCHEME, `pyim-default-scheme' 和
