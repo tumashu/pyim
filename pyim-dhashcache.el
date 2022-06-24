@@ -770,14 +770,14 @@ pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 \\='utf
        pyim-dhashcache-icode2word)
       (setq export-lines
             (sort export-lines
-                  #'pyim-dhashcache-pinyin-string<))
+                  #'pyim-dhashcache--pinyin-string<))
       (goto-char (point-min))
       (insert ";;; -*- coding: utf-8-unix -*-\n")
       (dolist (line export-lines)
         (insert line))
       (pyim-dcache-write-file file confirm))))
 
-(defun pyim-dhashcache-pinyin-string< (a b)
+(defun pyim-dhashcache--pinyin-string< (a b)
   "比较 A 和 B 两个字符串的拼音的大小。"
   (let ((pinyin1 (pyim-cstring-to-pinyin-simple a))
         (pinyin2 (pyim-cstring-to-pinyin-simple b)))
