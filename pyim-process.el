@@ -440,7 +440,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 
 (defun pyim-process--run-delay-timer-function ()
   "Function used by `pyim-process--run-delay-timer'"
-  (pyim-process-handle-candidates-async)
+  (pyim-process--handle-candidates-async)
   (pyim-process--handle-candidates-limit-time))
 
 (defun pyim-process--handle-candidates-limit-time ()
@@ -460,7 +460,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
                  ,@new-candidates
                  ,@(cdr old-candidates)))))
 
-(defun pyim-process-handle-candidates-async ()
+(defun pyim-process--handle-candidates-async ()
   "使用异步的方式获取候选词条词条。"
   (let ((scheme (pyim-scheme-current))
         (buffer (current-buffer)))
