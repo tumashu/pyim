@@ -209,9 +209,9 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
          &optional match-beginning first-equal all-equal char-level-num)
   "从 IMOBJ 创建一个搜索中文的 regexp, 适用于全拼输入法。"
   (let* ((num (pyim-cregexp--char-level-num char-level-num))
-         (pinyin-list (pyim-cregexp-quanpin-get-pinyin-list imobj))
+         (pinyin-list (pyim-cregexp--quanpin-get-pinyin-list imobj))
          (cchars-list
-          (pyim-cregexp-quanpin-get-cchars-from-pinyin-list
+          (pyim-cregexp--quanpin-get-cchars-from-pinyin-list
            pinyin-list all-equal first-equal num))
          (regexp
           (mapconcat (lambda (x)
@@ -221,13 +221,13 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
     (unless (equal regexp "")
       (concat (if match-beginning "^" "") regexp))))
 
-(defun pyim-cregexp-quanpin-get-pinyin-list (imobj)
+(defun pyim-cregexp--quanpin-get-pinyin-list (imobj)
   "从 IMOBJ 生成类似 (\"ni\" \"hao\") 的拼音列表。"
   (mapcar (lambda (x)
             (concat (nth 0 x) (nth 1 x)))
           imobj))
 
-(defun pyim-cregexp-quanpin-get-cchars-from-pinyin-list
+(defun pyim-cregexp--quanpin-get-cchars-from-pinyin-list
     (pinyin-list all-equal first-equal char-level-num)
   "(\"ni\" \"hao\") => (\"你 ... 蔫 ... 鸟 ... 宁 ...\" \"好号毫\")"
   (let ((num (pyim-cregexp--char-level-num char-level-num))

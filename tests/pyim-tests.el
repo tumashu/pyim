@@ -1034,37 +1034,37 @@
       (pyim-cregexp-convert-at-point)
       (should (equal (buffer-string) (concat "hiXXX: " string))))))
 
-(ert-deftest pyim-tests-pyim-cregexp-quanpin-get-pinyin-list ()
-  (should (equal (pyim-cregexp-quanpin-get-pinyin-list
+(ert-deftest pyim-tests-pyim-cregexp--quanpin-get-pinyin-list ()
+  (should (equal (pyim-cregexp--quanpin-get-pinyin-list
                   '(("n" "i" "n" "i")
                     ("h" "ao" "h" "ao")))
                  '("ni" "hao"))))
 
-(ert-deftest pyim-tests-pyim-cregexp-quanpin-get-cchars-from-pinyin-list ()
-  (should (equal (pyim-cregexp-quanpin-get-cchars-from-pinyin-list '("ni" "hao") nil nil nil)
+(ert-deftest pyim-tests-pyim-cregexp--quanpin-get-cchars-from-pinyin-list ()
+  (should (equal (pyim-cregexp--quanpin-get-cchars-from-pinyin-list '("ni" "hao") nil nil nil)
                  '("你尼呢泥拟逆倪妮腻匿霓溺旎昵坭铌鲵伲怩睨祢疒猊慝鹝鹢薿麑懝兒䮘㧱聻㮞檷䀑抐誽䍲㮏㲡䘌縌㠜儞䘦鈮䰯伱愵嬺氼䘽䵑䵒屔婗䝚䁥䕥孨㵫屰䭲孴㹸譺㥾籾㦐㪒馜隬蚭抳䦵㲻㞾痆㣇䧇狋䛏胒鯓狔秜跜嫟迡鯢淣苨擬觬埿鑈棿腝蛪㘈眤㩘晲掜禰妳堄儗輗蜺鉨齯鶂貎膩暱惄柅鷊臡郳衵年念粘辗碾廿捻撵拈蔫鲶埝鲇辇黏䟢㮟䧔痆攆簐㘝輦䄭䬯鼰䄹艌䩞蹨㞋躎鮎䚓撚㲽跈秊秥姩鯰㜤䴴輾蹍榐唸卄齞涊淰溓娘酿孃䖆釀嬢醸鸟尿溺袅脲氽茑嬲鸮㼭茮樢䐁㠡蔦褭㜵䙚㭤䦊䮍㞙㒟裊鳥㳮䃵嬝嫋枿摄聂捏涅镍孽坭蘖啮蹑嗫臬镊颞乜陧菍嵲糵㟧㖕䞕峊㜦䜆籋䇣㘨䡾㖏䳖痆㘝踂帇㸎䄒䜓踗䌜錜鈢蠥㴪㜸圼㘿鑈噛㙞鉩㡪顳㩶聶鑷孼钀㮆隉疌㚔㖖嚙躡鎳䂼䯀囁䯅揑巕惗擜篞櫱䯵棿䭃䌰諗褹掜槷囐鋷讘銸嶭蘗摰鉨摂敜齧湼枿闑囓糱臲苶喦您恁㤛䚾䛘囜拰䋻宁凝拧泞柠咛坭狞佞聍甯苧䆨薴濘鸋鬡嬣䔭鑏㝕䭢橣獰聹嚀侫㲰檸矃寍寕寗寜㿦寧擰㣷䗿㩶鬤儜牛纽扭钮拗妞蚴忸狃杻䮗抝牜莥䤔㽱䂇怓紐䀔鈕靵汼炄䒜㺲䏔䋴衂沑㖻" "好号毫豪耗浩郝皓昊镐蒿壕灏嚎濠蚝貉颢嗥薅嚆鸮诐淏鄗皞椃䬉㬔蠔㠙鰝瀥昦㘪儫㬶嘷㝀㵆獆籇獋恏噑獔聕㩝灝䝞號虠䝥顥晧㙱㕺悎傐皡暤皥㚪暭鶴䒵㞻䚽䪽侾勂滈曍䧚哠狢䧫䯫峼鎬竓藃譹薃澔皜秏諕暠薧呺茠")
                  ))
 
-  (should (equal (pyim-cregexp-quanpin-get-cchars-from-pinyin-list '("ni" "hao") nil t nil)
+  (should (equal (pyim-cregexp--quanpin-get-cchars-from-pinyin-list '("ni" "hao") nil t nil)
                  '("你尼呢泥拟逆倪妮腻匿霓溺旎昵坭铌鲵伲怩睨祢疒猊慝鹝鹢薿麑懝兒䮘㧱聻㮞檷䀑抐誽䍲㮏㲡䘌縌㠜儞䘦鈮䰯伱愵嬺氼䘽䵑䵒屔婗䝚䁥䕥孨㵫屰䭲孴㹸譺㥾籾㦐㪒馜隬蚭抳䦵㲻㞾痆㣇䧇狋䛏胒鯓狔秜跜嫟迡鯢淣苨擬觬埿鑈棿腝蛪㘈眤㩘晲掜禰妳堄儗輗蜺鉨齯鶂貎膩暱惄柅鷊臡郳衵" "好号毫豪耗浩郝皓昊镐蒿壕灏嚎濠蚝貉颢嗥薅嚆鸮诐淏鄗皞椃䬉㬔蠔㠙鰝瀥昦㘪儫㬶嘷㝀㵆獆籇獋恏噑獔聕㩝灝䝞號虠䝥顥晧㙱㕺悎傐皡暤皥㚪暭鶴䒵㞻䚽䪽侾勂滈曍䧚哠狢䧫䯫峼鎬竓藃譹薃澔皜秏諕暠薧呺茠")))
 
-  (should (equal (pyim-cregexp-quanpin-get-cchars-from-pinyin-list '("ni" "hao") t nil nil)
+  (should (equal (pyim-cregexp--quanpin-get-cchars-from-pinyin-list '("ni" "hao") t nil nil)
                  '("你尼呢泥拟逆倪妮腻匿霓溺旎昵坭铌鲵伲怩睨祢疒猊慝鹝鹢薿麑懝兒䮘㧱聻㮞檷䀑抐誽䍲㮏㲡䘌縌㠜儞䘦鈮䰯伱愵嬺氼䘽䵑䵒屔婗䝚䁥䕥孨㵫屰䭲孴㹸譺㥾籾㦐㪒馜隬蚭抳䦵㲻㞾痆㣇䧇狋䛏胒鯓狔秜跜嫟迡鯢淣苨擬觬埿鑈棿腝蛪㘈眤㩘晲掜禰妳堄儗輗蜺鉨齯鶂貎膩暱惄柅鷊臡郳衵" "好号毫豪耗浩郝皓昊镐蒿壕灏嚎濠蚝貉颢嗥薅嚆鸮诐淏鄗皞椃䬉㬔蠔㠙鰝瀥昦㘪儫㬶嘷㝀㵆獆籇獋恏噑獔聕㩝灝䝞號虠䝥顥晧㙱㕺悎傐皡暤皥㚪暭鶴䒵㞻䚽䪽侾勂滈曍䧚哠狢䧫䯫峼鎬竓藃譹薃澔皜秏諕暠薧呺茠")))
 
-  (should (equal (pyim-cregexp-quanpin-get-cchars-from-pinyin-list '("ni" "hao") t nil 1)
+  (should (equal (pyim-cregexp--quanpin-get-cchars-from-pinyin-list '("ni" "hao") t nil 1)
                  '("你尼呢泥拟逆倪妮腻匿霓溺" "好号毫豪耗浩郝皓昊镐蒿壕")))
 
-  (should (equal (pyim-cregexp-quanpin-get-cchars-from-pinyin-list '("ni" "hao") t nil 2)
+  (should (equal (pyim-cregexp--quanpin-get-cchars-from-pinyin-list '("ni" "hao") t nil 2)
                  '("你尼呢泥拟逆倪妮腻匿霓溺旎昵坭铌鲵伲怩睨祢疒猊慝" "好号毫豪耗浩郝皓昊镐蒿壕灏嚎濠蚝貉颢嗥薅嚆鸮")))
 
-  (should (equal (pyim-cregexp-quanpin-get-cchars-from-pinyin-list '("ni" "hao") t nil 3)
+  (should (equal (pyim-cregexp--quanpin-get-cchars-from-pinyin-list '("ni" "hao") t nil 3)
                  '("你尼呢泥拟逆倪妮腻匿霓溺旎昵坭铌鲵伲怩睨祢疒猊慝鹝鹢薿麑" "好号毫豪耗浩郝皓昊镐蒿壕灏嚎濠蚝貉颢嗥薅嚆鸮诐淏鄗皞")
                  ))
 
-  (should (equal (pyim-cregexp-quanpin-get-cchars-from-pinyin-list '("ni" "hao") t nil 4)
+  (should (equal (pyim-cregexp--quanpin-get-cchars-from-pinyin-list '("ni" "hao") t nil 4)
                  '("你尼呢泥拟逆倪妮腻匿霓溺旎昵坭铌鲵伲怩睨祢疒猊慝鹝鹢薿麑懝兒䮘㧱聻㮞檷䀑抐誽䍲㮏㲡䘌縌㠜儞䘦鈮䰯伱愵嬺氼䘽䵑䵒屔婗䝚䁥䕥孨㵫屰䭲孴㹸譺㥾籾㦐㪒馜隬蚭抳䦵㲻㞾痆㣇䧇狋䛏胒鯓狔秜跜嫟迡鯢淣苨擬觬埿鑈棿腝蛪㘈眤㩘晲掜禰妳堄儗輗蜺鉨齯鶂貎膩暱惄柅鷊臡郳衵" "好号毫豪耗浩郝皓昊镐蒿壕灏嚎濠蚝貉颢嗥薅嚆鸮诐淏鄗皞椃䬉㬔蠔㠙鰝瀥昦㘪儫㬶嘷㝀㵆獆籇獋恏噑獔聕㩝灝䝞號虠䝥顥晧㙱㕺悎傐皡暤皥㚪暭鶴䒵㞻䚽䪽侾勂滈曍䧚哠狢䧫䯫峼鎬竓藃譹薃澔皜秏諕暠薧呺茠")))
 
-  (should (equal (pyim-cregexp-quanpin-get-cchars-from-pinyin-list '("ni" "hao") t nil 5)
+  (should (equal (pyim-cregexp--quanpin-get-cchars-from-pinyin-list '("ni" "hao") t nil 5)
                  '("你尼呢泥拟逆倪妮腻匿霓溺旎昵坭铌鲵伲怩睨祢疒猊慝鹝鹢薿麑懝兒䮘㧱聻㮞檷䀑抐誽䍲㮏㲡䘌縌㠜儞䘦鈮䰯伱愵嬺氼䘽䵑䵒屔婗䝚䁥䕥孨㵫屰䭲孴㹸譺㥾籾㦐㪒馜隬蚭抳䦵㲻㞾痆㣇䧇狋䛏胒鯓狔秜跜嫟迡鯢淣苨擬觬埿鑈棿腝蛪㘈眤㩘晲掜禰妳堄儗輗蜺鉨齯鶂貎膩暱惄柅鷊臡郳衵" "好号毫豪耗浩郝皓昊镐蒿壕灏嚎濠蚝貉颢嗥薅嚆鸮诐淏鄗皞椃䬉㬔蠔㠙鰝瀥昦㘪儫㬶嘷㝀㵆獆籇獋恏噑獔聕㩝灝䝞號虠䝥顥晧㙱㕺悎傐皡暤皥㚪暭鶴䒵㞻䚽䪽侾勂滈曍䧚哠狢䧫䯫峼鎬竓藃譹薃澔皜秏諕暠薧呺茠")))
 
   )
