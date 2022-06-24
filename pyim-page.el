@@ -606,7 +606,7 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
   (interactive "p")
   (pyim-page-next-word (- arg)))
 
-(defun pyim-page-hide ()
+(defun pyim-page--hide ()
   "Hide pyim page."
   (pyim-page-hide-tooltip (pyim-page--get-valid-tooltip)))
 
@@ -636,7 +636,7 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
     (setq-local cursor-type t))
   (setq pyim-page--minibuffer-string nil))
 
-(add-hook 'pyim-process-ui-hide-hook #'pyim-page-hide)
+(add-hook 'pyim-process-ui-hide-hook #'pyim-page--hide)
 
 ;; * Footer
 (provide 'pyim-page)
