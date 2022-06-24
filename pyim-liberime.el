@@ -169,7 +169,7 @@
   (let* ((entered (pyim-entered-get 'point-before))
          (word (string-remove-prefix
                 (or (pyim-outcome-get 1) "") (pyim-outcome-get)))
-         (code (pyim-liberime-get-code word entered))
+         (code (pyim-liberime--get-code word entered))
          (to-be-translated
           (string-remove-prefix code entered)))
     (push code pyim-liberime-code-log)
@@ -249,7 +249,7 @@
                 (setq words nil))
                (t (liberime-process-key 65366))))))))))
 
-(defun pyim-liberime-get-code (word input &optional _limit)
+(defun pyim-liberime--get-code (word input &optional _limit)
   "Get the code of WORD from the beginning of INPUT.
 `liberime-search' with LIMIT argument is used internal.
 
