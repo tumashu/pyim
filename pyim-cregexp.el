@@ -60,12 +60,12 @@
 
 这个函数同时考虑 SCHEME, `pyim-default-scheme' 和
 `pyim-cregexp-fallback-scheme'."
-  (or (pyim-cregexp-find-scheme scheme)
-      (pyim-cregexp-find-scheme pyim-default-scheme)
-      (pyim-cregexp-find-scheme pyim-cregexp-fallback-scheme)
-      (pyim-cregexp-find-scheme 'quanpin)))
+  (or (pyim-cregexp--find-scheme scheme)
+      (pyim-cregexp--find-scheme pyim-default-scheme)
+      (pyim-cregexp--find-scheme pyim-cregexp-fallback-scheme)
+      (pyim-cregexp--find-scheme 'quanpin)))
 
-(defun pyim-cregexp-find-scheme (scheme-or-name)
+(defun pyim-cregexp--find-scheme (scheme-or-name)
   "如果 SCHEME-OR-NAME 支持 cregexp 功能，就返回对应的 scheme."
   (let ((scheme (if (pyim-scheme-p scheme-or-name)
                     scheme-or-name
