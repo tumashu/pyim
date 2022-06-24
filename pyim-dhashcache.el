@@ -684,7 +684,7 @@ pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 \\='utf
                     (code-prefix-history (pyim-scheme-code-prefix-history scheme)))
                 (when code-prefix-history
                   (cons code-prefix-history code-prefix))))
-            pyim-scheme--all-schemes))))
+            (pyim-scheme-get-all-schemes)))))
 
 ;; ** 保存 dhashcache 相关函数
 (cl-defmethod pyim-dcache-save-caches

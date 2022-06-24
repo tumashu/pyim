@@ -157,7 +157,10 @@
     (cl-find-if
      (lambda (x)
        (equal (pyim-scheme-name x) scheme-name))
-     pyim-scheme--all-schemes)))
+     (pyim-scheme-get-all-schemes))))
+
+(defun pyim-scheme-get-all-schemes ()
+  pyim-scheme--all-schemes)
 
 (defun pyim-scheme-assistant-status ()
   pyim-scheme--enable-assistant-p)
