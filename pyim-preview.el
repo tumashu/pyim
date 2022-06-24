@@ -80,7 +80,7 @@ pyim 会使用 Emacs overlay 机制在 *待输入buffer* 光标处高亮显示�
   (let* ((scheme (pyim-scheme-current))
          (preview (pyim-preview-string scheme)))
     ;; Delete old preview string.
-    (pyim-preview-delete-string)
+    (pyim-preview--delete-string)
     ;; Insert new preview string.
     (insert preview)
     ;; Highlight new preview string.
@@ -118,13 +118,13 @@ pyim 会使用 Emacs overlay 机制在 *待输入buffer* 光标处高亮显示�
       (setq preview (concat preview rest)))
     (pyim-process-subword-and-magic-convert preview)))
 
-(defun pyim-preview-delete-string ()
+(defun pyim-preview--delete-string ()
   "删除已经插入 buffer 的 preview 预览字符串。"
   (when (and pyim-preview--overlay (overlay-start pyim-preview--overlay))
     (delete-region (overlay-start pyim-preview--overlay)
                    (overlay-end pyim-preview--overlay))))
 
-(add-hook 'pyim-process-ui-hide-hook #'pyim-preview-delete-string)
+(add-hook 'pyim-process-ui-hide-hook #'pyim-preview--delete-string)
 
 (defun pyim-preview-start-point ()
   "Preview 字符串的开始位置。"
