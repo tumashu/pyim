@@ -122,18 +122,6 @@ Only useful when use posframe.")
   '((t (:background "gray44")))
   "使用以词选字功能时，选择的汉字所使用的 face.")
 
-(defvar pyim-page--posframe-buffer " *pyim-page--posframe-buffer*"
-  "这个变量用来保存做为 page tooltip 的 posframe 的 buffer.")
-
-(defvar pyim-page--popup nil
-  "这个变量用来保存做为 page tooltip 的 popup.")
-
-(defvar pyim-page--popon nil
-  "这个变量用来保存做为 page tooltip 的 popon.")
-
-(defvar pyim-page--minibuffer-string nil
-  "函数 `pyim-page-show-with-minibuffer' 上一次处理的消息字符串。")
-
 (defvar pyim-page-tooltip-infos
   '((posframe
      :package posframe
@@ -309,6 +297,9 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
 所以我们的选择是：尽量选择支持背景颜色设置的 tooltip, 如果不支持，
 就放弃这个功能。")
 
+(defvar pyim-page--posframe-buffer " *pyim-page--posframe-buffer*"
+  "这个变量用来保存做为 page tooltip 的 posframe 的 buffer.")
+
 (cl-defmethod pyim-page-show (string position (_tooltip (eql posframe)))
   "在 POSITION 位置，使用 posframe STRING."
   (posframe-show pyim-page--posframe-buffer
@@ -319,6 +310,9 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
                  :foreground-color (face-attribute 'pyim-page :foreground)
                  :border-width pyim-page-posframe-border-width
                  :border-color (face-attribute 'pyim-page-border :background)))
+
+(defvar pyim-page--minibuffer-string nil
+  "函数 `pyim-page-show-with-minibuffer' 上一次处理的消息字符串。")
 
 (cl-defmethod pyim-page-show (string _position (_tooltip (eql minibuffer)))
   "使用 minibuffer 来显示 STRING。"
@@ -351,6 +345,9 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
 (declare-function popup-delete "popup")
 (defvar popup-version)
 
+(defvar pyim-page--popup nil
+  "这个变量用来保存做为 page tooltip 的 popup.")
+
 (cl-defmethod pyim-page-show (string position (_tooltip (eql popup)))
   "Show STRING at POSITION with the help of popup-el."
   (when pyim-page--popup
@@ -366,6 +363,9 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
 (declare-function popon-create "popon")
 (declare-function popon-kill "popon")
 (declare-function popon-x-y-at-pos "popon")
+
+(defvar pyim-page--popon nil
+  "这个变量用来保存做为 page tooltip 的 popon.")
 
 (cl-defmethod pyim-page-show (string position (_tooltip (eql popon)))
   "Show STRING at POSITION with the help of popon."
