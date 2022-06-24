@@ -404,8 +404,8 @@
        `(lambda ()
           ,@(pyim-dhashcache--async-inject-variables)
           (require 'pyim-dhashcache)
-          (let ((dcache (pyim-dhashcache-generate-dcache-file ',dict-files ,code2word-file)))
-            (pyim-dhashcache-generate-word2code-dcache-file dcache ,word2code-file))
+          (let ((dcache (pyim-dhashcache--generate-dcache-file ',dict-files ,code2word-file)))
+            (pyim-dhashcache--generate-word2code-dcache-file dcache ,word2code-file))
           (pyim-dcache-save-value-to-file ',dicts-md5 ,code2word-md5-file))
        (lambda (_)
          (pyim-dcache-reload-variable pyim-dhashcache-code2word)
@@ -413,7 +413,7 @@
          (pyim-dhashcache--update-shortcode2word force)
          (setq pyim-dhashcache--update-code2word-running-p nil))))))
 
-(defun pyim-dhashcache-generate-word2code-dcache-file (dcache file)
+(defun pyim-dhashcache--generate-word2code-dcache-file (dcache file)
   "从 DCACHE 生成一个 word -> code 的反向查询表.
 DCACHE 是一个 code -> words 的 hashtable.
 并将生成的表保存到 FILE 中."
@@ -449,7 +449,7 @@ DCACHE 是一个 code -> words 的 hashtable.
     (concat (file-name-as-directory pyim-dcache-directory)
             (symbol-name variable))))
 
-(defun pyim-dhashcache-generate-dcache-file (dict-files dcache-file)
+(defun pyim-dhashcache--generate-dcache-file (dict-files dcache-file)
   "读取词库文件列表：DICT-FILES, 生成一个词库缓冲文件 DCACHE-FILE.
 
 pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 \\='utf-8-unix,

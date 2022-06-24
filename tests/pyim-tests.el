@@ -1255,7 +1255,7 @@ wo-hao 我好
     (should (equal (pyim-dhashcache--get-ishortcodes-path 'hello) (expand-file-name "hello" dir)))
     (should (equal (pyim-dhashcache--get-ishortcodes-path "hello") nil))))
 
-(ert-deftest pyim-tests-pyim-dhashcache-generate-file ()
+(ert-deftest pyim-tests-pyim-dhashcache--generate-file ()
   (let ((dist-file (pyim-tests-make-temp-file))
         (dcache-file (pyim-tests-make-temp-file))
         (word2code-dcache-file (pyim-tests-make-temp-file))
@@ -1269,11 +1269,11 @@ wo 我
 zuo-zuo-ye 做作业
 zuo-zuo-you-mang 作作有芒")
       (write-region (point-min) (point-max) dist-file))
-    (pyim-dhashcache-generate-dcache-file (list dist-file) dcache-file)
+    (pyim-dhashcache--generate-dcache-file (list dist-file) dcache-file)
     (with-temp-buffer
       (insert-file-contents dcache-file)
       (setq output1 (read (current-buffer)))
-      (pyim-dhashcache-generate-word2code-dcache-file output1 word2code-dcache-file))
+      (pyim-dhashcache--generate-word2code-dcache-file output1 word2code-dcache-file))
     (with-temp-buffer
       (insert-file-contents word2code-dcache-file)
       (setq output2 (read (current-buffer))))
