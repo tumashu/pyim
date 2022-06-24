@@ -91,14 +91,14 @@
              (directory-files pyim-dcache-directory nil "-backup-"))
     (message "PYIM: 在 %S 目录中发现备份文件的存在，可能是词库缓存文件损坏导致，请抓紧检查处理！！！"
              pyim-dcache-directory))
-  (pyim-dhashcache-init-count-and-priority-variables)
+  (pyim-dhashcache--init-count-and-priority-variables)
   (pyim-dcache-init-variable pyim-dhashcache-code2word)
   (pyim-dcache-init-variable pyim-dhashcache-word2code)
   (pyim-dcache-init-variable pyim-dhashcache-shortcode2word)
   (pyim-dcache-init-variable pyim-dhashcache-icode2word)
   (pyim-dcache-init-variable pyim-dhashcache-ishortcode2word))
 
-(defun pyim-dhashcache-init-count-and-priority-variables ()
+(defun pyim-dhashcache--init-count-and-priority-variables ()
   "初始化 count 相关的变量。"
   (pyim-dcache-init-variable pyim-dhashcache-iword2count)
   (pyim-dcache-init-variable pyim-dhashcache-iword2count-log)
@@ -249,7 +249,7 @@
      `(lambda ()
         ,@(pyim-dhashcache-async-inject-variables)
         (require 'pyim-dhashcache)
-        (pyim-dhashcache-init-count-and-priority-variables)
+        (pyim-dhashcache--init-count-and-priority-variables)
         (maphash
          (lambda (key value)
            (puthash key
@@ -331,7 +331,7 @@
         ,@(pyim-dhashcache-async-inject-variables)
         (require 'pyim-dhashcache)
         (pyim-dcache-init-variable pyim-dhashcache-icode2word)
-        (pyim-dhashcache-init-count-and-priority-variables)
+        (pyim-dhashcache--init-count-and-priority-variables)
         (maphash
          (lambda (key value)
            (puthash key (pyim-dcache-sort-words value)
@@ -359,7 +359,7 @@
         ,@(pyim-dhashcache-async-inject-variables)
         (require 'pyim-dhashcache)
         (pyim-dcache-init-variable pyim-dhashcache-icode2word)
-        (pyim-dhashcache-init-count-and-priority-variables)
+        (pyim-dhashcache--init-count-and-priority-variables)
         (pyim-dcache-save-variable
          'pyim-dhashcache-ishortcode2word
          (pyim-dhashcache--update-ishortcode2word-1
@@ -493,7 +493,7 @@ pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 \\='utf
         ,@(pyim-dhashcache-async-inject-variables)
         (require 'pyim-dhashcache)
         (pyim-dcache-init-variable pyim-dhashcache-code2word)
-        (pyim-dhashcache-init-count-and-priority-variables)
+        (pyim-dhashcache--init-count-and-priority-variables)
         (pyim-dcache-save-variable
          'pyim-dhashcache-shortcode2word
          (pyim-dhashcache--update-shortcode2word-1
