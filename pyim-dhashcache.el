@@ -63,6 +63,9 @@
 在 pyim 中，优先级表示为数字列表， `pyim-dhashcache-count-types'
 每个 count type 对应一个数字。")
 
+;;-----------------------------------------
+;; 注意事项: 如果不是迫不得已，不要更改下面几个变量的名称，因为保存词库缓存的时
+;; 候，用到变量的名称，更改之后会出现严重的兼容问题。
 (defvar pyim-dhashcache-code2word nil)
 (defvar pyim-dhashcache-code2word-md5 nil)
 (defvar pyim-dhashcache-word2code nil)
@@ -75,6 +78,8 @@
 (defvar pyim-dhashcache-shortcode2word nil)
 (defvar pyim-dhashcache-icode2word nil)
 (defvar pyim-dhashcache-ishortcode2word nil)
+;; -----------------------------------------
+
 (defvar pyim-dhashcache--update-shortcode2word-p nil)
 (defvar pyim-dhashcache--update-ishortcode2word-p nil)
 (defvar pyim-dhashcache--update-icode2word-p nil)
