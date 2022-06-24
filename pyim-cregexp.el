@@ -108,7 +108,7 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
         rx-string)
     (while (not (pyim-cregexp--valid-p rx-string))
       (setq rx-string
-            (pyim-cregexp-create-beautiful-cregexp-from-string
+            (pyim-cregexp--create-beautiful-cregexp-from-string
              string scheme char-level-num chinese-only))
       (setq char-level-num (1- char-level-num)))
     rx-string))
@@ -128,7 +128,7 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
          ;; FIXME: Emacs can't handle regexps whose length is too big :-(
          (error nil))))
 
-(defun pyim-cregexp-create-beautiful-cregexp-from-string
+(defun pyim-cregexp--create-beautiful-cregexp-from-string
     (string scheme &optional char-level-num chinese-only)
   "使用 rx 和 xr, 从 STRING 生成一个漂亮的搜索中文的 regexp.
 
