@@ -107,7 +107,7 @@ timer 实现。"
     (when (timerp pyim-indicator--timer)
       (cancel-timer pyim-indicator--timer)
       (setq pyim-indicator--timer nil))
-    (pyim-indicator-revert-cursor-color)))
+    (pyim-indicator--revert-cursor-color)))
 
 (add-hook 'pyim-process-stop-daemon-hook #'pyim-indicator-stop-daemon)
 
@@ -123,7 +123,7 @@ timer 实现。"
           (when (functionp indicator)
             (funcall indicator current-input-method chinese-input-p)))))))
 
-(defun pyim-indicator-revert-cursor-color ()
+(defun pyim-indicator--revert-cursor-color ()
   "将 cursor 颜色重置到 pyim 启动之前的状态。"
   (when pyim-indicator--original-cursor-color
     (set-cursor-color pyim-indicator--original-cursor-color)))
