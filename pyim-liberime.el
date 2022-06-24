@@ -183,7 +183,7 @@
             (goto-char (point-max)))
           (pyim-process-run))
       ;; 在 rime 后端造词和调整瓷瓶词频
-      (pyim-liberime-create-word
+      (pyim-liberime--create-word
        (reverse pyim-liberime-code-log)
        (reverse pyim-liberime-word-log))
       ;; 使用 rime 的同时，也附带的优化 quanpin 的词库。
@@ -216,7 +216,7 @@
 
 (add-to-list 'pyim-process-autoselector 'pyim-autoselector-rime)
 
-(defun pyim-liberime-create-word (codes words)
+(defun pyim-liberime--create-word (codes words)
   "通过 CODES 和 WORDS 的信息，在 rime 后端重新造词和调整词频。
 比如：
 
