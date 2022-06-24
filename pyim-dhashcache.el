@@ -642,12 +642,12 @@ pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 \\='utf
 
 当前已有的功能：
 1. 基于 :code-prefix-history 信息，升级为新的 code-prefix。"
-  (pyim-dhashcache-upgrade-icode2word
+  (pyim-dhashcache--upgrade-icode2word
    (yes-or-no-p "Delete old key after upgrade? ")))
 
-(defun pyim-dhashcache-upgrade-icode2word (&optional delete-old-key)
+(defun pyim-dhashcache--upgrade-icode2word (&optional delete-old-key)
   "升级 icode2word 缓存。"
-  (dolist (ruler (pyim-dhashcache-upgrade-icode2word-rulers))
+  (dolist (ruler (pyim-dhashcache--upgrade-icode2word-rulers))
     (let ((old-prefix-list (car ruler))
           (new-prefix (cdr ruler)))
       (dolist (old-prefix old-prefix-list)
@@ -667,7 +667,7 @@ pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 \\='utf
              (message "PYIM: No need to upgrade in `pyim-dhashcache-icode2word'.")))
          pyim-dhashcache-icode2word)))))
 
-(defun pyim-dhashcache-upgrade-icode2word-rulers ()
+(defun pyim-dhashcache--upgrade-icode2word-rulers ()
   "返回 icode2word 升级规则。
 
 类似： (((\".\") . \"wubi/\") ((\"@\") . \"cangjie/\"))."
