@@ -584,6 +584,19 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
           maxpos)))
       (pyim-process-ui-refresh))))
 
+(defun pyim-page-numeric-key-valid-p (num-key)
+  "判断 NUM-KEY 是否是一个有效的数字选择键。"
+  (let ((index (if (numberp num-key)
+                   (- num-key 1)
+                 0))
+        (end (pyim-page--end)))
+    (when (= index -1) (setq index 9))
+    (if (> (+ index (pyim-page--start)) end)
+        (progn (pyim-page-refresh) nil)
+      (pyim-process-set-candidate-position
+       (+ (pyim-page--start) index))
+      t)))
+
 (defun pyim-page-previous-page (arg)
   (interactive "p")
   (pyim-page-next-page (- arg)))

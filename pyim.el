@@ -631,16 +631,8 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
           (progn
             (pyim-process-outcome-handle 'last-char)
             (pyim-process-terminate))
-        (let ((index (if (numberp n)
-                         (- n 1)
-                       0))
-              (end (pyim-page--end)))
-          (when (= index -1) (setq index 9))
-          (if (> (+ index (pyim-page--start)) end)
-              (pyim-page-refresh)
-            (pyim-process-set-candidate-position
-             (+ (pyim-page--start) index))
-            (pyim-select-word))))
+        (when (pyim-page-numeric-key-valid-p n)
+          (pyim-select-word)))
     ;; 有些输入法使用数字键编码，这种情况下，数字键就
     ;; 不能用来选词了。
     (call-interactively #'pyim-self-insert-command)))
