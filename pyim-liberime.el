@@ -103,7 +103,7 @@
 (declare-function liberime-process-key "liberime" (keycode &optional mask))
 (declare-function liberime-select-candidate "liberime" (num))
 
-(defun pyim-liberime-scheme (orig_func)
+(defun pyim-liberime--scheme (orig_func)
   "Advice function of `pyim-scheme-current'."
   (let ((scheme (funcall orig_func)))
     (if (pyim-scheme-rime-p scheme)
@@ -112,7 +112,7 @@
           (pyim-scheme-get 'quanpin))
       scheme)))
 
-(advice-add 'pyim-scheme-current :around #'pyim-liberime-scheme)
+(advice-add 'pyim-scheme-current :around #'pyim-liberime--scheme)
 
 (cl-defmethod pyim-imobjs-create (entered (_scheme pyim-scheme-rime))
   (list (list entered)))
