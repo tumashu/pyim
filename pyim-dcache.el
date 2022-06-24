@@ -114,8 +114,8 @@ AUTO-BACKUP-THRESHOLD 倍, 那么原值将自动备份到 FILE 对应的备份�
   (make-directory (file-name-directory file) t)
   (let* ((backup-file (concat file "-backup-" (format-time-string "%Y%m%d%H%M%S")))
          (orig-value (pyim-dcache-get-value-from-file file))
-         (orig-length (pyim-dcache-value-length orig-value))
-         (length (pyim-dcache-value-length value)))
+         (orig-length (pyim-dcache--value-length orig-value))
+         (length (pyim-dcache--value-length value)))
     (when (and (numberp auto-backup-threshold)
                (< length (* auto-backup-threshold orig-length)))
       (pyim-dcache-save-value-to-file orig-value backup-file)
@@ -135,7 +135,7 @@ AUTO-BACKUP-THRESHOLD 倍, 那么原值将自动备份到 FILE 对应的备份�
         (insert ";; End:")
         (pyim-dcache-write-file file)))))
 
-(defun pyim-dcache-value-length (value)
+(defun pyim-dcache--value-length (value)
   "获取 VALUE 的某个可以作为长度的值."
   (or (ignore-errors
         (if (hash-table-p value)
