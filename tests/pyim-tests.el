@@ -77,7 +77,7 @@
   ;; 设置 pyim-dcache-directory, 防止用户个人词库不小心被覆盖掉。
   (setq pyim-dcache-directory (pyim-tests-make-temp-file t))
   ;; 做测试的时候不保存词库，防止因为误操作导致个人词库损坏。
-  (defalias 'pyim-kill-emacs-hook-function #'ignore)
+  (defalias 'pyim--kill-emacs-hook-function #'ignore)
 
   (pyim-basedict-enable)
   (pyim-dcache-init-variables))
