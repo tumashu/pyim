@@ -217,6 +217,8 @@ PUNCT-LIST 格式类似：
           (car punc)
         (nth 1 punc)))))
 
+(defun pyim-punctuation-escape-p (char)
+  (member char pyim-punctuation-escape-list))
 
 ;; * Footer
 (provide 'pyim-punctuation)

@@ -693,12 +693,8 @@ alist 列表。"
      ;; 2. item2
      ;; 3. item3
 
-     ;; 在这种情况下，数字后面输入句号必须是半角句号而不是全角句号，
-     ;; pyim 调用 `pyim-process-outcome-handle-char' 时，会检测光标前面的字符，如果这个
-     ;; 字符属于 `pyim-punctuation-escape-list' ，pyim 将输入半角标点，
-     ;; 具体细节见：`pyim-process-outcome-handle-char'
-     ((member (char-before)
-              pyim-punctuation-escape-list)
+     ;; 在这种情况下，数字后面输入句号必须是半角句号而不是全角句号。
+     ((pyim-punctuation-escape-p (char-before))
       str)
 
      ;; 当 `pyim-punctuation-half-width-functions' 中
