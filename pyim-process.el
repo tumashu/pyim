@@ -88,9 +88,6 @@ entered (nihaom) 的第一个候选词。
   "延迟多少秒开始延迟获取词条。"
   :type 'integer)
 
-(defvar pyim-process-self-insert-commands nil
-  "保存所有的 self insert command.")
-
 (defvar pyim-process-ui-init-hook nil
   "Hook used to run ui init functions.")
 
@@ -108,6 +105,9 @@ entered (nihaom) 的第一个候选词。
 
 (defvar pyim-process-stop-daemon-hook nil
   "Pyim stop daemon hook.")
+
+(defvar pyim-process--self-insert-commands nil
+  "保存所有的 self insert command.")
 
 (defvar pyim-process--input-ascii nil
   "是否开启 pyim 英文输入模式.")
@@ -197,7 +197,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
    pyim-process--candidates
    pyim-process--candidate-position))
 
-;; ** 其它包调用的短小函数
+;; ** 其它包调用的小函数
 (defun pyim-process-translating-p ()
   pyim-process--translating)
 
@@ -211,7 +211,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   (setq pyim-process--force-input-chinese t))
 
 (defun pyim-process-register-self-insert-command (command)
-  (cl-pushnew command pyim-process-self-insert-commands))
+  (cl-pushnew command pyim-process--self-insert-commands))
 
 (defun pyim-process-get-entered (&optional type)
   (pyim-entered-get type))
@@ -480,7 +480,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 
 (defun pyim-process-self-insert-command-p (cmd)
   "测试 CMD 是否是一个 pyim self insert command."
-  (member cmd pyim-process-self-insert-commands))
+  (member cmd pyim-process--self-insert-commands))
 
 (defun pyim-process--autoselector-results ()
   "运行所有 autoselectors, 返回结果列表。"

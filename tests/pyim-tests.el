@@ -2049,8 +2049,8 @@ abc 这是")))
                    '(:select last :replace "test3")))))
 
 (ert-deftest pyim-tests-pyim-process-self-insert-command-p ()
-  (let ((pyim-process-self-insert-commands nil))
-    (cl-pushnew 'test pyim-process-self-insert-commands)
+  (let ((pyim-process--self-insert-commands nil))
+    (cl-pushnew 'test pyim-process--self-insert-commands)
     (should (pyim-process-self-insert-command-p 'test))))
 
 (ert-deftest pyim-tests-pyim-process-ui-refresh ()
