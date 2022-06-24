@@ -33,12 +33,12 @@
   "Dict tools for pyim."
   :group 'pyim)
 
-(defvar pyim-dict-manager-buffer "*pyim-dict-manager*")
+(defvar pyim-dict-manager--buffer "*pyim-dict-manager*")
 
 (defun pyim-dict-manager-refresh ()
   "Refresh the contents of the *pyim-dict-manager* buffer."
   (interactive)
-  (with-current-buffer pyim-dict-manager-buffer
+  (with-current-buffer pyim-dict-manager--buffer
     (let ((inhibit-read-only t)
           (dicts-list pyim-dicts)
           (format-string "%-4s %-4s %-60s\n")
@@ -84,7 +84,7 @@
 (defun pyim-dict-manager-toggle-dict (&optional _enable)
   "启用当前行对应的词库。"
   (interactive)
-  (when (equal (buffer-name) pyim-dict-manager-buffer)
+  (when (equal (buffer-name) pyim-dict-manager--buffer)
     (let* ((id (get-text-property (point) 'id))
            (dict (cl-copy-list (nth (1- id) pyim-dicts)))
            (disable (plist-get dict :disable))
@@ -100,7 +100,7 @@
 (defun pyim-dict-manager-delete-dict ()
   "从 `pyim-dicts' 中删除当前行对应的词库信息。"
   (interactive)
-  (when (equal (buffer-name) pyim-dict-manager-buffer)
+  (when (equal (buffer-name) pyim-dict-manager--buffer)
     (let ((id (get-text-property (point) 'id))
           (line (line-number-at-pos)))
       (when (yes-or-no-p "确定要删除这条词库信息吗? ")
@@ -112,7 +112,7 @@
 (defun pyim-dict-manager-dict-position-up ()
   "向上移动词库。"
   (interactive)
-  (when (equal (buffer-name) pyim-dict-manager-buffer)
+  (when (equal (buffer-name) pyim-dict-manager--buffer)
     (let* ((id (get-text-property (point) 'id))
            (dict1 (nth (- id 1) pyim-dicts))
            (dict2 (nth (- id 2) pyim-dicts))
@@ -127,7 +127,7 @@
 (defun pyim-dict-manager-dict-position-down ()
   "向下移动词库。"
   (interactive)
-  (when (equal (buffer-name) pyim-dict-manager-buffer)
+  (when (equal (buffer-name) pyim-dict-manager--buffer)
     (let* ((id (get-text-property (point) 'id))
            (dict1 (nth (- id 1) pyim-dicts))
            (dict2 (nth id pyim-dicts))
@@ -150,7 +150,7 @@
 (defun pyim-dict-manager-add-dict ()
   "为 `pyim-dicts' 添加词库信息。"
   (interactive)
-  (when (equal (buffer-name) pyim-dict-manager-buffer)
+  (when (equal (buffer-name) pyim-dict-manager--buffer)
     (let ((line (line-number-at-pos))
           dict name file first-used)
       (setq name (read-from-minibuffer "请输入词库名称： "))
@@ -189,7 +189,7 @@
 4. 保存词库设置。
 5. 重启输入法。"
   (interactive)
-  (let ((buffer (get-buffer-create pyim-dict-manager-buffer)))
+  (let ((buffer (get-buffer-create pyim-dict-manager--buffer)))
     (pyim-dict-manager-refresh)
     (switch-to-buffer buffer)
     (pyim-dict-manager-mode)
