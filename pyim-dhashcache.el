@@ -42,7 +42,7 @@
 (require 'pyim-scheme)
 (require 'sort)
 
-(defvar pyim-dhashcache-count-types
+(defvar pyim-dhashcache--count-types
   `((day
      ;; 保存 day count 时用到的 key 的格式, 类似 :20220206
      :format ":%Y%m%d"
@@ -60,7 +60,7 @@
      :factor ,(/ 100.0 7)))
   "通过 count 计算词条排序优先级时用到重要信息。
 
-在 pyim 中，优先级表示为数字列表， `pyim-dhashcache-count-types'
+在 pyim 中，优先级表示为数字列表， `pyim-dhashcache--count-types'
 每个 count type 对应一个数字。")
 
 ;;-----------------------------------------
@@ -293,7 +293,7 @@
                                               (cdr (assoc label counts-info))
                                               weights))
                         factor))))
-          pyim-dhashcache-count-types))
+          pyim-dhashcache--count-types))
 
 (defun pyim-dhashcache--get-ishortcodes-counts-from-log (log-info &optional time)
   "从 LOG-INFO 中获取所有的 count 值。
@@ -316,7 +316,7 @@
                        (plist (cdr (assoc label log-info))))
                   (push (or (plist-get plist key) 0) output)))
               `(,label ,@(reverse output))))
-          pyim-dhashcache-count-types))
+          pyim-dhashcache--count-types))
 
 (defun pyim-dhashcache--update-personal-words (&optional force)
   (pyim-dhashcache--update-icode2word force))
@@ -582,7 +582,7 @@ pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 \\='utf
   (pyim-dhashcache--put
     pyim-dhashcache-iword2count-log word
     (let (out)
-      (dolist (x pyim-dhashcache-count-types)
+      (dolist (x pyim-dhashcache--count-types)
         (let* ((label (car x))
                (key (intern (format-time-string (plist-get (cdr x) :format))))
                (n (plist-get (cdr x) :max-save-length))
