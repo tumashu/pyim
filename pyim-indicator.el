@@ -69,8 +69,8 @@ timer 实现。"
 
 (defvar pyim-indicator--timer-repeat 0.4)
 
-(defvar pyim-indicator-daemon-function-argument nil
-  "实现 `pyim-indicator-daemon-function' 时，用于传递参数，主要原因
+(defvar pyim-indicator--daemon-function-argument nil
+  "实现 `pyim-indicator--daemon-function' 时，用于传递参数，主要原因
 是由于 `post-command-hook' 不支持参数。")
 
 (defvar pyim-indicator--last-input-method-title nil
@@ -81,15 +81,15 @@ timer 实现。"
   (unless pyim-indicator--original-cursor-color
     (setq pyim-indicator--original-cursor-color
           (frame-parameter nil 'cursor-color)))
-  (setq pyim-indicator-daemon-function-argument
+  (setq pyim-indicator--daemon-function-argument
         #'pyim-process-indicator-function)
   (if pyim-indicator-use-post-command-hook
-      (add-hook 'post-command-hook #'pyim-indicator-daemon-function)
+      (add-hook 'post-command-hook #'pyim-indicator--daemon-function)
     (unless (timerp pyim-indicator--timer)
       (setq pyim-indicator--timer
             (run-with-timer
              nil pyim-indicator--timer-repeat
-             #'pyim-indicator-daemon-function)))))
+             #'pyim-indicator--daemon-function)))))
 
 (add-hook 'pyim-process-start-daemon-hook #'pyim-indicator-start-daemon)
 
@@ -102,8 +102,8 @@ timer 实现。"
            (lambda (buf)
              (buffer-local-value 'current-input-method buf))
            (remove (current-buffer) (buffer-list)))
-    (setq pyim-indicator-daemon-function-argument nil)
-    (remove-hook 'post-command-hook #'pyim-indicator-daemon-function)
+    (setq pyim-indicator--daemon-function-argument nil)
+    (remove-hook 'post-command-hook #'pyim-indicator--daemon-function)
     (when (timerp pyim-indicator--timer)
       (cancel-timer pyim-indicator--timer)
       (setq pyim-indicator--timer nil))
@@ -111,14 +111,14 @@ timer 实现。"
 
 (add-hook 'pyim-process-stop-daemon-hook #'pyim-indicator-stop-daemon)
 
-(defun pyim-indicator-daemon-function ()
+(defun pyim-indicator--daemon-function ()
   "`pyim-indicator-daemon' 内部使用的函数。"
   (while-no-input
     (redisplay)
     (ignore-errors
       (let ((chinese-input-p
-             (and (functionp pyim-indicator-daemon-function-argument)
-                  (funcall pyim-indicator-daemon-function-argument))))
+             (and (functionp pyim-indicator--daemon-function-argument)
+                  (funcall pyim-indicator--daemon-function-argument))))
         (dolist (indicator pyim-indicator-list)
           (when (functionp indicator)
             (funcall indicator current-input-method chinese-input-p)))))))
