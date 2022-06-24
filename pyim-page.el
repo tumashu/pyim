@@ -125,7 +125,7 @@ Only useful when use posframe.")
 (defvar pyim-page--posframe-buffer " *pyim-page--posframe-buffer*"
   "这个变量用来保存做为 page tooltip 的 posframe 的 buffer.")
 
-(defvar pyim-page-last-popup nil
+(defvar pyim-page--popup nil
   "这个变量用来保存做为 page tooltip 的 popup.")
 
 (defvar pyim-page-last-popon nil
@@ -353,10 +353,10 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
 
 (cl-defmethod pyim-page-show (string position (_tooltip (eql popup)))
   "Show STRING at POSITION with the help of popup-el."
-  (when pyim-page-last-popup
+  (when pyim-page--popup
     ;; 延迟获取词条的时候，如果不把已经存在的 popup 删除，就会出现两个 page.
-    (popup-delete pyim-page-last-popup))
-  (setq pyim-page-last-popup
+    (popup-delete pyim-page--popup))
+  (setq pyim-page--popup
         (apply #'popup-tip string
                :point position :around t :nowait t :nostrip t
                ;; popup v0.5.9 以后才支持 face 参数
@@ -615,7 +615,7 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
 
 (cl-defmethod pyim-page-hide-tooltip ((_tooltip (eql popup)))
   "Hide popup tooltip."
-  (popup-delete pyim-page-last-popup))
+  (popup-delete pyim-page--popup))
 
 (cl-defmethod pyim-page-hide-tooltip ((_tooltip (eql popon)))
   "Hide popon tooltip."
