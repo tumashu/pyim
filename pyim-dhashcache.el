@@ -684,9 +684,9 @@ pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 \\='utf
 ;; ** 保存 dhashcache 相关函数
 (cl-defmethod pyim-dcache-save-caches
   (&context ((pyim-dcache-backend) (eql pyim-dhashcache)))
-  (pyim-dhashcache-save-personal-dcache-to-file))
+  (pyim-dhashcache--save-personal-dcache-to-file))
 
-(defun pyim-dhashcache-save-personal-dcache-to-file ()
+(defun pyim-dhashcache--save-personal-dcache-to-file ()
   ;; 用户选择过的词
   (pyim-dcache-save-variable
    'pyim-dhashcache-icode2word
