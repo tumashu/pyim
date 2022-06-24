@@ -84,6 +84,10 @@ entered (nihaom) 的第一个候选词。
 (define-obsolete-variable-alias
   'pyim-process-async-delay 'pyim-process--run-delay "5.0")
 
+(defcustom pyim-process-run-delay 0.5
+  "延迟多少秒开始延迟获取词条。"
+  :type 'integer)
+
 (defvar pyim-process-self-insert-commands nil
   "保存所有的 self insert command.")
 
@@ -104,10 +108,6 @@ entered (nihaom) 的第一个候选词。
 
 (defvar pyim-process-stop-daemon-hook nil
   "Pyim stop daemon hook.")
-
-(defcustom pyim-process--run-delay 0.5
-  "延迟多少秒开始延迟获取词条。"
-  :type 'integer)
 
 (defvar pyim-process--input-ascii nil
   "是否开启 pyim 英文输入模式.")
@@ -438,7 +438,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   (pyim-process--run-delay-timer-reset)
   (setq pyim-process--run-delay-timer
         (run-with-timer
-         pyim-process--run-delay
+         pyim-process-run-delay
          nil #'pyim-process--run-delay-timer-function)))
 
 (defun pyim-process--run-delay-timer-reset ()
