@@ -112,7 +112,7 @@ entered (nihaom) 的第一个候选词。
 这个变量主要用于全拼和双拼输入法的多音字矫正，其取值一般使用用户
 输入生成的 imobjs 转换得到，保留了用户原始输入的许多信息。")
 
-(defvar pyim-process-run-delay-timer nil
+(defvar pyim-process--run-delay-timer nil
   "异步处理 entered 时，使用的 timer.")
 
 (defvar pyim-process-self-insert-commands nil
@@ -426,20 +426,20 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 注意：按理说，两种模式的延时阈值应该单独设置的，但当前 pyim 没有
 将其分开，因为这样做在满足当前需求的同时，可以简化代码，如果以后
 有新功能必须将其分开时，再做考虑。"
-  (pyim-process-run-delay-timer-reset)
-  (setq pyim-process-run-delay-timer
+  (pyim-process--run-delay-timer-reset)
+  (setq pyim-process--run-delay-timer
         (run-with-timer
          pyim-process-run-delay
-         nil #'pyim-process-run-delay-timer-function)))
+         nil #'pyim-process--run-delay-timer-function)))
 
-(defun pyim-process-run-delay-timer-reset ()
-  "Reset `pyim-process-run-delay-timer'."
-  (when pyim-process-run-delay-timer
-    (cancel-timer pyim-process-run-delay-timer)
-    (setq pyim-process-run-delay-timer nil)))
+(defun pyim-process--run-delay-timer-reset ()
+  "Reset `pyim-process--run-delay-timer'."
+  (when pyim-process--run-delay-timer
+    (cancel-timer pyim-process--run-delay-timer)
+    (setq pyim-process--run-delay-timer nil)))
 
-(defun pyim-process-run-delay-timer-function ()
-  "Function used by `pyim-process-run-delay-timer'"
+(defun pyim-process--run-delay-timer-function ()
+  "Function used by `pyim-process--run-delay-timer'"
   (pyim-process-handle-candidates-async)
   (pyim-process-handle-candidates-limit-time))
 
@@ -781,7 +781,7 @@ BUG：拼音无法有效地处理多音字。"
   (setq pyim-process-force-input-chinese nil)
   (setq pyim-process-candidates nil)
   (setq pyim-process-candidates-last nil)
-  (pyim-process-run-delay-timer-reset)
+  (pyim-process--run-delay-timer-reset)
   (pyim-process-ui-hide))
 
 (defun pyim-process-ui-hide ()
