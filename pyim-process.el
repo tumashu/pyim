@@ -88,7 +88,7 @@ entered (nihaom) 的第一个候选词。
   "延迟多少秒开始延迟获取词条。"
   :type 'integer)
 
-(defvar pyim-process-input-ascii nil
+(defvar pyim-process--input-ascii nil
   "是否开启 pyim 英文输入模式.")
 
 (defvar pyim-process-force-input-chinese nil
@@ -191,7 +191,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 细节信息请参考 `pyim-page--refresh' 的 docstring.")
 
 (pyim-register-local-variables
- '(pyim-process-input-ascii
+ '(pyim-process--input-ascii
    pyim-process-translating
    pyim-process--imobjs
    pyim-process--candidates
@@ -305,13 +305,13 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 (defun pyim-process-toggle-input-ascii ()
   "pyim 切换中英文输入模式, 同时调整标点符号样式。"
   (interactive)
-  (setq pyim-process-input-ascii
-        (not pyim-process-input-ascii)))
+  (setq pyim-process--input-ascii
+        (not pyim-process--input-ascii)))
 
 (defun pyim-process--input-chinese-predicate-1 ()
   "`pyim-process-input-chinese-p' 内部函数，测试环境。"
   (or (pyim-process-force-input-chinese-p)
-      (and (not pyim-process-input-ascii)
+      (and (not pyim-process--input-ascii)
            (not (pyim-process-auto-switch-english-input-p)))))
 
 (defun pyim-process--input-chinese-predicate-2 (event entered first-chars rest-chars)
@@ -695,7 +695,7 @@ alist 列表。"
     (auto
      ;; 如果用户手动或者根据环境自动切换为英文输入模式，
      ;; 那么标点符号也要切换为半角模式。
-     (and (not pyim-process-input-ascii)
+     (and (not pyim-process--input-ascii)
           (not (pyim-process-auto-switch-english-input-p))))))
 
 (defun pyim-process-create-code-criteria ()
