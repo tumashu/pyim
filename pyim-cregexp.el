@@ -158,13 +158,13 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
 (defun pyim-cregexp--create-cregexp-from-string
     (string scheme &optional char-level-num chinese-only)
   (let* ((char-level-num (pyim-cregexp--char-level-num char-level-num))
-         (string-list (pyim-cregexp-split-string string)))
+         (string-list (pyim-cregexp--split-string string)))
     ;; 确保 pyim 词库加载
     (pyim-dcache-init-variables)
     (pyim-cregexp--create-cregexp-from-string-list
      string-list scheme char-level-num chinese-only)))
 
-(defun pyim-cregexp-split-string (string)
+(defun pyim-cregexp--split-string (string)
   (let ((sep "#####&&&&#####"))
     (remove "" (split-string
                 (replace-regexp-in-string
