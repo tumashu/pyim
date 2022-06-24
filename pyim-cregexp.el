@@ -104,7 +104,7 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
     (string scheme &optional char-level-num chinese-only)
   "从 STRING 创建一个有效的搜索中文的 regexp."
   (let ((char-level-num
-         (pyim-cregexp-char-level-num char-level-num))
+         (pyim-cregexp--char-level-num char-level-num))
         rx-string)
     (while (not (pyim-cregexp-valid-p rx-string))
       (setq rx-string
@@ -113,7 +113,7 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
       (setq char-level-num (1- char-level-num)))
     rx-string))
 
-(defun pyim-cregexp-char-level-num (num)
+(defun pyim-cregexp--char-level-num (num)
   "根据 NUM 返回一个有效的常用汉字级别。"
   (if (numberp num)
       (max (min num 4) 1)
@@ -157,7 +157,7 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
 
 (defun pyim-cregexp-create-cregexp-from-string
     (string scheme &optional char-level-num chinese-only)
-  (let* ((char-level-num (pyim-cregexp-char-level-num char-level-num))
+  (let* ((char-level-num (pyim-cregexp--char-level-num char-level-num))
          (string-list (pyim-cregexp-split-string string)))
     ;; 确保 pyim 词库加载
     (pyim-dcache-init-variables)
@@ -208,7 +208,7 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
   (imobj (_scheme pyim-scheme-quanpin)
          &optional match-beginning first-equal all-equal char-level-num)
   "从 IMOBJ 创建一个搜索中文的 regexp, 适用于全拼输入法。"
-  (let* ((num (pyim-cregexp-char-level-num char-level-num))
+  (let* ((num (pyim-cregexp--char-level-num char-level-num))
          (pinyin-list (pyim-cregexp-quanpin-get-pinyin-list imobj))
          (cchars-list
           (pyim-cregexp-quanpin-get-cchars-from-pinyin-list
@@ -230,7 +230,7 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
 (defun pyim-cregexp-quanpin-get-cchars-from-pinyin-list
     (pinyin-list all-equal first-equal char-level-num)
   "(\"ni\" \"hao\") => (\"你 ... 蔫 ... 鸟 ... 宁 ...\" \"好号毫\")"
-  (let ((num (pyim-cregexp-char-level-num char-level-num))
+  (let ((num (pyim-cregexp--char-level-num char-level-num))
         (n 0)
         results)
     (dolist (py pinyin-list)
