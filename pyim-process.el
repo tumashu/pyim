@@ -330,12 +330,12 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
       (setq pyim-process--candidates
             (or (delete-dups (pyim-candidates-create pyim-process--imobjs scheme))
                 (list entered-to-translate)))
-      (unless (eq (pyim-process-auto-select) 'auto-select-success)
+      (unless (eq (pyim-process--auto-select) 'auto-select-success)
         (setq pyim-process--candidate-position 1)
         (pyim-process-ui-refresh)
         (pyim-process-run-delay)))))
 
-(defun pyim-process-auto-select ()
+(defun pyim-process--auto-select ()
   "自动上屏操作流程。
 
 1. (:select last) 模式：
