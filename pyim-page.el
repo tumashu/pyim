@@ -184,13 +184,13 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 1. 函数 `pyim-page-current-page' 返回值为3， 说明当前 page 为第3页。
 2. 函数 `pyim-page-total-page'  返回值为5，说明 page 共有5页。
 3. 函数 `pyim-page--start' 返回 B 所在的位置。
-4. 函数 `pyim-page-end' 返回 E 所在的位置。
+4. 函数 `pyim-page--end' 返回 E 所在的位置。
 5. 函数 `pyim-page-refresh' 会从待选词条列表中提取一个 sublist:
 
      (\"薿\" \"旎\" \"睨\" \"铌\" \"昵\" \"匿\" \"倪\" \"霓\" \"暱\")
 
 这个 sublist 的起点为 `pyim-page--start' 的返回值，终点为
-`pyim-page-end' 的返回值。并保存到一个 hashtable 的 :candidates
+`pyim-page--end' 的返回值。并保存到一个 hashtable 的 :candidates
 关键字对应的位置，这个 hastable 最终会做为参数传递给
 `pyim-page-style' 相关的函数，用于生成用于在选词框中显示的字符串。"
   (let* ((candidate-showed (pyim-page--get-showed-candidates))
@@ -224,7 +224,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                 x)))
           (cl-subseq (pyim-process-get-candidates)
                      (1- (pyim-page--start))
-                     (pyim-page-end))))
+                     (pyim-page--end))))
 
 (defun pyim-page--start (&optional candidate-position)
   "计算当前所在页的第一个词条的位置.
@@ -235,7 +235,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                       (pyim-process-get-candidate-position)))))
     (1+ (* (/ (1- pos) pyim-page-length) pyim-page-length))))
 
-(defun pyim-page-end ()
+(defun pyim-page--end ()
   "计算当前所在页的最后一个词条的位置，
 
 细节信息请参考 `pyim-page-refresh' 的 docstring."
