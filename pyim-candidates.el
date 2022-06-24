@@ -134,7 +134,7 @@
   ;; 这段代码主要实现以下功能：假如用户输入 nihaomazheshi, 但词库里面找不到对
   ;; 应的词条，那么输入法自动用 nihaoma 和 zheshi 的第一个词条："你好吗" 和 "
   ;; 这是" 连接成一个新的字符串 "你好吗这是" 做为第一个候选词。
-  (let* ((candidates (pyim-candidates-quanpin imobjs scheme))
+  (let* ((candidates (pyim-candidates--quanpin imobjs scheme))
          (n (length (car candidates)))
          output)
     (push (car candidates) output)
@@ -143,21 +143,21 @@
                            (mapcar (lambda (imobj)
                                      (nthcdr n imobj))
                                    imobjs))))
-      (let ((candidates (pyim-candidates-quanpin imobjs scheme)))
-        (push (car (pyim-candidates-quanpin imobjs scheme t)) output)
+      (let ((candidates (pyim-candidates--quanpin imobjs scheme)))
+        (push (car (pyim-candidates--quanpin imobjs scheme t)) output)
         (setq n (length (car candidates)))))
     (append (pyim-subconcat (nreverse output) "")
             candidates)))
 
-(defun pyim-candidates-quanpin (imobjs scheme &optional fast-search)
+(defun pyim-candidates--quanpin (imobjs scheme &optional fast-search)
   "用于全拼输入法的 `pyim-candidates-create' 方法内部使用的函数。"
   (let* ((znabc-words (pyim-candidates-znabc-words imobjs scheme fast-search))
          (jianpin-words (pyim-candidates-jianpin-words imobjs scheme fast-search))
-         (quanpin-words (pyim-candidates-quanpin-words imobjs scheme fast-search))
+         (quanpin-words (pyim-candidates--quanpin-words imobjs scheme fast-search))
          (personal-words (pyim-candidates--sort (nth 0 quanpin-words)))
          (common-words (nth 1 quanpin-words))
          (chief-word (pyim-candidates-get-chief scheme personal-words))
-         (quanpin-chars (pyim-candidates-quanpin-first-chars imobjs scheme fast-search))
+         (quanpin-chars (pyim-candidates--quanpin-first-chars imobjs scheme fast-search))
          (matched-chars (nth 0 quanpin-chars))
          (possible-chars (nth 1 quanpin-chars))
          (words `( :chief-word ,chief-word
@@ -212,46 +212,46 @@
           (push (delete-dups (append w2 w1)) jianpin-words)))
       (pyim-zip (nreverse jianpin-words) fast-search))))
 
-(defun pyim-candidates-quanpin-words (imobjs scheme &optional fast-search)
+(defun pyim-candidates--quanpin-words (imobjs scheme &optional fast-search)
   "从 dcache 获取个人词条，词库词条。"
   (let (personal-words common-words)
     (dolist (imobj imobjs)
-      (let* ((w1 (pyim-candidates-quanpin-personal-words imobj scheme))
-             (w2 (pyim-candidates-quanpin-common-words imobj scheme)))
+      (let* ((w1 (pyim-candidates--quanpin-personal-words imobj scheme))
+             (w2 (pyim-candidates--quanpin-common-words imobj scheme)))
         (push w1 personal-words)
         (push w2 common-words)))
     (setq personal-words (pyim-zip (nreverse personal-words) fast-search))
     (setq common-words (pyim-zip (nreverse common-words) fast-search))
     (list personal-words common-words)))
 
-(defun pyim-candidates-quanpin-personal-words (imobj scheme)
+(defun pyim-candidates--quanpin-personal-words (imobj scheme)
   (pyim-dcache-get
    (string-join (pyim-codes-create imobj scheme) "-")
    (if pyim-enable-shortcode
        '(icode2word ishortcode2word)
      '(icode2word))))
 
-(defun pyim-candidates-quanpin-common-words (imobj scheme)
+(defun pyim-candidates--quanpin-common-words (imobj scheme)
   (pyim-dcache-get
    (string-join (pyim-codes-create imobj scheme) "-")
    (if pyim-enable-shortcode
        '(code2word shortcode2word)
      '(code2word))))
 
-(defun pyim-candidates-quanpin-first-chars (imobjs scheme &optional fast-search)
+(defun pyim-candidates--quanpin-first-chars (imobjs scheme &optional fast-search)
   "获取词条第一汉字列表。"
   (let (matched-chars possible-chars)
     (dolist (imobj imobjs)
-      (let* ((w1 (pyim-candidates-quanpin-first-matched-chars imobj scheme))
+      (let* ((w1 (pyim-candidates--quanpin-first-matched-chars imobj scheme))
              (w2 (unless w1
-                   (pyim-candidates-quanpin-first-possible-chars imobj scheme))))
+                   (pyim-candidates--quanpin-first-possible-chars imobj scheme))))
         (push w1 matched-chars)
         (push w2 possible-chars)))
     (setq matched-chars (pyim-zip (nreverse matched-chars) fast-search))
     (setq possible-chars (pyim-zip (nreverse possible-chars) fast-search))
     (list matched-chars possible-chars)))
 
-(defun pyim-candidates-quanpin-first-matched-chars (imobj scheme)
+(defun pyim-candidates--quanpin-first-matched-chars (imobj scheme)
   "获取输入的全拼对应的第一个汉字。
 
 假如用户输入 nihao 时，获取 ni 对应的汉字。"
@@ -260,7 +260,7 @@
      `(,@(pyim-dcache-get code '(icode2word code2word))
        ,@(pyim-pymap-py2cchar-get code t t)))))
 
-(defun pyim-candidates-quanpin-first-possible-chars (imobj scheme)
+(defun pyim-candidates--quanpin-first-possible-chars (imobj scheme)
   "获取输入的全拼对应的第一个可能的常用汉字。
 
 假如用户输入 ni 时，获取拼音匹配 ni.* 的常用汉字，比如：ni niao
