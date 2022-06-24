@@ -55,7 +55,7 @@
           (cl-mapcar #'char-to-string string)
         (list string)))))
 
-(defun pyim-cstring-substrings (cstring &optional max-length number)
+(defun pyim-cstring--substrings (cstring &optional max-length number)
   "找出 CSTRING 中所有长度不超过 MAX-LENGTH 的子字符串，生成一个 alist。
 
 这个 alist 中的每个元素为：(子字符串 开始位置 结束位置), 参数
@@ -63,19 +63,19 @@ NUMBER 用于递归，表示子字符串在 CSTRING 中的位置。"
   (let ((number (or number 0)))
     (cond
      ((= (length cstring) 0) nil)
-     (t (append (pyim-cstring-substrings-1 cstring max-length number)
-                (pyim-cstring-substrings (substring cstring 1)
-                                         max-length (1+ number)))))))
+     (t (append (pyim-cstring--substrings-1 cstring max-length number)
+                (pyim-cstring--substrings (substring cstring 1)
+                                          max-length (1+ number)))))))
 
-(defun pyim-cstring-substrings-1 (cstring max-length number)
-  "`pyim-cstring-substrings' 的内部函数。"
+(defun pyim-cstring--substrings-1 (cstring max-length number)
+  "`pyim-cstring--substrings' 的内部函数。"
   (cond
    ((< (length cstring) 2) nil)
    (t (append
        (let ((length (length cstring)))
          (when (<= length (or max-length 6))
            (list (list cstring number (+ number length)))))
-       (pyim-cstring-substrings-1
+       (pyim-cstring--substrings-1
         (substring cstring 0 -1)
         max-length number)))))
 

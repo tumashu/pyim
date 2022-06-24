@@ -61,7 +61,7 @@ CHINESE-STRING 分词，得到一个词条 alist，这个 alist 的元素都是�
   (pyim-dcache-init-variables)
 
   (let (result)
-    (dolist (string-list (pyim-cstring-substrings chinese-string max-word-length))
+    (dolist (string-list (pyim-cstring--substrings chinese-string max-word-length))
       (let ((pinyin-list (pyim-cstring-to-pinyin (car string-list) nil "-" t)))
         (dolist (pinyin pinyin-list)
           (let ((words (pyim-dcache-get pinyin '(code2word)))) ; 忽略个人词库可以提高速度
