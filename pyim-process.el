@@ -97,7 +97,7 @@ entered (nihaom) 的第一个候选词。
 这个变量只用于 `pyim-convert-string-at-point', 不要
 在其它地方使用。")
 
-(defvar pyim-process-translating nil
+(defvar pyim-process--translating nil
   "记录是否在转换状态.")
 
 (defvar pyim-process--last-created-words nil
@@ -192,7 +192,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 
 (pyim-register-local-variables
  '(pyim-process--input-ascii
-   pyim-process-translating
+   pyim-process--translating
    pyim-process--imobjs
    pyim-process--candidates
    pyim-process--candidate-position))
@@ -485,10 +485,10 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
            (pyim-process-ui-refresh)))))))
 
 (defun pyim-process-translating-p ()
-  pyim-process-translating)
+  pyim-process--translating)
 
 (defun pyim-process-set-translating-flag (value)
-  (setq pyim-process-translating value))
+  (setq pyim-process--translating value))
 
 (defun pyim-process-get-candidates ()
   pyim-process--candidates)
