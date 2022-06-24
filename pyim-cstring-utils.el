@@ -95,13 +95,13 @@ CHINESE-STRING 分词，得到一个词条 alist，这个 alist 的元素都是�
   (mapconcat (lambda (str)
                (when (> (length str) 0)
                  (if (not (pyim-string-match-p "\\CC" str))
-                     (pyim-cstring-split-to-string-1
+                     (pyim-cstring--split-to-string
                       str prefer-short-word separator max-word-length)
                    str)))
              (pyim-cstring--partition string) (or separator " ")))
 
-(defun pyim-cstring-split-to-string-1 (chinese-string &optional prefer-short-word
-                                                      separator max-word-length)
+(defun pyim-cstring--split-to-string (chinese-string &optional prefer-short-word
+                                                     separator max-word-length)
   "`pyim-cstring-split-to-string' 内部函数。"
   (let ((str-length (length chinese-string))
         (word-list (pyim-cstring-split-to-list
