@@ -1329,16 +1329,16 @@ zuo-zuo-you-mang 作作有芒")
     (should (equal (gethash "n" ishortcode2word)
                    '("你" "呢")))))
 
-(ert-deftest pyim-tests-pyim-dhashcache-put/delete ()
+(ert-deftest pyim-tests-pyim-dhashcache--put/delete ()
   (let ((pyim-dcache-backend 'pyim-dhashcache)
         (pyim-dhashcache-icode2word (make-hash-table :test #'equal)))
     (puthash "ni-hao" '("你好" "呢耗") pyim-dhashcache-icode2word)
-    (pyim-dhashcache-put
-      pyim-dhashcache-icode2word "ni-hao"
-      (cons "呢毫" orig-value))
-    (pyim-dhashcache-put
-      pyim-dhashcache-icode2word "ni-bu-hao"
-      (list "你不好"))
+    (pyim-dhashcache--put
+     pyim-dhashcache-icode2word "ni-hao"
+     (cons "呢毫" orig-value))
+    (pyim-dhashcache--put
+     pyim-dhashcache-icode2word "ni-bu-hao"
+     (list "你不好"))
     (should (equal (gethash "ni-hao" pyim-dhashcache-icode2word) '("呢毫" "你好" "呢耗")))
     (should (equal (gethash "ni-bu-hao" pyim-dhashcache-icode2word) '("你不好")))
     (pyim-dcache-delete-word "你不好")

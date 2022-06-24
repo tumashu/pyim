@@ -147,7 +147,7 @@
   ;; 词库缓存会从 icode2word 再次重建。
   (pyim-dhashcache-insert-word-into-ishortcode2word word code prepend))
 
-(defmacro pyim-dhashcache-put (cache code &rest body)
+(defmacro pyim-dhashcache--put (cache code &rest body)
   "将 BODY 的返回值保存到 CACHE 对应的 CODE 中。
 
 注意事项：这个宏是一个指代宏，其中 orig-value 在这个宏中有特殊含
@@ -168,7 +168,7 @@
 
 默认 WORD 放到已有词条的最后，如果 PREPEND 为 non-nil, WORD 将放
 到已有词条的最前面。"
-  (pyim-dhashcache-put
+  (pyim-dhashcache--put
     pyim-dhashcache-icode2word code
     (if prepend
         `(,word ,@(remove word orig-value))
@@ -180,12 +180,12 @@
 默认 WORD 放到已有词条的最后，如果 PREPEND 为 non-nil, WORD 将放
 到已有词条的最前面。"
   (dolist (newcode (pyim-dhashcache-get-ishortcodes code))
-    (pyim-dhashcache-put
-      pyim-dhashcache-ishortcode2word
-      newcode
-      (if prepend
-          `(,word ,@(remove word orig-value))
-        `(,@(remove word orig-value) ,word)))))
+    (pyim-dhashcache--put
+     pyim-dhashcache-ishortcode2word
+     newcode
+     (if prepend
+         `(,word ,@(remove word orig-value))
+       `(,@(remove word orig-value) ,word)))))
 
 (defun pyim-dhashcache-get-ishortcodes (code)
   "获取CODE 所有的简写 ishortcodes.
@@ -565,55 +565,55 @@ pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 \\='utf
         (pyim-dhashcache--update-iword2count-recent
          word 50 pyim-dhashcache-iword2count-recent-50-words))
   ;; 更新总 count 表
-  (pyim-dhashcache-put
-    pyim-dhashcache-iword2count word
-    (cond
-     ((functionp wordcount-handler)
-      (funcall wordcount-handler (or orig-value 0)))
-     ((numberp wordcount-handler)
-      wordcount-handler)
-     (t (or orig-value 0))))
+  (pyim-dhashcache--put
+   pyim-dhashcache-iword2count word
+   (cond
+    ((functionp wordcount-handler)
+     (funcall wordcount-handler (or orig-value 0)))
+    ((numberp wordcount-handler)
+     wordcount-handler)
+    (t (or orig-value 0))))
   ;; 更新 count 日志表。
-  (pyim-dhashcache-put
-    pyim-dhashcache-iword2count-log word
-    (let (out)
-      (dolist (x pyim-dhashcache-count-types)
-        (let* ((label (car x))
-               (key (intern (format-time-string (plist-get (cdr x) :format))))
-               (n (plist-get (cdr x) :max-save-length))
-               (plist (cdr (assoc label orig-value)))
-               (value (plist-get plist key))
-               (output (if value
-                           (plist-put plist key (+ 1 value))
-                         (append (list key 1) plist)))
-               (length (length output))
-               (output (cl-subseq output 0 (min length (* 2 n)))))
-          (push `(,label ,@output) out)))
-      out))
+  (pyim-dhashcache--put
+   pyim-dhashcache-iword2count-log word
+   (let (out)
+     (dolist (x pyim-dhashcache-count-types)
+       (let* ((label (car x))
+              (key (intern (format-time-string (plist-get (cdr x) :format))))
+              (n (plist-get (cdr x) :max-save-length))
+              (plist (cdr (assoc label orig-value)))
+              (value (plist-get plist key))
+              (output (if value
+                          (plist-put plist key (+ 1 value))
+                        (append (list key 1) plist)))
+              (length (length output))
+              (output (cl-subseq output 0 (min length (* 2 n)))))
+         (push `(,label ,@output) out)))
+     out))
   ;; 更新优先级表
-  (pyim-dhashcache-put
-    pyim-dhashcache-iword2priority word
-    ;; Fix warn
-    (ignore orig-value)
-    (pyim-dhashcache-calculate-priority
-     (pyim-dhashcache-get-counts-from-log
-      (gethash word pyim-dhashcache-iword2count-log)))))
+  (pyim-dhashcache--put
+   pyim-dhashcache-iword2priority word
+   ;; Fix warn
+   (ignore orig-value)
+   (pyim-dhashcache-calculate-priority
+    (pyim-dhashcache-get-counts-from-log
+     (gethash word pyim-dhashcache-iword2count-log)))))
 
 (defun pyim-dhashcache--update-iword2count-recent (word n hash-table)
   (let (words-need-remove)
-    (pyim-dhashcache-put
-      hash-table :all-words
-      (setq orig-value (remove word orig-value))
-      (push word orig-value)
-      (if (<= (length orig-value) n)
-          orig-value
-        (setq words-need-remove (nthcdr n orig-value))
-        (cl-subseq orig-value 0 n)))
+    (pyim-dhashcache--put
+     hash-table :all-words
+     (setq orig-value (remove word orig-value))
+     (push word orig-value)
+     (if (<= (length orig-value) n)
+         orig-value
+       (setq words-need-remove (nthcdr n orig-value))
+       (cl-subseq orig-value 0 n)))
     (dolist (w words-need-remove)
       (remhash w hash-table))
-    (pyim-dhashcache-put
-      hash-table word
-      (+ (or orig-value 0) 1))
+    (pyim-dhashcache--put
+     hash-table word
+     (+ (or orig-value 0) 1))
     hash-table))
 
 ;; ** 根据 dhashcache 信息对词条进行排序
