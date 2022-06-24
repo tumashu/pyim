@@ -62,7 +62,7 @@
 
 (add-hook 'pyim-process-ui-init-hook #'pyim-preview--setup-overlay)
 
-(defun pyim-preview-delete-overlay ()
+(defun pyim-preview--delete-overlay ()
   "删除 pyim 光标处实时预览功能所需要的 overlay.
 
 这个函数会在 `pyim-input-method' 中调用，用于删除
