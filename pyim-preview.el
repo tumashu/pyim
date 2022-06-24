@@ -47,7 +47,7 @@
 (pyim-register-local-variables '(pyim-preview--overlay))
 
 ;; ** 待输入字符串预览
-(defun pyim-preview-setup-overlay ()
+(defun pyim-preview--setup-overlay ()
   "设置 pyim 光标处实时预览功能所需要的 overlay.
 
 这个函数会在 `pyim-input-method' 中调用，用于创建 overlay ，并将
@@ -60,7 +60,7 @@
       (if input-method-highlight-flag
           (overlay-put pyim-preview--overlay 'face 'pyim-preview-face)))))
 
-(add-hook 'pyim-process-ui-init-hook #'pyim-preview-setup-overlay)
+(add-hook 'pyim-process-ui-init-hook #'pyim-preview--setup-overlay)
 
 (defun pyim-preview-delete-overlay ()
   "删除 pyim 光标处实时预览功能所需要的 overlay.
