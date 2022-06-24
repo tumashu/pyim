@@ -247,7 +247,7 @@
     (setq pyim-dhashcache--update-iword2priority-p t)
     (async-start
      `(lambda ()
-        ,@(pyim-dhashcache-async-inject-variables)
+        ,@(pyim-dhashcache--async-inject-variables)
         (require 'pyim-dhashcache)
         (pyim-dhashcache--init-count-and-priority-variables)
         (maphash
@@ -265,7 +265,7 @@
      (lambda (_)
        (pyim-dcache-reload-variable pyim-dhashcache-iword2priority)))))
 
-(defun pyim-dhashcache-async-inject-variables ()
+(defun pyim-dhashcache--async-inject-variables ()
   "pyim's async-inject-variables."
   (list (async-inject-variables "^load-path$")
         (async-inject-variables "^exec-path$")
@@ -328,7 +328,7 @@
     (setq pyim-dhashcache--update-icode2word-p t)
     (async-start
      `(lambda ()
-        ,@(pyim-dhashcache-async-inject-variables)
+        ,@(pyim-dhashcache--async-inject-variables)
         (require 'pyim-dhashcache)
         (pyim-dcache-init-variable pyim-dhashcache-icode2word)
         (pyim-dhashcache--init-count-and-priority-variables)
@@ -356,7 +356,7 @@
     (setq pyim-dhashcache--update-ishortcode2word-p t)
     (async-start
      `(lambda ()
-        ,@(pyim-dhashcache-async-inject-variables)
+        ,@(pyim-dhashcache--async-inject-variables)
         (require 'pyim-dhashcache)
         (pyim-dcache-init-variable pyim-dhashcache-icode2word)
         (pyim-dhashcache--init-count-and-priority-variables)
@@ -402,7 +402,7 @@
       ;; use hashtable
       (async-start
        `(lambda ()
-          ,@(pyim-dhashcache-async-inject-variables)
+          ,@(pyim-dhashcache--async-inject-variables)
           (require 'pyim-dhashcache)
           (let ((dcache (pyim-dhashcache-generate-dcache-file ',dict-files ,code2word-file)))
             (pyim-dhashcache-generate-word2code-dcache-file dcache ,word2code-file))
@@ -490,7 +490,7 @@ pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 \\='utf
     (setq pyim-dhashcache--update-shortcode2word-p t)
     (async-start
      `(lambda ()
-        ,@(pyim-dhashcache-async-inject-variables)
+        ,@(pyim-dhashcache--async-inject-variables)
         (require 'pyim-dhashcache)
         (pyim-dcache-init-variable pyim-dhashcache-code2word)
         (pyim-dhashcache--init-count-and-priority-variables)
