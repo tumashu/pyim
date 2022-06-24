@@ -1553,8 +1553,8 @@ Alt-Svc: h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000,h3-Q050=\":443\"; ma
 Transfer-Encoding: chunked
 
 [\"SUCCESS\",[[\"nihao\",[\"你好\"],[],{\"annotation\":[\"ni hao\"],\"candidate_type\":[0],\"lc\":[\"16 16\"]}]]]")
-    (should (equal (pyim-cloudim-parse-google-buffer) '("你好")))
-    (should (equal (get-text-property 0 :comment (car (pyim-cloudim-parse-google-buffer))) "(云)"))))
+    (should (equal (pyim-cloudim--parse-google-buffer) '("你好")))
+    (should (equal (get-text-property 0 :comment (car (pyim-cloudim--parse-google-buffer))) "(云)"))))
 
 ;; ** pyim-probe 相关单元测试
 (ert-deftest pyim-tests-pyim-probe-program-mode ()

@@ -79,11 +79,11 @@
       (url-retrieve
        (format "https://www.google.cn/inputtools/request?ime=pinyin&text=%s" str)
        (lambda (_)
-         (funcall callback (cons imobjs (pyim-cloudim-parse-google-buffer)))
+         (funcall callback (cons imobjs (pyim-cloudim--parse-google-buffer)))
          (kill-buffer))
        nil t))))
 
-(defun pyim-cloudim-parse-google-buffer ()
+(defun pyim-cloudim--parse-google-buffer ()
   "解析 `pyim-cloudim-url-retrieve-sync' 返回的 google buffer."
   (pyim-cloudim--parse-baidu-buffer))
 
