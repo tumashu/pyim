@@ -289,10 +289,10 @@ ning niu 等等。"
   ;; 索词条。
   (let ((str (string-join (pyim-codes-create (car imobjs) scheme))))
     (when (> (length str) 0)
-      (pyim-candidates-search-buffer
+      (pyim-candidates--search-buffer
        (pyim-cregexp-create str scheme 3 t)))))
 
-(defun pyim-candidates-search-buffer (regexp)
+(defun pyim-candidates--search-buffer (regexp)
   "在当前 buffer 中使用 REGEXP 搜索词条。"
   (when (not (input-pending-p)) ;只有在用户输入停顿的时候才搜索 buffer.
     (save-excursion

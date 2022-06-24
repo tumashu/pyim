@@ -703,12 +703,12 @@
     (should (equal (pyim-tests-sublist (pyim-candidates--quanpin-first-possible-chars (car imobjs2) quanpin) 10)
                    '("你" "年" "娘" "鸟" "摄" "您" "宁" "牛" "尼" "念")))))
 
-(ert-deftest pyim-tests-pyim-candidates-search-buffer ()
+(ert-deftest pyim-tests-pyim-candidates--search-buffer ()
   (with-temp-buffer
     (insert "你好你好你坏你坏你话牛蛤牛和牛蛤牛蛤牛蛤牛蛤牛蛤")
-    (should (equal (pyim-candidates-search-buffer (pyim-cregexp-build "nh" 3 t))
+    (should (equal (pyim-candidates--search-buffer (pyim-cregexp-build "nh" 3 t))
                    '("牛蛤" "你坏" "你好" "牛和" "你话")))
-    (let ((words (pyim-candidates-search-buffer (pyim-cregexp-build "nh" 3 t))))
+    (let ((words (pyim-candidates--search-buffer (pyim-cregexp-build "nh" 3 t))))
       (should (equal (get-text-property 0 :comment (car words)) "(buf)")))))
 
 ;; ** pyim-cstring 相关单元测试
