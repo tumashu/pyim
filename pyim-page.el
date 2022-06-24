@@ -193,7 +193,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 `pyim-page-end' 的返回值。并保存到一个 hashtable 的 :candidates
 关键字对应的位置，这个 hastable 最终会做为参数传递给
 `pyim-page-style' 相关的函数，用于生成用于在选词框中显示的字符串。"
-  (let* ((candidate-showed (pyim-page-get-showed-candidates))
+  (let* ((candidate-showed (pyim-page--get-showed-candidates))
          (positon (pyim-page-get-selected-word-position))
          (tooltip (pyim-page-get-valid-tooltip))
          (style (pyim-page-get-page-style tooltip))
@@ -215,7 +215,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 
 (add-hook 'pyim-process-ui-refresh-hook #'pyim-page-refresh)
 
-(defun pyim-page-get-showed-candidates ()
+(defun pyim-page--get-showed-candidates ()
   "从 CANDIDATES 中获取当前 page 显示需要显示的部分内容。"
   (mapcar (lambda (x)
             (let ((comment (get-text-property 0 :comment x)))
