@@ -45,10 +45,10 @@
 临时激活某种辅助输入法（比如：拼音输入法）来输入汉字。"
   :type 'symbol)
 
-(defvar pyim-assistant-scheme-enable nil
+(defvar pyim-scheme--enable-assistant-p nil
   "设置临时 scheme, 用于五笔等形码输入法临时拼音输入。")
 
-(pyim-register-local-variables '(pyim-assistant-scheme-enable))
+(pyim-register-local-variables '(pyim-scheme--enable-assistant-p))
 
 (defvar pyim-schemes nil
   "Pyim 支持的所有拼音方案.")
@@ -146,7 +146,7 @@
 (defun pyim-scheme-current ()
   "获取当前正在使用的 scheme。"
   (or (pyim-scheme-get
-       (if pyim-assistant-scheme-enable
+       (if pyim-scheme--enable-assistant-p
            pyim-assistant-scheme
          pyim-default-scheme))
       (pyim-scheme-get 'quanpin)))
@@ -160,17 +160,17 @@
      pyim-schemes)))
 
 (defun pyim-scheme-assistant-status ()
-  pyim-assistant-scheme-enable)
+  pyim-scheme--enable-assistant-p)
 
 (defun pyim-scheme-enable-assistant ()
-  (setq pyim-assistant-scheme-enable t))
+  (setq pyim-scheme--enable-assistant-p t))
 
 (defun pyim-scheme-disable-assistant ()
-  (setq pyim-assistant-scheme-enable nil))
+  (setq pyim-scheme--enable-assistant-p nil))
 
 (defun pyim-scheme-toggle-assistant ()
-  (setq pyim-assistant-scheme-enable
-        (not pyim-assistant-scheme-enable)))
+  (setq pyim-scheme--enable-assistant-p
+        (not pyim-scheme--enable-assistant-p)))
 
 ;; 注意：这个 quanpin scheme 在 pyim 中有特殊的作用，许多功能都依赖 quanpin
 ;; scheme 的存在，所以这个 scheme 不可以删除，也不可以更改名字。

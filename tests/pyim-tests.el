@@ -99,14 +99,14 @@
 
   (let ((pyim-default-scheme 'wubi)
         (pyim-assistant-scheme 'cangjie)
-        (pyim-assistant-scheme-enable t))
+        (pyim-scheme--enable-assistant-p t))
     (should (equal (pyim-scheme-name
                     (pyim-scheme-current))
                    'cangjie)))
 
   (let ((pyim-default-scheme 'wubi)
         (pyim-assistant-scheme 'cangjie)
-        (pyim-assistant-scheme-enable nil))
+        (pyim-scheme--enable-assistant-p nil))
     (should (equal (pyim-scheme-name
                     (pyim-scheme-current))
                    'wubi)))
