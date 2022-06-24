@@ -96,11 +96,11 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
            (> (length string) 0)
            (pyim-scheme-p scheme)
            (pyim-scheme-cregexp-support-p scheme))
-      (pyim-cregexp-create-valid-cregexp-from-string
+      (pyim-cregexp--create-valid-cregexp-from-string
        string scheme char-level-num chinese-only)
     string))
 
-(defun pyim-cregexp-create-valid-cregexp-from-string
+(defun pyim-cregexp--create-valid-cregexp-from-string
     (string scheme &optional char-level-num chinese-only)
   "从 STRING 创建一个有效的搜索中文的 regexp."
   (let ((char-level-num
