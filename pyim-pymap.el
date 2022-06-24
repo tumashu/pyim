@@ -481,7 +481,7 @@
 ;; ** "汉字 -> 拼音" 以及 "拼音 -> 汉字" 的转换函数
 (defun pyim-pymap-cache-create (&optional force)
   "创建 pymap 相关的 cache."
-  (pyim-pymap-cchar2py-cache-create force)
+  (pyim-pymap--cchar2py-cache-create force)
   (pyim-pymap-py2cchar-cache-create force))
 
 (defun pyim-pymap-py2cchar-cache-create (&optional force)
@@ -554,14 +554,14 @@ pyim 在特定的时候需要读取一个汉字的拼音，这个工作由此完
 结果为:
 
 (\"wo\")"
-  (pyim-pymap-cchar2py-cache-create)
+  (pyim-pymap--cchar2py-cache-create)
   (let ((key (if (characterp char-or-str)
                  (char-to-string char-or-str)
                char-or-str)))
     (when (= (length key) 1)
       (gethash key pyim-pymap--cchar2py-cache))))
 
-(defun pyim-pymap-cchar2py-cache-create (&optional force)
+(defun pyim-pymap--cchar2py-cache-create (&optional force)
   "Build pinyin cchar->pinyin hashtable from `pyim-pymap'.
 
 If FORCE is non-nil, FORCE build."
