@@ -138,7 +138,7 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
          (pyim-cregexp--create-cregexp-from-rx
           (lambda (x)
             (if (stringp x)
-                (xr (pyim-cregexp-create-cregexp-from-string
+                (xr (pyim-cregexp--create-cregexp-from-string
                      x scheme char-level-num chinese-only))
               x))
           (xr string))))
@@ -155,13 +155,13 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
              rx-form))
     (_ (funcall fn rx-form))))
 
-(defun pyim-cregexp-create-cregexp-from-string
+(defun pyim-cregexp--create-cregexp-from-string
     (string scheme &optional char-level-num chinese-only)
   (let* ((char-level-num (pyim-cregexp--char-level-num char-level-num))
          (string-list (pyim-cregexp-split-string string)))
     ;; 确保 pyim 词库加载
     (pyim-dcache-init-variables)
-    (pyim-cregexp-create-cregexp-from-string-list
+    (pyim-cregexp--create-cregexp-from-string-list
      string-list scheme char-level-num chinese-only)))
 
 (defun pyim-cregexp-split-string (string)
@@ -171,7 +171,7 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
                  "\\([a-z]+'*\\)" (concat sep "\\1" sep) string)
                 sep))))
 
-(defun pyim-cregexp-create-cregexp-from-string-list
+(defun pyim-cregexp--create-cregexp-from-string-list
     (string-list scheme &optional char-level-num chinese-only)
   (mapconcat
    (lambda (string)
