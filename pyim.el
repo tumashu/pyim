@@ -151,7 +151,7 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
     (pyim-process-ui-init)
     (with-silent-modifications
       (unwind-protect
-          (let ((input-string (pyim-input-method-1 key)))
+          (let ((input-string (pyim--input-method key)))
             ;; (message "input-string: %s" input-string)
             (when (and (stringp input-string)
                        (> (length input-string) 0))
@@ -160,8 +160,8 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
                 (mapcar #'identity input-string))))
         (pyim-process-terminate)))))
 
-(defun pyim-input-method-1 (key)
-  "`pyim-input-method-1' 是 `pyim-input-method' 内部使用的函数。
+(defun pyim--input-method (key)
+  "`pyim--input-method' 是 `pyim-input-method' 内部使用的函数。
 
 这个函数比较复杂，作许多低层工作，但它的一个重要流程是：
 
