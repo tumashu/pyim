@@ -64,10 +64,10 @@ timer 实现。"
 (defvar pyim-indicator--original-cursor-color nil
   "记录 cursor 的原始颜色。")
 
-(defvar pyim-indicator-timer nil
+(defvar pyim-indicator--timer nil
   "`pyim-indicator-daemon' 使用的 timer.")
 
-(defvar pyim-indicator-timer-repeat 0.4)
+(defvar pyim-indicator--timer-repeat 0.4)
 
 (defvar pyim-indicator-daemon-function-argument nil
   "实现 `pyim-indicator-daemon-function' 时，用于传递参数，主要原因
@@ -85,10 +85,10 @@ timer 实现。"
         #'pyim-process-indicator-function)
   (if pyim-indicator-use-post-command-hook
       (add-hook 'post-command-hook #'pyim-indicator-daemon-function)
-    (unless (timerp pyim-indicator-timer)
-      (setq pyim-indicator-timer
+    (unless (timerp pyim-indicator--timer)
+      (setq pyim-indicator--timer
             (run-with-timer
-             nil pyim-indicator-timer-repeat
+             nil pyim-indicator--timer-repeat
              #'pyim-indicator-daemon-function)))))
 
 (add-hook 'pyim-process-start-daemon-hook #'pyim-indicator-start-daemon)
@@ -104,9 +104,9 @@ timer 实现。"
            (remove (current-buffer) (buffer-list)))
     (setq pyim-indicator-daemon-function-argument nil)
     (remove-hook 'post-command-hook #'pyim-indicator-daemon-function)
-    (when (timerp pyim-indicator-timer)
-      (cancel-timer pyim-indicator-timer)
-      (setq pyim-indicator-timer nil))
+    (when (timerp pyim-indicator--timer)
+      (cancel-timer pyim-indicator--timer)
+      (setq pyim-indicator--timer nil))
     (pyim-indicator-revert-cursor-color)))
 
 (add-hook 'pyim-process-stop-daemon-hook #'pyim-indicator-stop-daemon)
