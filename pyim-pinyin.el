@@ -34,6 +34,13 @@
   "Pinyin libs for pyim."
   :group 'pyim)
 
+(defcustom pyim-pinyin-fuzzy-alist
+  '(("en" "eng")
+    ("in" "ing")
+    ("un" "ong"))
+  "设定模糊音."
+  :type 'sexp)
+
 (defvar pyim-pinyin--shenmu
   '("b" "p" "m" "f" "d" "t" "n" "l" "g" "k" "h"
     "j" "q" "x" "z" "c" "s" "zh" "ch" "sh" "r" "y" "w"))
@@ -47,13 +54,6 @@
 (defvar pyim-pinyin--valid-yunmu
   '("a" "o" "e" "ai" "ei" "ui" "ao" "ou" "er" "an" "en"
     "ang" "eng"))
-
-(defcustom pyim-pinyin-fuzzy-alist
-  '(("en" "eng")
-    ("in" "ing")
-    ("un" "ong"))
-  "设定模糊音."
-  :type 'sexp)
 
 (defconst pyim-pinyin-shuangpin-invalid-pinyin-regexp
   (format "^\\(%s\\)$"
@@ -76,29 +76,28 @@
 因为用户有即时界面反馈,不可能连续输入无效拼音.")
 
 ;; 分解拼音的相关函数
-(defun pyim-pinyin--get-shenmu (pinyin)
-  "从一个拼音字符串 PINYIN 中提出第一个声母。"
-  (let ((i (min (length pinyin) 2))
-        shenmu)
-    (while (> i 0)
-      (setq shenmu (substring pinyin 0 i))
-      (if (member shenmu pyim-pinyin--shenmu)
-          (setq i 0)
-        (setq i (1- i))
-        (setq shenmu "")))
-    (cons shenmu
-          (substring pinyin (length shenmu)))))
+(defun pyim-pinyin-split (pinyin)
+  "将一个代表拼音的字符串 PINYIN, 分解为声母韵母对组成的列表.
 
-(defun pyim-pinyin--valid-charpy-p (shenmu yunmu)
-  "测试由 SHENMU 和 YUNMU 组成的拼音，是否是一个有效的汉字拼音。
-这个函数尊重 `pyim-pinyin-fuzzy-alist' 模糊音设置。"
-  (cl-some
-   (lambda (char-pinyin)
-     (pyim-pymap-py2cchar-get char-pinyin t))
-   (mapcar (lambda (x)
-             (concat (nth 0 x) (nth 1 x)))
-           (pyim-pinyin-find-fuzzy
-            (list shenmu yunmu shenmu yunmu)))))
+这个过程通过循环的调用 `pyim-pinyin--get-charpy' 来实现，整个过程
+类似用菜刀切黄瓜片，将一个拼音字符串逐渐切开。"
+  (let ((py pinyin)
+        charpy spinyin)
+    (while (when (string< "" pinyin)
+             (setq charpy (pyim-pinyin--get-charpy pinyin))
+             (if (and (equal (nth 0 (car charpy)) "")
+                      (equal (nth 1 (car charpy)) ""))
+                 (progn
+                   (setq spinyin nil)
+                   (setq pinyin ""))
+               (setq spinyin (append spinyin (list (car charpy))))
+               (setq pinyin (cdr charpy)))))
+    (or spinyin
+        ;; 如果无法按照拼音的规则来分解字符串，
+        ;; 就将字符串简单的包装一下，然后返回。
+        ;; 目前这个功能用于： 以u或者i开头的词库 #226
+        ;; https://github.com/tumashu/pyim/issues/226
+        (list (list "" py "" py)))))
 
 (defun pyim-pinyin--get-charpy (pinyin)
   "将拼音字符串 PINYIN 分解成声母，韵母和剩余部分."
@@ -135,6 +134,30 @@
     (cons (list shenmu yunmu shenmu yunmu)
           (substring yunmu-and-rest (length yunmu)))))
 
+(defun pyim-pinyin--get-shenmu (pinyin)
+  "从一个拼音字符串 PINYIN 中提出第一个声母。"
+  (let ((i (min (length pinyin) 2))
+        shenmu)
+    (while (> i 0)
+      (setq shenmu (substring pinyin 0 i))
+      (if (member shenmu pyim-pinyin--shenmu)
+          (setq i 0)
+        (setq i (1- i))
+        (setq shenmu "")))
+    (cons shenmu
+          (substring pinyin (length shenmu)))))
+
+(defun pyim-pinyin--valid-charpy-p (shenmu yunmu)
+  "测试由 SHENMU 和 YUNMU 组成的拼音，是否是一个有效的汉字拼音。
+这个函数尊重 `pyim-pinyin-fuzzy-alist' 模糊音设置。"
+  (cl-some
+   (lambda (char-pinyin)
+     (pyim-pymap-py2cchar-get char-pinyin t))
+   (mapcar (lambda (x)
+             (concat (nth 0 x) (nth 1 x)))
+           (pyim-pinyin-find-fuzzy
+            (list shenmu yunmu shenmu yunmu)))))
+
 (defun pyim-pinyin-find-fuzzy (info)
   "Find all fuzzy pinyins, INFO is (shenmu yunmu shenmu yunmu).
 
@@ -154,29 +177,6 @@
       (dolist (b (delete-dups (cons ym ym-list)))
         (push `(,a ,b ,@(nthcdr 2 info)) result)))
     (reverse result)))
-
-(defun pyim-pinyin-split (pinyin)
-  "将一个代表拼音的字符串 PINYIN, 分解为声母韵母对组成的列表.
-
-这个过程通过循环的调用 `pyim-pinyin--get-charpy' 来实现，整个过程
-类似用菜刀切黄瓜片，将一个拼音字符串逐渐切开。"
-  (let ((py pinyin)
-        charpy spinyin)
-    (while (when (string< "" pinyin)
-             (setq charpy (pyim-pinyin--get-charpy pinyin))
-             (if (and (equal (nth 0 (car charpy)) "")
-                      (equal (nth 1 (car charpy)) ""))
-                 (progn
-                   (setq spinyin nil)
-                   (setq pinyin ""))
-               (setq spinyin (append spinyin (list (car charpy))))
-               (setq pinyin (cdr charpy)))))
-    (or spinyin
-        ;; 如果无法按照拼音的规则来分解字符串，
-        ;; 就将字符串简单的包装一下，然后返回。
-        ;; 目前这个功能用于： 以u或者i开头的词库 #226
-        ;; https://github.com/tumashu/pyim/issues/226
-        (list (list "" py "" py)))))
 
 ;; * Footer
 (provide 'pyim-pinyin)
