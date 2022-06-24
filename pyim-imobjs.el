@@ -116,8 +116,8 @@
           (let* ((y (concat sp-sm (or sp-ym " ")))
                  (z (cadr (assoc y keymaps)))
                  (py (if z (list "" z sp-sm sp-ym) (list sm x sp-sm sp-ym))))
-            (unless (string-match-p pyim-pinyin-shuangpin-invalid-pinyin-regexp
-                                    (concat (nth 0 py) (nth 1 py)))
+            (when (pyim-pinyin-valid-shuangpin-p
+                   (concat (nth 0 py) (nth 1 py)))
               (push py one-word-pinyins))))
 
         (when (and one-word-pinyins (> (length one-word-pinyins) 0))

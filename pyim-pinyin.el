@@ -55,7 +55,7 @@
   '("a" "o" "e" "ai" "ei" "ui" "ao" "ou" "er" "an" "en"
     "ang" "eng"))
 
-(defconst pyim-pinyin-shuangpin-invalid-pinyin-regexp
+(defconst pyim-pinyin--shuangpin-invalid-pinyin-regexp
   (format "^\\(%s\\)$"
           (string-join
            '("[qtghkzcsdn]o"
@@ -177,6 +177,11 @@
       (dolist (b (delete-dups (cons ym ym-list)))
         (push `(,a ,b ,@(nthcdr 2 info)) result)))
     (reverse result)))
+
+(defun pyim-pinyin-valid-shuangpin-p (shuangpin)
+  (not (string-match-p
+        pyim-pinyin--shuangpin-invalid-pinyin-regexp
+        shuangpin)))
 
 ;; * Footer
 (provide 'pyim-pinyin)
