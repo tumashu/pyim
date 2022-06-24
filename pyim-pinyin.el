@@ -38,7 +38,7 @@
   '("b" "p" "m" "f" "d" "t" "n" "l" "g" "k" "h"
     "j" "q" "x" "z" "c" "s" "zh" "ch" "sh" "r" "y" "w"))
 
-(defvar pyim-pinyin-yunmu
+(defvar pyim-pinyin--yunmu
   '("a" "o" "e" "i" "u" "v" "ai" "ei" "ui" "ao" "ou" "iu"
     "ie" "ia" "ua" "ve" "er" "an" "en" "in" "un" "vn" "ang" "iong"
     "eng" "ing" "ong" "uan" "uang" "ian" "iang" "iao" "ue"
@@ -110,7 +110,7 @@
     (while (> i 0)
       (setq yunmu (substring yunmu-and-rest 0 i))
       (setq rest (substring yunmu-and-rest i))
-      (if (member yunmu pyim-pinyin-yunmu)
+      (if (member yunmu pyim-pinyin--yunmu)
           (cond (;; 如果声母和韵母组成的拼音不是一个有效的拼音，
                  ;; 就继续缩短，如果是，就进一步检测。
                  (not (pyim-pinyin-valid-charpy-p shenmu yunmu))
@@ -122,7 +122,7 @@
                       ;; 截取后的韵母最后一个字符是一个有效声母
                       (member (substring yunmu -1) pyim-pinyin--shenmu)
                       ;; 截取得到的韵母如果去掉最后一个字符，还是有效的韵母
-                      (member (substring yunmu 0 -1) pyim-pinyin-yunmu))
+                      (member (substring yunmu 0 -1) pyim-pinyin--yunmu))
                  (if (not (pyim-pinyin-valid-charpy-p shenmu (substring yunmu 0 -1)))
                      ;; 如果去掉韵母最后一个字符后，无法组成一个有效的拼音。
                      ;; 就不要缩短了。
