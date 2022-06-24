@@ -50,7 +50,7 @@
 
 类似: \"a\" -> (\"阿\" \"啊\" \"呵\" \"腌\" \"|\" \"嗄\" \"吖\" \"锕\" \"|\" \"|\" \"錒\" \"\")")
 
-(defvar pyim-pymap-py2cchar-cache3 nil
+(defvar pyim-pymap--py2cchar-cache3 nil
   "拼音查汉字功能需要的变量.
 
 类似: \"a\" -> (\"阿啊呵腌|嗄吖锕||錒\" \"爱 ... 溾\" \"厂广安 ... 菴馣\" \"昂盎 ... 軮䇦\" \"奥澳 ... 鴢泑\")")
@@ -501,7 +501,7 @@
           (make-hash-table :size 50000 :test #'equal))
     (setq pyim-pymap--py2cchar-cache2
           (make-hash-table :size 50000 :test #'equal))
-    (setq pyim-pymap-py2cchar-cache3
+    (setq pyim-pymap--py2cchar-cache3
           (make-hash-table :size 50000 :test #'equal))
     (dolist (x pyim-pymap)
       (let* ((py (car x))
@@ -512,9 +512,9 @@
                  pyim-pymap--py2cchar-cache2)
         (dotimes (i n)
           (let* ((key (substring py 0 (+ i 1)))
-                 (orig-value (gethash key pyim-pymap-py2cchar-cache3)))
+                 (orig-value (gethash key pyim-pymap--py2cchar-cache3)))
             (puthash key (delete-dups `(,@orig-value ,@cchars))
-                     pyim-pymap-py2cchar-cache3)))))))
+                     pyim-pymap--py2cchar-cache3)))))))
 
 (defun pyim-pymap-py2cchar-get (pinyin &optional equal-match return-list include-seperator)
   "获取拼音与 PINYIN 想匹配的所有汉字.
@@ -537,7 +537,7 @@
                (if return-list
                    (gethash pinyin pyim-pymap--py2cchar-cache2)
                  (gethash pinyin pyim-pymap--py2cchar-cache1))
-             (gethash pinyin pyim-pymap-py2cchar-cache3))))
+             (gethash pinyin pyim-pymap--py2cchar-cache3))))
       (setq output (remove "" output))
       (if include-seperator
           output
