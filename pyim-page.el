@@ -181,7 +181,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 假设当前选择的词条为 \"睨\", 那么 `pyim-process-get-candidate-position'
 的返回值为 A 所在的位置。那么：
 
-1. 函数 `pyim-page-current-page' 返回值为3， 说明当前 page 为第3页。
+1. 函数 `pyim-page--current-page' 返回值为3， 说明当前 page 为第3页。
 2. 函数 `pyim-page-total-page'  返回值为5，说明 page 共有5页。
 3. 函数 `pyim-page--start' 返回 B 所在的位置。
 4. 函数 `pyim-page--end' 返回 E 所在的位置。
@@ -199,7 +199,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
          (style (pyim-page--get-page-style tooltip))
          (page-info
           (list :scheme (pyim-scheme-current)
-                :current-page (pyim-page-current-page)
+                :current-page (pyim-page--current-page)
                 :total-page (pyim-page-total-page)
                 :candidates candidate-showed
                 :position positon
@@ -285,7 +285,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
   (or (cdr (assoc tooltip pyim-page-tooltip-style-alist))
       pyim-page-style))
 
-(defun pyim-page-current-page ()
+(defun pyim-page--current-page ()
   "计算当前选择的词条在第几页面.
 
 细节信息请参考 `pyim-page-refresh' 的 docstring."
