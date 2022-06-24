@@ -195,7 +195,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 `pyim-page-style' 相关的函数，用于生成用于在选词框中显示的字符串。"
   (let* ((candidate-showed (pyim-page--get-showed-candidates))
          (positon (pyim-page--get-selected-word-position))
-         (tooltip (pyim-page-get-valid-tooltip))
+         (tooltip (pyim-page--get-valid-tooltip))
          (style (pyim-page-get-page-style tooltip))
          (page-info
           (list :scheme (pyim-scheme-current)
@@ -253,7 +253,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
           (pyim-process-candidates-length))
      (1- (pyim-page--start))))
 
-(defun pyim-page-get-valid-tooltip ()
+(defun pyim-page--get-valid-tooltip ()
   "根据当前环境，获取一个可用的 tooltip."
   (cond
    ;; NOTE: 以前在 minibuffer 中试用过 posframe, linux 环境下运行效果还不错，但
@@ -608,7 +608,7 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
 
 (defun pyim-page-hide ()
   "Hide pyim page."
-  (pyim-page-hide-tooltip (pyim-page-get-valid-tooltip)))
+  (pyim-page-hide-tooltip (pyim-page--get-valid-tooltip)))
 
 (cl-defgeneric pyim-page-hide-tooltip (tooltip)
   "Hide TOOLTIP.")
