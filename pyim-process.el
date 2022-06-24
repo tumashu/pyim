@@ -185,7 +185,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 (defvar pyim-process--candidates-last nil
   "上一轮备选词条列表，这个变量主要用于 autoselector 机制.")
 
-(defvar pyim-process-candidate-position nil
+(defvar pyim-process--candidate-position nil
   "当前选择的词条在 `pyim-candidates’ 中的位置.
 
 细节信息请参考 `pyim-page--refresh' 的 docstring.")
@@ -195,7 +195,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
    pyim-process-translating
    pyim-process--imobjs
    pyim-process-candidates
-   pyim-process-candidate-position))
+   pyim-process--candidate-position))
 
 (defun pyim-process-ui-init ()
   "初始化 pyim 相关 UI."
@@ -331,7 +331,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
             (or (delete-dups (pyim-candidates-create pyim-process--imobjs scheme))
                 (list entered-to-translate)))
       (unless (eq (pyim-process-auto-select) 'auto-select-success)
-        (setq pyim-process-candidate-position 1)
+        (setq pyim-process--candidate-position 1)
         (pyim-process-ui-refresh)
         (pyim-process-run-delay)))))
 
@@ -485,13 +485,13 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   (setq pyim-process--candidates-last pyim-process-candidates))
 
 (defun pyim-process-get-candidate-position ()
-  pyim-process-candidate-position)
+  pyim-process--candidate-position)
 
 (defun pyim-process-candidates-length ()
   (length pyim-process-candidates))
 
 (defun pyim-process-set-candidate-position (n)
-  (setq pyim-process-candidate-position n))
+  (setq pyim-process--candidate-position n))
 
 (defun pyim-process-get-first-imobj ()
   (car pyim-process--imobjs))
@@ -538,14 +538,14 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
           pyim-outcome-history))
         ((eq type 'candidate)
          (let ((candidate
-                (nth (1- pyim-process-candidate-position)
+                (nth (1- pyim-process--candidate-position)
                      pyim-process-candidates)))
            (push
             (concat (pyim-outcome-get) candidate)
             pyim-outcome-history)))
         ((eq type 'candidate-and-last-char)
          (let ((candidate
-                (nth (1- pyim-process-candidate-position)
+                (nth (1- pyim-process--candidate-position)
                      pyim-process-candidates)))
            (push
             (concat (pyim-outcome-get)
