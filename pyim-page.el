@@ -146,7 +146,7 @@ Only useful when use posframe.")
      :package minibuffer))
   "pyim-page tooltip 相关信息。
 
-用于函数 `pyim-page-tooltip-valid-p'.")
+用于函数 `pyim-page--tooltip-valid-p'.")
 
 (defun pyim-page-refresh (&optional hightlight-current)
   "刷新 page 页面的函数.
@@ -262,13 +262,13 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
    ;; 在 exwm-xim 环境下输入中文时，只能使用 minibuffer, 因为应用窗口遮挡的缘故，
    ;; 其它方式不可用。
    ((pyim-exwm-xim-environment-p) 'minibuffer)
-   (t (or (cl-find-if #'pyim-page-tooltip-valid-p
+   (t (or (cl-find-if #'pyim-page--tooltip-valid-p
                       (if (listp pyim-page-tooltip)
                           pyim-page-tooltip
                         (list pyim-page-tooltip)))
           'minibuffer))))
 
-(defun pyim-page-tooltip-valid-p (tooltip)
+(defun pyim-page--tooltip-valid-p (tooltip)
   "测试 TOOLTIP 当前是否可用。"
   (let* ((info (alist-get tooltip pyim-page-tooltip-infos))
          (package (plist-get info :package))
