@@ -43,7 +43,7 @@
 (defcustom pyim-page-length 5
   "每页显示的词条数目.
 
-细节信息请参考 `pyim-page-refresh' 的 docstring."
+细节信息请参考 `pyim-page--refresh' 的 docstring."
   :type 'number)
 
 (defcustom pyim-page-tooltip '(posframe popup minibuffer)
@@ -131,7 +131,7 @@ Only useful when use posframe.")
 
 用于函数 `pyim-page--tooltip-valid-p'.")
 
-(defun pyim-page-refresh (&optional hightlight-current)
+(defun pyim-page--refresh (&optional hightlight-current)
   "刷新 page 页面的函数.
 
 这个函数主要用来处理选词框选词后，刷新显示问题，
@@ -168,7 +168,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 2. 函数 `pyim-page--total-page'  返回值为5，说明 page 共有5页。
 3. 函数 `pyim-page--start' 返回 B 所在的位置。
 4. 函数 `pyim-page--end' 返回 E 所在的位置。
-5. 函数 `pyim-page-refresh' 会从待选词条列表中提取一个 sublist:
+5. 函数 `pyim-page--refresh' 会从待选词条列表中提取一个 sublist:
 
      (\"薿\" \"旎\" \"睨\" \"铌\" \"昵\" \"匿\" \"倪\" \"霓\" \"暱\")
 
@@ -196,7 +196,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
        (funcall pyim-process-ui-position-function)
        tooltip))))
 
-(add-hook 'pyim-process-ui-refresh-hook #'pyim-page-refresh)
+(add-hook 'pyim-process-ui-refresh-hook #'pyim-page--refresh)
 
 (defun pyim-page--get-showed-candidates ()
   "从 CANDIDATES 中获取当前 page 显示需要显示的部分内容。"
@@ -212,7 +212,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 (defun pyim-page--start (&optional candidate-position)
   "计算当前所在页的第一个词条的位置.
 
-细节信息请参考 `pyim-page-refresh' 的 docstring."
+细节信息请参考 `pyim-page--refresh' 的 docstring."
   (let ((pos (min (pyim-process-candidates-length)
                   (or candidate-position
                       (pyim-process-get-candidate-position)))))
@@ -221,7 +221,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 (defun pyim-page--end ()
   "计算当前所在页的最后一个词条的位置，
 
-细节信息请参考 `pyim-page-refresh' 的 docstring."
+细节信息请参考 `pyim-page--refresh' 的 docstring."
   (let* ((whole (pyim-process-candidates-length))
          (len pyim-page-length)
          (pos (pyim-process-get-candidate-position))
@@ -271,13 +271,13 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 (defun pyim-page--current-page ()
   "计算当前选择的词条在第几页面.
 
-细节信息请参考 `pyim-page-refresh' 的 docstring."
+细节信息请参考 `pyim-page--refresh' 的 docstring."
   (1+ (/ (1- (pyim-process-get-candidate-position)) pyim-page-length)))
 
 (defun pyim-page--total-page ()
   "计算 page 总共有多少页.
 
-细节信息请参考 `pyim-page-refresh' 的 docstring."
+细节信息请参考 `pyim-page--refresh' 的 docstring."
   (1+ (/ (1- (pyim-process-candidates-length)) pyim-page-length)))
 
 (cl-defgeneric pyim-page-show (string position tooltip)
@@ -587,7 +587,7 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
         (end (pyim-page--end)))
     (when (= index -1) (setq index 9))
     (if (> (+ index (pyim-page--start)) end)
-        (progn (pyim-page-refresh) nil)
+        (progn (pyim-page--refresh) nil)
       (pyim-process-set-candidate-position
        (+ (pyim-page--start) index))
       t)))

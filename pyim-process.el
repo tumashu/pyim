@@ -188,7 +188,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 (defvar pyim-process-candidate-position nil
   "当前选择的词条在 `pyim-candidates’ 中的位置.
 
-细节信息请参考 `pyim-page-refresh' 的 docstring.")
+细节信息请参考 `pyim-page--refresh' 的 docstring.")
 
 (pyim-register-local-variables
  '(pyim-process-input-ascii
