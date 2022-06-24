@@ -477,12 +477,18 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
      pyim-process--imobjs scheme
      (lambda (async-return)
        (with-current-buffer buffer
-         (when (and pyim-process-translating
+         (when (and (pyim-process-translating-p)
                     (not (input-pending-p))
                     (equal (car async-return) pyim-process--imobjs))
            (setq pyim-process--candidates
                  (pyim-process--merge-candidates (cdr async-return) pyim-process--candidates))
            (pyim-process-ui-refresh)))))))
+
+(defun pyim-process-translating-p ()
+  pyim-process-translating)
+
+(defun pyim-process-set-translating-flag (value)
+  (setq pyim-process-translating value))
 
 (defun pyim-process-get-candidates ()
   pyim-process--candidates)
@@ -793,7 +799,7 @@ BUG：拼音无法有效地处理多音字。"
   "Terminate the translation of the current key.")
 
 (cl-defmethod pyim-process-terminate-really (_scheme)
-  (setq pyim-process-translating nil)
+  (pyim-process-set-translating-flag nil)
   (pyim-entered-erase-buffer)
   (setq pyim-process--code-criteria nil)
   (setq pyim-process--force-input-chinese nil)

@@ -189,13 +189,13 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
              (modified-p (buffer-modified-p))
              last-command-event last-command this-command)
 
-        (setq pyim-process-translating t)
+        (pyim-process-set-translating-flag t)
         (pyim-process-cleanup-input-output)
 
         (when key
           (pyim-add-unread-command-events key))
 
-        (while pyim-process-translating
+        (while (pyim-process-translating-p)
           (set-buffer-modified-p modified-p)
           (let* ((keyseq (read-key-sequence nil nil nil t))
                  (cmd (lookup-key pyim-mode-map keyseq)))
