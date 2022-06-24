@@ -740,9 +740,7 @@ BUG：拼音无法有效地处理多音字。"
     ;; 以词定字功能使用时，保存的词条应该是定字后的词条。
     (when (pyim-process-select-subword-p)
       (setq word (pyim-outcome-get-subword word)))
-    ;; 记录最近创建的词条，用于快速删词功能。
-    (setq pyim-process-last-created-words
-          (cons word (remove word pyim-process-last-created-words)))
+    (pyim-process-add-last-created-word word)
     (let* ((scheme (pyim-scheme-current))
            (code-prefix (pyim-scheme-code-prefix scheme))
            (codes (pyim-cstring-to-codes
@@ -768,6 +766,17 @@ BUG：拼音无法有效地处理多音字。"
       (mapconcat (lambda (code)
                    (format "%s -> %s" (concat (or code-prefix "") code) word))
                  codes "; "))))
+
+(defun pyim-process-last-created-words ()
+  pyim-process-last-created-words)
+
+(defun pyim-process-add-last-created-word (word)
+  (setq pyim-process-last-created-words
+        (cons word (remove word pyim-process-last-created-words))))
+
+(defun pyim-process-remove-last-created-word (word)
+  (setq pyim-process-last-created-words
+        (remove word pyim-process-last-created-words)))
 
 (defun pyim-process-delete-word (word)
   (pyim-dcache-delete-word word))
