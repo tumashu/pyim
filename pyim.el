@@ -825,7 +825,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
       (run-hooks 'pyim-convert-string-at-point-hook)
       (when (> length 0)
         (pyim-add-unread-command-events code)
-        (setq pyim-process-force-input-chinese t)))
+        (pyim-process-force-input-chinese)))
      ;; 当光标前的一个字符是标点符号时，半角/全角切换。
      ((pyim-string-match-p "[[:punct:]：－]" (pyim-char-before-to-string 0))
       (call-interactively 'pyim-punctuation-translate-at-point))
