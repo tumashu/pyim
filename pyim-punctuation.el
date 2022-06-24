@@ -106,7 +106,7 @@ If you don't like this function, set the variable to nil")
 
 每次运行 `pyim-punctuation-toggle' 命令，都会调整变量
 `pyim-punctuation-translate-p' 的取值，`pyim-process-outcome-handle-char' 根据
-`pyim-process-punctuation-full-width-p' 函数的返回值，来决定是否转换标点
+`pyim-process--punctuation-full-width-p' 函数的返回值，来决定是否转换标点
 符号：
 
 1. 当返回值为 \\='yes 时，`pyim-process-outcome-handle-char' 转换标点符号，从而输入全角标点。

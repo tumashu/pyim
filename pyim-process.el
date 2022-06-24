@@ -620,7 +620,7 @@ alist 列表。"
       "")
 
      ;; 关闭标点转换功能时，只插入英文标点。
-     ((not (pyim-process-punctuation-full-width-p))
+     ((not (pyim-process--punctuation-full-width-p))
       str)
 
      ;; 当用户使用 org-mode 以及 markdown 等轻量级标记语言撰写文档时，
@@ -670,7 +670,7 @@ alist 列表。"
      ;; 当输入的字符不是标点符号时，原样插入。
      (t str))))
 
-(defun pyim-process-punctuation-full-width-p ()
+(defun pyim-process--punctuation-full-width-p ()
   "判断是否需要切换到全角标点输入模式
 
 输入标点的样式的改变（全角或者半角）受三个方面影响：
@@ -682,7 +682,7 @@ alist 列表。"
 三方面的综合结果为： 只要当前的输入模式是英文输入模式，那么输入的
 标点符号 *必定* 是半角标点，如果当前输入模式是中文输入模式，那么，
 输入标点的样式用户可以使用 `pyim-punctuation-toggle'手动控制，具
-体请参考 `pyim-process-punctuation-full-width-p'。"
+体请参考 `pyim-process--punctuation-full-width-p'。"
   (cl-case (car pyim-punctuation-translate-p)
     (yes t)
     (no nil)
