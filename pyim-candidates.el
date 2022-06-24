@@ -44,7 +44,7 @@
   :type 'boolean)
 
 ;; ** 获取备选词列表
-(defun pyim-candidates-sort (candidates)
+(defun pyim-candidates--sort (candidates)
   "对 CANDIDATES 进行排序。"
   (pyim-dcache-sort-words candidates))
 
@@ -113,10 +113,10 @@
         ;; 5. output => 工子又 工子叕
         (setq output
               (let* ((personal-words (pyim-dcache-get last-code '(icode2word)))
-                     (personal-words (pyim-candidates-sort personal-words))
+                     (personal-words (pyim-candidates--sort personal-words))
                      (common-words (pyim-dcache-get last-code '(code2word)))
                      (chief-word (pyim-candidates-get-chief scheme personal-words common-words))
-                     (common-words (pyim-candidates-sort common-words))
+                     (common-words (pyim-candidates--sort common-words))
                      (other-words (pyim-dcache-get last-code '(shortcode2word))))
                 (mapcar (lambda (word)
                           (concat prefix word))
@@ -154,7 +154,7 @@
   (let* ((znabc-words (pyim-candidates-znabc-words imobjs scheme fast-search))
          (jianpin-words (pyim-candidates-jianpin-words imobjs scheme fast-search))
          (quanpin-words (pyim-candidates-quanpin-words imobjs scheme fast-search))
-         (personal-words (pyim-candidates-sort (nth 0 quanpin-words)))
+         (personal-words (pyim-candidates--sort (nth 0 quanpin-words)))
          (common-words (nth 1 quanpin-words))
          (chief-word (pyim-candidates-get-chief scheme personal-words))
          (quanpin-chars (pyim-candidates-quanpin-first-chars imobjs scheme fast-search))
