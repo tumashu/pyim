@@ -1457,7 +1457,7 @@ yin-xing 因行
       (should (not toggle-input-method-active))
       (call-interactively #'toggle-input-method))))
 
-(ert-deftest pyim-tests-pyim-dregcache-backend ()
+(ert-deftest pyim-tests-pyim-dregcache--backend ()
   (let ((pyim-dcache-backend 'pyim-dregcache)
         words
         file-info
@@ -1471,7 +1471,7 @@ yin-xing 因行
     (should (> (length pyim-dregcache-cache) 0))
     ;; get first dictionary cache
     (setq file-info (lax-plist-get pyim-dregcache-cache
-                                   (car (pyim-dregcache-all-dict-files))))
+                                   (car (pyim-dregcache--all-dict-files))))
 
     (setq content (plist-get file-info :content))
     (let ((i 0)
@@ -1480,12 +1480,12 @@ yin-xing 因行
       (while (< i (length chars))
         (should (eq (elt chars i) (elt (nth i content) 0)))
         (setq i (1+ i))))
-    (should (string= (pyim-dregcache-get-content "ai" file-info)
-                     (pyim-dregcache-get-content "a" file-info)))
-    (should (string= (pyim-dregcache-get-content "ba" file-info)
-                     (pyim-dregcache-get-content "b" file-info)))
-    (should (string= (pyim-dregcache-get-content "ze" file-info)
-                     (pyim-dregcache-get-content "z" file-info)))
+    (should (string= (pyim-dregcache--get-content "ai" file-info)
+                     (pyim-dregcache--get-content "a" file-info)))
+    (should (string= (pyim-dregcache--get-content "ba" file-info)
+                     (pyim-dregcache--get-content "b" file-info)))
+    (should (string= (pyim-dregcache--get-content "ze" file-info)
+                     (pyim-dregcache--get-content "z" file-info)))
 
     ;; test dregcache api
     (setq words (pyim-dcache-get "a"))
@@ -1510,7 +1510,7 @@ yin-xing 因行
     (let* ((gc-cons-threshold most-positive-fixnum))
       (message "search by code \"zun-yi\" takes %s seconds" (benchmark-run-compiled 1 (pyim-dcache-get "zun-yi"))))
 
-    ;; `pyim-dregcache-get' calls `pyim-pymap-py2cchar-get' before return result
+    ;; `pyim-dregcache--get' calls `pyim-pymap-py2cchar-get' before return result
     (should (eq (length words) 26))))
 
 ;; ** pyim-cloudim 相关单元测试
