@@ -152,6 +152,25 @@
          (words (liberime-search s nil)))
     words))
 
+(defun pyim-autoselector-rime (&rest _args)
+  "适用于RIME的自动上屏器."
+  (let* ((scheme (pyim-scheme-current)))
+    (when (pyim-scheme-rime-p scheme)
+      (let* ((commit (liberime-get-commit))
+             (context (liberime-get-context))
+             (composition (alist-get 'composition context))
+             (length (alist-get 'length composition)))
+        (cond
+         ;; 有新输入的顶屏模式
+         ((and commit (eq length 1))
+          `(:select last :replace-with ,commit))
+         ;; 无新输入的顶屏模式
+         (commit
+          `(:select current :replace-with ,commit))
+         (t nil))))))
+
+(add-to-list 'pyim-process-autoselector 'pyim-autoselector-rime)
+
 (cl-defmethod pyim-page-preview-create ((_scheme pyim-scheme-rime) &optional separator)
   (let* ((preedit (or (liberime-get-preedit)
                       (pyim-entered-get 'point-before))))
@@ -197,58 +216,6 @@
       ;; pyim 使用这个 hook 来处理联想词。
       (run-hooks 'pyim-select-finish-hook))))
 
-(defun pyim-autoselector-rime (&rest _args)
-  "适用于RIME的自动上屏器."
-  (let* ((scheme (pyim-scheme-current)))
-    (when (pyim-scheme-rime-p scheme)
-      (let* ((commit (liberime-get-commit))
-             (context (liberime-get-context))
-             (composition (alist-get 'composition context))
-             (length (alist-get 'length composition)))
-        (cond
-         ;; 有新输入的顶屏模式
-         ((and commit (eq length 1))
-          `(:select last :replace-with ,commit))
-         ;; 无新输入的顶屏模式
-         (commit
-          `(:select current :replace-with ,commit))
-         (t nil))))))
-
-(add-to-list 'pyim-process-autoselector 'pyim-autoselector-rime)
-
-(defun pyim-liberime--create-word (codes words)
-  "通过 CODES 和 WORDS 的信息，在 rime 后端重新造词和调整词频。
-比如：
-
-1. CODES -> (\"nihao\" \"ma\")
-2. WORDS -> (\"你好\" \"吗\")
-
-在 rime 后端将生成 “你好吗” 这个词条。"
-  (when (and (listp codes)
-             (listp words)
-             (not (cl-find-if-not #'stringp codes))
-             (not (cl-find-if-not #'stringp words)))
-    (liberime-clear-composition)
-    (dolist (key (string-to-list (string-join codes)))
-      (liberime-process-key key))
-    (let (word)
-      (while (setq word (pop words))
-        (let ((status t))
-          (while status
-            (let* ((context (liberime-get-context))
-                   (menu (alist-get 'menu context))
-                   (last-page-p (alist-get 'last-page-p menu))
-                   (candidates (alist-get 'candidates menu))
-                   (pos (cl-position word candidates :test #'equal)))
-              (cond
-               (pos (liberime-select-candidate pos)
-                    (setq status nil))
-               ((or last-page-p
-                    (not menu))
-                (setq status nil)
-                (setq words nil))
-               (t (liberime-process-key 65366))))))))))
-
 (defun pyim-liberime--get-code (word input &optional _limit)
   "Get the code of WORD from the beginning of INPUT.
 `liberime-search' with LIMIT argument is used internal.
@@ -293,6 +260,39 @@ Please see: https://github.com/rime/librime/issues/349"
       (or str input)))
    ;; 找不到通用的处理方式的话就不做截取处理。
    (t input)))
+
+(defun pyim-liberime--create-word (codes words)
+  "通过 CODES 和 WORDS 的信息，在 rime 后端重新造词和调整词频。
+比如：
+
+1. CODES -> (\"nihao\" \"ma\")
+2. WORDS -> (\"你好\" \"吗\")
+
+在 rime 后端将生成 “你好吗” 这个词条。"
+  (when (and (listp codes)
+             (listp words)
+             (not (cl-find-if-not #'stringp codes))
+             (not (cl-find-if-not #'stringp words)))
+    (liberime-clear-composition)
+    (dolist (key (string-to-list (string-join codes)))
+      (liberime-process-key key))
+    (let (word)
+      (while (setq word (pop words))
+        (let ((status t))
+          (while status
+            (let* ((context (liberime-get-context))
+                   (menu (alist-get 'menu context))
+                   (last-page-p (alist-get 'last-page-p menu))
+                   (candidates (alist-get 'candidates menu))
+                   (pos (cl-position word candidates :test #'equal)))
+              (cond
+               (pos (liberime-select-candidate pos)
+                    (setq status nil))
+               ((or last-page-p
+                    (not menu))
+                (setq status nil)
+                (setq words nil))
+               (t (liberime-process-key 65366))))))))))
 
 (cl-defmethod pyim-process-terminate-really ((_scheme pyim-scheme-rime))
   (cl-call-next-method)
