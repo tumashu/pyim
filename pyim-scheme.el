@@ -159,6 +159,19 @@
        (equal (pyim-scheme-name x) scheme-name))
      pyim-schemes)))
 
+(defun pyim-scheme-assistant-status ()
+  pyim-assistant-scheme-enable)
+
+(defun pyim-scheme-enable-assistant ()
+  (setq pyim-assistant-scheme-enable t))
+
+(defun pyim-scheme-disable-assistant ()
+  (setq pyim-assistant-scheme-enable nil))
+
+(defun pyim-scheme-toggle-assistant ()
+  (setq pyim-assistant-scheme-enable
+        (not pyim-assistant-scheme-enable)))
+
 ;; 注意：这个 quanpin scheme 在 pyim 中有特殊的作用，许多功能都依赖 quanpin
 ;; scheme 的存在，所以这个 scheme 不可以删除，也不可以更改名字。
 (pyim-scheme-add

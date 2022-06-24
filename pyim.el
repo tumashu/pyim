@@ -261,7 +261,7 @@ pyim 使用函数 `pyim-activate' 启动输入法的时候，会将变量
   (pyim-process-init-dcaches)
 
   ;; 启动或者重启的时候，退出辅助输入法。
-  (setq pyim-assistant-scheme-enable nil)
+  (pyim-scheme-disable-assistant)
 
   (run-hooks 'pyim-load-hook)
   ;; Make sure personal or other dcache are saved to file before kill emacs.
@@ -678,8 +678,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
       (progn
         (pyim-process-outcome-handle 'last-char)
         (pyim-process-terminate))
-    (setq pyim-assistant-scheme-enable
-          (not pyim-assistant-scheme-enable))
+    (pyim-scheme-toggle-assistant)
     (pyim-process-run)))
 
 ;; ** PYIM 输入操作命令

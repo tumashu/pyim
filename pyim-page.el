@@ -187,7 +187,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                 :candidates candidate-showed
                 :position positon
                 :hightlight-current hightlight-current
-                :assistant-enable pyim-assistant-scheme-enable)))
+                :assistant-enable (pyim-scheme-assistant-status))))
     ;; Show page.
     (when (and (null unread-command-events)
                (null unread-post-input-method-events))
