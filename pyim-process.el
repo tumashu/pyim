@@ -299,7 +299,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
          (rest-chars (pyim-scheme-rest-chars scheme))
          (entered (pyim-entered-get 'point-before)))
     (and (pyim-process--input-chinese-predicate-1)
-         (pyim-process-input-chinese-predicate-2
+         (pyim-process--input-chinese-predicate-2
           last-command-event entered first-chars rest-chars))))
 
 (defun pyim-process--input-chinese-predicate-1 ()
@@ -308,7 +308,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
       (and (not pyim-process-input-ascii)
            (not (pyim-process-auto-switch-english-input-p)))))
 
-(defun pyim-process-input-chinese-predicate-2 (event entered first-chars rest-chars)
+(defun pyim-process--input-chinese-predicate-2 (event entered first-chars rest-chars)
   "`pyim-process-input-chinese-p' 内部函数，测试输入。"
   (if (not (string< "" entered))
       (member event (mapcar #'identity first-chars))
