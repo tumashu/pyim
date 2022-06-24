@@ -274,7 +274,7 @@
                (lambda (x)
                  (= (length (split-string (cadr x) "|")) 4))
                pyim-pymap))
-  (should (equal (pyim-pymap-cchar< "的" "成") t))
+  (should (equal (pyim-pymap--cchar< "的" "成") t))
   (should (equal (pyim-pymap-cchar2py-get "阿")
                  '("e" "a")))
   (should (equal (pyim-pymap-cchar2py-get ?阿)

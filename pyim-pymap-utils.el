@@ -37,7 +37,7 @@
 (require 'pyim-pymap)
 
 ;; 如果改变这个变量的取值，那么 pyim-tests.el 中，许多 tests 都可能需要更新。
-(defvar pyim-pymap-commonly-used-cchar
+(defvar pyim-pymap--commonly-used-cchar
   (cl-remove-if-not
    (lambda (char)
      (string-match-p "\\cc" char))
@@ -298,22 +298,6 @@
 趯罍鼱鳠鳡鳣爟爚灈韂糵礵鹴皭龢鳤亹籥𫚭玃醾齇觿" ""))
   "常用汉字")
 
-(defun pyim-pymap-cchar< (a b)
-  "如果汉字 A 的使用频率大于汉字 B 的使用频率时，返回 non-nil"
-  (< (or (cl-position a pyim-pymap-commonly-used-cchar :test #'equal) 1000000)
-     (or (cl-position b pyim-pymap-commonly-used-cchar :test #'equal) 1000000)))
-
-(defun pyim-pymap-sort-pymap ()
-  "对 `pyim-pymap' 重新排序, 这个函数主要用于维护 `pyim-pymap'."
-  (let (pymap)
-    (dolist (py pyim-pymap)
-      (push (list (car py)
-                  (string-join
-                   (sort (split-string (cadr py) "")
-                         #'pyim-pymap-cchar<)))
-            pymap))
-    (reverse pymap)))
-
 (defun pyim-pymap-build-pymap ()
   "使用 libpinyin 自带的 data 文件创建 `pyim-pymap'.
 这个函数运行估计需要5分钟。"
@@ -342,11 +326,11 @@
      (with-temp-buffer
        (maphash
         (lambda (key value)
-          (let* ((n (- (length pyim-pymap-commonly-used-cchar) 1))
+          (let* ((n (- (length pyim-pymap--commonly-used-cchar) 1))
                  (value (reverse (delete-dups value)))
                  (seps (mapcar
                         (lambda (n)
-                          (propertize (nth n pyim-pymap-commonly-used-cchar)
+                          (propertize (nth n pyim-pymap--commonly-used-cchar)
                                       'sep t))
                         (list 4000 7000 n)))
                  (string
@@ -355,7 +339,7 @@
                              (if (get-text-property 0 'sep str)
                                  "|"
                                str))
-                           (sort (append seps value) #'pyim-pymap-cchar<)))))
+                           (sort (append seps value) #'pyim-pymap--cchar<)))))
             (insert (format "(%S %S)\n" key string))))
         hash-table)
        (sort-lines nil (point-min) (point-max))
@@ -377,6 +361,23 @@
        (emacs-lisp-mode)
        (indent-region (point-min) (point-max))
        (buffer-string)))))
+
+(defun pyim-pymap--sort-pymap ()
+  "对 `pyim-pymap' 重新排序, 这个函数主要用于维护 `pyim-pymap'."
+  (let (pymap)
+    (dolist (py pyim-pymap)
+      (push (list (car py)
+                  (string-join
+                   (sort (split-string (cadr py) "")
+                         #'pyim-pymap--cchar<)))
+            pymap))
+    (reverse pymap)))
+
+(defun pyim-pymap--cchar< (a b)
+  "如果汉字 A 的使用频率大于汉字 B 的使用频率时，返回 non-nil"
+  (< (or (cl-position a pyim-pymap--commonly-used-cchar :test #'equal) 1000000)
+     (or (cl-position b pyim-pymap--commonly-used-cchar :test #'equal) 1000000)))
+
 
 ;; * Footer
 (provide 'pyim-pymap-utils)
