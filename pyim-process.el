@@ -358,7 +358,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
           ;; autoselector 功能会影响手动连续选择功能，所以这里做了一些限制，
           ;; 只有在输入的时候才能够触发 autoselector 机制。
           (when (pyim-process-self-insert-command-p this-command)
-            (pyim-process-autoselector-results)))
+            (pyim-process--autoselector-results)))
          (select-last-word
           (pyim-process-autoselector-find-result results 'last))
          (select-current-word
@@ -389,7 +389,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
       ;; pyim 后续操作会检测这个返回值。
       'auto-select-success)))
 
-(defun pyim-process-autoselector-results ()
+(defun pyim-process--autoselector-results ()
   "运行所有 autoselectors, 返回结果列表。"
   (mapcar (lambda (x)
             (when (functionp x)

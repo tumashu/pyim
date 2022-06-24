@@ -2037,7 +2037,7 @@ abc 这是")))
                   (list :select 'last :replace "test4"))
                 (lambda ()
                   (list :select 'last :replace "test4"))))
-         (results (pyim-process-autoselector-results)))
+         (results (pyim-process--autoselector-results)))
     (should (equal results
                    '((:select current :replace "test1")
                      (:select current :replace "test2")
