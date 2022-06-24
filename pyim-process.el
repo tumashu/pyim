@@ -197,6 +197,68 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
    pyim-process--candidates
    pyim-process--candidate-position))
 
+;; ** 其它包调用的短小函数
+(defun pyim-process-translating-p ()
+  pyim-process--translating)
+
+(defun pyim-process-toggle-input-ascii ()
+  "pyim 切换中英文输入模式, 同时调整标点符号样式。"
+  (interactive)
+  (setq pyim-process--input-ascii
+        (not pyim-process--input-ascii)))
+
+(defun pyim-process-force-input-chinese ()
+  (setq pyim-process--force-input-chinese t))
+
+(defun pyim-process-get-entered (&optional type)
+  (pyim-entered-get type))
+
+(defun pyim-process-get-first-imobj ()
+  (car pyim-process--imobjs))
+
+(defun pyim-process-get-candidates ()
+  pyim-process--candidates)
+
+(defun pyim-process-get-last-candidates ()
+  pyim-process--candidates-last)
+
+(defun pyim-process-update-last-candidates ()
+  (setq pyim-process--candidates-last pyim-process--candidates))
+
+(defun pyim-process-get-candidate-position ()
+  pyim-process--candidate-position)
+
+(defun pyim-process-candidates-length ()
+  (length pyim-process--candidates))
+
+(defun pyim-process-set-candidate-position (n)
+  (setq pyim-process--candidate-position n))
+
+(defun pyim-process-select-subword-p ()
+  pyim-outcome-subword-info)
+
+(defun pyim-process-get-outcome-subword-info ()
+  pyim-outcome-subword-info)
+
+(defun pyim-process-last-created-words ()
+  pyim-process--last-created-words)
+
+(defun pyim-process-add-last-created-word (word)
+  (setq pyim-process--last-created-words
+        (cons word (remove word pyim-process--last-created-words))))
+
+(defun pyim-process-remove-last-created-word (word)
+  (setq pyim-process--last-created-words
+        (remove word pyim-process--last-created-words)))
+
+(defun pyim-process-delete-word (word)
+  (pyim-dcache-delete-word word))
+
+(defun pyim-process-cleanup-input-output ()
+  (pyim-entered-erase-buffer)
+  (pyim-process-outcome-handle ""))
+
+;; ** Dcache，UI 和 daemon 相关
 (defun pyim-process-ui-init ()
   "初始化 pyim 相关 UI."
   (run-hooks 'pyim-process-ui-init-hook))
@@ -226,15 +288,13 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   (interactive)
   (run-hooks 'pyim-process-stop-daemon-hook))
 
+;; ** 输入相关
 (defmacro pyim-process-with-entered-buffer (&rest forms)
   "PYIM 流程的输入保存在一个 buffer 中，使用 FORMS 处理这个 buffer
 中的信息。"
   (declare (indent 0) (debug t))
   `(pyim-entered-with-entered-buffer
      ,@forms))
-
-(defun pyim-process-get-entered (&optional type)
-  (pyim-entered-get type))
 
 (defun pyim-process-next-imelem-position (num &optional search-forward start)
   "从 `pyim-entered--buffer' 的当前位置，找到下一个或者下 NUM 个 imelem 对应的位置
@@ -269,19 +329,22 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
               (cl-decf pos)))))
       end-position)))
 
-(defun pyim-process-force-input-chinese ()
-  (setq pyim-process--force-input-chinese t))
+;; ** 中英文切换相关
+(defun pyim-process-input-chinese-p ()
+  "确定 pyim 是否需要启动中文输入模式."
+  (let* ((scheme (pyim-scheme-current))
+         (first-chars (pyim-scheme-first-chars scheme))
+         (rest-chars (pyim-scheme-rest-chars scheme))
+         (entered (pyim-entered-get 'point-before)))
+    (and (pyim-process--input-chinese-predicate-1)
+         (pyim-process--input-chinese-predicate-2
+          last-command-event entered first-chars rest-chars))))
 
-(defun pyim-process-auto-switch-english-input-p ()
-  "判断是否 *根据环境自动切换* 为英文输入模式，这个函数处理变量：
-`pyim-english-input-switch-functions'"
-  (let ((func-or-list pyim-english-input-switch-functions))
-    (cl-some (lambda (x)
-               (when (functionp x)
-                 (funcall x)))
-             (cond ((functionp func-or-list) (list func-or-list))
-                   ((listp func-or-list) func-or-list)
-                   (t nil)))))
+(defun pyim-process--input-chinese-predicate-1 ()
+  "`pyim-process-input-chinese-p' 内部函数，测试环境。"
+  (or (pyim-process--force-input-chinese-p)
+      (and (not pyim-process--input-ascii)
+           (not (pyim-process-auto-switch-english-input-p)))))
 
 (defun pyim-process--force-input-chinese-p ()
   "判断是否强制输入中文，这个函数主要处理变量：
@@ -295,27 +358,16 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
                        ((listp func-or-list) func-or-list)
                        (t nil))))))
 
-(defun pyim-process-input-chinese-p ()
-  "确定 pyim 是否需要启动中文输入模式."
-  (let* ((scheme (pyim-scheme-current))
-         (first-chars (pyim-scheme-first-chars scheme))
-         (rest-chars (pyim-scheme-rest-chars scheme))
-         (entered (pyim-entered-get 'point-before)))
-    (and (pyim-process--input-chinese-predicate-1)
-         (pyim-process--input-chinese-predicate-2
-          last-command-event entered first-chars rest-chars))))
-
-(defun pyim-process-toggle-input-ascii ()
-  "pyim 切换中英文输入模式, 同时调整标点符号样式。"
-  (interactive)
-  (setq pyim-process--input-ascii
-        (not pyim-process--input-ascii)))
-
-(defun pyim-process--input-chinese-predicate-1 ()
-  "`pyim-process-input-chinese-p' 内部函数，测试环境。"
-  (or (pyim-process--force-input-chinese-p)
-      (and (not pyim-process--input-ascii)
-           (not (pyim-process-auto-switch-english-input-p)))))
+(defun pyim-process-auto-switch-english-input-p ()
+  "判断是否 *根据环境自动切换* 为英文输入模式，这个函数处理变量：
+`pyim-english-input-switch-functions'"
+  (let ((func-or-list pyim-english-input-switch-functions))
+    (cl-some (lambda (x)
+               (when (functionp x)
+                 (funcall x)))
+             (cond ((functionp func-or-list) (list func-or-list))
+                   ((listp func-or-list) func-or-list)
+                   (t nil)))))
 
 (defun pyim-process--input-chinese-predicate-2 (event entered first-chars rest-chars)
   "`pyim-process-input-chinese-p' 内部函数，测试输入。"
@@ -327,6 +379,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   "Indicator function."
   (pyim-process--input-chinese-predicate-1))
 
+;; ** 运行流程，自动选词
 (defun pyim-process-run ()
   "查询 entered 字符串, 显示备选词等待用户选择。"
   (if (= (length (pyim-entered-get 'point-before)) 0)
@@ -343,6 +396,30 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
         (setq pyim-process--candidate-position 1)
         (pyim-process-ui-refresh)
         (pyim-process--run-delay)))))
+
+(defun pyim-process-terminate ()
+  "Terminate the translation of the current key."
+  (pyim-process-terminate-really (pyim-scheme-current)))
+
+(cl-defgeneric pyim-process-terminate-really (scheme)
+  "Terminate the translation of the current key.")
+
+(cl-defmethod pyim-process-terminate-really (_scheme)
+  (pyim-process-set-translating-flag nil)
+  (pyim-entered-erase-buffer)
+  (setq pyim-process--code-criteria nil)
+  (setq pyim-process--force-input-chinese nil)
+  (setq pyim-process--candidates nil)
+  (setq pyim-process--candidates-last nil)
+  (pyim-process--run-delay-timer-reset)
+  (pyim-process-ui-hide))
+
+(defun pyim-process-set-translating-flag (value)
+  (setq pyim-process--translating value))
+
+(defun pyim-process-ui-hide ()
+  "隐藏 pyim 相关 UI."
+  (run-hooks 'pyim-process-ui-hide-hook))
 
 (defun pyim-process--auto-select ()
   "自动上屏操作流程。
@@ -398,6 +475,10 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
       ;; pyim 后续操作会检测这个返回值。
       'auto-select-success)))
 
+(defun pyim-process-self-insert-command-p (cmd)
+  "测试 CMD 是否是一个 pyim self insert command."
+  (member cmd pyim-process-self-insert-commands))
+
 (defun pyim-process--autoselector-results ()
   "运行所有 autoselectors, 返回结果列表。"
   (mapcar (lambda (x)
@@ -408,10 +489,6 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
            pyim-process-autoselector
            :from-end t
            :test #'equal)))
-
-(defun pyim-process-self-insert-command-p (cmd)
-  "测试 CMD 是否是一个 pyim self insert command."
-  (member cmd pyim-process-self-insert-commands))
 
 (defun pyim-process--autoselector-find-result (results type)
   "从所有 autoselector 运行结果中，寻找返回类型为 TYPE 的结果。"
@@ -484,39 +561,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
                  (pyim-process--merge-candidates (cdr async-return) pyim-process--candidates))
            (pyim-process-ui-refresh)))))))
 
-(defun pyim-process-translating-p ()
-  pyim-process--translating)
-
-(defun pyim-process-set-translating-flag (value)
-  (setq pyim-process--translating value))
-
-(defun pyim-process-get-candidates ()
-  pyim-process--candidates)
-
-(defun pyim-process-get-last-candidates ()
-  pyim-process--candidates-last)
-
-(defun pyim-process-update-last-candidates ()
-  (setq pyim-process--candidates-last pyim-process--candidates))
-
-(defun pyim-process-get-candidate-position ()
-  pyim-process--candidate-position)
-
-(defun pyim-process-candidates-length ()
-  (length pyim-process--candidates))
-
-(defun pyim-process-set-candidate-position (n)
-  (setq pyim-process--candidate-position n))
-
-(defun pyim-process-get-first-imobj ()
-  (car pyim-process--imobjs))
-
-(defun pyim-process-select-subword-p ()
-  pyim-outcome-subword-info)
-
-(defun pyim-process-get-outcome-subword-info ()
-  pyim-outcome-subword-info)
-
+;; ** 上屏相关
 (defun pyim-process-toggle-set-subword-info (n)
   (if (member n pyim-outcome-subword-info)
       (setq pyim-outcome-subword-info
@@ -685,6 +730,7 @@ alist 列表。"
      ;; 当输入的字符不是标点符号时，原样插入。
      (t str))))
 
+;; ** 符号相关
 (defun pyim-process--punctuation-full-width-p ()
   "判断是否需要切换到全角标点输入模式
 
@@ -707,6 +753,7 @@ alist 列表。"
      (and (not pyim-process--input-ascii)
           (not (pyim-process-auto-switch-english-input-p))))))
 
+;; ** 造词相关
 (defun pyim-process-create-code-criteria ()
   "创建 `pyim-process--code-criteria'."
   (setq pyim-process--code-criteria
@@ -772,45 +819,6 @@ BUG：拼音无法有效地处理多音字。"
       (mapconcat (lambda (code)
                    (format "%s -> %s" (concat (or code-prefix "") code) word))
                  codes "; "))))
-
-(defun pyim-process-last-created-words ()
-  pyim-process--last-created-words)
-
-(defun pyim-process-add-last-created-word (word)
-  (setq pyim-process--last-created-words
-        (cons word (remove word pyim-process--last-created-words))))
-
-(defun pyim-process-remove-last-created-word (word)
-  (setq pyim-process--last-created-words
-        (remove word pyim-process--last-created-words)))
-
-(defun pyim-process-delete-word (word)
-  (pyim-dcache-delete-word word))
-
-(defun pyim-process-cleanup-input-output ()
-  (pyim-entered-erase-buffer)
-  (pyim-process-outcome-handle ""))
-
-(defun pyim-process-terminate ()
-  "Terminate the translation of the current key."
-  (pyim-process-terminate-really (pyim-scheme-current)))
-
-(cl-defgeneric pyim-process-terminate-really (scheme)
-  "Terminate the translation of the current key.")
-
-(cl-defmethod pyim-process-terminate-really (_scheme)
-  (pyim-process-set-translating-flag nil)
-  (pyim-entered-erase-buffer)
-  (setq pyim-process--code-criteria nil)
-  (setq pyim-process--force-input-chinese nil)
-  (setq pyim-process--candidates nil)
-  (setq pyim-process--candidates-last nil)
-  (pyim-process--run-delay-timer-reset)
-  (pyim-process-ui-hide))
-
-(defun pyim-process-ui-hide ()
-  "隐藏 pyim 相关 UI."
-  (run-hooks 'pyim-process-ui-hide-hook))
 
 ;; * Footer
 (provide 'pyim-process)
