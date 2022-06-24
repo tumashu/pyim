@@ -151,7 +151,7 @@
 
 (defun pyim-candidates--quanpin (imobjs scheme &optional fast-search)
   "用于全拼输入法的 `pyim-candidates-create' 方法内部使用的函数。"
-  (let* ((znabc-words (pyim-candidates-znabc-words imobjs scheme fast-search))
+  (let* ((znabc-words (pyim-candidates--znabc-words imobjs scheme fast-search))
          (jianpin-words (pyim-candidates-jianpin-words imobjs scheme fast-search))
          (quanpin-words (pyim-candidates--quanpin-words imobjs scheme fast-search))
          (personal-words (pyim-candidates--sort (nth 0 quanpin-words)))
@@ -170,7 +170,7 @@
     (when pyim-debug (print words))
     (delete-dups (cl-remove-if-not #'stringp words))))
 
-(defun pyim-candidates-znabc-words (imobjs scheme &optional fast-search)
+(defun pyim-candidates--znabc-words (imobjs scheme &optional fast-search)
   "智能ABC模式，得到尽可能的拼音组合，查询这些组合，得到的词条做为联想词。"
   (let ((codes (mapcar (lambda (x)
                          (pyim-subconcat x "-"))

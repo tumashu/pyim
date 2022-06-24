@@ -558,7 +558,7 @@
               wubi)
              '("㠭子叕" "㠭子又")))))
 
-(ert-deftest pyim-tests-pyim-candidates-znabc-words ()
+(ert-deftest pyim-tests-pyim-candidates--znabc-words ()
   (let* ((pyim-dhashcache-code2word (make-hash-table :test #'equal))
          (pyim-dhashcache-icode2word (make-hash-table :test #'equal))
          (quanpin (pyim-scheme-get 'quanpin))
@@ -566,9 +566,9 @@
     (puthash "ni-hao" (list "你好" "尼耗") pyim-dhashcache-code2word)
     (puthash "ni-hao-ma" (list "你好吗" "你好马") pyim-dhashcache-code2word)
     (puthash "ni-hao-ma-peng-you" (list "你好吗朋友" "你好吗喷油") pyim-dhashcache-code2word)
-    (should (equal (pyim-candidates-znabc-words imobjs quanpin)
+    (should (equal (pyim-candidates--znabc-words imobjs quanpin)
                    '("你好吗朋友" "你好吗" "你好" "你好吗喷油" "你好马" "尼耗")))
-    (should (equal (pyim-candidates-znabc-words imobjs quanpin t)
+    (should (equal (pyim-candidates--znabc-words imobjs quanpin t)
                    '("你好吗朋友" "你好吗" "你好")))))
 
 (ert-deftest pyim-tests-pyim-candidates-jianpin-words ()
