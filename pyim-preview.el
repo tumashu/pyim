@@ -39,26 +39,26 @@
 (defface pyim-preview-face '((t (:underline t)))
   "设置光标处预览字符串的 face.")
 
-(defvar pyim-preview-overlay nil
+(defvar pyim-preview--overlay nil
   "用于保存光标处预览字符串的 overlay.")
 
 (defvar input-method-highlight-flag) ;; fixed compiling error
 
-(pyim-register-local-variables '(pyim-preview-overlay))
+(pyim-register-local-variables '(pyim-preview--overlay))
 
 ;; ** 待输入字符串预览
 (defun pyim-preview-setup-overlay ()
   "设置 pyim 光标处实时预览功能所需要的 overlay.
 
 这个函数会在 `pyim-input-method' 中调用，用于创建 overlay ，并将
-其保存到 `pyim-preview-overlay' 变量，overlay 的 face 属性设置为
+其保存到 `pyim-preview--overlay' 变量，overlay 的 face 属性设置为
 `pyim-preview-face' ，用户可以使用这个变量来自定义 face"
   (let ((pos (point)))
-    (if (overlayp pyim-preview-overlay)
-        (move-overlay pyim-preview-overlay pos pos)
-      (setq pyim-preview-overlay (make-overlay pos pos))
+    (if (overlayp pyim-preview--overlay)
+        (move-overlay pyim-preview--overlay pos pos)
+      (setq pyim-preview--overlay (make-overlay pos pos))
       (if input-method-highlight-flag
-          (overlay-put pyim-preview-overlay 'face 'pyim-preview-face)))))
+          (overlay-put pyim-preview--overlay 'face 'pyim-preview-face)))))
 
 (add-hook 'pyim-process-ui-init-hook #'pyim-preview-setup-overlay)
 
@@ -66,10 +66,10 @@
   "删除 pyim 光标处实时预览功能所需要的 overlay.
 
 这个函数会在 `pyim-input-method' 中调用，用于删除
-`pyim-preview-overlay' 中保存的 overlay。"
-  (if (and (overlayp pyim-preview-overlay)
-           (overlay-start pyim-preview-overlay))
-      (delete-overlay pyim-preview-overlay)))
+`pyim-preview--overlay' 中保存的 overlay。"
+  (if (and (overlayp pyim-preview--overlay)
+           (overlay-start pyim-preview--overlay))
+      (delete-overlay pyim-preview--overlay)))
 
 (defun pyim-preview-refresh (&rest _)
   "刷新光标处预览.
@@ -84,8 +84,8 @@ pyim 会使用 Emacs overlay 机制在 *待输入buffer* 光标处高亮显示�
     ;; Insert new preview string.
     (insert preview)
     ;; Highlight new preview string.
-    (move-overlay pyim-preview-overlay
-                  (overlay-start pyim-preview-overlay) (point))))
+    (move-overlay pyim-preview--overlay
+                  (overlay-start pyim-preview--overlay) (point))))
 
 (add-hook 'pyim-process-ui-refresh-hook #'pyim-preview-refresh)
 
@@ -120,15 +120,15 @@ pyim 会使用 Emacs overlay 机制在 *待输入buffer* 光标处高亮显示�
 
 (defun pyim-preview-delete-string ()
   "删除已经插入 buffer 的 preview 预览字符串。"
-  (when (and pyim-preview-overlay (overlay-start pyim-preview-overlay))
-    (delete-region (overlay-start pyim-preview-overlay)
-                   (overlay-end pyim-preview-overlay))))
+  (when (and pyim-preview--overlay (overlay-start pyim-preview--overlay))
+    (delete-region (overlay-start pyim-preview--overlay)
+                   (overlay-end pyim-preview--overlay))))
 
 (add-hook 'pyim-process-ui-hide-hook #'pyim-preview-delete-string)
 
 (defun pyim-preview-start-point ()
   "Preview 字符串的开始位置。"
-  (overlay-start pyim-preview-overlay))
+  (overlay-start pyim-preview--overlay))
 
 (setq pyim-process-ui-position-function #'pyim-preview-start-point)
 
