@@ -1358,13 +1358,13 @@ zuo-zuo-you-mang 作作有芒")
     (pyim-dhashcache--update-iword2count "你好" (lambda (x) (* x 2)))
     (should (equal (gethash "你好" pyim-dhashcache-iword2count) 20))))
 
-(ert-deftest pyim-tests-pyim-dhashcache-export ()
+(ert-deftest pyim-tests-pyim-dhashcache--export ()
   (let ((file (pyim-tests-make-temp-file))
         (icode2word (make-hash-table :test #'equal)))
     (puthash "yin-xing"
              (list (propertize "银行" :noexport t)
                    "因行") icode2word)
-    (pyim-dhashcache-export icode2word file)
+    (pyim-dhashcache--export icode2word file)
     (with-temp-buffer
       (insert-file-contents file)
       (should (equal(buffer-string) ";;; -*- coding: utf-8-unix -*-

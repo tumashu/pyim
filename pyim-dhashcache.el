@@ -709,9 +709,9 @@ pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 \\='utf
   (file &context ((pyim-dcache-backend) (eql pyim-dhashcache))
         &optional confirm)
   "导出个人词库到 FILE."
-  (pyim-dhashcache-export pyim-dhashcache-icode2word file confirm))
+  (pyim-dhashcache--export pyim-dhashcache-icode2word file confirm))
 
-(defun pyim-dhashcache-export (dcache file &optional confirm)
+(defun pyim-dhashcache--export (dcache file &optional confirm)
   "将一个 pyim DCACHE 导出为文件 FILE.
 
 如果 CONFIRM 为 non-nil，文件存在时将会提示用户是否覆盖，
