@@ -237,7 +237,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   (pyim-entered-get type))
 
 (defun pyim-process-next-imelem-position (num &optional search-forward start)
-  "从 `pyim-entered-buffer' 的当前位置，找到下一个或者下 NUM 个 imelem 对应的位置
+  "从 `pyim-entered--buffer' 的当前位置，找到下一个或者下 NUM 个 imelem 对应的位置
 
 如果 SEARCH-FORWARD 为 t, 则向前搜索，反之，向后搜索。"
   (pyim-entered-with-entered-buffer

@@ -560,7 +560,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
           ;; 第三次选择：刀，   output = 小李飞刀
           (- (length (pyim-process-get-outcome))
              (length (pyim-process-get-outcome 1))))
-         ;; pyim-imobjs 包含 *pyim-entered-buffer* 里面光标前面的字符
+         ;; pyim-imobjs 包含 *pyim-entered--buffer* 里面光标前面的字符
          ;; 串，通过与 selected-word 做比较，获取光标前未转换的字符串。
          ;; to-be-translated.
          (to-be-translated

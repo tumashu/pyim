@@ -34,7 +34,7 @@
   "Entered tools for pyim."
   :group 'pyim)
 
-(defvar pyim-entered-buffer " *pyim-entered-buffer*"
+(defvar pyim-entered--buffer " *pyim-entered-buffer*"
   "一个 buffer，用来处理用户已经输入的字符串： entered。
 
 用户 *已经* 输入的字符组成的字符串，在 pyim 里面，叫做 entered,
@@ -55,11 +55,11 @@ pyim 使用一个 buffer 来处理 entered, 以实现 “用户输入字符串�
 
 (defmacro pyim-entered-with-entered-buffer (&rest forms)
   (declare (indent 0) (debug t))
-  `(with-current-buffer (get-buffer-create pyim-entered-buffer)
+  `(with-current-buffer (get-buffer-create pyim-entered--buffer)
      ,@forms))
 
 (defun pyim-entered-get (&optional type)
-  "从 `pyim-entered-buffer' 中获取拼音字符串.
+  "从 `pyim-entered--buffer' 中获取拼音字符串.
 
 默认返回 entered buffer 中的全部字符串。如果 TYPE 取值为
 point-before, 返回 entered buffer 中 point 之前的字符串，如果
@@ -75,7 +75,7 @@ TYPE 取值为 point-after, 返回 entered buffer 中 point 之后的字符
      (t (buffer-string)))))
 
 (defun pyim-entered-erase-buffer ()
-  "清除 `pyim-entered-buffer' 的内容"
+  "清除 `pyim-entered--buffer' 的内容"
   (pyim-entered-with-entered-buffer
     (erase-buffer)))
 
