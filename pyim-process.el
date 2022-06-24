@@ -84,37 +84,6 @@ entered (nihaom) 的第一个候选词。
 (define-obsolete-variable-alias
   'pyim-process-async-delay 'pyim-process--run-delay "5.0")
 
-(defcustom pyim-process--run-delay 0.5
-  "延迟多少秒开始延迟获取词条。"
-  :type 'integer)
-
-(defvar pyim-process--input-ascii nil
-  "是否开启 pyim 英文输入模式.")
-
-(defvar pyim-process--force-input-chinese nil
-  "是否强制开启中文输入模式.
-
-这个变量只用于 `pyim-convert-string-at-point', 不要
-在其它地方使用。")
-
-(defvar pyim-process--translating nil
-  "记录是否在转换状态.")
-
-(defvar pyim-process--last-created-words nil
-  "记录最近创建的词条， 用于实现快捷删词功能： `pyim-delete-last-word' .")
-
-(defvar pyim-process--code-criteria nil
-  "用于 code 选取的基准字符串。
-
-当获取到一个词条的多个 codes 时， pyim 会将所有的 codes 与这个字
-符串进行比较，然后选择一个与这个字符串最相似的 code.
-
-这个变量主要用于全拼和双拼输入法的多音字矫正，其取值一般使用用户
-输入生成的 imobjs 转换得到，保留了用户原始输入的许多信息。")
-
-(defvar pyim-process--run-delay-timer nil
-  "异步处理 entered 时，使用的 timer.")
-
 (defvar pyim-process-self-insert-commands nil
   "保存所有的 self insert command.")
 
@@ -135,6 +104,22 @@ entered (nihaom) 的第一个候选词。
 
 (defvar pyim-process-stop-daemon-hook nil
   "Pyim stop daemon hook.")
+
+(defcustom pyim-process--run-delay 0.5
+  "延迟多少秒开始延迟获取词条。"
+  :type 'integer)
+
+(defvar pyim-process--input-ascii nil
+  "是否开启 pyim 英文输入模式.")
+
+(defvar pyim-process--force-input-chinese nil
+  "是否强制开启中文输入模式.
+
+这个变量只用于 `pyim-convert-string-at-point', 不要
+在其它地方使用。")
+
+(defvar pyim-process--translating nil
+  "记录是否在转换状态.")
 
 (defvar pyim-process--imobjs nil
   "Imobj (Input method object) 组成的 list.
@@ -179,6 +164,15 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 2. shuangpin: (\"h\" \"ao\" \"h\" \"c\")
 3. wubi:      (\"aaaa\")")
 
+(defvar pyim-process--code-criteria nil
+  "用于 code 选取的基准字符串。
+
+当获取到一个词条的多个 codes 时， pyim 会将所有的 codes 与这个字
+符串进行比较，然后选择一个与这个字符串最相似的 code.
+
+这个变量主要用于全拼和双拼输入法的多音字矫正，其取值一般使用用户
+输入生成的 imobjs 转换得到，保留了用户原始输入的许多信息。")
+
 (defvar pyim-process--candidates nil
   "所有备选词条组成的列表.")
 
@@ -189,6 +183,12 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   "当前选择的词条在 `pyim-candidates’ 中的位置.
 
 细节信息请参考 `pyim-page--refresh' 的 docstring.")
+
+(defvar pyim-process--run-delay-timer nil
+  "异步处理 entered 时，使用的 timer.")
+
+(defvar pyim-process--last-created-words nil
+  "记录最近创建的词条， 用于实现快捷删词功能： `pyim-delete-last-word' .")
 
 (pyim-register-local-variables
  '(pyim-process--input-ascii
