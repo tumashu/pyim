@@ -196,7 +196,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
   (let* ((candidate-showed (pyim-page--get-showed-candidates))
          (positon (pyim-page--get-selected-word-position))
          (tooltip (pyim-page--get-valid-tooltip))
-         (style (pyim-page-get-page-style tooltip))
+         (style (pyim-page--get-page-style tooltip))
          (page-info
           (list :scheme (pyim-scheme-current)
                 :current-page (pyim-page-current-page)
@@ -280,7 +280,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
            (funcall test-func)) t)
      (t nil))))
 
-(defun pyim-page-get-page-style (tooltip)
+(defun pyim-page--get-page-style (tooltip)
   "依照 TOOLTIP 和 `pyim-page-style', 得到一个 page style."
   (or (cdr (assoc tooltip pyim-page-tooltip-style-alist))
       pyim-page-style))
