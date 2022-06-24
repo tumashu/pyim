@@ -103,7 +103,7 @@ entered (nihaom) 的第一个候选词。
 (defvar pyim-process-last-created-words nil
   "记录最近创建的词条， 用于实现快捷删词功能： `pyim-delete-last-word' .")
 
-(defvar pyim-process-code-criteria nil
+(defvar pyim-process--code-criteria nil
   "用于 code 选取的基准字符串。
 
 当获取到一个词条的多个 codes 时， pyim 会将所有的 codes 与这个字
@@ -693,14 +693,14 @@ alist 列表。"
           (not (pyim-process-auto-switch-english-input-p))))))
 
 (defun pyim-process-create-code-criteria ()
-  "创建 `pyim-process-code-criteria'."
-  (setq pyim-process-code-criteria
+  "创建 `pyim-process--code-criteria'."
+  (setq pyim-process--code-criteria
         (let ((str (string-join
                     (pyim-codes-create (pyim-process-get-first-imobj)
                                        (pyim-scheme-current)))))
-          (if (> (length pyim-process-code-criteria)
+          (if (> (length pyim-process--code-criteria)
                  (length str))
-              pyim-process-code-criteria
+              pyim-process--code-criteria
             str))))
 
 (defun pyim-process-create-word (word &optional prepend wordcount-handler criteria)
@@ -738,7 +738,7 @@ BUG：拼音无法有效地处理多音字。"
            (code-prefix (pyim-scheme-code-prefix scheme))
            (codes (pyim-cstring-to-codes
                    word scheme
-                   (or criteria pyim-process-code-criteria))))
+                   (or criteria pyim-process--code-criteria))))
       ;; 保存对应词条的词频
       (when (> (length word) 0)
         (pyim-dcache-update-wordcount word (or wordcount-handler #'1+)))
@@ -777,7 +777,7 @@ BUG：拼音无法有效地处理多音字。"
 (cl-defmethod pyim-process-terminate-really (_scheme)
   (setq pyim-process-translating nil)
   (pyim-entered-erase-buffer)
-  (setq pyim-process-code-criteria nil)
+  (setq pyim-process--code-criteria nil)
   (setq pyim-process-force-input-chinese nil)
   (setq pyim-process-candidates nil)
   (setq pyim-process-candidates-last nil)
