@@ -37,7 +37,7 @@
   "Chinese string tools for pyim."
   :group 'pyim)
 
-(defun pyim-cstring-partition (string &optional to-cchar)
+(defun pyim-cstring--partition (string &optional to-cchar)
   "STRING partition.
 
 1. Hello你好 -> (\"Hello\" \"你\" \"好\"), when TO-CCHAR is non-nil.
@@ -124,7 +124,7 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
                       (if (pyim-string-match-p "\\cc" str)
                           (pyim-pymap-cchar2py-get str)
                         (list str)))
-                    (pyim-cstring-partition string t)))
+                    (pyim-cstring--partition string t)))
 
       ;; 通过排列组合的方式, 重排 pinyins-list。
       ;; 比如：(("Hello") ("yin") ("hang" "xing")) -> (("Hello" "yin" "hang") ("Hello" "yin" "xing"))
