@@ -135,7 +135,7 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
 这个 regexp 可能正常使用，也可能长度超出 emacs 的限制。"
   (or (ignore-errors
         (rx-to-string
-         (pyim-cregexp-create-cregexp-from-rx
+         (pyim-cregexp--create-cregexp-from-rx
           (lambda (x)
             (if (stringp x)
                 (xr (pyim-cregexp-create-cregexp-from-string
@@ -144,14 +144,14 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
           (xr string))))
       string))
 
-(defun pyim-cregexp-create-cregexp-from-rx (fn rx-form)
+(defun pyim-cregexp--create-cregexp-from-rx (fn rx-form)
   (pcase rx-form
     ('nil nil)
     (`(,form) (funcall fn form))
     (`(any . ,_) rx-form)
     (`(,_ . ,_)
      (mapcar (lambda (x)
-               (pyim-cregexp-create-cregexp-from-rx fn x))
+               (pyim-cregexp--create-cregexp-from-rx fn x))
              rx-form))
     (_ (funcall fn rx-form))))
 
