@@ -85,14 +85,14 @@ pyim 输入半角标点，函数列表中每个函数都有一个参数：char �
 2. 当第一个元素为 \\='no 时，输入半角标点。
 3. 当第一个元素为 \\='auto 时，根据中英文环境，自动切换。")
 
-(defvar pyim-punctuation--pair-status
-  '(("\"" nil) ("'" nil))
-  "成对标点符号切换状态.")
-
 (defvar pyim-punctuation-escape-list (number-sequence ?0 ?9)
   "Punctuation will not insert after this characters.
 
 If you don't like this function, set the variable to nil")
+
+(defvar pyim-punctuation--pair-status
+  '(("\"" nil) ("'" nil))
+  "成对标点符号切换状态.")
 
 (pyim-register-local-variables
  '(pyim-punctuation-translate-p
