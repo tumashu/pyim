@@ -44,7 +44,7 @@
     "eng" "ing" "ong" "uan" "uang" "ian" "iang" "iao" "ue"
     "uai" "uo"))
 
-(defvar pyim-pinyin-valid-yunmu
+(defvar pyim-pinyin--valid-yunmu
   '("a" "o" "e" "ai" "ei" "ui" "ao" "ou" "er" "an" "en"
     "ang" "eng"))
 
