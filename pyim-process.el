@@ -441,9 +441,9 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 (defun pyim-process--run-delay-timer-function ()
   "Function used by `pyim-process--run-delay-timer'"
   (pyim-process-handle-candidates-async)
-  (pyim-process-handle-candidates-limit-time))
+  (pyim-process--handle-candidates-limit-time))
 
-(defun pyim-process-handle-candidates-limit-time ()
+(defun pyim-process--handle-candidates-limit-time ()
   "使用限时的方式获取候选词。"
   (let* ((scheme (pyim-scheme-current))
          (words (pyim-candidates-create-limit-time
