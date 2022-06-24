@@ -105,7 +105,7 @@ timer 实现。"
           (when (functionp indicator)
             (funcall indicator current-input-method chinese-input-p)))))))
 
-(defun pyim-indicator-stop-daemon ()
+(defun pyim-indicator--stop-daemon ()
   "Stop indicator daemon."
   (interactive)
   ;; 只有其它的 buffer 中没有启动 pyim 时，才停止 daemon.
@@ -121,7 +121,7 @@ timer 实现。"
       (setq pyim-indicator--timer nil))
     (pyim-indicator--revert-cursor-color)))
 
-(add-hook 'pyim-process-stop-daemon-hook #'pyim-indicator-stop-daemon)
+(add-hook 'pyim-process-stop-daemon-hook #'pyim-indicator--stop-daemon)
 
 (defun pyim-indicator--revert-cursor-color ()
   "将 cursor 颜色重置到 pyim 启动之前的状态。"
