@@ -55,7 +55,7 @@
    这个选项可以在 emacs 图形版和终端版使用，速度没有 posframe 快，
    偶尔会遇到选词框错位的问题。
 3. 当这个变量取值为 popon 时，使用 popon 包来绘制选词框，这个选项
-   效果类似 popup, 不过目前不支持背景颜色。
+   效果类似 popup。
 4. 当这个变量取值为 minibuffer 时，minibuffer 将做为选词框，
    这个选项也作为其他选项不可用时的 fallback.
 5. 当这个变量的取值是为一个 list 时，pyim 将按照优先顺序动态
@@ -376,7 +376,32 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
          (x (car x-y))
          (y (cdr x-y)))
     (setq pyim-page-last-popon
-          (popon-create string (cons x (+ y 1))))))
+          (popon-create
+           (pyim-page--add-default-page-face
+            (pyim-page--align-lines string))
+           (cons x (+ y 1))))))
+
+(defun pyim-page--add-default-page-face (string)
+  "为 STRING 添加默认 page face."
+  (with-temp-buffer
+    (insert string)
+    (add-face-text-property
+     (point-min) (point-max) 'pyim-page t)
+    (buffer-string)))
+
+(defun pyim-page--align-lines (string)
+  "用空格将 STRING 的每一行都对齐。"
+  (let* ((lines (split-string string "\n"))
+         (widths (mapcar #'string-width lines))
+         (max-width (apply #'max widths))
+         (new-lines
+          (mapcar (lambda (line)
+                    (concat line
+                            (make-string
+                             (- max-width (string-width line))
+                             ?\ )))
+                  lines)))
+    (string-join new-lines "\n")))
 
 (cl-defgeneric pyim-page-info-format (style page-info)
   "将 PAGE-INFO 按照 STYLE 格式化为选词框中显示的字符串。")

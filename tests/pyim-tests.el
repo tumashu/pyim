@@ -1717,6 +1717,22 @@ Transfer-Encoding: chunked
   )
 
 ;; ** pyim-probe 相关单元测试
+(ert-deftest pyim-tests-pyim-page--add-default-page-face ()
+  (let ((string (pyim-page--add-default-page-face
+                 (concat "aaa\n"
+                         (propertize "bbb\n" 'face 'pyim-page-select-word)
+                         "ccc"))))
+    (should (equal (get-text-property 0 'face string) 'pyim-page))
+    (should (equal (get-text-property 1 'face string) 'pyim-page))
+    (should (equal (get-text-property 10 'face string) 'pyim-page))
+    (should (equal (get-text-property 4 'face string) '(pyim-page-select-word pyim-page)))))
+
+(ert-deftest pyim-tests-pyim-page--align-lines ()
+  (should (equal (pyim-page--align-lines "你好
+abc 这是")
+                 "你好    
+abc 这是")))
+
 (ert-deftest pyim-tests-pyim-page-tooltip-valid-p ()
   (let ((pyim-page-tooltip-infos
          `((posframe1 :package posframe1)
