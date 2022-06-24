@@ -128,7 +128,7 @@ Only useful when use posframe.")
 (defvar pyim-page--popup nil
   "这个变量用来保存做为 page tooltip 的 popup.")
 
-(defvar pyim-page-last-popon nil
+(defvar pyim-page--popon nil
   "这个变量用来保存做为 page tooltip 的 popon.")
 
 (defvar pyim-page-last-minibuffer-string nil
@@ -369,13 +369,13 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
 
 (cl-defmethod pyim-page-show (string position (_tooltip (eql popon)))
   "Show STRING at POSITION with the help of popon."
-  (when pyim-page-last-popon
+  (when pyim-page--popon
     ;; 延迟获取词条的时候，如果不把已经存在的 popon 删除，就会出现两个 page.
-    (popon-kill pyim-page-last-popon))
+    (popon-kill pyim-page--popon))
   (let* ((x-y (popon-x-y-at-pos position))
          (x (car x-y))
          (y (cdr x-y)))
-    (setq pyim-page-last-popon
+    (setq pyim-page--popon
           (popon-create
            (pyim-page--add-default-page-face
             (pyim-page--align-lines string))
@@ -619,7 +619,7 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
 
 (cl-defmethod pyim-page-hide-tooltip ((_tooltip (eql popon)))
   "Hide popon tooltip."
-  (popon-kill pyim-page-last-popon))
+  (popon-kill pyim-page--popon))
 
 (cl-defmethod pyim-page-hide-tooltip ((_tooltip (eql posframe)))
   "Hide posframe tooltip."
