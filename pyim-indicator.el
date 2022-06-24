@@ -146,11 +146,11 @@ timer 实现。"
         (set-cursor-color (nth 0 pyim-indicator-cursor-color))
       (set-cursor-color
        (or (nth 1 pyim-indicator-cursor-color)
-           (pyim-indicator-select-color
+           (pyim-indicator--select-color
             (list "black" "white")
             pyim-indicator--original-cursor-color))))))
 
-(defun pyim-indicator-select-color (colors &optional prefer-color)
+(defun pyim-indicator--select-color (colors &optional prefer-color)
   "根据背景，选择一个比较显眼的颜色。
 
 如果 PREFER-COLOR 和背景颜色差异比较大，就使用 PREFER-COLOR.
