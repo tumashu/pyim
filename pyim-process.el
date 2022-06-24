@@ -182,7 +182,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 (defvar pyim-process-candidates nil
   "所有备选词条组成的列表.")
 
-(defvar pyim-process-candidates-last nil
+(defvar pyim-process--candidates-last nil
   "上一轮备选词条列表，这个变量主要用于 autoselector 机制.")
 
 (defvar pyim-process-candidate-position nil
@@ -369,7 +369,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
                                select-current-word)
                              :replace-with))
              (candidates (if select-last-word
-                             pyim-process-candidates-last
+                             pyim-process--candidates-last
                            pyim-process-candidates))
              (pyim-process-candidates
               (if (and str (stringp str))
@@ -479,10 +479,10 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   pyim-process-candidates)
 
 (defun pyim-process-get-last-candidates ()
-  pyim-process-candidates-last)
+  pyim-process--candidates-last)
 
 (defun pyim-process-update-last-candidates ()
-  (setq pyim-process-candidates-last pyim-process-candidates))
+  (setq pyim-process--candidates-last pyim-process-candidates))
 
 (defun pyim-process-get-candidate-position ()
   pyim-process-candidate-position)
@@ -780,7 +780,7 @@ BUG：拼音无法有效地处理多音字。"
   (setq pyim-process--code-criteria nil)
   (setq pyim-process-force-input-chinese nil)
   (setq pyim-process-candidates nil)
-  (setq pyim-process-candidates-last nil)
+  (setq pyim-process--candidates-last nil)
   (pyim-process--run-delay-timer-reset)
   (pyim-process-ui-hide))
 
