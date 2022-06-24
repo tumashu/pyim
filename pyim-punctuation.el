@@ -85,7 +85,7 @@ pyim 输入半角标点，函数列表中每个函数都有一个参数：char �
 2. 当第一个元素为 \\='no 时，输入半角标点。
 3. 当第一个元素为 \\='auto 时，根据中英文环境，自动切换。")
 
-(defvar pyim-punctuation-pair-status
+(defvar pyim-punctuation--pair-status
   '(("\"" nil) ("'" nil))
   "成对标点符号切换状态.")
 
@@ -96,7 +96,7 @@ If you don't like this function, set the variable to nil")
 
 (pyim-register-local-variables
  '(pyim-punctuation-translate-p
-   pyim-punctuation-pair-status
+   pyim-punctuation--pair-status
    pyim-punctuation-escape-list
    pyim-punctuation-half-width-functions))
 
@@ -203,15 +203,15 @@ PUNCT-LIST 格式类似：
 标点符号。
 
 函数 `pyim-punctuation-return-proper-punct' 内部，我们使用变量
-`pyim-punctuation-pair-status' 来记录 “成对” 中文标点符号的状态。"
+`pyim-punctuation--pair-status' 来记录 “成对” 中文标点符号的状态。"
   (let* ((str (car punc-list))
          (punc (cdr punc-list))
-         (switch-p (cdr (assoc str pyim-punctuation-pair-status))))
+         (switch-p (cdr (assoc str pyim-punctuation--pair-status))))
     (if (= (safe-length punc) 1)
         (car punc)
       (if before
           (setq switch-p (not switch-p))
-        (setf (cdr (assoc str pyim-punctuation-pair-status))
+        (setf (cdr (assoc str pyim-punctuation--pair-status))
               (not switch-p)))
       (if switch-p
           (car punc)

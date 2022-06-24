@@ -391,7 +391,7 @@
     (should (equal (buffer-string) "[]")))
 
   (with-temp-buffer
-    (let ((pyim-punctuation-pair-status
+    (let ((pyim-punctuation--pair-status
            '(("\"" nil) ("'" nil))))
       (insert "[{''}]")
       (backward-char 3)
@@ -401,7 +401,7 @@
       (should (equal (buffer-string) "[{''}]"))))
 
   (with-temp-buffer
-    (let ((pyim-punctuation-pair-status
+    (let ((pyim-punctuation--pair-status
            '(("\"" nil) ("'" nil))))
       (insert "[{''}]")
       (backward-char 3)
@@ -410,7 +410,7 @@
       (pyim-punctuation-translate-at-point)
       (should (equal (buffer-string) "[{''}]"))))
 
-  (let ((pyim-punctuation-pair-status
+  (let ((pyim-punctuation--pair-status
          '(("\"" nil) ("'" nil))))
     (should (equal (pyim-punctuation-return-proper-punct '("'" "‘" "’")) "‘"))
     (should (equal (pyim-punctuation-return-proper-punct '("'" "‘" "’")) "’"))))
