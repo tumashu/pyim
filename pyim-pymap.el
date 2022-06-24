@@ -482,9 +482,9 @@
 (defun pyim-pymap-cache-create (&optional force)
   "创建 pymap 相关的 cache."
   (pyim-pymap--cchar2py-cache-create force)
-  (pyim-pymap-py2cchar-cache-create force))
+  (pyim-pymap--py2cchar-cache-create force))
 
-(defun pyim-pymap-py2cchar-cache-create (&optional force)
+(defun pyim-pymap--py2cchar-cache-create (&optional force)
   "构建 pinyin 到 chinese char 的缓存.
 
 用于加快搜索速度，这个函数将缓存保存到 `pyim-pymap-py2cchar-cache' 变量中，
@@ -530,7 +530,7 @@
 
 如果 INCLUDE-SEPERATOR 是 non-nil, 返回的列表包含一个 \"|\" 号，pyim 用这个分隔符
 来区分 3500 个常用汉字和生僻字。"
-  (pyim-pymap-py2cchar-cache-create)
+  (pyim-pymap--py2cchar-cache-create)
   (when (and pinyin (stringp pinyin))
     (let ((output
            (if equal-match
