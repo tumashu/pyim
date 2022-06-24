@@ -139,13 +139,13 @@
   "将词条 WORD 插入到下面两个词库缓存中。
 
 1. `pyim-dhashcache-icode2word'
-2. `pyim-dhashcache-insert-word-into-ishortcode2word'."
-  (pyim-dhashcache-insert-word-into-icode2word word code prepend)
+2. `pyim-dhashcache--insert-word-into-ishortcode2word'."
+  (pyim-dhashcache--insert-word-into-icode2word word code prepend)
   ;; NOTE: 保存词条到 icode2word 词库缓存的同时，也在 ishortcode2word 词库缓存中
   ;; 临时写入一份，供当前 Emacs session 使用，但退出时 pyim 不会保存
   ;; ishortcode2word 词库缓存到文件，因为下次启动 Emacs 的时候，ishortcode2word
   ;; 词库缓存会从 icode2word 再次重建。
-  (pyim-dhashcache-insert-word-into-ishortcode2word word code prepend))
+  (pyim-dhashcache--insert-word-into-ishortcode2word word code prepend))
 
 (defmacro pyim-dhashcache--put (cache code &rest body)
   "将 BODY 的返回值保存到 CACHE 对应的 CODE 中。
@@ -163,18 +163,18 @@
        (setq ,new-value (progn ,@body))
        (puthash ,key ,new-value ,table))))
 
-(defun pyim-dhashcache-insert-word-into-icode2word (word code prepend)
+(defun pyim-dhashcache--insert-word-into-icode2word (word code prepend)
   "将词条 WORD 插入到 icode2word 词库缓存 CODE 键对应的位置.
 
 默认 WORD 放到已有词条的最后，如果 PREPEND 为 non-nil, WORD 将放
 到已有词条的最前面。"
   (pyim-dhashcache--put
-    pyim-dhashcache-icode2word code
-    (if prepend
-        `(,word ,@(remove word orig-value))
-      `(,@(remove word orig-value) ,word))))
+   pyim-dhashcache-icode2word code
+   (if prepend
+       `(,word ,@(remove word orig-value))
+     `(,@(remove word orig-value) ,word))))
 
-(defun pyim-dhashcache-insert-word-into-ishortcode2word (word code prepend)
+(defun pyim-dhashcache--insert-word-into-ishortcode2word (word code prepend)
   "将词条 WORD 插入到 ishortcode2word 词库缓存 CODE 首字母字符串对应的位置.
 
 默认 WORD 放到已有词条的最后，如果 PREPEND 为 non-nil, WORD 将放
