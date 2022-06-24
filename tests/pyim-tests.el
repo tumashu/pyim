@@ -1827,20 +1827,20 @@ abc 这是")))
                    "花花草草"))))
 
 ;; ** pyim-autoselecter 相关单元测试
-(ert-deftest pyim-tests-pyim-autoselecter-xingma-1 ()
-  (should-not (apply #'pyim-autoselector-xingma-1
+(ert-deftest pyim-tests-pyim-autoselecter--xingma ()
+  (should-not (apply #'pyim-autoselector--xingma
                      '(4 "aaaa" ("工" "藏匿" "花花草草" "工工" "㠭") ("工"))))
 
-  (should (equal (apply #'pyim-autoselector-xingma-1
+  (should (equal (apply #'pyim-autoselector--xingma
                         '(4 "aaaab" ("工" "藏匿" "花花草草" "工工" "㠭") ("工")))
                  '(:select last)))
 
   ;; 自动清除错误输入模式，类似微软五笔：敲第五个字母的时候，前面四个字母自动清除
-  (should (equal (apply #'pyim-autoselector-xingma-1
+  (should (equal (apply #'pyim-autoselector--xingma
                         '(4 "xxxxa" ("工" "戈") ("xxxx")))
                  '(:select last :replace-with "")))
 
-  (should (equal (apply #'pyim-autoselector-xingma-1
+  (should (equal (apply #'pyim-autoselector--xingma
                         '(4 "aaaa" ("工") ("工")))
                  '(:select current))))
 

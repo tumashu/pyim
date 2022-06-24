@@ -46,10 +46,10 @@
          (candidates (pyim-process-get-candidates))
          (last-candidates (pyim-process-get-last-candidates)))
     (when (pyim-scheme-xingma-p scheme)
-      (pyim-autoselector-xingma-1
+      (pyim-autoselector--xingma
        split-length entered candidates last-candidates))))
 
-(defun pyim-autoselector-xingma-1 (split-length entered candidates last-candidates)
+(defun pyim-autoselector--xingma (split-length entered candidates last-candidates)
   "`pyim-autoselector-xingma' 内部使用的函数。"
   (cond
    ((and (= (length entered) split-length)
