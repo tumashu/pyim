@@ -34,7 +34,7 @@
   "Pinyin libs for pyim."
   :group 'pyim)
 
-(defvar pyim-pinyin-shenmu
+(defvar pyim-pinyin--shenmu
   '("b" "p" "m" "f" "d" "t" "n" "l" "g" "k" "h"
     "j" "q" "x" "z" "c" "s" "zh" "ch" "sh" "r" "y" "w"))
 
@@ -82,7 +82,7 @@
         shenmu)
     (while (> i 0)
       (setq shenmu (substring pinyin 0 i))
-      (if (member shenmu pyim-pinyin-shenmu)
+      (if (member shenmu pyim-pinyin--shenmu)
           (setq i 0)
         (setq i (1- i))
         (setq shenmu "")))
@@ -120,7 +120,7 @@
                       ;; 截取后剩余的字符串 rest 找不出声母
                       (equal (car (pyim-pinyin-get-shenmu rest)) "")
                       ;; 截取后的韵母最后一个字符是一个有效声母
-                      (member (substring yunmu -1) pyim-pinyin-shenmu)
+                      (member (substring yunmu -1) pyim-pinyin--shenmu)
                       ;; 截取得到的韵母如果去掉最后一个字符，还是有效的韵母
                       (member (substring yunmu 0 -1) pyim-pinyin-yunmu))
                  (if (not (pyim-pinyin-valid-charpy-p shenmu (substring yunmu 0 -1)))
