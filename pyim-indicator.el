@@ -93,6 +93,18 @@ timer 实现。"
 
 (add-hook 'pyim-process-start-daemon-hook #'pyim-indicator-start-daemon)
 
+(defun pyim-indicator--daemon-function ()
+  "`pyim-indicator-daemon' 内部使用的函数。"
+  (while-no-input
+    (redisplay)
+    (ignore-errors
+      (let ((chinese-input-p
+             (and (functionp pyim-indicator--daemon-function-argument)
+                  (funcall pyim-indicator--daemon-function-argument))))
+        (dolist (indicator pyim-indicator-list)
+          (when (functionp indicator)
+            (funcall indicator current-input-method chinese-input-p)))))))
+
 (defun pyim-indicator-stop-daemon ()
   "Stop indicator daemon."
   (interactive)
@@ -111,30 +123,10 @@ timer 实现。"
 
 (add-hook 'pyim-process-stop-daemon-hook #'pyim-indicator-stop-daemon)
 
-(defun pyim-indicator--daemon-function ()
-  "`pyim-indicator-daemon' 内部使用的函数。"
-  (while-no-input
-    (redisplay)
-    (ignore-errors
-      (let ((chinese-input-p
-             (and (functionp pyim-indicator--daemon-function-argument)
-                  (funcall pyim-indicator--daemon-function-argument))))
-        (dolist (indicator pyim-indicator-list)
-          (when (functionp indicator)
-            (funcall indicator current-input-method chinese-input-p)))))))
-
 (defun pyim-indicator--revert-cursor-color ()
   "将 cursor 颜色重置到 pyim 启动之前的状态。"
   (when pyim-indicator--original-cursor-color
     (set-cursor-color pyim-indicator--original-cursor-color)))
-
-(defun pyim-indicator--update-mode-line ()
-  "更新 mode-line."
-  (unless (eq pyim-indicator--last-input-method-title
-              current-input-method-title)
-    (force-mode-line-update)
-    (setq pyim-indicator--last-input-method-title
-          current-input-method-title)))
 
 (defun pyim-indicator-with-cursor-color (input-method chinese-input-p)
   "Pyim 自带的 indicator, 通过光标颜色来显示输入状态。"
@@ -172,6 +164,14 @@ timer 实现。"
         (setq current-input-method-title (nth 0 pyim-indicator-modeline-string))
       (setq current-input-method-title (nth 1 pyim-indicator-modeline-string))))
   (pyim-indicator--update-mode-line))
+
+(defun pyim-indicator--update-mode-line ()
+  "更新 mode-line."
+  (unless (eq pyim-indicator--last-input-method-title
+              current-input-method-title)
+    (force-mode-line-update)
+    (setq pyim-indicator--last-input-method-title
+          current-input-method-title)))
 
 ;; * Footer
 (provide 'pyim-indicator)
