@@ -1011,7 +1011,7 @@
                    "\\(?:\\(?:aaaa'\\|aaaa\\|[工恭]恭?敬?敬?\\)\\(?:aaaa\\|[工恭]恭?敬?敬?\\)\\)"))
     (should (equal (pyim-cregexp--create-cregexp-from-string "aaaa'aaaa" wubi)
                    "\\(?:aaaa'\\|aaaa\\|[工恭][恭]?[敬]?[敬]?\\)\\(?:aaaa\\|[工恭][恭]?[敬]?[敬]?\\)"))
-    (should (equal (pyim-cregexp-build-xingma-regexp-from-words '("工" "恭恭敬敬"))
+    (should (equal (pyim-cregexp--build-xingma-regexp-from-words '("工" "恭恭敬敬"))
                    "[工恭][恭]?[敬]?[敬]?"))
     )
 

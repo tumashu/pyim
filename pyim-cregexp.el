@@ -260,13 +260,13 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
                                         (if first-equal
                                             (substring x 0 1)
                                           x))))
-                      (pyim-cregexp-build-xingma-regexp-from-words
+                      (pyim-cregexp--build-xingma-regexp-from-words
                        (pyim-dcache-get code '(code2word)))))
                   imobj "")))
     (unless (equal regexp "")
       (concat (if match-beginning "^" "") regexp))))
 
-(defun pyim-cregexp-build-xingma-regexp-from-words (words)
+(defun pyim-cregexp--build-xingma-regexp-from-words (words)
   "根据 WORDS, 创建一个可以搜索这些 WORDS 的 regexp.
 
 比如：工, 恭恭敬敬 => [工恭][恭]?[敬]?[敬]?
