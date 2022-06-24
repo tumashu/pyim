@@ -128,7 +128,7 @@ timer 实现。"
   (when pyim-indicator--original-cursor-color
     (set-cursor-color pyim-indicator--original-cursor-color)))
 
-(defun pyim-indicator-update-mode-line ()
+(defun pyim-indicator--update-mode-line ()
   "更新 mode-line."
   (unless (eq pyim-indicator--last-input-method-title
               current-input-method-title)
@@ -171,7 +171,7 @@ timer 实现。"
     (if chinese-input-p
         (setq current-input-method-title (nth 0 pyim-indicator-modeline-string))
       (setq current-input-method-title (nth 1 pyim-indicator-modeline-string))))
-  (pyim-indicator-update-mode-line))
+  (pyim-indicator--update-mode-line))
 
 ;; * Footer
 (provide 'pyim-indicator)
