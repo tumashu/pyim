@@ -76,7 +76,7 @@ timer 实现。"
 (defvar pyim-indicator--last-input-method-title nil
   "记录上一次 `current-input-method-title' 的取值。")
 
-(defun pyim-indicator-start-daemon ()
+(defun pyim-indicator--start-daemon ()
   "Indicator daemon, 用于实时显示输入法当前输入状态。"
   (unless pyim-indicator--original-cursor-color
     (setq pyim-indicator--original-cursor-color
@@ -91,7 +91,7 @@ timer 实现。"
              nil pyim-indicator--timer-repeat
              #'pyim-indicator--daemon-function)))))
 
-(add-hook 'pyim-process-start-daemon-hook #'pyim-indicator-start-daemon)
+(add-hook 'pyim-process-start-daemon-hook #'pyim-indicator--start-daemon)
 
 (defun pyim-indicator--daemon-function ()
   "`pyim-indicator-daemon' 内部使用的函数。"
