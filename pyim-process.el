@@ -179,7 +179,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 2. shuangpin: (\"h\" \"ao\" \"h\" \"c\")
 3. wubi:      (\"aaaa\")")
 
-(defvar pyim-process-candidates nil
+(defvar pyim-process--candidates nil
   "所有备选词条组成的列表.")
 
 (defvar pyim-process--candidates-last nil
@@ -194,7 +194,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
  '(pyim-process-input-ascii
    pyim-process-translating
    pyim-process--imobjs
-   pyim-process-candidates
+   pyim-process--candidates
    pyim-process--candidate-position))
 
 (defun pyim-process-ui-init ()
@@ -327,7 +327,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
       (setq entered-to-translate
             (pyim-entered-get 'point-before))
       (setq pyim-process--imobjs (pyim-imobjs-create entered-to-translate scheme))
-      (setq pyim-process-candidates
+      (setq pyim-process--candidates
             (or (delete-dups (pyim-candidates-create pyim-process--imobjs scheme))
                 (list entered-to-translate)))
       (unless (eq (pyim-process-auto-select) 'auto-select-success)
@@ -370,8 +370,8 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
                              :replace-with))
              (candidates (if select-last-word
                              pyim-process--candidates-last
-                           pyim-process-candidates))
-             (pyim-process-candidates
+                           pyim-process--candidates))
+             (pyim-process--candidates
               (if (and str (stringp str))
                   (list str)
                 candidates)))
@@ -449,8 +449,8 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
          (words (pyim-candidates-create-limit-time
                  pyim-process--imobjs scheme)))
     (when words
-      (setq pyim-process-candidates
-            (pyim-process-merge-candidates words pyim-process-candidates))
+      (setq pyim-process--candidates
+            (pyim-process-merge-candidates words pyim-process--candidates))
       (pyim-process-ui-refresh))))
 
 (defun pyim-process-merge-candidates (new-candidates old-candidates)
@@ -471,24 +471,24 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
          (when (and pyim-process-translating
                     (not (input-pending-p))
                     (equal (car async-return) pyim-process--imobjs))
-           (setq pyim-process-candidates
-                 (pyim-process-merge-candidates (cdr async-return) pyim-process-candidates))
+           (setq pyim-process--candidates
+                 (pyim-process-merge-candidates (cdr async-return) pyim-process--candidates))
            (pyim-process-ui-refresh)))))))
 
 (defun pyim-process-get-candidates ()
-  pyim-process-candidates)
+  pyim-process--candidates)
 
 (defun pyim-process-get-last-candidates ()
   pyim-process--candidates-last)
 
 (defun pyim-process-update-last-candidates ()
-  (setq pyim-process--candidates-last pyim-process-candidates))
+  (setq pyim-process--candidates-last pyim-process--candidates))
 
 (defun pyim-process-get-candidate-position ()
   pyim-process--candidate-position)
 
 (defun pyim-process-candidates-length ()
-  (length pyim-process-candidates))
+  (length pyim-process--candidates))
 
 (defun pyim-process-set-candidate-position (n)
   (setq pyim-process--candidate-position n))
@@ -539,14 +539,14 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
         ((eq type 'candidate)
          (let ((candidate
                 (nth (1- pyim-process--candidate-position)
-                     pyim-process-candidates)))
+                     pyim-process--candidates)))
            (push
             (concat (pyim-outcome-get) candidate)
             pyim-outcome-history)))
         ((eq type 'candidate-and-last-char)
          (let ((candidate
                 (nth (1- pyim-process--candidate-position)
-                     pyim-process-candidates)))
+                     pyim-process--candidates)))
            (push
             (concat (pyim-outcome-get)
                     candidate
@@ -779,7 +779,7 @@ BUG：拼音无法有效地处理多音字。"
   (pyim-entered-erase-buffer)
   (setq pyim-process--code-criteria nil)
   (setq pyim-process-force-input-chinese nil)
-  (setq pyim-process-candidates nil)
+  (setq pyim-process--candidates nil)
   (setq pyim-process--candidates-last nil)
   (pyim-process--run-delay-timer-reset)
   (pyim-process-ui-hide))
