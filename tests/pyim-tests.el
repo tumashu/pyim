@@ -2065,8 +2065,8 @@ abc 这是")))
     (should (equal result1 "result1"))
     (should (equal result2 "result2"))))
 
-(ert-deftest pyim-tests-pyim-process-merge-candidates ()
-  (should (equal (pyim-process-merge-candidates
+(ert-deftest pyim-tests-pyim-process--merge-candidates ()
+  (should (equal (pyim-process--merge-candidates
                   '("a" "b" "c") '("d" "e" "f" "a" "b"))
                  '("d" "a" "b" "c" "e" "f"))))
 

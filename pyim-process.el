@@ -450,10 +450,10 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
                  pyim-process--imobjs scheme)))
     (when words
       (setq pyim-process--candidates
-            (pyim-process-merge-candidates words pyim-process--candidates))
+            (pyim-process--merge-candidates words pyim-process--candidates))
       (pyim-process-ui-refresh))))
 
-(defun pyim-process-merge-candidates (new-candidates old-candidates)
+(defun pyim-process--merge-candidates (new-candidates old-candidates)
   "将 OLD-CANDIDATES 和 NEW-CANDIDATES 合并的默认策略。"
   (remove nil (delete-dups
                `(,(car old-candidates)
@@ -472,7 +472,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
                     (not (input-pending-p))
                     (equal (car async-return) pyim-process--imobjs))
            (setq pyim-process--candidates
-                 (pyim-process-merge-candidates (cdr async-return) pyim-process--candidates))
+                 (pyim-process--merge-candidates (cdr async-return) pyim-process--candidates))
            (pyim-process-ui-refresh)))))))
 
 (defun pyim-process-get-candidates ()
