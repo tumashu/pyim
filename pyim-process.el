@@ -136,7 +136,7 @@ entered (nihaom) 的第一个候选词。
 (defvar pyim-process-stop-daemon-hook nil
   "Pyim stop daemon hook.")
 
-(defvar pyim-process-imobjs nil
+(defvar pyim-process--imobjs nil
   "Imobj (Input method object) 组成的 list.
 
 imobj 在 pyim 里面的概念，类似与编译器里面的语法树，
@@ -193,7 +193,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 (pyim-register-local-variables
  '(pyim-process-input-ascii
    pyim-process-translating
-   pyim-process-imobjs
+   pyim-process--imobjs
    pyim-process-candidates
    pyim-process-candidate-position))
 
@@ -326,9 +326,9 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
            entered-to-translate)
       (setq entered-to-translate
             (pyim-entered-get 'point-before))
-      (setq pyim-process-imobjs (pyim-imobjs-create entered-to-translate scheme))
+      (setq pyim-process--imobjs (pyim-imobjs-create entered-to-translate scheme))
       (setq pyim-process-candidates
-            (or (delete-dups (pyim-candidates-create pyim-process-imobjs scheme))
+            (or (delete-dups (pyim-candidates-create pyim-process--imobjs scheme))
                 (list entered-to-translate)))
       (unless (eq (pyim-process-auto-select) 'auto-select-success)
         (setq pyim-process-candidate-position 1)
@@ -447,7 +447,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   "使用限时的方式获取候选词。"
   (let* ((scheme (pyim-scheme-current))
          (words (pyim-candidates-create-limit-time
-                 pyim-process-imobjs scheme)))
+                 pyim-process--imobjs scheme)))
     (when words
       (setq pyim-process-candidates
             (pyim-process-merge-candidates words pyim-process-candidates))
@@ -465,12 +465,12 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   (let ((scheme (pyim-scheme-current))
         (buffer (current-buffer)))
     (pyim-candidates-create-async
-     pyim-process-imobjs scheme
+     pyim-process--imobjs scheme
      (lambda (async-return)
        (with-current-buffer buffer
          (when (and pyim-process-translating
                     (not (input-pending-p))
-                    (equal (car async-return) pyim-process-imobjs))
+                    (equal (car async-return) pyim-process--imobjs))
            (setq pyim-process-candidates
                  (pyim-process-merge-candidates (cdr async-return) pyim-process-candidates))
            (pyim-process-ui-refresh)))))))
@@ -494,7 +494,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   (setq pyim-process-candidate-position n))
 
 (defun pyim-process-get-first-imobj ()
-  (car pyim-process-imobjs))
+  (car pyim-process--imobjs))
 
 (defun pyim-process-select-subword-p ()
   pyim-outcome-subword-info)
