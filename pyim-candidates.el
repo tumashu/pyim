@@ -152,7 +152,7 @@
 (defun pyim-candidates--quanpin (imobjs scheme &optional fast-search)
   "用于全拼输入法的 `pyim-candidates-create' 方法内部使用的函数。"
   (let* ((znabc-words (pyim-candidates--znabc-words imobjs scheme fast-search))
-         (jianpin-words (pyim-candidates-jianpin-words imobjs scheme fast-search))
+         (jianpin-words (pyim-candidates--jianpin-words imobjs scheme fast-search))
          (quanpin-words (pyim-candidates--quanpin-words imobjs scheme fast-search))
          (personal-words (pyim-candidates--sort (nth 0 quanpin-words)))
          (common-words (nth 1 quanpin-words))
@@ -181,7 +181,7 @@
                       (pyim-zip codes))
               fast-search)))
 
-(defun pyim-candidates-jianpin-words (imobjs scheme &optional fast-search)
+(defun pyim-candidates--jianpin-words (imobjs scheme &optional fast-search)
   "获取简拼词语。
 
 假如输入 \"nih\" ，那么搜索 code 为 \"n-h\" 的词条，然后筛选出所
