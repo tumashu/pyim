@@ -1235,25 +1235,25 @@ wo-hao 我好
   (should-not (pyim-dhashcache-pinyin-string< "你好" "你不好"))
   )
 
-(ert-deftest pyim-tests-pyim-dhashcache-get-shortcodes ()
-  (should (equal (pyim-dhashcache-get-shortcodes ".abcde") nil))
-  (should (equal (pyim-dhashcache-get-shortcodes "wubi/abcde")
+(ert-deftest pyim-tests-pyim-dhashcache--get-ishortcodes-shortcodes ()
+  (should (equal (pyim-dhashcache--get-ishortcodes-shortcodes ".abcde") nil))
+  (should (equal (pyim-dhashcache--get-ishortcodes-shortcodes "wubi/abcde")
                  '("wubi/abcd" "wubi/abc" "wubi/ab")))
-  (should (equal (pyim-dhashcache-get-shortcodes "abcde") nil))
-  (should (equal (pyim-dhashcache-get-shortcodes "ni-hao") nil))
-  (should (equal (pyim-dhashcache-get-shortcodes "") nil)))
+  (should (equal (pyim-dhashcache--get-ishortcodes-shortcodes "abcde") nil))
+  (should (equal (pyim-dhashcache--get-ishortcodes-shortcodes "ni-hao") nil))
+  (should (equal (pyim-dhashcache--get-ishortcodes-shortcodes "") nil)))
 
-(ert-deftest pyim-tests-pyim-dhashcache-get-ishortcodes ()
-  (should (equal (pyim-dhashcache-get-ishortcodes "ni-hao") '("n-h")))
-  (should (equal (pyim-dhashcache-get-ishortcodes "wubi/aaaa") nil))
-  (should (equal (pyim-dhashcache-get-ishortcodes "ni") '("n")))
-  (should (equal (pyim-dhashcache-get-ishortcodes "") nil)))
+(ert-deftest pyim-tests-pyim-dhashcache--get-ishortcodes-ishortcodes ()
+  (should (equal (pyim-dhashcache--get-ishortcodes-ishortcodes "ni-hao") '("n-h")))
+  (should (equal (pyim-dhashcache--get-ishortcodes-ishortcodes "wubi/aaaa") nil))
+  (should (equal (pyim-dhashcache--get-ishortcodes-ishortcodes "ni") '("n")))
+  (should (equal (pyim-dhashcache--get-ishortcodes-ishortcodes "") nil)))
 
-(ert-deftest pyim-tests-pyim-dhashcache-get-path ()
+(ert-deftest pyim-tests-pyim-dhashcache--get-ishortcodes-path ()
   (let* ((dir (pyim-tests-make-temp-file t))
          (pyim-dcache-directory dir))
-    (should (equal (pyim-dhashcache-get-path 'hello) (expand-file-name "hello" dir)))
-    (should (equal (pyim-dhashcache-get-path "hello") nil))))
+    (should (equal (pyim-dhashcache--get-ishortcodes-path 'hello) (expand-file-name "hello" dir)))
+    (should (equal (pyim-dhashcache--get-ishortcodes-path "hello") nil))))
 
 (ert-deftest pyim-tests-pyim-dhashcache-generate-file ()
   (let ((dist-file (pyim-tests-make-temp-file))
@@ -1371,7 +1371,7 @@ zuo-zuo-you-mang 作作有芒")
 yin-xing 因行
 ")))))
 
-(ert-deftest pyim-tests-pyim-dhashcache-get ()
+(ert-deftest pyim-tests-pyim-dhashcache--get-ishortcodes ()
   (let ((pyim-dcache-backend 'pyim-dhashcache)
         (pyim-dhashcache-code2word (make-hash-table :test #'equal))
         (pyim-dhashcache-icode2word (make-hash-table :test #'equal))
@@ -1415,8 +1415,8 @@ yin-xing 因行
     (should (equal (pyim-dcache-sort-words words)
                    '("你好" "呢耗" "你豪")))))
 
-(ert-deftest pyim-tests-pyim-dhashcache-get-counts-from-log ()
-  (should (member (pyim-dhashcache-get-counts-from-log
+(ert-deftest pyim-tests-pyim-dhashcache--get-ishortcodes-counts-from-log ()
+  (should (member (pyim-dhashcache--get-ishortcodes-counts-from-log
                    '((day :20220107 10
                           :20220106 6
                           :20220104 3

@@ -179,7 +179,7 @@
 
 默认 WORD 放到已有词条的最后，如果 PREPEND 为 non-nil, WORD 将放
 到已有词条的最前面。"
-  (dolist (newcode (pyim-dhashcache-get-ishortcodes code))
+  (dolist (newcode (pyim-dhashcache--get-ishortcodes-ishortcodes code))
     (pyim-dhashcache--put
      pyim-dhashcache-ishortcode2word
      newcode
@@ -187,7 +187,7 @@
          `(,word ,@(remove word orig-value))
        `(,@(remove word orig-value) ,word)))))
 
-(defun pyim-dhashcache-get-ishortcodes (code)
+(defun pyim-dhashcache--get-ishortcodes-ishortcodes (code)
   "获取CODE 所有的简写 ishortcodes.
 
 比如: ni-hao -> (n-h)
@@ -254,7 +254,7 @@
          (lambda (key value)
            (puthash key
                     (pyim-dhashcache-calculate-priority
-                     (pyim-dhashcache-get-counts-from-log
+                     (pyim-dhashcache--get-ishortcodes-counts-from-log
                       value))
                     pyim-dhashcache-iword2priority))
          pyim-dhashcache-iword2count-log)
@@ -290,7 +290,7 @@
                         factor))))
           pyim-dhashcache-count-types))
 
-(defun pyim-dhashcache-get-counts-from-log (log-info &optional time)
+(defun pyim-dhashcache--get-ishortcodes-counts-from-log (log-info &optional time)
   "从 LOG-INFO 中获取所有的 count 值。
 
 比如： ((day :20220205 10
@@ -372,7 +372,7 @@
   (let ((ishortcode2word (make-hash-table :test #'equal)))
     (maphash
      (lambda (key value)
-       (dolist (newkey (pyim-dhashcache-get-ishortcodes key))
+       (dolist (newkey (pyim-dhashcache--get-ishortcodes-ishortcodes key))
          (puthash newkey
                   (delete-dups
                    `(,@(gethash newkey ishortcode2word)
@@ -393,9 +393,9 @@
 
 如果 FORCE 为真，强制加载。"
   (interactive)
-  (let* ((code2word-file (pyim-dhashcache-get-path 'pyim-dhashcache-code2word))
-         (word2code-file (pyim-dhashcache-get-path 'pyim-dhashcache-word2code))
-         (code2word-md5-file (pyim-dhashcache-get-path 'pyim-dhashcache-code2word-md5)))
+  (let* ((code2word-file (pyim-dhashcache--get-ishortcodes-path 'pyim-dhashcache-code2word))
+         (word2code-file (pyim-dhashcache--get-ishortcodes-path 'pyim-dhashcache-word2code))
+         (code2word-md5-file (pyim-dhashcache--get-ishortcodes-path 'pyim-dhashcache-code2word-md5)))
     (when (or force (and (not (equal dicts-md5 (pyim-dcache-get-value-from-file code2word-md5-file)))
                          (not pyim-dhashcache--update-code2word-running-p)))
       (setq pyim-dhashcache--update-code2word-running-p t)
@@ -443,7 +443,7 @@ DCACHE 是一个 code -> words 的 hashtable.
        dcache)
       (pyim-dcache-save-value-to-file hashtable file))))
 
-(defun pyim-dhashcache-get-path (variable)
+(defun pyim-dhashcache--get-ishortcodes-path (variable)
   "获取保存 VARIABLE 取值的文件的路径."
   (when (symbolp variable)
     (concat (file-name-as-directory pyim-dcache-directory)
@@ -506,7 +506,7 @@ pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 \\='utf
   (let ((shortcode2word (make-hash-table :test #'equal)))
     (maphash
      (lambda (key value)
-       (dolist (x (pyim-dhashcache-get-shortcodes key))
+       (dolist (x (pyim-dhashcache--get-ishortcodes-shortcodes key))
          (puthash x
                   (mapcar
                    (lambda (word)
@@ -528,7 +528,7 @@ pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 \\='utf
      shortcode2word)
     shortcode2word))
 
-(defun pyim-dhashcache-get-shortcodes (code)
+(defun pyim-dhashcache--get-ishortcodes-shortcodes (code)
   "获取 CODE 所有的 shortcodes.
 
 比如：wubi/aaaa -> (wubi/aaa wubi/aa)
@@ -596,7 +596,7 @@ pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 \\='utf
    ;; Fix warn
    (ignore orig-value)
    (pyim-dhashcache-calculate-priority
-    (pyim-dhashcache-get-counts-from-log
+    (pyim-dhashcache--get-ishortcodes-counts-from-log
      (gethash word pyim-dhashcache-iword2count-log)))))
 
 (defun pyim-dhashcache--update-iword2count-recent (word n hash-table)
