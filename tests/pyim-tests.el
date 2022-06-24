@@ -1426,8 +1426,8 @@ yin-xing 因行
                   '(((day 6 0 3 3 0 0 0)) ;Fixme: In github-ci will result this value, why?
                     ((day 10 6 0 3 3 0 0))))))
 
-(ert-deftest pyim-tests-pyim-dhashcache-calculate-priority ()
-  (should (equal (pyim-dhashcache-calculate-priority
+(ert-deftest pyim-tests-pyim-dhashcache--calculate-priority ()
+  (should (equal (pyim-dhashcache--calculate-priority
                   '((day 3 7 6 4 5 9 1)))
                  '(69))))
 

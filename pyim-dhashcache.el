@@ -253,7 +253,7 @@
         (maphash
          (lambda (key value)
            (puthash key
-                    (pyim-dhashcache-calculate-priority
+                    (pyim-dhashcache--calculate-priority
                      (pyim-dhashcache--get-ishortcodes-counts-from-log
                       value))
                     pyim-dhashcache-iword2priority))
@@ -271,7 +271,7 @@
         (async-inject-variables "^exec-path$")
         (async-inject-variables "^pyim-.+?directory$")))
 
-(defun pyim-dhashcache-calculate-priority (counts-info)
+(defun pyim-dhashcache--calculate-priority (counts-info)
   "根据 COUNTS-INFO 计算优先级（优先级是多个数字组成的一个列表），
 用于对词条进行排序。COUNTS-INFO 是一个 alist, 其结构类似：
 
@@ -566,38 +566,38 @@ pyim 使用的词库文件是简单的文本文件，编码 *强制* 为 \\='utf
          word 50 pyim-dhashcache-iword2count-recent-50-words))
   ;; 更新总 count 表
   (pyim-dhashcache--put
-   pyim-dhashcache-iword2count word
-   (cond
-    ((functionp wordcount-handler)
-     (funcall wordcount-handler (or orig-value 0)))
-    ((numberp wordcount-handler)
-     wordcount-handler)
-    (t (or orig-value 0))))
+    pyim-dhashcache-iword2count word
+    (cond
+     ((functionp wordcount-handler)
+      (funcall wordcount-handler (or orig-value 0)))
+     ((numberp wordcount-handler)
+      wordcount-handler)
+     (t (or orig-value 0))))
   ;; 更新 count 日志表。
   (pyim-dhashcache--put
-   pyim-dhashcache-iword2count-log word
-   (let (out)
-     (dolist (x pyim-dhashcache-count-types)
-       (let* ((label (car x))
-              (key (intern (format-time-string (plist-get (cdr x) :format))))
-              (n (plist-get (cdr x) :max-save-length))
-              (plist (cdr (assoc label orig-value)))
-              (value (plist-get plist key))
-              (output (if value
-                          (plist-put plist key (+ 1 value))
-                        (append (list key 1) plist)))
-              (length (length output))
-              (output (cl-subseq output 0 (min length (* 2 n)))))
-         (push `(,label ,@output) out)))
-     out))
+    pyim-dhashcache-iword2count-log word
+    (let (out)
+      (dolist (x pyim-dhashcache-count-types)
+        (let* ((label (car x))
+               (key (intern (format-time-string (plist-get (cdr x) :format))))
+               (n (plist-get (cdr x) :max-save-length))
+               (plist (cdr (assoc label orig-value)))
+               (value (plist-get plist key))
+               (output (if value
+                           (plist-put plist key (+ 1 value))
+                         (append (list key 1) plist)))
+               (length (length output))
+               (output (cl-subseq output 0 (min length (* 2 n)))))
+          (push `(,label ,@output) out)))
+      out))
   ;; 更新优先级表
   (pyim-dhashcache--put
-   pyim-dhashcache-iword2priority word
-   ;; Fix warn
-   (ignore orig-value)
-   (pyim-dhashcache-calculate-priority
-    (pyim-dhashcache--get-ishortcodes-counts-from-log
-     (gethash word pyim-dhashcache-iword2count-log)))))
+    pyim-dhashcache-iword2priority word
+    ;; Fix warn
+    (ignore orig-value)
+    (pyim-dhashcache--calculate-priority
+     (pyim-dhashcache--get-ishortcodes-counts-from-log
+      (gethash word pyim-dhashcache-iword2count-log)))))
 
 (defun pyim-dhashcache--update-iword2count-recent (word n hash-table)
   (let (words-need-remove)
