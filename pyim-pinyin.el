@@ -75,26 +75,6 @@
 但同时产生了无效拼音 king .  用户手动输入的无效拼音无需考虑.
 因为用户有即时界面反馈,不可能连续输入无效拼音.")
 
-(defun pyim-pinyin-build-regexp (pinyin &optional match-beginning first-equal all-equal)
-  "从 PINYIN 构建一个 regexp，用于搜索联想词，
-
-比如：ni-hao:
-1. ^ni-hao[a-z]* , when FIRST-EQUAL set to `t'
-2. ^ni[a-z]*-hao[a-z]* , when FIRST-EQUAL set to `nil'"
-  (when (and pinyin (stringp pinyin))
-    (let ((pinyin-list (split-string pinyin "-"))
-          (count 0))
-      (concat (if match-beginning "^" "")
-              (mapconcat
-               (lambda (x)
-                 (setq count (+ count 1))
-                 (if (or (not first-equal) (> count 1))
-                     (if all-equal
-                         x
-                       (concat x "[a-z]*"))
-                   x))
-               pinyin-list "-")))))
-
 ;; 分解拼音的相关函数
 (defun pyim-pinyin-get-shenmu (pinyin)
   "从一个拼音字符串 PINYIN 中提出第一个声母。"

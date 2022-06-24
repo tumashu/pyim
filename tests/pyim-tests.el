@@ -371,18 +371,7 @@
                    '(("h" "eng" "h" "eng")
                      ("h" "en" "h" "eng")
                      ("f" "eng" "h" "eng")
-                     ("f" "en" "h" "eng")))))
-  ;; pyim-pinyin-build-regexp
-  (should (equal (pyim-pinyin-build-regexp "ni-hao")
-                 "ni[a-z]*-hao[a-z]*"))
-  (should (equal (pyim-pinyin-build-regexp "ni-hao" t)
-                 "^ni[a-z]*-hao[a-z]*"))
-  (should (equal (pyim-pinyin-build-regexp "ni-hao" nil t)
-                 "ni-hao[a-z]*"))
-  (should (equal (pyim-pinyin-build-regexp "ni-hao" nil nil t)
-                 "ni-hao"))
-  (should (equal (pyim-pinyin-build-regexp "ni-hao" t t)
-                 "^ni-hao[a-z]*")))
+                     ("f" "en" "h" "eng"))))))
 
 ;; ** pyim-punctuation 相关单元测试
 (ert-deftest pyim-tests-pyim-punctuation ()
