@@ -100,7 +100,7 @@
            (pyim-pinyin-find-fuzzy
             (list shenmu yunmu shenmu yunmu)))))
 
-(defun pyim-pinyin-get-charpy (pinyin)
+(defun pyim-pinyin--get-charpy (pinyin)
   "将拼音字符串 PINYIN 分解成声母，韵母和剩余部分."
   (let* ((x (pyim-pinyin--get-shenmu pinyin))
          (shenmu (car x))
@@ -158,12 +158,12 @@
 (defun pyim-pinyin-split (pinyin)
   "将一个代表拼音的字符串 PINYIN, 分解为声母韵母对组成的列表.
 
-这个过程通过循环的调用 `pyim-pinyin-get-charpy' 来实现，整个过程
+这个过程通过循环的调用 `pyim-pinyin--get-charpy' 来实现，整个过程
 类似用菜刀切黄瓜片，将一个拼音字符串逐渐切开。"
   (let ((py pinyin)
         charpy spinyin)
     (while (when (string< "" pinyin)
-             (setq charpy (pyim-pinyin-get-charpy pinyin))
+             (setq charpy (pyim-pinyin--get-charpy pinyin))
              (if (and (equal (nth 0 (car charpy)) "")
                       (equal (nth 1 (car charpy)) ""))
                  (progn

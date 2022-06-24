@@ -316,12 +316,12 @@
   (should-not (pyim-pinyin--valid-charpy-p "n" "k"))
   (should-not (pyim-pinyin--valid-charpy-p "a" "k"))
 
-  ;; pyim-pinyin-get-charpy
-  (should (equal (pyim-pinyin-get-charpy "nihao")
+  ;; pyim-pinyin--get-charpy
+  (should (equal (pyim-pinyin--get-charpy "nihao")
                  '(("n" "i" "n" "i") . "hao")))
-  (should (equal (pyim-pinyin-get-charpy "ao")
+  (should (equal (pyim-pinyin--get-charpy "ao")
                  '(("" "ao" "" "ao") . "")))
-  (should (equal (pyim-pinyin-get-charpy "nh")
+  (should (equal (pyim-pinyin--get-charpy "nh")
                  '(("n" "" "n" "") . "h")))
 
   ;; pyim-pinyin-split
