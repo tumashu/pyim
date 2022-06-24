@@ -91,7 +91,7 @@ entered (nihaom) 的第一个候选词。
 (defvar pyim-process--input-ascii nil
   "是否开启 pyim 英文输入模式.")
 
-(defvar pyim-process-force-input-chinese nil
+(defvar pyim-process--force-input-chinese nil
   "是否强制开启中文输入模式.
 
 这个变量只用于 `pyim-convert-string-at-point', 不要
@@ -270,7 +270,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
       end-position)))
 
 (defun pyim-process-force-input-chinese ()
-  (setq pyim-process-force-input-chinese t))
+  (setq pyim-process--force-input-chinese t))
 
 (defun pyim-process-auto-switch-english-input-p ()
   "判断是否 *根据环境自动切换* 为英文输入模式，这个函数处理变量：
@@ -283,11 +283,11 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
                    ((listp func-or-list) func-or-list)
                    (t nil)))))
 
-(defun pyim-process-force-input-chinese-p ()
+(defun pyim-process--force-input-chinese-p ()
   "判断是否强制输入中文，这个函数主要处理变量：
 `pyim-force-input-chinese-functions'."
   (let ((func-or-list pyim-force-input-chinese-functions))
-    (or pyim-process-force-input-chinese
+    (or pyim-process--force-input-chinese
         (cl-some (lambda (x)
                    (when (functionp x)
                      (funcall x)))
@@ -313,7 +313,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 
 (defun pyim-process--input-chinese-predicate-1 ()
   "`pyim-process-input-chinese-p' 内部函数，测试环境。"
-  (or (pyim-process-force-input-chinese-p)
+  (or (pyim-process--force-input-chinese-p)
       (and (not pyim-process--input-ascii)
            (not (pyim-process-auto-switch-english-input-p)))))
 
@@ -787,7 +787,7 @@ BUG：拼音无法有效地处理多音字。"
   (setq pyim-process-translating nil)
   (pyim-entered-erase-buffer)
   (setq pyim-process--code-criteria nil)
-  (setq pyim-process-force-input-chinese nil)
+  (setq pyim-process--force-input-chinese nil)
   (setq pyim-process--candidates nil)
   (setq pyim-process--candidates-last nil)
   (pyim-process--run-delay-timer-reset)
