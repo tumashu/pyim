@@ -122,7 +122,7 @@ Only useful when use posframe.")
   '((t (:background "gray44")))
   "使用以词选字功能时，选择的汉字所使用的 face.")
 
-(defvar pyim-page-posframe-buffer " *pyim-page-posframe-buffer*"
+(defvar pyim-page--posframe-buffer " *pyim-page--posframe-buffer*"
   "这个变量用来保存做为 page tooltip 的 posframe 的 buffer.")
 
 (defvar pyim-page-last-popup nil
@@ -311,7 +311,7 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
 
 (cl-defmethod pyim-page-show (string position (_tooltip (eql posframe)))
   "在 POSITION 位置，使用 posframe STRING."
-  (posframe-show pyim-page-posframe-buffer
+  (posframe-show pyim-page--posframe-buffer
                  :string string
                  :position position
                  :min-width pyim-page-posframe-min-width
@@ -623,7 +623,7 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
 
 (cl-defmethod pyim-page-hide-tooltip ((_tooltip (eql posframe)))
   "Hide posframe tooltip."
-  (posframe-hide pyim-page-posframe-buffer))
+  (posframe-hide pyim-page--posframe-buffer))
 
 (cl-defmethod pyim-page-hide-tooltip ((_tooltip (eql minibuffer)))
   "Hide minibuffer tooltip."
