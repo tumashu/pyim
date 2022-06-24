@@ -302,6 +302,12 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
          (pyim-process--input-chinese-predicate-2
           last-command-event entered first-chars rest-chars))))
 
+(defun pyim-process-toggle-input-ascii ()
+  "pyim 切换中英文输入模式, 同时调整标点符号样式。"
+  (interactive)
+  (setq pyim-process-input-ascii
+        (not pyim-process-input-ascii)))
+
 (defun pyim-process--input-chinese-predicate-1 ()
   "`pyim-process-input-chinese-p' 内部函数，测试环境。"
   (or (pyim-process-force-input-chinese-p)
