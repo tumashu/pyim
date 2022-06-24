@@ -360,9 +360,9 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
           (when (pyim-process-self-insert-command-p this-command)
             (pyim-process--autoselector-results)))
          (select-last-word
-          (pyim-process-autoselector-find-result results 'last))
+          (pyim-process--autoselector-find-result results 'last))
          (select-current-word
-          (pyim-process-autoselector-find-result results 'current)))
+          (pyim-process--autoselector-find-result results 'current)))
     (when (or select-last-word select-current-word)
       (let* ((str (plist-get (if select-last-word
                                  select-last-word
@@ -404,7 +404,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   "测试 CMD 是否是一个 pyim self insert command."
   (member cmd pyim-process-self-insert-commands))
 
-(defun pyim-process-autoselector-find-result (results type)
+(defun pyim-process--autoselector-find-result (results type)
   "从所有 autoselector 运行结果中，寻找返回类型为 TYPE 的结果。"
   (cl-find-if (lambda (x)
                 (equal (plist-get x :select) type))
