@@ -210,6 +210,9 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 (defun pyim-process-force-input-chinese ()
   (setq pyim-process--force-input-chinese t))
 
+(defun pyim-process-register-self-insert-command (command)
+  (cl-pushnew command pyim-process-self-insert-commands))
+
 (defun pyim-process-get-entered (&optional type)
   (pyim-entered-get type))
 

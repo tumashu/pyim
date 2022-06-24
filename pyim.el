@@ -342,7 +342,7 @@ REFRESH-COMMON-DCACHE 已经废弃，不要再使用了。"
     (pyim-process-outcome-handle 'last-char)
     (pyim-process-terminate))))
 
-(cl-pushnew 'pyim-self-insert-command pyim-process-self-insert-commands)
+(pyim-process-register-self-insert-command 'pyim-self-insert-command)
 
 ;; ** 加词功能
 (defun pyim-create-word-at-point (&optional number silent)
