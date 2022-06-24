@@ -309,12 +309,12 @@
   (should (equal (pyim-pinyin--get-shenmu "")
                  '(nil . "")))
 
-  ;; pyim-pinyin-valid-charpy-p
-  (should (pyim-pinyin-valid-charpy-p "n" "i"))
-  (should (pyim-pinyin-valid-charpy-p "" "a"))
-  (should (pyim-pinyin-valid-charpy-p "" "ao"))
-  (should-not (pyim-pinyin-valid-charpy-p "n" "k"))
-  (should-not (pyim-pinyin-valid-charpy-p "a" "k"))
+  ;; pyim-pinyin--valid-charpy-p
+  (should (pyim-pinyin--valid-charpy-p "n" "i"))
+  (should (pyim-pinyin--valid-charpy-p "" "a"))
+  (should (pyim-pinyin--valid-charpy-p "" "ao"))
+  (should-not (pyim-pinyin--valid-charpy-p "n" "k"))
+  (should-not (pyim-pinyin--valid-charpy-p "a" "k"))
 
   ;; pyim-pinyin-get-charpy
   (should (equal (pyim-pinyin-get-charpy "nihao")

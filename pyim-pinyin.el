@@ -89,7 +89,7 @@
     (cons shenmu
           (substring pinyin (length shenmu)))))
 
-(defun pyim-pinyin-valid-charpy-p (shenmu yunmu)
+(defun pyim-pinyin--valid-charpy-p (shenmu yunmu)
   "测试由 SHENMU 和 YUNMU 组成的拼音，是否是一个有效的汉字拼音。
 这个函数尊重 `pyim-pinyin-fuzzy-alist' 模糊音设置。"
   (cl-some
@@ -113,7 +113,7 @@
       (if (member yunmu pyim-pinyin--yunmu)
           (cond (;; 如果声母和韵母组成的拼音不是一个有效的拼音，
                  ;; 就继续缩短，如果是，就进一步检测。
-                 (not (pyim-pinyin-valid-charpy-p shenmu yunmu))
+                 (not (pyim-pinyin--valid-charpy-p shenmu yunmu))
                  (setq i (1- i))
                  (setq yunmu ""))
                 ((and (string< "" rest)
@@ -123,7 +123,7 @@
                       (member (substring yunmu -1) pyim-pinyin--shenmu)
                       ;; 截取得到的韵母如果去掉最后一个字符，还是有效的韵母
                       (member (substring yunmu 0 -1) pyim-pinyin--yunmu))
-                 (if (not (pyim-pinyin-valid-charpy-p shenmu (substring yunmu 0 -1)))
+                 (if (not (pyim-pinyin--valid-charpy-p shenmu (substring yunmu 0 -1)))
                      ;; 如果去掉韵母最后一个字符后，无法组成一个有效的拼音。
                      ;; 就不要缩短了。
                      (setq i 0)
