@@ -73,7 +73,7 @@ timer 实现。"
   "实现 `pyim-indicator-daemon-function' 时，用于传递参数，主要原因
 是由于 `post-command-hook' 不支持参数。")
 
-(defvar pyim-indicator-last-input-method-title nil
+(defvar pyim-indicator--last-input-method-title nil
   "记录上一次 `current-input-method-title' 的取值。")
 
 (defun pyim-indicator-start-daemon ()
@@ -130,10 +130,10 @@ timer 实现。"
 
 (defun pyim-indicator-update-mode-line ()
   "更新 mode-line."
-  (unless (eq pyim-indicator-last-input-method-title
+  (unless (eq pyim-indicator--last-input-method-title
               current-input-method-title)
     (force-mode-line-update)
-    (setq pyim-indicator-last-input-method-title
+    (setq pyim-indicator--last-input-method-title
           current-input-method-title)))
 
 (defun pyim-indicator-with-cursor-color (input-method chinese-input-p)
