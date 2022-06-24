@@ -123,15 +123,10 @@ Only useful when use posframe.")
   "使用以词选字功能时，选择的汉字所使用的 face.")
 
 (defvar pyim-page-tooltip-infos
-  '((posframe
-     :package posframe
-     :test posframe-workable-p)
-    (popup
-     :package popup)
-    (popon
-     :package popon)
-    (minibuffer
-     :package minibuffer))
+  '((posframe   :package posframe :test posframe-workable-p)
+    (popup      :package popup)
+    (popon      :package popon)
+    (minibuffer :package minibuffer))
   "pyim-page tooltip 相关信息。
 
 用于函数 `pyim-page--tooltip-valid-p'.")
