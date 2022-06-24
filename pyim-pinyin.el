@@ -76,7 +76,7 @@
 因为用户有即时界面反馈,不可能连续输入无效拼音.")
 
 ;; 分解拼音的相关函数
-(defun pyim-pinyin-get-shenmu (pinyin)
+(defun pyim-pinyin--get-shenmu (pinyin)
   "从一个拼音字符串 PINYIN 中提出第一个声母。"
   (let ((i (min (length pinyin) 2))
         shenmu)
@@ -102,7 +102,7 @@
 
 (defun pyim-pinyin-get-charpy (pinyin)
   "将拼音字符串 PINYIN 分解成声母，韵母和剩余部分."
-  (let* ((x (pyim-pinyin-get-shenmu pinyin))
+  (let* ((x (pyim-pinyin--get-shenmu pinyin))
          (shenmu (car x))
          (yunmu-and-rest (cdr x))
          (i (min (length yunmu-and-rest) 5))
@@ -118,7 +118,7 @@
                  (setq yunmu ""))
                 ((and (string< "" rest)
                       ;; 截取后剩余的字符串 rest 找不出声母
-                      (equal (car (pyim-pinyin-get-shenmu rest)) "")
+                      (equal (car (pyim-pinyin--get-shenmu rest)) "")
                       ;; 截取后的韵母最后一个字符是一个有效声母
                       (member (substring yunmu -1) pyim-pinyin--shenmu)
                       ;; 截取得到的韵母如果去掉最后一个字符，还是有效的韵母

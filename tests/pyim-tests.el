@@ -301,12 +301,12 @@
 
 ;; ** pyim-pinyin 相关单元测试
 (ert-deftest pyim-tests-pyim-pinyin ()
-  ;; pyim-pinyin-get-shenmu
-  (should (equal (pyim-pinyin-get-shenmu "nihao")
+  ;; pyim-pinyin--get-shenmu
+  (should (equal (pyim-pinyin--get-shenmu "nihao")
                  '("n" . "ihao")))
-  (should (equal (pyim-pinyin-get-shenmu "ao")
+  (should (equal (pyim-pinyin--get-shenmu "ao")
                  '("" . "ao")))
-  (should (equal (pyim-pinyin-get-shenmu "")
+  (should (equal (pyim-pinyin--get-shenmu "")
                  '(nil . "")))
 
   ;; pyim-pinyin-valid-charpy-p
