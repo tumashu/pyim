@@ -100,7 +100,7 @@ entered (nihaom) 的第一个候选词。
 (defvar pyim-process-translating nil
   "记录是否在转换状态.")
 
-(defvar pyim-process-last-created-words nil
+(defvar pyim-process--last-created-words nil
   "记录最近创建的词条， 用于实现快捷删词功能： `pyim-delete-last-word' .")
 
 (defvar pyim-process--code-criteria nil
@@ -768,15 +768,15 @@ BUG：拼音无法有效地处理多音字。"
                  codes "; "))))
 
 (defun pyim-process-last-created-words ()
-  pyim-process-last-created-words)
+  pyim-process--last-created-words)
 
 (defun pyim-process-add-last-created-word (word)
-  (setq pyim-process-last-created-words
-        (cons word (remove word pyim-process-last-created-words))))
+  (setq pyim-process--last-created-words
+        (cons word (remove word pyim-process--last-created-words))))
 
 (defun pyim-process-remove-last-created-word (word)
-  (setq pyim-process-last-created-words
-        (remove word pyim-process-last-created-words)))
+  (setq pyim-process--last-created-words
+        (remove word pyim-process--last-created-words)))
 
 (defun pyim-process-delete-word (word)
   (pyim-dcache-delete-word word))
