@@ -194,7 +194,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 关键字对应的位置，这个 hastable 最终会做为参数传递给
 `pyim-page-style' 相关的函数，用于生成用于在选词框中显示的字符串。"
   (let* ((candidate-showed (pyim-page--get-showed-candidates))
-         (positon (pyim-page-get-selected-word-position))
+         (positon (pyim-page--get-selected-word-position))
          (tooltip (pyim-page-get-valid-tooltip))
          (style (pyim-page-get-page-style tooltip))
          (page-info
@@ -247,7 +247,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
         last
       whole)))
 
-(defun pyim-page-get-selected-word-position ()
+(defun pyim-page--get-selected-word-position ()
   "获取当前选择的词条在 candidates 中的位置。"
   (- (min (pyim-process-get-candidate-position)
           (pyim-process-candidates-length))
