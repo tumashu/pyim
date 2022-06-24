@@ -82,9 +82,9 @@ entered (nihaom) 的第一个候选词。
                  (repeat function)))
 
 (define-obsolete-variable-alias
-  'pyim-process-async-delay 'pyim-process-run-delay "5.0")
+  'pyim-process-async-delay 'pyim-process--run-delay "5.0")
 
-(defcustom pyim-process-run-delay 0.5
+(defcustom pyim-process--run-delay 0.5
   "延迟多少秒开始延迟获取词条。"
   :type 'integer)
 
@@ -333,7 +333,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
       (unless (eq (pyim-process--auto-select) 'auto-select-success)
         (setq pyim-process--candidate-position 1)
         (pyim-process-ui-refresh)
-        (pyim-process-run-delay)))))
+        (pyim-process--run-delay)))))
 
 (defun pyim-process--auto-select ()
   "自动上屏操作流程。
@@ -414,10 +414,10 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   "刷新 pyim 相关 UI."
   (run-hook-with-args 'pyim-process-ui-refresh-hook hightlight-current))
 
-(defun pyim-process-run-delay ()
+(defun pyim-process--run-delay ()
   "运行延迟获取候选词流程。
 
-当用户输入停顿时间超过 `pyim-process-run-delay' 这个阈值时，就激
+当用户输入停顿时间超过 `pyim-process--run-delay' 这个阈值时，就激
 活延迟获取候选词流程，目前，延迟获取候选词有两种处理模式：
 
 1. 同步+限时+用户抢断模式：比如：搜索 buffer 词条等。
@@ -429,7 +429,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   (pyim-process--run-delay-timer-reset)
   (setq pyim-process--run-delay-timer
         (run-with-timer
-         pyim-process-run-delay
+         pyim-process--run-delay
          nil #'pyim-process--run-delay-timer-function)))
 
 (defun pyim-process--run-delay-timer-reset ()
