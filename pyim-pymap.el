@@ -40,26 +40,6 @@
 ;; * 代码                                                                 :code:
 (require 'pyim-common)
 
-(defvar pyim-pymap--py2cchar-cache1 nil
-  "拼音查汉字功能需要的变量.
-
-类似: \"a\" -> (\"阿啊呵腌|嗄吖锕||錒\")")
-
-(defvar pyim-pymap--py2cchar-cache2 nil
-  "拼音查汉字功能需要的变量.
-
-类似: \"a\" -> (\"阿\" \"啊\" \"呵\" \"腌\" \"|\" \"嗄\" \"吖\" \"锕\" \"|\" \"|\" \"錒\" \"\")")
-
-(defvar pyim-pymap--py2cchar-cache3 nil
-  "拼音查汉字功能需要的变量.
-
-类似: \"a\" -> (\"阿啊呵腌|嗄吖锕||錒\" \"爱 ... 溾\" \"厂广安 ... 菴馣\" \"昂盎 ... 軮䇦\" \"奥澳 ... 鴢泑\")")
-
-(defvar pyim-pymap--cchar2py-cache nil
-  "汉字转拼音功能需要的变量.
-
-类似: \"艾\" -> (\"yi\" \"ai\")")
-
 (defvar pyim-pymap
   '(("a" "阿啊呵腌|嗄吖锕||錒")
     ("ai" "爱埃艾碍癌呆哀挨矮隘蔼唉皑哎|霭捱暧嫒嗳瑷嗌锿砹诶乂欸叆毐|佁烠堨|㤅嘊伌礙䨠嬡娭鴱䀳䬵㘷䠹昹䔽娾䑂靄硋㕌呝嵦塧譪鱫䅬㱯噯敱㝶㑸䝽鎄㢊誒皚䶣馤璦皧銰躷瞹㿄㗒凒懓曖懝㗨濭藹賹阸㝵閡絠鯦譺㾢䔇㾨焥諰溰醷謁騃愛啀鑀靉敳薆厓僾餲愒壒溾")
@@ -478,11 +458,48 @@
 
 但不是完全一致。")
 
+(defvar pyim-pymap--py2cchar-cache1 nil
+  "拼音查汉字功能需要的变量.
+
+类似: \"a\" -> (\"阿啊呵腌|嗄吖锕||錒\")")
+
+(defvar pyim-pymap--py2cchar-cache2 nil
+  "拼音查汉字功能需要的变量.
+
+类似: \"a\" -> (\"阿\" \"啊\" \"呵\" \"腌\" \"|\" \"嗄\" \"吖\" \"锕\" \"|\" \"|\" \"錒\" \"\")")
+
+(defvar pyim-pymap--py2cchar-cache3 nil
+  "拼音查汉字功能需要的变量.
+
+类似: \"a\" -> (\"阿啊呵腌|嗄吖锕||錒\" \"爱 ... 溾\" \"厂广安 ... 菴馣\" \"昂盎 ... 軮䇦\" \"奥澳 ... 鴢泑\")")
+
+(defvar pyim-pymap--cchar2py-cache nil
+  "汉字转拼音功能需要的变量.
+
+类似: \"艾\" -> (\"yi\" \"ai\")")
+
 ;; ** "汉字 -> 拼音" 以及 "拼音 -> 汉字" 的转换函数
 (defun pyim-pymap-cache-create (&optional force)
   "创建 pymap 相关的 cache."
   (pyim-pymap--cchar2py-cache-create force)
   (pyim-pymap--py2cchar-cache-create force))
+
+(defun pyim-pymap--cchar2py-cache-create (&optional force)
+  "Build pinyin cchar->pinyin hashtable from `pyim-pymap'.
+
+If FORCE is non-nil, FORCE build."
+  (when (or force (not pyim-pymap--cchar2py-cache))
+    (setq pyim-pymap--cchar2py-cache
+          (make-hash-table :size 50000 :test #'equal))
+    (dolist (x pyim-pymap)
+      (let ((py (car x))
+            (cchar-list (string-to-list (car (cdr x)))))
+        (dolist (cchar cchar-list)
+          (let* ((key (char-to-string cchar))
+                 (cache (gethash key pyim-pymap--cchar2py-cache)))
+            (if cache
+                (puthash key (append (list py) cache) pyim-pymap--cchar2py-cache)
+              (puthash key (list py) pyim-pymap--cchar2py-cache))))))))
 
 (defun pyim-pymap--py2cchar-cache-create (&optional force)
   "构建 pinyin 到 chinese char 的缓存.
@@ -560,23 +577,6 @@ pyim 在特定的时候需要读取一个汉字的拼音，这个工作由此完
                char-or-str)))
     (when (= (length key) 1)
       (gethash key pyim-pymap--cchar2py-cache))))
-
-(defun pyim-pymap--cchar2py-cache-create (&optional force)
-  "Build pinyin cchar->pinyin hashtable from `pyim-pymap'.
-
-If FORCE is non-nil, FORCE build."
-  (when (or force (not pyim-pymap--cchar2py-cache))
-    (setq pyim-pymap--cchar2py-cache
-          (make-hash-table :size 50000 :test #'equal))
-    (dolist (x pyim-pymap)
-      (let ((py (car x))
-            (cchar-list (string-to-list (car (cdr x)))))
-        (dolist (cchar cchar-list)
-          (let* ((key (char-to-string cchar))
-                 (cache (gethash key pyim-pymap--cchar2py-cache)))
-            (if cache
-                (puthash key (append (list py) cache) pyim-pymap--cchar2py-cache)
-              (puthash key (list py) pyim-pymap--cchar2py-cache))))))))
 
 ;; * Footer
 (provide 'pyim-pymap)
