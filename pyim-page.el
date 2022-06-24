@@ -131,7 +131,7 @@ Only useful when use posframe.")
 (defvar pyim-page--popon nil
   "这个变量用来保存做为 page tooltip 的 popon.")
 
-(defvar pyim-page-last-minibuffer-string nil
+(defvar pyim-page--minibuffer-string nil
   "函数 `pyim-page-show-with-minibuffer' 上一次处理的消息字符串。")
 
 (defvar pyim-page-tooltip-infos
@@ -334,10 +334,10 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
 
       ;; 异步获取词条的时候，上一次的 page 字符串可能还在 Minibuffer 中，所以首
       ;; 先要将其去除，否则会出现两个 page.
-      (delete-char (length pyim-page-last-minibuffer-string))
+      (delete-char (length pyim-page--minibuffer-string))
       (save-excursion
         (insert
-         (setq pyim-page-last-minibuffer-string
+         (setq pyim-page--minibuffer-string
                (concat
                 ;; 显示一个伪 cursor.
                 (propertize " " 'face 'cursor)
@@ -629,12 +629,12 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
   "Hide minibuffer tooltip."
   (when (eq (selected-window) (minibuffer-window))
     ;; 从 minibuffer 中删除 page 字符串。
-    (delete-char (length pyim-page-last-minibuffer-string))
+    (delete-char (length pyim-page--minibuffer-string))
     ;; 在类似 vertico-posframe 这样的环境中，posframe window-point 同步问题
     ;; 不太好处理，这里使用一个简单粗暴的方式：在输入过程中，隐藏真实的
     ;; cursor 并显示一个伪 cursor, 输入完成之后再恢复。
     (setq-local cursor-type t))
-  (setq pyim-page-last-minibuffer-string nil))
+  (setq pyim-page--minibuffer-string nil))
 
 (add-hook 'pyim-process-ui-hide-hook #'pyim-page-hide)
 
