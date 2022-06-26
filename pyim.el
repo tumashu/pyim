@@ -336,8 +336,7 @@ REFRESH-COMMON-DCACHE 已经废弃，不要再使用了。"
       (insert (char-to-string last-command-event)))
     (pyim-process-run))
    ((pyim-process-get-candidates)
-    (pyim-process-outcome-handle 'candidate-and-last-char)
-    (pyim-process-terminate))
+    (pyim-process-select-word-and-last-char))
    (t (pyim-process-select-last-char))))
 
 (pyim-process-register-self-insert-command 'pyim-self-insert-command)

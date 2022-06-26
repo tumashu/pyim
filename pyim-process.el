@@ -570,6 +570,10 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   (pyim-process-outcome-handle 'last-char)
   (pyim-process-terminate))
 
+(defun pyim-process-select-word-and-last-char ()
+  (pyim-process-outcome-handle 'candidate-and-last-char)
+  (pyim-process-terminate))
+
 (cl-defgeneric pyim-process-select-word (scheme))
 
 (cl-defmethod pyim-process-select-word ((_scheme pyim-scheme-quanpin))
