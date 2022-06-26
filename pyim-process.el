@@ -312,8 +312,8 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
               (pyim-add-unread-command-events (this-single-command-raw-keys) t)
               ;; (message "unread-command-events: %s" unread-command-events)
               (pyim-process-terminate))))
-        ;; (message "return: %s" (pyim-process-get-outcome))
-        (pyim-process-get-outcome nil t t))
+        ;; (message "return: %s" (pyim-process-get-select-result))
+        (pyim-process-get-select-result nil t t))
     ;; Since KEY doesn't start any translation, just return it.
     ;; But translate KEY if necessary.
     (char-to-string key)))
@@ -530,7 +530,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
                   (list str)
                 candidates)))
         (pyim-process-select-word-without-save 'do-not-terminate)
-        (pyim-process-create-word (pyim-process-get-outcome) t))
+        (pyim-process-create-word (pyim-process-get-select-result) t))
       ;; autoselector 机制已经触发的时候，如果发现 entered buffer 中
       ;; point 后面还有未处理的输入，就将其转到下一轮处理，这种情况
       ;; 很少出现，一般是型码输入法，entered 编辑的时候有可能触发。
@@ -677,8 +677,8 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
           ;; 第一次选择：小李， output = 小李
           ;; 第二次选择：飞，   output = 小李飞
           ;; 第三次选择：刀，   output = 小李飞刀
-          (- (length (pyim-process-get-outcome))
-             (length (pyim-process-get-outcome 1))))
+          (- (length (pyim-process-get-select-result))
+             (length (pyim-process-get-select-result 1))))
          ;; pyim-imobjs 包含 *pyim-entered--buffer* 里面光标前面的字符
          ;; 串，通过与 selected-word 做比较，获取光标前未转换的字符串。
          ;; to-be-translated.
@@ -719,7 +719,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
             ;; 择更加好用。
             (goto-char (pyim-process-next-imelem-position 20 t 1)))
           (pyim-process-run))
-      (pyim-process-create-word (pyim-process-get-outcome) t)
+      (pyim-process-create-word (pyim-process-get-select-result) t)
       (pyim-process-terminate)
       ;; pyim 使用这个 hook 来处理联想词。
       (run-hooks 'pyim-select-finish-hook))))
@@ -802,7 +802,7 @@ BUG：拼音无法有效地处理多音字。"
                    (format "%s -> %s" (concat (or code-prefix "") code) word))
                  codes "; "))))
 
-(defun pyim-process-get-outcome (&optional n magic-convert use-subword)
+(defun pyim-process-get-select-result (&optional n magic-convert use-subword)
   "PYIM 流程的输出"
   (let ((str (pyim-outcome-get n)))
     (when use-subword
@@ -825,7 +825,7 @@ BUG：拼音无法有效地处理多音字。"
           (delete-region (point-min) (point)))
         (pyim-process-run))
     ;; NOTE: 以词定字的时候，到底应不应该保存词条呢，需要进一步研究。
-    (pyim-process-create-word (pyim-process-get-outcome) t)
+    (pyim-process-create-word (pyim-process-get-select-result) t)
     (pyim-process-terminate)
     ;; pyim 使用这个 hook 来处理联想词。
     (run-hooks 'pyim-select-finish-hook)))
