@@ -251,6 +251,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 (defun pyim-process-delete-word (word)
   (pyim-dcache-delete-word word))
 
+;; ** pyim-input-method 核心函数
 (defun pyim-process-input-method (key)
   "`pyim-process-input-method' 是 `pyim-input-method' 内部使用的函数。
 
