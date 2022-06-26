@@ -338,9 +338,7 @@ REFRESH-COMMON-DCACHE 已经废弃，不要再使用了。"
    ((pyim-process-get-candidates)
     (pyim-process-outcome-handle 'candidate-and-last-char)
     (pyim-process-terminate))
-   (t
-    (pyim-process-outcome-handle 'last-char)
-    (pyim-process-terminate))))
+   (t (pyim-process-select-last-char))))
 
 (pyim-process-register-self-insert-command 'pyim-self-insert-command)
 
@@ -549,9 +547,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   (interactive)
   (if (or pyim-select-word-by-number num)
       (if (null (pyim-process-get-candidates))
-          (progn
-            (pyim-process-outcome-handle 'last-char)
-            (pyim-process-terminate))
+          (pyim-process-select-last-char)
         (when (pyim-page-plan-to-select-word num)
           (pyim-select-word)))
     ;; 有些输入法使用数字键编码，这种情况下，数字键就
@@ -595,9 +591,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
 中文。"
   (interactive)
   (if (= (length (pyim-process-get-entered 'point-before)) 0)
-      (progn
-        (pyim-process-outcome-handle 'last-char)
-        (pyim-process-terminate))
+      (pyim-process-select-last-char)
     (pyim-scheme-toggle-assistant)
     (pyim-process-run)))
 
