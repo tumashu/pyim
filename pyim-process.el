@@ -254,7 +254,76 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 (defun pyim-process-delete-word (word)
   (pyim-dcache-delete-word word))
 
-(defun pyim-process-cleanup-input-output ()
+(defun pyim-process-input-method (key)
+  "`pyim-process-input-method' 是 `pyim-input-method' 内部使用的函数。
+
+这个函数比较复杂，作许多低层工作，但它的一个重要流程是：
+
+1. 使用函数 `read-key-sequence' 得到 key-sequence
+2. 使用函数 `lookup-key' 查询 `pyim-mode-map' 中，与上述 key-sequence 对应
+   的命令。
+3. 如果查询得到的命令是 self-insert-command 时，调用这个函数。
+4. 这个函数最终会返回需要插入到 buffer 的字符串。
+
+这个部份的代码涉及许多 emacs 低层函数，相对复杂，不容易理解，有兴
+趣的朋友可以参考 elisp 手册相关章节:
+1. Invoking the Input Method
+2. Input Methods
+3. Miscellaneous Event Input Features
+4. Reading One Event"
+  ;; Check the possibility of translating KEY.
+  ;; If KEY is nil, we can anyway start translation.
+  (pyim-process-ui-init)
+  (if (or (integerp key) (null key))
+      ;; OK, we can start translation.
+      (let* ((echo-keystrokes 0)
+             (help-char nil)
+             (overriding-terminal-local-map pyim-mode-map)
+             (input-method-function nil)
+             (input-method-use-echo-area nil)
+             (modified-p (buffer-modified-p))
+             last-command-event last-command this-command)
+
+        (pyim-process--set-translating-flag t)
+        (pyim-process--cleanup-input-output)
+
+        (when key
+          (pyim-add-unread-command-events key))
+
+        (while (pyim-process-translating-p)
+          (set-buffer-modified-p modified-p)
+          (let* ((keyseq (read-key-sequence nil nil nil t))
+                 (cmd (lookup-key pyim-mode-map keyseq)))
+            ;; (message "key: %s, cmd:%s\nlcmd: %s, lcmdv: %s, tcmd: %s"
+            ;;          key cmd last-command last-command-event this-command)
+            (if (if key
+                    (commandp cmd)
+                  (pyim-process-self-insert-command-p cmd))
+                (progn
+                  ;; (message "keyseq: %s" keyseq)
+                  (setq last-command-event (aref keyseq (1- (length keyseq)))
+                        last-command this-command
+                        this-command cmd)
+                  (setq key t)
+                  (condition-case-unless-debug err
+                      (call-interactively cmd)
+                    (error (message "pyim 出现错误: %S , 开启 debug-on-error 后可以了解详细情况。" err)
+                           (beep))))
+              ;; KEYSEQ is not defined in the translation keymap.
+              ;; Let's return the event(s) to the caller.
+              (pyim-add-unread-command-events (this-single-command-raw-keys) t)
+              ;; (message "unread-command-events: %s" unread-command-events)
+              (pyim-process-terminate))))
+        ;; (message "return: %s" (pyim-process-get-outcome))
+        (pyim-process-get-outcome nil t t))
+    ;; Since KEY doesn't start any translation, just return it.
+    ;; But translate KEY if necessary.
+    (char-to-string key)))
+
+(defun pyim-process--set-translating-flag (value)
+  (setq pyim-process--translating value))
+
+(defun pyim-process--cleanup-input-output ()
   (pyim-entered-erase-buffer)
   (pyim-process-outcome-handle ""))
 
@@ -405,7 +474,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   "Terminate the translation of the current key.")
 
 (cl-defmethod pyim-process-terminate-really (_scheme)
-  (pyim-process-set-translating-flag nil)
+  (pyim-process--set-translating-flag nil)
   (pyim-entered-erase-buffer)
   (setq pyim-process--code-criteria nil)
   (setq pyim-process--force-input-chinese nil)
@@ -413,9 +482,6 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   (setq pyim-process--candidates-last nil)
   (pyim-process--run-delay-timer-reset)
   (pyim-process-ui-hide))
-
-(defun pyim-process-set-translating-flag (value)
-  (setq pyim-process--translating value))
 
 (defun pyim-process-ui-hide ()
   "隐藏 pyim 相关 UI."
