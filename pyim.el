@@ -534,16 +534,14 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   "光标前移"
   (interactive)
   (pyim-process-with-entered-buffer
-    (ignore-errors
-      (forward-char)))
+    (forward-char))
   (pyim-process-run))
 
 (defun pyim-backward-point ()
   "光标后移"
   (interactive)
   (pyim-process-with-entered-buffer
-    (ignore-errors
-      (backward-char)))
+    (backward-char))
   (pyim-process-run))
 
 (defun pyim-backward-imelem (&optional search-forward)
@@ -579,8 +577,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   "向后删除1个字符"
   (interactive)
   (pyim-process-with-entered-buffer
-    (ignore-errors
-      (delete-char (- 0 (or n 1)))))
+    (delete-char (- 0 (or n 1))))
   (if (> (length (pyim-process-get-entered 'point-before)) 0)
       (pyim-process-run)
     (pyim-process-outcome-handle "")

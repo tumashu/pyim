@@ -363,7 +363,8 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 中的信息。"
   (declare (indent 0) (debug t))
   `(pyim-entered-with-entered-buffer
-     ,@forms))
+     (ignore-errors
+       ,@forms)))
 
 (defun pyim-process-next-imelem-position (num &optional search-forward start)
   "从 `pyim-entered--buffer' 的当前位置，找到下一个或者下 NUM 个 imelem 对应的位置
