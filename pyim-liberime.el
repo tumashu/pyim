@@ -182,7 +182,7 @@
 
 (defvar pyim-liberime-code-log nil)
 (defvar pyim-liberime-word-log nil)
-(cl-defmethod pyim-select-word-really ((_scheme pyim-scheme-rime))
+(cl-defmethod pyim-process-select-word ((_scheme pyim-scheme-rime))
   "从选词框中选择当前词条，然后删除该词条对应拼音。"
   (pyim-process-outcome-handle 'candidate)
   (let* ((entered (pyim-entered-get 'point-before))
