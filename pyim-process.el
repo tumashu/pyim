@@ -198,9 +198,6 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
    pyim-process--candidate-position))
 
 ;; ** 其它包调用的小函数
-(defun pyim-process-translating-p ()
-  pyim-process--translating)
-
 (defun pyim-process-toggle-input-ascii ()
   "pyim 切换中英文输入模式, 同时调整标点符号样式。"
   (interactive)
@@ -290,7 +287,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
         (when key
           (pyim-add-unread-command-events key))
 
-        (while (pyim-process-translating-p)
+        (while (pyim-process--translating-p)
           (set-buffer-modified-p modified-p)
           (let* ((keyseq (read-key-sequence nil nil nil t))
                  (cmd (lookup-key pyim-mode-map keyseq)))
@@ -326,6 +323,9 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 (defun pyim-process--cleanup-input-output ()
   (pyim-entered-erase-buffer)
   (pyim-process-outcome-handle ""))
+
+(defun pyim-process--translating-p ()
+  pyim-process--translating)
 
 ;; ** Dcache，UI 和 daemon 相关
 (defun pyim-process-ui-init ()
@@ -621,7 +621,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
      pyim-process--imobjs scheme
      (lambda (async-return)
        (with-current-buffer buffer
-         (when (and (pyim-process-translating-p)
+         (when (and (pyim-process--translating-p)
                     (not (input-pending-p))
                     (equal (car async-return) pyim-process--imobjs))
            (setq pyim-process--candidates
