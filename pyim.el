@@ -524,7 +524,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
 这个功能一般用于五笔等形码输入法，在忘记编码的时候临时用拼音输入
 中文。"
   (interactive)
-  (if (= (length (pyim-process-get-entered 'point-before)) 0)
+  (if (pyim-process-without-entered-p)
       (pyim-process-select-last-char)
     (pyim-scheme-toggle-assistant)
     (pyim-process-run)))
