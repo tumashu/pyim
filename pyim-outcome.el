@@ -79,9 +79,9 @@
 1. \"v\" 不是有效的声母，不会对中文输入造成太大的影响。
 2. \"v\" 字符很容易按。
 
-pyim 使用函数 `pyim-process-outcome-handle-char' 来处理特殊功能触发字符。当待输入的
-字符是触发字符时，`pyim-process-outcome-handle-char' 根据光标前的字符的不同来调用不
-同的功能，具体见 `pyim-process-outcome-handle-char' ：
+pyim 使用函数 `pyim-process-select-handle-char' 来处理特殊功能触发字符。当待输入的
+字符是触发字符时，`pyim-process-select-handle-char' 根据光标前的字符的不同来调用不
+同的功能，具体见 `pyim-process-select-handle-char' ：
 
 单字快捷键受到输入法方案的限制，比如：全拼输入法可以将其设置为v,
 但双拼输入法下设置 v 可能就不行，所以，pyim 首先会检查当前输入法

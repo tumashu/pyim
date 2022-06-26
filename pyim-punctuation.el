@@ -74,7 +74,7 @@
 
 取值为一个函数列表，这个函数列表中的任意一个函数的运行结果为 t 时，
 pyim 输入半角标点，函数列表中每个函数都有一个参数：char ，表示
-最后输入的一个字符，具体见: `pyim-process-outcome-handle-char' 。"
+最后输入的一个字符，具体见: `pyim-process-select-handle-char' 。"
   :type '(choice (const nil)
                  (repeat function)))
 
@@ -105,12 +105,12 @@ If you don't like this function, set the variable to nil")
   "Pyim 标点符号全角半角模式切换命令.
 
 每次运行 `pyim-punctuation-toggle' 命令，都会调整变量
-`pyim-punctuation-translate-p' 的取值，`pyim-process-outcome-handle-char' 根据
+`pyim-punctuation-translate-p' 的取值，`pyim-process-select-handle-char' 根据
 `pyim-process--punctuation-full-width-p' 函数的返回值，来决定是否转换标点
 符号：
 
-1. 当返回值为 \\='yes 时，`pyim-process-outcome-handle-char' 转换标点符号，从而输入全角标点。
-2. 当返回值为 \\='no 时，`pyim-process-outcome-handle-char' 忽略转换，从而输入半角标点。
+1. 当返回值为 \\='yes 时，`pyim-process-select-handle-char' 转换标点符号，从而输入全角标点。
+2. 当返回值为 \\='no 时，`pyim-process-select-handle-char' 忽略转换，从而输入半角标点。
 3. 当返回值为 \\='auto 时，根据中英文环境，自动切换。"
   (interactive)
   (setq pyim-punctuation-translate-p
