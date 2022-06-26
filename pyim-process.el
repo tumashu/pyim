@@ -632,19 +632,11 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   (setq pyim-process--candidate-position
         word-position-in-candidates))
 
-(defun pyim-process-select-last-char ()
-  (pyim-process-outcome-handle 'last-char)
-  (pyim-process-terminate))
-
-(defun pyim-process-select-word-and-last-char ()
-  (pyim-process-outcome-handle 'candidate-and-last-char)
-  (pyim-process-terminate))
-
 (cl-defgeneric pyim-process-select-word (scheme))
 
 (cl-defmethod pyim-process-select-word ((_scheme pyim-scheme-quanpin))
   "从选词框中选择当前词条，然后删除该词条对应拼音。"
-  (pyim-process-create-code-criteria)
+  (pyim-process--create-code-criteria)
   (pyim-process-outcome-handle 'candidate)
   (let* ((imobj (pyim-process-get-first-imobj))
          (length-selected-word
@@ -701,6 +693,17 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
       ;; pyim 使用这个 hook 来处理联想词。
       (run-hooks 'pyim-select-finish-hook))))
 
+(defun pyim-process--create-code-criteria ()
+  "创建 `pyim-process--code-criteria'."
+  (setq pyim-process--code-criteria
+        (let ((str (string-join
+                    (pyim-codes-create (pyim-process-get-first-imobj)
+                                       (pyim-scheme-current)))))
+          (if (> (length pyim-process--code-criteria)
+                 (length str))
+              pyim-process--code-criteria
+            str))))
+
 (cl-defmethod pyim-process-select-word ((_scheme pyim-scheme-xingma))
   "从选词框中选择当前词条，然后删除该词条对应编码。"
   (pyim-process-outcome-handle 'candidate)
@@ -718,6 +721,14 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
     (pyim-process-terminate)
     ;; pyim 使用这个 hook 来处理联想词。
     (run-hooks 'pyim-select-finish-hook)))
+
+(defun pyim-process-select-last-char ()
+  (pyim-process-outcome-handle 'last-char)
+  (pyim-process-terminate))
+
+(defun pyim-process-select-word-and-last-char ()
+  (pyim-process-outcome-handle 'candidate-and-last-char)
+  (pyim-process-terminate))
 
 ;; ** 上屏相关
 (defun pyim-process-toggle-set-subword-info (n)
@@ -908,17 +919,6 @@ alist 列表。"
           (not (pyim-process-auto-switch-english-input-p))))))
 
 ;; ** 造词相关
-(defun pyim-process-create-code-criteria ()
-  "创建 `pyim-process--code-criteria'."
-  (setq pyim-process--code-criteria
-        (let ((str (string-join
-                    (pyim-codes-create (pyim-process-get-first-imobj)
-                                       (pyim-scheme-current)))))
-          (if (> (length pyim-process--code-criteria)
-                 (length str))
-              pyim-process--code-criteria
-            str))))
-
 (defun pyim-process-create-word (word &optional prepend wordcount-handler criteria)
   "将中文词条 WORD 添加编码后，保存到用户选择过的词生成的缓存中。
 
