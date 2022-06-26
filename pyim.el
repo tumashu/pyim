@@ -460,9 +460,9 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
 然后再删除不需要的字，由于这个词条不是常用词条，所以
 不需要保存到个人词库。"
   (interactive)
-  (if (null (pyim-process-get-candidates))
-      (pyim-process-outcome-handle 'last-char)
-    (pyim-process-outcome-handle 'candidate))
+  (if (pyim-process-get-candidates)
+      (pyim-process-outcome-handle 'candidate)
+    (pyim-process-select-last-char))
   (pyim-process-terminate))
 
 (defun pyim-select-word ()
