@@ -744,6 +744,62 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   (pyim-process-outcome-handle "")
   (pyim-process-terminate))
 
+;; ** 造词相关
+(defun pyim-process-create-word (word &optional prepend wordcount-handler criteria)
+  "将中文词条 WORD 添加编码后，保存到用户选择过的词生成的缓存中。
+
+词条 WORD 默认会追加到已有词条的后面，如果 PREPEND 设置为 t,
+词条就会放到已有词条的最前面。
+
+这是函数会调用 `pyim-cstring-to-codes' 来获取中文词条对应的编码。
+
+WORDCOUNT-HANDLER 可以是一个数字，代表将此数字设置为 WORD 的新词频，
+WORDCOUNT-HANDLER 也可以是一个函数，其返回值将设置为 WORD 的新词频，
+而这个函数的参数则表示 WORD 当前词频，这个功能用于：`pyim-dcache-import',
+如果 WORDCOUNT-HANDLER 设置为其他, 则表示让 WORD 当前词频加1.
+
+如果 CRITERIA 是一个字符串，在多音字矫正时，将使用这个字符串来矫
+正多音字。
+
+BUG：拼音无法有效地处理多音字。"
+  (when (and (> (length word) 0)
+             ;; NOTE: 十二个汉字及以上的词条，加到个人词库里面用处不大，这是很主
+             ;; 观的一个数字，也许应该添加一个配置选项？
+             (< (length word) 12)
+             (not (pyim-string-match-p "\\CC" word)))
+    ;; PYIM 有些功能（比如：以词定字功能）会用到 text property, 保存词条之前将
+    ;; text property 去除，防止不必要的数据进入 cache.
+    (setq word (substring-no-properties word))
+    ;; 以词定字功能使用时，保存的词条应该是定字后的词条。
+    (when (pyim-process-select-subword-p)
+      (setq word (pyim-outcome-get-subword word)))
+    (pyim-process-add-last-created-word word)
+    (let* ((scheme (pyim-scheme-current))
+           (code-prefix (pyim-scheme-code-prefix scheme))
+           (codes (pyim-cstring-to-codes
+                   word scheme
+                   (or criteria pyim-process--code-criteria))))
+      ;; 保存对应词条的词频
+      (when (> (length word) 0)
+        (pyim-dcache-update-wordcount word (or wordcount-handler #'1+)))
+      ;; 添加词条到个人缓存
+      (dolist (code codes)
+        (unless (pyim-string-match-p "[^ a-z-]" code)
+          (pyim-dcache-insert-word
+           (if (and (> (length word) 1)
+                    (> (length codes) 1))
+               ;; 如果 word 超过一个汉字，并且得到多个 codes，那么大概率说明没有
+               ;; 正确处理多音字，这里设置一下 :noexport 属性，在导出词条的时候
+               ;; 不导出这些带标记的词。
+               (propertize word :noexport t)
+             word)
+           (concat (or code-prefix "") code) prepend)))
+      ;; TODO, 排序个人词库?
+      ;; 返回 codes 和 word, 用于 message 命令。
+      (mapconcat (lambda (code)
+                   (format "%s -> %s" (concat (or code-prefix "") code) word))
+                 codes "; "))))
+
 ;; ** 上屏相关
 (defun pyim-process-toggle-set-subword-info (n)
   (if (member n pyim-outcome-subword-info)
@@ -932,61 +988,6 @@ alist 列表。"
      (and (not pyim-process--input-ascii)
           (not (pyim-process-auto-switch-english-input-p))))))
 
-;; ** 造词相关
-(defun pyim-process-create-word (word &optional prepend wordcount-handler criteria)
-  "将中文词条 WORD 添加编码后，保存到用户选择过的词生成的缓存中。
-
-词条 WORD 默认会追加到已有词条的后面，如果 PREPEND 设置为 t,
-词条就会放到已有词条的最前面。
-
-这是函数会调用 `pyim-cstring-to-codes' 来获取中文词条对应的编码。
-
-WORDCOUNT-HANDLER 可以是一个数字，代表将此数字设置为 WORD 的新词频，
-WORDCOUNT-HANDLER 也可以是一个函数，其返回值将设置为 WORD 的新词频，
-而这个函数的参数则表示 WORD 当前词频，这个功能用于：`pyim-dcache-import',
-如果 WORDCOUNT-HANDLER 设置为其他, 则表示让 WORD 当前词频加1.
-
-如果 CRITERIA 是一个字符串，在多音字矫正时，将使用这个字符串来矫
-正多音字。
-
-BUG：拼音无法有效地处理多音字。"
-  (when (and (> (length word) 0)
-             ;; NOTE: 十二个汉字及以上的词条，加到个人词库里面用处不大，这是很主
-             ;; 观的一个数字，也许应该添加一个配置选项？
-             (< (length word) 12)
-             (not (pyim-string-match-p "\\CC" word)))
-    ;; PYIM 有些功能（比如：以词定字功能）会用到 text property, 保存词条之前将
-    ;; text property 去除，防止不必要的数据进入 cache.
-    (setq word (substring-no-properties word))
-    ;; 以词定字功能使用时，保存的词条应该是定字后的词条。
-    (when (pyim-process-select-subword-p)
-      (setq word (pyim-outcome-get-subword word)))
-    (pyim-process-add-last-created-word word)
-    (let* ((scheme (pyim-scheme-current))
-           (code-prefix (pyim-scheme-code-prefix scheme))
-           (codes (pyim-cstring-to-codes
-                   word scheme
-                   (or criteria pyim-process--code-criteria))))
-      ;; 保存对应词条的词频
-      (when (> (length word) 0)
-        (pyim-dcache-update-wordcount word (or wordcount-handler #'1+)))
-      ;; 添加词条到个人缓存
-      (dolist (code codes)
-        (unless (pyim-string-match-p "[^ a-z-]" code)
-          (pyim-dcache-insert-word
-           (if (and (> (length word) 1)
-                    (> (length codes) 1))
-               ;; 如果 word 超过一个汉字，并且得到多个 codes，那么大概率说明没有
-               ;; 正确处理多音字，这里设置一下 :noexport 属性，在导出词条的时候
-               ;; 不导出这些带标记的词。
-               (propertize word :noexport t)
-             word)
-           (concat (or code-prefix "") code) prepend)))
-      ;; TODO, 排序个人词库?
-      ;; 返回 codes 和 word, 用于 message 命令。
-      (mapconcat (lambda (code)
-                   (format "%s -> %s" (concat (or code-prefix "") code) word))
-                 codes "; "))))
 
 ;; * Footer
 (provide 'pyim-process)
