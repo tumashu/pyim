@@ -469,11 +469,10 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   "从选词框中选择当前词条，然后删除该词条对应拼音。"
   (interactive)
   (pyim-process-create-code-criteria)
-  (if (null (pyim-process-get-candidates))  ; 如果没有选项，输入空格
-      (progn
-        (pyim-process-outcome-handle 'last-char)
-        (pyim-process-terminate))
-    (pyim-process-select-word (pyim-scheme-current))))
+  (if (pyim-process-get-candidates)
+      (pyim-process-select-word (pyim-scheme-current))
+    ;; 如果没有选项，输入空格
+    (pyim-process-select-last-char)))
 
 (defun pyim-select-word-by-number (&optional num)
   "使用数字编号来选择对应的词条。"
