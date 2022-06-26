@@ -234,9 +234,6 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 (defun pyim-process-candidates-length ()
   (length pyim-process--candidates))
 
-(defun pyim-process-plan-to-select-word (n)
-  (setq pyim-process--candidate-position n))
-
 (defun pyim-process-select-subword-p ()
   pyim-outcome-subword-info)
 
@@ -563,6 +560,11 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
            (setq pyim-process--candidates
                  (pyim-process--merge-candidates (cdr async-return) pyim-process--candidates))
            (pyim-process-ui-refresh)))))))
+
+;; ** 选词相关
+(defun pyim-process-plan-to-select-word (word-position-in-candidates)
+  (setq pyim-process--candidate-position
+        word-position-in-candidates))
 
 ;; ** 上屏相关
 (defun pyim-process-toggle-set-subword-info (n)
