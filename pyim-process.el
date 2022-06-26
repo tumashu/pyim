@@ -216,9 +216,6 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 (defun pyim-process-get-entered (&optional type)
   (pyim-entered-get type))
 
-(defun pyim-process-get-first-imobj ()
-  (car pyim-process--imobjs))
-
 (defun pyim-process-get-candidates ()
   pyim-process--candidates)
 
@@ -703,6 +700,9 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
                  (length str))
               pyim-process--code-criteria
             str))))
+
+(defun pyim-process-get-first-imobj ()
+  (car pyim-process--imobjs))
 
 (cl-defmethod pyim-process-select-word ((_scheme pyim-scheme-xingma))
   "从选词框中选择当前词条，然后删除该词条对应编码。"
