@@ -734,6 +734,10 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   (pyim-process-outcome-handle 'candidate-and-last-char)
   (pyim-process-terminate))
 
+(defun pyim-process-select-nothing ()
+  (pyim-process-outcome-handle "")
+  (pyim-process-terminate))
+
 ;; ** 上屏相关
 (defun pyim-process-toggle-set-subword-info (n)
   (if (member n pyim-outcome-subword-info)

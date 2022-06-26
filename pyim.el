@@ -578,10 +578,9 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   (interactive)
   (pyim-process-with-entered-buffer
     (delete-char (- 0 (or n 1))))
-  (if (> (length (pyim-process-get-entered 'point-before)) 0)
-      (pyim-process-run)
-    (pyim-process-outcome-handle "")
-    (pyim-process-terminate)))
+  (if (pyim-process-without-entered-p)
+      (pyim-process-select-nothing)
+    (pyim-process-run)))
 
 (defun pyim-delete-forward-char ()
   "向前删除1个字符"
