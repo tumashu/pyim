@@ -454,7 +454,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   "Indicator function."
   (pyim-process--input-chinese-predicate-1))
 
-;; ** 运行流程，自动选词
+;; ** 解析输入 -> 获取词条 -> 自动选词
 (defun pyim-process-run ()
   "查询 entered 字符串, 显示备选词等待用户选择。"
   (if (= (length (pyim-entered-get 'point-before)) 0)
@@ -633,11 +633,12 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
                  (pyim-process--merge-candidates (cdr async-return) pyim-process--candidates))
            (pyim-process-ui-refresh)))))))
 
-;; ** 选词相关
+;; ** 预选词条相关
 (defun pyim-process-plan-to-select-word (word-position-in-candidates)
   (setq pyim-process--candidate-position
         word-position-in-candidates))
 
+;; ** 选词相关
 (cl-defgeneric pyim-process-select-word (scheme))
 
 (cl-defmethod pyim-process-select-word ((_scheme pyim-scheme-quanpin))
