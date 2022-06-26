@@ -562,17 +562,16 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
          result)))
     (string-join (nreverse result) (or separator ""))))
 
-(defun pyim-page-get-candidate-position-by-numeric-key (num-key)
-  "根据 NUM-KEY 获取一个有效的 candidate position.
-
-如果获取不到，返回 nil."
+(defun pyim-page-plan-to-select-word (num-key)
+  "按照 NUM-KEY 预选词条，如果预选不成功，则返回 nil."
   (let ((index (if (numberp num-key)
                    (- num-key 1)
                  0))
         (end (pyim-page--end)))
     (when (= index -1) (setq index 9))
     (when (<= (+ index (pyim-page--start)) end)
-      (+ (pyim-page--start) index))))
+      (pyim-process-plan-to-select-word
+       (+ (pyim-page--start) index)))))
 
 (defun pyim-page-next-page (arg)
   "Pyim page 翻页命令."
