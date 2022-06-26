@@ -151,9 +151,8 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
   第4页   柅    猊    郳  輗  坭  惄  堄  儗  伲
   第5页   祢    慝
 
-`pyim-process-get-candidate-position' 的返回值以及
-`pyim-page-length' 的设定值（默认设置为9），共同决定了 pyim 需要
-显示哪一页，比如：
+`pyim-process-word-position' 的返回值以及 `pyim-page-length' 的设
+定值（默认设置为9），共同决定了 pyim 需要显示哪一页，比如：
 
   第1页  你好  倪皓   泥    你  呢  拟  逆  腻  妮
   第2页  怩    溺     尼    禰  齯  麑  鲵  蜺  衵
@@ -161,7 +160,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
   第4页  柅    猊     郳    輗  坭  惄  堄  儗  伲
   第5页  祢    慝
 
-假设当前选择的词条为 \"睨\", 那么 `pyim-process-get-candidate-position'
+假设当前选择的词条为 \"睨\", 那么 `pyim-process-word-position'
 的返回值为 A 所在的位置。那么：
 
 1. 函数 `pyim-page--current-page' 返回值为3， 说明当前 page 为第3页。
@@ -173,19 +172,19 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
      (\"薿\" \"旎\" \"睨\" \"铌\" \"昵\" \"匿\" \"倪\" \"霓\" \"暱\")
 
 这个 sublist 的起点为 `pyim-page--start' 的返回值，终点为
-`pyim-page--end' 的返回值。并保存到一个 hashtable 的 :candidates
-关键字对应的位置，这个 hastable 最终会做为参数传递给
-`pyim-page-style' 相关的函数，用于生成用于在选词框中显示的字符串。"
-  (let* ((candidate-showed (pyim-page--get-showed-candidates))
-         (positon (pyim-page--get-selected-word-position))
+`pyim-page--end' 的返回值。并保存到一个 plist 的 :candidates 对应
+的位置，这个 plist 最终会做为参数传递给 `pyim-page-style' 相关的
+函数，用于生成用于在选词框中显示的字符串。"
+  (let* ((candidates-showed (pyim-page--get-showed-candidates))
+         (position (pyim-page--word-position-in-current-page))
          (tooltip (pyim-page--get-valid-tooltip))
          (style (pyim-page--get-page-style tooltip))
          (page-info
           (list :scheme (pyim-scheme-current)
                 :current-page (pyim-page--current-page)
                 :total-page (pyim-page--total-page)
-                :candidates candidate-showed
-                :position positon
+                :candidates candidates-showed
+                :position position
                 :hightlight-current hightlight-current
                 :assistant-enable (pyim-scheme-assistant-status))))
     ;; Show page.
@@ -206,17 +205,15 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                   (concat x comment)
                 x)))
           (cl-subseq (pyim-process-get-candidates)
-                     (1- (pyim-page--start))
+                     (pyim-page--start)
                      (pyim-page--end))))
 
-(defun pyim-page--start (&optional candidate-position)
+(defun pyim-page--start (&optional position)
   "计算当前所在页的第一个词条的位置.
 
 细节信息请参考 `pyim-page--refresh' 的 docstring."
-  (let ((pos (min (pyim-process-candidates-length)
-                  (or candidate-position
-                      (pyim-process-get-candidate-position)))))
-    (1+ (* (/ (1- pos) pyim-page-length) pyim-page-length))))
+  (* (/ (pyim-process-word-position position) pyim-page-length)
+     pyim-page-length))
 
 (defun pyim-page--end ()
   "计算当前所在页的最后一个词条的位置，
@@ -224,17 +221,16 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
 细节信息请参考 `pyim-page--refresh' 的 docstring."
   (let* ((whole (pyim-process-candidates-length))
          (len pyim-page-length)
-         (pos (pyim-process-get-candidate-position))
-         (last (* (/ (+ (1- pos) len) len) len)))
+         (pos (pyim-process-word-position))
+         (last (* (/ (+ pos len) len) len)))
     (if (< last whole)
         last
       whole)))
 
-(defun pyim-page--get-selected-word-position ()
-  "获取当前选择的词条在 candidates 中的位置。"
-  (- (min (pyim-process-get-candidate-position)
-          (pyim-process-candidates-length))
-     (1- (pyim-page--start))))
+(defun pyim-page--word-position-in-current-page ()
+  "获取当前选择的词条在在当前 page 中的位置。"
+  (- (pyim-process-word-position)
+     (pyim-page--start)))
 
 (defun pyim-page--get-valid-tooltip ()
   "根据当前环境，获取一个可用的 tooltip."
@@ -272,13 +268,17 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
   "计算当前选择的词条在第几页面.
 
 细节信息请参考 `pyim-page--refresh' 的 docstring."
-  (1+ (/ (1- (pyim-process-get-candidate-position)) pyim-page-length)))
+  (1+ (/ (pyim-process-word-position) pyim-page-length)))
 
 (defun pyim-page--total-page ()
   "计算 page 总共有多少页.
 
 细节信息请参考 `pyim-page--refresh' 的 docstring."
-  (1+ (/ (1- (pyim-process-candidates-length)) pyim-page-length)))
+  (let* ((length (pyim-process-candidates-length))
+         (n (/ length pyim-page-length)))
+    (if (> length (* n pyim-page-length))
+        (1+ n)
+      n)))
 
 (cl-defgeneric pyim-page-show (string position tooltip)
   "在 POSITION 位置，使用 TOOLTIP 显示字符串 STRING.
@@ -553,7 +553,7 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
         ;; 高亮当前选择的词条，用于 `pyim-page-next-word'
         (push
          (if (and hightlight-current
-                  (= i position))
+                  (= i (+ position 1)))
              (format "%d%s" i
                      (propertize
                       (format "[%s]" str)

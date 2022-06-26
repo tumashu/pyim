@@ -184,7 +184,7 @@
 (defvar pyim-liberime-word-log nil)
 (cl-defmethod pyim-process-select-word ((_scheme pyim-scheme-rime))
   "从选词框中选择当前词条，然后删除该词条对应拼音。"
-  (pyim-process-outcome-handle 'candidate)
+  (pyim-process-outcome-handle 'word)
   (let* ((entered (pyim-entered-get 'point-before))
          (word (string-remove-prefix
                 (or (pyim-outcome-get 1) "") (pyim-outcome-get)))

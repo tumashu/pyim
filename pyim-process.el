@@ -183,7 +183,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 (defvar pyim-process--candidates-last nil
   "上一轮备选词条列表，这个变量主要用于 autoselector 机制.")
 
-(defvar pyim-process--candidate-position nil
+(defvar pyim-process--word-position nil
   "当前选择的词条在 `pyim-candidates’ 中的位置.
 
 细节信息请参考 `pyim-page--refresh' 的 docstring.")
@@ -199,7 +199,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
    pyim-process--translating
    pyim-process--imobjs
    pyim-process--candidates
-   pyim-process--candidate-position))
+   pyim-process--word-position))
 
 ;; ** 其它包调用的小函数
 (defun pyim-process-toggle-input-ascii ()
@@ -228,12 +228,6 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 
 (defun pyim-process-update-last-candidates ()
   (setq pyim-process--candidates-last pyim-process--candidates))
-
-(defun pyim-process-get-candidate-position ()
-  pyim-process--candidate-position)
-
-(defun pyim-process-candidates-length ()
-  (length pyim-process--candidates))
 
 (defun pyim-process-select-subword-p ()
   pyim-outcome-subword-info)
@@ -468,7 +462,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
             (or (delete-dups (pyim-candidates-create pyim-process--imobjs scheme))
                 (list entered-to-translate)))
       (unless (eq (pyim-process--auto-select) 'auto-select-success)
-        (pyim-process-plan-to-select-word 1)
+        (pyim-process-plan-to-select-word 0)
         (pyim-process-ui-refresh)
         (pyim-process--run-delay)))))
 
@@ -533,7 +527,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
               (if (and str (stringp str))
                   (list str)
                 candidates)))
-        (pyim-process-outcome-handle 'candidate)
+        (pyim-process-outcome-handle 'word)
         (pyim-process-create-word (pyim-process-get-outcome) t))
       ;; autoselector 机制已经触发的时候，如果发现 entered buffer 中
       ;; point 后面还有未处理的输入，就将其转到下一轮处理，这种情况
@@ -634,25 +628,38 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
            (pyim-process-ui-refresh)))))))
 
 ;; ** 预选词条相关
-(defun pyim-process-plan-to-select-word (word-position-in-candidates)
-  (setq pyim-process--candidate-position
-        word-position-in-candidates))
+(defun pyim-process-plan-to-select-word (word-position)
+  "预选 candidates 列表中 WORD-POSITION 位置的词条。"
+  (setq pyim-process--word-position word-position))
+
+(defun pyim-process-word-position (&optional position)
+  "返回已选词条的位置。"
+  (min (- (pyim-process-candidates-length) 1)
+       (if (integerp position)
+           position
+         pyim-process--word-position)))
+
+(defun pyim-process-candidates-length ()
+  "返回候选词条列表长度。"
+  (length pyim-process--candidates))
 
 (defun pyim-process-next-word-position (n)
-  (let* ((new (+ (pyim-process-get-candidate-position) n))
-         (len (pyim-process-candidates-length))
-         (pos (if (>= len new)
-                  (if (> new 0) new len)
-                1)))
+  "返回已选词条后面地 N 个词条对应的位置。"
+  (let* ((new (+ (pyim-process-word-position) n))
+         (max (1- (pyim-process-candidates-length)))
+         (pos (if (>= max new)
+                  (if (< new 0) max new)
+                0)))
     pos))
 
 ;; ** 选词相关
-(cl-defgeneric pyim-process-select-word (scheme))
+(cl-defgeneric pyim-process-select-word (scheme)
+  "按照 SCHEME 对应的规则，对预选词条进行选词操作。")
 
 (cl-defmethod pyim-process-select-word ((_scheme pyim-scheme-quanpin))
-  "从选词框中选择当前词条，然后删除该词条对应拼音。"
+  "按照全拼规则，对预选词条进行选词操作。"
   (pyim-process--create-code-criteria)
-  (pyim-process-outcome-handle 'candidate)
+  (pyim-process-outcome-handle 'word)
   (let* ((imobj (pyim-process-get-first-imobj))
          (length-selected-word
           ;; 获取 *这一次* 选择词条的长度， 在“多次选择词条才能上屏”的情况下，
@@ -723,8 +730,8 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   (car pyim-process--imobjs))
 
 (cl-defmethod pyim-process-select-word ((_scheme pyim-scheme-xingma))
-  "从选词框中选择当前词条，然后删除该词条对应编码。"
-  (pyim-process-outcome-handle 'candidate)
+  "按照形码规则，对预选词条进行选词操作。"
+  (pyim-process-outcome-handle 'word)
   (if (pyim-process-with-entered-buffer
         (and (> (point) 1)
              (< (point) (point-max))))
@@ -740,16 +747,28 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
     ;; pyim 使用这个 hook 来处理联想词。
     (run-hooks 'pyim-select-finish-hook)))
 
+(defun pyim-process-select-word-without-save ()
+  "选择词条但不保存词条。"
+  (pyim-process-outcome-handle 'word)
+  (pyim-process-terminate))
+
 (defun pyim-process-select-last-char ()
+  "选择上一个输入的字符。"
   (pyim-process-outcome-handle 'last-char)
   (pyim-process-terminate))
 
 (defun pyim-process-select-word-and-last-char ()
-  (pyim-process-outcome-handle 'candidate-and-last-char)
+  "选择预选词条和上一次输入的字符。"
+  (pyim-process-outcome-handle 'word-and-last-char)
   (pyim-process-terminate))
 
 (defun pyim-process-select-nothing ()
+  "什么也补选。"
   (pyim-process-outcome-handle "")
+  (pyim-process-terminate))
+
+(defun pyim-process-select-entered ()
+  (pyim-process-outcome-handle 'entered)
   (pyim-process-terminate))
 
 ;; ** 造词相关
@@ -843,23 +862,20 @@ BUG：拼音无法有效地处理多音字。"
           (concat (pyim-outcome-get)
                   (pyim-process-outcome-handle-char last-command-event))
           pyim-outcome-history))
-        ((eq type 'candidate)
-         (let ((candidate
-                (nth (1- pyim-process--candidate-position)
-                     pyim-process--candidates)))
+        ((eq type 'word)
+         (let ((word (nth (1- pyim-process--word-position)
+                          pyim-process--candidates)))
            (push
-            (concat (pyim-outcome-get) candidate)
+            (concat (pyim-outcome-get) word)
             pyim-outcome-history)))
-        ((eq type 'candidate-and-last-char)
-         (let ((candidate
-                (nth (1- pyim-process--candidate-position)
-                     pyim-process--candidates)))
+        ((eq type 'word-and-last-char)
+         (let ((word (nth (1- pyim-process--word-position)
+                          pyim-process--candidates)))
            (push
-            (concat (pyim-outcome-get)
-                    candidate
+            (concat (pyim-outcome-get) word
                     (pyim-process-outcome-handle-char last-command-event))
             pyim-outcome-history)))
-        ((eq type 'pyim-entered)
+        ((eq type 'entered)
          (push (pyim-entered-get 'point-before) pyim-outcome-history))
         (t (error "Pyim: invalid outcome"))))
 

@@ -1705,7 +1705,72 @@ Transfer-Encoding: chunked
   ;; TODO
   )
 
-;; ** pyim-probe 相关单元测试
+;; ** pyim-page 相关单元测试
+(ert-deftest pyim-tests-pyim-page--start ()
+  (let ((pyim-process--candidates
+         '("你" "妮" "拟"
+           "你" "尼" "呢"
+           "泥" "妮" "拟"
+           "逆" "倪"))
+        (pyim-page-length 3))
+
+    (should (equal (pyim-page--start 2) 0))
+    (should (equal (pyim-page--start 7) 6))
+    (should (equal (pyim-page--start 6) 6))
+    (should (equal (pyim-page--start 5) 3))))
+
+(ert-deftest pyim-tests-pyim-page--end ()
+  (let ((pyim-process--candidates
+         '("你" "妮" "拟"
+           "你" "尼" "呢"
+           "泥" "妮" "拟"
+           "逆" "倪"))
+        (pyim-page-length 3))
+
+    (let ((pyim-process--word-position 0))
+      (should (eq (pyim-page--end) 3)))
+    (let ((pyim-process--word-position 1))
+      (should (eq (pyim-page--end) 3)))
+    (let ((pyim-process--word-position 1))
+      (should (eq (pyim-page--end) 3)))
+    (let ((pyim-process--word-position 2))
+      (should (eq (pyim-page--end) 3)))
+    (let ((pyim-process--word-position 3))
+      (should (eq (pyim-page--end) 6)))
+    (let ((pyim-process--word-position 9))
+      (should (eq (pyim-page--end) 11)))))
+
+(ert-deftest pyim-tests-pyim-page--current-page ()
+  (let ((pyim-process--candidates
+         '("你" "妮" "拟"
+           "你" "尼" "呢"
+           "泥" "妮" "拟"
+           "逆" "倪"))
+        (pyim-page-length 3))
+
+    (let ((pyim-process--word-position 0))
+      (should (equal (pyim-page--current-page) 1)))
+    (let ((pyim-process--word-position 2))
+      (should (equal (pyim-page--current-page) 1)))
+    (let ((pyim-process--word-position 3))
+      (should (equal (pyim-page--current-page) 2)))))
+
+(ert-deftest pyim-tests-pyim-page--total-page ()
+  (let ((pyim-process--candidates
+         '("你" "妮" "拟"
+           "你" "尼" "呢"
+           "泥" "妮" "拟"
+           "逆" "倪"))
+        (pyim-page-length 3))
+    (should (equal (pyim-page--total-page) 4)))
+
+  (let ((pyim-process--candidates
+         '("你" "妮" "拟"
+           "你" "尼" "呢"
+           "泥" "妮" "拟"))
+        (pyim-page-length 3))
+    (should (equal (pyim-page--total-page) 3))))
+
 (ert-deftest pyim-tests-pyim-page--add-default-page-face ()
   (let ((string (pyim-page--add-default-page-face
                  (concat "aaa\n"
@@ -1746,7 +1811,7 @@ abc 这是")))
                :current-page 1
                :total-page 26
                :candidates '("你好" "尼耗" "您耗" "您好" "你")
-               :position 3
+               :position 2
                :hightlight-current 'hightlight-current
                :assistant-enable nil)))
 
@@ -1773,18 +1838,18 @@ abc 这是")))
 (ert-deftest pyim-tests-pyim-page-menu-create ()
   (should
    (equal (pyim-page-menu-create '("你好" "尼耗" "您耗" "您好" "你") 0 nil t)
-          #("1.你好 2.尼耗 3.您耗 4.您好 5.你 " 13 17 (face pyim-page-selection))))
-  (should
-   (equal (pyim-page-menu-create '("你好" "尼耗" "您耗" "您好" "你") 1 nil t)
           #("1[你好]2.尼耗 3.您耗 4.您好 5.你 " 1 5 (face pyim-page-selection))))
   (should
-   (equal (pyim-page-menu-create '("你好" "尼耗" "您耗" "您好" "你") 3 nil t)
+   (equal (pyim-page-menu-create '("你好" "尼耗" "您耗" "您好" "你") 1 nil t)
+          #("1.你好 2[尼耗]3.您耗 4.您好 5.你 " 6 10 (face pyim-page-selection))))
+  (should
+   (equal (pyim-page-menu-create '("你好" "尼耗" "您耗" "您好" "你") 2 nil t)
           #("1.你好 2.尼耗 3[您耗]4.您好 5.你 " 11 15 (face pyim-page-selection)))))
 
 ;; ** pyim-preview 相关单元测试
 (ert-deftest pyim-tests-pyim-preview-string ()
   (let ((pyim-process--candidates '("世界" "时节" "使节" "视界" ))
-        (pyim-process--candidate-position 1)
+        (pyim-process--word-position 0)
         (pyim-outcome-history '("你好"))
         (pyim-process--imobjs '((("sh" "i" "sh" "i") ("j" "ie" "j" "ie"))))
         (scheme (pyim-scheme-get 'quanpin)))
@@ -1792,7 +1857,7 @@ abc 这是")))
                    "你好世界")))
 
   (let ((pyim-process--candidates '("世界" "时节" "使节" "视界" ))
-        (pyim-process--candidate-position 2)
+        (pyim-process--word-position 1)
         (pyim-outcome-history nil)
         (pyim-process--imobjs '((("sh" "i" "sh" "i") ("j" "ie" "j" "ie"))))
         (scheme (pyim-scheme-get 'quanpin)))
@@ -1800,7 +1865,7 @@ abc 这是")))
                    "时节")))
 
   (let ((pyim-process--candidates '("这是" "蛰是" "这时" "真实" "这使" "这事" "这" "者" "着" "折" "哲" "浙" "遮"))
-        (pyim-process--candidate-position 10)
+        (pyim-process--word-position 9)
         (pyim-outcome-history nil)
         (pyim-process--imobjs '((("zh" "e" "zh" "e") ("sh" "i" "sh" "i"))))
         (scheme (pyim-scheme-get 'quanpin)))
@@ -1808,7 +1873,7 @@ abc 这是")))
                    "折shi")))
 
   (let ((pyim-process--candidates '("工" "藏匿" "工工" "花花草草" "㠭"))
-        (pyim-process--candidate-position 4)
+        (pyim-process--word-position 3)
         (pyim-outcome-history nil)
         (pyim-process--imobjs '(("aaaa")))
         (scheme (pyim-scheme-get 'wubi)))
@@ -2069,6 +2134,41 @@ abc 这是")))
   (should (equal (pyim-process--merge-candidates
                   '("a" "b" "c") '("d" "e" "f" "a" "b"))
                  '("d" "a" "b" "c" "e" "f"))))
+
+(ert-deftest pyim-tests-pyim-process-word-position ()
+  (let ((pyim-process--candidates
+         '("你" "妮" "拟"
+           "你" "尼" "呢"
+           "泥" "妮" "拟"
+           "逆" "倪")))
+
+    (let ((pyim-process--word-position 3))
+      (should (equal (pyim-process-word-position) 3)))
+    (let ((pyim-process--word-position 10))
+      (should (equal (pyim-process-word-position) 10)))
+    (let ((pyim-process--word-position 11))
+      (should (equal (pyim-process-word-position) 10)))
+
+    (should (equal (pyim-process-word-position 0) 0))
+    (should (equal (pyim-process-word-position 10) 10))
+    (should (equal (pyim-process-word-position 11) 10))))
+
+(ert-deftest pyim-tests-pyim-process-next-word-position ()
+  (let ((pyim-process--candidates
+         '("你" "妮" "拟" "你" "尼" "呢" "泥" "妮" "拟" "逆" "倪"))
+        ;;; 0    1    2    3    4    5    6    7    8    9    10
+        (pyim-process--word-position 3))
+
+    (should (equal (pyim-process-next-word-position 1) 4))
+    (should (equal (pyim-process-next-word-position 7) 10))
+
+    (should (equal (pyim-process-next-word-position 8) 0))
+
+    (should (equal (pyim-process-next-word-position -1) 2))
+    (should (equal (pyim-process-next-word-position -3) 0))
+
+    (should (equal (pyim-process-next-word-position -4) 10))))
+
 
 (ert-run-tests-batch-and-exit)
 

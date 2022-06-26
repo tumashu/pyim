@@ -457,9 +457,8 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
 不需要保存到个人词库。"
   (interactive)
   (if (pyim-process-get-candidates)
-      (pyim-process-outcome-handle 'candidate)
-    (pyim-process-select-last-char))
-  (pyim-process-terminate))
+      (pyim-process-select-word-without-save)
+    (pyim-process-select-last-char)))
 
 (defun pyim-select-word ()
   "从选词框中选择当前词条，然后删除该词条对应拼音。"
@@ -500,15 +499,13 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
 (defun pyim-quit-clear ()
   "取消当前输入的命令."
   (interactive)
-  (pyim-process-outcome-handle "")
-  (pyim-process-terminate))
+  (pyim-process-select-nothing))
 
 ;; ** 字母上屏功能
 (defun pyim-quit-no-clear ()
   "字母上屏命令."
   (interactive)
-  (pyim-process-outcome-handle 'pyim-entered)
-  (pyim-process-terminate))
+  (pyim-process-select-entered))
 
 ;; ** 中英文输入模式切换
 (defalias 'pyim-toggle-input-ascii #'pyim-process-toggle-input-ascii)

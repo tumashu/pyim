@@ -95,8 +95,8 @@ pyim 会使用 Emacs overlay 机制在 *待输入buffer* 光标处高亮显示�
 (cl-defmethod pyim-preview-string (_scheme)
   "获得 preview 字符串。"
   (let* ((candidates (pyim-process-get-candidates))
-         (pos (1- (min (pyim-process-get-candidate-position)
-                       (length candidates))))
+         (pos (min (pyim-process-word-position)
+                   (1- (length candidates))))
          (preview (concat (pyim-process-get-outcome)
                           (nth pos candidates))))
     (pyim-process-subword-and-magic-convert preview)))
@@ -104,8 +104,8 @@ pyim 会使用 Emacs overlay 机制在 *待输入buffer* 光标处高亮显示�
 (cl-defmethod pyim-preview-string ((_scheme pyim-scheme-quanpin))
   "获得 preview 字符串，适用于全拼输入法。"
   (let* ((candidates (pyim-process-get-candidates))
-         (pos (1- (min (pyim-process-get-candidate-position)
-                       (length candidates))))
+         (pos (min (pyim-process-word-position)
+                   (1- (length candidates))))
          (preview (concat (pyim-process-get-outcome)
                           (nth pos candidates)))
          (rest (mapconcat
