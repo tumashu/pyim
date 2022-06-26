@@ -88,6 +88,10 @@ entered (nihaom) 的第一个候选词。
   "延迟多少秒开始延迟获取词条。"
   :type 'integer)
 
+(defcustom pyim-select-finish-hook nil
+  "Pyim 选词完成时运行的 hook."
+  :type 'hook)
+
 (defvar pyim-process-ui-init-hook nil
   "Hook used to run ui init functions.")
 

@@ -53,10 +53,6 @@
   "Pyim is a Chinese input method support quanpin, shuangpin, wubi and cangjie."
   :group 'leim)
 
-(defcustom pyim-select-finish-hook nil
-  "Pyim 选词完成时运行的 hook."
-  :type 'hook)
-
 (defcustom pyim-convert-string-at-point-hook nil
   "Hook of `pyim-convert-string-at-point'.
 
