@@ -596,13 +596,8 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
   (interactive "p")
   (if (pyim-process-without-entered-p)
       (pyim-process-select-last-char)
-    (let ((new (+ (pyim-process-get-candidate-position) arg))
-          (len (pyim-process-candidates-length)))
-      (pyim-process-plan-to-select-word
-       (if (>= len new)
-           (if (> new 0) new len)
-         1))
-      (pyim-process-ui-refresh 'hightlight-current))))
+    (pyim-process-plan-to-select-next-word arg)
+    (pyim-process-ui-refresh 'hightlight-current)))
 
 (defun pyim-page-previous-word (arg)
   (interactive "p")
