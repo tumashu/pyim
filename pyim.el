@@ -477,13 +477,16 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   "使用数字编号来选择对应的词条。"
   (interactive)
   (if (or pyim-select-word-by-number num)
-      (if (and (pyim-process-get-candidates)
-               (pyim-page-plan-to-select-word num))
-          (pyim-process-select-word (pyim-scheme-current))
-        (pyim-process-select-last-char))
+      (pyim-select-word-by-number-1 num)
     ;; 有些输入法使用数字键编码，这种情况下，数字键就
     ;; 不能用来选词了。
     (call-interactively #'pyim-self-insert-command)))
+
+(defun pyim-select-word-by-number-1 (num)
+  (if (and (pyim-process-get-candidates)
+           (pyim-page-plan-to-select-word num))
+      (pyim-process-select-word (pyim-scheme-current))
+    (pyim-process-select-last-char)))
 
 (defun pyim-select-subword-by-number (&optional n)
   "以词定字功能。"
