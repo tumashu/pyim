@@ -313,7 +313,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
               ;; (message "unread-command-events: %s" unread-command-events)
               (pyim-process-terminate))))
         ;; (message "return: %s" (pyim-process-get-select-result))
-        (pyim-process-get-select-result nil t t))
+        (pyim-process-get-select-result))
     ;; Since KEY doesn't start any translation, just return it.
     ;; But translate KEY if necessary.
     (char-to-string key)))
@@ -677,8 +677,8 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
           ;; 第一次选择：小李， output = 小李
           ;; 第二次选择：飞，   output = 小李飞
           ;; 第三次选择：刀，   output = 小李飞刀
-          (- (length (pyim-process-get-select-result))
-             (length (pyim-process-get-select-result 1))))
+          (- (length (pyim-outcome-get))
+             (length (pyim-outcome-get 1))))
          ;; pyim-imobjs 包含 *pyim-entered--buffer* 里面光标前面的字符
          ;; 串，通过与 selected-word 做比较，获取光标前未转换的字符串。
          ;; to-be-translated.
@@ -802,15 +802,15 @@ BUG：拼音无法有效地处理多音字。"
                    (format "%s -> %s" (concat (or code-prefix "") code) word))
                  codes "; "))))
 
-(defun pyim-process-get-select-result (&optional n magic-convert use-subword)
-  "PYIM 流程的输出"
-  (let ((str (pyim-outcome-get n)))
-    (when use-subword
-      (setq str (pyim-outcome-get-subword str))
-      (setq pyim-outcome-subword-info nil))
-    (when magic-convert
-      (setq str (pyim-outcome-magic-convert str)))
-    str))
+(defun pyim-process-get-select-result ()
+  "返回 PYIM 选择操作的结果。"
+  (pyim-process-subword-and-magic-convert
+   (pyim-outcome-get)))
+
+(defun pyim-process-subword-and-magic-convert (string)
+  "返回 STRING 以词定字和魔术转换后的新字符串."
+  (pyim-outcome-magic-convert
+   (pyim-outcome-get-subword string)))
 
 (cl-defmethod pyim-process-select-word ((_scheme pyim-scheme-xingma))
   "按照形码规则，对预选词条进行选词操作。"
@@ -968,11 +968,6 @@ alist 列表。"
   (push (pyim-entered-get 'point-before) pyim-outcome-history)
   (unless do-not-terminate
     (pyim-process-terminate)))
-
-(defun pyim-process-subword-and-magic-convert (string)
-  "返回 STRING 以词定字和魔术转换后的新字符串."
-  (pyim-outcome-magic-convert
-   (pyim-outcome-get-subword string)))
 
 ;; ** 符号相关
 (defun pyim-process--punctuation-full-width-p ()
