@@ -577,9 +577,7 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
   "Pyim page 翻页命令."
   (interactive "p")
   (if (= (length (pyim-process-get-entered 'point-before)) 0)
-      (progn
-        (pyim-process-outcome-handle 'last-char)
-        (pyim-process-terminate))
+      (pyim-process-select-last-char)
     (let* ((new (+ (pyim-process-get-candidate-position)
                    (* pyim-page-length arg) 1))
            (maxpos (+ 1 (pyim-process-candidates-length))))
@@ -597,9 +595,7 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
 (defun pyim-page-next-word (arg)
   (interactive "p")
   (if (= (length (pyim-process-get-entered 'point-before)) 0)
-      (progn
-        (pyim-process-outcome-handle 'last-char)
-        (pyim-process-terminate))
+      (pyim-process-select-last-char)
     (let ((new (+ (pyim-process-get-candidate-position) arg))
           (len (pyim-process-candidates-length)))
       (pyim-process-plan-to-select-word
