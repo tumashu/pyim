@@ -468,7 +468,6 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
 (defun pyim-select-word ()
   "从选词框中选择当前词条，然后删除该词条对应拼音。"
   (interactive)
-  (pyim-process-create-code-criteria)
   (if (pyim-process-get-candidates)
       (pyim-process-select-word (pyim-scheme-current))
     ;; 如果没有选项，输入空格
@@ -478,10 +477,10 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   "使用数字编号来选择对应的词条。"
   (interactive)
   (if (or pyim-select-word-by-number num)
-      (if (null (pyim-process-get-candidates))
-          (pyim-process-select-last-char)
-        (when (pyim-page-plan-to-select-word num)
-          (pyim-select-word)))
+      (if (and (pyim-process-get-candidates)
+               (pyim-page-plan-to-select-word num))
+          (pyim-process-select-word (pyim-scheme-current))
+        (pyim-process-select-last-char))
     ;; 有些输入法使用数字键编码，这种情况下，数字键就
     ;; 不能用来选词了。
     (call-interactively #'pyim-self-insert-command)))

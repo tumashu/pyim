@@ -644,6 +644,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 
 (cl-defmethod pyim-process-select-word ((_scheme pyim-scheme-quanpin))
   "从选词框中选择当前词条，然后删除该词条对应拼音。"
+  (pyim-process-create-code-criteria)
   (pyim-process-outcome-handle 'candidate)
   (let* ((imobj (pyim-process-get-first-imobj))
          (length-selected-word
