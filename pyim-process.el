@@ -638,13 +638,13 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   (setq pyim-process--candidate-position
         word-position-in-candidates))
 
-(defun pyim-process-plan-to-select-next-word (n)
-  (let ((new (+ (pyim-process-get-candidate-position) n))
-        (len (pyim-process-candidates-length))
-        (pos (if (>= len new)
-                 (if (> new 0) new len)
-               1)))
-    (pyim-process-plan-to-select-word pos)))
+(defun pyim-process-next-word-position (n)
+  (let* ((new (+ (pyim-process-get-candidate-position) n))
+         (len (pyim-process-candidates-length))
+         (pos (if (>= len new)
+                  (if (> new 0) new len)
+                1)))
+    pos))
 
 ;; ** 选词相关
 (cl-defgeneric pyim-process-select-word (scheme))
