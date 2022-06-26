@@ -584,7 +584,7 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
     (let* ((new (+ (pyim-process-get-candidate-position)
                    (* pyim-page-length arg) 1))
            (maxpos (+ 1 (pyim-process-candidates-length))))
-      (pyim-process-set-candidate-position
+      (pyim-process-plan-to-select-word
        (pyim-page--start
         (if (> new 0)
             (if (> new maxpos) 1 new)
@@ -603,7 +603,7 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
         (pyim-process-terminate))
     (let ((new (+ (pyim-process-get-candidate-position) arg))
           (len (pyim-process-candidates-length)))
-      (pyim-process-set-candidate-position
+      (pyim-process-plan-to-select-word
        (if (>= len new)
            (if (> new 0) new len)
          1))
