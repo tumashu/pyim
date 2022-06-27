@@ -662,60 +662,24 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   "按照全拼规则，对预选词条进行选词操作。"
   (pyim-process--create-code-criteria)
   (pyim-process-select-word-without-save 'do-not-terminate)
-  (let* ((imobj (pyim-process-get-first-imobj))
-         (length-selected-word
-          ;; 获取 *这一次* 选择词条的长度， 在“多次选择词条才能上屏”的情况下，
-          ;; 一定要和 output 的概念作区别。
-          ;; 比如： xiaolifeidao
-          ;; 第一次选择：小李， output = 小李
-          ;; 第二次选择：飞，   output = 小李飞
-          ;; 第三次选择：刀，   output = 小李飞刀
-          (- (length (pyim-outcome-get))
-             (length (pyim-outcome-get 1))))
-         ;; pyim-imobjs 包含 *pyim-entered--buffer* 里面光标前面的字符
-         ;; 串，通过与 selected-word 做比较，获取光标前未转换的字符串。
-         ;; to-be-translated.
-         (to-be-translated
-          (string-join (mapcar (lambda (w)
-                                 (concat (nth 2 w) (nth 3 w)))
-                               (nthcdr length-selected-word imobj)))))
-    ;; 大体来说，entered 字符串可以分解为三个部分：
-
-    ;; 1. 光标前字符串
-    ;;    1. 光标前已经转换的字符串
-    ;;    2. 光标前还没有转换的字符串。
-    ;; 2. 光标后字符串
-
-    ;; 下面对 entered 字符串的大体思路是：截取已经转换的字符串，把未转
-    ;; 换的字符串和光标后的字符串合并后下一轮递归的处理。
-
-    ;; 比如：entered 为 xiaolifeidao, 本次选择 “小李” 之后，需要将
-    ;; entered 截断，“小李” 这个词条长度为2, 就将 entered从头开始缩减
-    ;; 2 个 imelem 对应的字符，变成 feidao, 为下一次选择 “飞” 做准备。
-
-    ;; 注意事项： 这里有一个假设前提是： 一个 imelem 对应一个汉字，
-    ;; 在全拼输入法中，这个假设大多数情况是成立的，但在型码输入法
-    ;; 中，比如五笔输入法，就不成立，好在型码输入法一般不需要多次
-    ;; 选择。
-    (if (and (not (pyim-process--select-char-in-word-p)) ;以词定字的时候，不连续选择，处理起来太复杂。
-             (or (< length-selected-word (length imobj)) ;是否有未转换的光标前字符串
-                 (> (length (pyim-process-get-entered 'point-after)) 0))) ;是否有光标后字符串
-        (progn
-          (pyim-process-with-entered-buffer
-            ;; 把光标前已转换的 entered 字符串, 从 entered字符串里面剪
-            ;; 掉，保留未转换的字符串和光标之后的字符串。
-            (delete-region (point-min) (point))
-            (insert to-be-translated)
-            ;; 为下一次选词作准备，一般情况下词库里面的词条不会超过20
-            ;; 个汉字，所以这里光标向前移动不超过20个 imelem. 从而让下
-            ;; 一轮处理时的“光标前字符串”比较长，这种方式可能比逐字选
-            ;; 择更加好用。
-            (goto-char (pyim-process-next-imelem-position 20 t 1)))
-          (pyim-process-run))
-      (pyim-process-create-word (pyim-process-get-select-result) t)
-      (pyim-process-terminate)
-      ;; pyim 使用这个 hook 来处理联想词。
-      (run-hooks 'pyim-select-finish-hook))))
+  (if (and (not (pyim-process--select-char-in-word-p)) ;以词定字的时候，不连续选择，处理起来太复杂。
+           (or (< length-selected-word (length imobj)) ;是否有未转换的光标前字符串
+               (> (length (pyim-process-get-entered 'point-after)) 0))) ;是否有光标后字符串
+      (let ((to-be-translated (pyim-process--entered-to-be-translated)))
+        (pyim-process-with-entered-buffer
+          ;; 把光标前已转换的 entered 字符串, 从 entered 字符串里面去掉，保留未
+          ;; 转换的字符串和光标之后的字符串。
+          (delete-region (point-min) (point))
+          (insert to-be-translated)
+          ;; 为下一次选词作准备，一般情况下词库里面的词条不会超过20个汉字，所以
+          ;; 这里光标向前移动不超过20个 imelem. 从而让下一轮处理时的 “光标前字符
+          ;; 串” 比较长，这种方式可能比逐字选择更加好用。
+          (goto-char (pyim-process-next-imelem-position 20 t 1)))
+        (pyim-process-run))
+    (pyim-process-create-word (pyim-process-get-select-result) t)
+    (pyim-process-terminate)
+    ;; pyim 使用这个 hook 来处理联想词。
+    (run-hooks 'pyim-select-finish-hook)))
 
 (defun pyim-process--create-code-criteria ()
   "创建 `pyim-process--code-criteria'."
@@ -741,6 +705,46 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 
 (defun pyim-process-get-first-imobj ()
   (car pyim-process--imobjs))
+
+(defun pyim-process--entered-to-be-translated ()
+  "连续选择时，获取 entered 未转换的一部分.
+
+大体来说，entered 字符串可以分解为三个部分：
+
+1. 光标前字符串
+   1. 光标前已经转换的字符串
+   2. 光标前还没有转换的字符串。
+2. 光标后字符串
+
+对 entered 字符串的处理思路是：截取已经转换的字符串，把未转换的字
+符串和光标后的字符串合并后下一轮递归的处理。
+
+比如：entered 为 xiaolifeidao, 本次选择 “小李” 之后，需要将
+entered 截断，“小李” 这个词条长度为 2, 就将 entered 从头开始缩减
+2 个 imelem 对应的字符，变成 feidao, 为下一次选择 “飞” 做准备。
+
+在连续选择时，当前选择的词条和 outcome 是不一致的，比如：
+xiaolifeidao
+
+第一次选择：小李， outcome = 小李
+第二次选择：飞，   outcome = 小李飞
+第三次选择：刀，   outcome = 小李飞刀
+
+注意事项： 这里有一个假设前提是： 一个 imelem 对应一个汉字，
+在全拼输入法中，这个假设大多数情况是成立的，但在型码输入法
+中，比如五笔输入法，就不成立，好在型码输入法一般不需要多次
+选择。"
+  (let* ((imobj (pyim-process-get-first-imobj))
+         (length-selected-word
+          (- (length (pyim-outcome-get))
+             (length (pyim-outcome-get 1))))
+         ;; pyim-imobjs 包含 *pyim-entered-buffer* 里面光标前面的字符串，通过与
+         ;; selected-word 做比较，获取光标前未转换的字符串 to-be-translated.
+         (to-be-translated
+          (string-join (mapcar (lambda (w)
+                                 (concat (nth 2 w) (nth 3 w)))
+                               (nthcdr length-selected-word imobj)))))
+    to-be-translated)
 
 (defun pyim-process-create-word (word &optional prepend wordcount-handler criteria)
   "将中文词条 WORD 添加编码后，保存到用户选择过的词生成的缓存中。
