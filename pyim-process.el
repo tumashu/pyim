@@ -662,15 +662,14 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   "按照全拼规则，对预选词条进行选词操作。"
   (pyim-process--create-code-criteria)
   (pyim-process-select-word-without-save 'do-not-terminate)
-  (if (and (not (pyim-process--select-char-in-word-p)) ;以词定字的时候，不连续选择，处理起来太复杂。
-           (or (< length-selected-word (length imobj)) ;是否有未转换的光标前字符串
-               (> (length (pyim-process-get-entered 'point-after)) 0))) ;是否有光标后字符串
-      (let ((to-be-translated (pyim-process--entered-to-be-translated)))
+  (if (pyim-process--multi-step-select-word-p)
+      (let ((entered-to-be-translated
+             (pyim-process--entered-to-be-translated)))
         (pyim-process-with-entered-buffer
           ;; 把光标前已转换的 entered 字符串, 从 entered 字符串里面去掉，保留未
           ;; 转换的字符串和光标之后的字符串。
           (delete-region (point-min) (point))
-          (insert to-be-translated)
+          (insert entered-to-be-translated)
           ;; 为下一次选词作准备，一般情况下词库里面的词条不会超过20个汉字，所以
           ;; 这里光标向前移动不超过20个 imelem. 从而让下一轮处理时的 “光标前字符
           ;; 串” 比较长，这种方式可能比逐字选择更加好用。
@@ -699,6 +698,12 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
     (pyim-outcome-add (concat (pyim-outcome-get) word))
     (unless do-not-terminate
       (pyim-process-terminate))))
+
+(defun pyim-process--multi-step-select-word-p ()
+  "判断是否使用连续选词模式。"
+  (and (not (pyim-process--select-char-in-word-p)) ;以词定字的时候，不连续选择，处理起来太复杂。
+       (or (pyim-process--entered-to-be-translated)
+           (> (length (pyim-process-get-entered 'point-after)) 0))))
 
 (defun pyim-process--select-char-in-word-p ()
   pyim-process--char-position-in-word)
@@ -737,14 +742,11 @@ xiaolifeidao
   (let* ((imobj (pyim-process-get-first-imobj))
          (length-selected-word
           (- (length (pyim-outcome-get))
-             (length (pyim-outcome-get 1))))
-         ;; pyim-imobjs 包含 *pyim-entered-buffer* 里面光标前面的字符串，通过与
-         ;; selected-word 做比较，获取光标前未转换的字符串 to-be-translated.
-         (to-be-translated
-          (string-join (mapcar (lambda (w)
-                                 (concat (nth 2 w) (nth 3 w)))
-                               (nthcdr length-selected-word imobj)))))
-    to-be-translated)
+             (length (pyim-outcome-get 1)))))
+    (when (< length-selected-word (length imobj))
+      (string-join (mapcar (lambda (w)
+                             (concat (nth 2 w) (nth 3 w)))
+                           (nthcdr length-selected-word imobj))))))
 
 (defun pyim-process-create-word (word &optional prepend wordcount-handler criteria)
   "将中文词条 WORD 添加编码后，保存到用户选择过的词生成的缓存中。
