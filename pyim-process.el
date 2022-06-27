@@ -434,11 +434,14 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
            entered-to-translate)
       (setq entered-to-translate
             (pyim-entered-get 'point-before))
-      (setq pyim-process--imobjs (pyim-imobjs-create entered-to-translate scheme))
+      (setq pyim-process--imobjs
+            (pyim-imobjs-create entered-to-translate scheme))
       (setq pyim-process--last-candidates
             pyim-process--candidates)
       (setq pyim-process--candidates
-            (or (delete-dups (pyim-candidates-create pyim-process--imobjs scheme))
+            (or (delete-dups
+                 (pyim-candidates-create
+                  pyim-process--imobjs scheme))
                 (list entered-to-translate)))
       (unless (eq (pyim-process--auto-select) 'auto-select-success)
         (pyim-process-plan-to-select-word 0)
