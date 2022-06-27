@@ -217,12 +217,6 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 (defun pyim-process-register-self-insert-command (command)
   (cl-pushnew command pyim-process--self-insert-commands))
 
-(defun pyim-process-get-candidates ()
-  pyim-process--candidates)
-
-(defun pyim-process-get-last-candidates ()
-  pyim-process--last-candidates)
-
 ;; ** pyim-input-method 核心函数
 (defvar pyim-mode-map)
 
@@ -508,9 +502,10 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
                                  select-last-word
                                select-current-word)
                              :replace-with))
-             (candidates (if select-last-word
-                             pyim-process--last-candidates
-                           pyim-process--candidates))
+             (candidates
+              (if select-last-word
+                  (pyim-process-get-last-candidates)
+                (pyim-process-get-candidates)))
              (pyim-process--candidates
               (if (and str (stringp str))
                   (list str)
@@ -549,6 +544,12 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   (cl-find-if (lambda (x)
                 (equal (plist-get x :select) type))
               results))
+
+(defun pyim-process-get-last-candidates ()
+  pyim-process--last-candidates)
+
+(defun pyim-process-get-candidates ()
+  pyim-process--candidates)
 
 (defun pyim-process-ui-refresh (&optional hightlight-current)
   "刷新 pyim 相关 UI."
