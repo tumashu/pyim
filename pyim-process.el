@@ -229,20 +229,6 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 (defun pyim-process-get-outcome-subword-info ()
   pyim-outcome-subword-info)
 
-(defun pyim-process-last-created-words ()
-  pyim-process--last-created-words)
-
-(defun pyim-process-add-last-created-word (word)
-  (setq pyim-process--last-created-words
-        (cons word (remove word pyim-process--last-created-words))))
-
-(defun pyim-process-remove-last-created-word (word)
-  (setq pyim-process--last-created-words
-        (remove word pyim-process--last-created-words)))
-
-(defun pyim-process-delete-word (word)
-  (pyim-dcache-delete-word word))
-
 ;; ** pyim-input-method 核心函数
 (defvar pyim-mode-map)
 
@@ -276,8 +262,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
              (modified-p (buffer-modified-p))
              last-command-event last-command this-command)
 
-        (pyim-process--set-translating-flag t)
-        (pyim-process--cleanup-input-output)
+        (pyim-process--init-cleanup)
 
         (when key
           (pyim-add-unread-command-events key))
@@ -312,13 +297,14 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
     ;; But translate KEY if necessary.
     (char-to-string key)))
 
-(defun pyim-process--set-translating-flag (value)
-  (setq pyim-process--translating value))
-
-(defun pyim-process--cleanup-input-output ()
+(defun pyim-process--init-cleanup ()
   (pyim-entered-erase-buffer)
+  (pyim-process--set-translating-flag t)
   (setq pyim-outcome-subword-info nil)
   (setq pyim-outcome-history nil))
+
+(defun pyim-process--set-translating-flag (value)
+  (setq pyim-process--translating value))
 
 (defun pyim-process--translating-p ()
   pyim-process--translating)
@@ -814,6 +800,10 @@ BUG：拼音无法有效地处理多音字。"
                    (format "%s -> %s" (concat (or code-prefix "") code) word))
                  codes "; "))))
 
+(defun pyim-process-add-last-created-word (word)
+  (setq pyim-process--last-created-words
+        (cons word (remove word pyim-process--last-created-words))))
+
 (defun pyim-process-get-select-result ()
   "返回 PYIM 选择操作的结果。"
   (pyim-process-subword-and-magic-convert
@@ -991,6 +981,19 @@ alist 列表。"
           pyim-outcome-history)
     (unless do-not-terminate
       (pyim-process-terminate))))
+
+;; ** 删词相关
+(defun pyim-process-delete-word (word)
+  (pyim-dcache-delete-word word)
+  (pyim-process-remove-last-created-word word))
+
+(defun pyim-process-remove-last-created-word (word)
+  (setq pyim-process--last-created-words
+        (remove word pyim-process--last-created-words)))
+
+(defun pyim-process-last-created-words ()
+  pyim-process--last-created-words)
+
 
 ;; * Footer
 (provide 'pyim-process)

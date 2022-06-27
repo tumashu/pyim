@@ -444,7 +444,6 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
                     (pyim-process-last-created-words))))
         (dolist (word words)
           (pyim-process-delete-word word)
-          (pyim-process-remove-last-created-word word)
           (message "将词条: %S 从 personal 缓冲中删除。" word))))))
 
 ;; ** 选词功能
