@@ -632,7 +632,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   "预选 candidates 列表中 WORD-POSITION 位置的词条。"
   (setq pyim-process--word-position word-position))
 
-(defun pyim-process-plan-to-select-subword-toggle (char-position)
+(defun pyim-process-plan-to-toggle-select-subword (char-position)
   "Toggle 子字符串选择，CHAR-POSITION 是组成字字符串字符的位置。"
   (if (member char-position pyim-outcome-subword-info)
       (setq pyim-outcome-subword-info
