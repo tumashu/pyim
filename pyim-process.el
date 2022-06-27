@@ -732,7 +732,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 
 (defun pyim-process-select-word-without-save (&optional do-not-terminate)
   "选择词条但不保存词条。"
-  (let ((word (nth (1- pyim-process--word-position)
+  (let ((word (nth pyim-process--word-position
                    pyim-process--candidates)))
     (push (concat (pyim-outcome-get) word)
           pyim-outcome-history)
