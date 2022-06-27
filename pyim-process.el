@@ -217,9 +217,6 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 (defun pyim-process-register-self-insert-command (command)
   (cl-pushnew command pyim-process--self-insert-commands))
 
-(defun pyim-process-get-entered (&optional type)
-  (pyim-entered-get type))
-
 (defun pyim-process-get-candidates ()
   pyim-process--candidates)
 
@@ -450,6 +447,9 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 
 (defun pyim-process-without-entered-p ()
   (= (length (pyim-process-get-entered 'point-before)) 0))
+
+(defun pyim-process-get-entered (&optional type)
+  (pyim-entered-get type))
 
 (defun pyim-process-terminate ()
   "Terminate the translation of the current key."
