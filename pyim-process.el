@@ -643,16 +643,14 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   (length pyim-process--candidates))
 
 ;; ** 选词造词相关
-(defun pyim-process-select-nothing (&optional do-not-terminate)
+(defun pyim-process-select-nothing ()
   "不选择任何东西。"
   (setq pyim-outcome-history nil)
-  (unless do-not-terminate
-    (pyim-process-terminate)))
+  (pyim-process-terminate))
 
-(defun pyim-process-select-entered (&optional do-not-terminate)
+(defun pyim-process-select-entered ()
   (push (pyim-entered-get 'point-before) pyim-outcome-history)
-  (unless do-not-terminate
-    (pyim-process-terminate)))
+  (pyim-process-terminate))
 
 (cl-defgeneric pyim-process-select-word (scheme)
   "按照 SCHEME 对应的规则，对预选词条进行选词操作。")
@@ -834,13 +832,12 @@ BUG：拼音无法有效地处理多音字。"
     ;; pyim 使用这个 hook 来处理联想词。
     (run-hooks 'pyim-select-finish-hook)))
 
-(defun pyim-process-select-last-char (&optional do-not-terminate)
+(defun pyim-process-select-last-char ()
   "选择上一个输入的字符。"
   (push (concat (pyim-outcome-get)
                 (pyim-process-select-handle-char last-command-event))
         pyim-outcome-history)
-  (unless do-not-terminate
-    (pyim-process-terminate)))
+  (pyim-process-terminate))
 
 ;; Fix compile warn.
 (declare-function pyim-create-word-at-point "pyim")
@@ -974,15 +971,14 @@ alist 列表。"
      (and (not pyim-process--input-ascii)
           (not (pyim-process-auto-switch-english-input-p))))))
 
-(defun pyim-process-select-word-and-last-char (&optional do-not-terminate)
+(defun pyim-process-select-word-and-last-char ()
   "选择预选词条和上一次输入的字符。"
   (let ((word (nth (1- pyim-process--word-position)
                    pyim-process--candidates)))
     (push (concat (pyim-outcome-get) word
                   (pyim-process-select-handle-char last-command-event))
           pyim-outcome-history)
-    (unless do-not-terminate
-      (pyim-process-terminate))))
+    (pyim-process-terminate)))
 
 ;; ** 删词相关
 (defun pyim-process-delete-word (word)
