@@ -662,6 +662,17 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   (length pyim-process--candidates))
 
 ;; ** 选词造词相关
+(defun pyim-process-select-nothing (&optional do-not-terminate)
+  "不选择任何东西。"
+  (setq pyim-outcome-history nil)
+  (unless do-not-terminate
+    (pyim-process-terminate)))
+
+(defun pyim-process-select-entered (&optional do-not-terminate)
+  (push (pyim-entered-get 'point-before) pyim-outcome-history)
+  (unless do-not-terminate
+    (pyim-process-terminate)))
+
 (cl-defgeneric pyim-process-select-word (scheme)
   "按照 SCHEME 对应的规则，对预选词条进行选词操作。")
 
@@ -948,28 +959,6 @@ alist 列表。"
      ;; 当输入的字符不是标点符号时，原样插入。
      (t str))))
 
-(defun pyim-process-select-word-and-last-char (&optional do-not-terminate)
-  "选择预选词条和上一次输入的字符。"
-  (let ((word (nth (1- pyim-process--word-position)
-                   pyim-process--candidates)))
-    (push (concat (pyim-outcome-get) word
-                  (pyim-process-select-handle-char last-command-event))
-          pyim-outcome-history)
-    (unless do-not-terminate
-      (pyim-process-terminate))))
-
-(defun pyim-process-select-nothing (&optional do-not-terminate)
-  "不选择任何东西。"
-  (setq pyim-outcome-history nil)
-  (unless do-not-terminate
-    (pyim-process-terminate)))
-
-(defun pyim-process-select-entered (&optional do-not-terminate)
-  (push (pyim-entered-get 'point-before) pyim-outcome-history)
-  (unless do-not-terminate
-    (pyim-process-terminate)))
-
-;; ** 符号相关
 (defun pyim-process--punctuation-full-width-p ()
   "判断是否需要切换到全角标点输入模式
 
@@ -992,6 +981,15 @@ alist 列表。"
      (and (not pyim-process--input-ascii)
           (not (pyim-process-auto-switch-english-input-p))))))
 
+(defun pyim-process-select-word-and-last-char (&optional do-not-terminate)
+  "选择预选词条和上一次输入的字符。"
+  (let ((word (nth (1- pyim-process--word-position)
+                   pyim-process--candidates)))
+    (push (concat (pyim-outcome-get) word
+                  (pyim-process-select-handle-char last-command-event))
+          pyim-outcome-history)
+    (unless do-not-terminate
+      (pyim-process-terminate))))
 
 ;; * Footer
 (provide 'pyim-process)
