@@ -217,9 +217,6 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 (defun pyim-process-get-entered (&optional type)
   (pyim-entered-get type))
 
-(defun pyim-process-without-entered-p ()
-  (= (length (pyim-process-get-entered 'point-before)) 0))
-
 (defun pyim-process-get-candidates ()
   pyim-process--candidates)
 
@@ -451,7 +448,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 ;; ** 解析输入 -> 获取词条 -> 自动选词
 (defun pyim-process-run ()
   "查询 entered 字符串, 显示备选词等待用户选择。"
-  (if (= (length (pyim-entered-get 'point-before)) 0)
+  (if (pyim-process-without-entered-p)
       (pyim-process-terminate)
     (let* ((scheme (pyim-scheme-current))
            entered-to-translate)
@@ -465,6 +462,9 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
         (pyim-process-plan-to-select-word 0)
         (pyim-process-ui-refresh)
         (pyim-process--run-delay)))))
+
+(defun pyim-process-without-entered-p ()
+  (= (length (pyim-process-get-entered 'point-before)) 0))
 
 (defun pyim-process-terminate ()
   "Terminate the translation of the current key."
