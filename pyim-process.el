@@ -740,13 +740,14 @@ xiaolifeidao
 中，比如五笔输入法，就不成立，好在型码输入法一般不需要多次
 选择。"
   (let* ((imobj (pyim-process-get-first-imobj))
-         (length-selected-word
+         (length-selected-word-in-this-step
           (- (length (pyim-outcome-get))
              (length (pyim-outcome-get 1)))))
-    (when (< length-selected-word (length imobj))
-      (string-join (mapcar (lambda (w)
-                             (concat (nth 2 w) (nth 3 w)))
-                           (nthcdr length-selected-word imobj))))))
+    (when (< length-selected-word-in-this-step (length imobj))
+      (string-join
+       (mapcar (lambda (w)
+                 (concat (nth 2 w) (nth 3 w)))
+               (nthcdr length-selected-word-in-this-step imobj))))))
 
 (defun pyim-process-create-word (word &optional prepend wordcount-handler criteria)
   "将中文词条 WORD 添加编码后，保存到用户选择过的词生成的缓存中。
