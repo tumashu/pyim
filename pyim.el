@@ -487,7 +487,8 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   "以词定字功能。"
   (interactive)
   (pyim-process-plan-to-toggle-select-subword (or n 1))
-  (pyim-process-run))
+  (pyim-process-run)
+  (pyim-select-word))
 
 ;; ** 翻页和翻词功能
 (defalias 'pyim-previous-page #'pyim-page-previous-page)
