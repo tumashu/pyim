@@ -991,6 +991,9 @@ alist 列表。"
   (setq pyim-process--last-created-words
         (remove word pyim-process--last-created-words)))
 
+(defun pyim-process-last-created-word ()
+  (car pyim-process--last-created-words))
+
 (defun pyim-process-last-created-words ()
   pyim-process--last-created-words)
 

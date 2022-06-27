@@ -414,9 +414,10 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
 (defun pyim-delete-last-word ()
   "从个人词库中删除最新创建的词条。"
   (interactive)
-  (when (pyim-process-last-created-words)
-    (pyim-process-delete-word (car (pyim-process-last-created-words)))
-    (message "pyim: 从个人词库中删除词条 “%s” !" (car (pyim-process-last-created-words)))))
+  (let ((word (pyim-process-last-created-word)))
+    (when word
+      (pyim-process-delete-word word)
+      (message "pyim: 从个人词库中删除词条 “%s” !" word))))
 
 (defun pyim-delete-word-at-point (&optional number silent)
   "将光标前字符数为 NUMBER 的中文字符串从个人词库中删除
