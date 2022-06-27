@@ -276,7 +276,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   (pyim-entered-erase-buffer)
   (pyim-process--set-translating-flag t)
   (setq pyim-process--char-position-in-word nil)
-  (setq pyim-outcome-history nil))
+  (pyim-outcome-erase))
 
 (defun pyim-process--set-translating-flag (value)
   (setq pyim-process--translating value))
@@ -648,11 +648,11 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 ;; ** 选词造词相关
 (defun pyim-process-select-nothing ()
   "不选择任何东西。"
-  (setq pyim-outcome-history nil)
+  (pyim-outcome-erase)
   (pyim-process-terminate))
 
 (defun pyim-process-select-entered ()
-  (push (pyim-entered-get 'point-before) pyim-outcome-history)
+  (pyim-outcome-add (pyim-entered-get 'point-before))
   (pyim-process-terminate))
 
 (cl-defgeneric pyim-process-select-word (scheme)
@@ -732,8 +732,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   "选择词条但不保存词条。"
   (let ((word (nth pyim-process--word-position
                    pyim-process--candidates)))
-    (push (concat (pyim-outcome-get) word)
-          pyim-outcome-history)
+    (pyim-outcome-add (concat (pyim-outcome-get) word))
     (unless do-not-terminate
       (pyim-process-terminate))))
 
@@ -837,9 +836,9 @@ BUG：拼音无法有效地处理多音字。"
 
 (defun pyim-process-select-last-char ()
   "选择上一个输入的字符。"
-  (push (concat (pyim-outcome-get)
-                (pyim-process-select-handle-char last-command-event))
-        pyim-outcome-history)
+  (pyim-outcome-add
+   (concat (pyim-outcome-get)
+           (pyim-process-select-handle-char last-command-event)))
   (pyim-process-terminate))
 
 ;; Fix compile warn.
@@ -972,9 +971,9 @@ alist 列表。"
   "选择预选词条和上一次输入的字符。"
   (let ((word (nth (1- pyim-process--word-position)
                    pyim-process--candidates)))
-    (push (concat (pyim-outcome-get) word
-                  (pyim-process-select-handle-char last-command-event))
-          pyim-outcome-history)
+    (pyim-outcome-add
+     (concat (pyim-outcome-get) word
+             (pyim-process-select-handle-char last-command-event)))
     (pyim-process-terminate)))
 
 ;; ** 删词相关
