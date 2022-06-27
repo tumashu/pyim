@@ -920,14 +920,8 @@ alist 列表。"
      ((pyim-punctuation-escape-p (char-before))
       str)
 
-     ;; 当 `pyim-punctuation-half-width-functions' 中
-     ;; 任意一个函数返回值为 t 时，插入英文标点。
-     ((cl-some (lambda (x)
-                 (if (functionp x)
-                     (funcall x char)
-                   nil))
-               pyim-punctuation-half-width-functions)
-      str)
+     ;; 自动切换全角/半角标点符号。
+     ((pyim-punctuation-auto-half-width-p char) str)
 
      ;; 当光标前面为英文标点时， 按 `pyim-outcome-trigger'
      ;; 对应的字符后， 自动将其转换为对应的中文标点。

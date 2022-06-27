@@ -220,6 +220,15 @@ PUNCT-LIST 格式类似：
 (defun pyim-punctuation-escape-p (char)
   (member char pyim-punctuation-escape-list))
 
+(defun pyim-punctuation-auto-half-width-p (char)
+  "测试是否自动切换到半角标点符号。"
+  (cl-some (lambda (x)
+             (if (functionp x)
+                 (funcall x char)
+               nil))
+           pyim-punctuation-half-width-functions))
+
+
 ;; * Footer
 (provide 'pyim-punctuation)
 
