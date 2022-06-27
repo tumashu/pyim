@@ -730,8 +730,7 @@ xiaolifeidao
 选择。"
   (let* ((imobj (pyim-process-get-first-imobj))
          (length-selected-word-in-this-step
-          (- (length (pyim-outcome-get))
-             (length (pyim-outcome-get 1)))))
+          (length (pyim-outcome-diff))))
     (when (< length-selected-word-in-this-step (length imobj))
       (string-join
        (mapcar (lambda (w)

@@ -126,13 +126,22 @@ pyim 使用函数 `pyim-process-select-handle-char' 来处理特殊功能触发�
 (pyim-register-local-variables '(pyim-outcome--history))
 
 ;; ** 选词框相关函数
-(defun pyim-outcome-get (&optional n)
+(defun pyim-outcome-get ()
   "获取 outcome"
-  (nth (or n 0) pyim-outcome--history))
+  (pyim-outcome--get 0))
+
+(defun pyim-outcome--get (n)
+  "获取 outcome"
+  (nth n pyim-outcome--history))
 
 (defun pyim-outcome-add (outcome)
   "添加 OUTCOME."
   (push outcome pyim-outcome--history))
+
+(defun pyim-outcome-diff ()
+  "OUTCOME 的变化。"
+  (string-remove-prefix
+   (or (pyim-outcome--get 1) "") (pyim-outcome--get 0)))
 
 (defun pyim-outcome-erase ()
   "清除 OUTCOME."
