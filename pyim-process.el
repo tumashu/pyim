@@ -320,6 +320,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 
 (defun pyim-process--cleanup-input-output ()
   (pyim-entered-erase-buffer)
+  (setq pyim-outcome-subword-info nil)
   (setq pyim-outcome-history nil))
 
 (defun pyim-process--translating-p ()
