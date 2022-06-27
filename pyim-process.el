@@ -663,18 +663,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   (pyim-process--create-code-criteria)
   (pyim-process-select-word-without-save 'do-not-terminate)
   (if (pyim-process--multi-step-select-word-p)
-      (let ((entered-to-be-translated
-             (pyim-process--entered-to-be-translated)))
-        (pyim-process-with-entered-buffer
-          ;; 把光标前已转换的 entered 字符串, 从 entered 字符串里面去掉，保留未
-          ;; 转换的字符串和光标之后的字符串。
-          (delete-region (point-min) (point))
-          (insert entered-to-be-translated)
-          ;; 为下一次选词作准备，一般情况下词库里面的词条不会超过20个汉字，所以
-          ;; 这里光标向前移动不超过20个 imelem. 从而让下一轮处理时的 “光标前字符
-          ;; 串” 比较长，这种方式可能比逐字选择更加好用。
-          (goto-char (pyim-process-next-imelem-position 20 t 1)))
-        (pyim-process-run))
+      (pyim-process--select-word-in-next-step)
     (pyim-process-create-word (pyim-process-get-select-result) t)
     (pyim-process-terminate)
     ;; pyim 使用这个 hook 来处理联想词。
@@ -748,6 +737,21 @@ xiaolifeidao
        (mapcar (lambda (w)
                  (concat (nth 2 w) (nth 3 w)))
                (nthcdr length-selected-word-in-this-step imobj))))))
+
+(defun pyim-process--select-word-in-next-step ()
+  "在连续选词模式下，下一轮需要进行的选词操作。"
+  (let ((entered-to-be-translated
+         (pyim-process--entered-to-be-translated)))
+    (pyim-process-with-entered-buffer
+      ;; 把光标前已转换的 entered 字符串, 从 entered 字符串里面去掉，保留未
+      ;; 转换的字符串和光标之后的字符串。
+      (delete-region (point-min) (point))
+      (insert entered-to-be-translated)
+      ;; 为下一次选词作准备，一般情况下词库里面的词条不会超过20个汉字，所以
+      ;; 这里光标向前移动不超过20个 imelem. 从而让下一轮处理时的 “光标前字符
+      ;; 串” 比较长，这种方式可能比逐字选择更加好用。
+      (goto-char (pyim-process-next-imelem-position 20 t 1)))
+    (pyim-process-run)))
 
 (defun pyim-process-create-word (word &optional prepend wordcount-handler criteria)
   "将中文词条 WORD 添加编码后，保存到用户选择过的词生成的缓存中。
