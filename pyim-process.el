@@ -229,9 +229,6 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 (defun pyim-process-update-last-candidates ()
   (setq pyim-process--candidates-last pyim-process--candidates))
 
-(defun pyim-process-select-subword-p ()
-  pyim-outcome-subword-info)
-
 (defun pyim-process-get-outcome-subword-info ()
   pyim-outcome-subword-info)
 
@@ -754,6 +751,9 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
           pyim-outcome-history)
     (unless do-not-terminate
       (pyim-process-terminate))))
+
+(defun pyim-process-select-subword-p ()
+  pyim-outcome-subword-info)
 
 (defun pyim-process-get-first-imobj ()
   (car pyim-process--imobjs))
