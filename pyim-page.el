@@ -118,10 +118,6 @@ Only useful when use posframe.")
   '((t (:background "gray44")))
   "选词框中已选词条的 face.")
 
-(defface pyim-page-subword
-  '((t (:background "gray44")))
-  "使用以词选字功能时，选择的汉字所使用的 face.")
-
 (defvar pyim-page-tooltip-infos
   '((posframe   :package posframe :test posframe-workable-p)
     (popup      :package popup)
@@ -546,9 +542,6 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
                   (if (consp candidate)
                       (concat (car candidate) (cdr candidate))
                     candidate))))
-        (dolist (n (pyim-process-get-outcome-subword-info))
-          (when (<= n (length str))
-            (set-text-properties (- n 1) n '(face pyim-page-subword) str)))
         (setq i (1+ i))
         ;; 高亮当前选择的词条，用于 `pyim-page-next-word'
         (push

@@ -99,7 +99,7 @@ pyim 会使用 Emacs overlay 机制在 *待输入buffer* 光标处高亮显示�
                    (1- (length candidates))))
          (preview (concat (pyim-process-get-select-result)
                           (nth pos candidates))))
-    (pyim-process-subword-and-magic-convert preview)))
+    (pyim-process-magic-convert preview)))
 
 (cl-defmethod pyim-preview-string ((_scheme pyim-scheme-quanpin))
   "获得 preview 字符串，适用于全拼输入法。"
@@ -116,7 +116,7 @@ pyim 会使用 Emacs overlay 机制在 *待输入buffer* 光标处高亮显示�
                 "'")))
     (when (string< "" rest)
       (setq preview (concat preview rest)))
-    (pyim-process-subword-and-magic-convert preview)))
+    (pyim-process-magic-convert preview)))
 
 (defun pyim-preview--delete-string ()
   "删除已经插入 buffer 的 preview 预览字符串。"

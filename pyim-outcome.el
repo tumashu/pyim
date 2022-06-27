@@ -119,9 +119,6 @@ pyim 使用函数 `pyim-process-select-handle-char' 来处理特殊功能触发�
 5. 第三次选择：四
 6. 变量取值为： (\"一二三四\" \"一二三\" \"一二\")")
 
-(defvar pyim-outcome-subword-info nil
-  "在以词定字功能中，用来保存字的位置。")
-
 (defvar pyim-outcome--magic-convert-cache nil
   "用来临时保存 `pyim-outcome-magic-convert' 的结果.
 从而加快同一个字符串第二次的转换速度。")
@@ -132,16 +129,6 @@ pyim 使用函数 `pyim-process-select-handle-char' 来处理特殊功能触发�
 (defun pyim-outcome-get (&optional n)
   "获取 outcome"
   (nth (or n 0) pyim-outcome-history))
-
-(defun pyim-outcome-get-subword (word)
-  "根据 `pyim-outcome-subword-info' 的信息，获取 WORD 的一个子词条。"
-  (if pyim-outcome-subword-info
-      (let (output)
-        (dolist (i (sort pyim-outcome-subword-info #'>))
-          (when (<= i (length word))
-            (push (substring word (- i 1) i) output)))
-        (string-join output))
-    word))
 
 (defun pyim-outcome-magic-convert (str)
   "用于处理 `pyim-outcome-magic-converter' 的函数。"

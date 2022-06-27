@@ -188,6 +188,9 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 
 细节信息请参考 `pyim-page--refresh' 的 docstring.")
 
+(defvar pyim-process--char-position-in-word nil
+  "“以词定字”功能中“字”在“词”中的位置.")
+
 (defvar pyim-process--run-delay-timer nil
   "异步处理 entered 时，使用的 timer.")
 
@@ -225,9 +228,6 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 
 (defun pyim-process-update-last-candidates ()
   (setq pyim-process--candidates-last pyim-process--candidates))
-
-(defun pyim-process-get-outcome-subword-info ()
-  pyim-outcome-subword-info)
 
 ;; ** pyim-input-method 核心函数
 (defvar pyim-mode-map)
@@ -300,7 +300,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 (defun pyim-process--init-cleanup ()
   (pyim-entered-erase-buffer)
   (pyim-process--set-translating-flag t)
-  (setq pyim-outcome-subword-info nil)
+  (setq pyim-process--char-position-in-word nil)
   (setq pyim-outcome-history nil))
 
 (defun pyim-process--set-translating-flag (value)
@@ -618,12 +618,9 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   "预选 candidates 列表中 WORD-POSITION 位置的词条。"
   (setq pyim-process--word-position word-position))
 
-(defun pyim-process-plan-to-toggle-select-subword (char-position)
-  "Toggle 子字符串选择，CHAR-POSITION 是组成字字符串字符的位置。"
-  (if (member char-position pyim-outcome-subword-info)
-      (setq pyim-outcome-subword-info
-            (remove char-position pyim-outcome-subword-info))
-    (push char-position pyim-outcome-subword-info)))
+(defun pyim-process-plan-to-select-char-in-word (char-position)
+  "以词定字功能中，通过 CHAR-POSITION 预选词条中的汉字。"
+  (setq pyim-process--char-position-in-word char-position))
 
 (defun pyim-process-next-word-position (n)
   "返回已选词条后面地 N 个词条对应的位置。"
@@ -699,7 +696,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
     ;; 在全拼输入法中，这个假设大多数情况是成立的，但在型码输入法
     ;; 中，比如五笔输入法，就不成立，好在型码输入法一般不需要多次
     ;; 选择。
-    (if (and (not (pyim-process-select-subword-p)) ;以词定字的时候，不连续选择，处理起来太复杂。
+    (if (and (not (pyim-process--select-char-in-word-p)) ;以词定字的时候，不连续选择，处理起来太复杂。
              (or (< length-selected-word (length imobj)) ;是否有未转换的光标前字符串
                  (> (length (pyim-process-get-entered 'point-after)) 0))) ;是否有光标后字符串
         (progn
@@ -739,8 +736,8 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
     (unless do-not-terminate
       (pyim-process-terminate))))
 
-(defun pyim-process-select-subword-p ()
-  pyim-outcome-subword-info)
+(defun pyim-process--select-char-in-word-p ()
+  pyim-process--char-position-in-word)
 
 (defun pyim-process-get-first-imobj ()
   (car pyim-process--imobjs))
@@ -767,12 +764,9 @@ BUG：拼音无法有效地处理多音字。"
              ;; 观的一个数字，也许应该添加一个配置选项？
              (< (length word) 12)
              (not (pyim-string-match-p "\\CC" word)))
-    ;; PYIM 有些功能（比如：以词定字功能）会用到 text property, 保存词条之前将
-    ;; text property 去除，防止不必要的数据进入 cache.
+    ;; PYIM 有些功能会用到 text property, 保存词条之前将 text property 去除，防
+    ;; 止不必要的数据进入 cache.
     (setq word (substring-no-properties word))
-    ;; 以词定字功能使用时，保存的词条应该是定字后的词条。
-    (when (pyim-process-select-subword-p)
-      (setq word (pyim-outcome-get-subword word)))
     (pyim-process-add-last-created-word word)
     (let* ((scheme (pyim-scheme-current))
            (code-prefix (pyim-scheme-code-prefix scheme))
@@ -806,13 +800,21 @@ BUG：拼音无法有效地处理多音字。"
 
 (defun pyim-process-get-select-result ()
   "返回 PYIM 选择操作的结果。"
-  (pyim-process-subword-and-magic-convert
+  (pyim-process-magic-convert
    (pyim-outcome-get)))
 
-(defun pyim-process-subword-and-magic-convert (string)
+(defun pyim-process-magic-convert (string)
   "返回 STRING 以词定字和魔术转换后的新字符串."
   (pyim-outcome-magic-convert
-   (pyim-outcome-get-subword string)))
+   (pyim-process--char-in-word string)))
+
+(defun pyim-process--char-in-word (word)
+  (let ((pos pyim-process--char-position-in-word)
+        (length (length word)))
+    (if (and (integerp pos)
+             (< pos length))
+        (substring word pos (1+ pos))
+      word)))
 
 (cl-defmethod pyim-process-select-word ((_scheme pyim-scheme-xingma))
   "按照形码规则，对预选词条进行选词操作。"

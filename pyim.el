@@ -100,7 +100,7 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
       (define-key map (kbd (car x))
                   (lambda ()
                     (interactive)
-                    (pyim-select-subword-by-number (cdr x)))))
+                    (pyim-select-char-in-word-by-number (cdr x)))))
     (define-key map " " #'pyim-select-word)
     (define-key map (kbd "C-SPC") #'pyim-select-word-simple)
     (define-key map [backspace] #'pyim-delete-backward-char)
@@ -483,11 +483,11 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
       (pyim-process-select-word (pyim-scheme-current))
     (pyim-process-select-last-char)))
 
-(defun pyim-select-subword-by-number (&optional n)
+(defun pyim-select-char-in-word-by-number (&optional n)
   "以词定字功能。"
   (interactive)
-  (pyim-process-plan-to-toggle-select-subword (or n 1))
-  (pyim-select-word))
+  (pyim-process-plan-to-select-char-in-word (1- (or n 1)))
+  (pyim-process-select-word (pyim-scheme-current)))
 
 ;; ** 翻页和翻词功能
 (defalias 'pyim-previous-page #'pyim-page-previous-page)
