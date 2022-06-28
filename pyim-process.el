@@ -505,20 +505,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
          (select-current-word
           (pyim-process--autoselector-find-result results 'current)))
     (when (or select-last-word select-current-word)
-      (let* ((str (plist-get (if select-last-word
-                                 select-last-word
-                               select-current-word)
-                             :replace-with))
-             (candidates
-              (if select-last-word
-                  (pyim-process-get-last-candidates)
-                (pyim-process-get-candidates)))
-             (pyim-process--candidates
-              (if (and str (stringp str))
-                  (list str)
-                candidates)))
-        (pyim-process-select-word-without-save 'do-not-terminate)
-        (pyim-process-create-word (pyim-process-get-select-result) t))
+      (pyim-process--auto-select-word select-last-word select-current-word)
       ;; autoselector 机制已经触发的时候，如果发现 entered buffer 中
       ;; point 后面还有未处理的输入，就将其转到下一轮处理，这种情况
       ;; 很少出现，一般是型码输入法，entered 编辑的时候有可能触发。
@@ -547,6 +534,26 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   (cl-find-if (lambda (x)
                 (equal (plist-get x :select) type))
               results))
+
+(defun pyim-process--auto-select-word (select-last-word select-current-word)
+  (let ((pyim-process--candidates
+         (pyim-process--get-autoselect-candidates
+          select-last-word select-current-word)))
+    (pyim-process-select-word-without-save 'do-not-terminate)
+    (pyim-process-create-word (pyim-process-get-select-result) t)))
+
+(defun pyim-process--get-autoselect-candidates (select-last-word select-current-word)
+  (let* ((str (plist-get (if select-last-word
+                             select-last-word
+                           select-current-word)
+                         :replace-with))
+         (candidates
+          (if select-last-word
+              (pyim-process-get-last-candidates)
+            (pyim-process-get-candidates))))
+    (if (and str (stringp str))
+        (list str)
+      candidates)))
 
 (defun pyim-process-get-last-candidates ()
   pyim-process--last-candidates)
