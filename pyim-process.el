@@ -864,69 +864,66 @@ BUG：拼音无法有效地处理多音字。"
   (let ((str (char-to-string char)))
     (cond
      ((pyim-process--invalid-char-p char) "")
-
-     ((pyim-process--trigger-delete-word-p char)
-      (let ((number-before-2 (pyim-char-before-to-number 1)))
-        (delete-char -2)
-        (pyim-process-delete-word-at-point number-before-2))
-      "")
-
-     ((pyim-process--trigger-create-word-p char)
-      (let ((number-before-1 (pyim-char-before-to-number 0)))
-        (delete-char -1)
-        (pyim-process-create-word-at-point number-before-1))
-      "")
-
-     ((pyim-process--trigger-call-function-p char)
-      (pyim-outcome-call-trigger-function)
-      "")
-
-     ((pyim-process--trigger-punctuation-to-full-width-p char)
-      (pyim-punctuation-translate 'full-width)
-      "")
-
-     ((pyim-process--trigger-punctuation-to-half-width-p char)
-      (pyim-punctuation-translate 'half-width)
-      "")
-
-     ((pyim-process--punctuation-half-width-p char)
-      str)
-
+     ((pyim-process--trigger-feature-run-p char) "")
+     ((pyim-process--punctuation-half-width-p char) str)
      ((pyim-punctuation-p char)
       (pyim-punctuation-return-proper-punct char))
-
      (t str))))
 
 (defun pyim-process--invalid-char-p (char)
   "当 CHAR 是空格前面的字符时，返回 t."
   (< char ? ))
 
-(defun pyim-process--trigger-delete-word-p (char)
-  "当光标之前的字符串类似 “[1-9]-<trigger char>”时，比如 “你好-2v” ，返回 t."
-  (let* ((str (char-to-string char))
-         (str-before-2 (pyim-char-before-to-string 1))
+(defun pyim-process--trigger-feature-run-p (char)
+  (and (pyim-outcome-trigger-p (char-to-string char))
+       (not (eq (pyim-process--trigger-feature-run)
+                'without-trigger-feature))))
+
+(defun pyim-process--trigger-feature-run ()
+  (cond
+   ((pyim-process--trigger-delete-word-p)
+    (let ((number-before-2 (pyim-char-before-to-number 1)))
+      (delete-char -2)
+      (pyim-process-delete-word-at-point number-before-2)))
+
+   ((pyim-process--trigger-create-word-p)
+    (let ((number-before-1 (pyim-char-before-to-number 0)))
+      (delete-char -1)
+      (pyim-process-create-word-at-point number-before-1)))
+
+   ((pyim-process--trigger-call-function-p)
+    (pyim-outcome-call-trigger-function))
+
+   ((pyim-process--trigger-punctuation-to-full-width-p)
+    (pyim-punctuation-translate 'full-width))
+
+   ((pyim-process--trigger-punctuation-to-half-width-p)
+    (pyim-punctuation-translate 'half-width))
+
+   (t 'without-trigger-feature)))
+
+(defun pyim-process--trigger-delete-word-p ()
+  "当光标之前的字符串类似 “<中文>[1-9]-” 时，比如 “你好2-” ，返回 t."
+  (let* ((str-before-2 (pyim-char-before-to-string 1))
          (str-before-3 (pyim-char-before-to-string 2)))
     (and (eq (char-before) ?-)
          (pyim-string-match-p "[0-9]" str-before-2)
-         (pyim-string-match-p "\\cc" str-before-3)
-         (pyim-outcome-trigger-p str))))
+         (pyim-string-match-p "\\cc" str-before-3))))
 
 (defun pyim-process-delete-word-at-point (&optional number silent)
   "将光标前字符数为 NUMBER 的中文字符串从个人词库中删除
 当 SILENT 设置为 t 是，不显示提醒信息。"
-  (let* ((string (pyim-cstring-at-point (or number 2))))
+  (let ((string (pyim-cstring-at-point (or number 2))))
     (when string
       (pyim-process-delete-word string)
       (unless silent
         (message "词条: \"%s\" 已经从个人词库缓冲中删除。" string)))))
 
-(defun pyim-process--trigger-create-word-p (char)
-  "当光标之前的字符串类似“[2-9]<trigger char>”时，比如 “你好2v” ，返回 t."
-  (let* ((str (char-to-string char))
-         (str-before-2 (pyim-char-before-to-string 1)))
+(defun pyim-process--trigger-create-word-p ()
+  "当光标之前的字符串类似 “<中文>[2-9]” 时，比如 “你好2” ，返回 t."
+  (let ((str-before-2 (pyim-char-before-to-string 1)))
     (and (member (char-before) (number-sequence ?2 ?9))
-         (pyim-string-match-p "\\cc" str-before-2)
-         (pyim-outcome-trigger-p str))))
+         (pyim-string-match-p "\\cc" str-before-2))))
 
 (defun pyim-process-create-word-at-point (&optional number silent)
   "将光标前字符数为 NUMBER 的中文字符串添加到个人词库中，当
@@ -938,34 +935,29 @@ SILENT 设置为 t 是，不显示提醒信息。"
       (unless silent
         (message "将词条: %S 加入 personal 缓冲。" output)))))
 
-(defun pyim-process--trigger-call-function-p (char)
-  "判断是否触发 `pyim-outcome-trigger-function'."
-  (let* ((str (char-to-string char))
-         (str-before-1 (pyim-char-before-to-string 0)))
+(defun pyim-process--trigger-call-function-p ()
+  "当光标之前是中文但不是标点符号时，返回 t."
+  (let ((str-before-1 (pyim-char-before-to-string 0)))
     (and (not (pyim-punctuation-position str-before-1))
          (pyim-string-match-p "\\cc" str-before-1)
-         (pyim-outcome-trigger-p str)
          (functionp pyim-outcome-trigger-function))))
 
-(defun pyim-process--trigger-punctuation-to-full-width-p (char)
+(defun pyim-process--trigger-punctuation-to-full-width-p ()
   "当光标前面是半角标点时，返回 t."
-  (let* ((str (char-to-string char))
-         (str-before-1 (pyim-char-before-to-string 0))
+  (let* ((str-before-1 (pyim-char-before-to-string 0))
          (punc-posit-before-1 (pyim-punctuation-position str-before-1)))
     (and (numberp punc-posit-before-1)
-         (= punc-posit-before-1 0)
-         (pyim-outcome-trigger-p str))))
+         (= punc-posit-before-1 0))))
 
-(defun pyim-process--trigger-punctuation-to-half-width-p (char)
+(defun pyim-process--trigger-punctuation-to-half-width-p ()
   "当光标前面是全角标点时，返回 t."
-  (let* ((str (char-to-string char))
-         (str-before-1 (pyim-char-before-to-string 0))
+  (let* ((str-before-1 (pyim-char-before-to-string 0))
          (punc-posit-before-1 (pyim-punctuation-position str-before-1)))
     (and (numberp punc-posit-before-1)
-         (> punc-posit-before-1 0)
-         (pyim-outcome-trigger-p str))))
+         (> punc-posit-before-1 0))))
 
 (defun pyim-process--punctuation-half-width-p (char)
+  "根据 CHAR 和环境信息，判断是否输入半角符号。"
   (or (not (pyim-process--punctuation-full-width-p))
       (pyim-punctuation-auto-half-width-p char)
       (pyim-punctuation-escape-p (char-before))))

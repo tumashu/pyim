@@ -2201,31 +2201,34 @@ abc 这是")))
   (let ((pyim-default-scheme 'quanpin))
     (with-temp-buffer
       (insert "你好2-")
-      (should (pyim-process--trigger-delete-word-p ?v)))))
+      (should (pyim-process--trigger-delete-word-p)))))
 
 (ert-deftest pyim-tests-pyim-process--trigger-create-word-p ()
   (let ((pyim-default-scheme 'quanpin))
     (with-temp-buffer
       (insert "你好2")
-      (should (pyim-process--trigger-create-word-p ?v)))))
+      (should (pyim-process--trigger-create-word-p)))))
 
 (ert-deftest pyim-tests-pyim-process--trigger-call-function-p ()
   (let ((pyim-default-scheme 'quanpin))
     (with-temp-buffer
       (insert "你好")
-      (should (pyim-process--trigger-call-function-p ?v)))))
+      (should (pyim-process--trigger-call-function-p)))
+    (with-temp-buffer
+      (insert "你好，")
+      (should-not (pyim-process--trigger-call-function-p)))))
 
 (ert-deftest pyim-tests-pyim-process--trigger-punctuation-to-full-width-p ()
   (let ((pyim-default-scheme 'quanpin))
     (with-temp-buffer
       (insert ",")
-      (should (pyim-process--trigger-punctuation-to-full-width-p ?v)))))
+      (should (pyim-process--trigger-punctuation-to-full-width-p)))))
 
 (ert-deftest pyim-tests-pyim-process--trigger-punctuation-to-half-width-p ()
   (let ((pyim-default-scheme 'quanpin))
     (with-temp-buffer
       (insert "，")
-      (should (pyim-process--trigger-punctuation-to-half-width-p ?v)))))
+      (should (pyim-process--trigger-punctuation-to-half-width-p)))))
 
 
 (ert-run-tests-batch-and-exit)
