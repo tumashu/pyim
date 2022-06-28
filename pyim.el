@@ -274,15 +274,7 @@ REFRESH-COMMON-DCACHE 已经废弃，不要再使用了。"
 (pyim-process-register-self-insert-command 'pyim-self-insert-command)
 
 ;; ** 加词功能
-(defun pyim-create-word-at-point (&optional number silent)
-  "将光标前字符数为 NUMBER 的中文字符串添加到个人词库中，当
-SILENT 设置为 t 是，不显示提醒信息。"
-  (let ((string (pyim-cstring-at-point (or number 2)))
-        output)
-    (when string
-      (setq output (pyim-process-create-word string))
-      (unless silent
-        (message "将词条: %S 加入 personal 缓冲。" output)))))
+(defalias 'pyim-create-word-at-point #'pyim-process-create-word-at-point)
 
 (defun pyim-create-2cchar-word-at-point ()
   "将光标前2个中文字符组成的字符串加入个人词库。"

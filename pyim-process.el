@@ -860,7 +860,6 @@ BUG：拼音无法有效地处理多音字。"
   (pyim-process-terminate))
 
 ;; Fix compile warn.
-(declare-function pyim-create-word-at-point "pyim")
 (declare-function pyim-delete-word-at-point "pyim")
 
 (defun pyim-process-select-handle-char (char)
@@ -879,7 +878,7 @@ BUG：拼音无法有效地处理多音字。"
      ((pyim-process--trigger-create-word-p char)
       (let ((str-before-1 (pyim-char-before-to-string 0)))
         (delete-char -1)
-        (pyim-create-word-at-point
+        (pyim-process-create-word-at-point
          (string-to-number str-before-1)))
       "")
 
@@ -925,6 +924,16 @@ BUG：拼音无法有效地处理多音字。"
     (and (member (char-before) (number-sequence ?2 ?9))
          (pyim-string-match-p "\\cc" str-before-2)
          (pyim-outcome-trigger-p str))))
+
+(defun pyim-process-create-word-at-point (&optional number silent)
+  "将光标前字符数为 NUMBER 的中文字符串添加到个人词库中，当
+SILENT 设置为 t 是，不显示提醒信息。"
+  (let ((string (pyim-cstring-at-point (or number 2)))
+        output)
+    (when string
+      (setq output (pyim-process-create-word string))
+      (unless silent
+        (message "将词条: %S 加入 personal 缓冲。" output)))))
 
 (defun pyim-process--call-trigger-function-p (char)
   "判断是否触发 `pyim-outcome-trigger-function'."
