@@ -866,17 +866,15 @@ BUG：拼音无法有效地处理多音字。"
      ((pyim-process--invalid-char-p char) "")
 
      ((pyim-process--trigger-delete-word-p char)
-      (let ((str-before-2 (pyim-char-before-to-string 1)))
+      (let ((number-before-2 (pyim-char-before-to-number 1)))
         (delete-char -2)
-        (pyim-process-delete-word-at-point
-         (string-to-number str-before-2)))
+        (pyim-process-delete-word-at-point number-before-2))
       "")
 
      ((pyim-process--trigger-create-word-p char)
-      (let ((str-before-1 (pyim-char-before-to-string 0)))
+      (let ((number-before-1 (pyim-char-before-to-number 0)))
         (delete-char -1)
-        (pyim-process-create-word-at-point
-         (string-to-number str-before-1)))
+        (pyim-process-create-word-at-point number-before-1))
       "")
 
      ((pyim-process--trigger-call-function-p char)
@@ -916,7 +914,7 @@ BUG：拼音无法有效地处理多音字。"
 (defun pyim-process-delete-word-at-point (&optional number silent)
   "将光标前字符数为 NUMBER 的中文字符串从个人词库中删除
 当 SILENT 设置为 t 是，不显示提醒信息。"
-  (let ((string (pyim-cstring-at-point (or number 2))))
+  (let* ((string (pyim-cstring-at-point (or number 2))))
     (when string
       (pyim-process-delete-word string)
       (unless silent
@@ -933,8 +931,8 @@ BUG：拼音无法有效地处理多音字。"
 (defun pyim-process-create-word-at-point (&optional number silent)
   "将光标前字符数为 NUMBER 的中文字符串添加到个人词库中，当
 SILENT 设置为 t 是，不显示提醒信息。"
-  (let ((string (pyim-cstring-at-point (or number 2)))
-        output)
+  (let* ((string (pyim-cstring-at-point (or number 2)))
+         output)
     (when string
       (setq output (pyim-process-create-word string))
       (unless silent

@@ -146,6 +146,10 @@ When CARE-FIRST-ONE is no-nil, ((a b c) (d e)) => (a d)."
     (when (char-after point-after)
       (char-to-string (char-after point-after)))))
 
+(defun pyim-char-before-to-number (num)
+  (string-to-number
+   (pyim-char-before-to-string num)))
+
 (if (fboundp 'string-distance)
     (defalias 'pyim-string-distance 'string-distance)
   (defun pyim-string-distance (s1 s2)
