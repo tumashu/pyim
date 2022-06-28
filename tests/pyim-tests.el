@@ -374,6 +374,12 @@
                      ("f" "en" "h" "eng"))))))
 
 ;; ** pyim-punctuation 相关单元测试
+(ert-deftest pyim-tests-pyim-punctuation-p ()
+  (should (pyim-punctuation-p ?,))
+  (should-not (pyim-punctuation-p ?，))
+  (should-not (pyim-punctuation-p ?a))
+  (should-not (pyim-punctuation-p ?1)))
+
 (ert-deftest pyim-tests-pyim-punctuation ()
   (with-temp-buffer
     (insert ",")
@@ -2190,6 +2196,36 @@ abc 这是")))
     (should (equal (pyim-process-next-word-position -3) 0))
 
     (should (equal (pyim-process-next-word-position -4) 10))))
+
+(ert-deftest pyim-tests-pyim-process--trigger-delete-word-p ()
+  (let ((pyim-default-scheme 'quanpin))
+    (with-temp-buffer
+      (insert "你好2-")
+      (should (pyim-process--trigger-delete-word-p ?v)))))
+
+(ert-deftest pyim-tests-pyim-process--trigger-create-word-p ()
+  (let ((pyim-default-scheme 'quanpin))
+    (with-temp-buffer
+      (insert "你好2")
+      (should (pyim-process--trigger-create-word-p ?v)))))
+
+(ert-deftest pyim-tests-pyim-process--call-trigger-function-p ()
+  (let ((pyim-default-scheme 'quanpin))
+    (with-temp-buffer
+      (insert "你好")
+      (should (pyim-process--call-trigger-function-p ?v)))))
+
+(ert-deftest pyim-tests-pyim-process--translate-punctuation-to-full-width-p ()
+  (let ((pyim-default-scheme 'quanpin))
+    (with-temp-buffer
+      (insert ",")
+      (should (pyim-process--translate-punctuation-to-full-width-p ?v)))))
+
+(ert-deftest pyim-tests-pyim-process--translate-punctuation-to-half-width-p ()
+  (let ((pyim-default-scheme 'quanpin))
+    (with-temp-buffer
+      (insert "，")
+      (should (pyim-process--translate-punctuation-to-half-width-p ?v)))))
 
 
 (ert-run-tests-batch-and-exit)
