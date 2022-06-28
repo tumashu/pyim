@@ -884,11 +884,11 @@ BUG：拼音无法有效地处理多音字。"
       (message "PYIM: 运行 `pyim-outcome-trigger-function' 函数。")
       "")
 
-     ((pyim-process--translate-punctuation-to-full-width-p char)
+     ((pyim-process--trigger-punctuation-to-full-width-p char)
       (pyim-punctuation-translate 'full-width)
       "")
 
-     ((pyim-process--translate-punctuation-to-half-width-p char)
+     ((pyim-process--trigger-punctuation-to-half-width-p char)
       (pyim-punctuation-translate 'half-width)
       "")
 
@@ -950,7 +950,7 @@ SILENT 设置为 t 是，不显示提醒信息。"
          (pyim-outcome-trigger-p str)
          (functionp pyim-outcome-trigger-function))))
 
-(defun pyim-process--translate-punctuation-to-full-width-p (char)
+(defun pyim-process--trigger-punctuation-to-full-width-p (char)
   "当光标前面是半角标点时，返回 t."
   (let* ((str (char-to-string char))
          (str-before-1 (pyim-char-before-to-string 0))
@@ -959,7 +959,7 @@ SILENT 设置为 t 是，不显示提醒信息。"
          (= punc-posit-before-1 0)
          (pyim-outcome-trigger-p str))))
 
-(defun pyim-process--translate-punctuation-to-half-width-p (char)
+(defun pyim-process--trigger-punctuation-to-half-width-p (char)
   "当光标前面是全角标点时，返回 t."
   (let* ((str (char-to-string char))
          (str-before-1 (pyim-char-before-to-string 0))

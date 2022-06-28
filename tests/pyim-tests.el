@@ -2215,17 +2215,17 @@ abc 这是")))
       (insert "你好")
       (should (pyim-process--trigger-call-function-p ?v)))))
 
-(ert-deftest pyim-tests-pyim-process--translate-punctuation-to-full-width-p ()
+(ert-deftest pyim-tests-pyim-process--trigger-punctuation-to-full-width-p ()
   (let ((pyim-default-scheme 'quanpin))
     (with-temp-buffer
       (insert ",")
-      (should (pyim-process--translate-punctuation-to-full-width-p ?v)))))
+      (should (pyim-process--trigger-punctuation-to-full-width-p ?v)))))
 
-(ert-deftest pyim-tests-pyim-process--translate-punctuation-to-half-width-p ()
+(ert-deftest pyim-tests-pyim-process--trigger-punctuation-to-half-width-p ()
   (let ((pyim-default-scheme 'quanpin))
     (with-temp-buffer
       (insert "，")
-      (should (pyim-process--translate-punctuation-to-half-width-p ?v)))))
+      (should (pyim-process--trigger-punctuation-to-half-width-p ?v)))))
 
 
 (ert-run-tests-batch-and-exit)
