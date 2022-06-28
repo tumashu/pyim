@@ -274,7 +274,8 @@ REFRESH-COMMON-DCACHE 已经废弃，不要再使用了。"
 (pyim-process-register-self-insert-command 'pyim-self-insert-command)
 
 ;; ** 加词功能
-(defalias 'pyim-create-word-at-point #'pyim-process-create-word-at-point)
+(defalias 'pyim-create-word-at-point
+  #'pyim-process-create-word-at-point)
 
 (defun pyim-create-2cchar-word-at-point ()
   "将光标前2个中文字符组成的字符串加入个人词库。"
