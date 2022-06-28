@@ -859,9 +859,6 @@ BUG：拼音无法有效地处理多音字。"
            (pyim-process-select-handle-char last-command-event)))
   (pyim-process-terminate))
 
-;; Fix compile warn.
-(declare-function pyim-delete-word-at-point "pyim")
-
 (defun pyim-process-select-handle-char (char)
   "Pyim 字符转换函数，CHAR 代表 *待输入* 的字符。"
   (let ((str (char-to-string char)))
@@ -871,7 +868,7 @@ BUG：拼音无法有效地处理多音字。"
      ((pyim-process--trigger-delete-word-p char)
       (let ((str-before-2 (pyim-char-before-to-string 1)))
         (delete-char -2)
-        (pyim-delete-word-at-point
+        (pyim-process-delete-word-at-point
          (string-to-number str-before-2)))
       "")
 
@@ -916,6 +913,15 @@ BUG：拼音无法有效地处理多音字。"
          (pyim-string-match-p "[0-9]" str-before-2)
          (pyim-string-match-p "\\cc" str-before-3)
          (pyim-outcome-trigger-p str))))
+
+(defun pyim-process-delete-word-at-point (&optional number silent)
+  "将光标前字符数为 NUMBER 的中文字符串从个人词库中删除
+当 SILENT 设置为 t 是，不显示提醒信息。"
+  (let ((string (pyim-cstring-at-point (or number 2))))
+    (when string
+      (pyim-process-delete-word string)
+      (unless silent
+        (message "词条: \"%s\" 已经从个人词库缓冲中删除。" string)))))
 
 (defun pyim-process--trigger-create-word-p (char)
   "当光标之前的字符串类似“[2-9]<trigger char>”时，比如 “你好2v” ，返回 t."

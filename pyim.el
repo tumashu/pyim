@@ -413,14 +413,8 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
       (pyim-process-delete-word word)
       (message "pyim: 从个人词库中删除词条 “%s” !" word))))
 
-(defun pyim-delete-word-at-point (&optional number silent)
-  "将光标前字符数为 NUMBER 的中文字符串从个人词库中删除
-当 SILENT 设置为 t 是，不显示提醒信息。"
-  (let ((string (pyim-cstring-at-point (or number 2))))
-    (when string
-      (pyim-process-delete-word string)
-      (unless silent
-        (message "词条: \"%s\" 已经从个人词库缓冲中删除。" string)))))
+(defalias 'pyim-delete-word-at-point
+  #'pyim-process-delete-word-at-point)
 
 (defun pyim-delete-word ()
   "从个人词库中删除词条。"
