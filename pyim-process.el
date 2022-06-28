@@ -205,8 +205,6 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
    pyim-process--word-position))
 
 ;; ** pyim-input-method 核心函数
-(defvar pyim-mode-map)
-
 (defun pyim-process-input-method (key)
   "`pyim-process-input-method' 是 `pyim-input-method' 内部使用的函数。
 
@@ -231,7 +229,8 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
       ;; OK, we can start translation.
       (let* ((echo-keystrokes 0)
              (help-char nil)
-             (overriding-terminal-local-map pyim-mode-map)
+             (mode-map (pyim-process-get-mode-map))
+             (overriding-terminal-local-map mode-map)
              (input-method-function nil)
              (input-method-use-echo-area nil)
              (modified-p (buffer-modified-p))
@@ -245,7 +244,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
         (while (pyim-process--translating-p)
           (set-buffer-modified-p modified-p)
           (let* ((keyseq (read-key-sequence nil nil nil t))
-                 (cmd (lookup-key pyim-mode-map keyseq)))
+                 (cmd (lookup-key mode-map keyseq)))
             ;; (message "key: %s, cmd:%s\nlcmd: %s, lcmdv: %s, tcmd: %s"
             ;;          key cmd last-command last-command-event this-command)
             (if (if key
@@ -271,6 +270,9 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
     ;; Since KEY doesn't start any translation, just return it.
     ;; But translate KEY if necessary.
     (char-to-string key)))
+
+(cl-defgeneric pyim-process-get-mode-map ()
+  "获取 pyim mode map.")
 
 (defun pyim-process--init-cleanup ()
   (pyim-entered-erase-buffer)

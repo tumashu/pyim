@@ -132,6 +132,9 @@ Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
     map)
   "Pyim 的 Keymap.")
 
+(cl-defmethod pyim-process-get-mode-map ()
+  pyim-mode-map)
+
 ;; ** pyim 输入法定义
 (defun pyim-input-method (key)
   "得到需要插入到 buffer 的字符串, 并将其插入到待输入 buffer.
