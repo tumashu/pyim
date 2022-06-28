@@ -86,9 +86,18 @@ pyim 输入半角标点，函数列表中每个函数都有一个参数：char �
 3. 当第一个元素为 \\='auto 时，根据中英文环境，自动切换。")
 
 (defvar pyim-punctuation-escape-list (number-sequence ?0 ?9)
-  "Punctuation will not insert after this characters.
+  "如果某些字符后面必须使用半角字符，可以将这些字符添加到此列表。
 
-If you don't like this function, set the variable to nil")
+比如：当用户使用 org-mode 以及 markdown 等轻量级标记语言撰写文档
+时，常常需要输入数字列表，比如：
+
+1. item1
+2. item2
+3. item3
+
+在这种情况下，数字后面输入句号必须是半角句号而不是全角句号。
+
+这个变量设置为 nil 时，取消这个功能。")
 
 (defvar pyim-punctuation--pair-status
   '(("\"" nil) ("'" nil))
@@ -138,6 +147,21 @@ If you don't like this function, set the variable to nil")
           (pyim-punctuation-translate 'full-width)
         (pyim-punctuation-translate 'half-width)))))
 
+(defun pyim-punctuation-p (punct)
+  "判断 PUNCT 是否是包含在 `pyim-punctuation-dict' 中的标点符号。"
+  (assoc (char-to-string punct) pyim-punctuation-dict))
+
+(defun pyim-punctuation-position (punct)
+  "返回 PUNCT 在 `pyim-punctuation-dict' 某一行中的位置。"
+  (let* ((punc-list
+          (cl-some (lambda (x)
+                     (when (member punct x) x))
+                   pyim-punctuation-dict))
+         (punc-position
+          (cl-position punct punc-list
+                       :test #'equal)))
+    punc-position))
+
 (defun pyim-punctuation-translate (&optional punct-style)
   "将光标前1个或前后连续成对的n个标点符号进行全角/半角转换.
 
@@ -180,7 +204,7 @@ If you don't like this function, set the variable to nil")
             (cond
              ((eq punct-style 'full-width)
               (if (= position 0)
-                  (push (pyim-punctuation-return-proper-punct puncts) result)
+                  (push (pyim-punctuation--return-proper-punct puncts) result)
                 (push punct result)))
              ((eq punct-style 'half-width)
               (if (= position 0)
@@ -189,7 +213,11 @@ If you don't like this function, set the variable to nil")
     (insert (string-join (reverse result)))
     (backward-char rnum)))
 
-(defun pyim-punctuation-return-proper-punct (punc-list &optional before)
+(defun pyim-punctuation-return-proper-punct (punct-char)
+  (let ((punc-list (assoc (char-to-string punct-char) pyim-punctuation-dict)))
+    (pyim-punctuation--return-proper-punct punc-list)))
+
+(defun pyim-punctuation--return-proper-punct (punc-list &optional before)
   "返回合适的标点符号，PUNCT-LIST 为标点符号列表.
 
 这个函数用于处理成对的全角标点符号，简单来说：如果第一次输入的标
@@ -202,7 +230,7 @@ PUNCT-LIST 格式类似：
 当 BEFORE 为 t 时，只返回切换之前的结果，这个用来获取切换之前的
 标点符号。
 
-函数 `pyim-punctuation-return-proper-punct' 内部，我们使用变量
+函数 `pyim-punctuation--return-proper-punct' 内部，我们使用变量
 `pyim-punctuation--pair-status' 来记录 “成对” 中文标点符号的状态。"
   (let* ((str (car punc-list))
          (punc (cdr punc-list))
@@ -217,9 +245,6 @@ PUNCT-LIST 格式类似：
           (car punc)
         (nth 1 punc)))))
 
-(defun pyim-punctuation-escape-p (char)
-  (member char pyim-punctuation-escape-list))
-
 (defun pyim-punctuation-auto-half-width-p (char)
   "测试是否自动切换到半角标点符号。"
   (cl-some (lambda (x)
@@ -228,6 +253,8 @@ PUNCT-LIST 格式类似：
                nil))
            pyim-punctuation-half-width-functions))
 
+(defun pyim-punctuation-escape-p (char)
+  (member char pyim-punctuation-escape-list))
 
 ;; * Footer
 (provide 'pyim-punctuation)

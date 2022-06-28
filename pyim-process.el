@@ -864,104 +864,99 @@ BUG：拼音无法有效地处理多音字。"
 (declare-function pyim-delete-word-at-point "pyim")
 
 (defun pyim-process-select-handle-char (char)
-  "Pyim 字符转换函数，主要用于处理标点符号.
-
-pyim 在运行过程中调用这个函数来进行标点符号格式的转换。
-
-常用的标点符号数量不多，所以 pyim 没有使用文件而是使用一个变量
-`pyim-punctuation-dict' 来设置标点符号对应表，这个变量是一个
-alist 列表。"
-  (let* ((str (char-to-string char))
-         ;; 注意：`str' 是 *待输入* 的字符对应的字符串。
-         (str-before-1 (pyim-char-before-to-string 0))
-         (str-before-2 (pyim-char-before-to-string 1))
-         (str-before-3 (pyim-char-before-to-string 2))
-         ;; 从标点词库中搜索与 `str' 对应的标点列表。
-         (punc-list (assoc str pyim-punctuation-dict))
-         ;; 从标点词库中搜索与 `str-before-1' 对应的标点列表。
-         (punc-list-before-1
-          (cl-some (lambda (x)
-                     (when (member str-before-1 x) x))
-                   pyim-punctuation-dict))
-         ;; `str-before-1' 在其对应的标点列表中的位置。
-         (punc-posit-before-1
-          (cl-position str-before-1 punc-list-before-1
-                       :test #'equal))
-         (trigger (pyim-outcome-get-trigger)))
+  "Pyim 字符转换函数，CHAR 代表 *待输入* 的字符。"
+  (let ((str (char-to-string char)))
     (cond
-     ;; 空格之前的字符什么也不输入。
-     ((< char ? ) "")
+     ((pyim-process--invalid-char-p char) "")
 
-     ;; 这个部份与标点符号处理无关，主要用来快速删除用户自定义词条。
-     ;; 比如：在一个中文字符串后输入 2-v，可以将光标前两个中文字符
-     ;; 组成的字符串，从个人词库删除。
-     ((and (eq (char-before) ?-)
-           (pyim-string-match-p "[0-9]" str-before-2)
-           (pyim-string-match-p "\\cc" str-before-3)
-           (equal str trigger))
-      (delete-char -2)
-      (pyim-delete-word-at-point
-       (string-to-number str-before-2))
-      "")
-     ;; 这个部份与标点符号处理无关，主要用来快速保存用户自定义词条。
-     ;; 比如：在一个中文字符串后输入 2v，可以将光标前两个中文字符
-     ;; 组成的字符串，保存到个人词库。
-     ((and (member (char-before) (number-sequence ?2 ?9))
-           (pyim-string-match-p "\\cc" str-before-2)
-           (equal str trigger))
-      (delete-char -1)
-      (pyim-create-word-at-point
-       (string-to-number str-before-1))
+     ((pyim-process--trigger-delete-word-p char)
+      (let ((str-before-2 (pyim-char-before-to-string 1)))
+        (delete-char -2)
+        (pyim-delete-word-at-point
+         (string-to-number str-before-2)))
       "")
 
-     ;; 光标前面的字符为中文字符时，按 v 清洗当前行的内容。
-     ((and (not (numberp punc-posit-before-1))
-           (pyim-string-match-p "\\cc" str-before-1)
-           (equal str trigger)
-           (functionp pyim-outcome-trigger-function))
+     ((pyim-process--trigger-create-word-p char)
+      (let ((str-before-1 (pyim-char-before-to-string 0)))
+        (delete-char -1)
+        (pyim-create-word-at-point
+         (string-to-number str-before-1)))
+      "")
+
+     ((pyim-process--call-trigger-function-p char)
       (funcall pyim-outcome-trigger-function)
+      (message "PYIM: 运行 `pyim-outcome-trigger-function' 函数。")
       "")
 
-     ;; 关闭标点转换功能时，只插入英文标点。
-     ((not (pyim-process--punctuation-full-width-p))
+     ((pyim-process--punctuation-half-width-p char)
       str)
 
-     ;; 当用户使用 org-mode 以及 markdown 等轻量级标记语言撰写文档时，
-     ;; 常常需要输入数字列表，比如：
-
-     ;; 1. item1
-     ;; 2. item2
-     ;; 3. item3
-
-     ;; 在这种情况下，数字后面输入句号必须是半角句号而不是全角句号。
-     ((pyim-punctuation-escape-p (char-before))
-      str)
-
-     ;; 自动切换全角/半角标点符号。
-     ((pyim-punctuation-auto-half-width-p char) str)
-
-     ;; 当光标前面为英文标点时， 按 `pyim-outcome-trigger'
-     ;; 对应的字符后， 自动将其转换为对应的中文标点。
-     ((and (numberp punc-posit-before-1)
-           (= punc-posit-before-1 0)
-           (equal str trigger))
+     ((pyim-process--translate-punctuation-to-full-width-p char)
       (pyim-punctuation-translate 'full-width)
       "")
 
-     ;; 当光标前面为中文标点时， 按 `pyim-outcome-trigger'
-     ;; 对应的字符后， 自动将其转换为对应的英文标点。
-     ((and (numberp punc-posit-before-1)
-           (> punc-posit-before-1 0)
-           (equal str trigger))
+     ((pyim-process--translate-punctuation-to-half-width-p char)
       (pyim-punctuation-translate 'half-width)
       "")
 
-     ;; 正常输入标点符号。
-     (punc-list
-      (pyim-punctuation-return-proper-punct punc-list))
+     ((pyim-punctuation-p char)
+      (pyim-punctuation-return-proper-punct char))
 
-     ;; 当输入的字符不是标点符号时，原样插入。
      (t str))))
+
+(defun pyim-process--invalid-char-p (char)
+  "当 CHAR 是空格前面的字符时，返回 t."
+  (< char ? ))
+
+(defun pyim-process--trigger-delete-word-p (char)
+  "当光标之前的字符串类似 “[1-9]-<trigger char>”时，比如 “你好-2v” ，返回 t."
+  (let* ((str (char-to-string char))
+         (str-before-2 (pyim-char-before-to-string 1))
+         (str-before-3 (pyim-char-before-to-string 2)))
+    (and (eq (char-before) ?-)
+         (pyim-string-match-p "[0-9]" str-before-2)
+         (pyim-string-match-p "\\cc" str-before-3)
+         (pyim-outcome-trigger-p str))))
+
+(defun pyim-process--trigger-create-word-p (char)
+  "当光标之前的字符串类似“[2-9]<trigger char>”时，比如 “你好2v” ，返回 t."
+  (let* ((str (char-to-string char))
+         (str-before-2 (pyim-char-before-to-string 1)))
+    (and (member (char-before) (number-sequence ?2 ?9))
+         (pyim-string-match-p "\\cc" str-before-2)
+         (pyim-outcome-trigger-p str))))
+
+(defun pyim-process--call-trigger-function-p (char)
+  "判断是否触发 `pyim-outcome-trigger-function'."
+  (let* ((str (char-to-string char))
+         (str-before-1 (pyim-char-before-to-string 0)))
+    (and (not (pyim-punctuation-position str-before-1))
+         (pyim-string-match-p "\\cc" str-before-1)
+         (pyim-outcome-trigger-p str)
+         (functionp pyim-outcome-trigger-function))))
+
+(defun pyim-process--translate-punctuation-to-full-width-p (char)
+  "当光标前面是半角标点时，返回 t."
+  (let* ((str (char-to-string char))
+         (str-before-1 (pyim-char-before-to-string 0))
+         (punc-posit-before-1 (pyim-punctuation-position str-before-1)))
+    (and (numberp punc-posit-before-1)
+         (= punc-posit-before-1 0)
+         (pyim-outcome-trigger-p str))))
+
+(defun pyim-process--translate-punctuation-to-half-width-p (char)
+  "当光标前面是全角标点时，返回 t."
+  (let* ((str (char-to-string char))
+         (str-before-1 (pyim-char-before-to-string 0))
+         (punc-posit-before-1 (pyim-punctuation-position str-before-1)))
+    (and (numberp punc-posit-before-1)
+         (> punc-posit-before-1 0)
+         (pyim-outcome-trigger-p str))))
+
+(defun pyim-process--punctuation-half-width-p (char)
+  (or (not (pyim-process--punctuation-full-width-p))
+      (pyim-punctuation-auto-half-width-p char)
+      (pyim-punctuation-escape-p (char-before))))
 
 (defun pyim-process--punctuation-full-width-p ()
   "判断是否需要切换到全角标点输入模式

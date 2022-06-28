@@ -88,7 +88,7 @@ pyim 使用函数 `pyim-process-select-handle-char' 来处理特殊功能触发�
 方案下，这个快捷键设置是否合理有效，如果不是一个合理的设置，则使
 用拼音方案默认的 :prefer-triggers 。
 
-具体请参考 `pyim-outcome-get-trigger' 。"
+具体请参考 `pyim-outcome--get-trigger' 。"
   :type '(choice (const nil) string))
 
 (defcustom pyim-outcome-trigger-function 'pyim-outcome-trigger-function-default
@@ -157,7 +157,11 @@ pyim 使用函数 `pyim-process-select-handle-char' 来处理特殊功能触发�
             result))
     str))
 
-(defun pyim-outcome-get-trigger ()
+(defun pyim-outcome-trigger-p (str)
+  "判断 STR 是否是一个 trigger."
+  (equal (pyim-outcome--get-trigger) str))
+
+(defun pyim-outcome--get-trigger ()
   "检查 `pyim-outcome-trigger' 是否为一个合理的 trigger char 。
 
 pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
@@ -173,10 +177,7 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
          (prefer-triggers (pyim-scheme-prefer-triggers
                            (pyim-scheme-current))))
     (if (pyim-string-match-p (regexp-quote user-trigger) first-char)
-        (progn
-          ;; (message "注意：pyim-outcome-trigger 设置和当前输入法冲突，使用推荐设置：\"%s\""
-          ;;          prefer-trigger)
-          (car prefer-triggers))
+        (car prefer-triggers)
       user-trigger)))
 
 (defun pyim-outcome-trigger-function-default (&optional no-space)

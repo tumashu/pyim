@@ -412,8 +412,8 @@
 
   (let ((pyim-punctuation--pair-status
          '(("\"" nil) ("'" nil))))
-    (should (equal (pyim-punctuation-return-proper-punct '("'" "‘" "’")) "‘"))
-    (should (equal (pyim-punctuation-return-proper-punct '("'" "‘" "’")) "’"))))
+    (should (equal (pyim-punctuation--return-proper-punct '("'" "‘" "’")) "‘"))
+    (should (equal (pyim-punctuation--return-proper-punct '("'" "‘" "’")) "’"))))
 
 ;; ** pyim-entered 相关单元测试
 (ert-deftest pyim-tests-pyim-entered ()
