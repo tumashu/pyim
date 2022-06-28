@@ -786,7 +786,7 @@ BUG：拼音无法有效地处理多音字。"
     ;; PYIM 有些功能会用到 text property, 保存词条之前将 text property 去除，防
     ;; 止不必要的数据进入 cache.
     (setq word (substring-no-properties word))
-    (pyim-process-add-last-created-word word)
+    (pyim-process--add-last-created-word word)
     (let* ((scheme (pyim-scheme-current))
            (code-prefix (pyim-scheme-code-prefix scheme))
            (codes (pyim-cstring-to-codes
@@ -812,7 +812,7 @@ BUG：拼音无法有效地处理多音字。"
                    (format "%s -> %s" (concat (or code-prefix "") code) word))
                  codes "; "))))
 
-(defun pyim-process-add-last-created-word (word)
+(defun pyim-process--add-last-created-word (word)
   (setq pyim-process--last-created-words
         (cons word (remove word pyim-process--last-created-words))))
 
