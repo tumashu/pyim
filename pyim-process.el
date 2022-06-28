@@ -778,43 +778,49 @@ WORDCOUNT-HANDLER 也可以是一个函数，其返回值将设置为 WORD 的�
 正多音字。
 
 BUG：拼音无法有效地处理多音字。"
-  (when (and (> (length word) 0)
-             ;; NOTE: 十二个汉字及以上的词条，加到个人词库里面用处不大，这是很主
-             ;; 观的一个数字，也许应该添加一个配置选项？
-             (< (length word) 12)
-             (not (pyim-string-match-p "\\CC" word)))
-    ;; PYIM 有些功能会用到 text property, 保存词条之前将 text property 去除，防
-    ;; 止不必要的数据进入 cache.
-    (setq word (substring-no-properties word))
+  (when (pyim-process--create-word-p word)
     (pyim-process--add-last-created-word word)
-    (let* ((scheme (pyim-scheme-current))
-           (code-prefix (pyim-scheme-code-prefix scheme))
-           (codes (pyim-cstring-to-codes
-                   word scheme
-                   (or criteria pyim-process--code-criteria))))
-      ;; 保存对应词条的词频
-      (when (> (length word) 0)
-        (pyim-dcache-update-wordcount word (or wordcount-handler #'1+)))
-      ;; 添加词条到个人缓存
-      (dolist (code codes)
-        (unless (pyim-string-match-p "[^ a-z-]" code)
-          (pyim-dcache-insert-word
-           (if (and (> (length word) 1)
-                    (> (length codes) 1))
-               ;; 如果 word 超过一个汉字，并且得到多个 codes，那么大概率说明没有
-               ;; 正确处理多音字，这里设置一下 :noexport 属性，在导出词条的时候
-               ;; 不导出这些带标记的词。
-               (propertize word :noexport t)
-             word)
-           (concat (or code-prefix "") code) prepend)))
-      ;; 返回 codes 和 word, 用于 message 命令。
-      (mapconcat (lambda (code)
-                   (format "%s -> %s" (concat (or code-prefix "") code) word))
-                 codes "; "))))
+    (pyim-process--add-word-to-dcache word prepend wordcount-handler criteria)))
+
+(defun pyim-process--create-word-p (word)
+  (and (> (length word) 0)
+       ;; NOTE: 十二个汉字及以上的词条，加到个人词库里面用处不大，这是很主观的一
+       ;; 个数字，也许应该添加一个配置选项？
+       (< (length word) 12)
+       (not (pyim-string-match-p "\\CC" word))))
 
 (defun pyim-process--add-last-created-word (word)
   (setq pyim-process--last-created-words
         (cons word (remove word pyim-process--last-created-words))))
+
+(defun pyim-process--add-word-to-dcache (word prepend wordcount-handler criteria)
+  (let* (;; PYIM 有些功能会用到 text property, 保存词条之前将 text property 去除，防
+         ;; 止不必要的数据进入 cache.
+         (word (substring-no-properties word))
+         (scheme (pyim-scheme-current))
+         (code-prefix (pyim-scheme-code-prefix scheme))
+         (codes (pyim-cstring-to-codes
+                 word scheme
+                 (or criteria pyim-process--code-criteria))))
+    ;; 保存对应词条的词频
+    (when (> (length word) 0)
+      (pyim-dcache-update-wordcount word (or wordcount-handler #'1+)))
+    ;; 添加词条到个人缓存
+    (dolist (code codes)
+      (unless (pyim-string-match-p "[^ a-z-]" code)
+        (pyim-dcache-insert-word
+         (if (and (> (length word) 1)
+                  (> (length codes) 1))
+             ;; 如果 word 超过一个汉字，并且得到多个 codes，那么大概率说明没有
+             ;; 正确处理多音字，这里设置一下 :noexport 属性，在导出词条的时候
+             ;; 不导出这些带标记的词。
+             (propertize word :noexport t)
+           word)
+         (concat (or code-prefix "") code) prepend)))
+    ;; 返回 codes 和 word, 用于 message 命令。
+    (mapconcat (lambda (code)
+                 (format "%s -> %s" (concat (or code-prefix "") code) word))
+               codes "; ")))
 
 (defun pyim-process-get-select-result ()
   "返回 PYIM 选择操作的结果。"
