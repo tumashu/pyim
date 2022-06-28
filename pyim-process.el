@@ -879,7 +879,7 @@ BUG：拼音无法有效地处理多音字。"
          (string-to-number str-before-1)))
       "")
 
-     ((pyim-process--call-trigger-function-p char)
+     ((pyim-process--trigger-call-function-p char)
       (funcall pyim-outcome-trigger-function)
       (message "PYIM: 运行 `pyim-outcome-trigger-function' 函数。")
       "")
@@ -941,7 +941,7 @@ SILENT 设置为 t 是，不显示提醒信息。"
       (unless silent
         (message "将词条: %S 加入 personal 缓冲。" output)))))
 
-(defun pyim-process--call-trigger-function-p (char)
+(defun pyim-process--trigger-call-function-p (char)
   "判断是否触发 `pyim-outcome-trigger-function'."
   (let* ((str (char-to-string char))
          (str-before-1 (pyim-char-before-to-string 0)))

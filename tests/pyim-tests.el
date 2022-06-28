@@ -2209,11 +2209,11 @@ abc 这是")))
       (insert "你好2")
       (should (pyim-process--trigger-create-word-p ?v)))))
 
-(ert-deftest pyim-tests-pyim-process--call-trigger-function-p ()
+(ert-deftest pyim-tests-pyim-process--trigger-call-function-p ()
   (let ((pyim-default-scheme 'quanpin))
     (with-temp-buffer
       (insert "你好")
-      (should (pyim-process--call-trigger-function-p ?v)))))
+      (should (pyim-process--trigger-call-function-p ?v)))))
 
 (ert-deftest pyim-tests-pyim-process--translate-punctuation-to-full-width-p ()
   (let ((pyim-default-scheme 'quanpin))
