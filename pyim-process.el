@@ -101,9 +101,6 @@ entered (nihaom) 的第一个候选词。
 (defvar pyim-process-ui-hide-hook nil
   "Hook used to run ui hide functions.")
 
-(defvar pyim-process-ui-position-function #'point
-  "The value is a function returned a position where ui place.")
-
 (defvar pyim-process-start-daemon-hook nil
   "Pyim start daemon hook.")
 
@@ -314,6 +311,10 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 (defun pyim-process-ui-init ()
   "初始化 pyim 相关 UI."
   (run-hooks 'pyim-process-ui-init-hook))
+
+(cl-defgeneric pyim-process-ui-position ()
+  "返回选词框等 UI 放置的位置。"
+  (point))
 
 (defun pyim-process-init-dcaches (&optional force)
   "PYIM 流程，词库相关的初始化工作。"

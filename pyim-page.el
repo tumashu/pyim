@@ -188,7 +188,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                (null unread-post-input-method-events))
       (pyim-page-show
        (pyim-page-info-format style page-info)
-       (funcall pyim-process-ui-position-function)
+       (pyim-process-ui-position)
        tooltip))))
 
 (add-hook 'pyim-process-ui-refresh-hook #'pyim-page--refresh)
