@@ -79,6 +79,12 @@ TYPE 取值为 point-after, 返回 entered buffer 中 point 之后的字符
   (pyim-entered-with-entered-buffer
     (erase-buffer)))
 
+(defun pyim-entered-in-the-middle-of-entered-p ()
+  "判断 entered buffer 中，光标是否在 entered 字符串中间。"
+  (pyim-entered-with-entered-buffer
+    (and (> (point) 1)
+         (< (point) (point-max)))))
+
 ;; * Footer
 (provide 'pyim-entered)
 

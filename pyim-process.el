@@ -829,9 +829,7 @@ BUG：拼音无法有效地处理多音字。"
 (cl-defmethod pyim-process-select-word ((_scheme pyim-scheme-xingma))
   "按照形码规则，对预选词条进行选词操作。"
   (pyim-process-select-word-without-save 'do-not-terminate)
-  (if (pyim-process-with-entered-buffer
-        (and (> (point) 1)
-             (< (point) (point-max))))
+  (if (pyim-entered-in-the-middle-of-entered-p)
       (progn
         (pyim-process-with-entered-buffer
           ;; 把本次已经选择的词条对应的子 entered, 从 entered

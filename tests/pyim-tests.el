@@ -427,6 +427,28 @@
   (pyim-entered-erase-buffer)
   (should (equal (pyim-entered-get) "")))
 
+(ert-deftest pyim-tests-pyim-entered-in-the-middle-of-entered-p ()
+  (pyim-entered-with-entered-buffer
+    (erase-buffer)
+    (insert "nihao")
+    (goto-char (point-min)))
+  (should-not (pyim-entered-in-the-middle-of-entered-p))
+
+  (pyim-entered-with-entered-buffer
+    (forward-char 1))
+  (should (pyim-entered-in-the-middle-of-entered-p))
+
+  (pyim-entered-with-entered-buffer
+    (goto-char (point-max)))
+  (should-not (pyim-entered-in-the-middle-of-entered-p))
+
+  (pyim-entered-with-entered-buffer
+    (backward-char 1))
+  (should (pyim-entered-in-the-middle-of-entered-p))
+
+  ;; Do not delete.
+  (pyim-entered-erase-buffer))
+
 ;; ** pyim-impobjs 相关单元测试
 (ert-deftest pyim-tests-pyim-imobjs ()
   (let ((pyim-pinyin-fuzzy-alist '(("en" "eng")
