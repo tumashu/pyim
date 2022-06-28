@@ -149,7 +149,9 @@ pyim 输入半角标点，函数列表中每个函数都有一个参数：char �
 
 (defun pyim-punctuation-p (punct)
   "判断 PUNCT 是否是包含在 `pyim-punctuation-dict' 中的标点符号。"
-  (assoc (char-to-string punct) pyim-punctuation-dict))
+  (cl-some (lambda (x)
+             (when (member (char-to-string punct) x) x))
+           pyim-punctuation-dict))
 
 (defun pyim-punctuation-position (punct)
   "返回 PUNCT 在 `pyim-punctuation-dict' 某一行中的位置。"

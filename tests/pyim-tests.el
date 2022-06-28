@@ -376,7 +376,7 @@
 ;; ** pyim-punctuation 相关单元测试
 (ert-deftest pyim-tests-pyim-punctuation-p ()
   (should (pyim-punctuation-p ?,))
-  (should-not (pyim-punctuation-p ?，))
+  (should (pyim-punctuation-p ?，))
   (should-not (pyim-punctuation-p ?a))
   (should-not (pyim-punctuation-p ?1)))
 
