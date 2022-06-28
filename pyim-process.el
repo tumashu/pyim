@@ -666,7 +666,6 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
       (pyim-process--select-word-in-next-step)
     (pyim-process-create-word (pyim-process-get-select-result) t)
     (pyim-process-terminate)
-    ;; pyim 使用这个 hook 来处理联想词。
     (run-hooks 'pyim-select-finish-hook)))
 
 (defun pyim-process--create-code-criteria ()
@@ -798,7 +797,6 @@ BUG：拼音无法有效地处理多音字。"
                (propertize word :noexport t)
              word)
            (concat (or code-prefix "") code) prepend)))
-      ;; TODO, 排序个人词库?
       ;; 返回 codes 和 word, 用于 message 命令。
       (mapconcat (lambda (code)
                    (format "%s -> %s" (concat (or code-prefix "") code) word))
@@ -832,14 +830,10 @@ BUG：拼音无法有效地处理多音字。"
   (if (pyim-entered-in-the-middle-of-entered-p)
       (progn
         (pyim-process-with-entered-buffer
-          ;; 把本次已经选择的词条对应的子 entered, 从 entered
-          ;; 字符串里面剪掉。
           (delete-region (point-min) (point)))
         (pyim-process-run))
-    ;; NOTE: 以词定字的时候，到底应不应该保存词条呢，需要进一步研究。
     (pyim-process-create-word (pyim-process-get-select-result) t)
     (pyim-process-terminate)
-    ;; pyim 使用这个 hook 来处理联想词。
     (run-hooks 'pyim-select-finish-hook)))
 
 (defun pyim-process-select-last-char ()
