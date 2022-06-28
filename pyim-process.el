@@ -880,8 +880,7 @@ BUG：拼音无法有效地处理多音字。"
       "")
 
      ((pyim-process--trigger-call-function-p char)
-      (funcall pyim-outcome-trigger-function)
-      (message "PYIM: 运行 `pyim-outcome-trigger-function' 函数。")
+      (pyim-outcome-call-trigger-function)
       "")
 
      ((pyim-process--trigger-punctuation-to-full-width-p char)

@@ -180,6 +180,11 @@ pyim 的 translate-trigger-char 要占用一个键位，为了防止用户
         (car prefer-triggers)
       user-trigger)))
 
+(defun pyim-outcome-call-trigger-function ()
+  (when (functionp pyim-outcome-trigger-function)
+    (funcall pyim-outcome-trigger-function)
+    (message "PYIM: 运行 `pyim-outcome-trigger-function' 函数。")))
+
 (defun pyim-outcome-trigger-function-default (&optional no-space)
   "默认的 `pyim-outcome-trigger-function'.
 
