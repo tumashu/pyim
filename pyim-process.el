@@ -884,9 +884,6 @@ BUG：拼音无法有效地处理多音字。"
       (message "PYIM: 运行 `pyim-outcome-trigger-function' 函数。")
       "")
 
-     ((pyim-process--punctuation-half-width-p char)
-      str)
-
      ((pyim-process--translate-punctuation-to-full-width-p char)
       (pyim-punctuation-translate 'full-width)
       "")
@@ -894,6 +891,9 @@ BUG：拼音无法有效地处理多音字。"
      ((pyim-process--translate-punctuation-to-half-width-p char)
       (pyim-punctuation-translate 'half-width)
       "")
+
+     ((pyim-process--punctuation-half-width-p char)
+      str)
 
      ((pyim-punctuation-p char)
       (pyim-punctuation-return-proper-punct char))
