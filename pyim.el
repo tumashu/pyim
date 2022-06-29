@@ -53,17 +53,6 @@
   "Pyim is a Chinese input method support quanpin, shuangpin, wubi and cangjie."
   :group 'leim)
 
-(defcustom pyim-convert-string-at-point-hook nil
-  "Hook of `pyim-convert-string-at-point'.
-
-这个 hook 运行时机：
-1. 获取并删除光标处 code 字符串之后。
-2. code 转换得到的中文字符串插入之前。
-
-Tip: 用户也可以利用 `pyim-outcome-trigger-function-default' 函数
-来构建适合自己的 hook 函数。"
-  :type 'hook)
-
 (defcustom pyim-select-word-by-number t
   "使用数字键来选择词条.
 
@@ -303,7 +292,8 @@ REFRESH-COMMON-DCACHE 已经废弃，不要再使用了。"
         (if (not (string-match-p "^\\cc+\\'" string))
             (error "不是纯中文字符串")
           (setq output (pyim-process-create-word string))
-          (message "将词条: %S 插入 personal file。" output))))))
+          (message "将词条: %S 插入 personal file。" output))))
+    (deactivate-mark)))
 
 ;; ** 导入词条功能
 (defun pyim-import-words-and-counts (file &optional merge-method silent)
@@ -589,71 +579,54 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   (interactive "P")
   (unless (equal input-method-function 'pyim-input-method)
     (activate-input-method 'pyim))
+  (let ((string (pyim--string-at-region-or-point)))
+    (cond
+     ((region-active-p) (pyim-create-word-from-selection))
+     ((pyim-process-trigger-feature-run-p) nil)
+     ((pyim--find-code string) (pyim--convert-string string))
+     (t (message "Pyim: pyim-convert-string-at-point did nothing.")))))
+
+(defun pyim--string-at-region-or-point ()
+  (if mark-active
+      (buffer-substring-no-properties
+       (region-beginning) (region-end))
+    (buffer-substring (point) (line-beginning-position))))
+
+(defun pyim--find-code (string)
+  "从 STRING 末尾提取一个有效的 code."
   (let* ((case-fold-search nil)
          (scheme (pyim-scheme-current))
          (first-chars (pyim-scheme-first-chars scheme))
-         (rest-chars (pyim-scheme-rest-chars scheme))
-         (string (if mark-active
-                     (buffer-substring-no-properties
-                      (region-beginning) (region-end))
-                   (buffer-substring (point) (line-beginning-position))))
-         (str-before-1 (pyim-char-before-to-string 0))
-         (str-before-2 (pyim-char-before-to-string 1))
-         (str-before-3 (pyim-char-before-to-string 2))
-         code length)
-    (cond
-     ;; 如果用户已经选择词条，就将此词条添加到个人词库。
-     ((region-active-p)
-      (pyim-create-word-from-selection)
-      (deactivate-mark))
-     ;; 删除用户自定义词条。比如：在一个中文字符串后输入 2-，运行此命令可以将
-     ;; 光标前两个中文字符组成的字符串，从个人词库删除。
-     ((and (eq (char-before) ?-)
-           (pyim-string-match-p "[0-9]" str-before-2)
-           (pyim-string-match-p "\\cc" str-before-3))
-      (delete-char -2)
-      (pyim-delete-word-at-point
-       (string-to-number str-before-2)))
-     ;; 输入"-"然后运行此命令，可以快速删除最近一次创建的词条。
-     ((and (eq (char-before) ?-)
-           (pyim-string-match-p "\\cc" str-before-2))
-      (delete-char -1)
-      (pyim-delete-last-word))
-     ;; 快速保存用户自定义词条。比如：在一个中文字符串后输入 2，运行此命令可以
-     ;; 将光标前两个中文字符组成的字符串，保存到个人词库。
-     ((and (member (char-before) (number-sequence ?2 ?9))
-           (pyim-string-match-p "\\cc" str-before-2))
-      (delete-char -1)
-      (pyim-create-word-at-point
-       (string-to-number str-before-1)))
-     ;; 金手指功能
-     ((string-match
-       ;; 创建一个 regexp, 用于提取出光标处一个适合
-       ;; 转换的字符串。
-       (format "[%s]+ *$"
-               (cl-delete-duplicates
-                (concat first-chars rest-chars "'-")))
-       string)
-      (setq code
-            ;; 一些编程语言使用单引号 ' 做为字符串的标记，这里需要特殊处理。
-            (replace-regexp-in-string
-             "^[-']" ""
-             (match-string 0 string)))
-      (setq length (length code))
-      (setq code (replace-regexp-in-string " +" "" code))
-      (when mark-active
-        (delete-region
-         (region-beginning) (region-end)))
-      (when (and (not mark-active) (> length 0))
-        (delete-char (- 0 length)))
-      (run-hooks 'pyim-convert-string-at-point-hook)
-      (when (> length 0)
-        (pyim-add-unread-command-events code)
-        (pyim-process-force-input-chinese)))
-     ;; 当光标前的一个字符是标点符号时，半角/全角切换。
-     ((pyim-string-match-p "[[:punct:]：－]" (pyim-char-before-to-string 0))
-      (call-interactively 'pyim-punctuation-translate-at-point))
-     (t (message "Pyim: pyim-convert-string-at-point did nothing.")))))
+         (rest-chars (pyim-scheme-rest-chars scheme)))
+    (when (string-match
+           ;; 创建一个 regexp, 用于提取出光标处一个适合
+           ;; 转换的字符串。
+           (format "[%s]+ *$"
+                   (cl-delete-duplicates
+                    (concat first-chars rest-chars "'-")))
+           string)
+      (let* ((code (replace-regexp-in-string
+                    ;; 一些编程语言使用单引号做为字符串的标记，这里需要特殊处理。
+                    "^[-']" ""
+                    (match-string 0 string)))
+             (length (length code))
+             (code (replace-regexp-in-string " +" "" code)))
+        (list code length)))))
+
+(defun pyim--convert-string (string)
+  (let* ((code-info-at-point (pyim--find-code string))
+         (code (nth 0 code-info-at-point))
+         (char-num-need-delete
+          (nth 1 code-info-at-point)))
+    (when mark-active
+      (delete-region
+       (region-beginning) (region-end)))
+    (when (and (not mark-active)
+               (> char-num-need-delete 0))
+      (backward-delete-char char-num-need-delete))
+    (when (> (length code) 0)
+      (pyim-add-unread-command-events code)
+      (pyim-process-force-input-chinese))))
 
 ;; ** 编码反查功能
 (defun pyim-search-word-code ()

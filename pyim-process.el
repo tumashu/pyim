@@ -864,7 +864,9 @@ BUG：拼音无法有效地处理多音字。"
   (let ((str (char-to-string char)))
     (cond
      ((pyim-process--invalid-char-p char) "")
-     ((pyim-process--trigger-feature-run-p char) "")
+     ((and (pyim-outcome-trigger-p (char-to-string char))
+           (pyim-process-trigger-feature-run-p))
+      "")
      ((pyim-process--punctuation-half-width-p char) str)
      ((pyim-punctuation-p char)
       (pyim-punctuation-return-proper-punct char))
@@ -874,10 +876,9 @@ BUG：拼音无法有效地处理多音字。"
   "当 CHAR 是空格前面的字符时，返回 t."
   (< char ? ))
 
-(defun pyim-process--trigger-feature-run-p (char)
-  (and (pyim-outcome-trigger-p (char-to-string char))
-       (not (eq (pyim-process--trigger-feature-run)
-                'without-trigger-feature))))
+(defun pyim-process-trigger-feature-run-p ()
+  (not (eq (pyim-process--trigger-feature-run)
+           'without-trigger-feature)))
 
 (defun pyim-process--trigger-feature-run ()
   (cond
