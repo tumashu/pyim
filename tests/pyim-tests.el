@@ -2230,14 +2230,14 @@ abc 这是")))
       (insert "，")
       (should (pyim-process--trigger-punctuation-to-half-width-p)))))
 
-(ert-deftest pyim-tests-pyim-process-find-entered-at-point ()
+(ert-deftest pyim-tests-pyim-process--find-entered-at-point ()
   (with-temp-buffer
     (insert "123abc'd   ")
-    (should (equal (pyim-process-find-entered-at-point) '("abc'd" 8))))
+    (should (equal (pyim-process--find-entered-at-point) '("abc'd" 8))))
 
   (with-temp-buffer
     (insert "123'abcd   ")
-    (should (equal (pyim-process-find-entered-at-point) '("abcd" 7)))))
+    (should (equal (pyim-process--find-entered-at-point) '("abcd" 7)))))
 
 
 (ert-run-tests-batch-and-exit)

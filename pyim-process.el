@@ -390,13 +390,16 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
     (buffer-substring (point) (line-beginning-position))))
 
 (defun pyim-process-feed-entered-at-point-into-pyim ()
-  (let* ((entered-info (pyim-process-find-entered-at-point))
+  (let* ((entered-info (pyim-process--find-entered-at-point))
          (entered (nth 0 entered-info))
          (char-num-need-delete (nth 1 entered-info)))
-    (pyim-process--delete-region-or-chars char-num-need-delete)
-    (pyim-process--feed-entered-into-pyim entered)))
+    (when entered-info
+      (pyim-process--delete-region-or-chars char-num-need-delete)
+      (pyim-process--feed-entered-into-pyim entered)
+      ;; NOTE: 这里必须返回 t, 因为这个函数的返回结果会被作为判断条件使用。
+      t)))
 
-(defun pyim-process-find-entered-at-point ()
+(defun pyim-process--find-entered-at-point ()
   "从光标处提取一个有效的 entered 字符串."
   (let* ((case-fold-search nil)
          (scheme (pyim-scheme-current))

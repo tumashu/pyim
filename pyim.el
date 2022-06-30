@@ -292,8 +292,10 @@ REFRESH-COMMON-DCACHE 已经废弃，不要再使用了。"
         (if (not (string-match-p "^\\cc+\\'" string))
             (error "不是纯中文字符串")
           (setq output (pyim-process-create-word string))
-          (message "将词条: %S 插入 personal file。" output))))
-    (deactivate-mark)))
+          (message "将词条: %S 插入 personal file。" output)))
+      (deactivate-mark)
+      ;; NOTE: 这里必须返回 t, 因为这个函数的返回结果会被用来做为判断条件。
+      t)))
 
 ;; ** 导入词条功能
 (defun pyim-import-words-and-counts (file &optional merge-method silent)
@@ -579,13 +581,10 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   (interactive "P")
   (unless (equal input-method-function 'pyim-input-method)
     (activate-input-method 'pyim))
-  (cond
-   ((region-active-p) (pyim-create-word-from-selection))
-   ;; `pyim-process-trigger-feature-run-p' 函数本身就会做相应的操作。
-   ((pyim-process-trigger-feature-run-p) nil)
-   ((pyim-process-find-entered-at-point)
-    (pyim-process-feed-entered-at-point-into-pyim))
-   (t (message "PYIM: `pyim-convert-string-at-point' did nothing."))))
+  (or (pyim-create-word-from-selection)
+      (pyim-process-trigger-feature-run-p)
+      (pyim-process-feed-entered-at-point-into-pyim)
+      (message "PYIM: `pyim-convert-string-at-point' did nothing.")))
 
 ;; ** 编码反查功能
 (defun pyim-search-word-code ()
