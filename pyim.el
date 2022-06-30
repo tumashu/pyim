@@ -579,12 +579,16 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
 (defun pyim-convert-string-at-point (&optional _)
   "将光标前的用户输入的字符串转换为中文."
   (interactive "P")
-  (unless (equal input-method-function 'pyim-input-method)
-    (activate-input-method 'pyim))
+  (pyim--activate-pyim)
   (or (pyim-create-word-from-selection)
       (pyim-process-trigger-feature-run-p)
       (pyim-process-feed-entered-at-point-into-pyim)
       (message "PYIM: `pyim-convert-string-at-point' did nothing.")))
+
+(defun pyim--activate-pyim ()
+  "如果当前输入法设置为 pyim, 就激活它。"
+  (unless (equal input-method-function 'pyim-input-method)
+    (activate-input-method 'pyim)))
 
 ;; ** 编码反查功能
 (defun pyim-search-word-code ()
