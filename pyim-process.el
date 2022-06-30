@@ -394,9 +394,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
          (entered (nth 0 entered-info))
          (char-num-need-delete (nth 1 entered-info)))
     (pyim-process--delete-region-or-chars char-num-need-delete)
-    (when (> (length entered) 0)
-      (pyim-add-unread-command-events entered)
-      (pyim-process--force-input-chinese))))
+    (pyim-process--feed-entered-into-pyim entered)))
 
 (defun pyim-process-find-entered-at-point ()
   "从光标处提取一个有效的 entered 字符串."
@@ -424,6 +422,11 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
        (region-beginning) (region-end))
     (when (and (numberp num) (> num 0))
       (backward-delete-char num))))
+
+(defun pyim-process--feed-entered-into-pyim (entered)
+  (when (and (stringp entered) (> (length entered) 0))
+    (pyim-add-unread-command-events entered)
+    (pyim-process--force-input-chinese)))
 
 (defun pyim-process--force-input-chinese ()
   "让 pyim 强制输入中文，忽略所有探针函数。"
