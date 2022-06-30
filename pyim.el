@@ -597,21 +597,18 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   (let* ((case-fold-search nil)
          (scheme (pyim-scheme-current))
          (first-chars (pyim-scheme-first-chars scheme))
-         (rest-chars (pyim-scheme-rest-chars scheme)))
-    (when (string-match
-           ;; 创建一个 regexp, 用于提取出光标处一个适合
-           ;; 转换的字符串。
-           (format "[%s]+ *$"
-                   (cl-delete-duplicates
-                    (concat first-chars rest-chars "'-")))
-           string)
-      (let* ((code (replace-regexp-in-string
-                    ;; 一些编程语言使用单引号做为字符串的标记，这里需要特殊处理。
-                    "^[-']" ""
-                    (match-string 0 string)))
-             (length (length code))
+         (rest-chars (pyim-scheme-rest-chars scheme))
+         (regexp-used-to-extract-code
+          (format "[%s]+ *$"
+                  (cl-delete-duplicates
+                   (concat first-chars rest-chars "'-")))))
+    (when (string-match regexp-used-to-extract-code string)
+      (let* ((code (match-string 0 string))
+             ;; 一些编程语言使用单引号做为字符串的标记，这里需要特殊处理。
+             (code (replace-regexp-in-string "^[-']" "" code))
+             (backward-delete-char-number (length code))
              (code (replace-regexp-in-string " +" "" code)))
-        (list code length)))))
+        (list code backward-delete-char-number)))))
 
 (defun pyim--convert-string (string)
   (let* ((code-info-at-point (pyim--find-code string))
