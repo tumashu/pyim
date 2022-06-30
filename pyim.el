@@ -579,54 +579,13 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   (interactive "P")
   (unless (equal input-method-function 'pyim-input-method)
     (activate-input-method 'pyim))
-  (let ((string (pyim--string-at-region-or-point)))
-    (cond
-     ((region-active-p) (pyim-create-word-from-selection))
-     ((pyim-process-trigger-feature-run-p) nil)
-     ((pyim--find-code string) (pyim--convert-string string))
-     (t (message "Pyim: pyim-convert-string-at-point did nothing.")))))
-
-(defun pyim--string-at-region-or-point ()
-  (if mark-active
-      (buffer-substring-no-properties
-       (region-beginning) (region-end))
-    (buffer-substring (point) (line-beginning-position))))
-
-(defun pyim--find-code (string)
-  "从 STRING 末尾提取一个有效的 code."
-  (let* ((case-fold-search nil)
-         (scheme (pyim-scheme-current))
-         (first-chars (pyim-scheme-first-chars scheme))
-         (rest-chars (pyim-scheme-rest-chars scheme))
-         (regexp-used-to-extract-code
-          (format "[%s]+ *$"
-                  (cl-delete-duplicates
-                   (concat first-chars rest-chars "'-")))))
-    (when (string-match regexp-used-to-extract-code string)
-      (let* ((code (match-string 0 string))
-             ;; 一些编程语言使用单引号做为字符串的标记，这里需要特殊处理。
-             (code (replace-regexp-in-string "^[-']" "" code))
-             (backward-delete-char-number (length code))
-             (code (replace-regexp-in-string " +" "" code)))
-        (list code backward-delete-char-number)))))
-
-(defun pyim--convert-string (string)
-  (let* ((code-info-at-point (pyim--find-code string))
-         (code (nth 0 code-info-at-point))
-         (char-num-need-delete
-          (nth 1 code-info-at-point)))
-    (pyim--delete-region-or-chars char-num-need-delete)
-    (when (> (length code) 0)
-      (pyim-add-unread-command-events code)
-      (pyim-process-force-input-chinese))))
-
-(defun pyim--delete-region-or-chars (&optional num)
-  "删除 region 或者光标之前 NUM 个字符。"
-  (if mark-active
-      (delete-region
-       (region-beginning) (region-end))
-    (when (and (numberp num) (> num 0))
-      (backward-delete-char num))))
+  (cond
+   ((region-active-p) (pyim-create-word-from-selection))
+   ;; `pyim-process-trigger-feature-run-p' 函数本身就会做相应的操作。
+   ((pyim-process-trigger-feature-run-p) nil)
+   ((pyim-process-find-entered-at-point)
+    (pyim-process-feed-entered-at-point-into-pyim))
+   (t (message "PYIM: `pyim-convert-string-at-point' did nothing."))))
 
 ;; ** 编码反查功能
 (defun pyim-search-word-code ()

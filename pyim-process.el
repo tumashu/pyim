@@ -383,16 +383,58 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
               (cl-decf pos)))))
       end-position)))
 
+(defun pyim-process--string-at-region-or-point ()
+  (if mark-active
+      (buffer-substring-no-properties
+       (region-beginning) (region-end))
+    (buffer-substring (point) (line-beginning-position))))
+
+(defun pyim-process-feed-entered-at-point-into-pyim ()
+  (let* ((entered-info (pyim-process-find-entered-at-point))
+         (entered (nth 0 entered-info))
+         (char-num-need-delete (nth 1 entered-info)))
+    (pyim-process--delete-region-or-chars char-num-need-delete)
+    (when (> (length entered) 0)
+      (pyim-add-unread-command-events entered)
+      (pyim-process--force-input-chinese))))
+
+(defun pyim-process-find-entered-at-point ()
+  "从光标处提取一个有效的 entered 字符串."
+  (let* ((case-fold-search nil)
+         (scheme (pyim-scheme-current))
+         (first-chars (pyim-scheme-first-chars scheme))
+         (rest-chars (pyim-scheme-rest-chars scheme))
+         (regexp-used-to-extract-entered
+          (format "[%s]+ *$"
+                  (cl-delete-duplicates
+                   (concat first-chars rest-chars "'-"))))
+         (string (pyim-process--string-at-region-or-point)))
+    (when (string-match regexp-used-to-extract-entered string)
+      (let* ((entered (match-string 0 string))
+             ;; 一些编程语言使用单引号做为字符串的标记，这里需要特殊处理。
+             (entered (replace-regexp-in-string "^[-']" "" entered))
+             (backward-delete-char-number (length entered))
+             (entered (replace-regexp-in-string " +" "" entered)))
+        (list entered backward-delete-char-number)))))
+
+(defun pyim-process--delete-region-or-chars (&optional num)
+  "删除 region 或者光标之前 NUM 个字符。"
+  (if mark-active
+      (delete-region
+       (region-beginning) (region-end))
+    (when (and (numberp num) (> num 0))
+      (backward-delete-char num))))
+
+(defun pyim-process--force-input-chinese ()
+  "让 pyim 强制输入中文，忽略所有探针函数。"
+  (setq pyim-process--force-input-chinese t))
+
 ;; ** 中英文切换相关
 (defun pyim-process-toggle-input-ascii ()
   "pyim 切换中英文输入模式, 同时调整标点符号样式。"
   (interactive)
   (setq pyim-process--input-ascii
         (not pyim-process--input-ascii)))
-
-(defun pyim-process-force-input-chinese ()
-  "让 pyim 强制输入中文，忽略所有探针函数。"
-  (setq pyim-process--force-input-chinese t))
 
 (defun pyim-process-input-chinese-p ()
   "确定 pyim 是否需要启动中文输入模式."

@@ -2230,13 +2230,14 @@ abc 这是")))
       (insert "，")
       (should (pyim-process--trigger-punctuation-to-half-width-p)))))
 
-;; pyim.el 单元测试
-(ert-deftest pyim-tests-pyim--find-code ()
-  (equal (pyim--find-code "123abc'd   ")
-         '("abc'd" 8))
-  (equal (pyim--find-code "123'abcd   ")
-         '("abcd" 7)))
+(ert-deftest pyim-tests-pyim-process-find-entered-at-point ()
+  (with-temp-buffer
+    (insert "123abc'd   ")
+    (should (equal (pyim-process-find-entered-at-point) '("abc'd" 8))))
 
+  (with-temp-buffer
+    (insert "123'abcd   ")
+    (should (equal (pyim-process-find-entered-at-point) '("abcd" 7)))))
 
 
 (ert-run-tests-batch-and-exit)
