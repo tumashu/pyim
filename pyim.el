@@ -618,15 +618,18 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
          (code (nth 0 code-info-at-point))
          (char-num-need-delete
           (nth 1 code-info-at-point)))
-    (when mark-active
-      (delete-region
-       (region-beginning) (region-end)))
-    (when (and (not mark-active)
-               (> char-num-need-delete 0))
-      (backward-delete-char char-num-need-delete))
+    (pyim--delete-region-or-chars char-num-need-delete)
     (when (> (length code) 0)
       (pyim-add-unread-command-events code)
       (pyim-process-force-input-chinese))))
+
+(defun pyim--delete-region-or-chars (&optional num)
+  "删除 region 或者光标之前 NUM 个字符。"
+  (if mark-active
+      (delete-region
+       (region-beginning) (region-end))
+    (when (and (numberp num) (> num 0))
+      (backward-delete-char num))))
 
 ;; ** 编码反查功能
 (defun pyim-search-word-code ()
