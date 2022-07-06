@@ -211,9 +211,7 @@
           (pyim-process-create-word (pyim-outcome-get))))
       (setq pyim-liberime-code-log nil)
       (setq pyim-liberime-word-log nil)
-      (pyim-process-terminate)
-      ;; pyim 使用这个 hook 来处理联想词。
-      (run-hooks 'pyim-select-finish-hook))))
+      (pyim-process-terminate))))
 
 (defun pyim-liberime--get-code (word input &optional _limit)
   "Get the code of WORD from the beginning of INPUT.

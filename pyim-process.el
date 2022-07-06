@@ -716,6 +716,10 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
 (cl-defgeneric pyim-process-select-word (scheme)
   "按照 SCHEME 对应的规则，对预选词条进行选词操作。")
 
+(cl-defmethod pyim-process-select-word :after (_scheme)
+  "运行 `pyim-select-finish-hook'."
+  (run-hooks 'pyim-select-finish-hook))
+
 (cl-defmethod pyim-process-select-word ((_scheme pyim-scheme-quanpin))
   "按照全拼规则，对预选词条进行选词操作。"
   (pyim-process--create-code-criteria)
@@ -723,8 +727,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
   (if (pyim-process--multi-step-select-word-p)
       (pyim-process--select-word-in-next-step)
     (pyim-process-create-word (pyim-process-get-select-result) t)
-    (pyim-process-terminate)
-    (run-hooks 'pyim-select-finish-hook)))
+    (pyim-process-terminate)))
 
 (defun pyim-process--create-code-criteria ()
   "创建 `pyim-process--code-criteria'."
@@ -897,8 +900,7 @@ BUG：拼音无法有效地处理多音字。"
           (delete-region (point-min) (point)))
         (pyim-process-run))
     (pyim-process-create-word (pyim-process-get-select-result) t)
-    (pyim-process-terminate)
-    (run-hooks 'pyim-select-finish-hook)))
+    (pyim-process-terminate)))
 
 (defun pyim-process-select-last-char ()
   "选择上一个输入的字符。"
