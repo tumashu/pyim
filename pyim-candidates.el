@@ -105,7 +105,7 @@
       (delete-dups result))))
 
 (defun pyim-candidates--xingma-words (code)
-  "按照形码 scheme 的规则，搜索 CODE, 得到相应的词条列表。
+  "搜索形码 CODE, 得到相应的词条列表。
 
 当前的词条的构建规则是：
 1. 先排公共词库中的字。
