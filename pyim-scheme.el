@@ -162,7 +162,7 @@
 (defun pyim-scheme-get-all-schemes ()
   pyim-scheme--all-schemes)
 
-(defun pyim-scheme-assistant-status ()
+(defun pyim-scheme-assistant-enable-p ()
   pyim-scheme--enable-assistant-p)
 
 (defun pyim-scheme-enable-assistant ()

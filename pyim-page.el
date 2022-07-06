@@ -182,7 +182,7 @@ page 的概念，比如，上面的 “nihao” 的 *待选词列表* 就可以�
                 :candidates candidates-showed
                 :position position
                 :hightlight-current hightlight-current
-                :assistant-enable (pyim-scheme-assistant-status))))
+                :assistant-enable (pyim-scheme-assistant-enable-p))))
     ;; Show page.
     (when (and (null unread-command-events)
                (null unread-post-input-method-events))
@@ -500,7 +500,24 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
        (if (equal 1 (point))
            (concat "|" translated)
          (concat (replace-regexp-in-string (concat separator "'") "'" translated)
-                 " |" (buffer-substring-no-properties (point) (point-max))))))))
+                 " |" (buffer-substring-no-properties (point) (point-max)))))
+     ;; 使用辅助输入法时，在 page 中提示默认输入法的 code, 这个功能对形码用户挺
+     ;; 有用。
+     (pyim-page--code-hint-of-default-scheme))))
+
+(defun pyim-page--code-hint-of-default-scheme ()
+  "获取当前词条在默认输入法下的 code 提示."
+  (when (pyim-scheme-assistant-enable-p)
+    (let* ((word (nth (pyim-process-word-position)
+                      (pyim-process-get-candidates)))
+           (codes (sort (pyim-cstring-to-codes
+                         word (pyim-scheme-get pyim-default-scheme))
+                        (lambda (a b)
+                          (< (length a) (length b)))))
+           (hint (string-join codes " ")))
+      (if (> (length hint) 0)
+          (format " [%s]" hint)
+        " "))))
 
 (cl-defmethod pyim-page-preview-create ((scheme pyim-scheme-shuangpin) &optional separator)
   (let ((keymaps (pyim-scheme-shuangpin-keymaps scheme))
