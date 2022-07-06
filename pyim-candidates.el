@@ -51,19 +51,6 @@
 (cl-defgeneric pyim-candidates-get-chief (scheme &optional personal-words common-words)
   "PYIM 输入法第一位候选词的获取策略。")
 
-(cl-defmethod pyim-candidates-get-chief ((_scheme pyim-scheme-xingma)
-                                         &optional personal-words common-words)
-  "五笔仓颉等形码输入法第一位候选词的选择策略。"
-  (or
-   ;; 如果从公共词库里面获取到的第一个词条是汉字，就选择它。
-   (when (= (length (car common-words)) 1)
-     (car common-words))
-   ;; 从个人词库里面按排列的先后顺序，获取一个汉字。
-   (cl-find-if
-    (lambda (word)
-      (= (length word) 1))
-    personal-words)))
-
 (cl-defmethod pyim-candidates-get-chief ((_scheme pyim-scheme-quanpin)
                                          &optional personal-words _common-words)
   "PYIM 输入法第一位候选词的获取通用策略。"
@@ -104,34 +91,50 @@
         (when other-codes
           (setq prefix (mapconcat
                         (lambda (code)
-                          (pyim-candidates-get-chief
-                           scheme
-                           (pyim-dcache-get code '(icode2word))
-                           (pyim-dcache-get code '(code2word))))
+                          (car (pyim-candidates--xingma-words code)))
                         other-codes "")))
 
         ;; 5. output => 工子又 工子叕
         (setq output
               (mapcar (lambda (word)
                         (concat prefix word))
-                      (pyim-candidates--xingma-words last-code scheme)))
+                      (pyim-candidates--xingma-words last-code)))
         (setq output (remove "" (or output (list prefix))))
         (setq result (append result output))))
     (when (car result)
       (delete-dups result))))
 
-(defun pyim-candidates--xingma-words (code scheme)
-  "按照形码 scheme 的规则，搜索 CODE, 得到相应的词条列表。"
-  (let* ((personal-words (pyim-dcache-get code '(icode2word)))
-         (personal-words (pyim-candidates--sort personal-words))
-         (common-words (pyim-dcache-get code '(code2word)))
-         (chief-word (pyim-candidates-get-chief scheme personal-words common-words))
-         (common-words (pyim-candidates--sort common-words))
-         (other-words (pyim-dcache-get code '(shortcode2word))))
-    `(,chief-word
-      ,@personal-words
-      ,@common-words
-      ,@other-words)))
+(defun pyim-candidates--xingma-words (code)
+  "按照形码 scheme 的规则，搜索 CODE, 得到相应的词条列表。
+
+当前的词条的构建规则是：
+1. 先排公共词库中的字。
+2. 然后再排所有词库中的词，词会按词频动态调整。"
+  (let* ((common-words (pyim-dcache-get code '(code2word)))
+         (common-chars (pyim-candidates--get-chars common-words))
+         (personal-words (pyim-dcache-get code '(icode2word)))
+         (other-words (pyim-dcache-get code '(shortcode2word)))
+         (words-without-chars
+          (pyim-candidates--sort
+           (pyim-candidates--remove-chars
+            (delete-dups
+             `(,@personal-words
+               ,@common-words
+               ,@other-words))))))
+    `(,@common-chars
+      ,@words-without-chars)))
+
+(defun pyim-candidates--get-chars (words)
+  "从 WORDS 中获取字。"
+  (cl-remove-if (lambda (x)
+                  (> (length x) 1))
+                words))
+
+(defun pyim-candidates--remove-chars (words)
+  "把 WORDS 中的字删除。"
+  (cl-remove-if (lambda (x)
+                  (< (length x) 2))
+                words))
 
 (cl-defmethod pyim-candidates-create (imobjs (scheme pyim-scheme-quanpin))
   "按照 SCHEME, 从 IMOBJS 获得候选词条，用于全拼输入法。"
