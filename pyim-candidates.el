@@ -112,22 +112,26 @@
 
         ;; 5. output => 工子又 工子叕
         (setq output
-              (let* ((personal-words (pyim-dcache-get last-code '(icode2word)))
-                     (personal-words (pyim-candidates--sort personal-words))
-                     (common-words (pyim-dcache-get last-code '(code2word)))
-                     (chief-word (pyim-candidates-get-chief scheme personal-words common-words))
-                     (common-words (pyim-candidates--sort common-words))
-                     (other-words (pyim-dcache-get last-code '(shortcode2word))))
-                (mapcar (lambda (word)
-                          (concat prefix word))
-                        `(,chief-word
-                          ,@personal-words
-                          ,@common-words
-                          ,@other-words))))
+              (mapcar (lambda (word)
+                        (concat prefix word))
+                      (pyim-candidates--xingma-words last-code scheme)))
         (setq output (remove "" (or output (list prefix))))
         (setq result (append result output))))
     (when (car result)
       (delete-dups result))))
+
+(defun pyim-candidates--xingma-words (code scheme)
+  "按照形码 scheme 的规则，搜索 CODE, 得到相应的词条列表。"
+  (let* ((personal-words (pyim-dcache-get code '(icode2word)))
+         (personal-words (pyim-candidates--sort personal-words))
+         (common-words (pyim-dcache-get code '(code2word)))
+         (chief-word (pyim-candidates-get-chief scheme personal-words common-words))
+         (common-words (pyim-candidates--sort common-words))
+         (other-words (pyim-dcache-get code '(shortcode2word))))
+    `(,chief-word
+      ,@personal-words
+      ,@common-words
+      ,@other-words)))
 
 (cl-defmethod pyim-candidates-create (imobjs (scheme pyim-scheme-quanpin))
   "按照 SCHEME, 从 IMOBJS 获得候选词条，用于全拼输入法。"
