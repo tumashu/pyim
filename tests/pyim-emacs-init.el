@@ -1,5 +1,6 @@
 (require 'pyim)
 (setq default-input-method "pyim")
+(setq pyim-debug t)
 
 (defun pyim-test-find-file (file)
   "Read FILE's content into current buffer."
