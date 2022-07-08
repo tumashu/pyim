@@ -40,6 +40,7 @@
 (require 'pyim-dcache)
 
 (defvar pyim-dregcache-cache nil)
+(defvar pyim-dregcache-loaded-dict-files nil)
 (defvar pyim-dregcache-icode2word nil)
 (defvar pyim-dregcache-iword2count nil)
 (defvar pyim-dregcache-dicts-md5 nil)
@@ -104,14 +105,17 @@
         (t nil)))
 
 (defun pyim-dregcache--get-code2word-shortcode2word (code)
-  (when pyim-debug (message "pyim-dregcache--get-code2word-shortcode2word called => %s" code))
-  (let ((dict-files (pyim-dregcache--all-dict-files))
+  (let ((dict-files (pyim-dregcache-cached-dict-files))
         result)
 
+    (when pyim-debug (message "pyim-dregcache--get-code2word-shortcode2word called. code=%s dict-files=%s"
+                              code
+                              dict-files))
     (when pyim-debug (message "pyim-dregcache--get is called. code=%s" code))
     (when dict-files
       (dolist (file dict-files)
-        (let* ((file-info (lax-plist-get pyim-dregcache-cache file))
+        ;; please note file is a symbol, not string
+        (let* ((file-info (plist-get pyim-dregcache-cache file))
                (content (pyim-dregcache--get-content code file-info)))
           (setq result (append (pyim-dregcache--get-1 content code) result)))))
     ;; `push' plus `nreverse' is more efficient than `add-to-list'
@@ -197,14 +201,9 @@
           ;; tian-an-men => tian-an-men[a-z-]*
           (concat s "[a-z-]*"))))))))
 
-(defun pyim-dregcache--all-dict-files ()
+(defun pyim-dregcache-cached-dict-files ()
   "所有词典文件."
-  (let* (rlt)
-    (dolist (item pyim-dregcache-cache)
-      (when (stringp item)
-        (push item rlt)))
-    ;; restore user's dictionary order
-    (nreverse rlt)))
+  pyim-dregcache-loaded-dict-files)
 
 (defun pyim-dregcache--get-content (code file-info)
   "找到 CODE 对应的字典子缓冲区.  FILE-INFO 是字典文件的所有信息."
@@ -365,17 +364,23 @@ DICT-FILES 是词库文件列表. DICTS-MD5 是词库的MD5校验码.
       (pyim-dregcache--load-dictionary-file file))
     (setq pyim-dregcache-dicts-md5 dicts-md5)))
 
+(defun pyim-dregcache-reset-cache ()
+  "Reset dregcache backend's cache."
+  (setq pyim-dregcache-cache nil)
+  (setq pyim-dregcache-loaded-dict-files nil))
+
 (defun pyim-dregcache--load-dictionary-file (dict-file)
   "READ from DICT-FILE."
   (let* ((raw-content (with-temp-buffer
                         (insert-file-contents dict-file)
-                        (buffer-string))))
+                        (buffer-string)))
+         (file (intern (file-truename dict-file))))
+    (unless (memq file pyim-dregcache-loaded-dict-files)
+      (push file pyim-dregcache-loaded-dict-files))
     (setq pyim-dregcache-cache
-          ;; use string type as key, so have to use `lax-plist-put'
-          ;; @see https://www.gnu.org/software/emacs/manual/html_node/elisp/Plist-Access.html#Plist-Access
-          (lax-plist-put pyim-dregcache-cache
-                         (file-truename dict-file)
-                         (pyim-dregcache--create-cache-content raw-content)))))
+          (plist-put pyim-dregcache-cache
+                     file
+                     (pyim-dregcache--create-cache-content raw-content)))))
 
 (defun pyim-dregcache--create-cache-content (raw-content)
   "将 RAW-CONTENT 划分成可以更高效搜索的缓冲区."

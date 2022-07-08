@@ -1475,7 +1475,7 @@ yin-xing 因行
         words
         file-info
         content)
-    (setq pyim-dregcache-cache nil)
+    (pyim-dregcache-reset-cache)
 
     ;; load dictionary
     (pyim-dcache-init-variables)
@@ -1483,8 +1483,8 @@ yin-xing 因行
     ;; cache is filled
     (should (> (length pyim-dregcache-cache) 0))
     ;; get first dictionary cache
-    (setq file-info (lax-plist-get pyim-dregcache-cache
-                                   (car (pyim-dregcache--all-dict-files))))
+    (setq file-info (plist-get pyim-dregcache-cache
+                               (car (pyim-dregcache-cached-dict-files))))
 
     (setq content (plist-get file-info :content))
     (let ((i 0)
