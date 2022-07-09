@@ -43,16 +43,20 @@
   :group 'pyim)
 
 (defcustom pyim-dcache-backend 'pyim-dhashcache
-  "词库后端引擎.负责缓冲词库并提供搜索词的算法.
-可选项为 `pyim-dhashcache' 或 `pyim-dregcache'.
-前者搜索单词速度很快,消耗内存多.  后者搜索单词速度较快,消耗内存少.
+  "词库后端引擎，负责缓冲词库并提供搜索词条的算法。
 
-`pyim-dregcache' 速度和词库大小成正比.  当词库接近100M大小时,
-在六年历史的笔记本上会有一秒的延迟. 这时建议换用 `pyim-dhashcache'.
+目前有两个选项：
 
-注意事项：
-1. `pyim-dregcache' 只支持全拼和双拼输入法，不支持其它型码输入法。
-2. 如果使用这个后端，用户需要： (require \\='pyim-dregcache)."
+1. `pyim-dhashcache'
+2. `pyim-dregcache'
+
+`pyim-dhashcache' 是 pyim 默认使用的后端，使用 hashtable 实现，搜
+索词条速度很快，但消耗内存多。
+
+`pyim-dregcache' 消耗内存少，搜索速度和词库大小成反比，当词库小于
+100M 时，速度还可以，可以尝试，需要注意的是，这个后端只支持全拼和
+双拼输入法，不支持型码输入法，如果使用这个后端，用户需要自己在
+Emacs 配置中添加 (require \\='pyim-dregcache)."
   :type 'symbol)
 
 (defvar pyim-dcache-auto-update t
