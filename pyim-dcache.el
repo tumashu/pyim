@@ -68,9 +68,9 @@ Emacs 配置中添加 (require \\='pyim-dregcache)."
 一般不建议将这个变量设置为 nil，除非有以下情况：
 
 1. 用户的词库已经非常稳定，并且想通过禁用这个功能来降低
-pyim 对资源的消耗。
+   pyim 对资源的消耗。
 2. 自动更新功能无法正常工作，用户通过手工从其他机器上拷贝
-dcache 文件的方法让 pyim 正常工作。")
+   dcache 文件的方法让 pyim 正常工作。")
 
 ;; ** Dcache 变量初始化相关函数
 (defmacro pyim-dcache-init-variable (variable &optional fallback-value)
