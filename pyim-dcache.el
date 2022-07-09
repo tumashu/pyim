@@ -218,8 +218,7 @@ dcache.
 (cl-defgeneric pyim-dcache-insert-word (word code prepend)
   "将词条 WORD 插入到 dcache 中。
 
-如果 PREPEND 为 non-nil, 词条将放到已有词条的最前面。
-内部函数会根据 CODE 来确定插入对应的 hash key.")
+如果 PREPEND 为 non-nil, 词条将放到 CODE 已有对应词条的最前面。")
 
 ;; ** Dcache 删词功能
 (cl-defgeneric pyim-dcache-delete-word (word)
