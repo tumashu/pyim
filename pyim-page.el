@@ -110,7 +110,7 @@ page style."
   "Face used for the pyim page.")
 
 (defface pyim-page-border
-  '((t (:inherit pyim-page)))
+  '((t (:inherit pyim-page :background "gray")))
   "Face used for the pyim page border.
 Only useful when use posframe.")
 
