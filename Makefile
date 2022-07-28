@@ -2,7 +2,7 @@
 SHELL = /bin/sh
 EMACS ?= emacs
 
-.PHONY: test lint clean deps compile
+.PHONY: test clean deps compile
 
 EMACS_GENERIC_OPTS=--quick --directory . --directory .deps
 EMACS_BATCH_OPTS:=--batch $(EMACS_GENERIC_OPTS)
@@ -31,14 +31,11 @@ deps:
 	@if [ ! -f .deps/pyim-basedict.el ]; then curl -L $(BASEDICT_URL) > .deps/pyim-basedict.el; fi;
 	@if [ ! -f .deps/pyim-basedict.pyim ]; then curl -L $(BASEDICT_PYIM_URL) > .deps/pyim-basedict.pyim; fi;
 
-lint: deps
-	@$(EMACS) $(EMACS_BATCH_OPTS) --load ./tests/pyim-elint.el 2>&1 | grep -E "([Ee]rror|[Ww]arning):" && exit 1 || exit 0
-
 compile: deps
 	$(RM) *.elc
 	@$(EMACS) $(EMACS_BATCH_OPTS) --load ./tests/pyim-byte-compile.el 2>&1 | grep -E "([Ee]rror|[Ww]arning):" && exit 1 || exit 0
 
-# test: lint compile deps clean
+# test: compile deps clean
 test: compile deps
 	@$(EMACS) $(EMACS_BATCH_OPTS) --load ./tests/pyim-tests.el
 	$(RM) pyim-tests-temp-*

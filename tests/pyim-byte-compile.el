@@ -1,4 +1,4 @@
-;;; pyim-elint.el --- syntax check the code  -*- lexical-binding: t -*-
+;;; pyim-byte-compile.el --- syntax check the code  -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2022 Free Software Foundation, Inc.
 ;;
@@ -45,5 +45,4 @@
   (dolist (file files)
     (byte-compile-file file)))
 
-(provide 'pyim-byte-compile)
-;;; pyim-elint.el ends here
+;;; pyim-byte-compile.el ends here
