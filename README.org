@@ -418,13 +418,6 @@ EMACS=~/my-whatever-directory/bin/emacs make runemacs
 #+end_src
 
 Emacs启动后 "M-x toggle-input-method" 或按 "C-/" 打开输入法。
-* 捐赠
-您可以通过小额捐赠的方式支持 pyim 的开发工作，具体方式：
-
-1. 通过支付宝收款账户：tumashu@163.com
-2. 通过支付宝钱包扫描：
-
-   [[file:snapshots/QR-code-for-author.jpg]]
 
 * Tips
 
