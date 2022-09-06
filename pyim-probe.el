@@ -103,7 +103,7 @@
 
 用于：`pyim-english-input-switch-functions' 。"
   (when (eq major-mode 'org-mode)
-    (let ((line-string (buffer-substring (point-at-bol) (point))))
+    (let ((line-string (buffer-substring (line-beginning-position) (point))))
       (and (looking-at "[ \t]*$")
            (string-match "^[ \t]*<\\([a-zA-Z]*\\)$" line-string)))))
 
@@ -167,7 +167,7 @@
   "激活这个 pyim 探针函数后，行首输入标点时，强制输入半角标点。
 
 用于：`pyim-punctuation-half-width-functions' 。"
-  (let ((line-string (buffer-substring (point-at-bol) (point))))
+  (let ((line-string (buffer-substring (line-beginning-position) (point))))
     (and (member (char-to-string char)
                  (mapcar #'car pyim-punctuation-dict))
          (string-match "^[ \t]*$" line-string))))
