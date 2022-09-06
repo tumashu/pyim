@@ -922,6 +922,11 @@
       (should (equal (buffer-substring (point-min) (point)) "哈哈")))))
 
 ;; ** pyim-cregexp 相关单元测试
+(ert-deftest pyim-tests-pyim-cregexp--valid-p ()
+  (should-not (pyim-cregexp--valid-p "\\"))
+  (should (pyim-cregexp--valid-p "\\\\"))
+  (should (pyim-cregexp--valid-p "a")))
+
 (ert-deftest pyim-tests-pyim-cregexp--find-scheme ()
   (should-not (pyim-cregexp--find-scheme nil))
   (should (equal (pyim-scheme-name (pyim-cregexp--find-scheme 'wubi)) 'wubi))
