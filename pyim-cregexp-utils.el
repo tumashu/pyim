@@ -103,7 +103,12 @@ buffer."
         (funcall (if ,isearch-forward
                      're-search-forward
                    're-search-backward)
-                 (pyim-cregexp-build string) bound noerror count)))))
+                 ;; FIXME: 搜索字符串中的 '\' 不太好处理，如果遇到, 目前的做法是
+                 ;; 不做任何处理，这个是需要改进的地方。
+                 (if (string-match-p "\\\\" string)
+                     (regexp-quote string)
+                   (pyim-cregexp-build string))
+                 bound noerror count)))))
 
 ;; 让 ivy 支持 code 搜索。
 (declare-function ivy--regex-plus "ivy")
