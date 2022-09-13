@@ -112,10 +112,10 @@
 
 1. 从光标往前找第一个非数字的字符，为中文字符时，输入下一个字符时默认开启中文输入
 2. 从光标往前找第一个非数字的字符，为其他字符时，输入下一个字符时默认开启英文输入
-3. 使用 `pyim-convert-code-at-point' 可以将光标前的 code 字符串转换为中文，
-   所以用户需要给 `pyim-convert-code-at-point' 绑定一个快捷键，比如：
+3. 使用 `pyim-convert-string-at-point' 可以将光标前的 code 字符串转换为中文，
+   所以用户需要给 `pyim-convert-string-at-point' 绑定一个快捷键，比如：
 
-   (global-set-key (kbd \"M-i\") #\\='pyim-convert-code-at-point)
+   (global-set-key (kbd \"M-i\") #\\='pyim-convert-string-at-point)
 
 这个函数用于：`pyim-english-input-switch-functions' 。"
   (let* ((offset 0)
