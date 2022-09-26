@@ -213,6 +213,10 @@
       (setq pyim-liberime-word-log nil)
       (pyim-process-terminate))))
 
+(cl-defmethod pyim-cstring-to-codes (string (_scheme pyim-scheme-rime) &optional criteria)
+  "将中文字符串 STRING 转换为对应的拼音。"
+  (pyim-cstring-to-codes string (pyim-scheme-get 'quanpin) criteria))
+
 (defun pyim-liberime--get-code (word input &optional _limit)
   "Get the code of WORD from the beginning of INPUT.
 `liberime-search' with LIMIT argument is used internal.
