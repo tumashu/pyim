@@ -299,4 +299,4 @@ Please see: https://github.com/rime/librime/issues/349"
 ;; * Footer
 (provide 'pyim-liberime)
 
-;;; pyim-librime.el ends here
+;;; pyim-liberime.el ends here
