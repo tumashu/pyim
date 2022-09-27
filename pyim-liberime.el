@@ -200,7 +200,7 @@
             (insert to-be-translated)
             (goto-char (point-max)))
           (pyim-process-run))
-      ;; 在 rime 后端造词和调整瓷瓶词频
+      ;; 在 rime 后端造词和调整词频
       (pyim-liberime--create-word
        (reverse pyim-liberime-code-log)
        (reverse pyim-liberime-word-log))
