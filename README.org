@@ -417,7 +417,7 @@ pyim 当前内置两种指示器实现方式：
 EMACS=~/my-whatever-directory/bin/emacs make runemacs
 #+end_src
 
-Emacs启动后 "M-x toggle-input-method" 或按 "C-/" 打开输入法。
+Emacs启动后 "M-x toggle-input-method" 或按 "C-\\" 打开输入法。
 
 * Tips
 
