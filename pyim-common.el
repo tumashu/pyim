@@ -108,10 +108,10 @@ When CARE-FIRST-ONE is no-nil, ((a b c) (d e)) => (a d)."
         (apply #'cl-mapcar
                #'list lists))))))
 
-(if (fboundp 'flatten-tree)
-    (defalias 'pyim-flatten-tree 'flatten-tree)
-  (defun pyim-flatten-tree (tree)
-    "Take TREE and \"flatten\" it."
+(defun pyim-flatten-tree (tree)
+  "Take TREE and \"flatten\" it."
+  (if (fboundp 'flatten-tree)
+      (flatten-tree tree)
     (let (elems)
       (while (consp tree)
         (let ((elem (pop tree)))
