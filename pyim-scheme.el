@@ -409,6 +409,63 @@
     ("oo" "o")
     ("ou" "ou"))))
 
+(pyim-scheme-add
+ '(ziranma
+   :document "自然码双拼（不含形码）方案"
+   :class shuangpin
+   :first-chars "abcdefghijklmnopqrstuvwxyz"
+   :rest-chars  "abcdefghijklmnopqrstuvwxyz"
+   :prefer-triggers nil
+   :cregexp-support-p t
+   :keymaps
+   (("a" "a" "a")
+    ("b" "b" "ou")
+    ("c" "c" "iao")
+    ("d" "d" "uang" "iang")
+    ("e" "e" "e")
+    ("f" "f" "en")
+    ("g" "g" "eng")
+    ("h" "h" "ang")
+    ("i" "ch" "i")
+    ("j" "j" "an")
+    ("k" "k" "ao")
+    ("l" "l" "ai")
+    ("m" "m" "ian")
+    ("n" "n" "in")
+    ("o" "o" "uo" "o")
+    ("p" "p" "un")
+    ("q" "q" "iu")
+    ("r" "r" "uan")
+    ("s" "s" "iong" "ong")
+    ("t" "t" "ue" "ve")
+    ("u" "sh" "u")
+    ("v" "zh" "v" "ui")
+    ("w" "w" "ia" "ua")
+    ("x" "x" "ie")
+    ("y" "y" "ing" "uai")
+    ("z" "z" "ei")
+    ("aa" "a")
+    ("an" "an")
+    ("aj" "an")
+    ("ai" "ai")
+    ("al" "ai")
+    ("ao" "ao")
+    ("ak" "ao")
+    ("ah" "ang")
+    ("ee" "e")
+    ("ei" "ei")
+    ("ez" "ei")
+    ("en" "en")
+    ("ef" "en")
+    ("er" "er")
+    ("eg" "eng")
+    ("oo" "o")
+    ("ou" "ou")
+    ("ob" "ou")
+    )
+   )
+ )
+
 ;; * Footer
 (provide 'pyim-scheme)
 
