@@ -61,13 +61,24 @@
   ;; NOTE: 以前这个函数使用 `json-parse-buffer' 来处理返回的结果，但因为旧版本
   ;; Emacs 没有 `json-parse-buffer' 函数，所以现在改用这种简单粗暴的方式，虽然没
   ;; 有使用 json 得到的结果精确，但应该适用于大多数情况，同时也减少了一个包依赖。
-  (let ((word (replace-regexp-in-string
-               "\\CC" ""
-               (decode-coding-string
-                (buffer-string)
-                'utf-8))))
-    (when (> (length word) 0)
-      (list (propertize word :comment "(云)")))))
+  (let ((words (pyim-cloudim--parse-baidu-buffer-string (buffer-string))))
+    (when (> (length words) 0)
+      (mapcar (lambda (word)
+                (propertize word :comment "(云)"))
+              words))))
+
+(defun pyim-cloudim--parse-baidu-buffer-string (string)
+  "从 baidu buffer STRING 中抓取中文词条，返回对应的词条列表."
+  (let ((string (decode-coding-string string 'utf-8))
+        (sep "丨"))
+    (cl-remove-if-not
+     (lambda (x)
+       (> (length x) 0))
+     (split-string
+      (replace-regexp-in-string
+       "\\CC" ""
+       (replace-regexp-in-string "," sep string))
+      (format "[%s]+" sep)))))
 
 (cl-defmethod pyim-candidates-create-async
   (imobjs (scheme pyim-scheme-quanpin) callback

@@ -1546,9 +1546,13 @@ Content-Length: 88
 Content-Type: text/plain; charset=utf-8
 Date: Sun, 08 May 2022 00:56:13 GMT
 
-{\"0\":[[[\"你好\",5,{\"pinyin\":\"ni'hao\",\"type\":\"IMEDICT\"}]]],\"1\":\"ni'hao\",\"result\":[null]}")
-    (should (equal (pyim-cloudim--parse-baidu-buffer) '("你好")))
+{\"0\":[[[\"嘻嘻\",4,{\"pinyin\":\"xi'xi\",\"type\":\"IMEDICT\"}],[\"茜茜\",8,{\"pinyin\":\"qian'qian\",\"type\":\"IMEDICT\"}],[\"洗洗\",4,{\"pinyin\":\"xi'xi\",\"type\":\"IMEDICT\"}]]],\"1\":\"xi'xi\",\"result\":[null]}")
+    (should (equal (pyim-cloudim--parse-baidu-buffer) '("嘻嘻" "茜茜" "洗洗")))
     (should (equal (get-text-property 0 :comment (car (pyim-cloudim--parse-baidu-buffer))) "(云)")))
+
+  (should (equal (pyim-cloudim--parse-baidu-buffer-string
+                  "{\"0\":[[[\"嘻嘻\",4,{\"pinyin\":\"xi'xi\",\"type\":\"IMEDICT\"}],[\"茜茜\",8,{\"pinyin\":\"qian'qian\",\"type\":\"IMEDICT\"}],[\"洗洗\",4,{\"pinyin\":\"xi'xi\",\"type\":\"IMEDICT\"}]]],\"1\":\"xi'xi\",\"result\":[null]}")
+                 '("嘻嘻" "茜茜" "洗洗")))
 
   (with-temp-buffer
     (insert "HTTP/1.1 200 OK
