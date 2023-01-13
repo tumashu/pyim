@@ -295,33 +295,25 @@ Please see: https://github.com/rime/librime/issues/349"
                 (setq words nil))
                (t (liberime-process-key 65366))))))))))
 
-(defun pyim-liberime-create-word-at-point (&optional number silent)
-  "将光标前字符数为 NUMBER 的中文字符串添加到 RIME 数据库中。
-当 SILENT 设置为 t 是，不显示提醒信息。
+(defun pyim-liberime-create-word (word &rest _)
+  "将 WORD 添加到 RIME 数据库中。
 
-这个命令对多音字处理比较弱，所以有可能在 RIME 数据库中添加一些不
-合理的词条，比如：
-
-   yin-xing -> 银行
-
-这个问题暂时还没有好的方法解决。"
-  (interactive)
+这个函数仅用于 rime-quanpin scheme."
   (when-let* ((rime-quanpin-p
                (equal (pyim-scheme-name (pyim-scheme-current))
                       'rime-quanpin))
-              (string (pyim-cstring-at-point (or number 2)))
-              (chars (remove "" (split-string string "")))
+              (chars (remove "" (split-string word "")))
               (codes-list
                (mapcar (lambda (x)
                          (split-string x "-"))
-                       (pyim-cstring-to-pinyin string nil "-" t nil t))))
+                       (pyim-cstring-to-pinyin word nil "-" t nil t))))
     (dolist (codes codes-list)
-      (pyim-liberime--create-word codes chars)
-      (unless silent
-        (message "将词条: %S -> %S 加入 rime 数据库。"
-                 (string-join codes "-") string)))))
+      (pyim-liberime--create-word codes chars))
+    (mapconcat (lambda (codes)
+                 (format "%s -> %s" (string-join codes "-") word))
+               codes-list "; ")))
 
-(advice-add 'pyim-process-create-word-at-point :after #'pyim-liberime-create-word-at-point)
+(advice-add 'pyim-process-create-word :after #'pyim-liberime-create-word)
 
 (cl-defmethod pyim-process-terminate-really ((_scheme pyim-scheme-rime))
   (cl-call-next-method)
