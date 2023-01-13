@@ -151,15 +151,15 @@ AUTO-BACKUP-THRESHOLD 倍, 那么原值将自动备份到 FILE 对应的备份�
   "A helper function to write dcache files."
   (let ((coding-system-for-write 'utf-8-unix)
         (create-lockfiles nil))
-    (when (and confirm
-               (file-exists-p filename)
-               ;; NS does its own confirm dialog.
-               (not (and (eq (framep-on-display) 'ns)
-                         (listp last-nonmenu-event)
-                         use-dialog-box))
-               (or (y-or-n-p (format-message
-                              "File `%s' exists; overwrite? " filename))
-                   (user-error "Canceled"))))
+    (and confirm
+         (file-exists-p filename)
+         ;; NS does its own confirm dialog.
+         (not (and (eq (framep-on-display) 'ns)
+                   (listp last-nonmenu-event)
+                   use-dialog-box))
+         (or (y-or-n-p (format-message
+                        "File `%s' exists; overwrite? " filename))
+             (user-error "Canceled")))
     (write-region (point-min) (point-max) filename nil :silent)
     (message "Saving file %s..." filename)))
 
