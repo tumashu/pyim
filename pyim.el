@@ -9,7 +9,7 @@
 ;; URL: https://github.com/tumashu/pyim
 ;; Version: 5.2.9
 ;; Keywords: convenience, Chinese, pinyin, input-method
-;; Package-Requires: ((emacs "25.1") (async "1.6") (xr "1.13"))
+;; Package-Requires: ((emacs "27.1") (async "1.6") (xr "1.13"))
 
 ;; This file is part of GNU Emacs.
 
@@ -38,10 +38,6 @@
 (require 'pyim-common)
 (require 'pyim-cstring)
 (require 'pyim-dhashcache)
-;; NOTE: pyim 默认使用 dhashcache, 按理说不需要加载 dregcache, 但以前 pyim 支持
-;; 动态加载后端，由于简化代码的原因，这个功能取消了，require dregcache 是为了向
-;; 后兼容，未来也许会取消加载。
-(require 'pyim-dregcache)
 (require 'pyim-indicator)
 (require 'pyim-page)
 (require 'pyim-preview)

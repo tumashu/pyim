@@ -81,9 +81,6 @@ entered (nihaom) 的第一个候选词。
   :type '(choice (const nil)
                  (repeat function)))
 
-(define-obsolete-variable-alias
-  'pyim-process-async-delay 'pyim-process--run-delay "5.0")
-
 (defcustom pyim-process-run-delay 0.5
   "延迟多少秒开始延迟获取词条。"
   :type 'integer)
