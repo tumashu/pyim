@@ -309,9 +309,8 @@ Please see: https://github.com/rime/librime/issues/349"
                        (pyim-cstring-to-pinyin word nil "-" t nil t))))
     (dolist (codes codes-list)
       (pyim-liberime--create-word codes chars))
-    (mapconcat (lambda (codes)
-                 (format "%s -> %s" (string-join codes "-") word))
-               codes-list "; ")))
+    (liberime-clear-commit)
+    (liberime-clear-composition)))
 
 (advice-add 'pyim-process-create-word :after #'pyim-liberime-create-word)
 
