@@ -112,35 +112,31 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
       (if return-list
           (list string)
         string)
-    (let (pinyins-list)
-      ;; ("Hello" "银" "行") -> (("Hello") ("yin") ("hang" "xing"))
-      (setq pinyins-list
+    (let* ((pinyins-list
+            ;; ("Hello" "银" "行") -> (("Hello") ("yin") ("hang" "xing"))
             (mapcar (lambda (str)
                       (if (pyim-string-match-p "\\cc" str)
                           (pyim-pymap-cchar2py-get str)
                         (list str)))
                     (pyim-cstring--partition string t)))
-
-      ;; 通过排列组合的方式, 重排 pinyins-list。
-      ;; 比如：(("Hello") ("yin") ("hang")) -> (("Hello" "yin" "hang"))
-      (setq pinyins-list
-            (pyim-permutate-list
-             (pyim-cstring--adjust-duoyinzi
-              string pinyins-list)))
-
+           ;; 通过排列组合的方式, 重排 pinyins-list。
+           ;; 比如：(("Hello") ("yin") ("hang")) -> (("Hello" "yin" "hang"))
+           (pinyins-list (pyim-permutate-list
+                          (pyim-cstring--adjust-duoyinzi
+                           string pinyins-list)))
+           (list (mapcar (lambda (x)
+                           (mapconcat (lambda (str)
+                                        (if shou-zi-mu
+                                            (substring str 0 1)
+                                          str))
+                                      x separator))
+                         (if ignore-duo-yin-zi
+                             (list (car pinyins-list))
+                           pinyins-list))))
       ;; 返回拼音字符串或者拼音列表
-      (let ((list (mapcar (lambda (x)
-                            (mapconcat (lambda (str)
-                                         (if shou-zi-mu
-                                             (substring str 0 1)
-                                           str))
-                                       x separator))
-                          (if ignore-duo-yin-zi
-                              (list (car pinyins-list))
-                            pinyins-list))))
-        (if return-list
-            list
-          (string-join list " "))))))
+      (if return-list
+          list
+        (string-join list " ")))))
 
 (defun pyim-cstring--adjust-duoyinzi (word pinyins-list)
   "根据 WORD 对 PINYINS-LIST 进行校正。
