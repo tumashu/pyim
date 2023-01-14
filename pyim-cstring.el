@@ -129,18 +129,15 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
               string pinyins-list)))
 
       ;; 返回拼音字符串或者拼音列表
-      (let* ((pinyins-list
-              (or pinyins-list-adjusted
-                  pinyins-list))
-             (list (mapcar (lambda (x)
-                             (mapconcat (lambda (str)
-                                          (if shou-zi-mu
-                                              (substring str 0 1)
-                                            str))
-                                        x separator))
-                           (if ignore-duo-yin-zi
-                               (list (car pinyins-list))
-                             pinyins-list))))
+      (let ((list (mapcar (lambda (x)
+                            (mapconcat (lambda (str)
+                                         (if shou-zi-mu
+                                             (substring str 0 1)
+                                           str))
+                                       x separator))
+                          (if ignore-duo-yin-zi
+                              (list (car pinyins-list))
+                            pinyins-list))))
         (if return-list
             list
           (string-join list " "))))))
