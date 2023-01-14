@@ -864,11 +864,7 @@ BUG：拼音无法有效地处理多音字。"
              ;; 不导出这些带标记的词。
              (propertize word :noexport t)
            word)
-         (concat (or code-prefix "") code) prepend)))
-    ;; 返回 codes 和 word, 用于 message 命令。
-    (mapconcat (lambda (code)
-                 (format "%s -> %s" (concat (or code-prefix "") code) word))
-               codes "; ")))
+         (concat (or code-prefix "") code) prepend)))))
 
 (defun pyim-process-get-select-result ()
   "返回 PYIM 选择操作的结果。"
@@ -976,12 +972,10 @@ BUG：拼音无法有效地处理多音字。"
 (defun pyim-process-create-word-at-point (&optional number silent)
   "将光标前字符数为 NUMBER 的中文字符串添加到个人词库中，当
 SILENT 设置为 t 是，不显示提醒信息。"
-  (let* ((string (pyim-cstring-at-point (or number 2)))
-         output)
-    (when string
-      (setq output (pyim-process-create-word string))
-      (unless silent
-        (message "将词条: %S 加入 personal 缓冲。" output)))))
+  (when-let* ((string (pyim-cstring-at-point (or number 2))))
+    (pyim-process-create-word string)
+    (unless silent
+      (message "将词条: %S 加入词库。" string))))
 
 (defun pyim-process--trigger-call-function-p ()
   "当光标之前是中文但不是标点符号时，返回 t."

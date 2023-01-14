@@ -281,14 +281,13 @@ REFRESH-COMMON-DCACHE 已经废弃，不要再使用了。"
   "Add the selected text as a Chinese word into the personal dictionary."
   (interactive)
   (when (region-active-p)
-    (let ((string (buffer-substring-no-properties (region-beginning) (region-end)))
-          output)
+    (let ((string (buffer-substring-no-properties (region-beginning) (region-end))))
       (if (> (length string) 6)
           (error "词条太长")
         (if (not (string-match-p "^\\cc+\\'" string))
             (error "不是纯中文字符串")
-          (setq output (pyim-process-create-word string))
-          (message "将词条: %S 插入 personal file。" output)))
+          (pyim-process-create-word string)
+          (message "将词条: %S 插入 personal file。" string)))
       (deactivate-mark)
       ;; NOTE: 这里必须返回 t, 因为这个函数的返回结果会被用来做为判断条件。
       t)))
@@ -327,18 +326,16 @@ MERGE-METHOD 是一个函数，这个函数需要两个数字参数，代表词�
                (word (car content))
                (count (string-to-number
                        (or (car (cdr content)) "0")))
-               (criteria (car (cdr (cdr content))))
-               output)
-          (setq output
-                (pyim-process-create-word
-                 word nil
-                 (lambda (x)
-                   (funcall (or merge-method #'max)
-                            (or x 0)
-                            count))
-                 criteria))
+               (criteria (car (cdr (cdr content)))))
+          (pyim-process-create-word
+           word nil
+           (lambda (x)
+             (funcall (or merge-method #'max)
+                      (or x 0)
+                      count))
+           criteria)
           (unless silent
-            (message "* 导入 %S" output)))
+            (message "* 导入 %S" word)))
         (forward-line 1)))
     ;; 保存一下用户选择过的词生成的缓存和词频缓存，
     ;; 因为使用 async 机制更新 dcache 时，需要从 dcache 文件
