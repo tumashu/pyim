@@ -204,7 +204,7 @@
     (list (mapconcat
            (lambda (x)
              (substring x 0 1))
-           (split-string code "-") "-"))))
+           (remove "" (split-string code "-")) "-"))))
 
 ;; ** 从 dhashcache 删除词条相关函数
 (cl-defmethod pyim-dcache-delete-word

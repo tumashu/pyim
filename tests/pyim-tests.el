@@ -1257,6 +1257,8 @@ wo-hao 我好
   (should (equal (pyim-dhashcache--get-ishortcodes-shortcodes "") nil)))
 
 (ert-deftest pyim-tests-pyim-dhashcache--get-ishortcodes-ishortcodes ()
+  (should (equal (pyim-dhashcache--get-ishortcodes-ishortcodes "ni--hao--") '("n-h")))
+  (should (equal (pyim-dhashcache--get-ishortcodes-ishortcodes "ni--hao") '("n-h")))
   (should (equal (pyim-dhashcache--get-ishortcodes-ishortcodes "ni-hao") '("n-h")))
   (should (equal (pyim-dhashcache--get-ishortcodes-ishortcodes "wubi/aaaa") nil))
   (should (equal (pyim-dhashcache--get-ishortcodes-ishortcodes "ni") '("n")))
