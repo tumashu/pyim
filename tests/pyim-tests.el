@@ -291,6 +291,10 @@
                  '("阿" "啊" "呵" "腌" "|" "嗄" "吖" "锕" "|" "|" "錒")))
   (should (equal (pyim-pymap-py2cchar-get "zhua" t)
                  '("抓挝爪||髽|膼撾檛簻")))
+  (should (equal (pyim-pymap-py2duoyinzi-get "ai")
+                 '("艾滋" "艾蒿" "未艾")))
+  (should (equal (pyim-pymap-py2duoyinzi-get "ai" t)
+                 '("艾")))
   (should (equal (mapcar (lambda (x)
                            (concat (substring x 0 1)
                                    (substring x -1)))
@@ -791,38 +795,22 @@
                    "我爱-北京-天安-门"))))
 
 (ert-deftest pyim-tests-pyim-cstring-to-pinyin ()
-  (let ((pyim-dhashcache-code2word (make-hash-table :test #'equal))
-        (str "银行很行"))
-    ;; Create code2word dcache.
-    (puthash "yin-hang-hen-xing" (list "银行很行") pyim-dhashcache-code2word)
-    ;; pyim-cstring-split-to-list
-    (should (equal (pyim-cstring-to-pinyin "银行很行")
-                   (concat "yinxinghenxing yinxinghenheng yinxinghenhang "
-                           "yinhenghenxing yinhenghenheng yinhenghenhang "
-                           "yinhanghenxing yinhanghenheng yinhanghenhang")))
-    (should (equal (pyim-cstring-to-pinyin "银行很行" t)
-                   "yxhx yxhh yxhh yhhx yhhh yhhh yhhx yhhh yhhh"))
-    (should (equal (pyim-cstring-to-pinyin "银行很行" nil "-")
-                   (concat "yin-xing-hen-xing yin-xing-hen-heng yin-xing-hen-hang "
-                           "yin-heng-hen-xing yin-heng-hen-heng yin-heng-hen-hang "
-                           "yin-hang-hen-xing yin-hang-hen-heng yin-hang-hen-hang")))
-    (should (equal (pyim-cstring-to-pinyin "银行很行" nil "-" t)
-                   '("yin-xing-hen-xing" "yin-xing-hen-heng" "yin-xing-hen-hang"
-                     "yin-heng-hen-xing" "yin-heng-hen-heng" "yin-heng-hen-hang"
-                     "yin-hang-hen-xing" "yin-hang-hen-heng" "yin-hang-hen-hang")))
-    (should (equal (pyim-cstring-to-pinyin "银行很行" nil "-" t t)
-                   '("yin-xing-hen-xing")))
-    (should (equal (pyim-cstring-to-pinyin "银行很行" nil "-" nil nil t)
-                   "yin-hang-hen-xing"))
-    (should (equal (pyim-cstring-to-pinyin "Hello 银行很行 Hi" nil "-" nil t)
-                   "Hello -yin-xing-hen-xing- Hi"))
-    ;; FIXME: 这个 test 是不合理的，不过暂时找不到简单的修复方式。
-    (should (equal (pyim-cstring-to-pinyin "Hello 银行很行 Hi" nil "-" nil nil t)
-                   (concat "Hello -yin-xing-hen-xing- Hi Hello -yin-xing-hen-heng- Hi "
-                           "Hello -yin-xing-hen-hang- Hi Hello -yin-heng-hen-xing- Hi "
-                           "Hello -yin-heng-hen-heng- Hi Hello -yin-heng-hen-hang- Hi "
-                           "Hello -yin-hang-hen-xing- Hi Hello -yin-hang-hen-heng- Hi "
-                           "Hello -yin-hang-hen-hang- Hi")))))
+  (should (equal (pyim-cstring--adjust-duoyinzi
+                  "银行传说" '(("yin") ("xing" "heng" "hang")
+                               ("zhuan" "chuan") ("yue" "shuo" "shui")))
+                 '(("yin") ("hang") ("chuan") ("shuo"))))
+
+  ;; pyim-cstring-split-to-list
+  (should (equal (pyim-cstring-to-pinyin "银行传说") "yinhangchuanshuo"))
+  (should (equal (pyim-cstring-to-pinyin "银行传说" t) "yhcs"))
+  (should (equal (pyim-cstring-to-pinyin "银行传说" nil "-") "yin-hang-chuan-shuo"))
+  (should (equal (pyim-cstring-to-pinyin "银行传说" nil "-" t) '("yin-hang-chuan-shuo")))
+  (should (equal (pyim-cstring-to-pinyin "银行传说" nil "-" t t) '("yin-hang-chuan-shuo")))
+  (should (equal (pyim-cstring-to-pinyin "Hello 银行传说 Hi" nil "-" nil t)
+                 "Hello -yin-hang-chuan-shuo- Hi"))
+  ;; FIXME: 这个 test 是不合理的，不过暂时找不到简单的修复方式。
+  (should (equal (pyim-cstring-to-pinyin "Hello 银行传说 Hi" nil "-" nil nil t)
+                 "Hello -yin-hang-chuan-shuo- Hi")))
 
 (ert-deftest pyim-tests-pyim-cstring-to-xingma ()
   (let ((pyim-dhashcache-word2code (make-hash-table :test #'equal))

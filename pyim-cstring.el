@@ -98,18 +98,13 @@ NUMBER 用于递归，表示子字符串在 CSTRING 中的位置。"
 ;; ** 中文字符串到拼音的转换工具
 ;;;###autoload
 (defun pyim-cstring-to-pinyin (string &optional shou-zi-mu separator
-                                      return-list ignore-duo-yin-zi adjust-duo-yin-zi)
+                                      return-list ignore-duo-yin-zi _)
   "将汉字字符串转换为对应的拼音字符串的工具.
 
 如果 SHOU-ZI-MU 设置为 t, 转换仅得到拼音首字母字符串。当
 RETURN-LIST 设置为 t 时，返回一个拼音列表，这个列表包含词条的一个
 或者多个拼音（词条包含多音字时）；如果 IGNORE-DUO-YIN-ZI 设置为
-t, 遇到多音字时，只使用第一个拼音，其它拼音忽略；当
-ADJUST-DUO-YIN-Zi 设置为 t 时, `pyim-cstring-to-pinyin' 会使用 pyim 已
-安装的词库来校正多音字，但这个功能有一定的限制:
-
-1. pyim 普通词库中不存在的词条不能较正
-2. 多音字校正速度比较慢，实时转换会产生卡顿。
+t, 遇到多音字时，只使用第一个拼音，其它拼音忽略。
 
 BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结果会
 包含多余的连接符：比如： \"你=好\" --> \"ni-=-hao\""
@@ -127,22 +122,11 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
                     (pyim-cstring--partition string t)))
 
       ;; 通过排列组合的方式, 重排 pinyins-list。
-      ;; 比如：(("Hello") ("yin") ("hang" "xing")) -> (("Hello" "yin" "hang") ("Hello" "yin" "xing"))
+      ;; 比如：(("Hello") ("yin") ("hang")) -> (("Hello" "yin" "hang"))
       (setq pinyins-list
-            (pyim-permutate-list pinyins-list))
-
-      ;; 使用 pyim 的安装的词库来校正多音字。
-      ;; FIXME：如果 string 包含非中文的字符，那么多音字矫正将不起作用。
-      (when adjust-duo-yin-zi
-        (pyim-dcache-init-variables)
-        (dolist (pylist pinyins-list)
-          (let* ((py-str (mapconcat #'identity pylist "-"))
-                 (words-from-dicts
-                  (pyim-dcache-get py-str '(code2word))))
-            (when (member string words-from-dicts)
-              (push pylist pinyins-list-adjusted))))
-        (setq pinyins-list-adjusted
-              (nreverse pinyins-list-adjusted)))
+            (pyim-permutate-list
+             (pyim-cstring--adjust-duoyinzi
+              string pinyins-list)))
 
       ;; 返回拼音字符串或者拼音列表
       (let* ((pinyins-list
@@ -160,6 +144,40 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
         (if return-list
             list
           (string-join list " "))))))
+
+(defun pyim-cstring--adjust-duoyinzi (word pinyins-list)
+  "根据 WORD 对 PINYINS-LIST 进行校正。
+
+比如：
+
+1. WORD:         人民银行
+2. PINYINS-LIST: ((\"ren\") (\"min\") (\"yin\") (\"hang\" \"xing\"))
+3. 输出结果为：  ((\"ren\") (\"min\") (\"yin\") (\"hang\"))
+
+这个函数依赖 `pyim-pymap-duoyinzi' 提供的多音字数据。"
+  (mapcar (lambda (pinyins)
+            (if (= (length pinyins) 1)
+                pinyins
+              (let ((py-adjusted
+                     ;; NOTE: 多音字校正规则：
+                     ;; 1. 首先通过在 WORD 中搜索多音字组成的词条来校正。
+                     ;; 2. 如果多音字组成的词条无法搜索到，就使用这个多音字最常用的读音，
+                     ;;    这样处理有可能校正错误，但大多数情况还是适用的。
+                     (or (cl-find-if
+                          (lambda (pinyin)
+                            (when-let* ((x (pyim-pymap-py2duoyinzi-get pinyin)))
+                              (string-match-p (string-join x "\\|") word)))
+                          pinyins)
+                         (cl-find-if
+                          (lambda (pinyin)
+                            (when-let* ((x (pyim-pymap-py2duoyinzi-get pinyin t)))
+                              (string-match-p (string-join x "\\|") word)))
+                          pinyins))))
+                ;; 如果多音字校正没有任何结果，就用校正前的信息。
+                (if py-adjusted
+                    (list py-adjusted)
+                  pinyins))))
+          pinyins-list))
 
 ;;;###autoload
 (defun pyim-cstring-to-pinyin-simple (string &optional shou-zi-mu separator return-list)
