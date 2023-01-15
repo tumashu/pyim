@@ -154,14 +154,14 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
     (dotimes (i n)
       (let ((pinyins (nth i pinyins-list))
             ;; 当前位置对应的汉字和位置前后汉字组成的两字词语。
-            (words (list (ignore-errors
+            (words (list (when (>= (- i 2) 0)
                            (concat (nth (- i 2) string-parts)
                                    (nth (- i 1) string-parts)
                                    (nth i string-parts)))
-                         (ignore-errors
+                         (when (>= (- i 1) 0)
                            (concat (nth (- i 1) string-parts)
                                    (nth i string-parts)))
-                         (ignore-errors
+                         (when (< (+ i 1) n)
                            (concat (nth i string-parts)
                                    (nth (+ i 1) string-parts)))))
             ;; 当前位置汉字
