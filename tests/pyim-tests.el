@@ -291,8 +291,8 @@
                  '("阿" "啊" "呵" "腌" "|" "嗄" "吖" "锕" "|" "|" "錒")))
   (should (equal (pyim-pymap-py2cchar-get "zhua" t)
                  '("抓挝爪||髽|膼撾檛簻")))
-  (should (equal (pyim-pymap-py2duoyinzi-get "ai")
-                 '("艾滋" "艾蒿" "未艾")))
+  (should (equal (pyim-pymap-py2duoyinzi-get "a")
+                 '("腌臜" "吖啶")))
   (should (equal (pyim-pymap-py2duoyinzi-get "ai" t)
                  '("艾")))
   (should (equal (mapcar (lambda (x)
@@ -799,9 +799,8 @@
   (should (equal (pyim-cstring--find-duoyinzi-pinyin
                   '("xing" "hang") '("银行"))
                  "hang"))
-  (should (equal (pyim-cstring--find-duoyinzi-pinyin
-                  '("xing" "hang") '("不行" "行为"))
-                 "xing"))
+  (should-not (pyim-cstring--find-duoyinzi-pinyin
+               '("xing" "hang") '("不行" "行为")))
 
   (should (equal (pyim-cstring--find-duoyinzi-pinyin
                   '("bu" "pi") '("不") t)
