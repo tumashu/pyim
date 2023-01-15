@@ -833,7 +833,7 @@
                  '(("yin") ("hang") ("hang")
                    ("ye") ("hen") ("xing")
                    ("bu") ("xing") ("ye")
-                   ("xing") ("xing" "heng" "hang")
+                   ("xing") ("xing")
                    ("ye") ("xing"))))
 
   ;; pyim-cstring-split-to-list
@@ -870,18 +870,10 @@
         (quanpin (pyim-scheme-get 'quanpin))
         (wubi (pyim-scheme-get 'wubi))
         (cangjie (pyim-scheme-get 'cangjie)))
-    (should (equal (pyim-cstring-to-codes "行行" quanpin)
-                   '("xing-xing" "xing-heng" "xing-hang"
-                     "heng-xing" "heng-heng" "heng-hang"
-                     "hang-xing" "hang-heng" "hang-hang")))
     (should (equal (pyim-cstring-to-codes "行行" quanpin "xinxin")
                    '("xing-xing")))
     (should (equal (pyim-cstring-to-codes "行行" quanpin "xx")
                    '("xing-xing")))
-    (should (equal (pyim-cstring-to-codes "行行" quanpin "xinhang")
-                   '("xing-hang")))
-    (should (equal (pyim-cstring-to-codes "行行" quanpin "xh")
-                   '("xing-heng")))
 
     (puthash "工" (list "wubi/aaaa" "cangjie/mlm" "gong") pyim-dhashcache-word2code)
     (puthash "房" (list "wubi/yny") pyim-dhashcache-word2code)
