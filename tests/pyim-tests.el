@@ -795,10 +795,46 @@
                    "我爱-北京-天安-门"))))
 
 (ert-deftest pyim-tests-pyim-cstring-to-pinyin ()
+
+  (should (equal (pyim-cstring--find-duoyinzi-pinyin
+                  '("xing" "hang") '("银行"))
+                 "hang"))
+  (should (equal (pyim-cstring--find-duoyinzi-pinyin
+                  '("xing" "hang") '("不行" "行为"))
+                 "xing"))
+
+  (should (equal (pyim-cstring--find-duoyinzi-pinyin
+                  '("bu" "pi") '("不") t)
+                 "bu"))
+
   (should (equal (pyim-cstring--adjust-duoyinzi
-                  "银行传说" '(("yin") ("xing" "heng" "hang")
-                               ("zhuan" "chuan") ("yue" "shuo" "shui")))
+                  '("银" "行" "传" "说")
+                  '(("yin") ("xing" "heng" "hang")
+                    ("zhuan" "chuan") ("yue" "shuo" "shui")))
                  '(("yin") ("hang") ("chuan") ("shuo"))))
+
+  (should (equal (pyim-cstring--adjust-duoyinzi
+                  '("银" "行" "很" "行")
+                  '(("yin") ("xing" "heng" "hang")
+                    ("hen") ("xing" "heng" "hang")))
+                 '(("yin") ("hang") ("hen") ("xing"))))
+
+  (should (equal (pyim-cstring--adjust-duoyinzi
+                  '("银" "行" "行" "业" "很" "行"
+                    "不" "行" "也" "行"
+                    "行" "也" "行")
+                  '(("yin") ("xing" "heng" "hang")
+                    ("xing" "heng" "hang") ("ye")
+                    ("hen") ("xing" "heng" "hang")
+                    ("dun" "bu") ("xing" "heng" "hang")
+                    ("ye") ("xing" "heng" "hang")
+                    ("xing" "heng" "hang") ("ye")
+                    ("xing" "heng" "hang")))
+                 '(("yin") ("hang") ("hang")
+                   ("ye") ("hen") ("xing")
+                   ("bu") ("xing") ("ye")
+                   ("xing") ("xing" "heng" "hang")
+                   ("ye") ("xing"))))
 
   ;; pyim-cstring-split-to-list
   (should (equal (pyim-cstring-to-pinyin "银行传说") "yinhangchuanshuo"))
