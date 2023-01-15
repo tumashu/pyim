@@ -198,7 +198,7 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
 4. 返回结果：    hang"
   (cl-find-if
    (lambda (pinyin)
-     (when-let* ((x (string-join (pyim-pymap-py2duoyinzi-get pinyin search-char) "--")))
+     (when-let* ((x (string-join (pyim-pymap-py2duoyinzi-get pinyin search-char) "-")))
        (cl-some
         (lambda (reg)
           (and reg (string-match-p reg x)))

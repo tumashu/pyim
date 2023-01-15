@@ -378,6 +378,32 @@
   (< (or (cl-position a pyim-pymap--commonly-used-cchar :test #'equal) 1000000)
      (or (cl-position b pyim-pymap--commonly-used-cchar :test #'equal) 1000000)))
 
+(defun pyim-pymap-get-duoyinzi-words ()
+  (interactive)
+  (let (code2word output)
+    (maphash
+     (lambda (key value)
+       (let* ((pys (split-string key "-"))
+              (length (length pys)))
+         (when (and (> length 1)
+                    (< length 3))
+           (push (cons pys value) code2word))))
+     pyim-dhashcache-code2word)
+
+    (dolist (x code2word)
+      (let ((words (cdr x)))
+        (dolist (word words)
+          (let ((chars (remove "" (split-string word "")))
+                (i 0))
+            (dolist (char chars)
+              (when-let* ((cpys (pyim-pymap-cchar2py-get char))
+                          (py (nth i (car x)))
+                          (_ (> (length cpys) 1)))
+                (setf (alist-get py output nil nil #'equal)
+                      (delete-dups `(,@(alist-get py output nil nil #'equal) ,word))))
+              (setq i (1+ i)))))))
+
+    (sort output (lambda (a b) (string< (car a) (car b))))))
 
 ;; * Footer
 (provide 'pyim-pymap-utils)
