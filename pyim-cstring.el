@@ -154,11 +154,7 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
     (dotimes (i n)
       (let ((pinyins (nth i pinyins-list))
             ;; 当前位置对应的汉字和位置前后汉字组成的两字词语。
-            (words (list (when (>= (- i 2) 0)
-                           (concat (nth (- i 2) string-parts)
-                                   (nth (- i 1) string-parts)
-                                   (nth i string-parts)))
-                         (when (>= (- i 1) 0)
+            (words (list (when (>= (- i 1) 0)
                            (concat (nth (- i 1) string-parts)
                                    (nth i string-parts)))
                          (when (< (+ i 1) n)
@@ -198,7 +194,7 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
 4. 返回结果：    hang"
   (cl-find-if
    (lambda (pinyin)
-     (when-let* ((x (string-join (pyim-pymap-py2duoyinzi-get pinyin search-char) "-")))
+     (when-let ((x (string-join (pyim-pymap-py2duoyinzi-get pinyin search-char) "-")))
        (cl-some
         (lambda (reg)
           (and reg (string-match-p reg x)))

@@ -415,10 +415,10 @@
                           ;; 看这个拼音是否需要特殊处理
                           (need (member pinyin char-pinyins)))
                 (setf (alist-get pinyin output nil nil #'equal)
-                      (delete-dups `(,@(alist-get pinyin output nil nil #'equal) ,word))))
+                      (sort (delete-dups `(,@(alist-get pinyin output nil nil #'equal) ,word)) #'string<)))
               (setq i (1+ i)))))))
 
-    (sort output (lambda (a b) (string< (car a) (car b))))))
+    (pp (sort output (lambda (a b) (string< (car a) (car b)))))))
 
 ;; * Footer
 (provide 'pyim-pymap-utils)
