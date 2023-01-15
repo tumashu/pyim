@@ -382,6 +382,9 @@
 
 (defun pyim-pymap-get-duoyinzi-words ()
   (interactive)
+
+  (pyim-pymap--py2duoyinzi-cache-create t)
+
   (let (code2word output)
     (maphash
      (lambda (key value)
@@ -398,11 +401,21 @@
           (let ((chars (remove "" (split-string word "")))
                 (i 0))
             (dolist (char chars)
-              (when-let* ((cpys (pyim-pymap-cchar2py-get char))
-                          (py (nth i (car x)))
-                          (lengthp (> (length cpys) 1)))
-                (setf (alist-get py output nil nil #'equal)
-                      (delete-dups `(,@(alist-get py output nil nil #'equal) ,word))))
+              (when-let* (;; 找到这个汉字所有得拼音
+                          (char-pinyins (pyim-pymap-cchar2py-get char))
+                          ;; 判断是不是多音字
+                          (lengthp (> (length char-pinyins) 1))
+                          ;; 剔除已经设置为 fallback 拼音
+                          (char-pinyins (cl-remove-if
+                                         (lambda (py)
+                                           (member char (pyim-pymap-py2duoyinzi-get py t)))
+                                         char-pinyins))
+                          ;; 找到 code2word 词库中，这个字对应得拼音
+                          (pinyin (nth i (car x)))
+                          ;; 看这个拼音是否需要特殊处理
+                          (need (member pinyin char-pinyins)))
+                (setf (alist-get pinyin output nil nil #'equal)
+                      (delete-dups `(,@(alist-get pinyin output nil nil #'equal) ,word))))
               (setq i (1+ i)))))))
 
     (sort output (lambda (a b) (string< (car a) (car b))))))
