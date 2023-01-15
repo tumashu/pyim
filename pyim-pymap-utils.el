@@ -378,6 +378,8 @@
   (< (or (cl-position a pyim-pymap--commonly-used-cchar :test #'equal) 1000000)
      (or (cl-position b pyim-pymap--commonly-used-cchar :test #'equal) 1000000)))
 
+(defvar pyim-dhashcache-code2word)
+
 (defun pyim-pymap-get-duoyinzi-words ()
   (interactive)
   (let (code2word output)
