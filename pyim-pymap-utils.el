@@ -400,7 +400,7 @@
             (dolist (char chars)
               (when-let* ((cpys (pyim-pymap-cchar2py-get char))
                           (py (nth i (car x)))
-                          (_ (> (length cpys) 1)))
+                          (lengthp (> (length cpys) 1)))
                 (setf (alist-get py output nil nil #'equal)
                       (delete-dups `(,@(alist-get py output nil nil #'equal) ,word))))
               (setq i (1+ i)))))))
