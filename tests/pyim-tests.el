@@ -796,13 +796,13 @@
 
 (ert-deftest pyim-tests-pyim-cstring-to-pinyin ()
 
-  (should (equal (pyim-cstring--find-duoyinzi-pinyin
+  (should (equal (pyim-pymap-possible-cchar-pinyin
                   '("xing" "hang") '("银行"))
                  "hang"))
-  (should-not (pyim-cstring--find-duoyinzi-pinyin
+  (should-not (pyim-pymap-possible-cchar-pinyin
                '("xing" "hang") '("不行" "行为")))
 
-  (should (equal (pyim-cstring--find-duoyinzi-pinyin
+  (should (equal (pyim-pymap-possible-cchar-pinyin
                   '("bu" "pi") '("不") t)
                  "bu"))
 

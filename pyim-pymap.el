@@ -1062,6 +1062,26 @@ pyim 在特定的时候需要读取一个汉字的拼音，这个工作由此完
     (when (= (length key) 1)
       (gethash key pyim-pymap--cchar2py-cache))))
 
+(defun pyim-pymap-possible-cchar-pinyin (cchar-pinyins cchar-words &optional search-char)
+  "寻找一个汉字当前最可能的读音。
+
+以 (行) 作为例子：
+1. PINYINS:     此汉字所有的读音组成的列表，比如: (xing hang)
+2. WORDS:       此汉字本身或者和前后汉字组成的词语，比如: (银行 行业)
+3. SEARCH-CHAR: 如果仅仅搜索汉字本身，就设置为 t, 此处设置为 nil.
+4. 返回结果：   hang"
+  (cl-find-if
+   (lambda (pinyin)
+     (when-let ((x (string-join
+                    (pyim-pymap-py2duoyinzi-get
+                     pinyin search-char)
+                    "-")))
+       (cl-some
+        (lambda (word)
+          (and word (string-match-p word x)))
+        cchar-words)))
+   cchar-pinyins))
+
 (defun pyim-pymap-py2duoyinzi-get (pinyin &optional return-chars)
   "获取与 PINYIN 想匹配的多音字（词）。"
   (pyim-pymap--py2duoyinzi-cache-create)

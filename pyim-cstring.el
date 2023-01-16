@@ -154,14 +154,14 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
     (dotimes (i n)
       (let ((pinyins (nth i pinyins-list))
             ;; 当前位置对应的汉字和位置前后汉字组成的两字词语。
-            (words (list (when (>= (- i 1) 0)
-                           (concat (nth (- i 1) string-parts)
-                                   (nth i string-parts)))
-                         (when (< (+ i 1) n)
-                           (concat (nth i string-parts)
-                                   (nth (+ i 1) string-parts)))))
+            (words-list (list (when (>= (- i 1) 0)
+                                (concat (nth (- i 1) string-parts)
+                                        (nth i string-parts)))
+                              (when (< (+ i 1) n)
+                                (concat (nth i string-parts)
+                                        (nth (+ i 1) string-parts)))))
             ;; 当前位置汉字
-            (char (list (nth i string-parts))))
+            (char-list (list (nth i string-parts))))
         (if (= (length pinyins) 1)
             (push pinyins output)
           (let ((py-adjusted
@@ -169,37 +169,20 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
                   ;; NOTE: 多音字校正规则：
                   ;; 1. 首先通过 pyim 自带的多音字词语来校正，具体见：
                   ;; `pyim-pymap-duoyinzi-words'
-                  (pyim-cstring--find-duoyinzi-pinyin pinyins words)
+                  (pyim-pymap-possible-cchar-pinyin pinyins words-list)
                   ;; 2. 然后通过 pyim 自带的多音字常用读音进行校正, 具体见：
                   ;; `pyim-pymap-duoyinzi-chars',
                   ;;
                   ;; NOTE: 如果用户想要使用某个汉字的偏僻读音，这样处理是有问题
                   ;; 的，但大多数情况我们还是使用汉字的常用读音，让偏僻的读音进
                   ;; 入用户个人词库似乎也没有什么好处。
-                  (pyim-cstring--find-duoyinzi-pinyin pinyins char t))))
+                  (pyim-pymap-possible-cchar-pinyin pinyins char-list t))))
             ;; 3. 如果多音字校正没有结果，就使用未校正的信息。
             (push (if py-adjusted
                       (list py-adjusted)
                     pinyins)
                   output)))))
     (reverse output)))
-
-(defun pyim-cstring--find-duoyinzi-pinyin (pinyins words &optional search-char)
-  "寻找一个汉字当前最可能的读音。
-
-以 (行) 作为例子：
-1. PINYINS:     此汉字所有的读音组成的列表，比如: (xing hang)
-2. WORDS:       此汉字本身或者和前后汉字组成的词语，比如: (银行 行业)
-3. SEARCH-CHAR: 如果仅仅搜索汉字本身，就设置为 t, 此处设置为 nil.
-4. 返回结果：    hang"
-  (cl-find-if
-   (lambda (pinyin)
-     (when-let ((x (string-join (pyim-pymap-py2duoyinzi-get pinyin search-char) "-")))
-       (cl-some
-        (lambda (reg)
-          (and reg (string-match-p reg x)))
-        words)))
-   pinyins))
 
 ;;;###autoload
 (defun pyim-cstring-to-pinyin-simple (string &optional shou-zi-mu separator return-list)
