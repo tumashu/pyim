@@ -28,7 +28,7 @@
 ;;; Code:
 ;; * 代码                                                           :code:
 (require 'cl-lib)
-(require 'posframe)
+(require 'posframe nil t)
 (require 'pyim-common)
 (require 'pyim-process)
 
