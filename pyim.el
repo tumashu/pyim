@@ -283,11 +283,11 @@ REFRESH-COMMON-DCACHE 已经废弃，不要再使用了。"
   (when (region-active-p)
     (let ((string (buffer-substring-no-properties (region-beginning) (region-end))))
       (if (> (length string) 6)
-          (error "词条太长")
+          (error "PYIM: 所选词条太长。")
         (if (not (string-match-p "^\\cc+\\'" string))
-            (error "不是纯中文字符串")
+            (error "PYIM: 所选词条包含非中文字符。")
           (pyim-process-create-word string)
-          (message "将词条: %S 插入 personal file。" string)))
+          (message "PYIM: 将词条 %S 加入词库。" string)))
       (deactivate-mark)
       ;; NOTE: 这里必须返回 t, 因为这个函数的返回结果会被用来做为判断条件。
       t)))
@@ -389,7 +389,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
         (when (and word (not (pyim-string-match-p "\\CC" word)))
           (pyim-process-delete-word word)))
       (forward-line 1)))
-  (message "pyim: 批量删词完成！"))
+  (message "PYIM: 批量删词完成！"))
 
 (defun pyim-delete-last-word ()
   "从个人词库中删除最新创建的词条。"
@@ -397,7 +397,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   (let ((word (pyim-process-last-created-word)))
     (when word
       (pyim-process-delete-word word)
-      (message "pyim: 从个人词库中删除词条 “%s” !" word))))
+      (message "PYIM: 将词条 %S 从个人词库中删除！" word))))
 
 (defalias 'pyim-delete-word-at-point
   #'pyim-process-delete-word-at-point)
@@ -412,14 +412,14 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
       (when (and (< (length string) 6)
                  (> (length string) 0))
         (pyim-process-delete-word string)
-        (message "将词条: %S 从 personal 缓冲中删除。" string)
+        (message "将词条 %S 从个人词库中删除。" string)
         (deactivate-mark))))
    (t (let ((words (completing-read-multiple
                     "请选择需要删除的词条(可多选): "
                     (pyim-process-last-created-words))))
         (dolist (word words)
           (pyim-process-delete-word word)
-          (message "将词条: %S 从 personal 缓冲中删除。" word))))))
+          (message "将词条 %S 从个人词库中删除。" word))))))
 
 ;; ** 选词功能
 (defun pyim-select-word-simple ()
@@ -576,7 +576,7 @@ FILE 的格式与 `pyim-dcache-export' 生成的文件格式相同，
   (or (pyim-create-word-from-selection)
       (pyim-process-trigger-feature-run-p)
       (pyim-process-feed-entered-at-point-into-pyim)
-      (message "PYIM: `pyim-convert-string-at-point' did nothing.")))
+      (message "PYIM: 命令 `pyim-convert-string-at-point' 没有起作用！")))
 
 (defun pyim--activate-pyim ()
   "如果当前输入法设置为 pyim, 就激活它。"

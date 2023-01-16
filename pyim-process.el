@@ -975,7 +975,7 @@ SILENT 设置为 t 是，不显示提醒信息。"
   (when-let* ((string (pyim-cstring-at-point (or number 2))))
     (pyim-process-create-word string)
     (unless silent
-      (message "将词条: %S 加入词库。" string))))
+      (message "PYIM: 将词条 %S 加入词库。" string))))
 
 (defun pyim-process--trigger-call-function-p ()
   "当光标之前是中文但不是标点符号时，返回 t."
