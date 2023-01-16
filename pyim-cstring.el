@@ -109,22 +109,10 @@ t, 遇到多音字时，只使用第一个拼音，其它拼音忽略。
 BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结果会
 包含多余的连接符：比如： \"你=好\" --> \"ni-=-hao\""
   (if (not (pyim-string-match-p "\\cc" string))
-      (if return-list
-          (list string)
-        string)
-    (let* ((string-parts (pyim-cstring--partition string t))
-           (pinyins-list
-            ;; ("Hello" "银" "行") -> (("Hello") ("yin") ("hang" "xing"))
-            (mapcar (lambda (str)
-                      (if (pyim-string-match-p "\\cc" str)
-                          (pyim-pymap-cchar2py-get str)
-                        (list str)))
-                    string-parts))
-           ;; 通过排列组合的方式, 重排 pinyins-list。
-           ;; 比如：(("Hello") ("yin") ("hang")) -> (("Hello" "yin" "hang"))
-           (pinyins-list (pyim-permutate-list
-                          (pyim-cstring--adjust-duoyinzi
-                           string-parts pinyins-list)))
+      (if return-list (list string) string)
+    (let* ((pinyins-list
+            (or (pyim-cstring-to-pinyin--from-dcache string)
+                (pyim-cstring-to-pinyin--from-pymap string)))
            (list (mapcar (lambda (x)
                            (mapconcat (lambda (str)
                                         (if shou-zi-mu
@@ -138,6 +126,35 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
       (if return-list
           list
         (string-join list " ")))))
+
+(defun pyim-cstring-to-pinyin--from-dcache (cstring)
+  "从 Dcache 中搜索 CSTRING 对应的拼音。"
+  (let* ((string-parts (pyim-cstring--partition cstring))
+         (pinyins-list
+          (mapcar (lambda (str)
+                    (if (pyim-string-match-p "\\cc" str)
+                        (when-let ((code (car (pyim-dcache-get str '(word2code)))))
+                          (split-string code "-"))
+                      (list str)))
+                  string-parts)))
+    (unless (member nil pinyins-list)
+      (list (apply #'append pinyins-list)))))
+
+(defun pyim-cstring-to-pinyin--from-pymap (cstring)
+  "使用 PYMAP 提供的工具来搜索 CSTRING 对应的拼音。"
+  (let* ((string-parts (pyim-cstring--partition cstring t))
+         (pinyins-list
+          ;; ("Hello" "银" "行") -> (("Hello") ("yin") ("hang" "xing"))
+          (mapcar (lambda (str)
+                    (if (pyim-string-match-p "\\cc" str)
+                        (pyim-pymap-cchar2py-get str)
+                      (list str)))
+                  string-parts)))
+    ;; 通过排列组合的方式, 重排 pinyins-list。
+    ;; 比如：(("Hello") ("yin") ("hang")) -> (("Hello" "yin" "hang"))
+    (pyim-permutate-list
+     (pyim-cstring--adjust-duoyinzi
+      string-parts pinyins-list))))
 
 (defun pyim-cstring--adjust-duoyinzi (string-parts pinyins-list)
   "根据 STRING-PARTS 对 PINYINS-LIST 进行校正。

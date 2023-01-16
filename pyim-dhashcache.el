@@ -40,6 +40,7 @@
 (require 'pyim-dcache)
 (require 'pyim-dict)
 (require 'pyim-scheme)
+(require 'pyim-pymap)
 (require 'sort)
 
 (defvar pyim-dhashcache--count-types
@@ -426,25 +427,42 @@ DCACHE 是一个 code -> words 的 hashtable.
     (let ((hashtable (make-hash-table :size 1000000 :test #'equal)))
       (maphash
        (lambda (code words)
-         ;; 这里主要考虑五笔仓颉等形码输入法，也就是 code-prefix 中包含 "/" 的输
-         ;; 入法，全拼输入法反查功能主要使用 pymap 实现，不使用这个表。
-         (when (pyim-string-match-p "/" code)
+         (if (pyim-string-match-p "/" code)
+             ;; 这里主要考虑五笔仓颉等形码输入法，也就是 code-prefix 中包含 "/"
+             ;; 的输入法，
+             (dolist (word words)
+               (let ((value (gethash word hashtable))
+                     ;; NOTE: 这里使用 `cl-copy-seq', 可以让保存的文件内容类似：
+                     ;;
+                     ;;   "呵" ("he" "a")
+                     ;;
+                     ;; 而不是：
+                     ;;
+                     ;;   "呵" (#9="he" #2#)
+                     ;;
+                     (code (cl-copy-seq code)))
+                 (puthash word
+                          (if value
+                              `(,code ,@value)
+                            (list code))
+                          hashtable)))
+           ;; 使用拼音输入法时，构建词条到拼音的哈希表非常消耗内存，在这里只处理
+           ;; 包含多音字的词条（2-4个字），测试发现，生成的哈希表也不小，大约是
+           ;; code2word 的 1/4.
+           ;;
+           ;; 除了包含多音字的 2-4 字词条，其余词条的拼音反查功能主要使用 pymap
+           ;; 实现，不使用这个表。
            (dolist (word words)
              (let ((value (gethash word hashtable))
-                   ;; NOTE: 这里使用 `cl-copy-seq', 可以让保存的文件内容类似：
-                   ;;
-                   ;;   "呵" ("he" "a")
-                   ;;
-                   ;; 而不是：
-                   ;;
-                   ;;   "呵" (#9="he" #2#)
-                   ;;
                    (code (cl-copy-seq code)))
-               (puthash word
-                        (if value
-                            `(,code ,@value)
-                          (list code))
-                        hashtable)))))
+               (when (and (> (length word) 1)
+                          (< (length word) 5)
+                          (pyim-pymap-duoyinzi-include-p word))
+                 (puthash word
+                          (if value
+                              `(,code ,@value)
+                            (list code))
+                          hashtable))))))
        dcache)
       (pyim-dcache-save-value-to-file hashtable file))))
 
