@@ -292,7 +292,7 @@
   (should (equal (pyim-pymap-py2cchar-get "zhua" t)
                  '("抓挝爪||髽|膼撾檛簻")))
   (should (equal (pyim-pymap-py2duoyinzi-get "a")
-                 '("腌臜" "吖啶")))
+                 '("吖啶" "腌臜")))
   (should (equal (pyim-pymap-py2duoyinzi-get "ai" t)
                  '("艾")))
   (should (equal (mapcar (lambda (x)
