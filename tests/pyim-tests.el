@@ -293,6 +293,8 @@
                  '("抓挝爪||髽|膼撾檛簻")))
   (should (equal (pyim-pymap-py2duoyinzi-get "a")
                  '("吖啶" "腌臜")))
+  (should (pyim-pymap-duoyinzi-include-p "银行"))
+  (should-not (pyim-pymap-duoyinzi-include-p "银子"))
   (should (equal (pyim-pymap-py2duoyinzi-get "ai" t)
                  '("艾")))
   (should (equal (mapcar (lambda (x)

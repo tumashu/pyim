@@ -1090,6 +1090,15 @@ pyim 在特定的时候需要读取一个汉字的拼音，这个工作由此完
         (gethash pinyin pyim-pymap--py2duoyinzi-cache1)
       (gethash pinyin pyim-pymap--py2duoyinzi-cache2))))
 
+(defun pyim-pymap-duoyinzi-include-p (cstring)
+  "判断 CSTRING 中文字符串是否包含多音字。"
+  (pyim-pymap--cchar2py-cache-create)
+  (let ((chars (split-string cstring "")))
+    (cl-some
+     (lambda (char)
+       (> (length (pyim-pymap-cchar2py-get char)) 1))
+     chars)))
+
 ;; * Footer
 (provide 'pyim-pymap)
 
