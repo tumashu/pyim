@@ -1116,14 +1116,14 @@ pyim 在特定的时候需要读取一个汉字的拼音，这个工作由此完
                   ;; NOTE: 多音字校正规则：
                   ;; 1. 首先通过 pyim 自带的多音字词语来校正，具体见：
                   ;; `pyim-pymap-duoyinzi-words'
-                  (pyim-pymap-possible-cchar-pinyin pinyins words-list)
+                  (pyim-pymap--possible-cchar-pinyin pinyins words-list)
                   ;; 2. 然后通过 pyim 自带的多音字常用读音进行校正, 具体见：
                   ;; `pyim-pymap-duoyinzi-chars',
                   ;;
                   ;; NOTE: 如果用户想要使用某个汉字的偏僻读音，这样处理是有问题
                   ;; 的，但大多数情况我们还是使用汉字的常用读音，让偏僻的读音进
                   ;; 入用户个人词库似乎也没有什么好处。
-                  (pyim-pymap-possible-cchar-pinyin pinyins char-list t))))
+                  (pyim-pymap--possible-cchar-pinyin pinyins char-list t))))
             ;; 3. 如果多音字校正没有结果，就使用未校正的信息。
             (push (if py-adjusted
                       (list py-adjusted)
@@ -1131,7 +1131,7 @@ pyim 在特定的时候需要读取一个汉字的拼音，这个工作由此完
                   output)))))
     (reverse output)))
 
-(defun pyim-pymap-possible-cchar-pinyin (cchar-pinyins cchar-words &optional search-char)
+(defun pyim-pymap--possible-cchar-pinyin (cchar-pinyins cchar-words &optional search-char)
   "寻找一个汉字当前最可能的读音。
 
 以 (行) 作为例子：

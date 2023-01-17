@@ -807,13 +807,13 @@
 
 (ert-deftest pyim-tests-pyim-cstring-to-pinyin ()
 
-  (should (equal (pyim-pymap-possible-cchar-pinyin
+  (should (equal (pyim-pymap--possible-cchar-pinyin
                   '("xing" "hang") '("银行"))
                  "hang"))
-  (should-not (pyim-pymap-possible-cchar-pinyin
+  (should-not (pyim-pymap--possible-cchar-pinyin
                '("xing" "hang") '("不行" "行为")))
 
-  (should (equal (pyim-pymap-possible-cchar-pinyin
+  (should (equal (pyim-pymap--possible-cchar-pinyin
                   '("bu" "pi") '("不") t)
                  "bu"))
 
