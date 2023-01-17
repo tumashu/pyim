@@ -297,6 +297,10 @@
   (should-not (pyim-pymap-duoyinzi-include-p "银子"))
   (should (equal (pyim-pymap-py2duoyinzi-get "ai" t)
                  '("艾")))
+
+  (should (equal (pyim-pymap-cchars2pys-get '("hello" "你" "好" "ma"))
+                 '(("hello" "ni" "hao" "ma"))))
+
   (should (equal (mapcar (lambda (x)
                            (concat (substring x 0 1)
                                    (substring x -1)))
@@ -808,19 +812,19 @@
                   '("bu" "pi") '("不") t)
                  "bu"))
 
-  (should (equal (pyim-cstring--adjust-duoyinzi
+  (should (equal (pyim-pymap--adjust-duoyinzi
                   '("银" "行" "传" "说")
                   '(("yin") ("xing" "heng" "hang")
                     ("zhuan" "chuan") ("yue" "shuo" "shui")))
                  '(("yin") ("hang") ("chuan") ("shuo"))))
 
-  (should (equal (pyim-cstring--adjust-duoyinzi
+  (should (equal (pyim-pymap--adjust-duoyinzi
                   '("银" "行" "很" "行")
                   '(("yin") ("xing" "heng" "hang")
                     ("hen") ("xing" "heng" "hang")))
                  '(("yin") ("hang") ("hen") ("xing"))))
 
-  (should (equal (pyim-cstring--adjust-duoyinzi
+  (should (equal (pyim-pymap--adjust-duoyinzi
                   '("银" "行" "行" "业" "很" "行"
                     "不" "行" "也" "行"
                     "行" "也" "行")

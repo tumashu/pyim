@@ -131,79 +131,28 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
   "从 Dcache 中搜索 CSTRING 对应的拼音。"
   (let* ((string-parts (pyim-cstring--partition cstring))
          (pinyins-list
-          (mapcar (lambda (str)
-                    (if (pyim-string-match-p "\\cc" str)
-                        (when-let ((code (cl-find-if-not
-                                          (lambda (c)
-                                            ;; 注意：Pinyin 词库中不包含 "/" 字符。
-                                            (string-match-p c "/"))
-                                          (pyim-dcache-get str '(word2code)))))
-                          (split-string code "-"))
-                      (list str)))
+          (mapcar #'pyim-cstring--get-pinyin-code
                   string-parts)))
     (unless (member nil pinyins-list)
       (list (apply #'append pinyins-list)))))
 
+(defun pyim-cstring--get-pinyin-code (str)
+  "从 Dcache 中获取中文字符串 STR 对应的拼音。
+
+如果 STR 不包含中文，不做特殊处理。"
+  (if (pyim-string-match-p "\\cc" str)
+      (when-let ((code (cl-find-if-not
+                        (lambda (c)
+                          ;; 注意：Pinyin 词库中不包含 "/" 字符。
+                          (string-match-p c "/"))
+                        (pyim-dcache-get str '(word2code)))))
+        (split-string code "-"))
+    (list str)))
+
 (defun pyim-cstring-to-pinyin--from-pymap (cstring)
   "使用 PYMAP 提供的工具来搜索 CSTRING 对应的拼音。"
-  (let* ((string-parts (pyim-cstring--partition cstring t))
-         (pinyins-list
-          ;; ("Hello" "银" "行") -> (("Hello") ("yin") ("hang" "xing"))
-          (mapcar (lambda (str)
-                    (if (pyim-string-match-p "\\cc" str)
-                        (pyim-pymap-cchar2py-get str)
-                      (list str)))
-                  string-parts)))
-    ;; 通过排列组合的方式, 重排 pinyins-list。
-    ;; 比如：(("Hello") ("yin") ("hang")) -> (("Hello" "yin" "hang"))
-    (pyim-permutate-list
-     (pyim-cstring--adjust-duoyinzi
-      string-parts pinyins-list))))
-
-(defun pyim-cstring--adjust-duoyinzi (string-parts pinyins-list)
-  "根据 STRING-PARTS 对 PINYINS-LIST 进行校正。
-
-比如：
-
-1. STRING-PARTS: (\"人\" \"民\" \"银\" \"行\")
-2. PINYINS-LIST: ((\"ren\") (\"min\") (\"yin\") (\"hang\" \"xing\"))
-3. 输出结果为：  ((\"ren\") (\"min\") (\"yin\") (\"hang\"))
-
-这个函数依赖 `pyim-pymap-duoyinzi' 提供的多音字数据。"
-  (let ((n (length pinyins-list))
-        output)
-    (dotimes (i n)
-      (let ((pinyins (nth i pinyins-list))
-            ;; 当前位置对应的汉字和位置前后汉字组成的两字词语。
-            (words-list (list (when (>= (- i 1) 0)
-                                (concat (nth (- i 1) string-parts)
-                                        (nth i string-parts)))
-                              (when (< (+ i 1) n)
-                                (concat (nth i string-parts)
-                                        (nth (+ i 1) string-parts)))))
-            ;; 当前位置汉字
-            (char-list (list (nth i string-parts))))
-        (if (= (length pinyins) 1)
-            (push pinyins output)
-          (let ((py-adjusted
-                 (or
-                  ;; NOTE: 多音字校正规则：
-                  ;; 1. 首先通过 pyim 自带的多音字词语来校正，具体见：
-                  ;; `pyim-pymap-duoyinzi-words'
-                  (pyim-pymap-possible-cchar-pinyin pinyins words-list)
-                  ;; 2. 然后通过 pyim 自带的多音字常用读音进行校正, 具体见：
-                  ;; `pyim-pymap-duoyinzi-chars',
-                  ;;
-                  ;; NOTE: 如果用户想要使用某个汉字的偏僻读音，这样处理是有问题
-                  ;; 的，但大多数情况我们还是使用汉字的常用读音，让偏僻的读音进
-                  ;; 入用户个人词库似乎也没有什么好处。
-                  (pyim-pymap-possible-cchar-pinyin pinyins char-list t))))
-            ;; 3. 如果多音字校正没有结果，就使用未校正的信息。
-            (push (if py-adjusted
-                      (list py-adjusted)
-                    pinyins)
-                  output)))))
-    (reverse output)))
+  (pyim-pymap-cchars2pys-get
+   (pyim-cstring--partition cstring t)))
 
 ;;;###autoload
 (defun pyim-cstring-to-pinyin-simple (string &optional shou-zi-mu separator return-list)
