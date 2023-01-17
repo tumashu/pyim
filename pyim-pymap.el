@@ -1142,7 +1142,7 @@ pyim 在特定的时候需要读取一个汉字的拼音，这个工作由此完
   (cl-find-if
    (lambda (pinyin)
      (when-let ((x (string-join
-                    (pyim-pymap-py2duoyinzi-get
+                    (pyim-pymap--py2duoyinzi-get
                      pinyin search-char)
                     "-")))
        (cl-some
@@ -1151,7 +1151,7 @@ pyim 在特定的时候需要读取一个汉字的拼音，这个工作由此完
         cchar-words)))
    cchar-pinyins))
 
-(defun pyim-pymap-py2duoyinzi-get (pinyin &optional return-chars)
+(defun pyim-pymap--py2duoyinzi-get (pinyin &optional return-chars)
   "获取与 PINYIN 想匹配的多音字（词）。"
   (pyim-pymap--py2duoyinzi-cache-create)
   (when (and pinyin (stringp pinyin))

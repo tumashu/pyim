@@ -408,7 +408,7 @@
                           ;; 剔除已经设置为 fallback 拼音
                           (char-pinyins (cl-remove-if
                                          (lambda (py)
-                                           (member char (pyim-pymap-py2duoyinzi-get py t)))
+                                           (member char (pyim-pymap--py2duoyinzi-get py t)))
                                          char-pinyins))
                           ;; 找到 code2word 词库中，这个字对应得拼音
                           (pinyin (nth i (car x)))

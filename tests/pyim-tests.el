@@ -291,11 +291,11 @@
                  '("阿" "啊" "呵" "腌" "|" "嗄" "吖" "锕" "|" "|" "錒")))
   (should (equal (pyim-pymap-py2cchar-get "zhua" t)
                  '("抓挝爪||髽|膼撾檛簻")))
-  (should (equal (pyim-pymap-py2duoyinzi-get "a")
+  (should (equal (pyim-pymap--py2duoyinzi-get "a")
                  '("吖啶" "腌臜")))
   (should (pyim-pymap-duoyinzi-include-p "银行"))
   (should-not (pyim-pymap-duoyinzi-include-p "银子"))
-  (should (equal (pyim-pymap-py2duoyinzi-get "ai" t)
+  (should (equal (pyim-pymap--py2duoyinzi-get "ai" t)
                  '("艾")))
 
   (should (equal (pyim-pymap-cchars2pys-get '("hello" "你" "好" "ma"))
