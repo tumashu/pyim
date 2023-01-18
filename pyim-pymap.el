@@ -956,7 +956,8 @@ If FORCE is non-nil, FORCE build."
     (dolist (x pyim-pymap)
       (let ((py (car x))
             (cchar-list (string-to-list (car (cdr x)))))
-        (dolist (cchar cchar-list)
+        ;; NOTE: "|" 是做为分割符使用的，删除。
+        (dolist (cchar (remove ?| cchar-list))
           (let* ((key (char-to-string cchar))
                  (cache (gethash key pyim-pymap--cchar2py-cache)))
             (if cache
