@@ -111,10 +111,9 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
 
 (defun pyim-cstring-to-pinyin--from-dcache (cstring)
   "从 Dcache 中搜索 CSTRING 对应的拼音。"
-  (let* ((string-parts (pyim-pymap-split-string cstring))
-         (pinyins-list
+  (let* ((pinyins-list
           (mapcar #'pyim-cstring--get-pinyin-code
-                  string-parts)))
+                  (pyim-pymap-split-string cstring))))
     (unless (member nil pinyins-list)
       (list (apply #'append pinyins-list)))))
 
