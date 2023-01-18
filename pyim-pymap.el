@@ -1044,29 +1044,30 @@ If FORCE is non-nil, FORCE build."
           output
         (remove "|" output)))))
 
-(defun pyim-pymap-cchars2pys-get (cchars)
-  "将汉字列表转换为拼音列表，转换过程中矫正多音字。
+(defun pyim-pymap-str2py-get (string)
+  "将 STRING 转换为拼音列表，转换过程中尽可能矫正多音字。
 
 比如：
-1. CCHARS:  (\"你\" \"好\")
+1. STRING:  你好
 2. OUTPUTS: ((\"ni\" \"hao\"))
 
 注意事项：
 1. 这个函数遇到非汉字字符串时，原样输出。
 2. 多音字矫正依赖 pymap 自带的多音字矫正信息的完善程度，可能会出
    现矫正不正确的情况，这个函数为了保证性能，只处理常用多音字。"
-  (let* ((pinyins-list
+  (let* ((chars (pyim-pymap-split-string string t))
+         (pinyins-list
           ;; ("Hello" "银" "行") -> (("Hello") ("yin") ("hang" "xing"))
           (mapcar (lambda (str)
                     (if (pyim-string-match-p "\\cc" str)
                         (pyim-pymap-cchar2py-get str)
                       (list str)))
-                  cchars)))
+                  chars)))
     ;; 通过排列组合的方式, 重排 pinyins-list。
     ;; 比如：(("Hello") ("yin") ("hang")) -> (("Hello" "yin" "hang"))
     (pyim-permutate-list
      (pyim-pymap--adjust-duoyinzi
-      cchars pinyins-list))))
+      chars pinyins-list))))
 
 (defun pyim-pymap-split-string (string &optional to-cchar)
   "将 STRING 按照中文处理的标准切开.

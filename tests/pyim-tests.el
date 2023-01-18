@@ -318,10 +318,10 @@
   (should (equal (pyim-pymap--py2duoyinzi-get "ai" t)
                  '("艾")))
 
-  (should (equal (pyim-pymap-cchars2pys-get '("hello" "你" "好" "ma"))
+  (should (equal (pyim-pymap-str2py-get '"hello你好ma")
                  '(("hello" "ni" "hao" "ma"))))
 
-  (should (equal (pyim-pymap-cchars2pys-get '("hello" "你" "鹢" "ma"))
+  (should (equal (pyim-pymap-str2py-get '"hello你鹢ma")
                  '(("hello" "ni" "yi" "ma")
                    ("hello" "ni" "ni" "ma")
                    ("hello" "ni" "hua" "ma"))))

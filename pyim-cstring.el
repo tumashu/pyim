@@ -94,7 +94,7 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
       (if return-list (list string) string)
     (let* ((pinyins-list
             (or (pyim-cstring-to-pinyin--from-dcache string)
-                (pyim-cstring-to-pinyin--from-pymap string)))
+                (pyim-pymap-str2py-get string)))
            (list (mapcar (lambda (x)
                            (mapconcat (lambda (str)
                                         (if shou-zi-mu
@@ -130,11 +130,6 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
                         (pyim-dcache-get str '(word2code)))))
         (split-string code "-"))
     (list str)))
-
-(defun pyim-cstring-to-pinyin--from-pymap (cstring)
-  "使用 PYMAP 提供的工具来搜索 CSTRING 对应的拼音。"
-  (pyim-pymap-cchars2pys-get
-   (pyim-pymap-split-string cstring t)))
 
 ;;;###autoload
 (defun pyim-cstring-to-pinyin-simple (string &optional shou-zi-mu separator return-list)
