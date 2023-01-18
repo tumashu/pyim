@@ -269,6 +269,26 @@
   (should (pyim-numbers> '(2) '(1 3))))
 
 ;; ** pyim-pymap 相关单元测试
+(ert-deftest pyim-tests-pyim-pymap-split-string ()
+  (should (equal (pyim-pymap-split-string "你好 hello 你好")
+                 '("你好" " hello " "你好")))
+  (should (equal (pyim-pymap-split-string "hello 你好 hello 你好 hello")
+                 '("hello " "你好" " hello " "你好" " hello")))
+  (should (equal (pyim-pymap-split-string "你好 hello 你好@")
+                 '("你好" " hello " "你好" "@")))
+  (should (equal (pyim-pymap-split-string "你好 hello 你好，你好")
+                 '("你好" " hello " "你好" "，" "你好")))
+  (should (equal (pyim-pymap-split-string "你好 hello 你好" t)
+                 '("你" "好" " hello " "你" "好")))
+  (should (equal (pyim-pymap-split-string "你好")
+                 '("你好")))
+  (should (equal (pyim-pymap-split-string "你好" t)
+                 '("你" "好")))
+  (should (equal (pyim-pymap-split-string "hello")
+                 '("hello")))
+  (should (equal (pyim-pymap-split-string "hello" t)
+                 '("hello"))))
+
 (ert-deftest pyim-tests-pyim-pymap ()
   (should-not (cl-find-if-not
                (lambda (x)
@@ -729,20 +749,6 @@
       (should (equal (get-text-property 0 :comment (car words)) "(buf)")))))
 
 ;; ** pyim-cstring 相关单元测试
-(ert-deftest pyim-tests-pyim-cstring--partition ()
-  (should (equal (pyim-cstring--partition "你好 hello 你好")
-                 '("你好" " hello " "你好")))
-  (should (equal (pyim-cstring--partition "你好 hello 你好" t)
-                 '("你" "好" " hello " "你" "好")))
-  (should (equal (pyim-cstring--partition "你好")
-                 '("你好")))
-  (should (equal (pyim-cstring--partition "你好" t)
-                 '("你" "好")))
-  (should (equal (pyim-cstring--partition "hello")
-                 '("hello")))
-  (should (equal (pyim-cstring--partition "hello" t)
-                 '("hello"))))
-
 (ert-deftest pyim-tests-pyim-cstring--substrings ()
   (should (equal (pyim-cstring--substrings "我爱北京")
                  '(("我爱北京" 0 4)

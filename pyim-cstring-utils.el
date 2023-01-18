@@ -98,7 +98,7 @@ CHINESE-STRING 分词，得到一个词条 alist，这个 alist 的元素都是�
                      (pyim-cstring--split-to-string
                       str prefer-short-word separator max-word-length)
                    str)))
-             (pyim-cstring--partition string) (or separator " ")))
+             (pyim-pymap-split-string string) (or separator " ")))
 
 (defun pyim-cstring--split-to-string (chinese-string &optional prefer-short-word
                                                      separator max-word-length)

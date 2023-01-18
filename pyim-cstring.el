@@ -37,24 +37,6 @@
   "Chinese string tools for pyim."
   :group 'pyim)
 
-(defun pyim-cstring--partition (string &optional to-cchar)
-  "STRING partition.
-
-1. Hello你好 -> (\"Hello\" \"你\" \"好\"), when TO-CCHAR is non-nil.
-2. Hello你好 -> (\"Hello\" \"你好\"), when TO-CCHAR is nil."
-  ;; NOTE: 使用5个\0作为分割符有没有其它副作用？有待观察。
-  (let ((sep (make-string 5 ?\0)))
-    (if (pyim-string-match-p "\\CC" string)
-        ;; 处理中英文混合的情况
-        (remove "" (split-string
-                    (replace-regexp-in-string
-                     (if to-cchar "\\(\\cc\\)" "\\(\\cc+\\)")
-                     (concat sep "\\1" sep) string)
-                    sep))
-      (if to-cchar
-          (cl-mapcar #'char-to-string string)
-        (list string)))))
-
 (defun pyim-cstring--substrings (cstring &optional max-length number)
   "找出 CSTRING 中所有长度不超过 MAX-LENGTH 的子字符串，生成一个 alist。
 
@@ -129,7 +111,7 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
 
 (defun pyim-cstring-to-pinyin--from-dcache (cstring)
   "从 Dcache 中搜索 CSTRING 对应的拼音。"
-  (let* ((string-parts (pyim-cstring--partition cstring))
+  (let* ((string-parts (pyim-pymap-split-string cstring))
          (pinyins-list
           (mapcar #'pyim-cstring--get-pinyin-code
                   string-parts)))
@@ -152,7 +134,7 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
 (defun pyim-cstring-to-pinyin--from-pymap (cstring)
   "使用 PYMAP 提供的工具来搜索 CSTRING 对应的拼音。"
   (pyim-pymap-cchars2pys-get
-   (pyim-cstring--partition cstring t)))
+   (pyim-pymap-split-string cstring t)))
 
 ;;;###autoload
 (defun pyim-cstring-to-pinyin-simple (string &optional shou-zi-mu separator return-list)

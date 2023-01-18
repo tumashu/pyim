@@ -1068,6 +1068,27 @@ If FORCE is non-nil, FORCE build."
      (pyim-pymap--adjust-duoyinzi
       cchars pinyins-list))))
 
+(defun pyim-pymap-split-string (string &optional to-cchar)
+  "将 STRING 按照中文处理的标准切开.
+
+1. Hello你好 -> (\"Hello\" \"你\" \"好\"), when TO-CCHAR is non-nil.
+2. Hello你好 -> (\"Hello\" \"你好\"), when TO-CCHAR is nil."
+  (let* ((sep (make-string 5 ?\0))
+         (chars (split-string string ""))
+         (chars-with-seps
+          (cl-mapcan (lambda (a b)
+                       (let ((x (pyim-pymap-cchar2py-get a))
+                             (y (pyim-pymap-cchar2py-get b)))
+                         (cond ((and x y)
+                                (if to-cchar
+                                    (list a sep)
+                                  (list a)))
+                               ((and (not x) (not y))
+                                (list a))
+                               (t (list a sep)))))
+                     chars (cdr chars))))
+    (remove "" (split-string (string-join chars-with-seps) sep))))
+
 (defun pyim-pymap-cchar2py-get (char-or-str)
   "获取字符或者字符串 CHAR-OR-STR 对应的拼音 code.
 
