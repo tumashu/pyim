@@ -36,7 +36,11 @@
   :group 'pyim)
 
 ;; ** 中文字符串分词相关功能
-(defun pyim-cstring-split-to-list (chinese-string &optional max-word-length delete-dups prefer-short-word)
+(defun pyim-cstring-split-to-list (chinese-string
+                                   &optional
+                                   max-word-length
+                                   delete-dups
+                                   prefer-short-word)
   "一个基于 pyim 的中文分词函数。这个函数可以将中文字符串
 CHINESE-STRING 分词，得到一个词条 alist，这个 alist 的元素都是列
 表，其中第一个元素为分词得到的词条，第二个元素为词条相对于字符串
@@ -52,11 +56,13 @@ CHINESE-STRING 分词，得到一个词条 alist，这个 alist 的元素都是�
 如果 PREFER-SHORT-WORD 为 non-nil, 去重的时候则优先保留较短的词。
 
 注意事项：
+
 1. 这个工具使用暴力匹配模式来分词，*不能检测出* pyim 词库中不存在
-的中文词条。
+   的中文词条。
+
 2. 这个函数的分词速度比较慢，仅仅适用于中文短句的分词，不适用于文
-章分词。根据评估，20个汉字组成的字符串需要大约0.3s， 40个汉字消耗
-1s，随着字符串长度的增大消耗的时间呈几何倍数增加。"
+   章分词。根据评估，20个汉字组成的字符串需要大约0.3s， 40个汉字
+   消耗1s，随着字符串长度的增大消耗的时间呈几何倍数增加。"
   ;; 如果 pyim 词库没有加载，加载 pyim 词库，确保 `pyim-dcache-get' 可以正常运行。
   (pyim-dcache-init-variables)
 
@@ -83,15 +89,17 @@ CHINESE-STRING 分词，得到一个词条 alist，这个 alist 的元素都是�
          :from-end prefer-short-word)
       result)))
 
-(defun pyim-cstring-split-to-string (string &optional prefer-short-word
-                                            separator max-word-length)
+(defun pyim-cstring-split-to-string (string
+                                     &optional
+                                     prefer-short-word
+                                     separator
+                                     max-word-length)
   "将中文字符串 STRING 分词.
 
 在分词的位置插入空格或者自定义分隔符 SEPERATERS，默认情况下较长的
-词条优先使用，如果 PREFER-SHORT-WORD 设置为 t，则优先使用较短的
-词条。默认最长词条不超过6个字符，用户可以通 MAX-WORD-LENGTH 来
-自定义词条的最大长度，但值得注意的是，这个值设置越大，分词速度越
-慢。"
+词条优先使用，如果 PREFER-SHORT-WORD 设置为 t，则优先使用较短的词
+条。默认最长词条不超过6个字符，用户可以通 MAX-WORD-LENGTH 来自定
+义词条的最大长度，但值得注意的是，这个值设置越大，分词速度越慢。"
   (mapconcat (lambda (str)
                (when (> (length str) 0)
                  (if (not (pyim-string-match-p "\\CC" str))
@@ -100,8 +108,11 @@ CHINESE-STRING 分词，得到一个词条 alist，这个 alist 的元素都是�
                    str)))
              (pyim-pymap-split-string string) (or separator " ")))
 
-(defun pyim-cstring--split-to-string (chinese-string &optional prefer-short-word
-                                                     separator max-word-length)
+(defun pyim-cstring--split-to-string (chinese-string
+                                      &optional
+                                      prefer-short-word
+                                      separator
+                                      max-word-length)
   "`pyim-cstring-split-to-string' 内部函数。"
   (let ((str-length (length chinese-string))
         (word-list (pyim-cstring-split-to-list
@@ -143,18 +154,21 @@ CHINESE-STRING 分词，得到一个词条 alist，这个 alist 的元素都是�
 
 ;; ** 获取光标处中文词条的功能
 (defun pyim-cstring-words-at-point (&optional end-of-point)
-  "获取光标当前的词条列表，当 END-OF-POINT 设置为 t 时，获取光标后的词条列表。
-词条列表的每一个元素都是列表，这些列表的第一个元素为词条，第二个元素为光标处到词条
-头部的距离，第三个元素为光标处到词条尾部的距离。
+  "获取光标当前的词条列表，当 END-OF-POINT 设置为 t 时，获取光标后的
+词条列表。词条列表的每一个元素都是列表，这些列表的第一个元素为词
+条，第二个元素为光标处到词条头部的距离，第三个元素为光标处到词条
+尾部的距离。
 
 其工作原理是：
 
-1. 使用 `thing-at-point' 获取当前光标处的一个字符串，一般而言：英文会得到
-   一个单词，中文会得到一个句子。
+1. 使用 `thing-at-point' 获取当前光标处的一个字符串，一般而言：英
+   文会得到一个单词，中文会得到一个句子。
+
 2. 英文单词直接返回这个单词的列表。
-3. 中文句子首先用 `pyim-cstring-split-to-list' 分词，然后根据光标在中文句子
-   中的位置，筛选出符合要求的中文词条。得到并返回 *一个* 或者 *多个* 词条
-   的列表。"
+
+3. 中文句子首先用 `pyim-cstring-split-to-list' 分词，然后根据光标
+   在中文句子中的位置，筛选出符合要求的中文词条。得到并返回 *一个*
+   或者 *多个* 词条的列表。"
   ;;
   ;;                                光标到词 光标到词
   ;;                                首的距离 尾的距离
