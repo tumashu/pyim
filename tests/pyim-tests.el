@@ -199,6 +199,12 @@
                  '("a-b-c-d" "a-b-c" "a-b")))
   (should (equal (pyim-subconcat nil) nil)))
 
+(ert-deftest pyim-tests-pyim-split-list ()
+  (should (equal (pyim-split-list '(a b sep c d) 'sep)
+                 '((a b) (c d))))
+  (should (equal (pyim-split-list '(sep b sep c sep) 'sep)
+                 '(nil (b) (c) nil))))
+
 (ert-deftest pyim-tests-pyim-string-distance ()
   (should (equal (pyim-string-distance "nihaoma" "nihaoma") 0))
   (should (equal (pyim-string-distance "nihaoma" "nhm") 4))

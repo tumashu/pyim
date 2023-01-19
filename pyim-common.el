@@ -131,6 +131,16 @@ When CARE-FIRST-ONE is no-nil, ((a b c) (d e)) => (a d)."
         (push (string-join list (or sep "")) output)))
     (nreverse output)))
 
+(defun pyim-split-list (list separator)
+  "Split LIST into sublists bounded by equal SEPARATOR."
+  (let (group result)
+    (dolist (x (append list (list separator)))
+      (if (not (equal x separator))
+          (push x group)
+        (push (nreverse group) result)
+        (setq group nil)))
+    (reverse result)))
+
 (defun pyim-char-before-to-string (num)
   "得到光标前第 NUM 个字符，并将其转换为字符串。"
   (let* ((point (point))
