@@ -1075,21 +1075,45 @@ If FORCE is non-nil, FORCE build."
 
 1. Hello你好 -> (\"Hello\" \"你\" \"好\"), when TO-CCHAR is non-nil.
 2. Hello你好 -> (\"Hello\" \"你好\"), when TO-CCHAR is nil."
-  (let* ((sep (make-string 5 ?\0))
-         (chars (split-string string ""))
+  (let* ((chars (split-string string ""))
+         (sep 'pymap-separator)
          (chars-with-seps
-          (cl-mapcan (lambda (a b)
-                       (let ((x (pyim-pymap-cchar2py-get a))
-                             (y (pyim-pymap-cchar2py-get b)))
-                         (cond ((and x y)
-                                (if to-cchar
-                                    (list a sep)
-                                  (list a)))
-                               ((and (not x) (not y))
-                                (list a))
-                               (t (list a sep)))))
-                     chars (cdr chars))))
-    (remove "" (split-string (string-join chars-with-seps) sep))))
+          (pyim-pymap--add-seps-to-chars chars sep to-cchar))
+         (chars-grouped
+          (pyim-split-list chars-with-seps sep))
+         (substrings-list
+          (mapcar #'string-join chars-grouped)))
+    (remove "" substrings-list)))
+
+(defun pyim-pymap--add-seps-to-chars (chars separator to-cchar)
+  "在 CCHRS 列表的中英文之间或者中文与中文之间插入 SEPARATOR 元素。
+
+如果 SEPARATOR 设置为 mysep, 那么：
+1. TO-CCHAR is nil:
+
+   (\"a\" \"你\" \"好\" \"b\" \"c\")
+=> (\"a\" mysep \"你\" \"好\" mysep \"b\" \"c\")
+
+2. TO-CCHAR is non-nil:
+
+   (\"a\" \"你\" \"好\" \"b\" \"c\")
+=> (\"a\" mysep \"你\" mysep \"好\" mysep \"b\" \"c\")"
+  (cl-mapcan (lambda (a b)
+               (let ((a-cchar-p (pyim-pymap-cchar2py-get a))
+                     (b-cchar-p (pyim-pymap-cchar2py-get b)))
+                 (cond
+                  ;; 如果 to-char 为 non-nil, 中文与中文之间插入一个
+                  ;; sep, 否则不需要插入 sep.
+                  ((and a-cchar-p b-cchar-p)
+                   (if to-cchar
+                       (list a separator)
+                     (list a)))
+                  ;; 非中文之间不需要插入一个 sep.
+                  ((and (not a-cchar-p) (not b-cchar-p))
+                   (list a))
+                  ;; 中文和非中文之间需要插入一个 sep.
+                  (t (list a separator)))))
+             chars (cdr chars)))
 
 (defun pyim-pymap-cchar2py-get (char-or-str)
   "获取字符或者字符串 CHAR-OR-STR 对应的拼音 code.
