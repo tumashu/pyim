@@ -534,8 +534,8 @@ E-Neo 同学编写了一个词库转换工具: [[https://github.com/E-Neo/scel2p
 ** 将汉字字符串转换为拼音字符串
 下面两个函数可以将中文字符串转换的拼音字符串或者列表，用于 emacs-lisp 编程。
 
-1. `pyim-cstring-to-pinyin' （考虑多音字）
-2. `pyim-cstring-to-pinyin-simple'  （不考虑多音字）
+1. `pyim-cstring-to-pinyin' （尽可能处理多音字，但有可能得到多个拼音）
+2. `pyim-cstring-to-pinyin-simple'  （尽可能处理多音字，但是只从可能的拼音中获取第一个拼音）
 
 ** 中文分词
 pyim-cstring-utils 包含了一个简单的分词函数：`pyim-cstring-split-to-list', 可以
