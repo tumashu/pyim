@@ -359,14 +359,11 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
   (when pyim-page--popon
     ;; 延迟获取词条的时候，如果不把已经存在的 popon 删除，就会出现两个 page.
     (popon-kill pyim-page--popon))
-  (let* ((x-y (popon-x-y-at-pos position))
-         (x (car x-y))
-         (y (cdr x-y)))
-    (setq pyim-page--popon
-          (popon-create
-           (pyim-page--add-default-page-face
-            (pyim-page--align-lines string))
-           (cons x (+ y 1))))))
+  (setq pyim-page--popon
+        (popon-create
+         (pyim-page--add-default-page-face
+          (pyim-page--align-lines string))
+         (popon-x-y-at-pos position))))
 
 (defun pyim-page--add-default-page-face (string)
   "为 STRING 添加默认 page face."
