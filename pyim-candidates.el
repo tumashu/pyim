@@ -43,6 +43,12 @@
   "启用输入联想词功能."
   :type 'boolean)
 
+(defcustom pyim-candidates-search-buffer-p t
+  "是否从当前 buffer 搜索词条。
+
+这个功能很好用，但偶尔会导致 pyim 卡顿。"
+  :type 'boolean)
+
 ;; ** 获取备选词列表
 (defun pyim-candidates--sort (candidates)
   "对 CANDIDATES 进行排序。"
@@ -295,7 +301,8 @@ ning niu 等等。"
   ;; 构建一个搜索中文的正则表达式, 然后使用这个正则表达式在当前 buffer 中搜
   ;; 索词条。
   (let ((str (string-join (pyim-codes-create (car imobjs) scheme))))
-    (when (> (length str) 0)
+    (when (and pyim-candidates-search-buffer-p
+               (> (length str) 0))
       (pyim-candidates--search-buffer
        (pyim-cregexp-create str scheme 3 t)))))
 
