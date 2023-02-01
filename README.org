@@ -423,6 +423,13 @@ Emacs启动后 "M-x toggle-input-method" 或按 "C-\\" 打开输入法。
 
 * Tips
 
+** pyim 有时候会出现卡顿，如何处理。
+可以将云搜词和当前 buffer 搜词功能关闭试试看。
+#+begin_example
+(setq pyim-cloudim nil)
+(setq pyim-candidates-search-buffer-p nil)
+#+end_example
+
 ** 如何快速切换 scheme
 
 可以试试 pyim-default-scheme 命令。
