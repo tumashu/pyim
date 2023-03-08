@@ -421,7 +421,7 @@ imobj 组合构成在一起，构成了 imobjs 这个概念。比如：
       (delete-region
        (region-beginning) (region-end))
     (when (and (numberp num) (> num 0))
-      (backward-delete-char num))))
+      (delete-char (- 0 num)))))
 
 (defun pyim-process--feed-entered-into-pyim (entered)
   (when (and (stringp entered) (> (length entered) 0))
