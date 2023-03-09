@@ -124,10 +124,16 @@ regexp, 所以搜索单字的时候一般可以搜到生僻字，但搜索句子
   "Return t when cregexp is a valid regexp."
   (and cregexp
        (stringp cregexp)
-       (condition-case nil
-           (progn (string-match-p cregexp "") t)
-         ;; FIXME: Emacs can't handle regexps whose length is too big :-(
-         (error nil))))
+       (not (pyim-cregexp--match-error-p cregexp))))
+
+(defun pyim-cregexp--match-error-p (cregexp)
+  "Return t when an match error is signaled.
+
+Emacs can't handle regexps whose length is too big :-("
+  (equal (condition-case nil
+             (string-match-p cregexp "")
+           (error 'error))
+         'error))
 
 (defun pyim-cregexp--create-beautiful-cregexp-from-string
     (string scheme &optional char-level-num chinese-only)
