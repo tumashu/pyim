@@ -48,7 +48,7 @@
 
 这个变量的取值为一个函数列表，这个函数列表中的任意一个函数的
 运行结果为 t 时，pyim 开启英文输入功能。"
-  :type 'symbol)
+  :type '(repeat function))
 
 (defcustom pyim-force-input-chinese-functions nil
   "让 pyim 强制输入中文.
@@ -56,11 +56,11 @@
 这个变量的取值为一个函数列表，这个函数列表中的任意一个函数的运行
 结果为 t 时，pyim 将强制输入中文功能,无视
 `pyim-english-input-switch-functions' 的设置."
-  :type 'symbol)
+  :type '(repeat function))
 
 (defvaralias 'pyim-autoselector 'pyim-process-autoselector)
 (defcustom pyim-process-autoselector nil
-  "已经启用的自动上屏器.
+  "当前启用的自动上屏器列表.
 
 自动上屏器是一个函数。假设用户已经输入 \"nihao\", 并按下 \"m\" 键，
 那么当前entered 就是 \"nihaom\". 上次 entered 是 \"nihao\". 那么
@@ -78,12 +78,11 @@ entered (nihaom) 的第一个候选词。
 
 注意：多个 autoselector 函数运行时，最好不要相互影响，如果相互有
 影响，需要用户自己管理。"
-  :type '(choice (const nil)
-                 (repeat function)))
+  :type '(repeat function))
 
 (defcustom pyim-process-run-delay 0.5
   "延迟多少秒开始延迟获取词条。"
-  :type 'integer)
+  :type 'number)
 
 (defcustom pyim-select-finish-hook nil
   "Pyim 选词完成时运行的 hook."

@@ -57,7 +57,8 @@
 100M 时，速度还可以，可以尝试，需要注意的是，这个后端只支持全拼和
 双拼输入法，不支持型码输入法，如果使用这个后端，用户需要自己在
 Emacs 配置中添加 (require \\='pyim-dregcache)."
-  :type 'symbol)
+  :type '(radio (const pyim-dhashcache)
+                (const pyim-dregcache)))
 
 (defvar pyim-dcache-auto-update t
   "是否自动创建和更新词库对应的 dcache 文件.

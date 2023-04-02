@@ -34,16 +34,23 @@
   "Scheme tools for pyim."
   :group 'pyim)
 
+(define-widget 'pyim-scheme 'lazy "输入法方案"
+  :type '(choice (const :tag "全拼" quanpin)
+                 (const :tag "双拼" shuangpin)
+                 (const :tag "形码" xingma)
+                 (const :tag "五笔" wubi)
+                 (symbol :tag "其他")))
+
 (defcustom pyim-default-scheme 'quanpin
   "设置 pyim 使用哪一种输入法方案，默认使用全拼输入."
-  :type 'symbol)
+  :type 'pyim-scheme)
 
 (defcustom pyim-assistant-scheme 'quanpin
   "设置辅助输入法方案.
 
 这个功能主要用于五笔等形码输入法，在忘记编码的情况下，
 临时激活某种辅助输入法（比如：拼音输入法）来输入汉字。"
-  :type 'symbol)
+  :type 'pyim-scheme)
 
 (defvar pyim-scheme--enable-assistant-p nil
   "设置临时 scheme, 用于五笔等形码输入法临时拼音输入。")

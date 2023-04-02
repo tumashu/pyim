@@ -44,7 +44,7 @@
 
 如果 `pyim-cregexp-build' 无法支持用户正在使用的 scheme 时，
 将使用这个 scheme."
-  :type 'symbol)
+  :type 'pyim-scheme)
 
 (defun pyim-cregexp-build (string &optional char-level-num chinese-only)
   "根据 STRING 构建一个中文 regexp.

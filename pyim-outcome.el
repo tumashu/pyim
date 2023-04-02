@@ -40,7 +40,8 @@
 (defcustom pyim-outcome-magic-converter nil
   "将 “待选词条” 在 “上屏” 之前自动转换为其他字符串.
 这个功能可以实现“简转繁”，“输入中文得到英文”之类的功能。"
-  :type 'function)
+  :type '(choice (const nil)
+                 function))
 
 (defcustom pyim-outcome-trigger "v"
   "用于触发特殊操作的字符，相当与单字快捷键.
@@ -91,7 +92,7 @@ pyim 使用函数 `pyim-process-select-handle-char' 来处理特殊功能触发�
 具体请参考 `pyim-outcome--get-trigger' 。"
   :type '(choice (const nil) string))
 
-(defcustom pyim-outcome-trigger-function 'pyim-outcome-trigger-function-default
+(defcustom pyim-outcome-trigger-function #'pyim-outcome-trigger-function-default
   "可以使用 `pyim-outcome-trigger' 激活的函数。
 
 这个函数与『单字快捷键配合使用』，当光标前面的字符为汉字字符时，
