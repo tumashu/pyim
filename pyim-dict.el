@@ -46,7 +46,9 @@ plist 来表示，比如：
 
 另外一个与这个变量功能类似的变量是： `pyim-extra-dicts', 专门
 用于和 elpa 格式的词库包集成。"
-  :type 'list)
+  :type '(repeat (plist :key-type (choice (const :tag "词库名称" :name)
+                                          (const :tag "词库文件" :file))
+                        :value-type string)))
 
 (defvar pyim-extra-dicts nil
   "类似 `pyim-dicts', 不过这个变量主要用于 elpa 词库包。

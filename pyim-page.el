@@ -42,13 +42,24 @@
 细节信息请参考 `pyim-page--refresh' 的 docstring."
   :type 'number)
 
+(define-widget 'pyim-page-tooltip-1 'lazy nil
+  :type '(choice (const posframe)
+                 (const popup)
+                 (const popon)
+                 (const minibuffer)))
+
+(define-widget 'pyim-page-tooltip 'lazy
+  "如何绘制 pyim 选词框，详见变量 `pyim-page-tooltip'。"
+  :type '(choice (pyim-page-tooltip-1 :tag "单一选词框")
+                 (repeat :tag "依次选择可用选词框" pyim-page-tooltip-1)))
+
 (defcustom pyim-page-tooltip '(posframe popup minibuffer)
   "如何绘制 pyim 选词框.
 
 1. 当这个变量取值为 posframe 时，使用 posframe 包来绘制选词框，
-   使用 emacs 26 图形版的用户推荐使用这个选项。
+   使用 Emacs 26 图形版的用户推荐使用这个选项。
 2. 当这个变量取值为 popup 时，使用 popup-el 包来绘制选词框，
-   这个选项可以在 emacs 图形版和终端版使用，速度没有 posframe 快，
+   这个选项可以在 Emacs 图形版和终端版使用，速度没有 posframe 快，
    偶尔会遇到选词框错位的问题。
 3. 当这个变量取值为 popon 时，使用 popon 包来绘制选词框，这个选项
    效果类似 popup。
@@ -56,14 +67,13 @@
    这个选项也作为其他选项不可用时的 fallback.
 5. 当这个变量的取值是为一个 list 时，pyim 将按照优先顺序动态
    选择一个当前环境可用的 tooltip."
-  :type '(choice (repeat (choice (const posframe)
-                                 (const popup)
-                                 (const popon)
-                                 (const minibuffer)))
-                 (const posframe)
-                 (const popup)
-                 (const popon)
-                 (const minibuffer)))
+  :type 'pyim-page-tooltip)
+
+(define-widget 'pyim-page-style 'lazy "选词框的格式"
+  :type '(choice (const :tag "单行选词框" two-lines)
+                 (const :tag "双行选词框" one-line)
+                 (const :tag "垂直选词框" vertical)
+                 (const :tag "单行选词框 (minibuffer)" minibuffer)))
 
 (defcustom pyim-page-style 'two-lines
   "这个变量用来控制选词框的格式.
@@ -74,10 +84,7 @@ pyim 内建的有四种选词框格式：
 2. two-lines   双行选词框
 3. vertical    垂直选词框
 4. minibuffer  单行选词框 (minibuffer 中专用)"
-  :type '(choice (const two-lines)
-                 (const one-line)
-                 (const vertical)
-                 (const minibuffer)))
+  :type 'pyim-page-style)
 
 (defcustom pyim-page-tooltip-style-alist
   '((minibuffer . minibuffer))
@@ -85,8 +92,8 @@ pyim 内建的有四种选词框格式：
 
 这个表是一个 alist, 每个元素的 car 代表 tooltip, cdr 代表对应的
 page style."
-  :type '(alist :key-type symbol
-                :value-type symbol))
+  :type '(alist :key-type pyim-page-tooltip-1
+                :value-type pyim-page-style))
 
 (defcustom pyim-page-posframe-border-width 0
   "posframe的内间距。

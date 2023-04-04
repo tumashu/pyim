@@ -67,7 +67,12 @@
     ("|" "÷")
     ("{" "『"))
   "标点符号表."
-  :type 'list)
+  :type
+  '(repeat (cons (string :tag "半角标点")
+                 (choice :tag "全角标点"
+                         (list :tag "单个" string)
+                         (list :tag "成对" (string :tag "前")
+                               (string :tag "后"))))))
 
 (defcustom pyim-punctuation-half-width-functions nil
   "让 pyim 输入半角标点.
@@ -75,8 +80,7 @@
 取值为一个函数列表，这个函数列表中的任意一个函数的运行结果为 t 时，
 pyim 输入半角标点，函数列表中每个函数都有一个参数：char ，表示
 最后输入的一个字符，具体见: `pyim-process-select-handle-char' 。"
-  :type '(choice (const nil)
-                 (repeat function)))
+  :type '(repeat function))
 
 (defvar pyim-punctuation-translate-p '(auto yes no)
   "这个变量的第一个元素的取值用于控制标点符号全角半角模式切换.

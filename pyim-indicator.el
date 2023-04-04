@@ -35,16 +35,16 @@
   "Indicator for pyim."
   :group 'pyim)
 
-(defcustom pyim-indicator-list (list #'pyim-indicator-with-cursor-color #'pyim-indicator-with-modeline)
+(defcustom pyim-indicator-list '(pyim-indicator-with-cursor-color
+                                 pyim-indicator-with-modeline)
   "PYIM 当前使用的 indicators.
 Indicator 用于显示输入法当前输入状态（英文还是中文）。"
-  :type '(choice (const :tag "Off" nil)
-                 (repeat :tag "Indicator functions" function)))
+  :type '(repeat :tag "Indicator functions" function))
 
 (defcustom pyim-indicator-use-post-command-hook t
   "pyim-indicator daemon 是否使用 `post-command-hook' 实现。
 
-如果设置为 t, 则使用 post-command-hook 实现, 设置为 nil, 则使用
+如果设置为 t, 则使用 `post-command-hook' 实现, 设置为 nil, 则使用
 timer 实现。"
   :type 'boolean)
 
