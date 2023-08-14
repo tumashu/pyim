@@ -8,7 +8,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        emacs_version: [27.1, 28.1, release-snapshot, snapshot]
+        emacs_version: [27.1, 28.1, 29.1, release-snapshot, snapshot]
     steps:
     - uses: purcell/setup-emacs@master
       with:
