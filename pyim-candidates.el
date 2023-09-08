@@ -49,6 +49,13 @@
 这个功能很好用，但偶尔会导致 pyim 卡顿。"
   :type 'boolean)
 
+(defcustom pyim-candidates-xingma-words-function
+  #'pyim-candidates-xingma-words-default
+  "形码输入法候选词列表生成函数。
+
+如果形码输入法用户需要微调候选词词频，可以自定义这个函数。"
+  :type 'function)
+
 ;; ** 获取备选词列表
 (defun pyim-candidates--sort (candidates)
   "对 CANDIDATES 进行排序。"
@@ -97,20 +104,25 @@
         (when other-codes
           (setq prefix (mapconcat
                         (lambda (code)
-                          (car (pyim-candidates--xingma-words code)))
+                          (car (pyim-candidates-xingma-words code)))
                         other-codes "")))
 
         ;; 5. output => 工子又 工子叕
         (setq output
               (mapcar (lambda (word)
                         (concat prefix word))
-                      (pyim-candidates--xingma-words last-code)))
+                      (pyim-candidates-xingma-words last-code)))
         (setq output (remove "" (or output (list prefix))))
         (setq result (append result output))))
     (when (car result)
       (delete-dups result))))
 
-(defun pyim-candidates--xingma-words (code)
+(defun pyim-candidates-xingma-words (code)
+  "搜索形码 CODE, 得到相应的词条列表。"
+  (and (functionp pyim-candidates-xingma-words-function)
+       (funcall pyim-candidates-xingma-words-function code)))
+
+(defun pyim-candidates-xingma-words-default (code)
   "搜索形码 CODE, 得到相应的词条列表。
 
 当前的词条的构建规则是：

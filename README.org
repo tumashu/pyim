@@ -440,6 +440,12 @@ Emacs启动后 "M-x toggle-input-method" 或按 "C-\\" 打开输入法。
 (setq pyim-enable-shortcode nil)
 #+end_example
 
+** 形码输入法如何微调候选词序
+
+#+begin_example
+(setq pyim-candidates-xingma-words-function #'my-func)
+#+end_example
+
 ** 如何将个人词条相关信息导入和导出？
 
 1. 导入使用命令： pyim-dcache-import
