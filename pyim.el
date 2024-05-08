@@ -127,9 +127,13 @@
 这个函数会处理用户输入的字符，并最终的得到需要插入 buffer 的字符
 串。这个字符串会被分解为 event list, 通过 emacs 低层函数
 `read-event' 来将这些 list 插入到 *待输入buffer*。"
-  (if (or buffer-read-only
-          overriding-terminal-local-map
-          overriding-local-map)
+  (if (or
+       ;; NOTE: 在 widget 输入框存在的情况下，即使 buffer 是只读的，widget 输入
+       ;; 框也有可能要输入文本，EWW 就存在类似情况。
+       ;;
+       ;; buffer-read-only
+       overriding-terminal-local-map
+       overriding-local-map)
       (list key)
     ;; (message "call with key: %S" key-or-string)
     (with-silent-modifications
