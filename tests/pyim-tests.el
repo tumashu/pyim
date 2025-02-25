@@ -1750,8 +1750,8 @@ Transfer-Encoding: chunked
     (should (pyim-probe-org-latex-mode))
 
     (erase-buffer)
-    (insert "$$")
-    (backward-char 1)
+    (insert "\\(\\)")
+    (backward-char 2)
     (should (pyim-probe-org-latex-mode))
 
     (erase-buffer)
