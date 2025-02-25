@@ -122,11 +122,11 @@ BUG: 当 STRING 中包含其它标点符号，并且设置 SEPERATER 时，结�
 
 如果 STR 不包含中文，不做特殊处理。"
   (if (pyim-string-match-p "\\cc" str)
-      (when-let ((code (cl-find-if-not
-                        (lambda (c)
-                          ;; 注意：Pinyin 词库中不包含 "/" 字符。
-                          (string-match-p c "/"))
-                        (pyim-dcache-get str '(word2code)))))
+      (when-let* ((code (cl-find-if-not
+                         (lambda (c)
+                           ;; 注意：Pinyin 词库中不包含 "/" 字符。
+                           (string-match-p c "/"))
+                         (pyim-dcache-get str '(word2code)))))
         (split-string code "-"))
     (list str)))
 
