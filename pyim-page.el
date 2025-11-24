@@ -311,10 +311,9 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
 (cl-defmethod pyim-page-show (string _position (_tooltip (eql minibuffer)))
   "使用 minibuffer 来显示 STRING。"
   (let ((max-mini-window-height (+ pyim-page-length 2))
-        (message-log-max nil)
-        (string (replace-regexp-in-string "%" "%%" string)))
+        (message-log-max nil))
     (if (not (eq (selected-window) (minibuffer-window)))
-        (message string)
+        (message (replace-regexp-in-string "%" "%%" string))
       (message nil)
       ;; 在类似 vertico-posframe 这样的环境中，posframe window-point 同步问题不
       ;; 太好处理，这里使用一个简单粗暴的方式：在输入过程中，隐藏真实的 cursor
