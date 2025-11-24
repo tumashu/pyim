@@ -311,7 +311,8 @@ pyim-page 的核心的功能，为此增加代码的复杂度和测试的难度�
 (cl-defmethod pyim-page-show (string _position (_tooltip (eql minibuffer)))
   "使用 minibuffer 来显示 STRING。"
   (let ((max-mini-window-height (+ pyim-page-length 2))
-        (message-log-max nil))
+        (message-log-max nil)
+        (string (replace-regexp-in-string "%" "%%" string)))
     (if (not (eq (selected-window) (minibuffer-window)))
         (message string)
       (message nil)
