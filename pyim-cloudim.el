@@ -50,7 +50,7 @@
   (let ((str (string-join (pyim-codes-create (car imobjs) scheme))))
     (unless (< (length str) 1)
       (url-retrieve
-       (format "https://olime.baidu.com/py?py=%s" str)
+       (format "https://olimenew.baidu.com/py?input=%s&inputtype=py&resultcoding=utf-8" str)
        (lambda (_)
          (funcall callback (cons imobjs (pyim-cloudim--parse-baidu-buffer)))
          (kill-buffer))
